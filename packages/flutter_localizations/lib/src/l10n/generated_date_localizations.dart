@@ -6,20 +6,22 @@
 // To regenerate run (omit --overwrite to print to console instead of the file):
 // dart --enable-asserts dev/tools/localization/bin/gen_date_localizations.dart --overwrite
 
+import 'package:intl/date_symbols.dart' as intl;
+
 /// The subset of date symbols supported by the intl package which are also
 /// supported by flutter_localizations.
-const Map<String, dynamic> dateSymbols = <String, dynamic>{
-  'af': <String, dynamic>{
-    'NAME': 'af',
-    'ERAS': <dynamic>[
+final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
+  'af': intl.DateSymbols(
+    NAME: 'af',
+    ERAS: const <String>[
       'v.C.',
       'n.C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'voor Christus',
       'na Christus',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -33,7 +35,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -47,7 +49,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Januarie',
       'Februarie',
       'Maart',
@@ -61,7 +63,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Desember',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Januarie',
       'Februarie',
       'Maart',
@@ -75,7 +77,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Desember',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan.',
       'Feb.',
       'Mrt.',
@@ -89,7 +91,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov.',
       'Des.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan.',
       'Feb.',
       'Mrt.',
@@ -103,7 +105,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov.',
       'Des.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sondag',
       'Maandag',
       'Dinsdag',
@@ -112,7 +114,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Vrydag',
       'Saterdag',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sondag',
       'Maandag',
       'Dinsdag',
@@ -121,7 +123,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Vrydag',
       'Saterdag',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'So.',
       'Ma.',
       'Di.',
@@ -130,7 +132,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Vr.',
       'Sa.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'So.',
       'Ma.',
       'Di.',
@@ -139,7 +141,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Vr.',
       'Sa.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'D',
@@ -148,7 +150,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'D',
@@ -157,59 +159,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'K1',
       'K2',
       'K3',
       'K4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1ste kwartaal',
       '2de kwartaal',
       '3de kwartaal',
       '4de kwartaal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'vm.',
       'nm.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE dd MMMM y',
       'dd MMMM y',
       'dd MMM y',
       'y-MM-dd',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'am': <String, dynamic>{
-    'NAME': 'am',
-    'ERAS': <dynamic>[
+  ),
+  'am': intl.DateSymbols(
+    NAME: 'am',
+    ERAS: const <String>[
       'ዓ/ዓ',
       'ዓ/ም',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ዓመተ ዓለም',
       'ዓመተ ምሕረት',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ጃ',
       'ፌ',
       'ማ',
@@ -223,7 +225,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ኖ',
       'ዲ',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ጃ',
       'ፌ',
       'ማ',
@@ -237,7 +239,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ኖ',
       'ዲ',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ጃንዩወሪ',
       'ፌብሩወሪ',
       'ማርች',
@@ -251,7 +253,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ኖቬምበር',
       'ዲሴምበር',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ጃንዩወሪ',
       'ፌብሩወሪ',
       'ማርች',
@@ -265,7 +267,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ኖቬምበር',
       'ዲሴምበር',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ጃንዩ',
       'ፌብሩ',
       'ማርች',
@@ -279,7 +281,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ኖቬም',
       'ዲሴም',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ጃንዩ',
       'ፌብሩ',
       'ማርች',
@@ -293,7 +295,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ኖቬም',
       'ዲሴም',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'እሑድ',
       'ሰኞ',
       'ማክሰኞ',
@@ -302,7 +304,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ዓርብ',
       'ቅዳሜ',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'እሑድ',
       'ሰኞ',
       'ማክሰኞ',
@@ -311,7 +313,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ዓርብ',
       'ቅዳሜ',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'እሑድ',
       'ሰኞ',
       'ማክሰ',
@@ -320,7 +322,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ዓርብ',
       'ቅዳሜ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'እሑድ',
       'ሰኞ',
       'ማክሰ',
@@ -329,7 +331,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ዓርብ',
       'ቅዳሜ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'እ',
       'ሰ',
       'ማ',
@@ -338,7 +340,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ዓ',
       'ቅ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'እ',
       'ሰ',
       'ማ',
@@ -347,59 +349,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ዓ',
       'ቅ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ሩብ1',
       'ሩብ2',
       'ሩብ3',
       'ሩብ4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1ኛው ሩብ',
       '2ኛው ሩብ',
       '3ኛው ሩብ',
       '4ኛው ሩብ',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'ጥዋት',
       'ከሰዓት',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y MMMM d, EEEE',
       'd MMMM y',
       'd MMM y',
       'dd/MM/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'ar': <String, dynamic>{
-    'NAME': 'ar',
-    'ERAS': <dynamic>[
+  ),
+  'ar': intl.DateSymbols(
+    NAME: 'ar',
+    ERAS: const <String>[
       'ق.م',
       'م',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'قبل الميلاد',
       'ميلادي',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ي',
       'ف',
       'م',
@@ -413,7 +415,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ب',
       'د',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ي',
       'ف',
       'م',
@@ -427,7 +429,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ب',
       'د',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'يناير',
       'فبراير',
       'مارس',
@@ -441,7 +443,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نوفمبر',
       'ديسمبر',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'يناير',
       'فبراير',
       'مارس',
@@ -455,7 +457,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نوفمبر',
       'ديسمبر',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'يناير',
       'فبراير',
       'مارس',
@@ -469,7 +471,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نوفمبر',
       'ديسمبر',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'يناير',
       'فبراير',
       'مارس',
@@ -483,7 +485,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نوفمبر',
       'ديسمبر',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'الأحد',
       'الاثنين',
       'الثلاثاء',
@@ -492,7 +494,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'الجمعة',
       'السبت',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'الأحد',
       'الاثنين',
       'الثلاثاء',
@@ -501,7 +503,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'الجمعة',
       'السبت',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'الأحد',
       'الاثنين',
       'الثلاثاء',
@@ -510,7 +512,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'الجمعة',
       'السبت',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'الأحد',
       'الاثنين',
       'الثلاثاء',
@@ -519,7 +521,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'الجمعة',
       'السبت',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ح',
       'ن',
       'ث',
@@ -528,7 +530,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ج',
       'س',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ح',
       'ن',
       'ث',
@@ -537,60 +539,60 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ج',
       'س',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'الربع الأول',
       'الربع الثاني',
       'الربع الثالث',
       'الربع الرابع',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'الربع الأول',
       'الربع الثاني',
       'الربع الثالث',
       'الربع الرابع',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'ص',
       'م',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE، d MMMM y',
       'd MMMM y',
       'dd‏/MM‏/y',
       'd‏/M‏/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 5,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 5,
+    WEEKENDRANGE: const <int>[
       4,
       5,
     ],
-    'FIRSTWEEKCUTOFFDAY': 4,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 4,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-    'ZERODIGIT': '٠',
-  },
-  'az': <String, dynamic>{
-    'NAME': 'az',
-    'ERAS': <dynamic>[
+    ZERODIGIT: '٠',
+  ),
+  'az': intl.DateSymbols(
+    NAME: 'az',
+    ERAS: const <String>[
       'e.ə.',
       'y.e.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'eramızdan əvvəl',
       'yeni era',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -604,7 +606,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -618,7 +620,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'yanvar',
       'fevral',
       'mart',
@@ -632,7 +634,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noyabr',
       'dekabr',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Yanvar',
       'Fevral',
       'Mart',
@@ -646,7 +648,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Noyabr',
       'Dekabr',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'yan',
       'fev',
       'mar',
@@ -660,7 +662,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noy',
       'dek',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'yan',
       'fev',
       'mar',
@@ -674,7 +676,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noy',
       'dek',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'bazar',
       'bazar ertəsi',
       'çərşənbə axşamı',
@@ -683,7 +685,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'cümə',
       'şənbə',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'bazar',
       'bazar ertəsi',
       'çərşənbə axşamı',
@@ -692,7 +694,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'cümə',
       'şənbə',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'B.',
       'B.E.',
       'Ç.A.',
@@ -701,7 +703,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'C.',
       'Ş.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'B.',
       'B.E.',
       'Ç.A.',
@@ -710,7 +712,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'C.',
       'Ş.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       '7',
       '1',
       '2',
@@ -719,7 +721,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '5',
       '6',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       '7',
       '1',
       '2',
@@ -728,59 +730,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '5',
       '6',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1-ci kv.',
       '2-ci kv.',
       '3-cü kv.',
       '4-cü kv.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1-ci kvartal',
       '2-ci kvartal',
       '3-cü kvartal',
       '4-cü kvartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'd MMMM y, EEEE',
       'd MMMM y',
       'd MMM y',
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'be': <String, dynamic>{
-    'NAME': 'be',
-    'ERAS': <dynamic>[
+  ),
+  'be': intl.DateSymbols(
+    NAME: 'be',
+    ERAS: const <String>[
       'да н.э.',
       'н.э.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'да нараджэння Хрыстова',
       'ад нараджэння Хрыстова',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'с',
       'л',
       'с',
@@ -794,7 +796,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'л',
       'с',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'с',
       'л',
       'с',
@@ -808,7 +810,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'л',
       'с',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'студзеня',
       'лютага',
       'сакавіка',
@@ -822,7 +824,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'лістапада',
       'снежня',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'студзень',
       'люты',
       'сакавік',
@@ -836,7 +838,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'лістапад',
       'снежань',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'сту',
       'лют',
       'сак',
@@ -850,7 +852,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ліс',
       'сне',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'сту',
       'лют',
       'сак',
@@ -864,7 +866,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ліс',
       'сне',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'нядзеля',
       'панядзелак',
       'аўторак',
@@ -873,7 +875,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пятніца',
       'субота',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'нядзеля',
       'панядзелак',
       'аўторак',
@@ -882,7 +884,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пятніца',
       'субота',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'нд',
       'пн',
       'аў',
@@ -891,7 +893,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пт',
       'сб',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'нд',
       'пн',
       'аў',
@@ -900,7 +902,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пт',
       'сб',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'н',
       'п',
       'а',
@@ -909,7 +911,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'п',
       'с',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'н',
       'п',
       'а',
@@ -918,59 +920,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'п',
       'с',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1-шы кв.',
       '2-гі кв.',
       '3-ці кв.',
       '4-ты кв.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1-шы квартал',
       '2-гі квартал',
       '3-ці квартал',
       '4-ты квартал',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d MMMM y 'г'.",
       "d MMMM y 'г'.",
       'd.MM.y',
       'd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss, zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       "{1} 'у' {0}",
       "{1} 'у' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'bg': <String, dynamic>{
-    'NAME': 'bg',
-    'ERAS': <dynamic>[
+  ),
+  'bg': intl.DateSymbols(
+    NAME: 'bg',
+    ERAS: const <String>[
       'пр.Хр.',
       'сл.Хр.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'преди Христа',
       'след Христа',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'я',
       'ф',
       'м',
@@ -984,7 +986,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'н',
       'д',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'я',
       'ф',
       'м',
@@ -998,7 +1000,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'н',
       'д',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'януари',
       'февруари',
       'март',
@@ -1012,7 +1014,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноември',
       'декември',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'януари',
       'февруари',
       'март',
@@ -1026,7 +1028,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноември',
       'декември',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'яну',
       'фев',
       'март',
@@ -1040,7 +1042,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ное',
       'дек',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'яну',
       'фев',
       'март',
@@ -1054,7 +1056,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ное',
       'дек',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'неделя',
       'понеделник',
       'вторник',
@@ -1063,7 +1065,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'петък',
       'събота',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'неделя',
       'понеделник',
       'вторник',
@@ -1072,7 +1074,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'петък',
       'събота',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'нд',
       'пн',
       'вт',
@@ -1081,7 +1083,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пт',
       'сб',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'нд',
       'пн',
       'вт',
@@ -1090,7 +1092,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пт',
       'сб',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'н',
       'п',
       'в',
@@ -1099,7 +1101,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'п',
       'с',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'н',
       'п',
       'в',
@@ -1108,59 +1110,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'п',
       'с',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1. трим.',
       '2. трим.',
       '3. трим.',
       '4. трим.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. тримесечие',
       '2. тримесечие',
       '3. тримесечие',
       '4. тримесечие',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'пр.об.',
       'сл.об.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d MMMM y 'г'.",
       "d MMMM y 'г'.",
       "d.MM.y 'г'.",
       "d.MM.yy 'г'.",
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       "H:mm:ss 'ч'. zzzz",
       "H:mm:ss 'ч'. z",
       "H:mm:ss 'ч'.",
       "H:mm 'ч'.",
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'bn': <String, dynamic>{
-    'NAME': 'bn',
-    'ERAS': <dynamic>[
+  ),
+  'bn': intl.DateSymbols(
+    NAME: 'bn',
+    ERAS: const <String>[
       'খ্রিস্টপূর্ব',
       'খৃষ্টাব্দ',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'খ্রিস্টপূর্ব',
       'খ্রীষ্টাব্দ',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'জা',
       'ফে',
       'মা',
@@ -1174,7 +1176,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ন',
       'ডি',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'জা',
       'ফে',
       'মা',
@@ -1188,7 +1190,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ন',
       'ডি',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'জানুয়ারী',
       'ফেব্রুয়ারী',
       'মার্চ',
@@ -1202,7 +1204,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'নভেম্বর',
       'ডিসেম্বর',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'জানুয়ারী',
       'ফেব্রুয়ারী',
       'মার্চ',
@@ -1216,7 +1218,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'নভেম্বর',
       'ডিসেম্বর',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'জানু',
       'ফেব',
       'মার্চ',
@@ -1230,7 +1232,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'নভেম্বর',
       'ডিসেম্বর',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'জানুয়ারী',
       'ফেব্রুয়ারী',
       'মার্চ',
@@ -1244,7 +1246,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'নভেম্বর',
       'ডিসেম্বর',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'রবিবার',
       'সোমবার',
       'মঙ্গলবার',
@@ -1253,7 +1255,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'শুক্রবার',
       'শনিবার',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'রবিবার',
       'সোমবার',
       'মঙ্গলবার',
@@ -1262,7 +1264,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'শুক্রবার',
       'শনিবার',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'রবি',
       'সোম',
       'মঙ্গল',
@@ -1271,7 +1273,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'শুক্র',
       'শনি',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'রবি',
       'সোম',
       'মঙ্গল',
@@ -1280,7 +1282,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'শুক্র',
       'শনি',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'র',
       'সো',
       'ম',
@@ -1289,7 +1291,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'শু',
       'শ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'র',
       'সো',
       'ম',
@@ -1298,60 +1300,60 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'শু',
       'শ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ত্রৈমাসিক',
       'দ্বিতীয় ত্রৈমাসিক',
       'তৃতীয় ত্রৈমাসিক',
       'চতুর্থ ত্রৈমাসিক',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ত্রৈমাসিক',
       'দ্বিতীয় ত্রৈমাসিক',
       'তৃতীয় ত্রৈমাসিক',
       'চতুর্থ ত্রৈমাসিক',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM, y',
       'd MMMM, y',
       'd MMM, y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-    'ZERODIGIT': '০',
-  },
-  'bs': <String, dynamic>{
-    'NAME': 'bs',
-    'ERAS': <dynamic>[
+    ZERODIGIT: '০',
+  ),
+  'bs': intl.DateSymbols(
+    NAME: 'bs',
+    ERAS: const <String>[
       'p. n. e.',
       'n. e.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'prije nove ere',
       'nove ere',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'j',
       'f',
       'm',
@@ -1365,7 +1367,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'd',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'j',
       'f',
       'm',
@@ -1379,7 +1381,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'd',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'januar',
       'februar',
       'mart',
@@ -1393,7 +1395,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembar',
       'decembar',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'januar',
       'februar',
       'mart',
@@ -1407,7 +1409,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembar',
       'decembar',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan',
       'feb',
       'mar',
@@ -1421,7 +1423,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan',
       'feb',
       'mar',
@@ -1435,7 +1437,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'nedjelja',
       'ponedjeljak',
       'utorak',
@@ -1444,7 +1446,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'petak',
       'subota',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'nedjelja',
       'ponedjeljak',
       'utorak',
@@ -1453,7 +1455,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'petak',
       'subota',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ned',
       'pon',
       'uto',
@@ -1462,7 +1464,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pet',
       'sub',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ned',
       'pon',
       'uto',
@@ -1471,7 +1473,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pet',
       'sub',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'N',
       'P',
       'U',
@@ -1480,7 +1482,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'n',
       'p',
       'u',
@@ -1489,59 +1491,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       's',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'KV1',
       'KV2',
       'KV3',
       'KV4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'Prvi kvartal',
       'Drugi kvartal',
       'Treći kvartal',
       'Četvrti kvartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'prijepodne',
       'popodne',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d. MMMM y.',
       'd. MMMM y.',
       'd. MMM y.',
       'd. M. y.',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       "{1} 'u' {0}",
       "{1} 'u' {0}",
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'ca': <String, dynamic>{
-    'NAME': 'ca',
-    'ERAS': <dynamic>[
+  ),
+  'ca': intl.DateSymbols(
+    NAME: 'ca',
+    ERAS: const <String>[
       'aC',
       'dC',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'abans de Crist',
       'després de Crist',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'GN',
       'FB',
       'MÇ',
@@ -1555,7 +1557,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'NV',
       'DS',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'GN',
       'FB',
       'MÇ',
@@ -1569,7 +1571,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'NV',
       'DS',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'de gener',
       'de febrer',
       'de març',
@@ -1583,7 +1585,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'de novembre',
       'de desembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'gener',
       'febrer',
       'març',
@@ -1597,7 +1599,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembre',
       'desembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'de gen.',
       'de febr.',
       'de març',
@@ -1611,7 +1613,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'de nov.',
       'de des.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'gen.',
       'febr.',
       'març',
@@ -1625,7 +1627,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'des.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'diumenge',
       'dilluns',
       'dimarts',
@@ -1634,7 +1636,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'divendres',
       'dissabte',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'diumenge',
       'dilluns',
       'dimarts',
@@ -1643,7 +1645,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'divendres',
       'dissabte',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dg.',
       'dl.',
       'dt.',
@@ -1652,7 +1654,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'dv.',
       'ds.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dg.',
       'dl.',
       'dt.',
@@ -1661,7 +1663,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'dv.',
       'ds.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'dg',
       'dl',
       'dt',
@@ -1670,7 +1672,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'dv',
       'ds',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'dg',
       'dl',
       'dt',
@@ -1679,59 +1681,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'dv',
       'ds',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1T',
       '2T',
       '3T',
       '4T',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1r trimestre',
       '2n trimestre',
       '3r trimestre',
       '4t trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a. m.',
       'p. m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d MMMM 'de' y",
       "d MMMM 'de' y",
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss zzzz',
       'H:mm:ss z',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'a' 'les' {0}",
       "{1} 'a' 'les' {0}",
       '{1}, {0}',
       '{1} {0}',
     ],
-  },
-  'cs': <String, dynamic>{
-    'NAME': 'cs',
-    'ERAS': <dynamic>[
+  ),
+  'cs': intl.DateSymbols(
+    NAME: 'cs',
+    ERAS: const <String>[
       'př. n. l.',
       'n. l.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'před naším letopočtem',
       'našeho letopočtu',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -1745,7 +1747,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -1759,7 +1761,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ledna',
       'února',
       'března',
@@ -1773,7 +1775,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'listopadu',
       'prosince',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'leden',
       'únor',
       'březen',
@@ -1787,7 +1789,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'listopad',
       'prosinec',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'led',
       'úno',
       'bře',
@@ -1801,7 +1803,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'lis',
       'pro',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'led',
       'úno',
       'bře',
@@ -1815,7 +1817,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'lis',
       'pro',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'neděle',
       'pondělí',
       'úterý',
@@ -1824,7 +1826,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pátek',
       'sobota',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'neděle',
       'pondělí',
       'úterý',
@@ -1833,7 +1835,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pátek',
       'sobota',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ne',
       'po',
       'út',
@@ -1842,7 +1844,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pá',
       'so',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ne',
       'po',
       'út',
@@ -1851,7 +1853,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pá',
       'so',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'N',
       'P',
       'Ú',
@@ -1860,7 +1862,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'N',
       'P',
       'Ú',
@@ -1869,59 +1871,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. čtvrtletí',
       '2. čtvrtletí',
       '3. čtvrtletí',
       '4. čtvrtletí',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'dop.',
       'odp.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d. MMMM y',
       'd. MMMM y',
       'd. M. y',
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss zzzz',
       'H:mm:ss z',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'da': <String, dynamic>{
-    'NAME': 'da',
-    'ERAS': <dynamic>[
+  ),
+  'da': intl.DateSymbols(
+    NAME: 'da',
+    ERAS: const <String>[
       'f.Kr.',
       'e.Kr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'f.Kr.',
       'e.Kr.',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -1935,7 +1937,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -1949,7 +1951,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'januar',
       'februar',
       'marts',
@@ -1963,7 +1965,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'januar',
       'februar',
       'marts',
@@ -1977,7 +1979,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mar.',
@@ -1991,7 +1993,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mar.',
@@ -2005,7 +2007,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'søndag',
       'mandag',
       'tirsdag',
@@ -2014,7 +2016,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fredag',
       'lørdag',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'søndag',
       'mandag',
       'tirsdag',
@@ -2023,7 +2025,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fredag',
       'lørdag',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'søn.',
       'man.',
       'tir.',
@@ -2032,7 +2034,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fre.',
       'lør.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'søn',
       'man',
       'tir',
@@ -2041,7 +2043,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fre',
       'lør',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -2050,7 +2052,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -2059,59 +2061,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1. kvt.',
       '2. kvt.',
       '3. kvt.',
       '4. kvt.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. kvartal',
       '2. kvartal',
       '3. kvartal',
       '4. kvartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE 'den' d. MMMM y",
       'd. MMMM y',
       'd. MMM y',
       'dd.MM.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH.mm.ss zzzz',
       'HH.mm.ss z',
       'HH.mm.ss',
       'HH.mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'kl'. {0}",
       "{1} 'kl'. {0}",
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'de': <String, dynamic>{
-    'NAME': 'de',
-    'ERAS': <dynamic>[
+  ),
+  'de': intl.DateSymbols(
+    NAME: 'de',
+    ERAS: const <String>[
       'v. Chr.',
       'n. Chr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'v. Chr.',
       'n. Chr.',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -2125,7 +2127,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -2139,7 +2141,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Januar',
       'Februar',
       'März',
@@ -2153,7 +2155,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Dezember',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Januar',
       'Februar',
       'März',
@@ -2167,7 +2169,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Dezember',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan.',
       'Feb.',
       'März',
@@ -2181,7 +2183,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov.',
       'Dez.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mär',
@@ -2195,7 +2197,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dez',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sonntag',
       'Montag',
       'Dienstag',
@@ -2204,7 +2206,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Freitag',
       'Samstag',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sonntag',
       'Montag',
       'Dienstag',
@@ -2213,7 +2215,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Freitag',
       'Samstag',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'So.',
       'Mo.',
       'Di.',
@@ -2222,7 +2224,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fr.',
       'Sa.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'So',
       'Mo',
       'Di',
@@ -2231,7 +2233,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fr',
       'Sa',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'D',
@@ -2240,7 +2242,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'D',
@@ -2249,59 +2251,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. Quartal',
       '2. Quartal',
       '3. Quartal',
       '4. Quartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d. MMMM y',
       'd. MMMM y',
       'dd.MM.y',
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'um' {0}",
       "{1} 'um' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'de_CH': <String, dynamic>{
-    'NAME': 'de_CH',
-    'ERAS': <dynamic>[
+  ),
+  'de_CH': intl.DateSymbols(
+    NAME: 'de_CH',
+    ERAS: const <String>[
       'v. Chr.',
       'n. Chr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'v. Chr.',
       'n. Chr.',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -2315,7 +2317,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -2329,7 +2331,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Januar',
       'Februar',
       'März',
@@ -2343,7 +2345,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Dezember',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Januar',
       'Februar',
       'März',
@@ -2357,7 +2359,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Dezember',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan.',
       'Feb.',
       'März',
@@ -2371,7 +2373,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov.',
       'Dez.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mär',
@@ -2385,7 +2387,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dez',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sonntag',
       'Montag',
       'Dienstag',
@@ -2394,7 +2396,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Freitag',
       'Samstag',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sonntag',
       'Montag',
       'Dienstag',
@@ -2403,7 +2405,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Freitag',
       'Samstag',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'So.',
       'Mo.',
       'Di.',
@@ -2412,7 +2414,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fr.',
       'Sa.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'So',
       'Mo',
       'Di',
@@ -2421,7 +2423,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fr',
       'Sa',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'D',
@@ -2430,7 +2432,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'D',
@@ -2439,59 +2441,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. Quartal',
       '2. Quartal',
       '3. Quartal',
       '4. Quartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d. MMMM y',
       'd. MMMM y',
       'dd.MM.y',
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'um' {0}",
       "{1} 'um' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'el': <String, dynamic>{
-    'NAME': 'el',
-    'ERAS': <dynamic>[
+  ),
+  'el': intl.DateSymbols(
+    NAME: 'el',
+    ERAS: const <String>[
       'π.Χ.',
       'μ.Χ.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'προ Χριστού',
       'μετά Χριστόν',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'Ι',
       'Φ',
       'Μ',
@@ -2505,7 +2507,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ν',
       'Δ',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'Ι',
       'Φ',
       'Μ',
@@ -2519,7 +2521,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ν',
       'Δ',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Ιανουαρίου',
       'Φεβρουαρίου',
       'Μαρτίου',
@@ -2533,7 +2535,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Νοεμβρίου',
       'Δεκεμβρίου',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Ιανουάριος',
       'Φεβρουάριος',
       'Μάρτιος',
@@ -2547,7 +2549,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Νοέμβριος',
       'Δεκέμβριος',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Ιαν',
       'Φεβ',
       'Μαρ',
@@ -2561,7 +2563,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Νοε',
       'Δεκ',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Ιαν',
       'Φεβ',
       'Μάρ',
@@ -2575,7 +2577,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Νοέ',
       'Δεκ',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Κυριακή',
       'Δευτέρα',
       'Τρίτη',
@@ -2584,7 +2586,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Παρασκευή',
       'Σάββατο',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Κυριακή',
       'Δευτέρα',
       'Τρίτη',
@@ -2593,7 +2595,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Παρασκευή',
       'Σάββατο',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Κυρ',
       'Δευ',
       'Τρί',
@@ -2602,7 +2604,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Παρ',
       'Σάβ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Κυρ',
       'Δευ',
       'Τρί',
@@ -2611,7 +2613,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Παρ',
       'Σάβ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Κ',
       'Δ',
       'Τ',
@@ -2620,7 +2622,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Π',
       'Σ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Κ',
       'Δ',
       'Τ',
@@ -2629,59 +2631,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Π',
       'Σ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Τ1',
       'Τ2',
       'Τ3',
       'Τ4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1ο τρίμηνο',
       '2ο τρίμηνο',
       '3ο τρίμηνο',
       '4ο τρίμηνο',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'π.μ.',
       'μ.μ.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} - {0}',
       '{1} - {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'en': <String, dynamic>{
-    'NAME': 'en',
-    'ERAS': <dynamic>[
+  ),
+  'en': intl.DateSymbols(
+    NAME: 'en',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -2695,7 +2697,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -2709,7 +2711,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -2723,7 +2725,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -2737,7 +2739,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -2751,7 +2753,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -2765,7 +2767,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -2774,7 +2776,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -2783,7 +2785,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -2792,7 +2794,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -2801,7 +2803,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -2810,7 +2812,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -2819,59 +2821,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1st quarter',
       '2nd quarter',
       '3rd quarter',
       '4th quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, MMMM d, y',
       'MMMM d, y',
       'MMM d, y',
       'M/d/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'at' {0}",
       "{1} 'at' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'en_AU': <String, dynamic>{
-    'NAME': 'en_AU',
-    'ERAS': <dynamic>[
+  ),
+  'en_AU': intl.DateSymbols(
+    NAME: 'en_AU',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -2885,7 +2887,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -2899,7 +2901,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -2913,7 +2915,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -2927,7 +2929,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -2941,7 +2943,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -2955,7 +2957,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -2964,7 +2966,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -2973,7 +2975,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -2982,7 +2984,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -2991,7 +2993,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Su.',
       'M.',
       'Tu.',
@@ -3000,7 +3002,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F.',
       'Sa.',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Su.',
       'M.',
       'Tu.',
@@ -3009,59 +3011,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F.',
       'Sa.',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1st quarter',
       '2nd quarter',
       '3rd quarter',
       '4th quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'am',
       'pm',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'at' {0}",
       "{1} 'at' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'en_CA': <String, dynamic>{
-    'NAME': 'en_CA',
-    'ERAS': <dynamic>[
+  ),
+  'en_CA': intl.DateSymbols(
+    NAME: 'en_CA',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3075,7 +3077,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3089,7 +3091,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3103,7 +3105,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3117,7 +3119,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan.',
       'Feb.',
       'Mar.',
@@ -3131,7 +3133,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov.',
       'Dec.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan.',
       'Feb.',
       'Mar.',
@@ -3145,7 +3147,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov.',
       'Dec.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3154,7 +3156,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3163,7 +3165,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Sun.',
       'Mon.',
       'Tue.',
@@ -3172,7 +3174,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri.',
       'Sat.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Sun.',
       'Mon.',
       'Tue.',
@@ -3181,7 +3183,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri.',
       'Sat.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3190,7 +3192,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3199,59 +3201,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1st quarter',
       '2nd quarter',
       '3rd quarter',
       '4th quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a.m.',
       'p.m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, MMMM d, y',
       'MMMM d, y',
       'MMM d, y',
       'y-MM-dd',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'at' {0}",
       "{1} 'at' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'en_GB': <String, dynamic>{
-    'NAME': 'en_GB',
-    'ERAS': <dynamic>[
+  ),
+  'en_GB': intl.DateSymbols(
+    NAME: 'en_GB',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3265,7 +3267,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3279,7 +3281,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3293,7 +3295,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3307,7 +3309,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -3321,7 +3323,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -3335,7 +3337,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3344,7 +3346,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3353,7 +3355,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -3362,7 +3364,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -3371,7 +3373,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3380,7 +3382,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3389,59 +3391,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1st quarter',
       '2nd quarter',
       '3rd quarter',
       '4th quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'am',
       'pm',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'dd/MM/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'at' {0}",
       "{1} 'at' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'en_IE': <String, dynamic>{
-    'NAME': 'en_IE',
-    'ERAS': <dynamic>[
+  ),
+  'en_IE': intl.DateSymbols(
+    NAME: 'en_IE',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3455,7 +3457,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3469,7 +3471,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3483,7 +3485,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3497,7 +3499,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -3511,7 +3513,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -3525,7 +3527,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3534,7 +3536,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3543,7 +3545,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -3552,7 +3554,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -3561,7 +3563,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3570,7 +3572,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3579,59 +3581,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1st quarter',
       '2nd quarter',
       '3rd quarter',
       '4th quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a.m.',
       'p.m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d MMMM y',
       'd MMMM y',
       'd MMM y',
       'dd/MM/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'at' {0}",
       "{1} 'at' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'en_IN': <String, dynamic>{
-    'NAME': 'en_IN',
-    'ERAS': <dynamic>[
+  ),
+  'en_IN': intl.DateSymbols(
+    NAME: 'en_IN',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3645,7 +3647,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3659,7 +3661,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3673,7 +3675,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3687,7 +3689,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -3701,7 +3703,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -3715,7 +3717,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3724,7 +3726,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3733,7 +3735,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -3742,7 +3744,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -3751,7 +3753,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3760,7 +3762,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3769,59 +3771,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1st quarter',
       '2nd quarter',
       '3rd quarter',
       '4th quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'am',
       'pm',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM, y',
       'd MMMM y',
       'dd-MMM-y',
       'dd/MM/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'at' {0}",
       "{1} 'at' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'en_SG': <String, dynamic>{
-    'NAME': 'en_SG',
-    'ERAS': <dynamic>[
+  ),
+  'en_SG': intl.DateSymbols(
+    NAME: 'en_SG',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3835,7 +3837,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -3849,7 +3851,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3863,7 +3865,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -3877,7 +3879,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -3891,7 +3893,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -3905,7 +3907,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3914,7 +3916,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -3923,7 +3925,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -3932,7 +3934,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -3941,7 +3943,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3950,7 +3952,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -3959,59 +3961,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1st quarter',
       '2nd quarter',
       '3rd quarter',
       '4th quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'am',
       'pm',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'at' {0}",
       "{1} 'at' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'en_US': <String, dynamic>{
-    'NAME': 'en_US',
-    'ERAS': <dynamic>[
+  ),
+  'en_US': intl.DateSymbols(
+    NAME: 'en_US',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -4025,7 +4027,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -4039,7 +4041,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -4053,7 +4055,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -4067,7 +4069,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -4081,7 +4083,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -4095,7 +4097,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -4104,7 +4106,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -4113,7 +4115,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -4122,7 +4124,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -4131,7 +4133,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -4140,7 +4142,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -4149,59 +4151,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1st quarter',
       '2nd quarter',
       '3rd quarter',
       '4th quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, MMMM d, y',
       'MMMM d, y',
       'MMM d, y',
       'M/d/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'at' {0}",
       "{1} 'at' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'en_ZA': <String, dynamic>{
-    'NAME': 'en_ZA',
-    'ERAS': <dynamic>[
+  ),
+  'en_ZA': intl.DateSymbols(
+    NAME: 'en_ZA',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -4215,7 +4217,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -4229,7 +4231,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -4243,7 +4245,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'January',
       'February',
       'March',
@@ -4257,7 +4259,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'December',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -4271,7 +4273,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -4285,7 +4287,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -4294,7 +4296,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunday',
       'Monday',
       'Tuesday',
@@ -4303,7 +4305,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friday',
       'Saturday',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -4312,7 +4314,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Sun',
       'Mon',
       'Tue',
@@ -4321,7 +4323,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fri',
       'Sat',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -4330,7 +4332,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -4339,59 +4341,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1st quarter',
       '2nd quarter',
       '3rd quarter',
       '4th quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'am',
       'pm',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, dd MMMM y',
       'dd MMMM y',
       'dd MMM y',
       'y/MM/dd',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'at' {0}",
       "{1} 'at' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'es': <String, dynamic>{
-    'NAME': 'es',
-    'ERAS': <dynamic>[
+  ),
+  'es': intl.DateSymbols(
+    NAME: 'es',
+    ERAS: const <String>[
       'a. C.',
       'd. C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'antes de Cristo',
       'después de Cristo',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'E',
       'F',
       'M',
@@ -4405,7 +4407,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'E',
       'F',
       'M',
@@ -4419,7 +4421,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'enero',
       'febrero',
       'marzo',
@@ -4433,7 +4435,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noviembre',
       'diciembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'enero',
       'febrero',
       'marzo',
@@ -4447,7 +4449,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noviembre',
       'diciembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ene.',
       'feb.',
       'mar.',
@@ -4461,7 +4463,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dic.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ene.',
       'feb.',
       'mar.',
@@ -4475,7 +4477,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dic.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'domingo',
       'lunes',
       'martes',
@@ -4484,7 +4486,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'viernes',
       'sábado',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'domingo',
       'lunes',
       'martes',
@@ -4493,7 +4495,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'viernes',
       'sábado',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dom.',
       'lun.',
       'mar.',
@@ -4502,7 +4504,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vie.',
       'sáb.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dom.',
       'lun.',
       'mar.',
@@ -4511,7 +4513,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vie.',
       'sáb.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -4520,7 +4522,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -4529,59 +4531,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'T1',
       'T2',
       'T3',
       'T4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1.er trimestre',
       '2.º trimestre',
       '3.er trimestre',
       '4.º trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a. m.',
       'p. m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d 'de' MMMM 'de' y",
       "d 'de' MMMM 'de' y",
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss (zzzz)',
       'H:mm:ss z',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'es_419': <String, dynamic>{
-    'NAME': 'es_419',
-    'ERAS': <dynamic>[
+  ),
+  'es_419': intl.DateSymbols(
+    NAME: 'es_419',
+    ERAS: const <String>[
       'a. C.',
       'd. C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'antes de Cristo',
       'después de Cristo',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'E',
       'F',
       'M',
@@ -4595,7 +4597,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'E',
       'F',
       'M',
@@ -4609,7 +4611,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'enero',
       'febrero',
       'marzo',
@@ -4623,7 +4625,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noviembre',
       'diciembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'enero',
       'febrero',
       'marzo',
@@ -4637,7 +4639,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noviembre',
       'diciembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ene.',
       'feb.',
       'mar.',
@@ -4651,7 +4653,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dic.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ene.',
       'feb.',
       'mar.',
@@ -4665,7 +4667,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dic.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'domingo',
       'lunes',
       'martes',
@@ -4674,7 +4676,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'viernes',
       'sábado',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'domingo',
       'lunes',
       'martes',
@@ -4683,7 +4685,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'viernes',
       'sábado',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dom.',
       'lun.',
       'mar.',
@@ -4692,7 +4694,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vie.',
       'sáb.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dom.',
       'lun.',
       'mar.',
@@ -4701,7 +4703,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vie.',
       'sáb.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'd',
       'l',
       'm',
@@ -4710,7 +4712,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'v',
       's',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -4719,59 +4721,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'T1',
       'T2',
       'T3',
       'T4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1.º trimestre',
       '2.º trimestre',
       '3.º trimestre',
       '4.º trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a.m.',
       'p.m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d 'de' MMMM 'de' y",
       "d 'de' MMMM 'de' y",
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'es_MX': <String, dynamic>{
-    'NAME': 'es_MX',
-    'ERAS': <dynamic>[
+  ),
+  'es_MX': intl.DateSymbols(
+    NAME: 'es_MX',
+    ERAS: const <String>[
       'a. C.',
       'd. C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'antes de Cristo',
       'después de Cristo',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'E',
       'F',
       'M',
@@ -4785,7 +4787,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'E',
       'F',
       'M',
@@ -4799,7 +4801,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'enero',
       'febrero',
       'marzo',
@@ -4813,7 +4815,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noviembre',
       'diciembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'enero',
       'febrero',
       'marzo',
@@ -4827,7 +4829,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noviembre',
       'diciembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ene.',
       'feb.',
       'mar.',
@@ -4841,7 +4843,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dic.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ene.',
       'feb.',
       'mar.',
@@ -4855,7 +4857,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dic.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'domingo',
       'lunes',
       'martes',
@@ -4864,7 +4866,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'viernes',
       'sábado',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'domingo',
       'lunes',
       'martes',
@@ -4873,7 +4875,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'viernes',
       'sábado',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dom.',
       'lun.',
       'mar.',
@@ -4882,7 +4884,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vie.',
       'sáb.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dom.',
       'lun.',
       'mar.',
@@ -4891,7 +4893,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vie.',
       'sáb.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -4900,7 +4902,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -4909,59 +4911,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1er. trim.',
       '2º. trim.',
       '3er. trim.',
       '4º trim.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1.er trimestre',
       '2º. trimestre',
       '3.er trimestre',
       '4o. trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a. m.',
       'p. m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d 'de' MMMM 'de' y",
       "d 'de' MMMM 'de' y",
       'd MMM y',
       'dd/MM/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss zzzz',
       'H:mm:ss z',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'es_US': <String, dynamic>{
-    'NAME': 'es_US',
-    'ERAS': <dynamic>[
+  ),
+  'es_US': intl.DateSymbols(
+    NAME: 'es_US',
+    ERAS: const <String>[
       'a. C.',
       'd. C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'antes de Cristo',
       'después de Cristo',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'E',
       'F',
       'M',
@@ -4975,7 +4977,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'E',
       'F',
       'M',
@@ -4989,7 +4991,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'enero',
       'febrero',
       'marzo',
@@ -5003,7 +5005,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noviembre',
       'diciembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'enero',
       'febrero',
       'marzo',
@@ -5017,7 +5019,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noviembre',
       'diciembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ene.',
       'feb.',
       'mar.',
@@ -5031,7 +5033,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dic.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ene.',
       'feb.',
       'mar.',
@@ -5045,7 +5047,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dic.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'domingo',
       'lunes',
       'martes',
@@ -5054,7 +5056,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'viernes',
       'sábado',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'domingo',
       'lunes',
       'martes',
@@ -5063,7 +5065,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'viernes',
       'sábado',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dom.',
       'lun.',
       'mar.',
@@ -5072,7 +5074,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vie.',
       'sáb.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dom.',
       'lun.',
       'mar.',
@@ -5081,7 +5083,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vie.',
       'sáb.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -5090,7 +5092,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -5099,59 +5101,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'T1',
       'T2',
       'T3',
       'T4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1.er trimestre',
       '2.º trimestre',
       '3.er trimestre',
       '4.º trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a. m.',
       'p. m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d 'de' MMMM 'de' y",
       "d 'de' MMMM 'de' y",
       'd MMM y',
       'd/M/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'et': <String, dynamic>{
-    'NAME': 'et',
-    'ERAS': <dynamic>[
+  ),
+  'et': intl.DateSymbols(
+    NAME: 'et',
+    ERAS: const <String>[
       'eKr',
       'pKr',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'enne Kristust',
       'pärast Kristust',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'V',
       'M',
@@ -5165,7 +5167,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'V',
       'M',
@@ -5179,7 +5181,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'jaanuar',
       'veebruar',
       'märts',
@@ -5193,7 +5195,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'detsember',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'jaanuar',
       'veebruar',
       'märts',
@@ -5207,7 +5209,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'detsember',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jaan',
       'veebr',
       'märts',
@@ -5221,7 +5223,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dets',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jaan',
       'veebr',
       'märts',
@@ -5235,7 +5237,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dets',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'pühapäev',
       'esmaspäev',
       'teisipäev',
@@ -5244,7 +5246,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'reede',
       'laupäev',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'pühapäev',
       'esmaspäev',
       'teisipäev',
@@ -5253,7 +5255,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'reede',
       'laupäev',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'P',
       'E',
       'T',
@@ -5262,7 +5264,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'R',
       'L',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'P',
       'E',
       'T',
@@ -5271,7 +5273,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'R',
       'L',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'P',
       'E',
       'T',
@@ -5280,7 +5282,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'R',
       'L',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'P',
       'E',
       'T',
@@ -5289,59 +5291,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'R',
       'L',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'K1',
       'K2',
       'K3',
       'K4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. kvartal',
       '2. kvartal',
       '3. kvartal',
       '4. kvartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d. MMMM y',
       'd. MMMM y',
       'd. MMM y',
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'eu': <String, dynamic>{
-    'NAME': 'eu',
-    'ERAS': <dynamic>[
+  ),
+  'eu': intl.DateSymbols(
+    NAME: 'eu',
+    ERAS: const <String>[
       'K.a.',
       'K.o.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'K.a.',
       'Kristo ondoren',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'U',
       'O',
       'M',
@@ -5355,7 +5357,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'A',
       'A',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'U',
       'O',
       'M',
@@ -5369,7 +5371,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'A',
       'A',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'urtarrila',
       'otsaila',
       'martxoa',
@@ -5383,7 +5385,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'azaroa',
       'abendua',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'urtarrila',
       'otsaila',
       'martxoa',
@@ -5397,7 +5399,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'azaroa',
       'abendua',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'urt.',
       'ots.',
       'mar.',
@@ -5411,7 +5413,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'aza.',
       'abe.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'urt.',
       'ots.',
       'mar.',
@@ -5425,7 +5427,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'aza.',
       'abe.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'igandea',
       'astelehena',
       'asteartea',
@@ -5434,7 +5436,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ostirala',
       'larunbata',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'igandea',
       'astelehena',
       'asteartea',
@@ -5443,7 +5445,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ostirala',
       'larunbata',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ig.',
       'al.',
       'ar.',
@@ -5452,7 +5454,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'or.',
       'lr.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ig.',
       'al.',
       'ar.',
@@ -5461,7 +5463,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'or.',
       'lr.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'I',
       'A',
       'A',
@@ -5470,7 +5472,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'O',
       'L',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'I',
       'A',
       'A',
@@ -5479,59 +5481,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'O',
       'L',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1Hh',
       '2Hh',
       '3Hh',
       '4Hh',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. hiruhilekoa',
       '2. hiruhilekoa',
       '3. hiruhilekoa',
       '4. hiruhilekoa',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "y('e')'ko' MMMM'ren' d('a'), EEEE",
       "y('e')'ko' MMMM'ren' d('a')",
       "y('e')'ko' MMM d('a')",
       'yy/M/d',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss (zzzz)',
       'HH:mm:ss (z)',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'fa': <String, dynamic>{
-    'NAME': 'fa',
-    'ERAS': <dynamic>[
+  ),
+  'fa': intl.DateSymbols(
+    NAME: 'fa',
+    ERAS: const <String>[
       'ق.م.',
       'م.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'قبل از میلاد',
       'میلادی',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ژ',
       'ف',
       'م',
@@ -5545,7 +5547,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ن',
       'د',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ژ',
       'ف',
       'م',
@@ -5559,7 +5561,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ن',
       'د',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ژانویهٔ',
       'فوریهٔ',
       'مارس',
@@ -5573,7 +5575,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نوامبر',
       'دسامبر',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ژانویه',
       'فوریه',
       'مارس',
@@ -5587,7 +5589,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نوامبر',
       'دسامبر',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ژانویهٔ',
       'فوریهٔ',
       'مارس',
@@ -5601,7 +5603,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نوامبر',
       'دسامبر',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ژانویه',
       'فوریه',
       'مارس',
@@ -5615,7 +5617,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نوامبر',
       'دسامبر',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'یکشنبه',
       'دوشنبه',
       'سه‌شنبه',
@@ -5624,7 +5626,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعه',
       'شنبه',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'یکشنبه',
       'دوشنبه',
       'سه‌شنبه',
@@ -5633,7 +5635,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعه',
       'شنبه',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'یکشنبه',
       'دوشنبه',
       'سه‌شنبه',
@@ -5642,7 +5644,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعه',
       'شنبه',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'یکشنبه',
       'دوشنبه',
       'سه‌شنبه',
@@ -5651,7 +5653,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعه',
       'شنبه',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ی',
       'د',
       'س',
@@ -5660,7 +5662,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ج',
       'ش',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ی',
       'د',
       'س',
@@ -5669,60 +5671,60 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ج',
       'ش',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'س‌م۱',
       'س‌م۲',
       'س‌م۳',
       'س‌م۴',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'سه‌ماههٔ اول',
       'سه‌ماههٔ دوم',
       'سه‌ماههٔ سوم',
       'سه‌ماههٔ چهارم',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'قبل‌ازظهر',
       'بعدازظهر',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d MMMM y',
       'd MMMM y',
       'd MMM y',
       'y/M/d',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss (zzzz)',
       'H:mm:ss (z)',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 5,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 5,
+    WEEKENDRANGE: const <int>[
       4,
       4,
     ],
-    'FIRSTWEEKCUTOFFDAY': 4,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 4,
+    DATETIMEFORMATS: const <String>[
       '{1}، ساعت {0}',
       '{1}، ساعت {0}',
       '{1}،‏ {0}',
       '{1}،‏ {0}',
     ],
-    'ZERODIGIT': '۰',
-  },
-  'fi': <String, dynamic>{
-    'NAME': 'fi',
-    'ERAS': <dynamic>[
+    ZERODIGIT: '۰',
+  ),
+  'fi': intl.DateSymbols(
+    NAME: 'fi',
+    ERAS: const <String>[
       'eKr.',
       'jKr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ennen Kristuksen syntymää',
       'jälkeen Kristuksen syntymän',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'T',
       'H',
       'M',
@@ -5736,7 +5738,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'M',
       'J',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'T',
       'H',
       'M',
@@ -5750,7 +5752,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'M',
       'J',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'tammikuuta',
       'helmikuuta',
       'maaliskuuta',
@@ -5764,7 +5766,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'marraskuuta',
       'joulukuuta',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'tammikuu',
       'helmikuu',
       'maaliskuu',
@@ -5778,7 +5780,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'marraskuu',
       'joulukuu',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'tammik.',
       'helmik.',
       'maalisk.',
@@ -5792,7 +5794,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'marrask.',
       'jouluk.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'tammi',
       'helmi',
       'maalis',
@@ -5806,7 +5808,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'marras',
       'joulu',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'sunnuntaina',
       'maanantaina',
       'tiistaina',
@@ -5815,7 +5817,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'perjantaina',
       'lauantaina',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'sunnuntai',
       'maanantai',
       'tiistai',
@@ -5824,7 +5826,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'perjantai',
       'lauantai',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'su',
       'ma',
       'ti',
@@ -5833,7 +5835,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pe',
       'la',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'su',
       'ma',
       'ti',
@@ -5842,7 +5844,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pe',
       'la',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -5851,7 +5853,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'L',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -5860,59 +5862,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'L',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1. nelj.',
       '2. nelj.',
       '3. nelj.',
       '4. nelj.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. neljännes',
       '2. neljännes',
       '3. neljännes',
       '4. neljännes',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'ap.',
       'ip.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'cccc d. MMMM y',
       'd. MMMM y',
       'd.M.y',
       'd.M.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H.mm.ss zzzz',
       'H.mm.ss z',
       'H.mm.ss',
       'H.mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'klo' {0}",
       "{1} 'klo' {0}",
       "{1} 'klo' {0}",
       '{1} {0}',
     ],
-  },
-  'fil': <String, dynamic>{
-    'NAME': 'fil',
-    'ERAS': <dynamic>[
+  ),
+  'fil': intl.DateSymbols(
+    NAME: 'fil',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'Ene',
       'Peb',
       'Mar',
@@ -5926,7 +5928,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nob',
       'Dis',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'E',
       'P',
       'M',
@@ -5940,7 +5942,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nob',
       'Dis',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Enero',
       'Pebrero',
       'Marso',
@@ -5954,7 +5956,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nobyembre',
       'Disyembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Enero',
       'Pebrero',
       'Marso',
@@ -5968,7 +5970,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nobyembre',
       'Disyembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Ene',
       'Peb',
       'Mar',
@@ -5982,7 +5984,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nob',
       'Dis',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Ene',
       'Peb',
       'Mar',
@@ -5996,7 +5998,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nob',
       'Dis',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Linggo',
       'Lunes',
       'Martes',
@@ -6005,7 +6007,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biyernes',
       'Sabado',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Linggo',
       'Lunes',
       'Martes',
@@ -6014,7 +6016,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biyernes',
       'Sabado',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Lin',
       'Lun',
       'Mar',
@@ -6023,7 +6025,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biy',
       'Sab',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Lin',
       'Lun',
       'Mar',
@@ -6032,7 +6034,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biy',
       'Sab',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Lin',
       'Lun',
       'Mar',
@@ -6041,7 +6043,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biy',
       'Sab',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Lin',
       'Lun',
       'Mar',
@@ -6050,59 +6052,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biy',
       'Sab',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ika-1 quarter',
       'ika-2 quarter',
       'ika-3 quarter',
       'ika-4 na quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, MMMM d, y',
       'MMMM d, y',
       'MMM d, y',
       'M/d/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'nang' {0}",
       "{1} 'nang' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'fr': <String, dynamic>{
-    'NAME': 'fr',
-    'ERAS': <dynamic>[
+  ),
+  'fr': intl.DateSymbols(
+    NAME: 'fr',
+    ERAS: const <String>[
       'av. J.-C.',
       'ap. J.-C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'avant Jésus-Christ',
       'après Jésus-Christ',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -6116,7 +6118,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -6130,7 +6132,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'janvier',
       'février',
       'mars',
@@ -6144,7 +6146,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembre',
       'décembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'janvier',
       'février',
       'mars',
@@ -6158,7 +6160,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembre',
       'décembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'janv.',
       'févr.',
       'mars',
@@ -6172,7 +6174,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'déc.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'janv.',
       'févr.',
       'mars',
@@ -6186,7 +6188,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'déc.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'dimanche',
       'lundi',
       'mardi',
@@ -6195,7 +6197,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vendredi',
       'samedi',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'dimanche',
       'lundi',
       'mardi',
@@ -6204,7 +6206,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vendredi',
       'samedi',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dim.',
       'lun.',
       'mar.',
@@ -6213,7 +6215,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ven.',
       'sam.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dim.',
       'lun.',
       'mar.',
@@ -6222,7 +6224,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ven.',
       'sam.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -6231,7 +6233,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -6240,59 +6242,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'T1',
       'T2',
       'T3',
       'T4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1er trimestre',
       '2e trimestre',
       '3e trimestre',
       '4e trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d MMMM y',
       'd MMMM y',
       'd MMM y',
       'dd/MM/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'à' {0}",
       "{1} 'à' {0}",
       "{1} 'à' {0}",
       '{1} {0}',
     ],
-  },
-  'fr_CA': <String, dynamic>{
-    'NAME': 'fr_CA',
-    'ERAS': <dynamic>[
+  ),
+  'fr_CA': intl.DateSymbols(
+    NAME: 'fr_CA',
+    ERAS: const <String>[
       'av. J.-C.',
       'ap. J.-C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'avant Jésus-Christ',
       'après Jésus-Christ',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -6306,7 +6308,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -6320,7 +6322,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'janvier',
       'février',
       'mars',
@@ -6334,7 +6336,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembre',
       'décembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'janvier',
       'février',
       'mars',
@@ -6348,7 +6350,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembre',
       'décembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'janv.',
       'févr.',
       'mars',
@@ -6362,7 +6364,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'déc.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'janv.',
       'févr.',
       'mars',
@@ -6376,7 +6378,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'déc.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'dimanche',
       'lundi',
       'mardi',
@@ -6385,7 +6387,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vendredi',
       'samedi',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'dimanche',
       'lundi',
       'mardi',
@@ -6394,7 +6396,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vendredi',
       'samedi',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dim.',
       'lun.',
       'mar.',
@@ -6403,7 +6405,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ven.',
       'sam.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dim.',
       'lun.',
       'mar.',
@@ -6412,7 +6414,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ven.',
       'sam.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -6421,7 +6423,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -6430,59 +6432,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'T1',
       'T2',
       'T3',
       'T4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1er trimestre',
       '2e trimestre',
       '3e trimestre',
       '4e trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a.m.',
       'p.m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d MMMM y',
       'd MMMM y',
       'd MMM y',
       'yy-MM-dd',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       "HH 'h' mm 'min' ss 's' zzzz",
       "HH 'h' mm 'min' ss 's' z",
       "HH 'h' mm 'min' ss 's'",
       "HH 'h' mm",
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'à' {0}",
       "{1} 'à' {0}",
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'gl': <String, dynamic>{
-    'NAME': 'gl',
-    'ERAS': <dynamic>[
+  ),
+  'gl': intl.DateSymbols(
+    NAME: 'gl',
+    ERAS: const <String>[
       'a.C.',
       'd.C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'antes de Cristo',
       'despois de Cristo',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'x.',
       'f.',
       'm.',
@@ -6496,7 +6498,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n.',
       'd.',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'X',
       'F',
       'M',
@@ -6510,7 +6512,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'xaneiro',
       'febreiro',
       'marzo',
@@ -6524,7 +6526,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembro',
       'decembro',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Xaneiro',
       'Febreiro',
       'Marzo',
@@ -6538,7 +6540,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Novembro',
       'Decembro',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'xan.',
       'feb.',
       'mar.',
@@ -6552,7 +6554,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Xan.',
       'Feb.',
       'Mar.',
@@ -6566,7 +6568,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov.',
       'Dec.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'domingo',
       'luns',
       'martes',
@@ -6575,7 +6577,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'venres',
       'sábado',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Domingo',
       'Luns',
       'Martes',
@@ -6584,7 +6586,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Venres',
       'Sábado',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dom.',
       'luns',
       'mar.',
@@ -6593,7 +6595,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ven.',
       'sáb.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Dom.',
       'Luns',
       'Mar.',
@@ -6602,7 +6604,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ven.',
       'Sáb.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'd.',
       'l.',
       'm.',
@@ -6611,7 +6613,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'v.',
       's.',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -6620,59 +6622,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'T1',
       'T2',
       'T3',
       'T4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1.º trimestre',
       '2.º trimestre',
       '3.º trimestre',
       '4.º trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a.m.',
       'p.m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d 'de' MMMM 'de' y",
       "d 'de' MMMM 'de' y",
       "d 'de' MMM 'de' y",
       'dd/MM/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{0} 'do' {1}",
       "{0} 'do' {1}",
       '{0}, {1}',
       '{0}, {1}',
     ],
-  },
-  'gsw': <String, dynamic>{
-    'NAME': 'gsw',
-    'ERAS': <dynamic>[
+  ),
+  'gsw': intl.DateSymbols(
+    NAME: 'gsw',
+    ERAS: const <String>[
       'v. Chr.',
       'n. Chr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'v. Chr.',
       'n. Chr.',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -6686,7 +6688,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -6700,7 +6702,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Januar',
       'Februar',
       'März',
@@ -6714,7 +6716,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Novämber',
       'Dezämber',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Januar',
       'Februar',
       'März',
@@ -6728,7 +6730,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Novämber',
       'Dezämber',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mär',
@@ -6742,7 +6744,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dez',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mär',
@@ -6756,7 +6758,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dez',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Sunntig',
       'Määntig',
       'Ziischtig',
@@ -6765,7 +6767,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friitig',
       'Samschtig',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Sunntig',
       'Määntig',
       'Ziischtig',
@@ -6774,7 +6776,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Friitig',
       'Samschtig',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Su.',
       'Mä.',
       'Zi.',
@@ -6783,7 +6785,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fr.',
       'Sa.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Su.',
       'Mä.',
       'Zi.',
@@ -6792,7 +6794,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Fr.',
       'Sa.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'D',
@@ -6801,7 +6803,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'D',
@@ -6810,59 +6812,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. Quartal',
       '2. Quartal',
       '3. Quartal',
       '4. Quartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'am Vormittag',
       'am Namittag',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d. MMMM y',
       'd. MMMM y',
       'dd.MM.y',
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'gu': <String, dynamic>{
-    'NAME': 'gu',
-    'ERAS': <dynamic>[
+  ),
+  'gu': intl.DateSymbols(
+    NAME: 'gu',
+    ERAS: const <String>[
       'ઈ.સ.પૂર્વે',
       'ઈ.સ.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ઈસવીસન પૂર્વે',
       'ઇસવીસન',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'જા',
       'ફે',
       'મા',
@@ -6876,7 +6878,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ન',
       'ડિ',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'જા',
       'ફે',
       'મા',
@@ -6890,7 +6892,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ન',
       'ડિ',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'જાન્યુઆરી',
       'ફેબ્રુઆરી',
       'માર્ચ',
@@ -6904,7 +6906,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'નવેમ્બર',
       'ડિસેમ્બર',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'જાન્યુઆરી',
       'ફેબ્રુઆરી',
       'માર્ચ',
@@ -6918,7 +6920,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'નવેમ્બર',
       'ડિસેમ્બર',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'જાન્યુ',
       'ફેબ્રુ',
       'માર્ચ',
@@ -6932,7 +6934,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'નવે',
       'ડિસે',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'જાન્યુ',
       'ફેબ્રુ',
       'માર્ચ',
@@ -6946,7 +6948,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'નવે',
       'ડિસે',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'રવિવાર',
       'સોમવાર',
       'મંગળવાર',
@@ -6955,7 +6957,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'શુક્રવાર',
       'શનિવાર',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'રવિવાર',
       'સોમવાર',
       'મંગળવાર',
@@ -6964,7 +6966,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'શુક્રવાર',
       'શનિવાર',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'રવિ',
       'સોમ',
       'મંગળ',
@@ -6973,7 +6975,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'શુક્ર',
       'શનિ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'રવિ',
       'સોમ',
       'મંગળ',
@@ -6982,7 +6984,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'શુક્ર',
       'શનિ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ર',
       'સો',
       'મં',
@@ -6991,7 +6993,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'શુ',
       'શ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ર',
       'સો',
       'મં',
@@ -7000,59 +7002,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'શુ',
       'શ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1લો ત્રિમાસ',
       '2જો ત્રિમાસ',
       '3જો ત્રિમાસ',
       '4થો ત્રિમાસ',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM, y',
       'd MMMM, y',
       'd MMM, y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'hh:mm:ss a zzzz',
       'hh:mm:ss a z',
       'hh:mm:ss a',
       'hh:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} એ {0} વાગ્યે',
       '{1} એ {0} વાગ્યે',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'he': <String, dynamic>{
-    'NAME': 'he',
-    'ERAS': <dynamic>[
+  ),
+  'he': intl.DateSymbols(
+    NAME: 'he',
+    ERAS: const <String>[
       'לפנה״ס',
       'לספירה',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'לפני הספירה',
       'לספירה',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -7066,7 +7068,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -7080,7 +7082,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ינואר',
       'פברואר',
       'מרץ',
@@ -7094,7 +7096,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'נובמבר',
       'דצמבר',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ינואר',
       'פברואר',
       'מרץ',
@@ -7108,7 +7110,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'נובמבר',
       'דצמבר',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ינו׳',
       'פבר׳',
       'מרץ',
@@ -7122,7 +7124,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'נוב׳',
       'דצמ׳',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ינו׳',
       'פבר׳',
       'מרץ',
@@ -7136,7 +7138,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'נוב׳',
       'דצמ׳',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'יום ראשון',
       'יום שני',
       'יום שלישי',
@@ -7145,7 +7147,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'יום שישי',
       'יום שבת',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'יום ראשון',
       'יום שני',
       'יום שלישי',
@@ -7154,7 +7156,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'יום שישי',
       'יום שבת',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'יום א׳',
       'יום ב׳',
       'יום ג׳',
@@ -7163,7 +7165,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'יום ו׳',
       'שבת',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'יום א׳',
       'יום ב׳',
       'יום ג׳',
@@ -7172,7 +7174,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'יום ו׳',
       'שבת',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'א׳',
       'ב׳',
       'ג׳',
@@ -7181,7 +7183,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ו׳',
       'ש׳',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'א׳',
       'ב׳',
       'ג׳',
@@ -7190,59 +7192,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ו׳',
       'ש׳',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'רבעון 1',
       'רבעון 2',
       'רבעון 3',
       'רבעון 4',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'לפנה״צ',
       'אחה״צ',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d בMMMM y',
       'd בMMMM y',
       'd בMMM y',
       'd.M.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss zzzz',
       'H:mm:ss z',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       4,
       5,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} בשעה {0}',
       '{1} בשעה {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'hi': <String, dynamic>{
-    'NAME': 'hi',
-    'ERAS': <dynamic>[
+  ),
+  'hi': intl.DateSymbols(
+    NAME: 'hi',
+    ERAS: const <String>[
       'ईसा-पूर्व',
       'ईस्वी',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ईसा-पूर्व',
       'ईसवी सन',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ज',
       'फ़',
       'मा',
@@ -7256,7 +7258,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'न',
       'दि',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ज',
       'फ़',
       'मा',
@@ -7270,7 +7272,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'न',
       'दि',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'जनवरी',
       'फ़रवरी',
       'मार्च',
@@ -7284,7 +7286,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नवंबर',
       'दिसंबर',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'जनवरी',
       'फ़रवरी',
       'मार्च',
@@ -7298,7 +7300,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नवंबर',
       'दिसंबर',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'जन॰',
       'फ़र॰',
       'मार्च',
@@ -7312,7 +7314,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नव॰',
       'दिस॰',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'जन॰',
       'फ़र॰',
       'मार्च',
@@ -7326,7 +7328,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नव॰',
       'दिस॰',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'रविवार',
       'सोमवार',
       'मंगलवार',
@@ -7335,7 +7337,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्रवार',
       'शनिवार',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'रविवार',
       'सोमवार',
       'मंगलवार',
@@ -7344,7 +7346,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्रवार',
       'शनिवार',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'रवि',
       'सोम',
       'मंगल',
@@ -7353,7 +7355,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्र',
       'शनि',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'रवि',
       'सोम',
       'मंगल',
@@ -7362,7 +7364,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्र',
       'शनि',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'र',
       'सो',
       'मं',
@@ -7371,7 +7373,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शु',
       'श',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'र',
       'सो',
       'मं',
@@ -7380,59 +7382,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शु',
       'श',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ति1',
       'ति2',
       'ति3',
       'ति4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'पहली तिमाही',
       'दूसरी तिमाही',
       'तीसरी तिमाही',
       'चौथी तिमाही',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'am',
       'pm',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} को {0}',
       '{1} को {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'hr': <String, dynamic>{
-    'NAME': 'hr',
-    'ERAS': <dynamic>[
+  ),
+  'hr': intl.DateSymbols(
+    NAME: 'hr',
+    ERAS: const <String>[
       'pr. Kr.',
       'po. Kr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'prije Krista',
       'poslije Krista',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1.',
       '2.',
       '3.',
@@ -7446,7 +7448,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11.',
       '12.',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1.',
       '2.',
       '3.',
@@ -7460,7 +7462,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11.',
       '12.',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'siječnja',
       'veljače',
       'ožujka',
@@ -7474,7 +7476,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'studenoga',
       'prosinca',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'siječanj',
       'veljača',
       'ožujak',
@@ -7488,7 +7490,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'studeni',
       'prosinac',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'sij',
       'velj',
       'ožu',
@@ -7502,7 +7504,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'stu',
       'pro',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'sij',
       'velj',
       'ožu',
@@ -7516,7 +7518,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'stu',
       'pro',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'nedjelja',
       'ponedjeljak',
       'utorak',
@@ -7525,7 +7527,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'petak',
       'subota',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'nedjelja',
       'ponedjeljak',
       'utorak',
@@ -7534,7 +7536,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'petak',
       'subota',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ned',
       'pon',
       'uto',
@@ -7543,7 +7545,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pet',
       'sub',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ned',
       'pon',
       'uto',
@@ -7552,7 +7554,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pet',
       'sub',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'N',
       'P',
       'U',
@@ -7561,7 +7563,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'n',
       'p',
       'u',
@@ -7570,59 +7572,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       's',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1kv',
       '2kv',
       '3kv',
       '4kv',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. kvartal',
       '2. kvartal',
       '3. kvartal',
       '4. kvartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d. MMMM y.',
       'd. MMMM y.',
       'd. MMM y.',
       'dd. MM. y.',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss (zzzz)',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       "{1} 'u' {0}",
       "{1} 'u' {0}",
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'hu': <String, dynamic>{
-    'NAME': 'hu',
-    'ERAS': <dynamic>[
+  ),
+  'hu': intl.DateSymbols(
+    NAME: 'hu',
+    ERAS: const <String>[
       'i. e.',
       'i. sz.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Krisztus előtt',
       'időszámításunk szerint',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -7636,7 +7638,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -7650,7 +7652,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'január',
       'február',
       'március',
@@ -7664,7 +7666,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'január',
       'február',
       'március',
@@ -7678,7 +7680,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan.',
       'febr.',
       'márc.',
@@ -7692,7 +7694,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan.',
       'febr.',
       'márc.',
@@ -7706,7 +7708,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'vasárnap',
       'hétfő',
       'kedd',
@@ -7715,7 +7717,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'péntek',
       'szombat',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'vasárnap',
       'hétfő',
       'kedd',
@@ -7724,7 +7726,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'péntek',
       'szombat',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'V',
       'H',
       'K',
@@ -7733,7 +7735,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'Szo',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'V',
       'H',
       'K',
@@ -7742,7 +7744,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'Szo',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'V',
       'H',
       'K',
@@ -7751,7 +7753,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'Sz',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'V',
       'H',
       'K',
@@ -7760,59 +7762,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'Sz',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'I. n.év',
       'II. n.év',
       'III. n.év',
       'IV. n.év',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'I. negyedév',
       'II. negyedév',
       'III. negyedév',
       'IV. negyedév',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'de.',
       'du.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y. MMMM d., EEEE',
       'y. MMMM d.',
       'y. MMM d.',
       'y. MM. dd.',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss zzzz',
       'H:mm:ss z',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'hy': <String, dynamic>{
-    'NAME': 'hy',
-    'ERAS': <dynamic>[
+  ),
+  'hy': intl.DateSymbols(
+    NAME: 'hy',
+    ERAS: const <String>[
       'մ.թ.ա.',
       'մ.թ.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Քրիստոսից առաջ',
       'Քրիստոսից հետո',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'Հ',
       'Փ',
       'Մ',
@@ -7826,7 +7828,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ն',
       'Դ',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'Հ',
       'Փ',
       'Մ',
@@ -7840,7 +7842,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ն',
       'Դ',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'հունվարի',
       'փետրվարի',
       'մարտի',
@@ -7854,7 +7856,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'նոյեմբերի',
       'դեկտեմբերի',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'հունվար',
       'փետրվար',
       'մարտ',
@@ -7868,7 +7870,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'նոյեմբեր',
       'դեկտեմբեր',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'հնվ',
       'փտվ',
       'մրտ',
@@ -7882,7 +7884,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'նոյ',
       'դեկ',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'հնվ',
       'փտվ',
       'մրտ',
@@ -7896,7 +7898,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'նոյ',
       'դեկ',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'կիրակի',
       'երկուշաբթի',
       'երեքշաբթի',
@@ -7905,7 +7907,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ուրբաթ',
       'շաբաթ',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'կիրակի',
       'երկուշաբթի',
       'երեքշաբթի',
@@ -7914,7 +7916,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ուրբաթ',
       'շաբաթ',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'կիր',
       'երկ',
       'երք',
@@ -7923,7 +7925,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ուր',
       'շբթ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'կիր',
       'երկ',
       'երք',
@@ -7932,7 +7934,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ուր',
       'շբթ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Կ',
       'Ե',
       'Ե',
@@ -7941,7 +7943,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ո',
       'Շ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Կ',
       'Ե',
       'Ե',
@@ -7950,59 +7952,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ո',
       'Շ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1-ին եռմս.',
       '2-րդ եռմս.',
       '3-րդ եռմս.',
       '4-րդ եռմս.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1-ին եռամսյակ',
       '2-րդ եռամսյակ',
       '3-րդ եռամսյակ',
       '4-րդ եռամսյակ',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y թ. MMMM d, EEEE',
       'dd MMMM, y թ.',
       'dd MMM, y թ.',
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'id': <String, dynamic>{
-    'NAME': 'id',
-    'ERAS': <dynamic>[
+  ),
+  'id': intl.DateSymbols(
+    NAME: 'id',
+    ERAS: const <String>[
       'SM',
       'M',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Sebelum Masehi',
       'Masehi',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -8016,7 +8018,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -8030,7 +8032,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Januari',
       'Februari',
       'Maret',
@@ -8044,7 +8046,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Desember',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Januari',
       'Februari',
       'Maret',
@@ -8058,7 +8060,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Desember',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -8072,7 +8074,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Des',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mar',
@@ -8086,7 +8088,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Des',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Minggu',
       'Senin',
       'Selasa',
@@ -8095,7 +8097,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jumat',
       'Sabtu',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Minggu',
       'Senin',
       'Selasa',
@@ -8104,7 +8106,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jumat',
       'Sabtu',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Min',
       'Sen',
       'Sel',
@@ -8113,7 +8115,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jum',
       'Sab',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Min',
       'Sen',
       'Sel',
@@ -8122,7 +8124,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jum',
       'Sab',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'M',
       'S',
       'S',
@@ -8131,7 +8133,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'J',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'M',
       'S',
       'S',
@@ -8140,59 +8142,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'J',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'K1',
       'K2',
       'K3',
       'K4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'Kuartal ke-1',
       'Kuartal ke-2',
       'Kuartal ke-3',
       'Kuartal ke-4',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, dd MMMM y',
       'd MMMM y',
       'd MMM y',
       'dd/MM/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH.mm.ss zzzz',
       'HH.mm.ss z',
       'HH.mm.ss',
       'HH.mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'is': <String, dynamic>{
-    'NAME': 'is',
-    'ERAS': <dynamic>[
+  ),
+  'is': intl.DateSymbols(
+    NAME: 'is',
+    ERAS: const <String>[
       'f.Kr.',
       'e.Kr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'fyrir Krist',
       'eftir Krist',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -8206,7 +8208,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -8220,7 +8222,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'janúar',
       'febrúar',
       'mars',
@@ -8234,7 +8236,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nóvember',
       'desember',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'janúar',
       'febrúar',
       'mars',
@@ -8248,7 +8250,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nóvember',
       'desember',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mar.',
@@ -8262,7 +8264,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nóv.',
       'des.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mar.',
@@ -8276,7 +8278,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nóv.',
       'des.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'sunnudagur',
       'mánudagur',
       'þriðjudagur',
@@ -8285,7 +8287,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'föstudagur',
       'laugardagur',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'sunnudagur',
       'mánudagur',
       'þriðjudagur',
@@ -8294,7 +8296,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'föstudagur',
       'laugardagur',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'sun.',
       'mán.',
       'þri.',
@@ -8303,7 +8305,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fös.',
       'lau.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'sun.',
       'mán.',
       'þri.',
@@ -8312,7 +8314,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fös.',
       'lau.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'Þ',
@@ -8321,7 +8323,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'Þ',
@@ -8330,59 +8332,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'F1',
       'F2',
       'F3',
       'F4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. fjórðungur',
       '2. fjórðungur',
       '3. fjórðungur',
       '4. fjórðungur',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'f.h.',
       'e.h.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d. MMMM y',
       'd. MMMM y',
       'd. MMM y',
       'd.M.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'kl'. {0}",
       "{1} 'kl'. {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'it': <String, dynamic>{
-    'NAME': 'it',
-    'ERAS': <dynamic>[
+  ),
+  'it': intl.DateSymbols(
+    NAME: 'it',
+    ERAS: const <String>[
       'a.C.',
       'd.C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'avanti Cristo',
       'dopo Cristo',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'G',
       'F',
       'M',
@@ -8396,7 +8398,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'G',
       'F',
       'M',
@@ -8410,7 +8412,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'gennaio',
       'febbraio',
       'marzo',
@@ -8424,7 +8426,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembre',
       'dicembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'gennaio',
       'febbraio',
       'marzo',
@@ -8438,7 +8440,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembre',
       'dicembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'gen',
       'feb',
       'mar',
@@ -8452,7 +8454,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dic',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'gen',
       'feb',
       'mar',
@@ -8466,7 +8468,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dic',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'domenica',
       'lunedì',
       'martedì',
@@ -8475,7 +8477,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'venerdì',
       'sabato',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'domenica',
       'lunedì',
       'martedì',
@@ -8484,7 +8486,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'venerdì',
       'sabato',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dom',
       'lun',
       'mar',
@@ -8493,7 +8495,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ven',
       'sab',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dom',
       'lun',
       'mar',
@@ -8502,7 +8504,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ven',
       'sab',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -8511,7 +8513,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -8520,59 +8522,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'T1',
       'T2',
       'T3',
       'T4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1º trimestre',
       '2º trimestre',
       '3º trimestre',
       '4º trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d MMMM y',
       'd MMMM y',
       'd MMM y',
       'dd/MM/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'ja': <String, dynamic>{
-    'NAME': 'ja',
-    'ERAS': <dynamic>[
+  ),
+  'ja': intl.DateSymbols(
+    NAME: 'ja',
+    ERAS: const <String>[
       '紀元前',
       '西暦',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       '紀元前',
       '西暦',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -8586,7 +8588,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -8600,7 +8602,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -8614,7 +8616,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -8628,7 +8630,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -8642,7 +8644,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -8656,7 +8658,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       '日曜日',
       '月曜日',
       '火曜日',
@@ -8665,7 +8667,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '金曜日',
       '土曜日',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       '日曜日',
       '月曜日',
       '火曜日',
@@ -8674,7 +8676,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '金曜日',
       '土曜日',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       '日',
       '月',
       '火',
@@ -8683,7 +8685,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '金',
       '土',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       '日',
       '月',
       '火',
@@ -8692,7 +8694,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '金',
       '土',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       '日',
       '月',
       '火',
@@ -8701,7 +8703,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '金',
       '土',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       '日',
       '月',
       '火',
@@ -8710,59 +8712,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '金',
       '土',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '第1四半期',
       '第2四半期',
       '第3四半期',
       '第4四半期',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       '午前',
       '午後',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y年M月d日EEEE',
       'y年M月d日',
       'y/MM/dd',
       'y/MM/dd',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H時mm分ss秒 zzzz',
       'H:mm:ss z',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'ka': <String, dynamic>{
-    'NAME': 'ka',
-    'ERAS': <dynamic>[
+  ),
+  'ka': intl.DateSymbols(
+    NAME: 'ka',
+    ERAS: const <String>[
       'ძვ. წ.',
       'ახ. წ.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ძველი წელთაღრიცხვით',
       'ახალი წელთაღრიცხვით',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ი',
       'თ',
       'მ',
@@ -8776,7 +8778,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ნ',
       'დ',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ი',
       'თ',
       'მ',
@@ -8790,7 +8792,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ნ',
       'დ',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'იანვარი',
       'თებერვალი',
       'მარტი',
@@ -8804,7 +8806,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ნოემბერი',
       'დეკემბერი',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'იანვარი',
       'თებერვალი',
       'მარტი',
@@ -8818,7 +8820,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ნოემბერი',
       'დეკემბერი',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'იან',
       'თებ',
       'მარ',
@@ -8832,7 +8834,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ნოე',
       'დეკ',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'იან',
       'თებ',
       'მარ',
@@ -8846,7 +8848,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ნოე',
       'დეკ',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'კვირა',
       'ორშაბათი',
       'სამშაბათი',
@@ -8855,7 +8857,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'პარასკევი',
       'შაბათი',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'კვირა',
       'ორშაბათი',
       'სამშაბათი',
@@ -8864,7 +8866,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'პარასკევი',
       'შაბათი',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'კვი',
       'ორშ',
       'სამ',
@@ -8873,7 +8875,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'პარ',
       'შაბ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'კვი',
       'ორშ',
       'სამ',
@@ -8882,7 +8884,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'პარ',
       'შაბ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'კ',
       'ო',
       'ს',
@@ -8891,7 +8893,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'პ',
       'შ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'კ',
       'ო',
       'ს',
@@ -8900,59 +8902,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'პ',
       'შ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'I კვ.',
       'II კვ.',
       'III კვ.',
       'IV კვ.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'I კვარტალი',
       'II კვარტალი',
       'III კვარტალი',
       'IV კვარტალი',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, dd MMMM, y',
       'd MMMM, y',
       'd MMM. y',
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'kk': <String, dynamic>{
-    'NAME': 'kk',
-    'ERAS': <dynamic>[
+  ),
+  'kk': intl.DateSymbols(
+    NAME: 'kk',
+    ERAS: const <String>[
       'б.з.д.',
       'б.з.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Біздің заманымызға дейін',
       'біздің заманымыз',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'Қ',
       'А',
       'Н',
@@ -8966,7 +8968,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Қ',
       'Ж',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'Қ',
       'А',
       'Н',
@@ -8980,7 +8982,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Қ',
       'Ж',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'қаңтар',
       'ақпан',
       'наурыз',
@@ -8994,7 +8996,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'қараша',
       'желтоқсан',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Қаңтар',
       'Ақпан',
       'Наурыз',
@@ -9008,7 +9010,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Қараша',
       'Желтоқсан',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'қаң.',
       'ақп.',
       'нау.',
@@ -9022,7 +9024,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'қар.',
       'жел.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'қаң.',
       'ақп.',
       'нау.',
@@ -9036,7 +9038,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'қар.',
       'жел.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'жексенбі',
       'дүйсенбі',
       'сейсенбі',
@@ -9045,7 +9047,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'жұма',
       'сенбі',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'жексенбі',
       'дүйсенбі',
       'сейсенбі',
@@ -9054,7 +9056,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'жұма',
       'сенбі',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'жс',
       'дс',
       'сс',
@@ -9063,7 +9065,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'жм',
       'сб',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'жс',
       'дс',
       'сс',
@@ -9072,7 +9074,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'жм',
       'сб',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Ж',
       'Д',
       'С',
@@ -9081,7 +9083,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ж',
       'С',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Ж',
       'Д',
       'С',
@@ -9090,59 +9092,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ж',
       'С',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'І тқс.',
       'ІІ тқс.',
       'ІІІ тқс.',
       'IV тқс.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'І тоқсан',
       'ІІ тоқсан',
       'ІІІ тоқсан',
       'IV тоқсан',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "y 'ж'. d MMMM, EEEE",
       "y 'ж'. d MMMM",
       "y 'ж'. dd MMM",
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'km': <String, dynamic>{
-    'NAME': 'km',
-    'ERAS': <dynamic>[
+  ),
+  'km': intl.DateSymbols(
+    NAME: 'km',
+    ERAS: const <String>[
       'មុន គ.ស.',
       'គ.ស.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'មុន​គ្រិស្តសករាជ',
       'គ្រិស្តសករាជ',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ម',
       'ក',
       'ម',
@@ -9156,7 +9158,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'វ',
       'ធ',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ម',
       'ក',
       'ម',
@@ -9170,7 +9172,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'វ',
       'ធ',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'មករា',
       'កុម្ភៈ',
       'មីនា',
@@ -9184,7 +9186,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'វិច្ឆិកា',
       'ធ្នូ',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'មករា',
       'កុម្ភៈ',
       'មីនា',
@@ -9198,7 +9200,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'វិច្ឆិកា',
       'ធ្នូ',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'មករា',
       'កុម្ភៈ',
       'មីនា',
@@ -9212,7 +9214,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'វិច្ឆិកា',
       'ធ្នូ',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'មករា',
       'កុម្ភៈ',
       'មីនា',
@@ -9226,7 +9228,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'វិច្ឆិកា',
       'ធ្នូ',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'អាទិត្យ',
       'ច័ន្ទ',
       'អង្គារ',
@@ -9235,7 +9237,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'សុក្រ',
       'សៅរ៍',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'អាទិត្យ',
       'ចន្ទ',
       'អង្គារ',
@@ -9244,7 +9246,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'សុក្រ',
       'សៅរ៍',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'អាទិត្យ',
       'ចន្ទ',
       'អង្គារ',
@@ -9253,7 +9255,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'សុក្រ',
       'សៅរ៍',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'អាទិត្យ',
       'ចន្ទ',
       'អង្គារ',
@@ -9262,7 +9264,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'សុក្រ',
       'សៅរ៍',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'អ',
       'ច',
       'អ',
@@ -9271,7 +9273,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ស',
       'ស',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'អ',
       'ច',
       'អ',
@@ -9280,59 +9282,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ស',
       'ស',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ត្រីមាសទី 1',
       'ត្រីមាសទី 2',
       'ត្រីមាសទី 3',
       'ត្រីមាសទី 4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ត្រីមាសទី 1',
       'ត្រីមាសទី 2',
       'ត្រីមាសទី 3',
       'ត្រីមាសទី 4',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d MMMM y',
       'd MMMM y',
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} នៅ​ម៉ោង {0}',
       '{1} នៅ​ម៉ោង {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'kn': <String, dynamic>{
-    'NAME': 'kn',
-    'ERAS': <dynamic>[
+  ),
+  'kn': intl.DateSymbols(
+    NAME: 'kn',
+    ERAS: const <String>[
       '\u{c95}\u{ccd}\u{cb0}\u{cbf}\u{2e}\u{caa}\u{cc2}',
       '\u{c95}\u{ccd}\u{cb0}\u{cbf}\u{2e}\u{cb6}',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       '\u{c95}\u{ccd}\u{cb0}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{20}\u{caa}\u{cc2}\u{cb0}\u{ccd}\u{cb5}',
       '\u{c95}\u{ccd}\u{cb0}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{20}\u{cb6}\u{c95}',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '\u{c9c}',
       '\u{cab}\u{cc6}',
       '\u{cae}\u{cbe}',
@@ -9346,7 +9348,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{ca8}',
       '\u{ca1}\u{cbf}',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '\u{c9c}',
       '\u{cab}\u{cc6}',
       '\u{cae}\u{cbe}',
@@ -9360,7 +9362,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{ca8}',
       '\u{ca1}\u{cbf}',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       '\u{c9c}\u{ca8}\u{cb5}\u{cb0}\u{cbf}',
       '\u{cab}\u{cc6}\u{cac}\u{ccd}\u{cb0}\u{cb5}\u{cb0}\u{cbf}',
       '\u{cae}\u{cbe}\u{cb0}\u{ccd}\u{c9a}\u{ccd}',
@@ -9374,7 +9376,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{ca8}\u{cb5}\u{cc6}\u{c82}\u{cac}\u{cb0}\u{ccd}',
       '\u{ca1}\u{cbf}\u{cb8}\u{cc6}\u{c82}\u{cac}\u{cb0}\u{ccd}',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       '\u{c9c}\u{ca8}\u{cb5}\u{cb0}\u{cbf}',
       '\u{cab}\u{cc6}\u{cac}\u{ccd}\u{cb0}\u{cb5}\u{cb0}\u{cbf}',
       '\u{cae}\u{cbe}\u{cb0}\u{ccd}\u{c9a}\u{ccd}',
@@ -9388,7 +9390,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{ca8}\u{cb5}\u{cc6}\u{c82}\u{cac}\u{cb0}\u{ccd}',
       '\u{ca1}\u{cbf}\u{cb8}\u{cc6}\u{c82}\u{cac}\u{cb0}\u{ccd}',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       '\u{c9c}\u{ca8}\u{cb5}\u{cb0}\u{cbf}',
       '\u{cab}\u{cc6}\u{cac}\u{ccd}\u{cb0}\u{cb5}\u{cb0}\u{cbf}',
       '\u{cae}\u{cbe}\u{cb0}\u{ccd}\u{c9a}\u{ccd}',
@@ -9402,7 +9404,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{ca8}\u{cb5}\u{cc6}\u{c82}',
       '\u{ca1}\u{cbf}\u{cb8}\u{cc6}\u{c82}',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       '\u{c9c}\u{ca8}',
       '\u{cab}\u{cc6}\u{cac}\u{ccd}\u{cb0}',
       '\u{cae}\u{cbe}\u{cb0}\u{ccd}\u{c9a}\u{ccd}',
@@ -9416,7 +9418,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{ca8}\u{cb5}\u{cc6}\u{c82}',
       '\u{ca1}\u{cbf}\u{cb8}\u{cc6}\u{c82}',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       '\u{cad}\u{cbe}\u{ca8}\u{cc1}\u{cb5}\u{cbe}\u{cb0}',
       '\u{cb8}\u{ccb}\u{cae}\u{cb5}\u{cbe}\u{cb0}',
       '\u{cae}\u{c82}\u{c97}\u{cb3}\u{cb5}\u{cbe}\u{cb0}',
@@ -9425,7 +9427,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{cb6}\u{cc1}\u{c95}\u{ccd}\u{cb0}\u{cb5}\u{cbe}\u{cb0}',
       '\u{cb6}\u{ca8}\u{cbf}\u{cb5}\u{cbe}\u{cb0}',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       '\u{cad}\u{cbe}\u{ca8}\u{cc1}\u{cb5}\u{cbe}\u{cb0}',
       '\u{cb8}\u{ccb}\u{cae}\u{cb5}\u{cbe}\u{cb0}',
       '\u{cae}\u{c82}\u{c97}\u{cb3}\u{cb5}\u{cbe}\u{cb0}',
@@ -9434,7 +9436,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{cb6}\u{cc1}\u{c95}\u{ccd}\u{cb0}\u{cb5}\u{cbe}\u{cb0}',
       '\u{cb6}\u{ca8}\u{cbf}\u{cb5}\u{cbe}\u{cb0}',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       '\u{cad}\u{cbe}\u{ca8}\u{cc1}',
       '\u{cb8}\u{ccb}\u{cae}',
       '\u{cae}\u{c82}\u{c97}\u{cb3}',
@@ -9443,7 +9445,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{cb6}\u{cc1}\u{c95}\u{ccd}\u{cb0}',
       '\u{cb6}\u{ca8}\u{cbf}',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       '\u{cad}\u{cbe}\u{ca8}\u{cc1}',
       '\u{cb8}\u{ccb}\u{cae}',
       '\u{cae}\u{c82}\u{c97}\u{cb3}',
@@ -9452,7 +9454,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{cb6}\u{cc1}\u{c95}\u{ccd}\u{cb0}',
       '\u{cb6}\u{ca8}\u{cbf}',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       '\u{cad}\u{cbe}',
       '\u{cb8}\u{ccb}',
       '\u{cae}\u{c82}',
@@ -9461,7 +9463,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{cb6}\u{cc1}',
       '\u{cb6}',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       '\u{cad}\u{cbe}',
       '\u{cb8}\u{ccb}',
       '\u{cae}\u{c82}',
@@ -9470,59 +9472,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '\u{cb6}\u{cc1}',
       '\u{cb6}',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '\u{ca4}\u{ccd}\u{cb0}\u{cc8}\u{20}\u{31}',
       '\u{ca4}\u{ccd}\u{cb0}\u{cc8}\u{20}\u{32}',
       '\u{ca4}\u{ccd}\u{cb0}\u{cc8}\u{20}\u{33}',
       '\u{ca4}\u{ccd}\u{cb0}\u{cc8}\u{20}\u{34}',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '\u{31}\u{ca8}\u{cc7}\u{20}\u{ca4}\u{ccd}\u{cb0}\u{cc8}\u{cae}\u{cbe}\u{cb8}\u{cbf}\u{c95}',
       '\u{32}\u{ca8}\u{cc7}\u{20}\u{ca4}\u{ccd}\u{cb0}\u{cc8}\u{cae}\u{cbe}\u{cb8}\u{cbf}\u{c95}',
       '\u{33}\u{ca8}\u{cc7}\u{20}\u{ca4}\u{ccd}\u{cb0}\u{cc8}\u{cae}\u{cbe}\u{cb8}\u{cbf}\u{c95}',
       '\u{34}\u{ca8}\u{cc7}\u{20}\u{ca4}\u{ccd}\u{cb0}\u{cc8}\u{cae}\u{cbe}\u{cb8}\u{cbf}\u{c95}',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       '\u{caa}\u{cc2}\u{cb0}\u{ccd}\u{cb5}\u{cbe}\u{cb9}\u{ccd}\u{ca8}',
       '\u{c85}\u{caa}\u{cb0}\u{cbe}\u{cb9}\u{ccd}\u{ca8}',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, MMMM d, y',
       'MMMM d, y',
       'MMM d, y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'hh:mm:ss a zzzz',
       'hh:mm:ss a z',
       'hh:mm:ss a',
       'hh:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'ko': <String, dynamic>{
-    'NAME': 'ko',
-    'ERAS': <dynamic>[
+  ),
+  'ko': intl.DateSymbols(
+    NAME: 'ko',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       '기원전',
       '서기',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1월',
       '2월',
       '3월',
@@ -9536,7 +9538,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11월',
       '12월',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1월',
       '2월',
       '3월',
@@ -9550,7 +9552,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11월',
       '12월',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       '1월',
       '2월',
       '3월',
@@ -9564,7 +9566,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11월',
       '12월',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       '1월',
       '2월',
       '3월',
@@ -9578,7 +9580,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11월',
       '12월',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       '1월',
       '2월',
       '3월',
@@ -9592,7 +9594,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11월',
       '12월',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       '1월',
       '2월',
       '3월',
@@ -9606,7 +9608,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11월',
       '12월',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       '일요일',
       '월요일',
       '화요일',
@@ -9615,7 +9617,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '금요일',
       '토요일',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       '일요일',
       '월요일',
       '화요일',
@@ -9624,7 +9626,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '금요일',
       '토요일',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       '일',
       '월',
       '화',
@@ -9633,7 +9635,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '금',
       '토',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       '일',
       '월',
       '화',
@@ -9642,7 +9644,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '금',
       '토',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       '일',
       '월',
       '화',
@@ -9651,7 +9653,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '금',
       '토',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       '일',
       '월',
       '화',
@@ -9660,59 +9662,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '금',
       '토',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1분기',
       '2분기',
       '3분기',
       '4분기',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '제 1/4분기',
       '제 2/4분기',
       '제 3/4분기',
       '제 4/4분기',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       '오전',
       '오후',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y년 M월 d일 EEEE',
       'y년 M월 d일',
       'y. M. d.',
       'yy. M. d.',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'a h시 m분 s초 zzzz',
       'a h시 m분 s초 z',
       'a h:mm:ss',
       'a h:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'ky': <String, dynamic>{
-    'NAME': 'ky',
-    'ERAS': <dynamic>[
+  ),
+  'ky': intl.DateSymbols(
+    NAME: 'ky',
+    ERAS: const <String>[
       'б.з.ч.',
       'б.з.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'биздин заманга чейин',
       'биздин заман',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'Я',
       'Ф',
       'М',
@@ -9726,7 +9728,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Н',
       'Д',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'Я',
       'Ф',
       'М',
@@ -9740,7 +9742,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Н',
       'Д',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'январь',
       'февраль',
       'март',
@@ -9754,7 +9756,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноябрь',
       'декабрь',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Январь',
       'Февраль',
       'Март',
@@ -9768,7 +9770,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ноябрь',
       'Декабрь',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'янв.',
       'фев.',
       'мар.',
@@ -9782,7 +9784,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноя.',
       'дек.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Янв',
       'Фев',
       'Мар',
@@ -9796,7 +9798,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ноя',
       'Дек',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'жекшемби',
       'дүйшөмбү',
       'шейшемби',
@@ -9805,7 +9807,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'жума',
       'ишемби',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'жекшемби',
       'дүйшөмбү',
       'шейшемби',
@@ -9814,7 +9816,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'жума',
       'ишемби',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'жек.',
       'дүй.',
       'шейш.',
@@ -9823,7 +9825,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'жума',
       'ишм.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'жек.',
       'дүй.',
       'шейш.',
@@ -9832,7 +9834,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'жума',
       'ишм.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Ж',
       'Д',
       'Ш',
@@ -9841,7 +9843,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ж',
       'И',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Ж',
       'Д',
       'Ш',
@@ -9850,59 +9852,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ж',
       'И',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1-чей.',
       '2-чей.',
       '3-чей.',
       '4-чей.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1-чейрек',
       '2-чейрек',
       '3-чейрек',
       '4-чейрек',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'таңкы',
       'түштөн кийинки',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "y-'ж'., d-MMMM, EEEE",
       "y-'ж'., d-MMMM",
       "y-'ж'., d-MMM",
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'lo': <String, dynamic>{
-    'NAME': 'lo',
-    'ERAS': <dynamic>[
+  ),
+  'lo': intl.DateSymbols(
+    NAME: 'lo',
+    ERAS: const <String>[
       'ກ່ອນ ຄ.ສ.',
       'ຄ.ສ.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ກ່ອນຄຣິດສັກກະລາດ',
       'ຄຣິດສັກກະລາດ',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -9916,7 +9918,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -9930,7 +9932,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ມັງກອນ',
       'ກຸມພາ',
       'ມີນາ',
@@ -9944,7 +9946,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ພະຈິກ',
       'ທັນວາ',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ມັງກອນ',
       'ກຸມພາ',
       'ມີນາ',
@@ -9958,7 +9960,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ພະຈິກ',
       'ທັນວາ',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ມ.ກ.',
       'ກ.ພ.',
       'ມ.ນ.',
@@ -9972,7 +9974,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ພ.ຈ.',
       'ທ.ວ.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ມ.ກ.',
       'ກ.ພ.',
       'ມ.ນ.',
@@ -9986,7 +9988,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ພ.ຈ.',
       'ທ.ວ.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'ວັນອາທິດ',
       'ວັນຈັນ',
       'ວັນອັງຄານ',
@@ -9995,7 +9997,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ວັນສຸກ',
       'ວັນເສົາ',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'ວັນອາທິດ',
       'ວັນຈັນ',
       'ວັນອັງຄານ',
@@ -10004,7 +10006,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ວັນສຸກ',
       'ວັນເສົາ',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ອາທິດ',
       'ຈັນ',
       'ອັງຄານ',
@@ -10013,7 +10015,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ສຸກ',
       'ເສົາ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ອາທິດ',
       'ຈັນ',
       'ອັງຄານ',
@@ -10022,7 +10024,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ສຸກ',
       'ເສົາ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ອາ',
       'ຈ',
       'ອ',
@@ -10031,7 +10033,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ສຸ',
       'ສ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ອາ',
       'ຈ',
       'ອ',
@@ -10040,59 +10042,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ສຸ',
       'ສ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ຕມ1',
       'ຕມ2',
       'ຕມ3',
       'ຕມ4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ໄຕຣມາດ 1',
       'ໄຕຣມາດ 2',
       'ໄຕຣມາດ 3',
       'ໄຕຣມາດ 4',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'ກ່ອນທ່ຽງ',
       'ຫຼັງທ່ຽງ',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE ທີ d MMMM G y',
       'd MMMM y',
       'd MMM y',
       'd/M/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H ໂມງ m ນາທີ ss ວິນາທີ zzzz',
       'H ໂມງ m ນາທີ ss ວິນາທີ z',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'lt': <String, dynamic>{
-    'NAME': 'lt',
-    'ERAS': <dynamic>[
+  ),
+  'lt': intl.DateSymbols(
+    NAME: 'lt',
+    ERAS: const <String>[
       'pr. Kr.',
       'po Kr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'prieš Kristų',
       'po Kristaus',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'S',
       'V',
       'K',
@@ -10106,7 +10108,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'L',
       'G',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'S',
       'V',
       'K',
@@ -10120,7 +10122,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'L',
       'G',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'sausio',
       'vasario',
       'kovo',
@@ -10134,7 +10136,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'lapkričio',
       'gruodžio',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'sausis',
       'vasaris',
       'kovas',
@@ -10148,7 +10150,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'lapkritis',
       'gruodis',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'saus.',
       'vas.',
       'kov.',
@@ -10162,7 +10164,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'lapkr.',
       'gruod.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'saus.',
       'vas.',
       'kov.',
@@ -10176,7 +10178,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'lapkr.',
       'gruod.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'sekmadienis',
       'pirmadienis',
       'antradienis',
@@ -10185,7 +10187,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'penktadienis',
       'šeštadienis',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'sekmadienis',
       'pirmadienis',
       'antradienis',
@@ -10194,7 +10196,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'penktadienis',
       'šeštadienis',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'sk',
       'pr',
       'an',
@@ -10203,7 +10205,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pn',
       'št',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'sk',
       'pr',
       'an',
@@ -10212,7 +10214,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pn',
       'št',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'P',
       'A',
@@ -10221,7 +10223,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'Š',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'P',
       'A',
@@ -10230,59 +10232,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'Š',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'I k.',
       'II k.',
       'III k.',
       'IV k.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'I ketvirtis',
       'II ketvirtis',
       'III ketvirtis',
       'IV ketvirtis',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'priešpiet',
       'popiet',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "y 'm'. MMMM d 'd'., EEEE",
       "y 'm'. MMMM d 'd'.",
       'y-MM-dd',
       'y-MM-dd',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'lv': <String, dynamic>{
-    'NAME': 'lv',
-    'ERAS': <dynamic>[
+  ),
+  'lv': intl.DateSymbols(
+    NAME: 'lv',
+    ERAS: const <String>[
       'p.m.ē.',
       'm.ē.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'pirms mūsu ēras',
       'mūsu ērā',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -10296,7 +10298,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -10310,7 +10312,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'janvāris',
       'februāris',
       'marts',
@@ -10324,7 +10326,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembris',
       'decembris',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'janvāris',
       'februāris',
       'marts',
@@ -10338,7 +10340,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembris',
       'decembris',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'janv.',
       'febr.',
       'marts',
@@ -10352,7 +10354,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'janv.',
       'febr.',
       'marts',
@@ -10366,7 +10368,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'svētdiena',
       'pirmdiena',
       'otrdiena',
@@ -10375,7 +10377,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'piektdiena',
       'sestdiena',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Svētdiena',
       'Pirmdiena',
       'Otrdiena',
@@ -10384,7 +10386,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Piektdiena',
       'Sestdiena',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'svētd.',
       'pirmd.',
       'otrd.',
@@ -10393,7 +10395,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'piektd.',
       'sestd.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Svētd.',
       'Pirmd.',
       'Otrd.',
@@ -10402,7 +10404,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Piektd.',
       'Sestd.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'P',
       'O',
@@ -10411,7 +10413,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'P',
       'O',
@@ -10420,59 +10422,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1. cet.',
       '2. cet.',
       '3. cet.',
       '4. cet.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. ceturksnis',
       '2. ceturksnis',
       '3. ceturksnis',
       '4. ceturksnis',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'priekšpusdienā',
       'pēcpusdienā',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, y. 'gada' d. MMMM",
       "y. 'gada' d. MMMM",
       "y. 'gada' d. MMM",
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'mk': <String, dynamic>{
-    'NAME': 'mk',
-    'ERAS': <dynamic>[
+  ),
+  'mk': intl.DateSymbols(
+    NAME: 'mk',
+    ERAS: const <String>[
       'пр.н.е.',
       'н.е.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'пред нашата ера',
       'од нашата ера',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ј',
       'ф',
       'м',
@@ -10486,7 +10488,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'н',
       'д',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ј',
       'ф',
       'м',
@@ -10500,7 +10502,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'н',
       'д',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'јануари',
       'февруари',
       'март',
@@ -10514,7 +10516,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноември',
       'декември',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'јануари',
       'февруари',
       'март',
@@ -10528,7 +10530,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноември',
       'декември',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'јан.',
       'фев.',
       'мар.',
@@ -10542,7 +10544,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноем.',
       'дек.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'јан.',
       'фев.',
       'мар.',
@@ -10556,7 +10558,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноем.',
       'дек.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'недела',
       'понеделник',
       'вторник',
@@ -10565,7 +10567,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'петок',
       'сабота',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'недела',
       'понеделник',
       'вторник',
@@ -10574,7 +10576,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'петок',
       'сабота',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'нед.',
       'пон.',
       'вт.',
@@ -10583,7 +10585,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пет.',
       'саб.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'нед.',
       'пон.',
       'вто.',
@@ -10592,7 +10594,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пет.',
       'саб.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'н',
       'п',
       'в',
@@ -10601,7 +10603,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'п',
       'с',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'н',
       'п',
       'в',
@@ -10610,59 +10612,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'п',
       'с',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'јан-мар',
       'апр-јун',
       'јул-сеп',
       'окт-дек',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'прво тромесечје',
       'второ тромесечје',
       'трето тромесечје',
       'четврто тромесечје',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'претпладне',
       'попладне',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, dd MMMM y',
       'dd MMMM y',
       'dd.M.y',
       'dd.M.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'ml': <String, dynamic>{
-    'NAME': 'ml',
-    'ERAS': <dynamic>[
+  ),
+  'ml': intl.DateSymbols(
+    NAME: 'ml',
+    ERAS: const <String>[
       'ക്രി.മു.',
       'എഡി',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ക്രിസ്‌തുവിന് മുമ്പ്',
       'ആന്നോ ഡൊമിനി',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ജ',
       'ഫെ',
       'മാ',
@@ -10676,7 +10678,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ന',
       'ഡി',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ജ',
       'ഫെ',
       'മാ',
@@ -10690,7 +10692,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ന',
       'ഡി',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ജനുവരി',
       'ഫെബ്രുവരി',
       'മാർച്ച്',
@@ -10704,7 +10706,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'നവംബർ',
       'ഡിസംബർ',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ജനുവരി',
       'ഫെബ്രുവരി',
       'മാർച്ച്',
@@ -10718,7 +10720,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'നവംബർ',
       'ഡിസംബർ',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ജനു',
       'ഫെബ്രു',
       'മാർ',
@@ -10732,7 +10734,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'നവം',
       'ഡിസം',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ജനു',
       'ഫെബ്രു',
       'മാർ',
@@ -10746,7 +10748,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'നവം',
       'ഡിസം',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'ഞായറാഴ്‌ച',
       'തിങ്കളാഴ്‌ച',
       'ചൊവ്വാഴ്ച',
@@ -10755,7 +10757,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'വെള്ളിയാഴ്‌ച',
       'ശനിയാഴ്‌ച',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'ഞായറാഴ്‌ച',
       'തിങ്കളാഴ്‌ച',
       'ചൊവ്വാഴ്‌ച',
@@ -10764,7 +10766,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'വെള്ളിയാഴ്‌ച',
       'ശനിയാഴ്‌ച',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ഞായർ',
       'തിങ്കൾ',
       'ചൊവ്വ',
@@ -10773,7 +10775,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'വെള്ളി',
       'ശനി',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ഞായർ',
       'തിങ്കൾ',
       'ചൊവ്വ',
@@ -10782,7 +10784,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'വെള്ളി',
       'ശനി',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ഞ',
       'തി',
       'ചൊ',
@@ -10791,7 +10793,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'വെ',
       'ശ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ഞാ',
       'തി',
       'ചൊ',
@@ -10800,59 +10802,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'വെ',
       'ശ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ഒന്നാം പാദം',
       'രണ്ടാം പാദം',
       'മൂന്നാം പാദം',
       'നാലാം പാദം',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ഒന്നാം പാദം',
       'രണ്ടാം പാദം',
       'മൂന്നാം പാദം',
       'നാലാം പാദം',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y, MMMM d, EEEE',
       'y, MMMM d',
       'y, MMM d',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'mn': <String, dynamic>{
-    'NAME': 'mn',
-    'ERAS': <dynamic>[
+  ),
+  'mn': intl.DateSymbols(
+    NAME: 'mn',
+    ERAS: const <String>[
       'МЭӨ',
       'МЭ',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'манай эриний өмнөх',
       'манай эриний',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'I',
       'II',
       'III',
@@ -10866,7 +10868,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'XI',
       'XII',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'I',
       'II',
       'III',
@@ -10880,7 +10882,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'XI',
       'XII',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'нэгдүгээр сар',
       'хоёрдугаар сар',
       'гуравдугаар сар',
@@ -10894,7 +10896,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'арван нэгдүгээр сар',
       'арван хоёрдугаар сар',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Нэгдүгээр сар',
       'Хоёрдугаар сар',
       'Гуравдугаар сар',
@@ -10908,7 +10910,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Арван нэгдүгээр сар',
       'Арван хоёрдугаар сар',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       '1-р сар',
       '2-р сар',
       '3-р сар',
@@ -10922,7 +10924,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11-р сар',
       '12-р сар',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       '1-р сар',
       '2-р сар',
       '3-р сар',
@@ -10936,7 +10938,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11-р сар',
       '12-р сар',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'ням',
       'даваа',
       'мягмар',
@@ -10945,7 +10947,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'баасан',
       'бямба',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Ням',
       'Даваа',
       'Мягмар',
@@ -10954,7 +10956,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Баасан',
       'Бямба',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Ня',
       'Да',
       'Мя',
@@ -10963,7 +10965,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ба',
       'Бя',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Ня',
       'Да',
       'Мя',
@@ -10972,7 +10974,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ба',
       'Бя',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Ня',
       'Да',
       'Мя',
@@ -10981,7 +10983,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ба',
       'Бя',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Ня',
       'Да',
       'Мя',
@@ -10990,59 +10992,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ба',
       'Бя',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'I улирал',
       'II улирал',
       'III улирал',
       'IV улирал',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1-р улирал',
       '2-р улирал',
       '3-р улирал',
       '4-р улирал',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'ү.ө.',
       'ү.х.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y.MM.dd, EEEE',
       'y.MM.dd',
       "y 'оны' MMM'ын' d",
       'y.MM.dd',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss (zzzz)',
       'HH:mm:ss (z)',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'mr': <String, dynamic>{
-    'NAME': 'mr',
-    'ERAS': <dynamic>[
+  ),
+  'mr': intl.DateSymbols(
+    NAME: 'mr',
+    ERAS: const <String>[
       'इ. स. पू.',
       'इ. स.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ईसवीसनपूर्व',
       'ईसवीसन',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'जा',
       'फे',
       'मा',
@@ -11056,7 +11058,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नो',
       'डि',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'जा',
       'फे',
       'मा',
@@ -11070,7 +11072,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नो',
       'डि',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'जानेवारी',
       'फेब्रुवारी',
       'मार्च',
@@ -11084,7 +11086,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोव्हेंबर',
       'डिसेंबर',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'जानेवारी',
       'फेब्रुवारी',
       'मार्च',
@@ -11098,7 +11100,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोव्हेंबर',
       'डिसेंबर',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'जाने',
       'फेब्रु',
       'मार्च',
@@ -11112,7 +11114,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोव्हें',
       'डिसें',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'जाने',
       'फेब्रु',
       'मार्च',
@@ -11126,7 +11128,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोव्हें',
       'डिसें',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'रविवार',
       'सोमवार',
       'मंगळवार',
@@ -11135,7 +11137,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्रवार',
       'शनिवार',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'रविवार',
       'सोमवार',
       'मंगळवार',
@@ -11144,7 +11146,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्रवार',
       'शनिवार',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'रवि',
       'सोम',
       'मंगळ',
@@ -11153,7 +11155,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्र',
       'शनि',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'रवि',
       'सोम',
       'मंगळ',
@@ -11162,7 +11164,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्र',
       'शनि',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'र',
       'सो',
       'मं',
@@ -11171,7 +11173,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शु',
       'श',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'र',
       'सो',
       'मं',
@@ -11180,60 +11182,60 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शु',
       'श',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ति१',
       'ति२',
       'ति३',
       'ति४',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'प्रथम तिमाही',
       'द्वितीय तिमाही',
       'तृतीय तिमाही',
       'चतुर्थ तिमाही',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'म.पू.',
       'म.उ.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM, y',
       'd MMMM, y',
       'd MMM, y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} रोजी {0}',
       '{1} रोजी {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-    'ZERODIGIT': '०',
-  },
-  'ms': <String, dynamic>{
-    'NAME': 'ms',
-    'ERAS': <dynamic>[
+    ZERODIGIT: '०',
+  ),
+  'ms': intl.DateSymbols(
+    NAME: 'ms',
+    ERAS: const <String>[
       'S.M.',
       'TM',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'S.M.',
       'TM',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -11247,7 +11249,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -11261,7 +11263,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Januari',
       'Februari',
       'Mac',
@@ -11275,7 +11277,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Disember',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Januari',
       'Februari',
       'Mac',
@@ -11289,7 +11291,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'November',
       'Disember',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mac',
@@ -11303,7 +11305,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dis',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mac',
@@ -11317,7 +11319,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dis',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Ahad',
       'Isnin',
       'Selasa',
@@ -11326,7 +11328,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jumaat',
       'Sabtu',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Ahad',
       'Isnin',
       'Selasa',
@@ -11335,7 +11337,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jumaat',
       'Sabtu',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Ahd',
       'Isn',
       'Sel',
@@ -11344,7 +11346,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jum',
       'Sab',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Ahd',
       'Isn',
       'Sel',
@@ -11353,7 +11355,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jum',
       'Sab',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'A',
       'I',
       'S',
@@ -11362,7 +11364,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'J',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'A',
       'I',
       'S',
@@ -11371,59 +11373,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'J',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'S1',
       'S2',
       'S3',
       'S4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'Suku pertama',
       'Suku Ke-2',
       'Suku Ke-3',
       'Suku Ke-4',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'PG',
       'PTG',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'd/MM/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'my': <String, dynamic>{
-    'NAME': 'my',
-    'ERAS': <dynamic>[
+  ),
+  'my': intl.DateSymbols(
+    NAME: 'my',
+    ERAS: const <String>[
       'ဘီစီ',
       'အဒေီ',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ခရစ်တော် မပေါ်မီနှစ်',
       'ခရစ်နှစ်',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ဇ',
       'ဖ',
       'မ',
@@ -11437,7 +11439,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'န',
       'ဒ',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ဇ',
       'ဖ',
       'မ',
@@ -11451,7 +11453,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'န',
       'ဒ',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ဇန်နဝါရီ',
       'ဖေဖော်ဝါရီ',
       'မတ်',
@@ -11465,7 +11467,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'နိုဝင်ဘာ',
       'ဒီဇင်ဘာ',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ဇန်နဝါရီ',
       'ဖေဖော်ဝါရီ',
       'မတ်',
@@ -11479,7 +11481,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'နိုဝင်ဘာ',
       'ဒီဇင်ဘာ',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ဇန်',
       'ဖေ',
       'မတ်',
@@ -11493,7 +11495,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'နို',
       'ဒီ',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ဇန်',
       'ဖေ',
       'မတ်',
@@ -11507,7 +11509,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'နို',
       'ဒီ',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'တနင်္ဂနွေ',
       'တနင်္လာ',
       'အင်္ဂါ',
@@ -11516,7 +11518,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'သောကြာ',
       'စနေ',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'တနင်္ဂနွေ',
       'တနင်္လာ',
       'အင်္ဂါ',
@@ -11525,7 +11527,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'သောကြာ',
       'စနေ',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'တနင်္ဂနွေ',
       'တနင်္လာ',
       'အင်္ဂါ',
@@ -11534,7 +11536,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'သောကြာ',
       'စနေ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'တနင်္ဂနွေ',
       'တနင်္လာ',
       'အင်္ဂါ',
@@ -11543,7 +11545,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'သောကြာ',
       'စနေ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'တ',
       'တ',
       'အ',
@@ -11552,7 +11554,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'သ',
       'စ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'တ',
       'တ',
       'အ',
@@ -11561,60 +11563,60 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'သ',
       'စ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ပထမ သုံးလပတ်',
       'ဒုတိယ သုံးလပတ်',
       'တတိယ သုံးလပတ်',
       'စတုတ္ထ သုံးလပတ်',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ပထမ သုံးလပတ်',
       'ဒုတိယ သုံးလပတ်',
       'တတိယ သုံးလပတ်',
       'စတုတ္ထ သုံးလပတ်',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'နံနက်',
       'ညနေ',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y၊ MMMM d၊ EEEE',
       'y၊ d MMMM',
       'y၊ MMM d',
       'dd-MM-yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'zzzz HH:mm:ss',
       'z HH:mm:ss',
       'B HH:mm:ss',
       'B H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-    'ZERODIGIT': '၀',
-  },
-  'nb': <String, dynamic>{
-    'NAME': 'nb',
-    'ERAS': <dynamic>[
+    ZERODIGIT: '၀',
+  ),
+  'nb': intl.DateSymbols(
+    NAME: 'nb',
+    ERAS: const <String>[
       'f.Kr.',
       'e.Kr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'før Kristus',
       'etter Kristus',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -11628,7 +11630,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -11642,7 +11644,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'januar',
       'februar',
       'mars',
@@ -11656,7 +11658,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'desember',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'januar',
       'februar',
       'mars',
@@ -11670,7 +11672,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'desember',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mar.',
@@ -11684,7 +11686,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'des.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan',
       'feb',
       'mar',
@@ -11698,7 +11700,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'des',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'søndag',
       'mandag',
       'tirsdag',
@@ -11707,7 +11709,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fredag',
       'lørdag',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'søndag',
       'mandag',
       'tirsdag',
@@ -11716,7 +11718,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fredag',
       'lørdag',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'søn.',
       'man.',
       'tir.',
@@ -11725,7 +11727,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fre.',
       'lør.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'søn.',
       'man.',
       'tir.',
@@ -11734,7 +11736,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fre.',
       'lør.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -11743,7 +11745,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -11752,59 +11754,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'K1',
       'K2',
       'K3',
       'K4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. kvartal',
       '2. kvartal',
       '3. kvartal',
       '4. kvartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a.m.',
       'p.m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d. MMMM y',
       'd. MMMM y',
       'd. MMM y',
       'dd.MM.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       "{1} 'kl'. {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'ne': <String, dynamic>{
-    'NAME': 'ne',
-    'ERAS': <dynamic>[
+  ),
+  'ne': intl.DateSymbols(
+    NAME: 'ne',
+    ERAS: const <String>[
       'ईसा पूर्व',
       'सन्',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ईसा पूर्व',
       'सन्',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'जन',
       'फेब',
       'मार्च',
@@ -11818,7 +11820,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोभे',
       'डिसे',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'जन',
       'फेेब',
       'मार्च',
@@ -11832,7 +11834,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोभे',
       'डिसे',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'जनवरी',
       'फेब्रुअरी',
       'मार्च',
@@ -11846,7 +11848,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोभेम्बर',
       'डिसेम्बर',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'जनवरी',
       'फेब्रुअरी',
       'मार्च',
@@ -11860,7 +11862,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोभेम्बर',
       'डिसेम्बर',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'जनवरी',
       'फेब्रुअरी',
       'मार्च',
@@ -11874,7 +11876,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोभेम्बर',
       'डिसेम्बर',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'जनवरी',
       'फेब्रुअरी',
       'मार्च',
@@ -11888,7 +11890,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'नोभेम्बर',
       'डिसेम्बर',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'आइतबार',
       'सोमबार',
       'मङ्गलबार',
@@ -11897,7 +11899,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्रबार',
       'शनिबार',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'आइतबार',
       'सोमबार',
       'मङ्गलबार',
@@ -11906,7 +11908,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्रबार',
       'शनिबार',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'आइत',
       'सोम',
       'मङ्गल',
@@ -11915,7 +11917,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्र',
       'शनि',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'आइत',
       'सोम',
       'मङ्गल',
@@ -11924,7 +11926,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शुक्र',
       'शनि',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'आ',
       'सो',
       'म',
@@ -11933,7 +11935,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शु',
       'श',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'आ',
       'सो',
       'म',
@@ -11942,60 +11944,60 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'शु',
       'श',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'पहिलो सत्र',
       'दोस्रो सत्र',
       'तेस्रो सत्र',
       'चौथो सत्र',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'पहिलो सत्र',
       'दोस्रो सत्र',
       'तेस्रो सत्र',
       'चौथो सत्र',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'पूर्वाह्न',
       'अपराह्न',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y MMMM d, EEEE',
       'y MMMM d',
       'y MMM d',
       'yy/M/d',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-    'ZERODIGIT': '०',
-  },
-  'nl': <String, dynamic>{
-    'NAME': 'nl',
-    'ERAS': <dynamic>[
+    ZERODIGIT: '०',
+  ),
+  'nl': intl.DateSymbols(
+    NAME: 'nl',
+    ERAS: const <String>[
       'v.Chr.',
       'n.Chr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'voor Christus',
       'na Christus',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -12009,7 +12011,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -12023,7 +12025,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'januari',
       'februari',
       'maart',
@@ -12037,7 +12039,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'januari',
       'februari',
       'maart',
@@ -12051,7 +12053,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mrt.',
@@ -12065,7 +12067,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mrt.',
@@ -12079,7 +12081,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'zondag',
       'maandag',
       'dinsdag',
@@ -12088,7 +12090,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vrijdag',
       'zaterdag',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'zondag',
       'maandag',
       'dinsdag',
@@ -12097,7 +12099,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vrijdag',
       'zaterdag',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'zo',
       'ma',
       'di',
@@ -12106,7 +12108,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vr',
       'za',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'zo',
       'ma',
       'di',
@@ -12115,7 +12117,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vr',
       'za',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Z',
       'M',
       'D',
@@ -12124,7 +12126,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'Z',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Z',
       'M',
       'D',
@@ -12133,59 +12135,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'Z',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'K1',
       'K2',
       'K3',
       'K4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1e kwartaal',
       '2e kwartaal',
       '3e kwartaal',
       '4e kwartaal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a.m.',
       'p.m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d MMMM y',
       'd MMMM y',
       'd MMM y',
       'dd-MM-y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       "{1} 'om' {0}",
       "{1} 'om' {0}",
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'no': <String, dynamic>{
-    'NAME': 'no',
-    'ERAS': <dynamic>[
+  ),
+  'no': intl.DateSymbols(
+    NAME: 'no',
+    ERAS: const <String>[
       'f.Kr.',
       'e.Kr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'før Kristus',
       'etter Kristus',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -12199,7 +12201,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -12213,7 +12215,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'januar',
       'februar',
       'mars',
@@ -12227,7 +12229,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'desember',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'januar',
       'februar',
       'mars',
@@ -12241,7 +12243,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'desember',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mar.',
@@ -12255,7 +12257,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'des.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan',
       'feb',
       'mar',
@@ -12269,7 +12271,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'des',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'søndag',
       'mandag',
       'tirsdag',
@@ -12278,7 +12280,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fredag',
       'lørdag',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'søndag',
       'mandag',
       'tirsdag',
@@ -12287,7 +12289,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fredag',
       'lørdag',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'søn.',
       'man.',
       'tir.',
@@ -12296,7 +12298,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fre.',
       'lør.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'søn.',
       'man.',
       'tir.',
@@ -12305,7 +12307,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fre.',
       'lør.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -12314,7 +12316,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -12323,59 +12325,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'K1',
       'K2',
       'K3',
       'K4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. kvartal',
       '2. kvartal',
       '3. kvartal',
       '4. kvartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a.m.',
       'p.m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d. MMMM y',
       'd. MMMM y',
       'd. MMM y',
       'dd.MM.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       "{1} 'kl'. {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'or': <String, dynamic>{
-    'NAME': 'or',
-    'ERAS': <dynamic>[
+  ),
+  'or': intl.DateSymbols(
+    NAME: 'or',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ଖ୍ରୀଷ୍ଟପୂର୍ବ',
       'ଖ୍ରୀଷ୍ଟାବ୍ଦ',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ଜା',
       'ଫେ',
       'ମା',
@@ -12389,7 +12391,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ନ',
       'ଡି',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ଜା',
       'ଫେ',
       'ମା',
@@ -12403,7 +12405,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ନ',
       'ଡି',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ଜାନୁଆରୀ',
       'ଫେବୃଆରୀ',
       'ମାର୍ଚ୍ଚ',
@@ -12417,7 +12419,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ନଭେମ୍ବର',
       'ଡିସେମ୍ବର',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ଜାନୁଆରୀ',
       'ଫେବୃଆରୀ',
       'ମାର୍ଚ୍ଚ',
@@ -12431,7 +12433,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ନଭେମ୍ବର',
       'ଡିସେମ୍ବର',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ଜାନୁଆରୀ',
       'ଫେବୃଆରୀ',
       'ମାର୍ଚ୍ଚ',
@@ -12445,7 +12447,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ନଭେମ୍ବର',
       'ଡିସେମ୍ବର',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ଜାନୁଆରୀ',
       'ଫେବୃଆରୀ',
       'ମାର୍ଚ୍ଚ',
@@ -12459,7 +12461,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ନଭେମ୍ବର',
       'ଡିସେମ୍ବର',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'ରବିବାର',
       'ସୋମବାର',
       'ମଙ୍ଗଳବାର',
@@ -12468,7 +12470,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ଶୁକ୍ରବାର',
       'ଶନିବାର',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'ରବିବାର',
       'ସୋମବାର',
       'ମଙ୍ଗଳବାର',
@@ -12477,7 +12479,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ଶୁକ୍ରବାର',
       'ଶନିବାର',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ରବି',
       'ସୋମ',
       'ମଙ୍ଗଳ',
@@ -12486,7 +12488,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ଶୁକ୍ର',
       'ଶନି',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ରବି',
       'ସୋମ',
       'ମଙ୍ଗଳ',
@@ -12495,7 +12497,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ଶୁକ୍ର',
       'ଶନି',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ର',
       'ସୋ',
       'ମ',
@@ -12504,7 +12506,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ଶୁ',
       'ଶ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ର',
       'ସୋ',
       'ମ',
@@ -12513,59 +12515,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ଶୁ',
       'ଶ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1ମ ତ୍ରୟମାସ',
       '2ୟ ତ୍ରୟମାସ',
       '3ୟ ତ୍ରୟମାସ',
       '4ର୍ଥ ତ୍ରୟମାସ',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1ମ ତ୍ରୟମାସ',
       '2ୟ ତ୍ରୟମାସ',
       '3ୟ ତ୍ରୟମାସ',
       '4ର୍ଥ ତ୍ରୟମାସ',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, MMMM d, y',
       'MMMM d, y',
       'MMM d, y',
       'M/d/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{0} ଠାରେ {1}',
       '{0} ଠାରେ {1}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'pa': <String, dynamic>{
-    'NAME': 'pa',
-    'ERAS': <dynamic>[
+  ),
+  'pa': intl.DateSymbols(
+    NAME: 'pa',
+    ERAS: const <String>[
       'ਈ. ਪੂ.',
       'ਸੰਨ',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ਈਸਵੀ ਪੂਰਵ',
       'ਈਸਵੀ ਸੰਨ',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ਜ',
       'ਫ਼',
       'ਮਾ',
@@ -12579,7 +12581,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਨ',
       'ਦ',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ਜ',
       'ਫ਼',
       'ਮਾ',
@@ -12593,7 +12595,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਨ',
       'ਦ',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ਜਨਵਰੀ',
       'ਫ਼ਰਵਰੀ',
       'ਮਾਰਚ',
@@ -12607,7 +12609,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਨਵੰਬਰ',
       'ਦਸੰਬਰ',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ਜਨਵਰੀ',
       'ਫ਼ਰਵਰੀ',
       'ਮਾਰਚ',
@@ -12621,7 +12623,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਨਵੰਬਰ',
       'ਦਸੰਬਰ',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ਜਨ',
       'ਫ਼ਰ',
       'ਮਾਰਚ',
@@ -12635,7 +12637,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਨਵੰ',
       'ਦਸੰ',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ਜਨ',
       'ਫ਼ਰ',
       'ਮਾਰਚ',
@@ -12649,7 +12651,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਨਵੰ',
       'ਦਸੰ',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'ਐਤਵਾਰ',
       'ਸੋਮਵਾਰ',
       'ਮੰਗਲਵਾਰ',
@@ -12658,7 +12660,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਸ਼ੁੱਕਰਵਾਰ',
       'ਸ਼ਨਿੱਚਰਵਾਰ',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'ਐਤਵਾਰ',
       'ਸੋਮਵਾਰ',
       'ਮੰਗਲਵਾਰ',
@@ -12667,7 +12669,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਸ਼ੁੱਕਰਵਾਰ',
       'ਸ਼ਨਿੱਚਰਵਾਰ',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ਐਤ',
       'ਸੋਮ',
       'ਮੰਗਲ',
@@ -12676,7 +12678,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਸ਼ੁੱਕਰ',
       'ਸ਼ਨਿੱਚਰ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ਐਤ',
       'ਸੋਮ',
       'ਮੰਗਲ',
@@ -12685,7 +12687,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਸ਼ੁੱਕਰ',
       'ਸ਼ਨਿੱਚਰ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ਐ',
       'ਸੋ',
       'ਮੰ',
@@ -12694,7 +12696,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਸ਼ੁੱ',
       'ਸ਼',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ਐ',
       'ਸੋ',
       'ਮੰ',
@@ -12703,59 +12705,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ਸ਼ੁੱ',
       'ਸ਼',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ਤਿਮਾਹੀ1',
       'ਤਿਮਾਹੀ2',
       'ਤਿਮਾਹੀ3',
       'ਤਿਮਾਹੀ4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ਪਹਿਲੀ ਤਿਮਾਹੀ',
       'ਦੂਜੀ ਤਿਮਾਹੀ',
       'ਤੀਜੀ ਤਿਮਾਹੀ',
       'ਚੌਥੀ ਤਿਮਾਹੀ',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'ਪੂ.ਦੁ.',
       'ਬਾ.ਦੁ.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'pl': <String, dynamic>{
-    'NAME': 'pl',
-    'ERAS': <dynamic>[
+  ),
+  'pl': intl.DateSymbols(
+    NAME: 'pl',
+    ERAS: const <String>[
       'p.n.e.',
       'n.e.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'przed naszą erą',
       'naszej ery',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       's',
       'l',
       'm',
@@ -12769,7 +12771,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'l',
       'g',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'S',
       'L',
       'M',
@@ -12783,7 +12785,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'L',
       'G',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'stycznia',
       'lutego',
       'marca',
@@ -12797,7 +12799,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'listopada',
       'grudnia',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'styczeń',
       'luty',
       'marzec',
@@ -12811,7 +12813,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'listopad',
       'grudzień',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'sty',
       'lut',
       'mar',
@@ -12825,7 +12827,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'lis',
       'gru',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'sty',
       'lut',
       'mar',
@@ -12839,7 +12841,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'lis',
       'gru',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'niedziela',
       'poniedziałek',
       'wtorek',
@@ -12848,7 +12850,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'piątek',
       'sobota',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'niedziela',
       'poniedziałek',
       'wtorek',
@@ -12857,7 +12859,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'piątek',
       'sobota',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'niedz.',
       'pon.',
       'wt.',
@@ -12866,7 +12868,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pt.',
       'sob.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'niedz.',
       'pon.',
       'wt.',
@@ -12875,7 +12877,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pt.',
       'sob.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'n',
       'p',
       'w',
@@ -12884,7 +12886,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       's',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'N',
       'P',
       'W',
@@ -12893,59 +12895,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'P',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'I kw.',
       'II kw.',
       'III kw.',
       'IV kw.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'I kwartał',
       'II kwartał',
       'III kwartał',
       'IV kwartał',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'dd.MM.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'ps': <String, dynamic>{
-    'NAME': 'ps',
-    'ERAS': <dynamic>[
+  ),
+  'ps': intl.DateSymbols(
+    NAME: 'ps',
+    ERAS: const <String>[
       'له میلاد وړاندې',
       'م.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'له میلاد څخه وړاندې',
       'له میلاد څخه وروسته',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ج',
       'ف',
       'م',
@@ -12959,7 +12961,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ن',
       'د',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -12973,7 +12975,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'جنوري',
       'فبروري',
       'مارچ',
@@ -12987,7 +12989,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نومبر',
       'دسمبر',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'جنوري',
       'فېبروري',
       'مارچ',
@@ -13001,7 +13003,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نومبر',
       'دسمبر',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'جنوري',
       'فبروري',
       'مارچ',
@@ -13015,7 +13017,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نومبر',
       'دسمبر',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'جنوري',
       'فبروري',
       'مارچ',
@@ -13029,7 +13031,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نومبر',
       'دسمبر',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'يونۍ',
       'دونۍ',
       'درېنۍ',
@@ -13038,7 +13040,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعه',
       'اونۍ',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'يونۍ',
       'دونۍ',
       'درېنۍ',
@@ -13047,7 +13049,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعه',
       'اونۍ',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'يونۍ',
       'دونۍ',
       'درېنۍ',
@@ -13056,7 +13058,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعه',
       'اونۍ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'يونۍ',
       'دونۍ',
       'درېنۍ',
@@ -13065,7 +13067,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعه',
       'اونۍ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -13074,7 +13076,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -13083,60 +13085,60 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'لومړۍ ربعه',
       '۲مه ربعه',
       '۳مه ربعه',
       '۴مه ربعه',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'لومړۍ ربعه',
       '۲مه ربعه',
       '۳مه ربعه',
       '۴مه ربعه',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'غ.م.',
       'غ.و.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE د y د MMMM d',
       'د y د MMMM d',
       'y MMM d',
       'y/M/d',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss (zzzz)',
       'H:mm:ss (z)',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 5,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 5,
+    WEEKENDRANGE: const <int>[
       3,
       4,
     ],
-    'FIRSTWEEKCUTOFFDAY': 4,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 4,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-    'ZERODIGIT': '۰',
-  },
-  'pt': <String, dynamic>{
-    'NAME': 'pt',
-    'ERAS': <dynamic>[
+    ZERODIGIT: '۰',
+  ),
+  'pt': intl.DateSymbols(
+    NAME: 'pt',
+    ERAS: const <String>[
       'a.C.',
       'd.C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'antes de Cristo',
       'depois de Cristo',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -13150,7 +13152,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -13164,7 +13166,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'janeiro',
       'fevereiro',
       'março',
@@ -13178,7 +13180,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembro',
       'dezembro',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'janeiro',
       'fevereiro',
       'março',
@@ -13192,7 +13194,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembro',
       'dezembro',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan',
       'fev',
       'mar',
@@ -13206,7 +13208,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dez',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan',
       'fev',
       'mar',
@@ -13220,7 +13222,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dez',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'domingo',
       'segunda-feira',
       'terça-feira',
@@ -13229,7 +13231,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'sexta-feira',
       'sábado',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'domingo',
       'segunda-feira',
       'terça-feira',
@@ -13238,7 +13240,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'sexta-feira',
       'sábado',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dom',
       'seg',
       'ter',
@@ -13247,7 +13249,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'sex',
       'sáb',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dom',
       'seg',
       'ter',
@@ -13256,7 +13258,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'sex',
       'sáb',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'D',
       'S',
       'T',
@@ -13265,7 +13267,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'S',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'S',
       'T',
@@ -13274,59 +13276,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'S',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'T1',
       'T2',
       'T3',
       'T4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1º trimestre',
       '2º trimestre',
       '3º trimestre',
       '4º trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d 'de' MMMM 'de' y",
       "d 'de' MMMM 'de' y",
       "d 'de' MMM 'de' y",
       'dd/MM/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'pt_PT': <String, dynamic>{
-    'NAME': 'pt_PT',
-    'ERAS': <dynamic>[
+  ),
+  'pt_PT': intl.DateSymbols(
+    NAME: 'pt_PT',
+    ERAS: const <String>[
       'a.C.',
       'd.C.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'antes de Cristo',
       'depois de Cristo',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -13340,7 +13342,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -13354,7 +13356,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'janeiro',
       'fevereiro',
       'março',
@@ -13368,7 +13370,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembro',
       'dezembro',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'janeiro',
       'fevereiro',
       'março',
@@ -13382,7 +13384,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembro',
       'dezembro',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan',
       'fev',
       'mar',
@@ -13396,7 +13398,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dez',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan',
       'fev',
       'mar',
@@ -13410,7 +13412,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dez',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'domingo',
       'segunda-feira',
       'terça-feira',
@@ -13419,7 +13421,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'sexta-feira',
       'sábado',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'domingo',
       'segunda-feira',
       'terça-feira',
@@ -13428,7 +13430,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'sexta-feira',
       'sábado',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'domingo',
       'segunda',
       'terça',
@@ -13437,7 +13439,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'sexta',
       'sábado',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'domingo',
       'segunda',
       'terça',
@@ -13446,7 +13448,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'sexta',
       'sábado',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'D',
       'S',
       'T',
@@ -13455,7 +13457,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'S',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'S',
       'T',
@@ -13464,59 +13466,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'S',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'T1',
       'T2',
       'T3',
       'T4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1.º trimestre',
       '2.º trimestre',
       '3.º trimestre',
       '4.º trimestre',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'da manhã',
       'da tarde',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d 'de' MMMM 'de' y",
       "d 'de' MMMM 'de' y",
       'dd/MM/y',
       'dd/MM/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 2,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 2,
+    DATETIMEFORMATS: const <String>[
       "{1} 'às' {0}",
       "{1} 'às' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'ro': <String, dynamic>{
-    'NAME': 'ro',
-    'ERAS': <dynamic>[
+  ),
+  'ro': intl.DateSymbols(
+    NAME: 'ro',
+    ERAS: const <String>[
       'î.Hr.',
       'd.Hr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'înainte de Hristos',
       'după Hristos',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'I',
       'F',
       'M',
@@ -13530,7 +13532,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'I',
       'F',
       'M',
@@ -13544,7 +13546,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ianuarie',
       'februarie',
       'martie',
@@ -13558,7 +13560,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noiembrie',
       'decembrie',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ianuarie',
       'februarie',
       'martie',
@@ -13572,7 +13574,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noiembrie',
       'decembrie',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ian.',
       'feb.',
       'mar.',
@@ -13586,7 +13588,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ian.',
       'feb.',
       'mar.',
@@ -13600,7 +13602,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'duminică',
       'luni',
       'marți',
@@ -13609,7 +13611,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vineri',
       'sâmbătă',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'duminică',
       'luni',
       'marți',
@@ -13618,7 +13620,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vineri',
       'sâmbătă',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'dum.',
       'lun.',
       'mar.',
@@ -13627,7 +13629,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vin.',
       'sâm.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'dum.',
       'lun.',
       'mar.',
@@ -13636,7 +13638,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'vin.',
       'sâm.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -13645,7 +13647,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'D',
       'L',
       'M',
@@ -13654,59 +13656,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'V',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'trim. I',
       'trim. II',
       'trim. III',
       'trim. IV',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'trimestrul I',
       'trimestrul al II-lea',
       'trimestrul al III-lea',
       'trimestrul al IV-lea',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'a.m.',
       'p.m.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'dd.MM.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'ru': <String, dynamic>{
-    'NAME': 'ru',
-    'ERAS': <dynamic>[
+  ),
+  'ru': intl.DateSymbols(
+    NAME: 'ru',
+    ERAS: const <String>[
       'до н. э.',
       'н. э.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'до Рождества Христова',
       'от Рождества Христова',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'Я',
       'Ф',
       'М',
@@ -13720,7 +13722,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Н',
       'Д',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'Я',
       'Ф',
       'М',
@@ -13734,7 +13736,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Н',
       'Д',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'января',
       'февраля',
       'марта',
@@ -13748,7 +13750,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноября',
       'декабря',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'январь',
       'февраль',
       'март',
@@ -13762,7 +13764,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ноябрь',
       'декабрь',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'янв.',
       'февр.',
       'мар.',
@@ -13776,7 +13778,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'нояб.',
       'дек.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'янв.',
       'февр.',
       'март',
@@ -13790,7 +13792,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'нояб.',
       'дек.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'воскресенье',
       'понедельник',
       'вторник',
@@ -13799,7 +13801,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пятница',
       'суббота',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'воскресенье',
       'понедельник',
       'вторник',
@@ -13808,7 +13810,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пятница',
       'суббота',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'вс',
       'пн',
       'вт',
@@ -13817,7 +13819,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пт',
       'сб',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'вс',
       'пн',
       'вт',
@@ -13826,7 +13828,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пт',
       'сб',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'вс',
       'пн',
       'вт',
@@ -13835,7 +13837,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пт',
       'сб',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'В',
       'П',
       'В',
@@ -13844,59 +13846,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'П',
       'С',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1-й кв.',
       '2-й кв.',
       '3-й кв.',
       '4-й кв.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1-й квартал',
       '2-й квартал',
       '3-й квартал',
       '4-й квартал',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d MMMM y 'г'.",
       "d MMMM y 'г'.",
       "d MMM y 'г'.",
       'dd.MM.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'si': <String, dynamic>{
-    'NAME': 'si',
-    'ERAS': <dynamic>[
+  ),
+  'si': intl.DateSymbols(
+    NAME: 'si',
+    ERAS: const <String>[
       'ක්‍රි.පූ.',
       'ක්‍රි.ව.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ක්‍රිස්තු පූර්ව',
       'ක්‍රිස්තු වර්ෂ',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ජ',
       'පෙ',
       'මා',
@@ -13910,7 +13912,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'නෙ',
       'දෙ',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ජ',
       'පෙ',
       'මා',
@@ -13924,7 +13926,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'නෙ',
       'දෙ',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ජනවාරි',
       'පෙබරවාරි',
       'මාර්තු',
@@ -13938,7 +13940,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'නොවැම්බර්',
       'දෙසැම්බර්',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ජනවාරි',
       'පෙබරවාරි',
       'මාර්තු',
@@ -13952,7 +13954,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'නොවැම්බර්',
       'දෙසැම්බර්',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ජන',
       'පෙබ',
       'මාර්තු',
@@ -13966,7 +13968,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'නොවැ',
       'දෙසැ',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ජන',
       'පෙබ',
       'මාර්',
@@ -13980,7 +13982,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'නොවැ',
       'දෙසැ',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'ඉරිදා',
       'සඳුදා',
       'අඟහරුවාදා',
@@ -13989,7 +13991,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'සිකුරාදා',
       'සෙනසුරාදා',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'ඉරිදා',
       'සඳුදා',
       'අඟහරුවාදා',
@@ -13998,7 +14000,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'සිකුරාදා',
       'සෙනසුරාදා',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ඉරිදා',
       'සඳුදා',
       'අඟහ',
@@ -14007,7 +14009,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'සිකු',
       'සෙන',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ඉරිදා',
       'සඳුදා',
       'අඟහ',
@@ -14016,7 +14018,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'සිකු',
       'සෙන',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ඉ',
       'ස',
       'අ',
@@ -14025,7 +14027,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'සි',
       'සෙ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ඉ',
       'ස',
       'අ',
@@ -14034,59 +14036,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'සි',
       'සෙ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'කාර්:1',
       'කාර්:2',
       'කාර්:3',
       'කාර්:4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1 වන කාර්තුව',
       '2 වන කාර්තුව',
       '3 වන කාර්තුව',
       '4 වන කාර්තුව',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'පෙ.ව.',
       'ප.ව.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y MMMM d, EEEE',
       'y MMMM d',
       'y MMM d',
       'y-MM-dd',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH.mm.ss zzzz',
       'HH.mm.ss z',
       'HH.mm.ss',
       'HH.mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'sk': <String, dynamic>{
-    'NAME': 'sk',
-    'ERAS': <dynamic>[
+  ),
+  'sk': intl.DateSymbols(
+    NAME: 'sk',
+    ERAS: const <String>[
       'pred Kr.',
       'po Kr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'pred Kristom',
       'po Kristovi',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'j',
       'f',
       'm',
@@ -14100,7 +14102,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'd',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'j',
       'f',
       'm',
@@ -14114,7 +14116,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'd',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'januára',
       'februára',
       'marca',
@@ -14128,7 +14130,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembra',
       'decembra',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'január',
       'február',
       'marec',
@@ -14142,7 +14144,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan',
       'feb',
       'mar',
@@ -14156,7 +14158,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan',
       'feb',
       'mar',
@@ -14170,7 +14172,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'nedeľa',
       'pondelok',
       'utorok',
@@ -14179,7 +14181,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'piatok',
       'sobota',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'nedeľa',
       'pondelok',
       'utorok',
@@ -14188,7 +14190,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'piatok',
       'sobota',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ne',
       'po',
       'ut',
@@ -14197,7 +14199,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pi',
       'so',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ne',
       'po',
       'ut',
@@ -14206,7 +14208,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pi',
       'so',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'n',
       'p',
       'u',
@@ -14215,7 +14217,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       's',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'n',
       'p',
       'u',
@@ -14224,59 +14226,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       's',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. štvrťrok',
       '2. štvrťrok',
       '3. štvrťrok',
       '4. štvrťrok',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d. MMMM y',
       'd. MMMM y',
       'd. M. y',
       'd. M. y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss zzzz',
       'H:mm:ss z',
       'H:mm:ss',
       'H:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
       '{1} {0}',
     ],
-  },
-  'sl': <String, dynamic>{
-    'NAME': 'sl',
-    'ERAS': <dynamic>[
+  ),
+  'sl': intl.DateSymbols(
+    NAME: 'sl',
+    ERAS: const <String>[
       'pr. Kr.',
       'po Kr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'pred Kristusom',
       'po Kristusu',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'j',
       'f',
       'm',
@@ -14290,7 +14292,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'd',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'j',
       'f',
       'm',
@@ -14304,7 +14306,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'd',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'januar',
       'februar',
       'marec',
@@ -14318,7 +14320,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'januar',
       'februar',
       'marec',
@@ -14332,7 +14334,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mar.',
@@ -14346,7 +14348,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mar.',
@@ -14360,7 +14362,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'nedelja',
       'ponedeljek',
       'torek',
@@ -14369,7 +14371,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'petek',
       'sobota',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'nedelja',
       'ponedeljek',
       'torek',
@@ -14378,7 +14380,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'petek',
       'sobota',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ned.',
       'pon.',
       'tor.',
@@ -14387,7 +14389,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pet.',
       'sob.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ned.',
       'pon.',
       'tor.',
@@ -14396,7 +14398,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pet.',
       'sob.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'n',
       'p',
       't',
@@ -14405,7 +14407,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       's',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'n',
       'p',
       't',
@@ -14414,59 +14416,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       's',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1. čet.',
       '2. čet.',
       '3. čet.',
       '4. čet.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. četrtletje',
       '2. četrtletje',
       '3. četrtletje',
       '4. četrtletje',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'dop.',
       'pop.',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, dd. MMMM y',
       'dd. MMMM y',
       'd. MMM y',
       'd. MM. yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'sq': <String, dynamic>{
-    'NAME': 'sq',
-    'ERAS': <dynamic>[
+  ),
+  'sq': intl.DateSymbols(
+    NAME: 'sq',
+    ERAS: const <String>[
       'p.K.',
       'mb.K.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'para Krishtit',
       'mbas Krishtit',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'j',
       'sh',
       'm',
@@ -14480,7 +14482,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'dh',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'j',
       'sh',
       'm',
@@ -14494,7 +14496,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'dh',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'janar',
       'shkurt',
       'mars',
@@ -14508,7 +14510,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nëntor',
       'dhjetor',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'janar',
       'shkurt',
       'mars',
@@ -14522,7 +14524,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nëntor',
       'dhjetor',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan',
       'shk',
       'mar',
@@ -14536,7 +14538,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nën',
       'dhj',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan',
       'shk',
       'mar',
@@ -14550,7 +14552,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nën',
       'dhj',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'e diel',
       'e hënë',
       'e martë',
@@ -14559,7 +14561,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'e premte',
       'e shtunë',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'e diel',
       'e hënë',
       'e martë',
@@ -14568,7 +14570,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'e premte',
       'e shtunë',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Die',
       'Hën',
       'Mar',
@@ -14577,7 +14579,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Pre',
       'Sht',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'die',
       'hën',
       'mar',
@@ -14586,7 +14588,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pre',
       'sht',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'd',
       'h',
       'm',
@@ -14595,7 +14597,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       'sh',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'd',
       'h',
       'm',
@@ -14604,59 +14606,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       'sh',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'tremujori I',
       'tremujori II',
       'tremujori III',
       'tremujori IV',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'tremujori i parë',
       'tremujori i dytë',
       'tremujori i tretë',
       'tremujori i katërt',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'e paradites',
       'e pasdites',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'd.M.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a, zzzz',
       'h:mm:ss a, z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       "{1} 'në' {0}",
       "{1} 'në' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'sr': <String, dynamic>{
-    'NAME': 'sr',
-    'ERAS': <dynamic>[
+  ),
+  'sr': intl.DateSymbols(
+    NAME: 'sr',
+    ERAS: const <String>[
       'п. н. е.',
       'н. е.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'пре нове ере',
       'нове ере',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ј',
       'ф',
       'м',
@@ -14670,7 +14672,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'н',
       'д',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ј',
       'ф',
       'м',
@@ -14684,7 +14686,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'н',
       'д',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'јануар',
       'фебруар',
       'март',
@@ -14698,7 +14700,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'новембар',
       'децембар',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'јануар',
       'фебруар',
       'март',
@@ -14712,7 +14714,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'новембар',
       'децембар',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'јан',
       'феб',
       'мар',
@@ -14726,7 +14728,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'нов',
       'дец',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'јан',
       'феб',
       'мар',
@@ -14740,7 +14742,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'нов',
       'дец',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'недеља',
       'понедељак',
       'уторак',
@@ -14749,7 +14751,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'петак',
       'субота',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'недеља',
       'понедељак',
       'уторак',
@@ -14758,7 +14760,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'петак',
       'субота',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'нед',
       'пон',
       'уто',
@@ -14767,7 +14769,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пет',
       'суб',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'нед',
       'пон',
       'уто',
@@ -14776,7 +14778,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пет',
       'суб',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'н',
       'п',
       'у',
@@ -14785,7 +14787,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'п',
       'с',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'н',
       'п',
       'у',
@@ -14794,59 +14796,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'п',
       'с',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'К1',
       'К2',
       'К3',
       'К4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'први квартал',
       'други квартал',
       'трећи квартал',
       'четврти квартал',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'пре подне',
       'по подне',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, dd. MMMM y.',
       'dd. MMMM y.',
       'dd.MM.y.',
       'd.M.yy.',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'sr_Latn': <String, dynamic>{
-    'NAME': 'sr_Latn',
-    'ERAS': <dynamic>[
+  ),
+  'sr_Latn': intl.DateSymbols(
+    NAME: 'sr_Latn',
+    ERAS: const <String>[
       'p. n. e.',
       'n. e.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'pre nove ere',
       'nove ere',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'j',
       'f',
       'm',
@@ -14860,7 +14862,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'd',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'j',
       'f',
       'm',
@@ -14874,7 +14876,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'n',
       'd',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'januar',
       'februar',
       'mart',
@@ -14888,7 +14890,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembar',
       'decembar',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'januar',
       'februar',
       'mart',
@@ -14902,7 +14904,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'novembar',
       'decembar',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan',
       'feb',
       'mar',
@@ -14916,7 +14918,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dec',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan',
       'feb',
       'mar',
@@ -14930,7 +14932,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov',
       'dec',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'nedelja',
       'ponedeljak',
       'utorak',
@@ -14939,7 +14941,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'petak',
       'subota',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'nedelja',
       'ponedeljak',
       'utorak',
@@ -14948,7 +14950,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'petak',
       'subota',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ned',
       'pon',
       'uto',
@@ -14957,7 +14959,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pet',
       'sub',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ned',
       'pon',
       'uto',
@@ -14966,7 +14968,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'pet',
       'sub',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'n',
       'p',
       'u',
@@ -14975,7 +14977,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       's',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'n',
       'p',
       'u',
@@ -14984,59 +14986,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'p',
       's',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'K1',
       'K2',
       'K3',
       'K4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'prvi kvartal',
       'drugi kvartal',
       'treći kvartal',
       'četvrti kvartal',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'pre podne',
       'po podne',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, dd. MMMM y.',
       'dd. MMMM y.',
       'dd.MM.y.',
       'd.M.yy.',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'sv': <String, dynamic>{
-    'NAME': 'sv',
-    'ERAS': <dynamic>[
+  ),
+  'sv': intl.DateSymbols(
+    NAME: 'sv',
+    ERAS: const <String>[
       'f.Kr.',
       'e.Kr.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'före Kristus',
       'efter Kristus',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -15050,7 +15052,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -15064,7 +15066,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'januari',
       'februari',
       'mars',
@@ -15078,7 +15080,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'januari',
       'februari',
       'mars',
@@ -15092,7 +15094,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'november',
       'december',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mars',
@@ -15106,7 +15108,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'jan.',
       'feb.',
       'mars',
@@ -15120,7 +15122,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'nov.',
       'dec.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'söndag',
       'måndag',
       'tisdag',
@@ -15129,7 +15131,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fredag',
       'lördag',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'söndag',
       'måndag',
       'tisdag',
@@ -15138,7 +15140,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fredag',
       'lördag',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'sön',
       'mån',
       'tis',
@@ -15147,7 +15149,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fre',
       'lör',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'sön',
       'mån',
       'tis',
@@ -15156,7 +15158,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'fre',
       'lör',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -15165,7 +15167,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -15174,59 +15176,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'L',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'K1',
       'K2',
       'K3',
       'K4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1:a kvartalet',
       '2:a kvartalet',
       '3:e kvartalet',
       '4:e kvartalet',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'fm',
       'em',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE d MMMM y',
       'd MMMM y',
       'd MMM y',
       'y-MM-dd',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       "'kl'. HH:mm:ss zzzz",
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 3,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'sw': <String, dynamic>{
-    'NAME': 'sw',
-    'ERAS': <dynamic>[
+  ),
+  'sw': intl.DateSymbols(
+    NAME: 'sw',
+    ERAS: const <String>[
       'KK',
       'BK',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Kabla ya Kristo',
       'Baada ya Kristo',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -15240,7 +15242,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -15254,7 +15256,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Januari',
       'Februari',
       'Machi',
@@ -15268,7 +15270,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Novemba',
       'Desemba',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Januari',
       'Februari',
       'Machi',
@@ -15282,7 +15284,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Novemba',
       'Desemba',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mac',
@@ -15296,7 +15298,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Des',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mac',
@@ -15310,7 +15312,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Des',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Jumapili',
       'Jumatatu',
       'Jumanne',
@@ -15319,7 +15321,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ijumaa',
       'Jumamosi',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Jumapili',
       'Jumatatu',
       'Jumanne',
@@ -15328,7 +15330,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ijumaa',
       'Jumamosi',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Jumapili',
       'Jumatatu',
       'Jumanne',
@@ -15337,7 +15339,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ijumaa',
       'Jumamosi',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Jumapili',
       'Jumatatu',
       'Jumanne',
@@ -15346,7 +15348,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Ijumaa',
       'Jumamosi',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -15355,7 +15357,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -15364,59 +15366,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Robo ya 1',
       'Robo ya 2',
       'Robo ya 3',
       'Robo ya 4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'Robo ya 1',
       'Robo ya 2',
       'Robo ya 3',
       'Robo ya 4',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM y',
       'd MMMM y',
       'd MMM y',
       'dd/MM/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'ta': <String, dynamic>{
-    'NAME': 'ta',
-    'ERAS': <dynamic>[
+  ),
+  'ta': intl.DateSymbols(
+    NAME: 'ta',
+    ERAS: const <String>[
       'கி.மு.',
       'கி.பி.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'கிறிஸ்துவுக்கு முன்',
       'அன்னோ டோமினி',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ஜ',
       'பி',
       'மா',
@@ -15430,7 +15432,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ந',
       'டி',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ஜ',
       'பி',
       'மா',
@@ -15444,7 +15446,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ந',
       'டி',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'ஜனவரி',
       'பிப்ரவரி',
       'மார்ச்',
@@ -15458,7 +15460,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'நவம்பர்',
       'டிசம்பர்',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'ஜனவரி',
       'பிப்ரவரி',
       'மார்ச்',
@@ -15472,7 +15474,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'நவம்பர்',
       'டிசம்பர்',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ஜன.',
       'பிப்.',
       'மார்.',
@@ -15486,7 +15488,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'நவ.',
       'டிச.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ஜன.',
       'பிப்.',
       'மார்.',
@@ -15500,7 +15502,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'நவ.',
       'டிச.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'ஞாயிறு',
       'திங்கள்',
       'செவ்வாய்',
@@ -15509,7 +15511,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'வெள்ளி',
       'சனி',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'ஞாயிறு',
       'திங்கள்',
       'செவ்வாய்',
@@ -15518,7 +15520,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'வெள்ளி',
       'சனி',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ஞாயி.',
       'திங்.',
       'செவ்.',
@@ -15527,7 +15529,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'வெள்.',
       'சனி',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ஞாயி.',
       'திங்.',
       'செவ்.',
@@ -15536,7 +15538,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'வெள்.',
       'சனி',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ஞா',
       'தி',
       'செ',
@@ -15545,7 +15547,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'வெ',
       'ச',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ஞா',
       'தி',
       'செ',
@@ -15554,59 +15556,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'வெ',
       'ச',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'காலா.1',
       'காலா.2',
       'காலா.3',
       'காலா.4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ஒன்றாம் காலாண்டு',
       'இரண்டாம் காலாண்டு',
       'மூன்றாம் காலாண்டு',
       'நான்காம் காலாண்டு',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'முற்பகல்',
       'பிற்பகல்',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM, y',
       'd MMMM, y',
       'd MMM, y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'a h:mm:ss zzzz',
       'a h:mm:ss z',
       'a h:mm:ss',
       'a h:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} ’அன்று’ {0}',
       '{1} ’அன்று’ {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'te': <String, dynamic>{
-    'NAME': 'te',
-    'ERAS': <dynamic>[
+  ),
+  'te': intl.DateSymbols(
+    NAME: 'te',
+    ERAS: const <String>[
       'క్రీపూ',
       'క్రీశ',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'క్రీస్తు పూర్వం',
       'క్రీస్తు శకం',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'జ',
       'ఫి',
       'మా',
@@ -15620,7 +15622,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'న',
       'డి',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'జ',
       'ఫి',
       'మా',
@@ -15634,7 +15636,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'న',
       'డి',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'జనవరి',
       'ఫిబ్రవరి',
       'మార్చి',
@@ -15648,7 +15650,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'నవంబర్',
       'డిసెంబర్',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'జనవరి',
       'ఫిబ్రవరి',
       'మార్చి',
@@ -15662,7 +15664,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'నవంబర్',
       'డిసెంబర్',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'జన',
       'ఫిబ్ర',
       'మార్చి',
@@ -15676,7 +15678,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'నవం',
       'డిసెం',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'జన',
       'ఫిబ్ర',
       'మార్చి',
@@ -15690,7 +15692,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'నవం',
       'డిసెం',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'ఆదివారం',
       'సోమవారం',
       'మంగళవారం',
@@ -15699,7 +15701,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'శుక్రవారం',
       'శనివారం',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'ఆదివారం',
       'సోమవారం',
       'మంగళవారం',
@@ -15708,7 +15710,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'శుక్రవారం',
       'శనివారం',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'ఆది',
       'సోమ',
       'మంగళ',
@@ -15717,7 +15719,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'శుక్ర',
       'శని',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'ఆది',
       'సోమ',
       'మంగళ',
@@ -15726,7 +15728,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'శుక్ర',
       'శని',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'ఆ',
       'సో',
       'మ',
@@ -15735,7 +15737,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'శు',
       'శ',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'ఆ',
       'సో',
       'మ',
@@ -15744,59 +15746,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'శు',
       'శ',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'త్రై1',
       'త్రై2',
       'త్రై3',
       'త్రై4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1వ త్రైమాసికం',
       '2వ త్రైమాసికం',
       '3వ త్రైమాసికం',
       '4వ త్రైమాసికం',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'd, MMMM y, EEEE',
       'd MMMM, y',
       'd MMM, y',
       'dd-MM-yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       6,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}కి',
       '{1} {0}కి',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'th': <String, dynamic>{
-    'NAME': 'th',
-    'ERAS': <dynamic>[
+  ),
+  'th': intl.DateSymbols(
+    NAME: 'th',
+    ERAS: const <String>[
       'ก่อน ค.ศ.',
       'ค.ศ.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'ปีก่อนคริสตกาล',
       'คริสต์ศักราช',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'ม.ค.',
       'ก.พ.',
       'มี.ค.',
@@ -15810,7 +15812,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'พ.ย.',
       'ธ.ค.',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'ม.ค.',
       'ก.พ.',
       'มี.ค.',
@@ -15824,7 +15826,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'พ.ย.',
       'ธ.ค.',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'มกราคม',
       'กุมภาพันธ์',
       'มีนาคม',
@@ -15838,7 +15840,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'พฤศจิกายน',
       'ธันวาคม',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'มกราคม',
       'กุมภาพันธ์',
       'มีนาคม',
@@ -15852,7 +15854,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'พฤศจิกายน',
       'ธันวาคม',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'ม.ค.',
       'ก.พ.',
       'มี.ค.',
@@ -15866,7 +15868,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'พ.ย.',
       'ธ.ค.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'ม.ค.',
       'ก.พ.',
       'มี.ค.',
@@ -15880,7 +15882,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'พ.ย.',
       'ธ.ค.',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'วันอาทิตย์',
       'วันจันทร์',
       'วันอังคาร',
@@ -15889,7 +15891,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'วันศุกร์',
       'วันเสาร์',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'วันอาทิตย์',
       'วันจันทร์',
       'วันอังคาร',
@@ -15898,7 +15900,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'วันศุกร์',
       'วันเสาร์',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'อา.',
       'จ.',
       'อ.',
@@ -15907,7 +15909,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ศ.',
       'ส.',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'อา.',
       'จ.',
       'อ.',
@@ -15916,7 +15918,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ศ.',
       'ส.',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'อา',
       'จ',
       'อ',
@@ -15925,7 +15927,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ศ',
       'ส',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'อา',
       'จ',
       'อ',
@@ -15934,59 +15936,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ศ',
       'ส',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'ไตรมาส 1',
       'ไตรมาส 2',
       'ไตรมาส 3',
       'ไตรมาส 4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ไตรมาส 1',
       'ไตรมาส 2',
       'ไตรมาส 3',
       'ไตรมาส 4',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'ก่อนเที่ยง',
       'หลังเที่ยง',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEEที่ d MMMM G y',
       'd MMMM G y',
       'd MMM y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H นาฬิกา mm นาที ss วินาที zzzz',
       'H นาฬิกา mm นาที ss วินาที z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'tl': <String, dynamic>{
-    'NAME': 'tl',
-    'ERAS': <dynamic>[
+  ),
+  'tl': intl.DateSymbols(
+    NAME: 'tl',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Before Christ',
       'Anno Domini',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'Ene',
       'Peb',
       'Mar',
@@ -16000,7 +16002,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nob',
       'Dis',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'E',
       'P',
       'M',
@@ -16014,7 +16016,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nob',
       'Dis',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Enero',
       'Pebrero',
       'Marso',
@@ -16028,7 +16030,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nobyembre',
       'Disyembre',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Enero',
       'Pebrero',
       'Marso',
@@ -16042,7 +16044,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nobyembre',
       'Disyembre',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Ene',
       'Peb',
       'Mar',
@@ -16056,7 +16058,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nob',
       'Dis',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Ene',
       'Peb',
       'Mar',
@@ -16070,7 +16072,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nob',
       'Dis',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Linggo',
       'Lunes',
       'Martes',
@@ -16079,7 +16081,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biyernes',
       'Sabado',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Linggo',
       'Lunes',
       'Martes',
@@ -16088,7 +16090,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biyernes',
       'Sabado',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Lin',
       'Lun',
       'Mar',
@@ -16097,7 +16099,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biy',
       'Sab',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Lin',
       'Lun',
       'Mar',
@@ -16106,7 +16108,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biy',
       'Sab',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Lin',
       'Lun',
       'Mar',
@@ -16115,7 +16117,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biy',
       'Sab',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Lin',
       'Lun',
       'Mar',
@@ -16124,59 +16126,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Biy',
       'Sab',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ika-1 quarter',
       'ika-2 quarter',
       'ika-3 quarter',
       'ika-4 na quarter',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, MMMM d, y',
       'MMMM d, y',
       'MMM d, y',
       'M/d/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       "{1} 'nang' {0}",
       "{1} 'nang' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'tr': <String, dynamic>{
-    'NAME': 'tr',
-    'ERAS': <dynamic>[
+  ),
+  'tr': intl.DateSymbols(
+    NAME: 'tr',
+    ERAS: const <String>[
       'MÖ',
       'MS',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Milattan Önce',
       'Milattan Sonra',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'O',
       'Ş',
       'M',
@@ -16190,7 +16192,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'K',
       'A',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'O',
       'Ş',
       'M',
@@ -16204,7 +16206,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'K',
       'A',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Ocak',
       'Şubat',
       'Mart',
@@ -16218,7 +16220,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Kasım',
       'Aralık',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Ocak',
       'Şubat',
       'Mart',
@@ -16232,7 +16234,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Kasım',
       'Aralık',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Oca',
       'Şub',
       'Mar',
@@ -16246,7 +16248,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Kas',
       'Ara',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Oca',
       'Şub',
       'Mar',
@@ -16260,7 +16262,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Kas',
       'Ara',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Pazar',
       'Pazartesi',
       'Salı',
@@ -16269,7 +16271,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Cuma',
       'Cumartesi',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Pazar',
       'Pazartesi',
       'Salı',
@@ -16278,7 +16280,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Cuma',
       'Cumartesi',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Paz',
       'Pzt',
       'Sal',
@@ -16287,7 +16289,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Cum',
       'Cmt',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Paz',
       'Pzt',
       'Sal',
@@ -16296,7 +16298,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Cum',
       'Cmt',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'P',
       'P',
       'S',
@@ -16305,7 +16307,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'C',
       'C',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'P',
       'P',
       'S',
@@ -16314,59 +16316,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'C',
       'C',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Ç1',
       'Ç2',
       'Ç3',
       'Ç4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1. çeyrek',
       '2. çeyrek',
       '3. çeyrek',
       '4. çeyrek',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'ÖÖ',
       'ÖS',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'd MMMM y EEEE',
       'd MMMM y',
       'd MMM y',
       'd.MM.y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'uk': <String, dynamic>{
-    'NAME': 'uk',
-    'ERAS': <dynamic>[
+  ),
+  'uk': intl.DateSymbols(
+    NAME: 'uk',
+    ERAS: const <String>[
       'до н. е.',
       'н. е.',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'до нашої ери',
       'нашої ери',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'с',
       'л',
       'б',
@@ -16380,7 +16382,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'л',
       'г',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'С',
       'Л',
       'Б',
@@ -16394,7 +16396,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Л',
       'Г',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'січня',
       'лютого',
       'березня',
@@ -16408,7 +16410,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'листопада',
       'грудня',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'січень',
       'лютий',
       'березень',
@@ -16422,7 +16424,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'листопад',
       'грудень',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'січ.',
       'лют.',
       'бер.',
@@ -16436,7 +16438,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'лист.',
       'груд.',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'січ',
       'лют',
       'бер',
@@ -16450,7 +16452,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'лис',
       'гру',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'неділя',
       'понеділок',
       'вівторок',
@@ -16459,7 +16461,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пʼятниця',
       'субота',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'неділя',
       'понеділок',
       'вівторок',
@@ -16468,7 +16470,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пʼятниця',
       'субота',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'нд',
       'пн',
       'вт',
@@ -16477,7 +16479,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пт',
       'сб',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'нд',
       'пн',
       'вт',
@@ -16486,7 +16488,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'пт',
       'сб',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Н',
       'П',
       'В',
@@ -16495,7 +16497,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'П',
       'С',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Н',
       'П',
       'В',
@@ -16504,59 +16506,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'П',
       'С',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1-й кв.',
       '2-й кв.',
       '3-й кв.',
       '4-й кв.',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1-й квартал',
       '2-й квартал',
       '3-й квартал',
       '4-й квартал',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'дп',
       'пп',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       "EEEE, d MMMM y 'р'.",
       "d MMMM y 'р'.",
       "d MMM y 'р'.",
       'dd.MM.yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       "{1} 'о' {0}",
       "{1} 'о' {0}",
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'ur': <String, dynamic>{
-    'NAME': 'ur',
-    'ERAS': <dynamic>[
+  ),
+  'ur': intl.DateSymbols(
+    NAME: 'ur',
+    ERAS: const <String>[
       'قبل مسیح',
       'عیسوی',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'قبل مسیح',
       'عیسوی',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -16570,7 +16572,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -16584,7 +16586,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'جنوری',
       'فروری',
       'مارچ',
@@ -16598,7 +16600,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نومبر',
       'دسمبر',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'جنوری',
       'فروری',
       'مارچ',
@@ -16612,7 +16614,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نومبر',
       'دسمبر',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'جنوری',
       'فروری',
       'مارچ',
@@ -16626,7 +16628,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نومبر',
       'دسمبر',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'جنوری',
       'فروری',
       'مارچ',
@@ -16640,7 +16642,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'نومبر',
       'دسمبر',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'اتوار',
       'پیر',
       'منگل',
@@ -16649,7 +16651,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعہ',
       'ہفتہ',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'اتوار',
       'پیر',
       'منگل',
@@ -16658,7 +16660,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعہ',
       'ہفتہ',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'اتوار',
       'پیر',
       'منگل',
@@ -16667,7 +16669,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعہ',
       'ہفتہ',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'اتوار',
       'پیر',
       'منگل',
@@ -16676,7 +16678,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'جمعہ',
       'ہفتہ',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -16685,7 +16687,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'T',
@@ -16694,59 +16696,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'F',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'پہلی سہ ماہی',
       'دوسری سہ ماہی',
       'تیسری سہ ماہی',
       'چوتهی سہ ماہی',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'پہلی سہ ماہی',
       'دوسری سہ ماہی',
       'تیسری سہ ماہی',
       'چوتهی سہ ماہی',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE، d MMMM، y',
       'd MMMM، y',
       'd MMM، y',
       'd/M/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'h:mm:ss a zzzz',
       'h:mm:ss a z',
       'h:mm:ss a',
       'h:mm a',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'uz': <String, dynamic>{
-    'NAME': 'uz',
-    'ERAS': <dynamic>[
+  ),
+  'uz': intl.DateSymbols(
+    NAME: 'uz',
+    ERAS: const <String>[
       'm.a.',
       'milodiy',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'miloddan avvalgi',
       'milodiy',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'Y',
       'F',
       'M',
@@ -16760,7 +16762,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'Y',
       'F',
       'M',
@@ -16774,7 +16776,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'yanvar',
       'fevral',
       'mart',
@@ -16788,7 +16790,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noyabr',
       'dekabr',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Yanvar',
       'Fevral',
       'Mart',
@@ -16802,7 +16804,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Noyabr',
       'Dekabr',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'yan',
       'fev',
       'mar',
@@ -16816,7 +16818,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'noy',
       'dek',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Yan',
       'Fev',
       'Mar',
@@ -16830,7 +16832,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Noy',
       'Dek',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'yakshanba',
       'dushanba',
       'seshanba',
@@ -16839,7 +16841,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'juma',
       'shanba',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'yakshanba',
       'dushanba',
       'seshanba',
@@ -16848,7 +16850,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'juma',
       'shanba',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Yak',
       'Dush',
       'Sesh',
@@ -16857,7 +16859,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jum',
       'Shan',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Yak',
       'Dush',
       'Sesh',
@@ -16866,7 +16868,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Jum',
       'Shan',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'Y',
       'D',
       'S',
@@ -16875,7 +16877,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'J',
       'S',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'Y',
       'D',
       'S',
@@ -16884,59 +16886,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'J',
       'S',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1-ch',
       '2-ch',
       '3-ch',
       '4-ch',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '1-chorak',
       '2-chorak',
       '3-chorak',
       '4-chorak',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'TO',
       'TK',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d-MMMM, y',
       'd-MMMM, y',
       'd-MMM, y',
       'dd/MM/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'H:mm:ss (zzzz)',
       'H:mm:ss (z)',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
       '{1}, {0}',
     ],
-  },
-  'vi': <String, dynamic>{
-    'NAME': 'vi',
-    'ERAS': <dynamic>[
+  ),
+  'vi': intl.DateSymbols(
+    NAME: 'vi',
+    ERAS: const <String>[
       'Trước CN',
       'sau CN',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'Trước CN',
       'sau CN',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -16950,7 +16952,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -16964,7 +16966,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'tháng 1',
       'tháng 2',
       'tháng 3',
@@ -16978,7 +16980,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'tháng 11',
       'tháng 12',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Tháng 1',
       'Tháng 2',
       'Tháng 3',
@@ -16992,7 +16994,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Tháng 11',
       'Tháng 12',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'thg 1',
       'thg 2',
       'thg 3',
@@ -17006,7 +17008,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'thg 11',
       'thg 12',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Thg 1',
       'Thg 2',
       'Thg 3',
@@ -17020,7 +17022,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Thg 11',
       'Thg 12',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'Chủ Nhật',
       'Thứ Hai',
       'Thứ Ba',
@@ -17029,7 +17031,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Thứ Sáu',
       'Thứ Bảy',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'Chủ Nhật',
       'Thứ Hai',
       'Thứ Ba',
@@ -17038,7 +17040,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Thứ Sáu',
       'Thứ Bảy',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'CN',
       'Th 2',
       'Th 3',
@@ -17047,7 +17049,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Th 6',
       'Th 7',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'CN',
       'Th 2',
       'Th 3',
@@ -17056,7 +17058,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Th 6',
       'Th 7',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'CN',
       'T2',
       'T3',
@@ -17065,7 +17067,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'T6',
       'T7',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'CN',
       'T2',
       'T3',
@@ -17074,59 +17076,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'T6',
       'T7',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'Quý 1',
       'Quý 2',
       'Quý 3',
       'Quý 4',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'SA',
       'CH',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, d MMMM, y',
       'd MMMM, y',
       'd MMM, y',
       'dd/MM/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 0,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 6,
+    DATETIMEFORMATS: const <String>[
       '{0} {1}',
       '{0} {1}',
       '{0}, {1}',
       '{0}, {1}',
     ],
-  },
-  'zh': <String, dynamic>{
-    'NAME': 'zh',
-    'ERAS': <dynamic>[
+  ),
+  'zh': intl.DateSymbols(
+    NAME: 'zh',
+    ERAS: const <String>[
       '公元前',
       '公元',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       '公元前',
       '公元',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -17140,7 +17142,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -17154,7 +17156,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       '一月',
       '二月',
       '三月',
@@ -17168,7 +17170,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '十一月',
       '十二月',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       '一月',
       '二月',
       '三月',
@@ -17182,7 +17184,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '十一月',
       '十二月',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17196,7 +17198,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17210,7 +17212,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       '星期日',
       '星期一',
       '星期二',
@@ -17219,7 +17221,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '星期五',
       '星期六',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       '星期日',
       '星期一',
       '星期二',
@@ -17228,7 +17230,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '星期五',
       '星期六',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       '周日',
       '周一',
       '周二',
@@ -17237,7 +17239,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '周五',
       '周六',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       '周日',
       '周一',
       '周二',
@@ -17246,7 +17248,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '周五',
       '周六',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       '日',
       '一',
       '二',
@@ -17255,7 +17257,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '五',
       '六',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       '日',
       '一',
       '二',
@@ -17264,59 +17266,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '五',
       '六',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '1季度',
       '2季度',
       '3季度',
       '4季度',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '第一季度',
       '第二季度',
       '第三季度',
       '第四季度',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       '上午',
       '下午',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y年M月d日EEEE',
       'y年M月d日',
       'y年M月d日',
       'y/M/d',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'zzzz ah:mm:ss',
       'z ah:mm:ss',
       'ah:mm:ss',
       'ah:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'zh_HK': <String, dynamic>{
-    'NAME': 'zh_HK',
-    'ERAS': <dynamic>[
+  ),
+  'zh_HK': intl.DateSymbols(
+    NAME: 'zh_HK',
+    ERAS: const <String>[
       '公元前',
       '公元',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       '公元前',
       '公元',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -17330,7 +17332,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -17344,7 +17346,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17358,7 +17360,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17372,7 +17374,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17386,7 +17388,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17400,7 +17402,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       '星期日',
       '星期一',
       '星期二',
@@ -17409,7 +17411,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '星期五',
       '星期六',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       '星期日',
       '星期一',
       '星期二',
@@ -17418,7 +17420,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '星期五',
       '星期六',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       '週日',
       '週一',
       '週二',
@@ -17427,7 +17429,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '週五',
       '週六',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       '週日',
       '週一',
       '週二',
@@ -17436,7 +17438,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '週五',
       '週六',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       '日',
       '一',
       '二',
@@ -17445,7 +17447,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '五',
       '六',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       '日',
       '一',
       '二',
@@ -17454,59 +17456,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '五',
       '六',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '第1季',
       '第2季',
       '第3季',
       '第4季',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       '上午',
       '下午',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y年M月d日EEEE',
       'y年M月d日',
       'y年M月d日',
       'd/M/y',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'ah:mm:ss [zzzz]',
       'ah:mm:ss [z]',
       'ah:mm:ss',
       'ah:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'zh_TW': <String, dynamic>{
-    'NAME': 'zh_TW',
-    'ERAS': <dynamic>[
+  ),
+  'zh_TW': intl.DateSymbols(
+    NAME: 'zh_TW',
+    ERAS: const <String>[
       '西元前',
       '西元',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       '西元前',
       '西元',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -17520,7 +17522,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       '1',
       '2',
       '3',
@@ -17534,7 +17536,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11',
       '12',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17548,7 +17550,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17562,7 +17564,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17576,7 +17578,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       '1月',
       '2月',
       '3月',
@@ -17590,7 +17592,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '11月',
       '12月',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       '星期日',
       '星期一',
       '星期二',
@@ -17599,7 +17601,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '星期五',
       '星期六',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       '星期日',
       '星期一',
       '星期二',
@@ -17608,7 +17610,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '星期五',
       '星期六',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       '週日',
       '週一',
       '週二',
@@ -17617,7 +17619,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '週五',
       '週六',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       '週日',
       '週一',
       '週二',
@@ -17626,7 +17628,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '週五',
       '週六',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       '日',
       '一',
       '二',
@@ -17635,7 +17637,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '五',
       '六',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       '日',
       '一',
       '二',
@@ -17644,59 +17646,59 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       '五',
       '六',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       '第1季',
       '第2季',
       '第3季',
       '第4季',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       '第1季',
       '第2季',
       '第3季',
       '第4季',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       '上午',
       '下午',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'y年M月d日 EEEE',
       'y年M月d日',
       'y年M月d日',
       'y/M/d',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'ah:mm:ss [zzzz]',
       'ah:mm:ss [z]',
       'ah:mm:ss',
       'ah:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
-  'zu': <String, dynamic>{
-    'NAME': 'zu',
-    'ERAS': <dynamic>[
+  ),
+  'zu': intl.DateSymbols(
+    NAME: 'zu',
+    ERAS: const <String>[
       'BC',
       'AD',
     ],
-    'ERANAMES': <dynamic>[
+    ERANAMES: const <String>[
       'BC',
       'AD',
     ],
-    'NARROWMONTHS': <dynamic>[
+    NARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -17710,7 +17712,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'STANDALONENARROWMONTHS': <dynamic>[
+    STANDALONENARROWMONTHS: const <String>[
       'J',
       'F',
       'M',
@@ -17724,7 +17726,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'N',
       'D',
     ],
-    'MONTHS': <dynamic>[
+    MONTHS: const <String>[
       'Januwari',
       'Februwari',
       'Mashi',
@@ -17738,7 +17740,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Novemba',
       'Disemba',
     ],
-    'STANDALONEMONTHS': <dynamic>[
+    STANDALONEMONTHS: const <String>[
       'Januwari',
       'Februwari',
       'Mashi',
@@ -17752,7 +17754,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Novemba',
       'Disemba',
     ],
-    'SHORTMONTHS': <dynamic>[
+    SHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mas',
@@ -17766,7 +17768,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dis',
     ],
-    'STANDALONESHORTMONTHS': <dynamic>[
+    STANDALONESHORTMONTHS: const <String>[
       'Jan',
       'Feb',
       'Mas',
@@ -17780,7 +17782,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Nov',
       'Dis',
     ],
-    'WEEKDAYS': <dynamic>[
+    WEEKDAYS: const <String>[
       'ISonto',
       'UMsombuluko',
       'ULwesibili',
@@ -17789,7 +17791,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ULwesihlanu',
       'UMgqibelo',
     ],
-    'STANDALONEWEEKDAYS': <dynamic>[
+    STANDALONEWEEKDAYS: const <String>[
       'ISonto',
       'UMsombuluko',
       'ULwesibili',
@@ -17798,7 +17800,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'ULwesihlanu',
       'UMgqibelo',
     ],
-    'SHORTWEEKDAYS': <dynamic>[
+    SHORTWEEKDAYS: const <String>[
       'Son',
       'Mso',
       'Bil',
@@ -17807,7 +17809,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Hla',
       'Mgq',
     ],
-    'STANDALONESHORTWEEKDAYS': <dynamic>[
+    STANDALONESHORTWEEKDAYS: const <String>[
       'Son',
       'Mso',
       'Bil',
@@ -17816,7 +17818,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'Hla',
       'Mgq',
     ],
-    'NARROWWEEKDAYS': <dynamic>[
+    NARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'B',
@@ -17825,7 +17827,7 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'H',
       'M',
     ],
-    'STANDALONENARROWWEEKDAYS': <dynamic>[
+    STANDALONENARROWWEEKDAYS: const <String>[
       'S',
       'M',
       'B',
@@ -17834,48 +17836,48 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       'H',
       'M',
     ],
-    'SHORTQUARTERS': <dynamic>[
+    SHORTQUARTERS: const <String>[
       'Q1',
       'Q2',
       'Q3',
       'Q4',
     ],
-    'QUARTERS': <dynamic>[
+    QUARTERS: const <String>[
       'ikota yesi-1',
       'ikota yesi-2',
       'ikota yesi-3',
       'ikota yesi-4',
     ],
-    'AMPMS': <dynamic>[
+    AMPMS: const <String>[
       'AM',
       'PM',
     ],
-    'DATEFORMATS': <dynamic>[
+    DATEFORMATS: const <String>[
       'EEEE, MMMM d, y',
       'MMMM d, y',
       'MMM d, y',
       'M/d/yy',
     ],
-    'TIMEFORMATS': <dynamic>[
+    TIMEFORMATS: const <String>[
       'HH:mm:ss zzzz',
       'HH:mm:ss z',
       'HH:mm:ss',
       'HH:mm',
     ],
-    'AVAILABLEFORMATS': null,
-    'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE': <dynamic>[
+    AVAILABLEFORMATS: null,
+    FIRSTDAYOFWEEK: 6,
+    WEEKENDRANGE: const <int>[
       5,
       6,
     ],
-    'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS': <dynamic>[
+    FIRSTWEEKCUTOFFDAY: 5,
+    DATETIMEFORMATS: const <String>[
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
       '{1} {0}',
     ],
-  },
+  ),
 };
 
 /// The subset of date patterns supported by the intl package which are also
