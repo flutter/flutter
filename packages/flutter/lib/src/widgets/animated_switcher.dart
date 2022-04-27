@@ -240,6 +240,7 @@ class AnimatedSwitcher extends StatefulWidget {
       children: <Widget>[
         ...previousChildren,
         if (currentChild != null) currentChild,
+        if (previousChildren.isEmpty && currentChild == null) const SizedBox.shrink(),
       ],
     );
   }

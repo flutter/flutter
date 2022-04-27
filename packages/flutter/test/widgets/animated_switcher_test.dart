@@ -166,6 +166,21 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('AnimatedSwitcher in Flex handles null children.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/88575
+    await tester.pumpWidget(
+      Column(
+        children: const <Widget>[
+          AnimatedSwitcher(
+            duration: Duration(milliseconds: 100),
+          ),
+        ],
+      ),
+    );
+
+    expect(tester.takeException(), null);
+  });
+
   testWidgets("AnimatedSwitcher doesn't start any animations after dispose.", (WidgetTester tester) async {
     await tester.pumpWidget(AnimatedSwitcher(
       duration: const Duration(milliseconds: 100),
