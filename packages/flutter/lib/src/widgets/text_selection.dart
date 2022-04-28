@@ -1036,6 +1036,7 @@ class _SelectionToolbarOverlay extends StatefulWidget {
 class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
+  double get hiddenAmountInEditingRegion => widget.preferredLineHeight-widget.selectionEndpoints.first.point.dy;
 
   @override
   void initState() {
@@ -1080,7 +1081,7 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
       child: CompositedTransformFollower(
         link: widget.layerLink,
         showWhenUnlinked: false,
-        offset: -widget.editingRegion.topLeft,
+        offset:-widget.editingRegion.translate(0,hiddenAmountInEditingRegion>0?-hiddenAmountInEditingRegion:0).topLeft,
         child: Builder(
           builder: (BuildContext context) {
             return widget.selectionControls!.buildToolbar(
