@@ -101,7 +101,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
 
     final double bottomAmountInEditableRegion = widget.endpoints.last.point.dy;
     final double anchorBottom = (bottomAmountInEditableRegion < widget.globalEditableRegion.size.height ? bottomAmountInEditableRegion : widget.globalEditableRegion.size.height) + widget.globalEditableRegion.top;
-    
+
     // The y-coordinate has to be calculated instead of directly quoting
     // selectionMidpoint.dy, since the caller
     // (TextSelectionOverlay._buildToolbar) does not know whether the toolbar is
