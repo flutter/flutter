@@ -96,17 +96,23 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     );
 
+    final double topAmountInEditableRegion = widget.endpoints.first.point.dy - widget.textLineHeight;
+    final double anchorTop = (topAmountInEditableRegion > 0 ? topAmountInEditableRegion : 0) + widget.globalEditableRegion.top;
+
+    final double bottomAmountInEditableRegion = widget.endpoints.last.point.dy;
+    final double anchorBottom = (bottomAmountInEditableRegion < widget.globalEditableRegion.size.height ? bottomAmountInEditableRegion : widget.globalEditableRegion.size.height) + widget.globalEditableRegion.top;
+    
     // The y-coordinate has to be calculated instead of directly quoting
     // selectionMidpoint.dy, since the caller
     // (TextSelectionOverlay._buildToolbar) does not know whether the toolbar is
     // going to be facing up or down.
     final Offset anchorAbove = Offset(
       anchorX,
-      widget.endpoints.first.point.dy - widget.textLineHeight + widget.globalEditableRegion.top,
+      anchorTop,
     );
     final Offset anchorBelow = Offset(
       anchorX,
-      widget.endpoints.last.point.dy + widget.globalEditableRegion.top,
+      anchorBottom,
     );
 
     final List<Widget> items = <Widget>[];
