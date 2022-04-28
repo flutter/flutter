@@ -50,7 +50,7 @@ void main() {
       output,
       <Object>[
         startsWith('Connecting to VM Service at'),
-        ..._testsProjectExpectedOutput
+        ..._testsProjectExpectedOutput,
       ],
       allowExtras: true, // Allow for printed call stack etc.
     );

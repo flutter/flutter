@@ -108,7 +108,7 @@ void main() {
       await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
       expect(log, <String>[
         'VMServiceFlutterDriver: >>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
-        'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}'
+        'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}',
       ]);
     });
 
@@ -587,7 +587,7 @@ void main() {
           'setVMTimelineFlags [Dart, GC, Compiler]',
           'getFlagList',
           'setVMTimelineFlags []',
-          'getVMTimeline null null'
+          'getVMTimeline null null',
         ]);
 
         expect(timeline.events!.single.name, 'test event');
@@ -679,7 +679,7 @@ void main() {
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: set_frame_sync, enabled: false}',
           'ext.flutter.driver {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
-          'ext.flutter.driver {command: set_frame_sync, enabled: true}'
+          'ext.flutter.driver {command: set_frame_sync, enabled: true}',
         ]);
       });
     });

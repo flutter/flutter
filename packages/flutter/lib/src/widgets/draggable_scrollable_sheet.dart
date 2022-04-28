@@ -896,7 +896,7 @@ class _DraggableScrollableSheetScrollPosition
     // See: [beginActivity].
     _ballisticCancelCallback = ballisticController.stop;
     double lastPosition = extent.currentPixels;
-    void _tick() {
+    void tick() {
       final double delta = ballisticController.value - lastPosition;
       lastPosition = ballisticController.value;
       extent.addPixelDelta(delta, context.notificationContext!);
@@ -913,7 +913,7 @@ class _DraggableScrollableSheetScrollPosition
     }
 
     ballisticController
-      ..addListener(_tick)
+      ..addListener(tick)
       ..animateWith(simulation).whenCompleteOrCancel(
         () {
           _ballisticCancelCallback = null;

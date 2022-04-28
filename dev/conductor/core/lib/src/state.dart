@@ -171,7 +171,7 @@ String phaseInstructions(pb.ConductorState state) {
         ].join('\n');
       }
       return <String>[
-        'Either all cherrypicks have been auto-applied or there were none.'
+        'Either all cherrypicks have been auto-applied or there were none.',
       ].join('\n');
     case ReleasePhase.PUBLISH_VERSION:
       if (!requiresFrameworkPR(state)) {
@@ -201,7 +201,7 @@ String phaseInstructions(pb.ConductorState state) {
           '\t 1. Post announcement to discord',
           '\t 2. Post announcement flutter release hotline chat room',
           '-----------------------------------------------------------------------',
-          'This release has been completed.'
+          'This release has been completed.',
         ].join('\n');
       }
       return <String>[
@@ -211,7 +211,7 @@ String phaseInstructions(pb.ConductorState state) {
         '\t 3. Post announcement to discord',
         '\t 4. Post announcement flutter release hotline chat room',
         '-----------------------------------------------------------------------',
-        'This release has been completed.'
+        'This release has been completed.',
       ].join('\n');
   }
   // For analyzer

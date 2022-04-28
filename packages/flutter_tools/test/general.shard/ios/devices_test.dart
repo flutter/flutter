@@ -436,7 +436,7 @@ void main() {
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
       xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
       });
       await added.future;
       expect(iosDevices.deviceNotifier!.items.length, 2);
@@ -444,7 +444,7 @@ void main() {
       expect(iosDevices.deviceNotifier!.items, contains(device2));
 
       xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
       });
       await removed.future;
       expect(iosDevices.deviceNotifier!.items, <Device>[device2]);
@@ -452,7 +452,7 @@ void main() {
       // Remove stream will throw over-completion if called more than once
       // which proves this is ignored.
       xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'bogus'
+        XCDeviceEvent.detach: 'bogus',
       });
 
       expect(addedCount, 2);

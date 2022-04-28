@@ -335,7 +335,7 @@ abstract class UnpackIOS extends Target {
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
-      ...archList
+      ...archList,
     ]);
 
     if (verifyResult.exitCode != 0) {
@@ -444,7 +444,7 @@ abstract class IosAssetBundle extends Target {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/App.framework/App'),
-    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist')
+    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist'),
   ];
 
   @override

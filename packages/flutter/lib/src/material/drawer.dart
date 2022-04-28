@@ -47,7 +47,7 @@ const double _kEdgeDragWidth = 20.0;
 const double _kMinFlingVelocity = 365.0;
 const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 
-/// A material design panel that slides in horizontally from the edge of a
+/// A Material Design panel that slides in horizontally from the edge of a
 /// [Scaffold] to show navigation links in an application.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=WRj86iHihgY}
@@ -134,7 +134,7 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///  * [ScaffoldState.openDrawer], which displays its [Drawer], if any.
 ///  * <https://material.io/design/components/navigation-drawer.html>
 class Drawer extends StatelessWidget {
-  /// Creates a material design drawer.
+  /// Creates a Material Design drawer.
   ///
   /// Typically used in the [Scaffold.drawer] property.
   ///

@@ -158,8 +158,9 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     return NotificationListener<ScrollMetricsNotification>(
       onNotification: (ScrollMetricsNotification notification) {
         _notifyListeners(_ConvertedScrollMetricsNotification(
-            metrics: notification.metrics,
-            context: notification.context,
+          metrics: notification.metrics,
+          context: notification.context,
+          depth: notification.depth,
         ));
         return false;
       },
@@ -184,9 +185,10 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
   }
 }
 
-class _ConvertedScrollMetricsNotification extends ScrollNotification {
+class _ConvertedScrollMetricsNotification extends ScrollUpdateNotification {
   _ConvertedScrollMetricsNotification({
     required super.metrics,
     required super.context,
+    required super.depth,
   });
 }

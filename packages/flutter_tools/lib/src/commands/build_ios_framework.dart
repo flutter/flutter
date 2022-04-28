@@ -490,7 +490,7 @@ end
             podProduct as Directory,
             simulatorBuildConfiguration
                 .childDirectory(builtProduct.basename)
-                .childDirectory(podFrameworkName)
+                .childDirectory(podFrameworkName),
           ];
 
           await _produceXCFramework(frameworks, binaryName, modeDirectory);
@@ -520,10 +520,10 @@ end
                 entity.basename.endsWith('dSYM'))
             .map((FileSystemEntity entity) =>
                 <String>['-debug-symbols', entity.path])
-            .expand<String>((List<String> parameter) => parameter)
+            .expand<String>((List<String> parameter) => parameter),
       ],
       '-output',
-      outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path
+      outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path,
     ];
 
     final RunResult xcframeworkResult = await globals.processUtils.run(

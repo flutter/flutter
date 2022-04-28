@@ -499,7 +499,7 @@ void main() {
       const FakeCommand(
         command: <String>[
           'which',
-          'sysctl'
+          'sysctl',
         ],
         stdout: '/sbin/sysctl',
       ),
@@ -601,20 +601,6 @@ void main() {
     expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
       contains(contains('profile')),
       contains(contains('release')),
-    ]));
-  });
-
-  testWithoutContext('Windows UWP desktop artifacts include profile, debug, and release artifacts', () {
-    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
-    final WindowsUwpEngineArtifacts artifacts = WindowsUwpEngineArtifacts(
-      cache,
-      platform: FakePlatform(operatingSystem: 'windows'),
-    );
-
-    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
-      contains(contains('profile')),
-      contains(contains('release')),
-      contains(contains('debug')),
     ]));
   });
 
@@ -812,7 +798,7 @@ void main() {
       fileSystem: fileSystem,
       platform: FakePlatform(
         environment: <String, String>{
-          'FLUTTER_STORAGE_BASE_URL': 'https://flutter.storage.com/override'
+          'FLUTTER_STORAGE_BASE_URL': 'https://flutter.storage.com/override',
         },
       ),
     );
@@ -834,7 +820,7 @@ void main() {
 
     expect(downloads, <String>[
       'https://flutter.storage.com/override/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
-      'https://flutter.storage.com/override/flutter_infra_release/cipd/flutter/web/canvaskit_bundle/+/abcdefg'
+      'https://flutter.storage.com/override/flutter_infra_release/cipd/flutter/web/canvaskit_bundle/+/abcdefg',
     ]);
   });
 
@@ -1020,9 +1006,9 @@ void main() {
           '--project-cache-dir',
           'cache/bin/cache/flutter_gradle_wrapper.rand0',
           'resolveDependencies',
-        ])
+        ]),
       ]),
-      AndroidSdk: () => fakeAndroidSdk
+      AndroidSdk: () => fakeAndroidSdk,
     });
 
     testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
@@ -1036,7 +1022,7 @@ void main() {
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.empty(),
-      AndroidSdk: () => null // Android SDK was not located.
+      AndroidSdk: () => null, // Android SDK was not located.
     });
   });
 }

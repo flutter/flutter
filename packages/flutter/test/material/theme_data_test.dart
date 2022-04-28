@@ -447,7 +447,7 @@ void main() {
               ),
               MyThemeExtensionB(
                 textStyle: TextStyle(fontSize: 50),
-              )
+              ),
             },
           ),
           home: Container(key: containerKey),

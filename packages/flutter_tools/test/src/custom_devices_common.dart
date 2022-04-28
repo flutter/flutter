@@ -18,7 +18,7 @@ void writeCustomDevicesConfigFile(
     <String, dynamic>{
       'custom-devices': configs != null ?
         configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList() :
-        json
+        json,
     },
   ));
 }
@@ -58,5 +58,5 @@ const Map<String, dynamic> testConfigJson = <String, dynamic>{
   'uninstall': <String>['testuninstall'],
   'runDebug': <String>['testrundebug'],
   'forwardPort': <String>['testforwardport'],
-  'forwardPortSuccessRegex': 'testforwardportsuccess'
+  'forwardPortSuccessRegex': 'testforwardportsuccess',
 };

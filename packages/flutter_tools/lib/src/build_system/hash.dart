@@ -17,7 +17,7 @@ final Uint32List _noise = Uint32List.fromList(<int>[
   0xd4ef3085, 0x04881d05, 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,
   0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039, 0x655b59c3, 0x8f0ccc92,
   0xffeff47d, 0x85845dd1, 0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,
-  0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
+  0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391,
 ]);
 
 /// Per-round shift amounts.
@@ -25,7 +25,7 @@ const List<int> _shiftAmounts = <int>[
   07, 12, 17, 22, 07, 12, 17, 22, 07, 12, 17, 22, 07, 12, 17, 22, 05, 09, 14,
   20, 05, 09, 14, 20, 05, 09, 14, 20, 05, 09, 14, 20, 04, 11, 16, 23, 04, 11,
   16, 23, 04, 11, 16, 23, 04, 11, 16, 23, 06, 10, 15, 21, 06, 10, 15, 21, 06,
-  10, 15, 21, 06, 10, 15, 21
+  10, 15, 21, 06, 10, 15, 21,
 ];
 
 /// A bitmask that limits an integer to 32 bits.

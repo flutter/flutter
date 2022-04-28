@@ -197,7 +197,7 @@ class AOTSnapshotter {
       // Faster async/await
       if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
-        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}'
+        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
       ],
       if (dartObfuscation)
         '--obfuscate',
@@ -314,7 +314,6 @@ class AOTSnapshotter {
       TargetPlatform.linux_x64,
       TargetPlatform.linux_arm64,
       TargetPlatform.windows_x64,
-      TargetPlatform.windows_uwp_x64,
     ].contains(platform);
   }
 }

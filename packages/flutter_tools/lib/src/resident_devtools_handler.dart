@@ -169,7 +169,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   Future<List<FlutterDevice>> _devicesWithExtensions(List<FlutterDevice> flutterDevices) async {
     final List<FlutterDevice> devices = await Future.wait(<Future<FlutterDevice>>[
-      for (final FlutterDevice device in flutterDevices) _waitForExtensionsForDevice(device)
+      for (final FlutterDevice device in flutterDevices) _waitForExtensionsForDevice(device),
     ]);
     return devices.where((FlutterDevice device) => device != null).toList();
   }
