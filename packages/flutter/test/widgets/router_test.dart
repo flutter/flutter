@@ -202,27 +202,7 @@ void main() {
       throwsA(isAssertionError.having(
         (AssertionError e) => e.message,
         'message',
-        'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.',
-      )),
-    );
-  });
-
-  testWidgets('Router throw when passing restorationId without routeInformationParser', (WidgetTester tester) async {
-    expect(
-      () {
-        Router<RouteInformation>(
-          restorationScopeId: 'foo',
-          routerDelegate: SimpleRouterDelegate(
-            builder: (BuildContext context, RouteInformation? information) {
-              return Text(information!.location!);
-            },
-          ),
-        );
-      },
-      throwsA(isAssertionError.having(
-        (AssertionError e) => e.message,
-        'message',
-        'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.',
+        'A routeInformationParser must be provided when a routeInformationProvider is specified.',
       )),
     );
   });
@@ -1725,14 +1705,14 @@ class SimpleRouterConfig extends RouterConfig<RouteInformation> {
   static const String text = 'simple!';
 
   @override
-  BackButtonDispatcher? get backButtonDispatcher => RootBackButtonDispatcher();
+  final BackButtonDispatcher? backButtonDispatcher = RootBackButtonDispatcher();
 
   @override
-  RouteInformationParser<RouteInformation>? get routeInformationParser => SimpleRouteInformationParser();
+  final RouteInformationParser<RouteInformation>? routeInformationParser = SimpleRouteInformationParser();
 
   @override
-  RouteInformationProvider? get routeInformationProvider => SimpleRouteInformationProvider();
+  final RouteInformationProvider? routeInformationProvider = SimpleRouteInformationProvider()..value = const RouteInformation(location: '/');
 
   @override
-  RouterDelegate<RouteInformation> get routerDelegate => SimpleRouterDelegate(builder: (_, __) => const Text(text));
+  final RouterDelegate<RouteInformation> routerDelegate = SimpleRouterDelegate(builder: (_, __) => const Text(text));
 }
