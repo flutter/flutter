@@ -10,6 +10,7 @@
 #include <lib/fidl/cpp/binding_set.h>
 #include <lib/sys/cpp/component_context.h>
 
+#include "dart_test_component_controller_v2.h"
 #include "runtime/dart/utils/mapped_resource.h"
 
 namespace dart_runner {
@@ -32,6 +33,12 @@ class DartRunner : public fuchsia::sys::Runner,
       fuchsia::component::runner::ComponentStartInfo start_info,
       fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
           controller) override;
+
+  // Add test components to this map to ensure it is kept alive in memory for
+  // the duration of test execution and retrieval of exit code.
+  std::map<DartTestComponentControllerV2*,
+           std::shared_ptr<DartTestComponentControllerV2>>
+      test_components_;
 
   // Not owned by DartRunner.
   sys::ComponentContext* context_;
