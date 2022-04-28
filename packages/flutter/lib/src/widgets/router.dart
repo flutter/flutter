@@ -304,7 +304,7 @@ class Router<T> extends StatefulWidget {
   /// router does not depend on route information. A common example is a sub router
   /// that builds its content completely based on the app state.
   ///
-  /// If the [routeInformationProvider] or [restorationScopeId] is not null, then
+  /// If the [routeInformationProvider] is not null, then
   /// [routeInformationParser] must also not be null.
   ///
   /// The [routerDelegate] must not be null.
@@ -315,11 +315,11 @@ class Router<T> extends StatefulWidget {
     required this.routerDelegate,
     this.backButtonDispatcher,
     this.restorationScopeId,
-  })  : assert(
-          routeInformationProvider == null || routeInformationParser != null,
-          'A routeInformationParser must be provided when a routeInformationProvider is specified.',
-        ),
-        assert(routerDelegate != null);
+  }) : assert(
+         routeInformationProvider == null || routeInformationParser != null,
+         'A routeInformationParser must be provided when a routeInformationProvider is specified.',
+       ),
+       assert(routerDelegate != null);
 
   /// Creates a router with a [RouterConfig].
   ///
@@ -328,8 +328,8 @@ class Router<T> extends StatefulWidget {
   /// depend on route information. A common example is a sub router that builds
   /// its content completely based on the app state.
   ///
-  /// If the [RouterConfig.routeInformationProvider] or [restorationScopeId]
-  /// is not null, then [RouterConfig.routeInformationParser] must also not be
+  /// If the [RouterConfig.routeInformationProvider] is not null, then
+  /// [RouterConfig.routeInformationParser] must also not be
   /// null.
   ///
   /// The [RouterConfig.routerDelegate] must not be null.
