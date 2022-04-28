@@ -449,11 +449,11 @@ class WindowsPlugin extends PluginPlatform
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass!,
+      if (pluginClass != null) 'class': pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage!,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage,
     };
   }
 }
@@ -519,11 +519,11 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass!,
+      if (pluginClass != null) 'class': pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage!,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage,
     };
   }
 }
