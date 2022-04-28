@@ -106,7 +106,8 @@ def FindExecutablePath(path):
 
 
 def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
-                        cwd=buildroot_dir, forbidden_output=[], expect_failure=False, coverage=False):
+                        cwd=buildroot_dir, forbidden_output=[], expect_failure=False, coverage=False,
+                        extra_env={}):
   if filter is not None and executable_name not in filter:
     print('Skipping %s due to filter.' % executable_name)
     return
@@ -138,6 +139,8 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
   if not env:
     env = os.environ.copy()
   env['FLUTTER_BUILD_DIRECTORY'] = build_dir
+  for key, value in extra_env.items():
+    env[key] = value
 
   try:
     RunCmd(test_command, cwd=cwd, forbidden_output=forbidden_output, expect_failure=expect_failure, env=env)
@@ -238,7 +241,9 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
     RunEngineExecutable(build_dir, 'txt_unittests', filter, icu_flags + shuffle_flags, coverage=coverage)
 
   if IsLinux():
-    RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, shuffle_flags, coverage=coverage)
+    gtk_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
+    RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, shuffle_flags, coverage=coverage,
+                        extra_env={'G_DEBUG': 'fatal-criticals'})
     RunEngineExecutable(build_dir, 'flutter_glfw_unittests', filter, shuffle_flags, coverage=coverage)
 
   # Impeller tests are only supported on macOS for now.

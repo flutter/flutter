@@ -766,7 +766,9 @@ static void fl_key_embedder_responder_handle_event_impl(
     }
   }
 
-  update_pressing_state(self, physical_key, is_down_event ? logical_key : 0);
+  if (out_event.type != kFlutterKeyEventTypeRepeat) {
+    update_pressing_state(self, physical_key, is_down_event ? logical_key : 0);
+  }
   possibly_update_lock_bit(self, logical_key, is_down_event);
   if (is_down_event) {
     update_mapping_record(self, physical_key, logical_key);
