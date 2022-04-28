@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
 source_set("display_list") {
@@ -57,33 +58,79 @@ source_set("display_list") {
   ]
 }
 
-# Instead of creating a new test harness for display lists, the flow_unittests
-# harness includes these in its own.
-source_set("unittests") {
-  testonly = true
+if (enable_unittests) {
+  test_fixtures("display_list_fixtures") {
+    fixtures = []
+  }
 
-  sources = [
-    "display_list_attributes_testing.h",
-    "display_list_canvas_unittests.cc",
-    "display_list_color_filter_unittests.cc",
-    "display_list_color_source_unittests.cc",
-    "display_list_complexity_unittests.cc",
-    "display_list_enum_unittests.cc",
-    "display_list_image_filter_unittests.cc",
-    "display_list_mask_filter_unittests.cc",
-    "display_list_paint_unittests.cc",
-    "display_list_test_utils.cc",
-    "display_list_test_utils.h",
-    "display_list_unittests.cc",
-    "display_list_vertices_unittests.cc",
-  ]
+  source_set("display_list_testing") {
+    testonly = true
 
-  deps = [
-    "//flutter/testing:testing_lib",
-    "//third_party/skia",
-  ]
+    sources = [
+      "display_list_attributes_testing.h",
+      "display_list_test_utils.cc",
+      "display_list_test_utils.h",
+    ]
 
-  public_deps = [ ":display_list" ]
+    deps = [
+      "//flutter/testing:testing_lib",
+      "//third_party/skia",
+    ]
+
+    public_deps = [ ":display_list" ]
+  }
+
+  executable("display_list_unittests") {
+    testonly = true
+
+    sources = [
+      "display_list_color_filter_unittests.cc",
+      "display_list_color_source_unittests.cc",
+      "display_list_complexity_unittests.cc",
+      "display_list_enum_unittests.cc",
+      "display_list_image_filter_unittests.cc",
+      "display_list_mask_filter_unittests.cc",
+      "display_list_paint_unittests.cc",
+      "display_list_unittests.cc",
+      "display_list_vertices_unittests.cc",
+    ]
+
+    deps = [
+      ":display_list",
+      ":display_list_fixtures",
+      ":display_list_testing",
+      "//flutter/testing",
+    ]
+
+    if (!defined(defines)) {
+      defines = []
+    }
+    if (is_win) {
+      # Required for M_PI and others.
+      defines += [ "_USE_MATH_DEFINES" ]
+    }
+  }
+
+  executable("display_list_rendertests") {
+    testonly = true
+
+    sources = [ "display_list_canvas_unittests.cc" ]
+
+    deps = [
+      ":display_list",
+      ":display_list_fixtures",
+      ":display_list_testing",
+      "//flutter/testing",
+    ]
+
+    if (!defined(defines)) {
+      defines = []
+    }
+    if (is_win) {
+      # Required for M_PI and others.
+      defines += [ "_USE_MATH_DEFINES" ]
+    }
+  }
 }
 
 fixtures_location("display_list_benchmarks_fixtures") {
