@@ -2273,19 +2273,6 @@ targets:
       task_name: web_size__compile_test
     scheduler: luci
 
-  - name: Linux android views
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/99001
-    recipe: flutter/android_views
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "android_virtual_device", "version": "31"}
-        ]
-      tags: >
-        ["framework","hostonly"]
-    timeout: 60
-
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
