@@ -299,3 +299,19 @@ BENCHMARK_F(SkParagraphFixture, PaintDecoration)(benchmark::State& state) {
     offset++;
   }
 }
+
+BENCHMARK_F(SkParagraphFixture, SimpleBuilder)(benchmark::State& state) {
+  const char* text = "Hello World";
+  sktxt::ParagraphStyle paragraph_style;
+  sktxt::TextStyle text_style;
+  text_style.setFontFamilies({SkString("Roboto")});
+  text_style.setColor(SK_ColorBLACK);
+  while (state.KeepRunning()) {
+    auto builder =
+        sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+    builder->pushStyle(text_style);
+    builder->addText(text);
+    builder->pop();
+    auto paragraph = builder->Build();
+  }
+}
