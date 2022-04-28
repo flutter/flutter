@@ -17,6 +17,14 @@
             path: "/svc/fuchsia.component.runner.ComponentRunner",
         },
     ],
+    use: [
+        {
+            protocol: [
+                "fuchsia.sys.Environment",
+                "fuchsia.sys.Loader",
+            ],
+        },
+    ],
     expose: [
         {
             runner: "dart_jit_runner",

@@ -1890,6 +1890,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_component_control
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_component_controller_v2.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_runner.h
+FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_test_component_controller_v2.cc
+FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_test_component_controller_v2.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/builtin.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/script_runner_snapshot.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/shim.dart

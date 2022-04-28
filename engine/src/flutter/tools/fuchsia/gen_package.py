@@ -70,8 +70,8 @@ def main():
 
   assert os.path.exists(args.pm_bin)
   assert os.path.exists(args.package_dir)
-
   pkg_dir = args.package_dir
+
   if not os.path.exists(os.path.join(pkg_dir, 'meta', 'package')):
     CreateMetaPackage(pkg_dir, args.far_name)
 

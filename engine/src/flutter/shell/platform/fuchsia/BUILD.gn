@@ -89,6 +89,9 @@ if (enable_unittests) {
   group("tests") {
     testonly = true
 
-    deps = [ "flutter:tests" ]
+    deps = [
+      "dart_runner:tests",
+      "flutter:tests",
+    ]
   }
 }

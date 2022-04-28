@@ -811,7 +811,7 @@ if (enable_unittests) {
   }
 
   # When adding a new dep here, please also ensure the dep is added to
-  # testing/fuchsia/run_tests.sh and testing/fuchsia/test_fars
+  # testing/fuchsia/test_suites.yaml.
   group("tests") {
     testonly = true
 

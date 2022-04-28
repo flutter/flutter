@@ -153,6 +153,7 @@ template("_fuchsia_archive") {
              ":${target_name}_dir",
              ":${_dbg_symbols_target}",
            ]
+
     sources = copy_outputs
 
     inputs = []

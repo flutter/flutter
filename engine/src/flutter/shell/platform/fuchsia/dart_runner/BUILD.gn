@@ -6,12 +6,85 @@ assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/fuchsia_config.gni")
+import("//flutter/testing/testing.gni")
 import("//flutter/tools/fuchsia/dart.gni")
 import("//flutter/tools/fuchsia/fuchsia_archive.gni")
 import("//flutter/tools/fuchsia/fuchsia_libs.gni")
 
+template("runner_sources") {
+  assert(defined(invoker.product), "runner_sources must define product")
+
+  source_set(target_name) {
+    sources = [
+      "builtin_libraries.cc",
+      "builtin_libraries.h",
+      "dart_component_controller.cc",
+      "dart_component_controller.h",
+      "dart_component_controller_v2.cc",
+      "dart_component_controller_v2.h",
+      "dart_runner.cc",
+      "dart_runner.h",
+      "dart_test_component_controller_v2.cc",
+      "dart_test_component_controller_v2.h",
+      "logging.h",
+      "service_isolate.cc",
+      "service_isolate.h",
+    ]
+
+    dart_public_deps = []
+    if (!invoker.product) {
+      dart_public_deps += [
+        "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils",
+        "//third_party/dart/runtime/bin:dart_io_api",
+      ]
+    } else {
+      dart_public_deps += [
+        "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils_product",
+        "//third_party/dart/runtime/bin:dart_io_api_product",
+      ]
+    }
+
+    public_deps = [
+                    "$fuchsia_sdk_root/pkg:sys_cpp",
+                    "//flutter/fml",
+                  ] + dart_public_deps
+
+    deps = [
+      "$fuchsia_sdk_root/fidl:fuchsia.component.runner",
+      "$fuchsia_sdk_root/fidl:fuchsia.logger",
+      "$fuchsia_sdk_root/fidl:fuchsia.test",
+      "$fuchsia_sdk_root/pkg:async",
+      "$fuchsia_sdk_root/pkg:async-cpp",
+      "$fuchsia_sdk_root/pkg:async-default",
+      "$fuchsia_sdk_root/pkg:async-loop",
+      "$fuchsia_sdk_root/pkg:async-loop-cpp",
+      "$fuchsia_sdk_root/pkg:async-loop-default",
+      "$fuchsia_sdk_root/pkg:fidl_cpp",
+      "$fuchsia_sdk_root/pkg:sys_cpp",
+      "$fuchsia_sdk_root/pkg:sys_cpp_testing",
+      "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
+      "$fuchsia_sdk_root/pkg:syslog",
+      "$fuchsia_sdk_root/pkg:trace",
+      "$fuchsia_sdk_root/pkg:vfs_cpp",
+      "$fuchsia_sdk_root/pkg:zx",
+      "//flutter/common",
+      "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
+      "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
+      "//flutter/third_party/tonic",
+    ]
+  }
+}
+
+runner_sources("dart_runner_sources") {
+  product = false
+}
+
+runner_sources("dart_runner_sources_product") {
+  product = true
+}
+
 template("runner") {
-  assert(defined(invoker.product), "The parameter 'product' must be defined")
+  assert(defined(invoker.product), "The parameter 'product' must be defined.")
   assert(defined(invoker.output_name),
          "The parameter 'output_name' must be defined")
 
@@ -22,60 +95,23 @@ template("runner") {
     extra_defines += [ "DEBUG" ]  # Needed due to direct dart dependencies.
   }
 
+  product_suffix = ""
+  if (invoker.product) {
+    product_suffix = "_product"
+  }
+
   executable(target_name) {
     output_name = invoker_output_name
 
-    sources = [
-      "builtin_libraries.cc",
-      "builtin_libraries.h",
-      "dart_component_controller.cc",
-      "dart_component_controller.h",
-      "dart_component_controller_v2.cc",
-      "dart_component_controller_v2.h",
-      "dart_runner.cc",
-      "dart_runner.h",
-      "logging.h",
-      "main.cc",
-      "service_isolate.cc",
-      "service_isolate.h",
-    ]
+    sources = [ "main.cc" ]
 
     defines = extra_defines
 
-    dart_deps = []
-    if (!invoker.product) {
-      dart_deps += [
-        "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils",
-        "//third_party/dart/runtime/bin:dart_io_api",
-      ]
-    } else {
-      dart_deps += [
-        "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils_product",
-        "//third_party/dart/runtime/bin:dart_io_api_product",
-      ]
-    }
-
     deps = [
-             "//flutter/common",
-             "//flutter/fml",
-             "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
-             "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
-             "$fuchsia_sdk_root/fidl:fuchsia.component.runner",
-             "$fuchsia_sdk_root/pkg:async",
-             "$fuchsia_sdk_root/pkg:async-cpp",
-             "$fuchsia_sdk_root/pkg:async-default",
-             "$fuchsia_sdk_root/pkg:async-loop",
-             "$fuchsia_sdk_root/pkg:async-loop-cpp",
-             "$fuchsia_sdk_root/pkg:async-loop-default",
-             "$fuchsia_sdk_root/pkg:fidl_cpp",
+             ":dart_runner_sources${product_suffix}",
              "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
-             "$fuchsia_sdk_root/pkg:sys_cpp",
-             "$fuchsia_sdk_root/pkg:syslog",
-             "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:trace-provider-so",
-             "$fuchsia_sdk_root/pkg:vfs_cpp",
-             "//flutter/third_party/tonic",
-           ] + dart_deps + extra_deps
+           ] + extra_deps
   }
 }
 
@@ -272,4 +308,39 @@ jit_runner_package("dart_jit_runner") {
 
 jit_runner_package("dart_jit_product_runner") {
   product = true
+}
+
+if (enable_unittests) {
+  executable("dart_test_runner_unittests") {
+    testonly = true
+
+    output_name = "dart_runner_tests"
+
+    sources = [ "tests/suite_impl_unittests.cc" ]
+
+    # This is needed for //third_party/googletest for linking zircon symbols.
+    libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+
+    deps = [
+      ":dart_runner_sources",
+      "//flutter/fml",
+      "//third_party/dart/runtime:libdart_jit",
+      "//third_party/dart/runtime/platform:libdart_platform_jit",
+      "//third_party/googletest:gtest_main",
+    ]
+  }
+
+  fuchsia_test_archive("dart_runner_tests") {
+    deps = [ ":dart_test_runner_unittests" ]
+
+    binary = "$target_name"
+  }
+
+  # When adding a new dep here, please also ensure the dep is added to
+  # testing/fuchsia/test_suites.yaml.
+  group("tests") {
+    testonly = true
+
+    deps = [ ":dart_runner_tests" ]
+  }
 }
