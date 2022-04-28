@@ -583,6 +583,9 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   void didChangeDependencies() {
     _routeParsePending = true;
     super.didChangeDependencies();
+    // The super.didChangeDependencies may have parsed the route information.
+    // This can happen if the didChangeDependencies is triggered by state
+    // restoration or first build.
     if (widget.routeInformationProvider != null && _routeParsePending) {
       _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
     }
@@ -1113,7 +1116,7 @@ abstract class RouteInformationParser<T> {
   /// {@endtemplate}
   ///
   /// One can implement [parseRouteInformationWithDependencies] instead if
-  /// the parsing depends other dependencies from the [BuildContext].
+  /// the parsing depends on other dependencies from the [BuildContext].
   Future<T> parseRouteInformation(RouteInformation routeInformation) {
     throw UnimplementedError(
       'One of the parseRouteInformation or '
