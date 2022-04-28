@@ -64,6 +64,8 @@ void expectCheckmarkColor(Finder finder, Color color) {
   expect(
     finder,
     paints
+      // Physical model path
+      ..path()
       // The first path that is painted is the selection overlay. We do not care
       // how it is painted but it has to be added it to this pattern so that the
       // check mark can be checked next.

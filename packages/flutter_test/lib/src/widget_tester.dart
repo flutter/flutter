@@ -977,7 +977,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
               'should be disposed by calling dispose() on the AnimationController itself. '
               'Otherwise, the ticker will leak.'
             ),
-            ticker.describeForError('The offending ticker was')
+            ticker.describeForError('The offending ticker was'),
           ]);
         }
       }
@@ -1002,7 +1002,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           'If your test uses SemanticsTester, it is '
           'sufficient to call dispose() on SemanticsTester. Otherwise, the '
           'existing handle will leak into another test and alter its behavior.'
-        )
+        ),
       ]);
     }
     _lastRecordedSemanticsHandles = null;

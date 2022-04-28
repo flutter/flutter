@@ -197,8 +197,8 @@ void main() {
           kLinuxExecutable,
           '--version',
         ],
-        stdout: 'ABC'
-      )
+        stdout: 'ABC',
+      ),
     ]);
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
@@ -243,7 +243,7 @@ void main() {
           'version',
         ],
         stdout: r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon\ version REG_SZ 74.0.0 A',
-      )
+      ),
     ]);
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),

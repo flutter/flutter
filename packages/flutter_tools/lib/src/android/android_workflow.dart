@@ -366,7 +366,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   Future<LicensesAccepted> get licensesAccepted async {
     LicensesAccepted? status;
 
-    void _handleLine(String line) {
+    void handleLine(String line) {
       if (licenseCounts.hasMatch(line)) {
         final Match? match = licenseCounts.firstMatch(line);
         if (match?.group(1) != match?.group(2)) {
@@ -399,12 +399,12 @@ class AndroidLicenseValidator extends DoctorValidator {
       final Future<void> output = process.stdout
         .transform<String>(const Utf8Decoder(reportErrors: false))
         .transform<String>(const LineSplitter())
-        .listen(_handleLine)
+        .listen(handleLine)
         .asFuture<void>(null);
       final Future<void> errors = process.stderr
         .transform<String>(const Utf8Decoder(reportErrors: false))
         .transform<String>(const LineSplitter())
-        .listen(_handleLine)
+        .listen(handleLine)
         .asFuture<void>(null);
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;

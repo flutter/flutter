@@ -36,7 +36,7 @@ class TestAssetBundle extends CachingAssetBundle {
 
 void main() {
   group('1.0 scale device tests', () {
-    void _buildAndTestWithOneAsset(String mainAssetPath) {
+    void buildAndTestWithOneAsset(String mainAssetPath) {
       final Map<String, List<String>> assetBundleMap = <String, List<String>>{};
 
       assetBundleMap[mainAssetPath] = <String>[];
@@ -55,27 +55,27 @@ void main() {
     }
 
     test('When asset is main variant check scale is 1.0', () {
-      _buildAndTestWithOneAsset('assets/normalFolder/normalFile.png');
+      buildAndTestWithOneAsset('assets/normalFolder/normalFile.png');
     });
 
     test('When asset path and key are the same string even though it could be took as a 3.0x variant', () async {
-      _buildAndTestWithOneAsset('assets/parentFolder/3.0x/normalFile.png');
+      buildAndTestWithOneAsset('assets/parentFolder/3.0x/normalFile.png');
     });
 
     test('When asset path contains variant identifier as part of parent folder name scale is 1.0', () {
-      _buildAndTestWithOneAsset('assets/parentFolder/__3.0x__/leafFolder/normalFile.png');
+      buildAndTestWithOneAsset('assets/parentFolder/__3.0x__/leafFolder/normalFile.png');
     });
 
     test('When asset path contains variant identifier as part of leaf folder name scale is 1.0', () {
-      _buildAndTestWithOneAsset('assets/parentFolder/__3.0x_leaf_folder_/normalFile.png');
+      buildAndTestWithOneAsset('assets/parentFolder/__3.0x_leaf_folder_/normalFile.png');
     });
 
     test('When asset path contains variant identifier as part of parent folder name scale is 1.0', () {
-      _buildAndTestWithOneAsset('assets/parentFolder/__3.0x__/leafFolder/normalFile.png');
+      buildAndTestWithOneAsset('assets/parentFolder/__3.0x__/leafFolder/normalFile.png');
     });
 
     test('When asset path contains variant identifier in parent folder scale is 1.0', () {
-      _buildAndTestWithOneAsset('assets/parentFolder/3.0x/leafFolder/normalFile.png');
+      buildAndTestWithOneAsset('assets/parentFolder/3.0x/leafFolder/normalFile.png');
     });
   });
 
@@ -151,7 +151,7 @@ void main() {
     const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
 
-    void _buildBundleAndTestVariantLogic(
+    void buildBundleAndTestVariantLogic(
       double deviceRatio,
       double chosenAssetRatio,
       String expectedAssetPath,
@@ -179,26 +179,26 @@ void main() {
     }
 
     test('Obvious case 1.0 - we have exact asset', () {
-      _buildBundleAndTestVariantLogic(1.0, 1.0, mainAssetPath);
+      buildBundleAndTestVariantLogic(1.0, 1.0, mainAssetPath);
     });
 
     test('Obvious case 3.0 - we have exact asset', () {
-      _buildBundleAndTestVariantLogic(3.0, 3.0, variantPath);
+      buildBundleAndTestVariantLogic(3.0, 3.0, variantPath);
     });
 
     test('Typical case 2.0', () {
-      _buildBundleAndTestVariantLogic(2.0, 1.0, mainAssetPath);
+      buildBundleAndTestVariantLogic(2.0, 1.0, mainAssetPath);
     });
 
     test('Borderline case 2.01', () {
-      _buildBundleAndTestVariantLogic(2.01, 3.0, variantPath);
+      buildBundleAndTestVariantLogic(2.01, 3.0, variantPath);
     });
     test('Borderline case 2.9', () {
-      _buildBundleAndTestVariantLogic(2.9, 3.0, variantPath);
+      buildBundleAndTestVariantLogic(2.9, 3.0, variantPath);
     });
 
     test('Typical case 4.0', () {
-      _buildBundleAndTestVariantLogic(4.0, 3.0, variantPath);
+      buildBundleAndTestVariantLogic(4.0, 3.0, variantPath);
     });
   });
 

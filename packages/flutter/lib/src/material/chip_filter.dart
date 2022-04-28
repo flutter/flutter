@@ -8,7 +8,7 @@ import 'chip.dart';
 import 'debug.dart';
 import 'theme_data.dart';
 
-/// A material design filter chip.
+/// A Material Design filter chip.
 ///
 /// Filter chips use tags or descriptive words as a way to filter content.
 ///

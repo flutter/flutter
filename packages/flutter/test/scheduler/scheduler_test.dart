@@ -140,15 +140,17 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    SchedulerBinding.instance.platformDispatcher.onReportTimings!(<FrameTiming>[FrameTiming(
-      vsyncStart: 5000,
-      buildStart: 10000,
-      buildFinish: 15000,
-      rasterStart: 16000,
-      rasterFinish: 20000,
-      rasterFinishWallTime: 20010,
-      frameNumber: 1991
-    )]);
+    SchedulerBinding.instance.platformDispatcher.onReportTimings!(<FrameTiming>[
+      FrameTiming(
+        vsyncStart: 5000,
+        buildStart: 10000,
+        buildFinish: 15000,
+        rasterStart: 16000,
+        rasterFinish: 20000,
+        rasterFinishWallTime: 20010,
+        frameNumber: 1991,
+      ),
+    ]);
 
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
     expect(events, hasLength(1));

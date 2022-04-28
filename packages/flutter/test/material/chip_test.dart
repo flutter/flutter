@@ -1964,7 +1964,7 @@ void main() {
                             ],
                             children: <TestSemantics>[
                               TestSemantics(
-                                label: 'Delete',
+                                tooltip: 'Delete',
                                 actions: <SemanticsAction>[SemanticsAction.tap],
                                 textDirection: TextDirection.ltr,
                                 flags: <SemanticsFlag>[

@@ -2328,11 +2328,11 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
     _hitTestHelper(regularHits, edgeHits, position, root, root.getTransformTo(null));
     // Order matches by the size of the hit area.
-    double _area(RenderObject object) {
+    double area(RenderObject object) {
       final Size size = object.semanticBounds.size;
       return size.width * size.height;
     }
-    regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
+    regularHits.sort((RenderObject a, RenderObject b) => area(a).compareTo(area(b)));
     final Set<RenderObject> hits = <RenderObject>{
       ...edgeHits,
       ...regularHits,

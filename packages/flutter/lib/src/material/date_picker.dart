@@ -126,13 +126,13 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// See also:
 ///
-///  * [showDateRangePicker], which shows a material design date range picker
+///  * [showDateRangePicker], which shows a Material Design date range picker
 ///    used to select a range of dates.
 ///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
 ///  * [InputDatePickerFormField], which provides a text input field for entering dates.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
-///  * [showTimePicker], which shows a dialog that contains a material design time picker.
+///  * [showTimePicker], which shows a dialog that contains a Material Design time picker.
 ///
 Future<DateTime?> showDatePicker({
   required BuildContext context,
@@ -925,7 +925,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [showDatePicker], which shows a material design date picker used to
+///  * [showDatePicker], which shows a Material Design date picker used to
 ///    select a single date.
 ///  * [DateTimeRange], which is used to describe a date range.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
