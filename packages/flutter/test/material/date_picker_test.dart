@@ -453,7 +453,7 @@ void main() {
     });
 
     testWidgets('Gets closed when date is selected', (WidgetTester tester) async {
-    await prepareDatePicker(tester, popOnDateSelection: true, (Future<DateTime?> date) async {
+    await prepareDatePicker(tester, (Future<DateTime?> date) async {
       expect(find.byType(DatePickerDialog), findsOneWidget);
 
       await tester.tap(find.text('25'));
@@ -461,9 +461,9 @@ void main() {
 
       expect(find.byType(DatePickerDialog), findsNothing);
       expect(await date, DateTime(2016, DateTime.january, 25));
-    });
+    }, popOnDateSelection: true);
 
-    await prepareDatePicker(tester, popOnDateSelection: true, (Future<DateTime?> date) async {
+    await prepareDatePicker(tester, (Future<DateTime?> date) async {
       await tester.tap(find.text('January 2016'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('2018'));
@@ -475,7 +475,7 @@ void main() {
 
       expect(find.byType(DatePickerDialog), findsNothing);
       expect(await date, DateTime(2018, DateTime.january, 25));
-      });
+      }, popOnDateSelection: true);
     });
   });
 
