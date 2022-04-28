@@ -63,8 +63,10 @@ class RenderSliverCustomExtentList extends RenderSliverMultiBoxAdaptor {
     required SliverCustomExtentListAssistant extentAssistant,
   }) : _extentAssistant = extentAssistant;
 
-  SliverCustomExtentListAssistant _extentAssistant;
+  /// The assistant which is responsible for calculating the relationship
+  /// between its index and layout offset of children.
   SliverCustomExtentListAssistant get extentAssistant => _extentAssistant;
+  SliverCustomExtentListAssistant _extentAssistant;
   set extentAssistant(SliverCustomExtentListAssistant value) {
     assert(value != null);
     if (_extentAssistant == value)

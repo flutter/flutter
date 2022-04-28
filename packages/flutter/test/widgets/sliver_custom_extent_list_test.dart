@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestItem extends StatelessWidget {
-  const TestItem({ Key? key, required this.item, this.width, this.height }) : super(key: key);
+  const TestItem({ super.key, required this.item, this.width, this.height });
   final int item;
   final double? width;
   final double? height;
