@@ -711,7 +711,6 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 @property(nonatomic, assign) CGRect markedRect;
 @property(nonatomic) BOOL isVisibleToAutofill;
 @property(nonatomic, assign) BOOL accessibilityEnabled;
-@property(nonatomic, retain) UITextInteraction* textInteraction API_AVAILABLE(ios(13.0));
 
 - (void)setEditableTransform:(NSArray*)matrix;
 @end
@@ -734,6 +733,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   // allowed to access its textInputDelegate.
   BOOL _decommissioned;
   bool _enableInteractiveSelection;
+  UITextInteraction* _textInteraction API_AVAILABLE(ios(13.0));
 }
 
 @synthesize tokenizer = _tokenizer;
@@ -905,7 +905,27 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   _hasPlaceholder = NO;
 }
 
+- (UITextInteraction*)textInteraction API_AVAILABLE(ios(13.0)) {
+  if (!_textInteraction) {
+    _textInteraction =
+        [[UITextInteraction textInteractionForMode:UITextInteractionModeEditable] retain];
+    _textInteraction.textInput = self;
+  }
+  return _textInteraction;
+}
+
 - (void)setTextInputState:(NSDictionary*)state {
+  if (@available(iOS 13.0, *)) {
+    // [UITextInteraction willMoveToView:] sometimes sets the textInput's inputDelegate
+    // to nil. This is likely a bug in UIKit. In order to inform the keyboard of text
+    // and selection changes when that happens, add a dummy UITextInteraction to this
+    // view so it sets a valid inputDelegate that we can call textWillChange et al. on.
+    // See https://github.com/flutter/engine/pull/32881.
+    if (!self.inputDelegate && self.isFirstResponder) {
+      [self addInteraction:self.textInteraction];
+    }
+  }
+
   NSString* newText = state[@"text"];
   BOOL textChanged = ![self.text isEqualToString:newText];
   if (textChanged) {
@@ -940,6 +960,12 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 
   if (textChanged) {
     [self.inputDelegate textDidChange:self];
+  }
+
+  if (@available(iOS 13.0, *)) {
+    if (_textInteraction) {
+      [self removeInteraction:_textInteraction];
+    }
   }
 }
 
@@ -1327,7 +1353,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   if (toIndex >= fromIndex) {
     return [FlutterTextRange rangeWithNSRange:NSMakeRange(fromIndex, toIndex - fromIndex)];
   } else {
-    // toIndex may be less than fromIndex, because
+    // toIndex can be smaller than fromIndex, because
     // UITextInputStringTokenizer does not handle CJK characters
     // well in some cases. See:
     // https://github.com/flutter/flutter/issues/58750#issuecomment-644469521
@@ -1698,14 +1724,6 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   // call always turns a CGRect's negative dimensions into non-negative values, e.g.,
   // (1, 2, -3, -4) would become (-2, -2, 3, 4).
   _isFloatingCursorActive = true;
-  // This makes sure UITextSelectionView.interactionAssistant is not nil so
-  // UITextSelectionView has access to this view (and its bounds). Otherwise
-  // floating cursor breaks: https://github.com/flutter/flutter/issues/70267.
-  if (@available(iOS 13.0, *)) {
-    self.textInteraction = [UITextInteraction textInteractionForMode:UITextInteractionModeEditable];
-    self.textInteraction.textInput = self;
-    [self addInteraction:_textInteraction];
-  }
   [self.textInputDelegate flutterTextInputView:self
                           updateFloatingCursor:FlutterFloatingCursorDragStateStart
                                     withClient:_textInputClient
@@ -1722,12 +1740,6 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 
 - (void)endFloatingCursor {
   _isFloatingCursorActive = false;
-  if (@available(iOS 13.0, *)) {
-    if (_textInteraction != NULL) {
-      [self removeInteraction:_textInteraction];
-      self.textInteraction = NULL;
-    }
-  }
   [self.textInputDelegate flutterTextInputView:self
                           updateFloatingCursor:FlutterFloatingCursorDragStateEnd
                                     withClient:_textInputClient
