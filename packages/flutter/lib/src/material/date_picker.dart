@@ -428,7 +428,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     setState(() {
       _selectedDate.value = date;
     });
-    
+
     if (widget.popOnDateSelection && _entryMode.value == DatePickerEntryMode.calendar) {
       Navigator.pop(context, date);
     }
