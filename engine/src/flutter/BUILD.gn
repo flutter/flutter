@@ -140,6 +140,8 @@ group("unittests") {
   # Compile all unittests targets if enabled.
   if (enable_unittests) {
     public_deps += [
+      "//flutter/display_list:display_list_rendertests",
+      "//flutter/display_list:display_list_unittests",
       "//flutter/flow:flow_unittests",
       "//flutter/fml:fml_unittests",
       "//flutter/lib/spirv/test/exception_shaders:spirv_compile_exception_shaders",
