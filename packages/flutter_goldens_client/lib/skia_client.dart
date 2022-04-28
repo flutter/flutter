@@ -192,7 +192,7 @@ class SkiaGoldClient {
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
       '--passfail',
-      ..._getPixelMatchingArguments(testName),
+      ..._getPixelMatchingArguments(),
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);
@@ -304,7 +304,7 @@ class SkiaGoldClient {
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
-      ..._getPixelMatchingArguments(testName),
+      ..._getPixelMatchingArguments(),
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);
@@ -325,14 +325,14 @@ class SkiaGoldClient {
     }
   }
 
-  // Constructs arguments for `goltctl` for controlling how pixels are compared.
+  // Constructs arguments for `goldctl` for controlling how pixels are compared.
   //
   // For AOT and CanvasKit exact pixel matching is used. For the HTML renderer
   // on the web a fuzzy matching algorithm is used that allows very small deltas
   // because Chromium cannot exactly reproduce the same golden on all computers.
   // It seems to depend on the hardware/OS/driver combination. However, those
   // differences are very small (typically not noticeable to human eye).
-  List<String> _getPixelMatchingArguments(String testName) {
+  List<String> _getPixelMatchingArguments() {
     // Only use fuzzy pixel matching in the HTML renderer.
     if (!_isBrowserTest || _isBrowserCanvasKitTest) {
       return const <String>[];
