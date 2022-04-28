@@ -646,7 +646,7 @@ class Actions extends StatefulWidget {
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
   static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
-    InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
+    InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>(system: true);
     while (actionsElement != null) {
       if (visitor(actionsElement) == true) {
         break;

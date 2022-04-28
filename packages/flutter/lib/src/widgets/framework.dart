@@ -2182,7 +2182,7 @@ abstract class BuildContext {
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect });
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect, bool system = false });
 
   /// Obtains the element corresponding to the nearest widget of the given type `T`,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -2200,7 +2200,9 @@ abstract class BuildContext {
   /// [dependOnInheritedWidgetOfExactType] in [State.didChangeDependencies]. It is
   /// safe to use this method from [State.deactivate], which is called whenever
   /// the widget is removed from the tree.
-  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
+  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>({
+    bool system = false,
+  });
 
   /// Returns the nearest ancestor widget of the given type `T`, which must be the
   /// type of a concrete [Widget] subclass.
@@ -4217,9 +4219,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect, bool system = false}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    assert(() {
+      if (system && ! T.toString().startsWith('_')) {
+        throw FlutterError('"system: true" should only be used by framework internal widgets.');
+      }
+      return true;
+    }());
+    final InheritedElement? ancestor = _inheritedWidgets?.lookup(T, system);
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4228,9 +4236,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
+  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>({ bool system = false}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    assert(() {
+      if (system && ! T.toString().startsWith('_')) {
+        throw FlutterError('"system: true" should only be used by framework internal widgets.');
+      }
+      return true;
+    }());
+    final InheritedElement? ancestor = _inheritedWidgets?.lookup(T, system);
     return ancestor;
   }
 
@@ -5260,8 +5274,8 @@ class InheritedTreeCache {
   final Map<Type, InheritedElement> _user;
   final Map<Type, InheritedElement> _system;
 
-  InheritedElement? operator[](Type type) {
-    return _user[type] ?? _system[type];
+  InheritedElement? lookup(Type type, bool system) {
+    return system ? _system[type] : _user[type];
   }
 
   void update(Type type, InheritedElement value, bool system) {

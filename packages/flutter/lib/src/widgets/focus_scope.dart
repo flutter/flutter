@@ -368,7 +368,7 @@ class Focus extends StatefulWidget {
   static FocusNode of(BuildContext context, { bool scopeOk = false }) {
     assert(context != null);
     assert(scopeOk != null);
-    final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
+    final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>(system: true);
     final FocusNode? node = marker?.notifier;
     assert(() {
       if (node == null) {

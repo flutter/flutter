@@ -283,7 +283,7 @@ class Scrollable extends StatefulWidget {
   /// Calling this method will create a dependency on the closest [Scrollable]
   /// in the [context], if there is one.
   static ScrollableState? of(BuildContext context) {
-    final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
+    final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>(system: true);
     return widget?.scrollable;
   }
 
@@ -301,7 +301,7 @@ class Scrollable extends StatefulWidget {
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
   static bool recommendDeferredLoadingForContext(BuildContext context) {
-    final _ScrollableScope? widget = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()?.widget as _ScrollableScope?;
+    final _ScrollableScope? widget = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>(system: true)?.widget as _ScrollableScope?;
     if (widget == null) {
       return false;
     }
