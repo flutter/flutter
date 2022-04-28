@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
@@ -110,7 +111,7 @@ Future<MigrateResult?> computeMigration({
     bool deleteTempDirectories = true,
     List<SupportedPlatform>? platforms,
     bool preferTwoWayMerge = false,
-    bool allowFallbackBaseRevision = false;
+    bool allowFallbackBaseRevision = false,
     required FileSystem fileSystem,
     required Logger logger,
     required MigrateUtils migrateUtils,
@@ -147,14 +148,16 @@ Future<MigrateResult?> computeMigration({
   blacklistPrefixes.remove(null);
 
   final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
-  final String fallbackRevision = getBaseRevision(metadata, allowFallbackBaseRevision, verbose, logger, status);
+  final String? metadataRevision = metadata.versionRevision;
   targetRevision ??= version.frameworkRevision;
   String rootBaseRevision = '';
   final Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
   final Set<String> revisions = <String>{};
   if (baseRevision == null) {
     for (final MigratePlatformConfig platform in config.platformConfigs.values) {
-      final String effectiveRevision = platform.baseRevision == null ? fallbackRevision : platform.baseRevision!;
+      final String effectiveRevision = platform.baseRevision == null ? 
+          metadataRevision ?? _getFallbackBaseRevision(allowFallbackBaseRevision, verbose, logger, status) :
+          platform.baseRevision!;
       if (platforms != null && !platforms.contains(platform.platform)) {
         continue;
       }
@@ -169,6 +172,10 @@ Future<MigrateResult?> computeMigration({
     }
   } else {
     rootBaseRevision = baseRevision;
+    revisionToConfigs[baseRevision] = <MigratePlatformConfig>[];
+    for (final SupportedPlatform platform in platforms) {
+      revisionToConfigs[baseRevision]!.add(MigratePlatformConfig(platform: platform, baseRevision: baseRevision));
+    }
   }
   // Reorder such that the root revision is created first.
   revisions.remove(rootBaseRevision);
@@ -178,6 +185,13 @@ Future<MigrateResult?> computeMigration({
   }
   if (verbose) {
     logger.printStatus('Potential base revisions: $revisionsList');
+  }
+  final fallbackRevision = _getFallbackBaseRevision(true, verbose, logger, status);
+  if (revisionsList.contains(fallbackRevision) && baseRevision != fallbackRevision && metadataRevision != fallbackRevision) {
+    status.pause();
+    logger.printStatus('Using Flutter v1.0.0 ($fallbackRevision) as the base revision since a valid base revision could not be found.', indent: 4, color: TerminalColor.grey);
+    logger.printStatus('This may result in more merge conflicts than normal expected.', indent: 4, color: TerminalColor.grey);
+    status.resume();
   }
 
   // Extract the files/paths that should be ignored by the migrate tool.
@@ -241,7 +255,7 @@ Future<MigrateResult?> computeMigration({
     baseAppPath,
     revisionsList,
     revisionToConfigs,
-    fallbackRevision,
+    baseRevision ?? metadataRevision ?? _getFallbackBaseRevision(allowFallbackBaseRevision, verbose, logger, status),
     targetRevision,
     name,
     androidLanguage,
@@ -353,16 +367,13 @@ String getLocalPath(String path, String basePath, FileSystem fileSystem) {
 }
 
 /// Returns a base revision to fallback to in case a true base revision is unknown.
-String getBaseRevision(FlutterProjectMetadata metadata, bool allowFallbackBaseRevision, bool verbose, Logger logger, Status status) {
-  if (metadata.versionRevision != null) {
-    return metadata.versionRevision!;
-  }
+String _getFallbackBaseRevision(bool allowFallbackBaseRevision, bool verbose, Logger logger, Status status) {
   if (!allowFallbackBaseRevision) {
     status.stop();
-    logger.printError('Could not determine base revision this app was created with.');
+    logger.printError('Could not determine base revision this app was created with:');
     logger.printError('.metadata file did not exist or did not contain a valid revision.', indent: 2);
-    logger.printError('Run this command again with the --allow-fallback-base-revision flag to use Flutter v1.0.0 as the base revision.', indent: 2);
-    throwToolExit('Failed to resolve base revision')
+    logger.printError('Run this command again with the `--allow-fallback-base-revision` flag to use Flutter v1.0.0 as the base revision or manually pass a revision with `--base-revision=<revision>`', indent: 2);
+    throwToolExit('Failed to resolve base revision');
   }
   // Earliest version of flutter with .metadata: c17099f474675d8066fec6984c242d8b409ae985 (2017)
   // Flutter 2.0.0: 60bd88df915880d23877bfc1602e8ddcf4c4dd2a

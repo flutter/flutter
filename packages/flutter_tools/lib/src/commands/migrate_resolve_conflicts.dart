@@ -225,12 +225,12 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
         logger.printStatus(terminal.clearScreen(), newline: false);
         logger.printStatus('Conflicts in $localPath complete.\n');
         logger.printStatus('You chose to:\n  Skip $skipCount conflicts\n  Acccept the original lines for $originalCount conflicts\n  Accept the new lines for $newCount conflicts\n');
-        String selection = 'y';
+        String selection = 'n';
         try {
           selection = await terminal.promptForCharInput(
             <String>['y', 'n', 'r'],
             logger: logger,
-            prompt: 'Commit the changes to disk? (y)es, (n)o, (r)etry this file',
+            prompt: 'Commit the changes to the working directory? (y)es, (N)o, (r)etry this file',
             defaultChoiceIndex: 1,
           );
         } on StateError catch(e) {
@@ -268,6 +268,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   }
 }
 
+/// Represents a conflict in a file and tracks what the developer chose to do with it.
 class Conflict {
   Conflict(this.startLine, this.dividerLine, this.endLine);
 

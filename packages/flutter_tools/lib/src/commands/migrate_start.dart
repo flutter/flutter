@@ -165,7 +165,7 @@ class MigrateStartCommand extends FlutterCommand {
       deleteTempDirectories: boolArg('delete-temp-directories'),
       platforms: platforms,
       preferTwoWayMerge: boolArg('prefer-two-way-merge'),
-      useFallbackBaseRevision: boolArg('allow-fallback-base-revision'),
+      allowFallbackBaseRevision: boolArg('allow-fallback-base-revision'),
       fileSystem: fileSystem,
       logger: logger,
       migrateUtils: migrateUtils,
