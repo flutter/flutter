@@ -653,6 +653,9 @@ class PaintingContext extends ClipContext {
 
   /// Blend further painting with an alpha value.
   ///
+  /// Prefer using [pushOpacityLayer], which can avoid compositing if it is
+  /// unnecessary.
+  ///
   /// The `offset` argument indicates an offset to apply to all the children
   /// (the rendering created by `painter`).
   ///
@@ -686,19 +689,26 @@ class PaintingContext extends ClipContext {
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
   ///
-  /// The `offset` argument indicates an offset to apply to all the children
-  /// (the rendering created by `painter`).
+  /// The [offset] argument indicates an offset to apply to all the children
+  /// (the rendering created by [painter]).
   ///
-  /// The `alpha` argument is the alpha value to use when blending the painting
-  /// done by `painter`. An alpha value of 0 means the painting is fully
+  /// The [alpha] argument is the alpha value to use when blending the painting
+  /// done by [painter]. An alpha value of 0 means the painting is fully
   /// transparent and an alpha value of 255 means the painting is fully opaque.
   ///
-  /// The `painter` callback will be called while the `alpha` is applied. It
+  /// The `painter` callback will be called while the [alpha] is applied. It
   /// is called synchronously during the call to [pushOpacityLayer].
+  ///
+  /// This method will only create a layer if [needsCompositing] is `true` and
+  /// [alpha] is greater than 0 and less than 255.
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   OpacityLayer? pushOpacityLayer(bool needsCompositing, Size size, Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
     if (alpha == 0) {
+      return null;
+    }
+    if (alpha == 255) {
+      painter(this, offset);
       return null;
     }
     if (needsCompositing) {

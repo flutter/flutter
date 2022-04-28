@@ -161,6 +161,22 @@ void main() {
     layout(boxNoCompositing, phase: EnginePhase.paint);
   });
 
+  test('PaintingContext.pushOpacityLayer does not create a layer if alpha is 255', () {
+    final _TestCustomLayerBox boxCompositing = _TestCustomLayerBox((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      final Layer? layer = context.pushOpacityLayer(true, const Size(100, 100), offset, 255, painter, oldLayer: oldLayer as OpacityLayer?);
+      expect(layer, isNull);
+      return layer;
+    });
+    layout(boxCompositing, phase: EnginePhase.paint);
+
+    final _TestCustomLayerBox boxNoCompositing = _TestCustomLayerBox((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      final Layer? layer = context.pushOpacityLayer(false, const Size(100, 100), offset, 255, painter, oldLayer: oldLayer as OpacityLayer?);
+      expect(layer, isNull);
+      return layer;
+    });
+    layout(boxNoCompositing, phase: EnginePhase.paint);
+  });
+
   test('PaintingContext.pushOpacityLayer creates a layer if needs compositing', () {
     final _TestCustomLayerBox boxCompositing = _TestCustomLayerBox((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
       final Layer? layer = context.pushOpacityLayer(true, const Size(100, 100), offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
