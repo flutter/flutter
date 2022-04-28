@@ -161,7 +161,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_buildWidget(navigationBar(),));
+    await tester.pumpWidget(_buildWidget(navigationBar()));
     final double defaultWidth = tester.getSize(find.byType(NavigationBar)).width;
     final Finder defaultCenterItem = find.byKey(const Key('Center'));
     final Offset center = tester.getCenter(defaultCenterItem);
@@ -184,11 +184,8 @@ void main() {
     final Finder leftPaddedCenterItem = find.byKey(const Key('Center'));
     final Offset leftPaddedCenter = tester.getCenter(leftPaddedCenterItem);
     expect(
-        leftPaddedCenter.dx,
-        closeTo(
-            (defaultWidth + safeAreaPadding) / 2.0,
-            precisionErrorTolerance
-        ),
+      leftPaddedCenter.dx,
+      closeTo((defaultWidth + safeAreaPadding) / 2.0, precisionErrorTolerance),
     );
 
     await tester.pumpWidget(
@@ -208,20 +205,20 @@ void main() {
     final Finder rightPaddedCenterItem = find.byKey(const Key('Center'));
     final Offset rightPaddedCenter = tester.getCenter(rightPaddedCenterItem);
     expect(
-        rightPaddedCenter.dx,
-        closeTo((defaultWidth - safeAreaPadding) / 2, precisionErrorTolerance),
+      rightPaddedCenter.dx,
+      closeTo((defaultWidth - safeAreaPadding) / 2, precisionErrorTolerance),
     );
 
     await tester.pumpWidget(
       _buildWidget(
         MediaQuery(
           data: const MediaQueryData(
-              padding: EdgeInsets.fromLTRB(
-                  safeAreaPadding,
-                  0,
-                  safeAreaPadding,
-                  safeAreaPadding
-              ),
+            padding: EdgeInsets.fromLTRB(
+                safeAreaPadding,
+                0,
+                safeAreaPadding,
+                safeAreaPadding
+            ),
           ),
           child: navigationBar(),
         ),
@@ -234,8 +231,8 @@ void main() {
     final Finder paddedCenterItem = find.byKey(const Key('Center'));
     final Offset paddedCenter = tester.getCenter(paddedCenterItem);
     expect(
-        paddedCenter.dx,
-        closeTo(defaultWidth / 2, precisionErrorTolerance),
+      paddedCenter.dx,
+      closeTo(defaultWidth / 2, precisionErrorTolerance),
     );
   });
 
