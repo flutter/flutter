@@ -140,7 +140,7 @@ void main() {
 
   testWidgets('NavigationBar respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
     const double safeAreaPadding = 40.0;
-    Widget _navigationBar() {
+    Widget navigationBar() {
       return NavigationBar(
         destinations: const <Widget>[
           NavigationDestination(
@@ -161,7 +161,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_buildWidget(_navigationBar(),));
+    await tester.pumpWidget(_buildWidget(navigationBar(),));
     final double defaultWidth = tester.getSize(find.byType(NavigationBar)).width;
     final Finder defaultCenterItem = find.byKey(const Key('Center'));
     final Offset center = tester.getCenter(defaultCenterItem);
@@ -170,8 +170,10 @@ void main() {
     await tester.pumpWidget(
       _buildWidget(
         MediaQuery(
-          data: const MediaQueryData(padding: EdgeInsets.only(left: safeAreaPadding)),
-          child: _navigationBar(),
+          data: const MediaQueryData(
+            padding: EdgeInsets.only(left: safeAreaPadding),
+          ),
+          child: navigationBar(),
         ),
       ),
     );
@@ -181,13 +183,21 @@ void main() {
     // e.g. Android device with system navigation bar in landscape mode.
     final Finder leftPaddedCenterItem = find.byKey(const Key('Center'));
     final Offset leftPaddedCenter = tester.getCenter(leftPaddedCenterItem);
-    expect(leftPaddedCenter.dx, closeTo((defaultWidth + safeAreaPadding) / 2.0, precisionErrorTolerance));
+    expect(
+        leftPaddedCenter.dx,
+        closeTo(
+            (defaultWidth + safeAreaPadding) / 2.0,
+            precisionErrorTolerance
+        ),
+    );
 
     await tester.pumpWidget(
       _buildWidget(
         MediaQuery(
-          data: const MediaQueryData(padding: EdgeInsets.only(right: safeAreaPadding)),
-          child: _navigationBar(),
+          data: const MediaQueryData(
+              padding: EdgeInsets.only(right: safeAreaPadding)
+          ),
+          child: navigationBar(),
         ),
       ),
     );
@@ -197,15 +207,23 @@ void main() {
     // e.g. Android device with system navigation bar in landscape mode.
     final Finder rightPaddedCenterItem = find.byKey(const Key('Center'));
     final Offset rightPaddedCenter = tester.getCenter(rightPaddedCenterItem);
-    expect(rightPaddedCenter.dx, closeTo((defaultWidth - safeAreaPadding) / 2,
-        precisionErrorTolerance));
+    expect(
+        rightPaddedCenter.dx,
+        closeTo((defaultWidth - safeAreaPadding) / 2, precisionErrorTolerance),
+    );
 
     await tester.pumpWidget(
       _buildWidget(
         MediaQuery(
-          data: const MediaQueryData(padding: EdgeInsets.fromLTRB(
-              safeAreaPadding, 0, safeAreaPadding, safeAreaPadding)),
-          child: _navigationBar(),
+          data: const MediaQueryData(
+              padding: EdgeInsets.fromLTRB(
+                  safeAreaPadding,
+                  0,
+                  safeAreaPadding,
+                  safeAreaPadding
+              ),
+          ),
+          child: navigationBar(),
         ),
       ),
     );
@@ -215,7 +233,10 @@ void main() {
     // e.g. iOS device with both sides of round corner.
     final Finder paddedCenterItem = find.byKey(const Key('Center'));
     final Offset paddedCenter = tester.getCenter(paddedCenterItem);
-    expect(paddedCenter.dx, closeTo(defaultWidth / 2, precisionErrorTolerance));
+    expect(
+        paddedCenter.dx,
+        closeTo(defaultWidth / 2, precisionErrorTolerance),
+    );
   });
 
   testWidgets('NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
