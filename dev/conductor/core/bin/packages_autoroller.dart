@@ -65,7 +65,7 @@ ${parser.usage}
   await PackageAutoroller(
     framework: framework,
     githubClient: results[kGithubClient] as String? ?? 'gh',
-    orgName: _parseOrgName(upstreamUrl),
+    orgName: _parseOrgName(mirrorUrl),
     token: (results[kTokenOption] as String).trim(),
   ).roll();
 }
