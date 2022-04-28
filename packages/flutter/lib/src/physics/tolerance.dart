@@ -44,5 +44,11 @@ class Tolerance {
   final double velocity;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'Tolerance')}(distance: ±$distance, time: ±$time, velocity: ±$velocity)';
+  String toString() {
+    return '${objectRuntimeType(this, 'Tolerance')}('
+        'distance: ±$distance, '
+        'time: ±$time, '
+        'velocity: ±$velocity'
+        ')';
+  }
 }
