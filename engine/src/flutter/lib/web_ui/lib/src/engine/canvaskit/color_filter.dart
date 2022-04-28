@@ -115,18 +115,28 @@ class CkMatrixColorFilter extends CkColorFilter {
 
   final List<double> matrix;
 
+  /// Flutter documentation says the translation column of the color matrix
+  /// is specified in unnormalized 0..255 space. CanvasKit expects the
+  /// translation values to be normalized to 0..1 space.
+  ///
+  /// See [https://api.flutter.dev/flutter/dart-ui/ColorFilter/ColorFilter.matrix.html].
+  Float32List get _normalizedMatrix {
+    assert(matrix.length == 20, 'Color Matrix must have 20 entries.');
+    final Float32List result = Float32List(20);
+    const List<int> translationIndices = <int>[4, 9, 14, 19];
+    for (int i = 0; i < 20; i++) {
+      if (translationIndices.contains(i)) {
+        result[i] = matrix[i] / 255.0;
+      } else {
+        result[i] = matrix[i];
+      }
+    }
+    return result;
+  }
+
   @override
   SkColorFilter _initRawColorFilter() {
-    assert(this.matrix.length == 20, 'Color Matrix must have 20 entries.');
-    final List<double> matrix = this.matrix;
-    if (matrix is Float32List) {
-      return canvasKit.ColorFilter.MakeMatrix(matrix);
-    }
-    final Float32List float32Matrix = Float32List(20);
-    for (int i = 0; i < 20; i++) {
-      float32Matrix[i] = matrix[i];
-    }
-    return canvasKit.ColorFilter.MakeMatrix(float32Matrix);
+    return canvasKit.ColorFilter.MakeMatrix(_normalizedMatrix);
   }
 
   @override

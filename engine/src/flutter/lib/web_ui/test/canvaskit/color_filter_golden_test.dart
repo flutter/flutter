@@ -107,6 +107,35 @@ void testMain() {
 
       await matchSceneGolden('canvaskit_invertcolors.png', builder.build());
     });
+
+    test('ColorFilter.matrix works for inverse matrix', () async {
+      final LayerSceneBuilder builder = LayerSceneBuilder();
+
+      builder.pushOffset(0, 0);
+
+      // Draw a red, green, and blue square with the inverted color matrix.
+      builder.pushColorFilter(const ui.ColorFilter.matrix(<double>[
+        -1, 0, 0, 0, 255, //
+        0, -1, 0, 0, 255, //
+        0, 0, -1, 0, 255, //
+        0, 0, 0, 1, 0, //
+      ]));
+
+      final CkPictureRecorder recorder = CkPictureRecorder();
+
+      final CkCanvas canvas = recorder.beginRecording(region);
+      canvas.drawRect(const ui.Rect.fromLTWH(50, 50, 100, 100),
+          CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0));
+      canvas.drawRect(const ui.Rect.fromLTWH(200, 50, 100, 100),
+          CkPaint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
+      canvas.drawRect(const ui.Rect.fromLTWH(350, 50, 100, 100),
+          CkPaint()..color = const ui.Color.fromARGB(255, 0, 0, 255));
+      final CkPicture invertedSquares = recorder.endRecording();
+
+      builder.addPicture(ui.Offset.zero, invertedSquares);
+
+      await matchSceneGolden('canvaskit_inverse_colormatrix.png', builder.build(), write: true);
+    });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isIosSafari || isFirefox);
