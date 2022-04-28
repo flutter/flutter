@@ -2,107 +2,13 @@
   "comment:0": "NOTE: THIS FILE IS GENERATED. DO NOT EDIT.",
   "comment:1": "Instead modify 'flutter/web_sdk/libraries.yaml' and follow the instructions therein.",
   "dartdevc": {
+    "include": [
+      {
+        "path": "../dart-sdk/lib/libraries.json",
+        "target": "dartdevc"
+      }
+    ],
     "libraries": {
-      "_runtime": {
-        "uri": "../dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/runtime.dart"
-      },
-      "_debugger": {
-        "uri": "../dart-sdk/lib/_internal/js_dev_runtime/private/debugger.dart"
-      },
-      "_foreign_helper": {
-        "uri": "../dart-sdk/lib/_internal/js_dev_runtime/private/foreign_helper.dart"
-      },
-      "_http": {
-        "uri": "../dart-sdk/lib/_http/http.dart"
-      },
-      "_interceptors": {
-        "uri": "../dart-sdk/lib/_internal/js_dev_runtime/private/interceptors.dart"
-      },
-      "_internal": {
-        "uri": "../dart-sdk/lib/internal/internal.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/internal_patch.dart"
-      },
-      "_isolate_helper": {
-        "uri": "../dart-sdk/lib/_internal/js_dev_runtime/private/isolate_helper.dart"
-      },
-      "_js_annotations": {
-        "uri": "../dart-sdk/lib/js/_js_annotations.dart"
-      },
-      "_js_helper": {
-        "uri": "../dart-sdk/lib/_internal/js_dev_runtime/private/js_helper.dart"
-      },
-      "_js_primitives": {
-        "uri": "../dart-sdk/lib/_internal/js_dev_runtime/private/js_primitives.dart"
-      },
-      "_metadata": {
-        "uri": "../dart-sdk/lib/html/html_common/metadata.dart"
-      },
-      "_native_typed_data": {
-        "uri": "../dart-sdk/lib/_internal/js_dev_runtime/private/native_typed_data.dart"
-      },
-      "async": {
-        "uri": "../dart-sdk/lib/async/async.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart"
-      },
-      "collection": {
-        "uri": "../dart-sdk/lib/collection/collection.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/collection_patch.dart"
-      },
-      "convert": {
-        "uri": "../dart-sdk/lib/convert/convert.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/convert_patch.dart"
-      },
-      "core": {
-        "uri": "../dart-sdk/lib/core/core.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/core_patch.dart"
-      },
-      "developer": {
-        "uri": "../dart-sdk/lib/developer/developer.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/developer_patch.dart"
-      },
-      "io": {
-        "uri": "../dart-sdk/lib/io/io.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/io_patch.dart",
-        "supported": false
-      },
-      "isolate": {
-        "uri": "../dart-sdk/lib/isolate/isolate.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/isolate_patch.dart",
-        "supported": false
-      },
-      "math": {
-        "uri": "../dart-sdk/lib/math/math.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/math_patch.dart"
-      },
-      "typed_data": {
-        "uri": "../dart-sdk/lib/typed_data/typed_data.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/typed_data_patch.dart"
-      },
-      "html": {
-        "uri": "../dart-sdk/lib/html/dart2js/html_dart2js.dart"
-      },
-      "html_common": {
-        "uri": "../dart-sdk/lib/html/html_common/html_common_dart2js.dart"
-      },
-      "indexed_db": {
-        "uri": "../dart-sdk/lib/indexed_db/dart2js/indexed_db_dart2js.dart"
-      },
-      "js": {
-        "uri": "../dart-sdk/lib/js/js.dart",
-        "patches": "../dart-sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart"
-      },
-      "js_util": {
-        "uri": "../dart-sdk/lib/js_util/js_util.dart"
-      },
-      "svg": {
-        "uri": "../dart-sdk/lib/svg/dart2js/svg_dart2js.dart"
-      },
-      "web_audio": {
-        "uri": "../dart-sdk/lib/web_audio/dart2js/web_audio_dart2js.dart"
-      },
-      "web_gl": {
-        "uri": "../dart-sdk/lib/web_gl/dart2js/web_gl_dart2js.dart"
-      },
       "ui": {
         "uri": "lib/ui/ui.dart"
       },
@@ -112,128 +18,18 @@
     }
   },
   "dart2js": {
+    "include": [
+      {
+        "path": "../dart-sdk/lib/libraries.json",
+        "target": "dart2js"
+      }
+    ],
     "libraries": {
       "ui": {
         "uri": "lib/ui/ui.dart"
       },
       "_engine": {
         "uri": "lib/_engine/engine.dart"
-      },
-      "async": {
-        "uri": "../dart-sdk/lib/async/async.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/async_patch.dart"
-      },
-      "collection": {
-        "uri": "../dart-sdk/lib/collection/collection.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/collection_patch.dart"
-      },
-      "convert": {
-        "uri": "../dart-sdk/lib/convert/convert.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/convert_patch.dart"
-      },
-      "core": {
-        "uri": "../dart-sdk/lib/core/core.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/core_patch.dart"
-      },
-      "developer": {
-        "uri": "../dart-sdk/lib/developer/developer.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/developer_patch.dart"
-      },
-      "html": {
-        "uri": "../dart-sdk/lib/html/dart2js/html_dart2js.dart"
-      },
-      "html_common": {
-        "uri": "../dart-sdk/lib/html/html_common/html_common_dart2js.dart"
-      },
-      "indexed_db": {
-        "uri": "../dart-sdk/lib/indexed_db/dart2js/indexed_db_dart2js.dart"
-      },
-      "_http": {
-        "uri": "../dart-sdk/lib/_http/http.dart"
-      },
-      "io": {
-        "uri": "../dart-sdk/lib/io/io.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/io_patch.dart",
-        "supported": false
-      },
-      "isolate": {
-        "uri": "../dart-sdk/lib/isolate/isolate.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/isolate_patch.dart",
-        "supported": false
-      },
-      "js": {
-        "uri": "../dart-sdk/lib/js/js.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/js_patch.dart"
-      },
-      "_js": {
-        "uri": "../dart-sdk/lib/js/_js.dart",
-        "patches": "../dart-sdk/lib/js/_js_client.dart"
-      },
-      "_js_annotations": {
-        "uri": "../dart-sdk/lib/js/_js_annotations.dart"
-      },
-      "js_util": {
-        "uri": "../dart-sdk/lib/js_util/js_util.dart"
-      },
-      "math": {
-        "uri": "../dart-sdk/lib/math/math.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/math_patch.dart"
-      },
-      "typed_data": {
-        "uri": "../dart-sdk/lib/typed_data/typed_data.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/typed_data_patch.dart"
-      },
-      "_native_typed_data": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/native_typed_data.dart"
-      },
-      "svg": {
-        "uri": "../dart-sdk/lib/svg/dart2js/svg_dart2js.dart"
-      },
-      "web_audio": {
-        "uri": "../dart-sdk/lib/web_audio/dart2js/web_audio_dart2js.dart"
-      },
-      "web_gl": {
-        "uri": "../dart-sdk/lib/web_gl/dart2js/web_gl_dart2js.dart"
-      },
-      "_dart2js_runtime_metrics": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/dart2js_runtime_metrics.dart"
-      },
-      "_internal": {
-        "uri": "../dart-sdk/lib/internal/internal.dart",
-        "patches": "../dart-sdk/lib/_internal/js_runtime/lib/internal_patch.dart"
-      },
-      "_js_helper": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/js_helper.dart"
-      },
-      "_late_helper": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/late_helper.dart"
-      },
-      "_rti": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/rti.dart"
-      },
-      "_interceptors": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/interceptors.dart"
-      },
-      "_foreign_helper": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/foreign_helper.dart"
-      },
-      "_js_names": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/js_names.dart"
-      },
-      "_js_primitives": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/js_primitives.dart"
-      },
-      "_js_embedded_names": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/shared/embedded_names.dart"
-      },
-      "_async_await_error_codes": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/shared/async_await_error_codes.dart"
-      },
-      "_recipe_syntax": {
-        "uri": "../dart-sdk/lib/_internal/js_runtime/lib/shared/recipe_syntax.dart"
-      },
-      "_metadata": {
-        "uri": "../dart-sdk/lib/html/html_common/metadata.dart"
       }
     }
   }
