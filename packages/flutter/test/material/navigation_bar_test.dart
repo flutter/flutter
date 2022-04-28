@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -135,6 +136,104 @@ void main() {
 
     final double expectedHeight = defaultSize + bottomPadding;
     expect(tester.getSize(find.byType(NavigationBar)).height, expectedHeight);
+  });
+
+  testWidgets('NavigationBar respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+    const double safeAreaPadding = 40.0;
+    Widget navigationBar() {
+      return NavigationBar(
+        destinations: const <Widget>[
+          NavigationDestination(
+            icon: Icon(Icons.ac_unit),
+            label: 'AC',
+          ),
+          NavigationDestination(
+            key: Key('Center'),
+            icon: Icon(Icons.center_focus_strong),
+            label: 'Center',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.access_alarm),
+            label: 'Alarm',
+          ),
+        ],
+        onDestinationSelected: (int i) {},
+      );
+    }
+
+    await tester.pumpWidget(_buildWidget(navigationBar()));
+    final double defaultWidth = tester.getSize(find.byType(NavigationBar)).width;
+    final Finder defaultCenterItem = find.byKey(const Key('Center'));
+    final Offset center = tester.getCenter(defaultCenterItem);
+    expect(center.dx, defaultWidth / 2);
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.only(left: safeAreaPadding),
+          ),
+          child: navigationBar(),
+        ),
+      ),
+    );
+
+    // The position of center item of navigation bar should indicate whether
+    // the safe area is sufficiently respected, when safe area is on the left side.
+    // e.g. Android device with system navigation bar in landscape mode.
+    final Finder leftPaddedCenterItem = find.byKey(const Key('Center'));
+    final Offset leftPaddedCenter = tester.getCenter(leftPaddedCenterItem);
+    expect(
+      leftPaddedCenter.dx,
+      closeTo((defaultWidth + safeAreaPadding) / 2.0, precisionErrorTolerance),
+    );
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+              padding: EdgeInsets.only(right: safeAreaPadding)
+          ),
+          child: navigationBar(),
+        ),
+      ),
+    );
+
+    // The position of center item of navigation bar should indicate whether
+    // the safe area is sufficiently respected, when safe area is on the right side.
+    // e.g. Android device with system navigation bar in landscape mode.
+    final Finder rightPaddedCenterItem = find.byKey(const Key('Center'));
+    final Offset rightPaddedCenter = tester.getCenter(rightPaddedCenterItem);
+    expect(
+      rightPaddedCenter.dx,
+      closeTo((defaultWidth - safeAreaPadding) / 2, precisionErrorTolerance),
+    );
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.fromLTRB(
+                safeAreaPadding,
+                0,
+                safeAreaPadding,
+                safeAreaPadding
+            ),
+          ),
+          child: navigationBar(),
+        ),
+      ),
+    );
+
+    // The position of center item of navigation bar should indicate whether
+    // the safe area is sufficiently respected, when safe areas are on both sides.
+    // e.g. iOS device with both sides of round corner.
+    final Finder paddedCenterItem = find.byKey(const Key('Center'));
+    final Offset paddedCenter = tester.getCenter(paddedCenterItem);
+    expect(
+      paddedCenter.dx,
+      closeTo(defaultWidth / 2, precisionErrorTolerance),
+    );
   });
 
   testWidgets('NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
