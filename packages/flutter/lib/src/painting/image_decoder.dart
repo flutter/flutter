@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-import 'dart:ui' as ui show Codec, FrameInfo, Image;
+import 'dart:ui' as ui show Codec, FrameInfo, Image, ImmutableBuffer;
 
 import 'binding.dart';
 
@@ -20,7 +20,8 @@ import 'binding.dart';
 /// [PaintingBinding.instantiateImageCodec], and therefore can be mocked in
 /// tests.
 Future<ui.Image> decodeImageFromList(Uint8List bytes) async {
-  final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodec(bytes);
+  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+  final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodec(buffer);
   final ui.FrameInfo frameInfo = await codec.getNextFrame();
   return frameInfo.image;
 }

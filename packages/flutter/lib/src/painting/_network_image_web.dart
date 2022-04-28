@@ -143,7 +143,7 @@ class NetworkImage
         throw image_provider.NetworkImageLoadException(
             statusCode: request.status!, uri: resolved);
 
-      return decode(bytes);
+      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
     } else {
       // This API only exists in the web engine implementation and is not
       // contained in the analyzer summary for Flutter.

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
@@ -54,6 +54,11 @@ abstract class AssetBundle {
   ///
   /// Throws an exception if the asset is not found.
   Future<ByteData> load(String key);
+
+  /// Retrieve an opaque binary resource from the asset bundle as a data stream.
+  ///
+  /// Throws an exception if the asset is not found.
+  Future<ui.ImmutableBuffer> loadBuffer(String key);
 
   /// Retrieve a string from the asset bundle.
   ///
@@ -151,6 +156,11 @@ class NetworkAssetBundle extends AssetBundle {
 
   @override
   String toString() => '${describeIdentity(this)}($_baseUrl)';
+
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    return ui.ImmutableBuffer.fromUint8List((await load(key)).buffer.asUint8List());
+  }
 }
 
 /// An [AssetBundle] that permanently caches string and structured resources
@@ -236,6 +246,19 @@ class PlatformAssetBundle extends CachingAssetBundle {
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;
+  }
+
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    if (kIsWeb) {
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List((await load(key)).buffer.asUint8List());
+      return buffer;
+    }
+    final ui.ImmutableBuffer? result = ui.ImmutableBuffer.fromAsset(key);
+    if (result == null) {
+      throw FlutterError('Unable to load asset: $key');
+    }
+    return result;
   }
 }
 

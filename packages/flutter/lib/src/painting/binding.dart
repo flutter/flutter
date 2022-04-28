@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show Uint8List;
-import 'dart:ui' as ui show instantiateImageCodec, Codec;
+import 'dart:ui' as ui show instantiateImageCodecFromBuffer, Codec, ImmutableBuffer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
@@ -98,7 +97,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// above its native resolution should prefer scaling the canvas the image is
   /// drawn into.
   Future<ui.Codec> instantiateImageCodec(
-    Uint8List bytes, {
+    ui.ImmutableBuffer buffer, {
     int? cacheWidth,
     int? cacheHeight,
     bool allowUpscaling = false,
@@ -106,8 +105,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     assert(cacheWidth == null || cacheWidth > 0);
     assert(cacheHeight == null || cacheHeight > 0);
     assert(allowUpscaling != null);
-    return ui.instantiateImageCodec(
-      bytes,
+    return ui.instantiateImageCodecFromBuffer(
+      buffer,
       targetWidth: cacheWidth,
       targetHeight: cacheHeight,
       allowUpscaling: allowUpscaling,
