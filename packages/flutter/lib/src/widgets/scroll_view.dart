@@ -179,9 +179,13 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// Defaults to null. When null, and a controller is not provided,
   /// [PrimaryScrollController.shouldInherit] is used to decide automatic
-  /// inheritance. By default, a [PrimaryScrollController] is configured to
-  /// automatically be inherited on [TargetPlatformVariant.mobile] for
-  /// ScrollViews in the [Axis.vertical] scroll direction.
+  /// inheritance.
+  ///
+  /// By default, the [PrimaryScrollController] that is injected by each
+  /// [ModalRoute] is configured to automatically be inherited on
+  /// [TargetPlatformVariant.mobile] for ScrollViews in the [Axis.vertical]
+  /// scroll direction. Adding another to your app will override the
+  /// PrimaryScrollController above it.
   /// {@endtemplate}
   final bool? primary;
 

@@ -21,12 +21,11 @@ const Set<TargetPlatform> _kMobilePlatforms = <TargetPlatform>{
 /// uses [of] to inherit the [PrimaryScrollController] associated with its
 /// subtree.
 ///
-/// The PrimaryScrollController can be automatically inherited
-/// based on the [scrollDirection] and [TargetPlatform]. A [ScrollView] that has
-/// not been provided a controller, or set [ScrollView.primary], will evaluate
-/// this inheritance option using [shouldInherit]. By default, an [Axis.vertical]
-/// ScrollView on mobile platforms will automatically inherit the
-/// PrimaryScrollController.
+/// A ScrollView that doesn't have a controller or the primary flag set will
+/// inherit the PrimarySCrollController, if [shouldInherit] allows it. By
+/// default [shouldInherit] is true for mobile platforms when the ScrollView has
+/// a scroll direction of [Axis.vertical]. This automatic inheritance can be
+/// configured with [automaticallyInheritForPlatforms] and [scrollDirection].
 ///
 /// Inheriting this ScrollController can provide default behavior for scroll
 /// views in a subtree. For example, the [Scaffold] uses this mechanism to
@@ -49,7 +48,7 @@ class PrimaryScrollController extends InheritedWidget {
   const PrimaryScrollController({
     super.key,
     required ScrollController this.controller,
-    this.autoForPlatforms = _kMobilePlatforms,
+    this.automaticallyInheritForPlatforms = _kMobilePlatforms,
     this.scrollDirection = Axis.vertical,
     required super.child,
   }) : assert(controller != null);
@@ -58,7 +57,7 @@ class PrimaryScrollController extends InheritedWidget {
   const PrimaryScrollController.none({
     super.key,
     required super.child,
-  }) : autoForPlatforms = const <TargetPlatform>{},
+  }) : automaticallyInheritForPlatforms = const <TargetPlatform>{},
        scrollDirection = null,
        controller = null;
 
@@ -73,37 +72,48 @@ class PrimaryScrollController extends InheritedWidget {
   /// The [Axis] this controller is configured for [ScrollView]s to
   /// automatically inherit.
   ///
-  /// Used in conjunction with [autoForPlatforms]. If the current
-  /// [TargetPlatform] is not included in [autoForPlatforms], this is ignored.
+  /// Used in conjunction with [automaticallyInheritForPlatforms]. If the
+  /// current [TargetPlatform] is not included in
+  /// [automaticallyInheritForPlatforms], this is ignored.
   ///
-  /// When null, no ScrollView in any Axis will automatically inherit this
-  /// controller. Defaults to [Axis.vertical].
+  /// When null, no [ScrollView] in any Axis will automatically inherit this
+  /// controller. This is dissimilar to [PrimaryScrollController.none]. When a
+  /// PrimaryScrollController is inherited, ScrollView will insert
+  /// PrimaryScrollController.none into the tree to prevent further descendant
+  /// ScrollViews from inheriting the current PrimaryScrollController.
+  ///
+  /// Defaults to [Axis.vertical].
   final Axis? scrollDirection;
 
   /// The [TargetPlatform]s this controller is configured for [ScrollView]s to
   /// automatically inherit.
   ///
-  /// Used in conjunction with [scrollDirection]. If the given [Axis] is not
-  /// [scrollDirection], this is ignored.
+  /// Used in conjunction with [scrollDirection]. If the [Axis] provided to
+  /// [shouldInherit] is not [scrollDirection], this is ignored.
   ///
   /// When empty, no ScrollView in any Axis will automatically inherit this
   /// controller. Defaults to [TargetPlatformVariant.mobile].
-  final Set<TargetPlatform> autoForPlatforms;
+  final Set<TargetPlatform> automaticallyInheritForPlatforms;
 
   /// Returns true if this PrimaryScrollController is configured to be
   /// automatically inherited for the current [TargetPlatform] and the given
   /// [Axis].
   ///
-  /// If a [ScrollController] has already been provided to
-  /// [ScrollView.controller], or [ScrollView.primary] is false, this is
-  /// disregarded.
+  /// This method is typically not called directly. [ScrollView] will call this
+  /// method if it has not been provided a [ScrollController] and
+  /// [ScrollView.primary] is unset.
+  ///
+  /// If a ScrollController has already been provided to
+  /// [ScrollView.controller], or [ScrollView.primary] is set, this is method is
+  /// not called by ScrollView as it will have determined whether or not to
+  /// inherit the PrimaryScrollController.
   static bool shouldInherit(BuildContext context, Axis scrollDirection) {
     final PrimaryScrollController? result = context.findAncestorWidgetOfExactType<PrimaryScrollController>();
-    final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
     if (result == null)
       return false;
 
-    if (result.autoForPlatforms.contains(platform))
+    final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
+    if (result.automaticallyInheritForPlatforms.contains(platform))
       return result.scrollDirection == scrollDirection;
     return false;
   }

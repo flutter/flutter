@@ -900,6 +900,17 @@ void main() {
     expect(log, isEmpty);
   });
 
+  test('PrimaryScrollController.automaticallyInheritOnPlatforms defaults to all mobile platforms', (){
+     final PrimaryScrollController primaryScrollController = PrimaryScrollController(
+        controller: ScrollController(),
+       child: const SizedBox(),
+     );
+     expect(
+       primaryScrollController.automaticallyInheritForPlatforms,
+       TargetPlatformVariant.mobile().values,
+     );
+  });
+
   testWidgets('Vertical CustomScrollViews are not primary by default', (WidgetTester tester) async {
     const CustomScrollView view = CustomScrollView();
     expect(view.primary, isNull);
@@ -951,7 +962,7 @@ void main() {
     expect(view.primary, isNull);
   });
 
-  testWidgets('Vertical GRidViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+  testWidgets('Vertical GridViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: GridView.count(crossAxisCount: 1),
