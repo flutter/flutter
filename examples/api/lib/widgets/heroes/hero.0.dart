@@ -41,8 +41,9 @@ class HeroExample extends StatelessWidget {
             child: _blueBox(const Size(50, 50)),
           ),
           onTap: () => _gotoDetailsPage(context),
-          title:
-              const Text('Tap on the icon to view hero animation transition.'),
+          title: const Text(
+            'Tap on the icon to view hero animation transition.',
+          ),
         ),
       ],
     );
