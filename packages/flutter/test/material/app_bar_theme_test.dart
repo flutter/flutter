@@ -15,8 +15,10 @@ void main() {
   });
 
   testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
+        theme: theme,
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
@@ -33,17 +35,33 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
-    expect(widget.color, Colors.blue);
-    expect(widget.elevation, 4.0);
-    expect(widget.shadowColor, Colors.black);
-    expect(widget.shape, null);
-    expect(iconTheme.data, const IconThemeData(color: Colors.white));
-    expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
-    expect(actionIconText.text.style!.color, Colors.white);
-    expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
-    expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
-    expect(tester.getSize(find.byType(AppBar)).width, 800);
+    if (theme.useMaterial3) {
+      expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+      expect(widget.color, theme.colorScheme.surface);
+      expect(widget.elevation, 0);
+      expect(widget.shadowColor, null);
+      expect(widget.surfaceTintColor, theme.colorScheme.surfaceTint);
+      expect(widget.shape, null);
+      expect(iconTheme.data, IconThemeData(color: theme.colorScheme.onSurface, size: 24));
+      expect(actionsIconTheme.data, IconThemeData(color: theme.colorScheme.onSurfaceVariant, size: 24));
+      expect(actionIconText.text.style!.color, Colors.black);
+      expect(text.style, Typography.material2021().englishLike.bodyText2!.merge(Typography.material2021().black.bodyText2).copyWith(color: theme.colorScheme.onSurface));
+      expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+      expect(tester.getSize(find.byType(AppBar)).width, 800);
+    } else {
+      expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
+      expect(widget.color, Colors.blue);
+      expect(widget.elevation, 4.0);
+      expect(widget.shadowColor, Colors.black);
+      expect(widget.surfaceTintColor, null);
+      expect(widget.shape, null);
+      expect(iconTheme.data, const IconThemeData(color: Colors.white));
+      expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
+      expect(actionIconText.text.style!.color, Colors.white);
+      expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
+      expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+      expect(tester.getSize(find.byType(AppBar)).width, 800);
+    }
   });
 
   testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
@@ -73,6 +91,7 @@ void main() {
     expect(widget.color, appBarTheme.backgroundColor);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
+    expect(widget.surfaceTintColor, appBarTheme.surfaceTintColor);
     expect(widget.shape, const StadiumBorder());
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
@@ -132,7 +151,8 @@ void main() {
     const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light;
     const Color color = Colors.orange;
     const double elevation = 3.0;
-    const Color shadowColor = Colors.red;
+    const Color shadowColor = Colors.purple;
+    const Color surfaceTintColor = Colors.brown;
     const ShapeBorder shape = RoundedRectangleBorder();
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
     const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
@@ -151,6 +171,7 @@ void main() {
             systemOverlayStyle: systemOverlayStyle,
             elevation: elevation,
             shadowColor: shadowColor,
+            surfaceTintColor: surfaceTintColor,
             shape: shape,
             iconTheme: iconThemeData,
             actionsIconTheme: actionsIconThemeData,
@@ -174,6 +195,7 @@ void main() {
     expect(widget.color, color);
     expect(widget.elevation, elevation);
     expect(widget.shadowColor, shadowColor);
+    expect(widget.surfaceTintColor, surfaceTintColor);
     expect(widget.shape, shape);
     expect(iconTheme.data, iconThemeData);
     expect(actionsIconTheme.data, actionsIconThemeData);
@@ -228,6 +250,7 @@ void main() {
     expect(widget.color, appBarTheme.backgroundColor);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
+    expect(widget.surfaceTintColor, appBarTheme.surfaceTintColor);
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
@@ -235,15 +258,13 @@ void main() {
   });
 
   testWidgets('ThemeData colorScheme is used when no AppBarTheme is set', (WidgetTester tester) async {
-    late ThemeData theme;
+    final ThemeData lightTheme = ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData darkTheme = ThemeData.from(colorScheme: const ColorScheme.dark());
     Widget buildFrame(ThemeData appTheme) {
       return MaterialApp(
         theme: appTheme,
         home: Builder(
           builder: (BuildContext context) {
-            // This ThemeData has been localized with ThemeData.localize. The
-            // appTheme parameter has not, so its textTheme is incomplete.
-            theme = Theme.of(context);
             return Scaffold(
               appBar: AppBar(
                 actions: <Widget>[
@@ -256,57 +277,120 @@ void main() {
       );
     }
 
-    // AppBar defaults for light themes:
-    // - elevation: 4
-    // - shadow color: black
-    // - background color: ColorScheme.primary
-    // - foreground color: ColorScheme.onPrimary
-    // - actions text: style bodyText2, foreground color
-    // - status bar brightness: light (based on color scheme brightness)
-    {
-      await tester.pumpWidget(buildFrame(ThemeData.from(colorScheme: const ColorScheme.light())));
+    if (lightTheme.useMaterial3) {
+      // M3 AppBar defaults for light themes:
+      // - elevation: 0
+      // - shadow color: null
+      // - surface tint color: ColorScheme.surfaceTint
+      // - background color: ColorScheme.surface
+      // - foreground color: ColorScheme.onSurface
+      // - actions text: style bodyText2, foreground color
+      // - status bar brightness: light (based on color scheme brightness)
+      {
+        await tester.pumpWidget(buildFrame(lightTheme));
 
-      final Material widget = _getAppBarMaterial(tester);
-      final IconTheme iconTheme = _getAppBarIconTheme(tester);
-      final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
-      final RichText actionIconText = _getAppBarIconRichText(tester);
-      final DefaultTextStyle text = _getAppBarText(tester);
+        final Material widget = _getAppBarMaterial(tester);
+        final IconTheme iconTheme = _getAppBarIconTheme(tester);
+        final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+        final RichText actionIconText = _getAppBarIconRichText(tester);
+        final DefaultTextStyle text = _getAppBarText(tester);
 
-      expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
-      expect(widget.color, theme.colorScheme.primary);
-      expect(widget.elevation, 4.0);
-      expect(widget.shadowColor, Colors.black);
-      expect(iconTheme.data.color, theme.colorScheme.onPrimary);
-      expect(actionsIconTheme.data.color, theme.colorScheme.onPrimary);
-      expect(actionIconText.text.style!.color, theme.colorScheme.onPrimary);
-      expect(text.style.compareTo(theme.textTheme.bodyText2!.copyWith(color: theme.colorScheme.onPrimary)), RenderComparison.identical);
-    }
+        expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+        expect(widget.color, lightTheme.colorScheme.surface);
+        expect(widget.elevation, 0);
+        expect(widget.shadowColor, null);
+        expect(widget.surfaceTintColor, lightTheme.colorScheme.surfaceTint);
+        expect(iconTheme.data.color, lightTheme.colorScheme.onSurface);
+        expect(actionsIconTheme.data.color, lightTheme.colorScheme.onSurface);
+        expect(actionIconText.text.style!.color, lightTheme.colorScheme.onSurface);
+        expect(text.style, Typography.material2021().englishLike.bodyText2!.merge(Typography.material2021().black.bodyText2).copyWith(color: lightTheme.colorScheme.onSurface));
+      }
 
-    // AppBar defaults for dark themes:
-    // - elevation: 4
-    // - shadow color: black
-    // - background color: ColorScheme.surface
-    // - foreground color: ColorScheme.onSurface
-    // - actions text: style bodyText2, foreground color
-    // - status bar brightness: dark (based on background color)
-    {
-      await tester.pumpWidget(buildFrame(ThemeData.from(colorScheme: const ColorScheme.dark())));
-      await tester.pumpAndSettle(); // Theme change animation
+      // M3 AppBar defaults for dark themes:
+      // - elevation: 0
+      // - shadow color: null
+      // - surface tint color: ColorScheme.surfaceTint
+      // - background color: ColorScheme.surface
+      // - foreground color: ColorScheme.onSurface
+      // - actions text: style bodyText2, foreground color
+      // - status bar brightness: dark (based on background color)
+      {
+        await tester.pumpWidget(buildFrame(ThemeData.from(colorScheme: const ColorScheme.dark())));
+        await tester.pumpAndSettle(); // Theme change animation
 
-      final Material widget = _getAppBarMaterial(tester);
-      final IconTheme iconTheme = _getAppBarIconTheme(tester);
-      final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
-      final RichText actionIconText = _getAppBarIconRichText(tester);
-      final DefaultTextStyle text = _getAppBarText(tester);
+        final Material widget = _getAppBarMaterial(tester);
+        final IconTheme iconTheme = _getAppBarIconTheme(tester);
+        final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+        final RichText actionIconText = _getAppBarIconRichText(tester);
+        final DefaultTextStyle text = _getAppBarText(tester);
 
-      expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
-      expect(widget.color, theme.colorScheme.surface);
-      expect(widget.elevation, 4.0);
-      expect(widget.shadowColor, Colors.black);
-      expect(iconTheme.data.color, theme.colorScheme.onSurface);
-      expect(actionsIconTheme.data.color, theme.colorScheme.onSurface);
-      expect(actionIconText.text.style!.color, theme.colorScheme.onSurface);
-      expect(text.style.compareTo(theme.textTheme.bodyText2!.copyWith(color: theme.colorScheme.onSurface)), RenderComparison.identical);
+        expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
+        expect(widget.color, darkTheme.colorScheme.surface);
+        expect(widget.elevation, 0);
+        expect(widget.shadowColor, null);
+        expect(widget.surfaceTintColor, darkTheme.colorScheme.surfaceTint);
+        expect(iconTheme.data.color, darkTheme.colorScheme.onSurface);
+        expect(actionsIconTheme.data.color, darkTheme.colorScheme.onSurface);
+        expect(actionIconText.text.style!.color, darkTheme.colorScheme.onSurface);
+        expect(text.style, Typography.material2021().englishLike.bodyText2!.merge(Typography.material2021().black.bodyText2).copyWith(color: darkTheme.colorScheme.onSurface));
+      }
+    } else {
+      // AppBar defaults for light themes:
+      // - elevation: 4
+      // - shadow color: black
+      // - surface tint color: null
+      // - background color: ColorScheme.primary
+      // - foreground color: ColorScheme.onPrimary
+      // - actions text: style bodyText2, foreground color
+      // - status bar brightness: light (based on color scheme brightness)
+      {
+        await tester.pumpWidget(buildFrame(lightTheme));
+
+        final Material widget = _getAppBarMaterial(tester);
+        final IconTheme iconTheme = _getAppBarIconTheme(tester);
+        final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+        final RichText actionIconText = _getAppBarIconRichText(tester);
+        final DefaultTextStyle text = _getAppBarText(tester);
+
+        expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
+        expect(widget.color, lightTheme.colorScheme.primary);
+        expect(widget.elevation, 4.0);
+        expect(widget.shadowColor, Colors.black);
+        expect(widget.surfaceTintColor, null);
+        expect(iconTheme.data.color, lightTheme.colorScheme.onPrimary);
+        expect(actionsIconTheme.data.color, lightTheme.colorScheme.onPrimary);
+        expect(actionIconText.text.style!.color, lightTheme.colorScheme.onPrimary);
+        expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2).copyWith(color: lightTheme.colorScheme.onPrimary));
+      }
+
+      // AppBar defaults for dark themes:
+      // - elevation: 4
+      // - shadow color: black
+      // - surface tint color: null
+      // - background color: ColorScheme.surface
+      // - foreground color: ColorScheme.onSurface
+      // - actions text: style bodyText2, foreground color
+      // - status bar brightness: dark (based on background color)
+      {
+        await tester.pumpWidget(buildFrame(darkTheme));
+        await tester.pumpAndSettle(); // Theme change animation
+
+        final Material widget = _getAppBarMaterial(tester);
+        final IconTheme iconTheme = _getAppBarIconTheme(tester);
+        final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+        final RichText actionIconText = _getAppBarIconRichText(tester);
+        final DefaultTextStyle text = _getAppBarText(tester);
+
+        expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
+        expect(widget.color, darkTheme.colorScheme.surface);
+        expect(widget.elevation, 4.0);
+        expect(widget.shadowColor, Colors.black);
+        expect(widget.surfaceTintColor, null);
+        expect(iconTheme.data.color, darkTheme.colorScheme.onSurface);
+        expect(actionsIconTheme.data.color, darkTheme.colorScheme.onSurface);
+        expect(actionIconText.text.style!.color, darkTheme.colorScheme.onSurface);
+        expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2).copyWith(color: darkTheme.colorScheme.onSurface));
+      }
     }
   });
 
@@ -315,7 +399,7 @@ void main() {
 
     Widget buildFrame({ Color? appIconColor, Color? appBarIconColor }) {
       return MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(useMaterial3: false, colorScheme: const ColorScheme.light()),
         home: IconTheme(
           data: IconThemeData(color: appIconColor),
           child: Builder(
@@ -408,6 +492,22 @@ void main() {
     expect(appBar.shadowColor, Colors.yellow);
   });
 
+  testWidgets('AppBar.surfaceTintColor takes priority over AppBarTheme.surfaceTintColor', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(surfaceTintColor: Colors.red)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+          surfaceTintColor: Colors.yellow,
+        ),
+      ),
+    ));
+
+    final AppBar appBar = tester.widget(find.byType(AppBar));
+    // The AppBar.surfaceTintColor should be used instead of AppBarTheme.surfaceTintColor.
+    expect(appBar.surfaceTintColor, Colors.yellow);
+  });
+
   testWidgets('AppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
@@ -493,6 +593,7 @@ void main() {
       backgroundColor: Color(0xff000001),
       elevation: 8.0,
       shadowColor: Color(0xff000002),
+      surfaceTintColor: Color(0xff000003),
       centerTitle: true,
       titleSpacing: 40.0,
     ).debugFillProperties(builder);
@@ -507,6 +608,7 @@ void main() {
       'backgroundColor: Color(0xff000001)',
       'elevation: 8.0',
       'shadowColor: Color(0xff000002)',
+      'surfaceTintColor: Color(0xff000003)',
       'centerTitle: true',
       'titleSpacing: 40.0',
     ]);
@@ -524,6 +626,7 @@ AppBarTheme _appBarTheme() {
   const Color backgroundColor = Colors.lightBlue;
   const double elevation = 6.0;
   const Color shadowColor = Colors.red;
+  const Color surfaceTintColor = Colors.green;
   const IconThemeData iconThemeData = IconThemeData(color: Colors.black);
   const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.pink);
   return const AppBarTheme(
@@ -532,6 +635,7 @@ AppBarTheme _appBarTheme() {
     backgroundColor: backgroundColor,
     elevation: elevation,
     shadowColor: shadowColor,
+    surfaceTintColor: surfaceTintColor,
     shape: StadiumBorder(),
     iconTheme: iconThemeData,
     toolbarHeight: 96,
