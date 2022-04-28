@@ -364,7 +364,9 @@ class DatePickerDialog extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
-  ///
+  /// If true, DatePicker dialog get's closed as date is selected, and returns date.
+  /// 
+  /// If false, has to click on 'OK' button to get the date.
   final bool popOnDateSelection;
 
   @override
