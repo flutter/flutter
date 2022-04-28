@@ -961,6 +961,53 @@ void _tests() {
       expect(tester.getBottomRight(find.byType(TimePickerDialog)), const Offset(390.0, 600.0));
     });
   });
+
+  testWidgets('style property applied to OK and CANCEL button', (WidgetTester tester) async {
+    final ButtonStyle cancelButtonStyle = TextButton.styleFrom(
+      textStyle: const TextStyle(fontSize: 20,color: Colors.red), 
+    );
+
+    final ButtonStyle confirmButtonStyle = TextButton.styleFrom(
+      textStyle: const TextStyle(fontSize: 20,color: Colors.blue),
+    );
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Material( 
+          child: Scaffold(
+            body: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () {
+                      showTimePicker(
+                        context: context,
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                        cancelButonStyle: cancelButtonStyle,
+                        confirmButtonStyle: confirmButtonStyle,
+                        cancelText: 'Cancel'
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final TextButton cancelTextButton = tester.widget(find.byType(TextButton).first);
+    expect(cancelTextButton.style, cancelButtonStyle);
+
+    final TextButton confirmtextButton = tester.widget(find.byType(TextButton).last);
+    expect(confirmtextButton.style, confirmButtonStyle);
+  });
 }
 
 void _testsInput() {

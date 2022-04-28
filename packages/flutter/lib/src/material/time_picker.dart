@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
@@ -1804,6 +1805,8 @@ class TimePickerDialog extends StatefulWidget {
     this.restorationId,
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.onEntryModeChanged,
+    this.cancelButonStyle,
+    this.confirmButtonStyle,
   }) : assert(initialTime != null);
 
   /// The time initially selected when the dialog is shown.
@@ -1850,6 +1853,16 @@ class TimePickerDialog extends StatefulWidget {
 
   /// Callback called when the selected entry mode is changed.
   final EntryModeChangeCallback? onEntryModeChanged;
+
+  /// Optionnaly provide your own button style for the cancel button.
+  ///
+  /// If null, the button uses [Theme.of(context).textButtonTheme].
+  final ButtonStyle? cancelButonStyle;
+
+  /// Optionally provide your own button style for the confirm button.
+  ///
+  /// If null, the button uses [Theme.of(context).textButtonTheme].
+  final ButtonStyle? confirmButtonStyle;
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();
@@ -2190,10 +2203,12 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
               overflowAlignment: OverflowBarAlignment.end,
               children: <Widget>[
                 TextButton(
+                  style: widget.cancelButonStyle,
                   onPressed: _handleCancel,
                   child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
                 ),
                 TextButton(
+                  style: widget.confirmButtonStyle,
                   onPressed: _handleOk,
                   child: Text(widget.confirmText ?? localizations.okButtonLabel),
                 ),
@@ -2421,6 +2436,8 @@ Future<TimeOfDay?> showTimePicker({
   RouteSettings? routeSettings,
   EntryModeChangeCallback? onEntryModeChanged,
   Offset? anchorPoint,
+  ButtonStyle? confirmButtonStyle,
+  ButtonStyle? cancelButonStyle,
 }) async {
   assert(context != null);
   assert(initialTime != null);
@@ -2438,6 +2455,8 @@ Future<TimeOfDay?> showTimePicker({
     hourLabelText: hourLabelText,
     minuteLabelText: minuteLabelText,
     onEntryModeChanged: onEntryModeChanged,
+    confirmButtonStyle: confirmButtonStyle,
+    cancelButonStyle: cancelButonStyle,
   );
   return showDialog<TimeOfDay>(
     context: context,
