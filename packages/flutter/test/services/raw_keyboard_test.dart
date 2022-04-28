@@ -2421,6 +2421,21 @@ void main() {
       expect(data.keyLabel, isEmpty);
     });
 
+    test('Prioritize logical key from specifiedLogicalKey', () {
+      final RawKeyEvent digit1FromFrench = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'linux',
+        'toolkit': 'gtk',
+        'keyCode': 0x6c6,
+        'scanCode': 0x26,
+        'unicodeScalarValues': 0x424,
+        'specifiedLogicalKey': 0x61,
+      });
+      final RawKeyEventDataLinux data = digit1FromFrench.data as RawKeyEventDataLinux;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+    });
+
     test('data.toString', () {
       expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
