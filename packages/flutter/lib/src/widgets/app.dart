@@ -403,6 +403,12 @@ class WidgetsApp extends StatefulWidget {
        routerConfig = null;
 
   /// Creates a [WidgetsApp] that uses the [Router] instead of a [Navigator].
+  ///
+  /// {@template flutter.widgets.WidgetsApp.router}
+  /// If the [routerConfig] is provided, the other router related delegates,
+  /// [routeInformationParser], [routeInformationProvider], [routerDelegate],
+  /// and [backButtonDispatcher], must all be null.
+  /// {@endtemplate}
   WidgetsApp.router({
     super.key,
     this.routeInformationProvider,
@@ -592,15 +598,12 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.routerConfig}
   /// An object to configure the underlying [Router].
   ///
-  /// If this is provided, the other router related delegates,
-  /// [routeInformationParser], [routeInformationProvider], [routerDelegate],
-  /// and [backButtonDispatcher] must all be null.
+  /// {@macro flutter.widgets.WidgetsApp.router}
   ///
   /// See also:
   ///
   ///  * [Router.withConfig], which receives this object when this
   ///    widget builds the [Router].
-  ///  * [RouterConfig], for how to implement its subclasses.
   /// {@endtemplate}
   final RouterConfig<Object>? routerConfig;
 

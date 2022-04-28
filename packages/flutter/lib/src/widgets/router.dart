@@ -80,26 +80,37 @@ class RouteInformation {
 /// and [BackButtonDispatcher]. This abstract class provides way to bundle these
 /// delegates into a single object to configure a [Router].
 ///
-/// The subclasses need to override each getter to return the corresponding
-/// delegate.
-///
 /// The [routerDelegate] must not be null. The [backButtonDispatcher],
 /// [routerInformationProvider], and [routerInformationProvider] are optional.
 ///
 /// If [routerInformationProvider] is not null, [routeInformationParser] must
 /// also not be null.
-abstract class RouterConfig<T> {
+class RouterConfig<T> {
+  /// Creates a [RouterConfig].
+  ///
+  /// The [routerDelegate] must not be null. The [backButtonDispatcher],
+  /// [routeInformationProvider], and [routeInformationParser] are optional.
+  ///
+  /// If [routeInformationProvider] is not null, [routeInformationParser] must
+  /// also not be null.
+  const RouterConfig({
+    this.routeInformationProvider,
+    this.routeInformationParser,
+    required this.routerDelegate,
+    this.backButtonDispatcher,
+  }) : assert(routeInformationProvider == null || routeInformationParser != null);
+
   /// The [RouteInformationProvider] that is used to configure the [Router].
-  RouteInformationProvider? get routeInformationProvider;
+  final RouteInformationProvider? routeInformationProvider;
 
   /// The [RouteInformationParser] that is used to configure the [Router].
-  RouteInformationParser<T>? get routeInformationParser;
+  final RouteInformationParser<T>? routeInformationParser;
 
   /// The [RouterDelegate] that is used to configure the [Router].
-  RouterDelegate<T> get routerDelegate;
+  final RouterDelegate<T> routerDelegate;
 
   /// The [BackButtonDispatcher] that is used to configure the [Router].
-  BackButtonDispatcher? get backButtonDispatcher;
+  final BackButtonDispatcher? backButtonDispatcher;
 }
 
 /// The dispatcher for opening and closing pages of an application.

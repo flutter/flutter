@@ -1086,7 +1086,7 @@ void main() {
       },
     );
     delegate.routeInformation = const RouteInformation(location: 'initial');
-    final SimpleRouterConfig routerConfig = SimpleRouterConfig(routerDelegate: delegate);
+    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await tester.pumpWidget(MaterialApp.router(
       routerDelegate: delegate,
       routerConfig: routerConfig,
@@ -1095,7 +1095,7 @@ void main() {
   });
 
   testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
-    final SimpleRouterConfig routerConfig = SimpleRouterConfig(
+    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
         routeInformationProvider: PlatformRouteInformationProvider(
           initialRouteInformation: const RouteInformation(
             location: 'initial',
@@ -1356,24 +1356,4 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
       ],
     );
   }
-}
-
-class SimpleRouterConfig extends RouterConfig<RouteInformation> {
-  SimpleRouterConfig({
-    this.routeInformationProvider,
-    this.routeInformationParser,
-    required this.routerDelegate,
-    this.backButtonDispatcher,
-  });
-  @override
-  final  BackButtonDispatcher? backButtonDispatcher;
-
-  @override
-  final  RouteInformationParser<RouteInformation>? routeInformationParser;
-
-  @override
-  final  RouteInformationProvider? routeInformationProvider;
-
-  @override
-  final  RouterDelegate<RouteInformation> routerDelegate;
 }

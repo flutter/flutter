@@ -1452,7 +1452,15 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
   });
 
   testWidgets('Router can initialize with RouterConfig', (WidgetTester tester) async {
-    final SimpleRouterConfig config = SimpleRouterConfig();
+    const String expected = 'text';
+    final RouterConfig<RouteInformation> config = RouterConfig<RouteInformation>(
+      routeInformationProvider: SimpleRouteInformationProvider()..value = const RouteInformation(location: '/'),
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: SimpleRouterDelegate(
+        builder: (_, __) => const Text(expected),
+      ),
+      backButtonDispatcher: RootBackButtonDispatcher(),
+    );
     final Router<RouteInformation> router = Router<RouteInformation>.withConfig(config: config);
     expect(router.routerDelegate, config.routerDelegate);
     expect(router.routeInformationParser, config.routeInformationParser);
@@ -1461,7 +1469,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
 
     await tester.pumpWidget(buildBoilerPlate(router));
 
-    expect(find.text(SimpleRouterConfig.text), findsOneWidget);
+    expect(find.text(expected), findsOneWidget);
   });
 }
 
@@ -1699,20 +1707,4 @@ class RedirectingInformationParser extends RouteInformationParser<RouteInformati
   RouteInformation restoreRouteInformation(RouteInformation configuration) {
     return configuration;
   }
-}
-
-class SimpleRouterConfig extends RouterConfig<RouteInformation> {
-  static const String text = 'simple!';
-
-  @override
-  final BackButtonDispatcher? backButtonDispatcher = RootBackButtonDispatcher();
-
-  @override
-  final RouteInformationParser<RouteInformation>? routeInformationParser = SimpleRouteInformationParser();
-
-  @override
-  final RouteInformationProvider? routeInformationProvider = SimpleRouteInformationProvider()..value = const RouteInformation(location: '/');
-
-  @override
-  final RouterDelegate<RouteInformation> routerDelegate = SimpleRouterDelegate(builder: (_, __) => const Text(text));
 }

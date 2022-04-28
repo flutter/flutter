@@ -192,6 +192,8 @@ class CupertinoApp extends StatefulWidget {
        routerConfig = null;
 
   /// Creates a [CupertinoApp] that uses the [Router] instead of a [Navigator].
+  ///
+  /// {@macro flutter.widgets.WidgetsApp.router}
   const CupertinoApp.router({
     super.key,
     this.routeInformationProvider,
