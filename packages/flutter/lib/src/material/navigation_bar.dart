@@ -147,41 +147,35 @@ class NavigationBar extends StatelessWidget {
     final NavigationDestinationLabelBehavior effectiveLabelBehavior = labelBehavior
       ?? navigationBarTheme.labelBehavior
       ?? defaults.labelBehavior!;
-    final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Material(
       color: backgroundColor
         ?? navigationBarTheme.backgroundColor
         ?? defaults.backgroundColor!,
       elevation: elevation ?? navigationBarTheme.elevation ?? defaults.elevation!,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: additionalBottomPadding),
-        child: MediaQuery.removePadding(
-          context: context,
-          removeBottom: true,
-          child: SizedBox(
-            height: effectiveHeight,
-            child: Row(
-              children: <Widget>[
-                for (int i = 0; i < destinations.length; i++)
-                  Expanded(
-                    child: _SelectableAnimatedBuilder(
-                      duration: animationDuration ?? const Duration(milliseconds: 500),
-                      isSelected: i == selectedIndex,
-                      builder: (BuildContext context, Animation<double> animation) {
-                        return _NavigationDestinationInfo(
-                          index: i,
-                          totalNumberOfDestinations: destinations.length,
-                          selectedAnimation: animation,
-                          labelBehavior: effectiveLabelBehavior,
-                          onTap: _handleTap(i),
-                          child: destinations[i],
-                        );
-                      },
-                    ),
+      child: SafeArea(
+        child: SizedBox(
+          height: effectiveHeight,
+          child: Row(
+            children: <Widget>[
+              for (int i = 0; i < destinations.length; i++)
+                Expanded(
+                  child: _SelectableAnimatedBuilder(
+                    duration: animationDuration ?? const Duration(milliseconds: 500),
+                    isSelected: i == selectedIndex,
+                    builder: (BuildContext context, Animation<double> animation) {
+                      return _NavigationDestinationInfo(
+                        index: i,
+                        totalNumberOfDestinations: destinations.length,
+                        selectedAnimation: animation,
+                        labelBehavior: effectiveLabelBehavior,
+                        onTap: _handleTap(i),
+                        child: destinations[i],
+                      );
+                    },
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),
