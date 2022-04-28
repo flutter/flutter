@@ -33,13 +33,6 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
   }
 }
 
-SurfaceFrame::~SurfaceFrame() {
-  if (submit_callback_ && !submitted_) {
-    // Dropping without a Submit.
-    submit_callback_(*this, nullptr);
-  }
-}
-
 bool SurfaceFrame::Submit() {
   if (submitted_) {
     return false;

@@ -197,6 +197,7 @@ FILE: ../../../flutter/flow/surface.cc
 FILE: ../../../flutter/flow/surface.h
 FILE: ../../../flutter/flow/surface_frame.cc
 FILE: ../../../flutter/flow/surface_frame.h
+FILE: ../../../flutter/flow/surface_frame_unittests.cc
 FILE: ../../../flutter/flow/texture_unittests.cc
 FILE: ../../../flutter/fml/ascii_trie.cc
 FILE: ../../../flutter/fml/ascii_trie.h
