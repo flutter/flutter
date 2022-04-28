@@ -822,21 +822,21 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
     for (int index = 0; index < lines.length; index++) {
       if (toStringRegExp.hasMatch(lines[index])) {
         final int sourceLine = index + 1;
-        bool _checkForRuntimeType(String line) {
+        bool checkForRuntimeType(String line) {
           if (line.contains(r'$runtimeType') || line.contains('runtimeType.toString()')) {
             problems.add('${file.path}:$sourceLine}: toString calls runtimeType.toString');
             return true;
           }
           return false;
         }
-        if (_checkForRuntimeType(lines[index])) {
+        if (checkForRuntimeType(lines[index])) {
           continue;
         }
         if (lines[index].contains('=>')) {
           while (!lines[index].contains(';')) {
             index++;
             assert(index < lines.length, 'Source file $file has unterminated toString method.');
-            if (_checkForRuntimeType(lines[index])) {
+            if (checkForRuntimeType(lines[index])) {
               break;
             }
           }
@@ -845,7 +845,7 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
           while (!lines[index].contains('}') && openBraceCount > 0) {
             index++;
             assert(index < lines.length, 'Source file $file has unbalanced braces in a toString method.');
-            if (_checkForRuntimeType(lines[index])) {
+            if (checkForRuntimeType(lines[index])) {
               break;
             }
             openBraceCount += '{'.allMatches(lines[index]).length;
