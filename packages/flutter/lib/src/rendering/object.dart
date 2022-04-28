@@ -708,12 +708,11 @@ class PaintingContext extends ClipContext {
         ..offset = offset;
       pushLayer(layer, painter, Offset.zero);
       return layer;
-    } else {
-      canvas.saveLayer(offset & size, Paint()..color = Color(alpha << 24));
-      painter(this, offset);
-      canvas.restore();
-      return null;
     }
+    canvas.saveLayer(offset & size, Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
+    painter(this, offset);
+    canvas.restore();
+    return null;
   }
 
   @override
