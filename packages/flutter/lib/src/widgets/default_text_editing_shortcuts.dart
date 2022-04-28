@@ -157,7 +157,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   );
 
   // These are shortcuts are shared between most platforms except macOS for it
-  // uses different modifier keys as the line/word modifer.
+  // uses different modifier keys as the line/word modifier.
   static final Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
     for (final bool pressShift in const <bool>[true, false])
