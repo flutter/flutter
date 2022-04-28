@@ -10,6 +10,11 @@ mobile, web, and desktop from a single codebase. Flutter works with existing
 code, is used by developers and organizations around the world, and is free and
 open source.
 
+## Table of Contents
+- [Documentation](#documentation)
+- [Terms of Service](#terms-of-service)
+- [About Flutter](#about-flutter)
+
 ## Documentation
 
 * [Install Flutter](https://flutter.dev/get-started/)
@@ -22,7 +27,7 @@ For announcements about new releases, follow the
 mailing list. Our documentation also tracks [breaking
 changes](https://flutter.dev/docs/release/breaking-changes) across releases.
 
-## Terms of service
+## Terms of Service
 
 The Flutter tool may occasionally download resources from Google servers. By
 downloading or using the Flutter SDK you agree to the Google Terms of Service:
