@@ -73,6 +73,35 @@ class RouteInformation {
   final Object? state;
 }
 
+/// A convenient bundle to configure a [Router] widget.
+///
+/// To configure a [Router] widget, one needs to provide several delegates,
+/// [RouteInformationProvider], [RouteInformationParser], [RouterDelegate],
+/// and [BackButtonDispatcher]. This abstract class provides way to bundle these
+/// delegates into a single object to configure a [Router].
+///
+/// The subclasses need to override each getter to return the corresponding
+/// delegate.
+///
+/// The [routerDelegate] must not be null. The [backButtonDispatcher],
+/// [routerInformationProvider], and [routerInformationProvider] are optional.
+///
+/// If [routerInformationProvider] is not null, [routeInformationParser] must
+/// also not be null.
+abstract class RouterConfig<T> {
+  /// The [RouteInformationProvider] that is used to configure the [Router].
+  RouteInformationProvider? get routeInformationProvider;
+
+  /// The [RouteInformationParser] that is used to configure the [Router].
+  RouteInformationParser<T>? get routeInformationParser;
+
+  /// The [RouterDelegate] that is used to configure the [Router].
+  RouterDelegate<T> get routerDelegate;
+
+  /// The [BackButtonDispatcher] that is used to configure the [Router].
+  BackButtonDispatcher? get backButtonDispatcher;
+}
+
 /// The dispatcher for opening and closing pages of an application.
 ///
 /// This widget listens for routing information from the operating system (e.g.
@@ -287,10 +316,37 @@ class Router<T> extends StatefulWidget {
     this.backButtonDispatcher,
     this.restorationScopeId,
   })  : assert(
-          (routeInformationProvider == null && restorationScopeId == null) || routeInformationParser != null,
-          'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.'
+          routeInformationProvider == null || routeInformationParser != null,
+          'A routeInformationParser must be provided when a routeInformationProvider is specified.',
         ),
         assert(routerDelegate != null);
+
+  /// Creates a router with a [RouterConfig].
+  ///
+  /// The [RouterConfig.routeInformationProvider] and
+  /// [RouterConfig.routeInformationParser] can be null if this router does not
+  /// depend on route information. A common example is a sub router that builds
+  /// its content completely based on the app state.
+  ///
+  /// If the [RouterConfig.routeInformationProvider] or [restorationScopeId]
+  /// is not null, then [RouterConfig.routeInformationParser] must also not be
+  /// null.
+  ///
+  /// The [RouterConfig.routerDelegate] must not be null.
+  factory Router.withConfig({
+    Key? key,
+    required RouterConfig<T> config,
+    String? restorationScopeId,
+  }) {
+    return Router<T>(
+      key: key,
+      routeInformationProvider: config.routeInformationProvider,
+      routeInformationParser: config.routeInformationParser,
+      routerDelegate: config.routerDelegate,
+      backButtonDispatcher: config.backButtonDispatcher,
+      restorationScopeId: restorationScopeId,
+    );
+  }
 
   /// The route information provider for the router.
   ///
@@ -511,6 +567,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_routeInformation, 'route');
     if (_routeInformation.value != null) {
+      assert(widget.routeInformationParser != null);
       _processRouteInformation(_routeInformation.value!, () => widget.routerDelegate.setRestoredRoutePath);
     } else if (widget.routeInformationProvider != null) {
       _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setInitialRoutePath);

@@ -248,15 +248,17 @@ class MaterialApp extends StatefulWidget {
        routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
-       backButtonDispatcher = null;
+       backButtonDispatcher = null,
+       routerConfig = null;
 
   /// Creates a [MaterialApp] that uses the [Router] instead of a [Navigator].
   const MaterialApp.router({
     super.key,
     this.scaffoldMessengerKey,
     this.routeInformationProvider,
-    required RouteInformationParser<Object> this.routeInformationParser,
-    required RouterDelegate<Object> this.routerDelegate,
+    this.routeInformationParser,
+    this.routerDelegate,
+    this.routerConfig,
     this.backButtonDispatcher,
     this.builder,
     this.title = '',
@@ -283,8 +285,7 @@ class MaterialApp extends StatefulWidget {
     this.restorationScopeId,
     this.scrollBehavior,
     this.useInheritedMediaQuery = false,
-  }) : assert(routeInformationParser != null),
-       assert(routerDelegate != null),
+  }) : assert(routerDelegate != null || routerConfig != null),
        assert(title != null),
        assert(debugShowMaterialGrid != null),
        assert(showPerformanceOverlay != null),
@@ -352,6 +353,9 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
   final BackButtonDispatcher? backButtonDispatcher;
+
+  /// {@macro flutter.widgets.widgetsApp.routerConfig}
+  final RouterConfig<Object>? routerConfig;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   ///
@@ -832,7 +836,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
 class _MaterialAppState extends State<MaterialApp> {
   late HeroController _heroController;
 
-  bool get _usesRouter => widget.routerDelegate != null;
+  bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
 
   @override
   void initState() {
@@ -925,8 +929,9 @@ class _MaterialAppState extends State<MaterialApp> {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
         routeInformationProvider: widget.routeInformationProvider,
-        routeInformationParser: widget.routeInformationParser!,
-        routerDelegate: widget.routerDelegate!,
+        routeInformationParser: widget.routeInformationParser,
+        routerDelegate: widget.routerDelegate,
+        routerConfig: widget.routerConfig,
         backButtonDispatcher: widget.backButtonDispatcher,
         builder: _materialBuilder,
         title: widget.title,

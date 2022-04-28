@@ -1308,7 +1308,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     expect(find.text('Current route: /404'), findsOneWidget);
     expect(reportedRouteInformation[1].location, '/404');
   });
-
+  
   testWidgets('RouterInformationParser can look up dependencies and reparse', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     provider.value = const RouteInformation(
@@ -1469,6 +1469,19 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await tester.pump();
     expect(find.text('$expectedMaxLines'), findsOneWidget);
     expect(parserCalled, isFalse);
+  });
+
+  testWidgets('Router can initialize with RouterConfig', (WidgetTester tester) async {
+    final SimpleRouterConfig config = SimpleRouterConfig();
+    final Router<RouteInformation> router = Router<RouteInformation>.withConfig(config: config);
+    expect(router.routerDelegate, config.routerDelegate);
+    expect(router.routeInformationParser, config.routeInformationParser);
+    expect(router.routeInformationProvider, config.routeInformationProvider);
+    expect(router.backButtonDispatcher, config.backButtonDispatcher);
+
+    await tester.pumpWidget(buildBoilerPlate(router));
+
+    expect(find.text(SimpleRouterConfig.text), findsOneWidget);
   });
 }
 
@@ -1706,4 +1719,20 @@ class RedirectingInformationParser extends RouteInformationParser<RouteInformati
   RouteInformation restoreRouteInformation(RouteInformation configuration) {
     return configuration;
   }
+}
+
+class SimpleRouterConfig extends RouterConfig<RouteInformation> {
+  static const String text = 'simple!';
+
+  @override
+  BackButtonDispatcher? get backButtonDispatcher => RootBackButtonDispatcher();
+
+  @override
+  RouteInformationParser<RouteInformation>? get routeInformationParser => SimpleRouteInformationParser();
+
+  @override
+  RouteInformationProvider? get routeInformationProvider => SimpleRouteInformationProvider();
+
+  @override
+  RouterDelegate<RouteInformation> get routerDelegate => SimpleRouterDelegate(builder: (_, __) => const Text(text));
 }
