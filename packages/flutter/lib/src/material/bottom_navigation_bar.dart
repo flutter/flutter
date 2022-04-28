@@ -138,7 +138,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// If [selectedLabelStyle].color and [unselectedLabelStyle].color values
   /// are non-null, they will be used instead of [selectedItemColor] and
-  /// [unselectedItemColor] to style the label color.
+  /// [unselectedItemColor].
   ///
   /// If custom [IconThemeData]s are used, you must provide both
   /// [selectedIconTheme] and [unselectedIconTheme], and both
@@ -384,7 +384,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.animation,
     this.iconSize, {
     this.onTap,
-    this.itemColorTween,
+    this.colorTween,
     this.flex,
     this.selected = false,
     required this.selectedLabelStyle,
@@ -410,7 +410,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final Animation<double> animation;
   final double iconSize;
   final VoidCallback? onTap;
-  final ColorTween? itemColorTween;
+  final ColorTween? colorTween;
   final double? flex;
   final bool selected;
   final IconThemeData? selectedIconTheme;
@@ -513,7 +513,7 @@ class _BottomNavigationTile extends StatelessWidget {
         child: _Tile(
           layout: layout,
           icon: _TileIcon(
-            itemColorTween: itemColorTween!,
+            colorTween: colorTween!,
             animation: animation,
             iconSize: iconSize,
             selected: selected,
@@ -522,7 +522,7 @@ class _BottomNavigationTile extends StatelessWidget {
             unselectedIconTheme: unselectedIconTheme,
           ),
           label: _Label(
-            itemColorTween: itemColorTween!,
+            colorTween: colorTween!,
             animation: animation,
             item: item,
             selectedLabelStyle: selectedLabelStyle,
@@ -602,7 +602,7 @@ class _Tile extends StatelessWidget {
 
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
-    required this.itemColorTween,
+    required this.colorTween,
     required this.animation,
     required this.iconSize,
     required this.selected,
@@ -612,7 +612,7 @@ class _TileIcon extends StatelessWidget {
   }) : assert(selected != null),
        assert(item != null);
 
-  final ColorTween itemColorTween;
+  final ColorTween colorTween;
   final Animation<double> animation;
   final double iconSize;
   final bool selected;
@@ -622,7 +622,7 @@ class _TileIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color? iconColor = itemColorTween.evaluate(animation);
+    final Color? iconColor = colorTween.evaluate(animation);
     final IconThemeData defaultIconTheme = IconThemeData(
       color: iconColor,
       size: iconSize,
@@ -646,14 +646,14 @@ class _TileIcon extends StatelessWidget {
 
 class _Label extends StatelessWidget {
   const _Label({
-    required this.itemColorTween,
+    required this.colorTween,
     required this.animation,
     required this.item,
     required this.selectedLabelStyle,
     required this.unselectedLabelStyle,
     required this.showSelectedLabels,
     required this.showUnselectedLabels,
-  }) : assert(itemColorTween != null),
+  }) : assert(colorTween != null),
        assert(animation != null),
        assert(item != null),
        assert(selectedLabelStyle != null),
@@ -661,7 +661,7 @@ class _Label extends StatelessWidget {
        assert(showSelectedLabels != null),
        assert(showUnselectedLabels != null);
 
-  final ColorTween itemColorTween;
+  final ColorTween colorTween;
   final Animation<double> animation;
   final BottomNavigationBarItem item;
   final TextStyle selectedLabelStyle;
@@ -679,16 +679,10 @@ class _Label extends StatelessWidget {
       selectedLabelStyle,
       animation.value,
     )!;
-    final ColorTween labelColor = ColorTween(
-      begin: unselectedLabelStyle.color
-        ?? itemColorTween.begin,
-      end: selectedLabelStyle.color
-        ?? itemColorTween.end,
-    );
     Widget text = DefaultTextStyle.merge(
       style: customStyle.copyWith(
         fontSize: selectedFontSize,
-        color: labelColor.evaluate(animation),
+        color: colorTween.evaluate(animation),
       ),
       // The font size should grow here when active, but because of the way
       // font rendering works, it doesn't grow smoothly if we just animate
@@ -929,10 +923,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
     }
 
-    final ColorTween itemColorTween;
+    final ColorTween colorTween;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
-        itemColorTween = ColorTween(
+        colorTween = ColorTween(
           begin: widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.unselectedWidgetColor,
@@ -943,7 +937,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
         break;
       case BottomNavigationBarType.shifting:
-        itemColorTween = ColorTween(
+        colorTween = ColorTween(
           begin: widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.colorScheme.surface,
@@ -977,7 +971,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         onTap: () {
           widget.onTap?.call(i);
         },
-        itemColorTween: itemColorTween,
+        colorTween: colorTween,
         flex: _evaluateFlex(_animations[i]),
         selected: i == widget.currentIndex,
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels ?? true,
