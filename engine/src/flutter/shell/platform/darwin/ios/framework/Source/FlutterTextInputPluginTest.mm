@@ -20,6 +20,7 @@ FLUTTER_ASSERT_ARC
 @interface FlutterTextInputView ()
 @property(nonatomic, copy) NSString* autofillId;
 - (void)setEditableTransform:(NSArray*)matrix;
+- (void)setTextInputClient:(int)client;
 - (void)setTextInputState:(NSDictionary*)state;
 - (void)setMarkedRect:(CGRect)markedRect;
 - (void)updateEditingState;
@@ -1071,6 +1072,41 @@ FLUTTER_ASSERT_ARC
                                }]]);
 }
 
+- (void)testInputViewsHasNonNilInputDelegate {
+  if (@available(iOS 13.0, *)) {
+    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+    [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+
+    [inputView setTextInputClient:123];
+    [inputView reloadInputViews];
+    [inputView becomeFirstResponder];
+    NSAssert(inputView.isFirstResponder, @"inputView is not first responder");
+    inputView.inputDelegate = nil;
+
+    FlutterTextInputView* mockInputView = OCMPartialMock(inputView);
+    [mockInputView setTextInputState:@{
+      @"text" : @"COMPOSING",
+      @"composingBase" : @1,
+      @"composingExtent" : @3
+    }];
+    OCMVerify([mockInputView setInputDelegate:[OCMArg isNotNil]]);
+  }
+}
+
+- (void)testInputViewsDoNotHaveUITextInteractions {
+  if (@available(iOS 13.0, *)) {
+    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+    BOOL hasTextInteraction = NO;
+    for (id interaction in inputView.interactions) {
+      hasTextInteraction = [interaction isKindOfClass:[UITextInteraction class]];
+      if (hasTextInteraction) {
+        break;
+      }
+    }
+    XCTAssertFalse(hasTextInteraction);
+  }
+}
+
 #pragma mark - UITextInput methods - Tests
 
 - (void)testUpdateFirstRectForRange {
@@ -1243,13 +1279,6 @@ FLUTTER_ASSERT_ARC
 }
 
 #pragma mark - Floating Cursor - Tests
-
-- (void)testInputViewsHaveUIInteractions {
-  if (@available(iOS 13.0, *)) {
-    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
-    XCTAssertGreaterThan(inputView.interactions.count, 0ul);
-  }
-}
 
 - (void)testFloatingCursorDoesNotThrow {
   // The keyboard implementation may send unbalanced calls to the input view.
