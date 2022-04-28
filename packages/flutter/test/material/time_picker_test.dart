@@ -964,7 +964,7 @@ void _tests() {
 
   testWidgets('style property applied to OK and CANCEL button', (WidgetTester tester) async {
     final ButtonStyle cancelButtonStyle = TextButton.styleFrom(
-      textStyle: const TextStyle(fontSize: 20,color: Colors.red), 
+      textStyle: const TextStyle(fontSize: 20,color: Colors.red),
     );
 
     final ButtonStyle confirmButtonStyle = TextButton.styleFrom(
@@ -973,7 +973,7 @@ void _tests() {
 
     Widget buildFrame() {
       return MaterialApp(
-        home: Material( 
+        home: Material(
           child: Scaffold(
             body: Center(
               child: Builder(
