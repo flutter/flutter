@@ -25,12 +25,6 @@ platform_properties:
       ios_profile: "false"
       ios_release: "false"
       no_bitcode: "false"
-      caches: >-
-        [
-          {"name":"builder_linux_engine","path":"builder"},
-          {"name":"gradle","path":"gradle"},
-          {"name":"openjdk","path":"java"}
-        ]
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
@@ -55,13 +49,6 @@ platform_properties:
       ios_profile: "false"
       ios_release: "false"
       no_bitcode: "false"
-      caches: >-
-        [
-          {"name":"flutter_cocoapods","path":"cocoapods"},
-          {"name":"osx_sdk_13a233","path":"osx_sdk"},
-          {"name":"builder_mac_engine","path":"builder"},
-          {"name":"openjdk","path":"java"}
-        ]
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
@@ -86,11 +73,6 @@ platform_properties:
       ios_profile: "false"
       ios_release: "false"
       no_bitcode: "false"
-      caches: >-
-        [
-          {"name":"builder_win_engine","path":"builder"},
-          {"name":"openjdk","path":"java"}
-        ]
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
@@ -288,15 +270,6 @@ targets:
     properties:
       add_recipes_cq: "true"
       jazzy_version: "0.14.1"
-      caches: >-
-        [
-          {"name":"flutter_cocoapods","path":"cocoapods"},
-          {"name":"osx_sdk_13a233_13_15","path":"osx_sdk"},
-          {"name":"builder_mac_engine","path":"builder"},
-          {"name":"openjdk","path":"java"},
-          {"name":"xcode_runtime_ios_13_0","path":"xcode_runtime_ios_13_0"},
-          {"name":"xcode_runtime_ios_15_0","path":"xcode_runtime_ios_15_0"}
-        ]
       runtime_versions: >-
         [
           "ios-13-0",
@@ -324,13 +297,6 @@ targets:
     properties:
       add_recipes_cq: "true"
       gcs_goldens_bucket: flutter_logs
-      caches: >-
-        [
-          {"name":"flutter_cocoapods","path":"cocoapods"},
-          {"name":"old_osx_sdk","path":"osx_sdk"},
-          {"name":"builder_mac_engine","path":"builder"},
-          {"name":"openjdk","path":"java"}
-        ]
       dependencies: >-
         [
           {"dependency": "goldctl"}
