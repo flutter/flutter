@@ -21,17 +21,20 @@ void main() {
     // Jump 25% into the transition (total length = 300ms)
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
     heroSize = tester.getSize(find.byType(Container));
-    expect(heroSize, const Size(102.65049055654471, 59.84646100797477));
+    expect(heroSize.width.roundToDouble(), 103.0);
+    expect(heroSize.height.roundToDouble(), 60.0);
 
     // Jump to 50% into the transition.
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
     heroSize = tester.getSize(find.byType(Container));
-    expect(heroSize, const Size(188.78659078027584, 146.4597263777841));
+    expect(heroSize.width.roundToDouble(), 189.0);
+    expect(heroSize.height.roundToDouble(), 146.0);
 
     // Jump to 75% into the transition.
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
     heroSize = tester.getSize(find.byType(Container));
-    expect(heroSize, const Size(199.29326723291655, 189.97546704388884));
+    expect(heroSize.width.roundToDouble(), 199.0);
+    expect(heroSize.height.roundToDouble(), 190.0);
 
     // Jump to 100% into the transition.
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
@@ -45,17 +48,20 @@ void main() {
     // Jump 25% into the transition (total length = 300ms)
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
     heroSize = tester.getSize(find.byType(Container));
-    expect(heroSize, const Size(199.29326723291655, 189.97546704388884));
+    expect(heroSize.width.roundToDouble(), 199.0);
+    expect(heroSize.height.roundToDouble(), 190.0);
 
     // Jump to 50% into the transition.
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
     heroSize = tester.getSize(find.byType(Container));
-    expect(heroSize, const Size(188.78659078027584, 146.4597263777841));
+    expect(heroSize.width.roundToDouble(), 189.0);
+    expect(heroSize.height.roundToDouble(), 146.0);
 
     // Jump to 75% into the transition.
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
     heroSize = tester.getSize(find.byType(Container));
-    expect(heroSize, const Size(102.65049055654471, 59.84646100797477));
+    expect(heroSize.width.roundToDouble(), 103.0);
+    expect(heroSize.height.roundToDouble(), 60.0);
 
     // Jump to 100% into the transition.
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
