@@ -198,6 +198,10 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
 
   RunEngineExecutable(build_dir, 'fml_unittests', filter, [ fml_unittests_filter ] + shuffle_flags)
 
+  RunEngineExecutable(build_dir, 'display_list_unittests', filter, shuffle_flags)
+
+  RunEngineExecutable(build_dir, 'display_list_rendertests', filter, shuffle_flags)
+
   RunEngineExecutable(build_dir, 'runtime_unittests', filter, shuffle_flags, coverage=coverage)
 
   RunEngineExecutable(build_dir, 'tonic_unittests', filter, shuffle_flags, coverage=coverage)
