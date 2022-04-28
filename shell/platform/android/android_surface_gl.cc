@@ -87,7 +87,8 @@ bool AndroidSurfaceGL::OnScreenSurfaceResize(const SkISize& size) {
 
 bool AndroidSurfaceGL::ResourceContextMakeCurrent() {
   FML_DCHECK(IsValid());
-  return offscreen_surface_->MakeCurrent();
+  auto status = offscreen_surface_->MakeCurrent();
+  return status != AndroidEGLSurfaceMakeCurrentStatus::kFailure;
 }
 
 bool AndroidSurfaceGL::ResourceContextClearCurrent() {
@@ -116,8 +117,9 @@ bool AndroidSurfaceGL::SetNativeWindow(
 std::unique_ptr<GLContextResult> AndroidSurfaceGL::GLContextMakeCurrent() {
   FML_DCHECK(IsValid());
   FML_DCHECK(onscreen_surface_);
+  auto status = onscreen_surface_->MakeCurrent();
   auto default_context_result = std::make_unique<GLContextDefaultResult>(
-      onscreen_surface_->MakeCurrent());
+      status != AndroidEGLSurfaceMakeCurrentStatus::kFailure);
   return std::move(default_context_result);
 }
 

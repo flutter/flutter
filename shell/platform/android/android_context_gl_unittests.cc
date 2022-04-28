@@ -184,6 +184,30 @@ TEST(AndroidContextGl, MSAAx4) {
                      &sample_count);
   EXPECT_EQ(sample_count, 4);
 }
+
+TEST(AndroidContextGl, EnsureMakeCurrentChecksCurrentContextStatus) {
+  GrMockOptions main_context_options;
+  sk_sp<GrDirectContext> main_context =
+      GrDirectContext::MakeMock(&main_context_options);
+  auto environment = fml::MakeRefCounted<AndroidEnvironmentGL>();
+  std::string thread_label =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      thread_label,
+      ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
+  TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
+  auto context = std::make_unique<AndroidContextGL>(
+      AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
+
+  auto pbuffer_surface = context->CreatePbufferSurface();
+  auto status = pbuffer_surface->MakeCurrent();
+  EXPECT_EQ(AndroidEGLSurfaceMakeCurrentStatus::kSuccessMadeCurrent, status);
+
+  // context already current, so status must reflect that.
+  status = pbuffer_surface->MakeCurrent();
+  EXPECT_EQ(AndroidEGLSurfaceMakeCurrentStatus::kSuccessAlreadyCurrent, status);
+}
 }  // namespace android
 }  // namespace testing
 }  // namespace flutter

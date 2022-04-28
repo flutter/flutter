@@ -25,6 +25,16 @@ namespace flutter {
 ///
 class AndroidEGLSurfaceDamage;
 
+/// Result of calling MakeCurrent on AndroidEGLSurface.
+enum class AndroidEGLSurfaceMakeCurrentStatus {
+  /// Success, the egl context for the surface was already current.
+  kSuccessAlreadyCurrent,
+  /// Success, the egl context for the surface made current.
+  kSuccessMadeCurrent,
+  /// Failed to make the egl context for the surface current.
+  kFailure,
+};
+
 class AndroidEGLSurface {
  public:
   AndroidEGLSurface(EGLSurface surface, EGLDisplay display, EGLContext context);
@@ -43,7 +53,7 @@ class AndroidEGLSurface {
   ///
   /// @return     Whether the surface was made current.
   ///
-  bool MakeCurrent() const;
+  AndroidEGLSurfaceMakeCurrentStatus MakeCurrent() const;
 
   //----------------------------------------------------------------------------
   ///
@@ -81,6 +91,9 @@ class AndroidEGLSurface {
   SkISize GetSize() const;
 
  private:
+  /// Returns true if the EGLContext held is current for the display and surface
+  bool IsContextCurrent() const;
+
   const EGLSurface surface_;
   const EGLDisplay display_;
   const EGLContext context_;
