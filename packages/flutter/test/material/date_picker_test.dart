@@ -62,6 +62,7 @@ void main() {
     WidgetTester tester,
     Future<void> Function(Future<DateTime?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
+    bool popOnDateSelection = false,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
@@ -99,6 +100,7 @@ void main() {
       fieldLabelText: fieldLabelText,
       helpText: helpText,
       keyboardType: keyboardType,
+      popOnDateSelection: popOnDateSelection,
       builder: (BuildContext context, Widget? child) {
         return Directionality(
           textDirection: textDirection,
@@ -448,6 +450,32 @@ void main() {
       expect(tester.getBottomRight(find.text('CANCEL')).dx, 188);
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
+    });
+
+    testWidgets('Gets closed when date is selected', (WidgetTester tester) async {
+    await prepareDatePicker(tester, popOnDateSelection: true, (Future<DateTime?> date) async {
+      expect(find.byType(DatePickerDialog), findsOneWidget); 
+
+      await tester.tap(find.text('25'));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      
+      expect(find.byType(DatePickerDialog), findsNothing);
+      expect(await date, DateTime(2016, DateTime.january, 25));
+    });
+
+    await prepareDatePicker(tester, popOnDateSelection: true, (Future<DateTime?> date) async {
+      await tester.tap(find.text('January 2016'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('2018'));
+      await tester.pumpAndSettle();
+      expect(find.text('January 2018'), findsOneWidget);
+
+      await tester.tap(find.text('25'));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      
+      expect(find.byType(DatePickerDialog), findsNothing);
+      expect(await date, DateTime(2018, DateTime.january, 25));
+      });
     });
   });
 

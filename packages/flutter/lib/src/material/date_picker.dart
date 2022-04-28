@@ -157,6 +157,7 @@ Future<DateTime?> showDatePicker({
   String? fieldLabelText,
   TextInputType? keyboardType,
   Offset? anchorPoint,
+  bool popOnDateSelection = false,
 }) async {
   assert(context != null);
   assert(initialDate != null);
@@ -202,6 +203,7 @@ Future<DateTime?> showDatePicker({
     fieldHintText: fieldHintText,
     fieldLabelText: fieldLabelText,
     keyboardType: keyboardType,
+    popOnDateSelection: popOnDateSelection,
   );
 
   if (textDirection != null) {
@@ -259,6 +261,7 @@ class DatePickerDialog extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.restorationId,
+    this.popOnDateSelection = false,
   }) : assert(initialDate != null),
        assert(firstDate != null),
        assert(lastDate != null),
@@ -361,6 +364,9 @@ class DatePickerDialog extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
+  ///
+  final bool popOnDateSelection;
+
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
 }
@@ -422,6 +428,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     setState(() {
       _selectedDate.value = date;
     });
+    
+    if (widget.popOnDateSelection && _entryMode.value == DatePickerEntryMode.calendar) {
+      Navigator.pop(context, date);
+    }
   }
 
   Size _dialogSize(BuildContext context) {
