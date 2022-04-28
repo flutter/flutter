@@ -59,8 +59,6 @@ class SurfaceFrame {
                std::unique_ptr<GLContextResult> context_result = nullptr,
                bool display_list_fallback = false);
 
-  ~SurfaceFrame();
-
   struct SubmitInfo {
     // The frame damage for frame n is the difference between frame n and
     // frame (n-1), and represents the area that a compositor must recompose.
