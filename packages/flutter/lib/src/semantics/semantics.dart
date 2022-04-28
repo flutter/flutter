@@ -130,7 +130,7 @@ class CustomSemanticsAction {
   final SemanticsAction? action;
 
   @override
-  int get hashCode => ui.hashValues(label, hint, action);
+  int get hashCode => Object.hash(label, hint, action);
 
   @override
   bool operator ==(Object other) {
@@ -242,12 +242,7 @@ class AttributedString {
   }
 
   @override
-  int get hashCode {
-    return ui.hashValues(
-      string,
-      attributes,
-    );
-  }
+  int get hashCode => Object.hash(string, attributes,);
 
   @override
   String toString() {
@@ -262,23 +257,15 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
   ///
   /// Such properties are used with [SemanticsData] objects.
   AttributedStringProperty(
-    String name,
-    AttributedString? value, {
-    bool showName = true,
+    String super.name,
+    super.value, {
+    super.showName,
     this.showWhenEmpty = false,
-    Object? defaultValue = kNoDefaultValue,
-    DiagnosticLevel level = DiagnosticLevel.info,
-    String? description,
+    super.defaultValue,
+    super.level,
+    super.description,
   }) : assert(showName != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         showName: showName,
-         defaultValue: defaultValue,
-         level: level,
-         description: description,
-       );
+       assert(level != null);
 
   /// Whether to show the property when the [value] is an [AttributedString]
   /// whose [AttributedString.string] is the empty string.
@@ -329,6 +316,7 @@ class SemanticsData with Diagnosticable {
     required this.attributedIncreasedValue,
     required this.attributedDecreasedValue,
     required this.attributedHint,
+    required this.tooltip,
     required this.textDirection,
     required this.rect,
     required this.elevation,
@@ -352,6 +340,7 @@ class SemanticsData with Diagnosticable {
        assert(attributedDecreasedValue != null),
        assert(attributedIncreasedValue != null),
        assert(attributedHint != null),
+       assert(tooltip == '' || textDirection != null, 'A SemanticsData object with tooltip "$tooltip" had a null textDirection.'),
        assert(attributedLabel.string == '' || textDirection != null, 'A SemanticsData object with label "${attributedLabel.string}" had a null textDirection.'),
        assert(attributedValue.string == '' || textDirection != null, 'A SemanticsData object with value "${attributedValue.string}" had a null textDirection.'),
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
@@ -441,6 +430,11 @@ class SemanticsData with Diagnosticable {
   ///
   /// See also [hint], which exposes just the raw text.
   final AttributedString attributedHint;
+
+  /// A textual description of the widget's tooltip.
+  ///
+  /// The reading direction is given by [textDirection].
+  final String tooltip;
 
   /// The reading direction for the text in [label], [value],
   /// [increasedValue], [decreasedValue], and [hint].
@@ -600,8 +594,9 @@ class SemanticsData with Diagnosticable {
     properties.add(AttributedStringProperty('increasedValue', attributedIncreasedValue));
     properties.add(AttributedStringProperty('decreasedValue', attributedDecreasedValue));
     properties.add(AttributedStringProperty('hint', attributedHint));
+    properties.add(StringProperty('tooltip', tooltip, defaultValue: ''));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    if (textSelection?.isValid == true)
+    if (textSelection?.isValid ?? false)
       properties.add(MessageProperty('textSelection', '[${textSelection!.start}, ${textSelection!.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
     properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
@@ -623,6 +618,7 @@ class SemanticsData with Diagnosticable {
         && other.attributedIncreasedValue == attributedIncreasedValue
         && other.attributedDecreasedValue == attributedDecreasedValue
         && other.attributedHint == attributedHint
+        && other.tooltip == tooltip
         && other.textDirection == textDirection
         && other.rect == rect
         && setEquals(other.tags, tags)
@@ -642,35 +638,34 @@ class SemanticsData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return ui.hashValues(
-      ui.hashValues(
-        flags,
-        actions,
-        attributedLabel,
-        attributedValue,
-        attributedIncreasedValue,
-        attributedDecreasedValue,
-        attributedHint,
-        textDirection,
-        rect,
-        tags,
-        textSelection,
-        scrollChildCount,
-        scrollIndex,
-        scrollPosition,
-        scrollExtentMax,
-        scrollExtentMin,
-        platformViewId,
-        maxValueLength,
-        currentValueLength,
-        transform,
-      ),
+  int get hashCode => Object.hash(
+    flags,
+    actions,
+    attributedLabel,
+    attributedValue,
+    attributedIncreasedValue,
+    attributedDecreasedValue,
+    attributedHint,
+    tooltip,
+    textDirection,
+    rect,
+    tags,
+    textSelection,
+    scrollChildCount,
+    scrollIndex,
+    scrollPosition,
+    scrollExtentMax,
+    scrollExtentMin,
+    platformViewId,
+    maxValueLength,
+    Object.hash(
+      currentValueLength,
+      transform,
       elevation,
       thickness,
-      ui.hashList(customSemanticsActionIds),
-    );
-  }
+      customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
+    ),
+  );
 
   static bool _sortedListsEqual(List<int>? left, List<int>? right) {
     if (left == null && right == null)
@@ -689,15 +684,11 @@ class SemanticsData with Diagnosticable {
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   _SemanticsDiagnosticableNode({
-    String? name,
-    required SemanticsNode value,
-    required DiagnosticsTreeStyle? style,
+    super.name,
+    required super.value,
+    required super.style,
     required this.childOrder,
-  }) : super(
-    name: name,
-    value: value,
-    style: style,
-  );
+  });
 
   final DebugSemanticsDumpOrder childOrder;
 
@@ -744,7 +735,7 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   bool get isNotEmpty => onTapHint != null || onLongPressHint != null;
 
   @override
-  int get hashCode => ui.hashValues(onTapHint, onLongPressHint);
+  int get hashCode => Object.hash(onTapHint, onLongPressHint);
 
   @override
   bool operator ==(Object other) {
@@ -804,6 +795,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.decreasedValue,
     this.attributedDecreasedValue,
     this.hint,
+    this.tooltip,
     this.attributedHint,
     this.hintOverrides,
     this.textDirection,
@@ -997,18 +989,16 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node should be considered a live region.
   ///
-  /// On Android, when the label changes on a live region semantics node,
-  /// TalkBack will make a polite announcement of the current label. This
-  /// announcement occurs even if the node is not focused, but only if the label
-  /// has changed since the last update.
+  /// A live region indicates that updates to semantics node are important.
+  /// Platforms may use this information to make polite announcements to the
+  /// user to inform them of updates to this node.
   ///
-  /// On iOS, no announcements are made but the node is marked as
-  /// `UIAccessibilityTraitUpdatesFrequently`.
-  ///
-  /// An example of a live region is the [SnackBar] widget. When it appears
-  /// on the screen it may be difficult to focus to read the label. A live
-  /// region causes an initial polite announcement to be generated
-  /// automatically.
+  /// An example of a live region is a [SnackBar] widget. On Android and iOS,
+  /// live region causes a polite announcement to be generated automatically,
+  /// even if the widget does not have accessibility focus. This announcement
+  /// may not be spoken if the OS accessibility services are already
+  /// announcing something else, such as reading the label of a focused widget
+  /// or providing a system announcement.
   ///
   /// See also:
   ///
@@ -1198,6 +1188,16 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    is exposed in TalkBack and VoiceOver.
   ///  * [hint] for a plain string version of this property.
   final AttributedString? attributedHint;
+
+  /// Provides a textual description of the widget's tooltip.
+  ///
+  /// In Android, this property sets the `AccessibilityNodeInfo.setTooltipText`.
+  /// In iOS, this property is appended to the end of the
+  /// `UIAccessibilityElement.accessibilityLabel`.
+  ///
+  /// If a [tooltip] is provided, there must either by an ambient
+  /// [Directionality] or an explicit [textDirection] should be provided.
+  final String? tooltip;
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
@@ -1490,6 +1490,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(AttributedStringProperty('attributedDecreasedValue', attributedDecreasedValue, defaultValue: null));
     properties.add(StringProperty('hint', hint, defaultValue: null));
     properties.add(AttributedStringProperty('attributedHint', attributedHint, defaultValue: null));
+    properties.add(StringProperty('tooltip', tooltip));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsHintOverrides>('hintOverrides', hintOverrides, defaultValue: null));
@@ -1919,6 +1920,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         || _attributedValue != config.attributedValue
         || _attributedIncreasedValue != config.attributedIncreasedValue
         || _attributedDecreasedValue != config.attributedDecreasedValue
+        || _tooltip != config.tooltip
         || _flags != config._flags
         || _textDirection != config.textDirection
         || _sortKey != config._sortKey
@@ -2047,6 +2049,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// See also [hint], which exposes just the raw text.
   AttributedString get attributedHint => _attributedHint;
   AttributedString _attributedHint = _kEmptyConfig.attributedHint;
+
+  /// A textual description of the widget's tooltip.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get tooltip => _tooltip;
+  String _tooltip = _kEmptyConfig.tooltip;
 
   /// The elevation along the z-axis at which the [rect] of this [SemanticsNode]
   /// is located above its parent.
@@ -2256,6 +2264,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _attributedIncreasedValue = config.attributedIncreasedValue;
     _attributedDecreasedValue = config.attributedDecreasedValue;
     _attributedHint = config.attributedHint;
+    _tooltip = config.tooltip;
     _hintOverrides = config.hintOverrides;
     _elevation = config.elevation;
     _thickness = config.thickness;
@@ -2303,6 +2312,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     AttributedString attributedIncreasedValue = _attributedIncreasedValue;
     AttributedString attributedDecreasedValue = _attributedDecreasedValue;
     AttributedString attributedHint = _attributedHint;
+    String tooltip = _tooltip;
     TextDirection? textDirection = _textDirection;
     Set<SemanticsTag>? mergedTags = tags == null ? null : Set<SemanticsTag>.of(tags!);
     TextSelection? textSelection = _textSelection;
@@ -2357,6 +2367,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           attributedIncreasedValue = node._attributedIncreasedValue;
         if (attributedDecreasedValue == null || attributedDecreasedValue.string == '')
           attributedDecreasedValue = node._attributedDecreasedValue;
+        if (tooltip == '')
+          tooltip = node._tooltip;
         if (node.tags != null) {
           mergedTags ??= <SemanticsTag>{};
           mergedTags!.addAll(node.tags!);
@@ -2406,6 +2418,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       attributedIncreasedValue: attributedIncreasedValue,
       attributedDecreasedValue: attributedDecreasedValue,
       attributedHint: attributedHint,
+      tooltip: tooltip,
       textDirection: textDirection,
       rect: rect,
       transform: transform,
@@ -2456,7 +2469,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
     }
     Int32List? customSemanticsActionIds;
-    if (data.customSemanticsActionIds?.isNotEmpty == true) {
+    if (data.customSemanticsActionIds?.isNotEmpty ?? false) {
       customSemanticsActionIds = Int32List(data.customSemanticsActionIds!.length);
       for (int i = 0; i < data.customSemanticsActionIds!.length; i++) {
         customSemanticsActionIds[i] = data.customSemanticsActionIds![i];
@@ -2478,6 +2491,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       decreasedValueAttributes: data.attributedDecreasedValue.attributes,
       hint: data.attributedHint.string,
       hintAttributes: data.attributedHint.attributes,
+      tooltip: data.tooltip,
       textDirection: data.textDirection,
       textSelectionBase: data.textSelection != null ? data.textSelection!.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection!.extentOffset : -1,
@@ -2616,9 +2630,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(AttributedStringProperty('increasedValue', _attributedIncreasedValue));
     properties.add(AttributedStringProperty('decreasedValue', _attributedDecreasedValue));
     properties.add(AttributedStringProperty('hint', _attributedHint));
+    properties.add(StringProperty('tooltip', _tooltip, defaultValue: ''));
     properties.add(EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
-    if (_textSelection?.isValid == true)
+    if (_textSelection?.isValid ?? false)
       properties.add(MessageProperty('text selection', '[${_textSelection!.start}, ${_textSelection!.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
     properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
@@ -3032,7 +3047,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance!.createSemanticsUpdateBuilder();
+    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
@@ -3053,7 +3068,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    SemanticsBinding.instance!.window.updateSemantics(builder.build());
+    SemanticsBinding.instance.platformDispatcher.updateSemantics(builder.build());
     notifyListeners();
   }
 
@@ -3976,6 +3991,16 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// A textual description of the widget's tooltip.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get tooltip => _tooltip;
+  String _tooltip = '';
+  set tooltip(String tooltip) {
+    _tooltip = tooltip;
+    _hasBeenAnnotated = true;
+  }
+
   /// Provides hint values which override the default hints on supported
   /// platforms.
   SemanticsHintOverrides? get hintOverrides => _hintOverrides;
@@ -4046,15 +4071,16 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is a live region.
   ///
-  /// On Android, when the label changes on a live region semantics node,
-  /// TalkBack will make a polite announcement of the current label. This
-  /// announcement occurs even if the node is not focused, but only if the label
-  /// has changed since the last update.
+  /// A live region indicates that updates to semantics node are important.
+  /// Platforms may use this information to make polite announcements to the
+  /// user to inform them of updates to this node.
   ///
-  /// An example of a live region is the [SnackBar] widget. When it appears
-  /// on the screen it may be difficult to focus to read the label. A live
-  /// region causes an initial polite announcement to be generated
-  /// automatically.
+  /// An example of a live region is a [SnackBar] widget. On Android and iOS,
+  /// live region causes a polite announcement to be generated automatically,
+  /// even if the widget does not have accessibility focus. This announcement
+  /// may not be spoken if the OS accessibility services are already
+  /// announcing something else, such as reading the label of a focused widget
+  /// or providing a system announcement.
   ///
   /// See also:
   ///
@@ -4440,6 +4466,8 @@ class SemanticsConfiguration {
       otherAttributedString: child._attributedHint,
       otherTextDirection: child.textDirection,
     );
+    if (_tooltip == '')
+      _tooltip = child._tooltip;
 
     _thickness = math.max(_thickness, child._thickness + child._elevation);
 
@@ -4462,6 +4490,7 @@ class SemanticsConfiguration {
       .._attributedDecreasedValue = _attributedDecreasedValue
       .._attributedHint = _attributedHint
       .._hintOverrides = _hintOverrides
+      .._tooltip = _tooltip
       .._elevation = _elevation
       .._thickness = _thickness
       .._flags = _flags
@@ -4618,12 +4647,11 @@ class OrdinalSortKey extends SemanticsSortKey {
   /// The [order] must be a finite number, and must not be null.
   const OrdinalSortKey(
     this.order, {
-    String? name,
+    super.name,
   }) : assert(order != null),
        assert(order != double.nan),
        assert(order > double.negativeInfinity),
-       assert(order < double.infinity),
-       super(name: name);
+       assert(order < double.infinity);
 
   /// Determines the placement of this key in a sequence of keys that defines
   /// the order in which this node is traversed by the platform's accessibility

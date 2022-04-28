@@ -105,23 +105,31 @@ void main() {
         '├─B\n'
         '│\n'), isNot(hasAGoodToStringDeep));
 
-    expect(_MockToStringDeep.fromLines(
-        <String>['Paragraph#00000\n',
-                 ' │ size: (400x200)\n',
-                 ' ╘═╦══ text ═══\n',
-                 '   ║ TextSpan:\n',
-                 '   ║   "I polished up that handle so carefullee\n',
-                 '   ║   That now I am the Ruler of the Queen\'s Navee!"\n',
-                 '   ╚═══════════\n']), hasAGoodToStringDeep);
+    expect(
+      _MockToStringDeep.fromLines(<String>[
+        'Paragraph#00000\n',
+        ' │ size: (400x200)\n',
+        ' ╘═╦══ text ═══\n',
+        '   ║ TextSpan:\n',
+        '   ║   "I polished up that handle so carefullee\n',
+        '   ║   That now I am the Ruler of the Queen\'s Navee!"\n',
+        '   ╚═══════════\n',
+      ]),
+      hasAGoodToStringDeep,
+    );
 
     // Text span
-    expect(_MockToStringDeep.fromLines(
-        <String>['Paragraph#00000\n',
-                 ' │ size: (400x200)\n',
-                 ' ╘═╦══ text ═══\n',
-                 '   ║ TextSpan:\n',
-                 '   ║   "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen\'s Navee!"\n',
-                 '   ╚═══════════\n']), isNot(hasAGoodToStringDeep));
+    expect(
+      _MockToStringDeep.fromLines(<String>[
+        'Paragraph#00000\n',
+        ' │ size: (400x200)\n',
+        ' ╘═╦══ text ═══\n',
+        '   ║ TextSpan:\n',
+        '   ║   "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen\'s Navee!"\n',
+        '   ╚═══════════\n',
+      ]),
+      isNot(hasAGoodToStringDeep),
+    );
   });
 
   test('normalizeHashCodesEquals', () {
@@ -566,6 +574,7 @@ void main() {
         attributedValue: AttributedString('c'),
         attributedDecreasedValue: AttributedString('d'),
         attributedHint: AttributedString('e'),
+        tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         elevation: 3.0,
@@ -673,6 +682,42 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('findsAtLeastNWidgets', () {
+    Widget boilerplate(Widget child) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: child,
+      );
+    }
+
+    testWidgets('succeeds when finds more then the specified count',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(boilerplate(Column(
+        children: const <Widget>[Text('1'), Text('2'), Text('3')],
+      )));
+
+      expect(find.byType(Text), findsAtLeastNWidgets(2));
+    });
+
+    testWidgets('succeeds when finds the exact specified count',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(boilerplate(Column(
+        children: const <Widget>[Text('1'), Text('2')],
+      )));
+
+      expect(find.byType(Text), findsAtLeastNWidgets(2));
+    });
+
+    testWidgets('fails when finds less then specified count',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(boilerplate(Column(
+        children: const <Widget>[Text('1'), Text('2')],
+      )));
+
+      expect(find.byType(Text), isNot(findsAtLeastNWidgets(3)));
+    });
+  });
 }
 
 enum _ComparatorBehavior {
@@ -731,12 +776,12 @@ class _FakeSemanticsNode extends SemanticsNode {
 
 @immutable
 class _CustomColor extends Color {
-  const _CustomColor(int value, {this.isEqual}) : super(value);
+  const _CustomColor(super.value, {this.isEqual});
   final bool? isEqual;
 
   @override
   bool operator ==(Object other) => isEqual ?? super == other;
 
   @override
-  int get hashCode => hashValues(super.hashCode, isEqual);
+  int get hashCode => Object.hash(super.hashCode, isEqual);
 }

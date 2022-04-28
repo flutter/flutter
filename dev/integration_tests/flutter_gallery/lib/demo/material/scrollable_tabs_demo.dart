@@ -36,7 +36,7 @@ const List<_Page> _allPages = <_Page>[
 ];
 
 class ScrollableTabsDemo extends StatefulWidget {
-  const ScrollableTabsDemo({Key? key}) : super(key: key);
+  const ScrollableTabsDemo({super.key});
 
   static const String routeName = '/material/scrollable-tabs';
 

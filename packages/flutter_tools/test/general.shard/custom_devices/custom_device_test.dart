@@ -36,7 +36,7 @@ void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> confi
   final File file = dir.childFile('.flutter_custom_devices.json');
   file.writeAsStringSync(jsonEncode(
     <String, dynamic>{
-      'custom-devices': configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
+      'custom-devices': configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList(),
     }
   ));
 }
@@ -56,11 +56,11 @@ void main() {
         <String>['scp', r'${localPath}', r'/tmp/${appName}', 'pi@raspberrypi'],
         <String, String>{
           'localPath': 'build/flutter_assets',
-          'appName': 'hello_world'
-        }
+          'appName': 'hello_world',
+        },
       ),
       <String>[
-        'scp', 'build/flutter_assets', '/tmp/hello_world', 'pi@raspberrypi'
+        'scp', 'build/flutter_assets', '/tmp/hello_world', 'pi@raspberrypi',
       ]
     );
 
@@ -69,11 +69,11 @@ void main() {
         <String>[r'${test1}', r' ${test2}', r'${test3}'],
         <String, String>{
           'test1': '_test1',
-          'test2': '_test2'
-        }
+          'test2': '_test2',
+        },
       ),
       <String>[
-        '_test1', ' _test2', r''
+        '_test1', ' _test2', r'',
       ]
     );
 
@@ -82,15 +82,15 @@ void main() {
         <String>[r'${test1}', r' ${test2}', r'${test3}'],
         <String, String>{
           'test1': '_test1',
-          'test2': '_test2'
+          'test2': '_test2',
         },
         additionalReplacementValues: <String, String>{
           'test2': '_nottest2',
-          'test3': '_test3'
+          'test3': '_test3',
         }
       ),
       <String>[
-        '_test1', ' _test2', r'_test3'
+        '_test1', ' _test2', r'_test3',
       ]
     );
   });
@@ -108,7 +108,7 @@ void main() {
     runDebugCommand: const <String>['testrundebug'],
     forwardPortCommand: const <String>['testforwardport'],
     forwardPortSuccessRegex: RegExp('testforwardportsuccess'),
-    screenshotCommand: const <String>['testscreenshot']
+    screenshotCommand: const <String>['testscreenshot'],
   );
 
   const String testConfigPingSuccessOutput = 'testpingsuccess\n';
@@ -150,7 +150,7 @@ void main() {
     },
     overrides: <Type, dynamic Function()>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any()
+      ProcessManager: () => FakeProcessManager.any(),
     }
   );
 
@@ -321,7 +321,7 @@ void main() {
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
             FakeCommand(command: testConfig.uninstallCommand),
-            FakeCommand(command: testConfig.installCommand, onRun: () => bothCommandsWereExecuted = true)
+            FakeCommand(command: testConfig.installCommand, onRun: () => bothCommandsWereExecuted = true),
           ])
       );
 
@@ -330,7 +330,7 @@ void main() {
     },
     overrides: <Type, dynamic Function()>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any()
+      ProcessManager: () => FakeProcessManager.any(),
     }
   );
 
@@ -346,8 +346,8 @@ void main() {
         FakeCommand(
           command: testConfig.forwardPortCommand,
           stdout: testConfigForwardPortSuccessOutput,
-          completer: forwardPortCommandCompleter
-        )
+          completer: forwardPortCommandCompleter,
+        ),
       ])
     );
 
@@ -370,13 +370,13 @@ void main() {
       FakeCommand(
         command: testConfig.runDebugCommand,
         completer: runDebugCompleter,
-        stdout: 'Observatory listening on http://127.0.0.1:12345/abcd/\n',
+        stdout: 'The Dart VM service is listening on http://127.0.0.1:12345/abcd/\n',
       ),
       FakeCommand(
         command: testConfig.forwardPortCommand,
         completer: forwardPortCompleter,
         stdout: testConfigForwardPortSuccessOutput,
-      )
+      ),
     ]);
 
     final CustomDeviceAppSession appSession = CustomDeviceAppSession(
@@ -411,7 +411,7 @@ void main() {
         FakeCommand(
           command: testConfigNonForwarding.runDebugCommand,
           completer: runDebugCompleter,
-          stdout: 'Observatory listening on http://192.168.178.123:12345/abcd/\n'
+          stdout: 'The Dart VM service is listening on http://192.168.178.123:12345/abcd/\n'
         ),
       ]
     );
@@ -456,13 +456,13 @@ void main() {
           FakeCommand(
             command: testConfig.runDebugCommand,
             completer: runDebugCompleter,
-            stdout: 'Observatory listening on http://127.0.0.1:12345/abcd/\n',
+            stdout: 'The Dart VM service is listening on http://127.0.0.1:12345/abcd/\n',
           ),
           FakeCommand(
             command: testConfig.forwardPortCommand,
             completer: forwardPortCompleter,
-            stdout: testConfigForwardPortSuccessOutput
-          )
+            stdout: testConfigForwardPortSuccessOutput,
+          ),
         ]
       );
 
@@ -515,7 +515,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any()
+      ProcessManager: () => FakeProcessManager.any(),
     }
   );
 
@@ -526,7 +526,7 @@ void main() {
       FakeCommand(
         command: testConfig.screenshotCommand,
         onRun: () => screenshotCommandWasExecuted = true,
-      )
+      ),
     ]);
 
     final MemoryFileSystem fs = MemoryFileSystem.test();
@@ -552,7 +552,7 @@ void main() {
       FakeCommand(
         command: testConfig.screenshotCommand,
         onRun: () => screenshotCommandWasExecuted = true,
-      )
+      ),
     ]);
 
     final MemoryFileSystem fs = MemoryFileSystem.test();

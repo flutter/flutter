@@ -85,7 +85,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     Padding(
                       padding: EdgeInsets.only(top: 16),
                       child: Text('Select a lot'),
-                    )
+                    ),
                   ];
                   break;
                 case ConnectionState.waiting:
@@ -98,7 +98,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     Padding(
                       padding: EdgeInsets.only(top: 16),
                       child: Text('Awaiting bids...'),
-                    )
+                    ),
                   ];
                   break;
                 case ConnectionState.active:
@@ -111,7 +111,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: Text('\$${snapshot.data}'),
-                    )
+                    ),
                   ];
                   break;
                 case ConnectionState.done:
@@ -124,7 +124,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: Text('\$${snapshot.data} (closed)'),
-                    )
+                    ),
                   ];
                   break;
               }

@@ -141,7 +141,7 @@ void main() {
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/', // dds forwarded URI
         },
       ),
     ]);
@@ -166,7 +166,7 @@ void main() {
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/', // dds forwarded URI
         },
       ),
     ]);
@@ -196,7 +196,7 @@ void main() {
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/', // dds forwarded URI
         },
       ),
     ]);
@@ -229,7 +229,7 @@ void main() {
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/', // dds forwarded URI
         },
       ),
     ]);
@@ -259,7 +259,7 @@ void main() {
         command: <String>['dart', 'foo.test', '-rexpanded'],
         exitCode: 11,
         environment: <String, String>{
-          'VM_SERVICE_URL': 'http://127.0.0.1:63426/1UasC_ihpXY=/'
+          'VM_SERVICE_URL': 'http://127.0.0.1:63426/1UasC_ihpXY=/',
         },
       ),
     ]);
@@ -311,13 +311,13 @@ void main() {
       const FakeVmServiceRequest(
         method: '_flutter.getSkSLs',
         args: <String, Object>{
-          'viewId': 'a'
+          'viewId': 'a',
         },
         jsonResponse: <String, Object>{
           'SkSLs': <String, Object>{
             'A': 'B',
-          }
-        }
+          },
+        },
       ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
@@ -335,10 +335,10 @@ void main() {
       'platform': 'android',
       'name': 'test',
       'engineRevision': 'abcdefghijklmnopqrstuvwxyz',
-      'data': <String, Object>{'A': 'B'}
+      'data': <String, Object>{'A': 'B'},
     });
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => FakeFlutterVersion()
+    FlutterVersion: () => FakeFlutterVersion(),
   });
 
   testWithoutContext('Can connect to existing application and stop it during cleanup', () async {
@@ -349,8 +349,8 @@ void main() {
         method: 'ext.flutter.exit',
         args: <String, Object>{
           'isolateId': '1',
-        }
-      )
+        },
+      ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
@@ -373,8 +373,8 @@ void main() {
         method: 'ext.flutter.exit',
         args: <String, Object>{
           'isolateId': '1',
-        }
-      )
+        },
+      ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
@@ -397,8 +397,8 @@ void main() {
         method: 'ext.flutter.exit',
         args: <String, Object>{
           'isolateId': '1',
-        }
-      )
+        },
+      ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
@@ -421,8 +421,8 @@ void main() {
         method: 'ext.flutter.exit',
         args: <String, Object>{
           'isolateId': '1',
-        }
-      )
+        },
+      ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
@@ -590,6 +590,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int hostPort,
     bool ipv6,
     bool disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {
     started = true;
   }

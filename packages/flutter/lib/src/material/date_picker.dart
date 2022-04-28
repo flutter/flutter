@@ -102,6 +102,8 @@ const double _inputFormLandscapeHeight = 108.0;
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day], and
 /// must be non-null.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// ### State Restoration
 ///
 /// Using this method will not enable state restoration for the date picker.
@@ -113,7 +115,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This sample demonstrates how to create a restorable Material date picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -124,11 +126,13 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// See also:
 ///
-///  * [showDateRangePicker], which shows a material design date range picker
+///  * [showDateRangePicker], which shows a Material Design date range picker
 ///    used to select a range of dates.
 ///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
 ///  * [InputDatePickerFormField], which provides a text input field for entering dates.
-///  * [showTimePicker], which shows a dialog that contains a material design time picker.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
+///  * [showTimePicker], which shows a dialog that contains a Material Design time picker.
 ///
 Future<DateTime?> showDatePicker({
   required BuildContext context,
@@ -151,6 +155,8 @@ Future<DateTime?> showDatePicker({
   String? errorInvalidText,
   String? fieldHintText,
   String? fieldLabelText,
+  TextInputType? keyboardType,
+  Offset? anchorPoint,
 }) async {
   assert(context != null);
   assert(initialDate != null);
@@ -195,6 +201,7 @@ Future<DateTime?> showDatePicker({
     errorInvalidText: errorInvalidText,
     fieldHintText: fieldHintText,
     fieldLabelText: fieldLabelText,
+    keyboardType: keyboardType,
   );
 
   if (textDirection != null) {
@@ -219,6 +226,7 @@ Future<DateTime?> showDatePicker({
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },
+    anchorPoint: anchorPoint,
   );
 }
 
@@ -234,7 +242,7 @@ Future<DateTime?> showDatePicker({
 class DatePickerDialog extends StatefulWidget {
   /// A Material-style date picker dialog.
   DatePickerDialog({
-    Key? key,
+    super.key,
     required DateTime initialDate,
     required DateTime firstDate,
     required DateTime lastDate,
@@ -249,6 +257,7 @@ class DatePickerDialog extends StatefulWidget {
     this.errorInvalidText,
     this.fieldHintText,
     this.fieldLabelText,
+    this.keyboardType,
     this.restorationId,
   }) : assert(initialDate != null),
        assert(firstDate != null),
@@ -258,8 +267,7 @@ class DatePickerDialog extends StatefulWidget {
        lastDate = DateUtils.dateOnly(lastDate),
        currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
        assert(initialEntryMode != null),
-       assert(initialCalendarMode != null),
-       super(key: key) {
+       assert(initialCalendarMode != null) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -333,6 +341,11 @@ class DatePickerDialog extends StatefulWidget {
   /// If this is null, it will default to the words representing the date format
   /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
+
+  /// The keyboard type of the [TextField].
+  ///
+  /// If this is null, it will default to [TextInputType.datetime]
+  final TextInputType? keyboardType;
 
   /// Restoration ID to save and restore the state of the [DatePickerDialog].
   ///
@@ -512,6 +525,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   errorInvalidText: widget.errorInvalidText,
                   fieldHintText: widget.fieldHintText,
                   fieldLabelText: widget.fieldLabelText,
+                  keyboardType: widget.keyboardType,
                   autofocus: true,
                 ),
                 const Spacer(),
@@ -683,7 +697,6 @@ class _DatePickerHeader extends StatelessWidget {
 
   /// Creates a header for use in a date picker dialog.
   const _DatePickerHeader({
-    Key? key,
     required this.helpText,
     required this.titleText,
     this.titleSemanticsLabel,
@@ -693,8 +706,7 @@ class _DatePickerHeader extends StatelessWidget {
     this.entryModeButton,
   }) : assert(helpText != null),
        assert(orientation != null),
-       assert(isShort != null),
-       super(key: key);
+       assert(isShort != null);
 
   static const double _datePickerHeaderLandscapeWidth = 152.0;
   static const double _datePickerHeaderPortraitHeight = 120.0;
@@ -889,6 +901,8 @@ class _DatePickerHeader extends StatelessWidget {
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// ### State Restoration
 ///
 /// Using this method will not enable state restoration for the date range picker.
@@ -911,10 +925,11 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [showDatePicker], which shows a material design date picker used to
+///  * [showDatePicker], which shows a Material Design date picker used to
 ///    select a single date.
 ///  * [DateTimeRange], which is used to describe a date range.
-///
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 Future<DateTimeRange?> showDateRangePicker({
   required BuildContext context,
   DateTimeRange? initialDateRange,
@@ -938,6 +953,7 @@ Future<DateTimeRange?> showDateRangePicker({
   RouteSettings? routeSettings,
   TextDirection? textDirection,
   TransitionBuilder? builder,
+  Offset? anchorPoint,
 }) async {
   assert(context != null);
   assert(
@@ -1020,6 +1036,7 @@ Future<DateTimeRange?> showDateRangePicker({
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },
+    anchorPoint: anchorPoint,
   );
 }
 
@@ -1063,7 +1080,7 @@ String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startD
 class DateRangePickerDialog extends StatefulWidget {
   /// A Material-style date range picker dialog.
   const DateRangePickerDialog({
-    Key? key,
+    super.key,
     this.initialDateRange,
     required this.firstDate,
     required this.lastDate,
@@ -1081,7 +1098,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.fieldStartLabelText,
     this.fieldEndLabelText,
     this.restorationId,
-  }) : super(key: key);
+  });
 
   /// The date range that the date range picker starts with when it opens.
   ///
@@ -1425,7 +1442,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
 
 class _CalendarRangePickerDialog extends StatelessWidget {
   const _CalendarRangePickerDialog({
-    Key? key,
+    super.key,
     required this.selectedStartDate,
     required this.selectedEndDate,
     required this.firstDate,
@@ -1438,7 +1455,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     required this.confirmText,
     required this.helpText,
     this.entryModeButton,
-  }) : super(key: key);
+  });
 
   final DateTime? selectedStartDate;
   final DateTime? selectedEndDate;
@@ -1575,7 +1592,6 @@ const double _maxCalendarWidthPortrait = 480.0;
 class _CalendarDateRangePicker extends StatefulWidget {
   /// Creates a scrollable calendar grid for picking date ranges.
   _CalendarDateRangePicker({
-    Key? key,
     DateTime? initialStartDate,
     DateTime? initialEndDate,
     required DateTime firstDate,
@@ -1589,8 +1605,7 @@ class _CalendarDateRangePicker extends StatefulWidget {
        assert(lastDate != null),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
-       super(key: key) {
+       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()) {
     assert(
       this.initialStartDate == null || this.initialEndDate == null || !this.initialStartDate!.isAfter(initialEndDate!),
       'initialStartDate must be on or before initialEndDate.',
@@ -1776,12 +1791,11 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
 
 class _CalendarKeyboardNavigator extends StatefulWidget {
   const _CalendarKeyboardNavigator({
-    Key? key,
     required this.child,
     required this.firstDate,
     required this.lastDate,
     required this.initialFocusedDay,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final DateTime firstDate;
@@ -1912,11 +1926,10 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 /// what the currently focused date (if any) should be.
 class _FocusedDate extends InheritedWidget {
   const _FocusedDate({
-    Key? key,
-    required Widget child,
+    required super.child,
     this.date,
     this.scrollDirection,
-  }) : super(key: key, child: child);
+  });
 
   final DateTime? date;
   final TraversalDirection? scrollDirection;
@@ -2114,7 +2127,6 @@ class _MonthSliverGridLayout extends SliverGridLayout {
 class _MonthItem extends StatefulWidget {
   /// Creates a month item.
   _MonthItem({
-    Key? key,
     required this.selectedDateStart,
     required this.selectedDateEnd,
     required this.currentDate,
@@ -2134,8 +2146,7 @@ class _MonthItem extends StatefulWidget {
        assert(currentDate != null),
        assert(onChanged != null),
        assert(displayedMonth != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+       assert(dragStartBehavior != null);
 
   /// The currently selected start date.
   ///
@@ -2542,7 +2553,6 @@ class _HighlightPainter extends CustomPainter {
 
 class _InputDateRangePickerDialog extends StatelessWidget {
   const _InputDateRangePickerDialog({
-    Key? key,
     required this.selectedStartDate,
     required this.selectedEndDate,
     required this.currentDate,
@@ -2553,7 +2563,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     required this.cancelText,
     required this.helpText,
     required this.entryModeButton,
-  }) : super(key: key);
+  });
 
   final DateTime? selectedStartDate;
   final DateTime? selectedEndDate;
@@ -2668,7 +2678,7 @@ class _InputDateRangePicker extends StatefulWidget {
   /// Creates a row with two text fields configured to accept the start and end dates
   /// of a date range.
   _InputDateRangePicker({
-    Key? key,
+    super.key,
     DateTime? initialStartDate,
     DateTime? initialEndDate,
     required DateTime firstDate,
@@ -2694,8 +2704,7 @@ class _InputDateRangePicker extends StatefulWidget {
        assert(firstDate != null),
        assert(lastDate != null),
        assert(autofocus != null),
-       assert(autovalidate != null),
-       super(key: key);
+       assert(autovalidate != null);
 
   /// The [DateTime] that represents the start of the initial date range selection.
   final DateTime? initialStartDate;

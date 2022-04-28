@@ -223,14 +223,13 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 
 class _LocalizationsScope extends InheritedWidget {
   const _LocalizationsScope({
-    Key? key,
+    super.key,
     required this.locale,
     required this.localizationsState,
     required this.typeToResources,
-    required Widget child,
+    required super.child,
   }) : assert(localizationsState != null),
-       assert(typeToResources != null),
-       super(key: key, child: child);
+       assert(typeToResources != null);
 
   final Locale locale;
   final _LocalizationsState localizationsState;
@@ -339,14 +338,13 @@ class _LocalizationsScope extends InheritedWidget {
 class Localizations extends StatefulWidget {
   /// Create a widget from which localizations (like translated strings) can be obtained.
   Localizations({
-    Key? key,
+    super.key,
     required this.locale,
     required this.delegates,
     this.child,
   }) : assert(locale != null),
        assert(delegates != null),
-       assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>)),
-       super(key: key);
+       assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -543,7 +541,7 @@ class _LocalizationsState extends State<Localizations> {
       // have finished loading. Until then the old locale will continue to be used.
       // - If we're running at app startup time then defer reporting the first
       // "useful" frame until after the async load has completed.
-      RendererBinding.instance!.deferFirstFrame();
+      RendererBinding.instance.deferFirstFrame();
       typeToResourcesFuture.then<void>((Map<Type, dynamic> value) {
         if (mounted) {
           setState(() {
@@ -551,7 +549,7 @@ class _LocalizationsState extends State<Localizations> {
             _locale = locale;
           });
         }
-        RendererBinding.instance!.allowFirstFrame();
+        RendererBinding.instance.allowFirstFrame();
       });
     }
   }

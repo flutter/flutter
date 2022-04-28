@@ -113,6 +113,8 @@ class ViewportOffsetSpy extends ViewportOffset {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderSliverList basic test - down', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;

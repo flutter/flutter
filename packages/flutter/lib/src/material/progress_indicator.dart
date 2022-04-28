@@ -18,7 +18,7 @@ const int _kIndeterminateCircularDuration = 1333 * 2222;
 
 enum _ActivityIndicatorType { material, adaptive }
 
-/// A base class for material design progress indicators.
+/// A base class for Material Design progress indicators.
 ///
 /// This widget cannot be instantiated directly. For a linear progress
 /// indicator, see [LinearProgressIndicator]. For a circular progress indicator,
@@ -42,14 +42,14 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// for determinate progress indicators to indicate how much progress has been made.
   /// {@endtemplate}
   const ProgressIndicator({
-    Key? key,
+    super.key,
     this.value,
     this.backgroundColor,
     this.color,
     this.valueColor,
     this.semanticsLabel,
     this.semanticsValue,
-  }) : super(key: key);
+  });
 
   /// If non-null, the value of this progress indicator.
   ///
@@ -225,7 +225,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design linear progress indicator, also known as a progress bar.
+/// A Material Design linear progress indicator, also known as a progress bar.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}
 ///
@@ -264,24 +264,15 @@ class LinearProgressIndicator extends ProgressIndicator {
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const LinearProgressIndicator({
-    Key? key,
-    double? value,
-    Color? backgroundColor,
-    Color? color,
-    Animation<Color?>? valueColor,
+    super.key,
+    super.value,
+    super.backgroundColor,
+    super.color,
+    super.valueColor,
     this.minHeight,
-    String? semanticsLabel,
-    String? semanticsValue,
-  }) : assert(minHeight == null || minHeight > 0),
-       super(
-         key: key,
-         value: value,
-         backgroundColor: backgroundColor,
-         color: color,
-         valueColor: valueColor,
-         semanticsLabel: semanticsLabel,
-         semanticsValue: semanticsValue,
-       );
+    super.semanticsLabel,
+    super.semanticsValue,
+  }) : assert(minHeight == null || minHeight > 0);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
   /// Color of the track being filled by the linear indicator.
@@ -447,7 +438,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design circular progress indicator, which spins to indicate that
+/// A Material Design circular progress indicator, which spins to indicate that
 /// the application is busy.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}
@@ -484,24 +475,15 @@ class CircularProgressIndicator extends ProgressIndicator {
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator({
-    Key? key,
-    double? value,
-    Color? backgroundColor,
-    Color? color,
-    Animation<Color?>? valueColor,
+    super.key,
+    super.value,
+    super.backgroundColor,
+    super.color,
+    super.valueColor,
     this.strokeWidth = 4.0,
-    String? semanticsLabel,
-    String? semanticsValue,
-  }) : _indicatorType = _ActivityIndicatorType.material,
-       super(
-         key: key,
-         value: value,
-         backgroundColor: backgroundColor,
-         color: color,
-         valueColor: valueColor,
-         semanticsLabel: semanticsLabel,
-         semanticsValue: semanticsValue,
-       );
+    super.semanticsLabel,
+    super.semanticsValue,
+  }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
   /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
@@ -512,22 +494,14 @@ class CircularProgressIndicator extends ProgressIndicator {
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator.adaptive({
-    Key? key,
-    double? value,
-    Color? backgroundColor,
-    Animation<Color?>? valueColor,
+    super.key,
+    super.value,
+    super.backgroundColor,
+    super.valueColor,
     this.strokeWidth = 4.0,
-    String? semanticsLabel,
-    String? semanticsValue,
-  }) : _indicatorType = _ActivityIndicatorType.adaptive,
-       super(
-         key: key,
-         value: value,
-         backgroundColor: backgroundColor,
-         valueColor: valueColor,
-         semanticsLabel: semanticsLabel,
-         semanticsValue: semanticsValue,
-       );
+    super.semanticsLabel,
+    super.semanticsValue,
+  }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
 
@@ -667,23 +641,15 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
 class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter {
   _RefreshProgressIndicatorPainter({
-    required Color valueColor,
-    required double? value,
-    required double headValue,
-    required double tailValue,
-    required double offsetValue,
-    required double rotationValue,
-    required double strokeWidth,
+    required super.valueColor,
+    required super.value,
+    required super.headValue,
+    required super.tailValue,
+    required super.offsetValue,
+    required super.rotationValue,
+    required super.strokeWidth,
     required this.arrowheadScale,
-  }) : super(
-    valueColor: valueColor,
-    value: value,
-    headValue: headValue,
-    tailValue: tailValue,
-    offsetValue: offsetValue,
-    rotationValue: rotationValue,
-    strokeWidth: strokeWidth,
-  );
+  });
 
   final double arrowheadScale;
 
@@ -743,24 +709,15 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const RefreshProgressIndicator({
-    Key? key,
-    double? value,
-    Color? backgroundColor,
-    Color? color,
-    Animation<Color?>? valueColor,
-    double strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
-    String? semanticsLabel,
-    String? semanticsValue,
-  }) : super(
-    key: key,
-    value: value,
-    backgroundColor: backgroundColor,
-    color: color,
-    valueColor: valueColor,
-    strokeWidth: strokeWidth,
-    semanticsLabel: semanticsLabel,
-    semanticsValue: semanticsValue,
-  );
+    super.key,
+    super.value,
+    super.backgroundColor,
+    super.color,
+    super.valueColor,
+    super.strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
+    super.semanticsLabel,
+    super.semanticsValue,
+  });
 
   /// Default stroke width.
   static const double defaultStrokeWidth = 2.5;

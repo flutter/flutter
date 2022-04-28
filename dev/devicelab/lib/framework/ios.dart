@@ -8,12 +8,44 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'host_agent.dart';
+import 'task_result.dart';
 import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
 
 Future<String> fileType(String pathToBinary) {
   return eval('file', <String>[pathToBinary]);
+}
+
+Future<String?> minPhoneOSVersion(String pathToBinary) async {
+  final String loadCommands = await eval('otool', <String>[
+    '-l',
+    '-arch',
+    'arm64',
+    pathToBinary,
+  ]);
+  if (!loadCommands.contains('LC_VERSION_MIN_IPHONEOS')) {
+    return null;
+  }
+
+  String? minVersion;
+  // Load command 7
+  // cmd LC_VERSION_MIN_IPHONEOS
+  // cmdsize 16
+  // version 9.0
+  // sdk 15.2
+  //  ...
+  final List<String> lines = LineSplitter.split(loadCommands).toList();
+  lines.asMap().forEach((int index, String line) {
+    if (line.contains('LC_VERSION_MIN_IPHONEOS') && lines.length - index - 1 > 3) {
+      final String versionLine = lines
+          .skip(index - 1)
+          .take(4).last;
+      final RegExp versionRegex = RegExp(r'\s*version\s*(\S*)');
+      minVersion = versionRegex.firstMatch(versionLine)?.group(1);
+    }
+  });
+  return minVersion;
 }
 
 Future<bool> containsBitcode(String pathToBinary) async {
@@ -51,6 +83,12 @@ Future<bool> containsBitcode(String pathToBinary) async {
     }
   });
   return !emptyBitcodeMarkerFound;
+}
+
+Future<void> checkContainsBitcode(String pathToBinary) async {
+  if (!await containsBitcode(pathToBinary)) {
+    throw TaskResult.failure('Expected bitcode in $pathToBinary');
+  }
 }
 
 /// Creates and boots a new simulator, passes the new simulator's identifier to

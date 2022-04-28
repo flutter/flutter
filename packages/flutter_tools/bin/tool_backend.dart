@@ -6,7 +6,7 @@
 import 'dart:convert'; // flutter_ignore: dart_convert_import.
 import 'dart:io'; // flutter_ignore: dart_io_import.
 
-/// Executes the required flutter tasks for a desktop build.
+/// Executes the required Flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
   final String buildMode = arguments[1].toLowerCase();
@@ -59,11 +59,10 @@ or
     if (Platform.isWindows)
       'flutter.bat'
     else
-      'flutter'
+      'flutter',
   ]);
-  final bool uwp = targetPlatform.contains('uwp');
   final String bundlePlatform = targetPlatform.startsWith('windows') ? 'windows' : targetPlatform;
-  final String target = '${buildMode}_bundle_${bundlePlatform}_assets${uwp ? '_uwp' : ''}';
+  final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
   final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[

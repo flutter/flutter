@@ -109,7 +109,7 @@ class IOCallbackManager implements CallbackManager {
   Future<dynamic> _onMethodChannelCall(MethodCall call) async {
     switch (call.method) {
       case 'scheduleFrame':
-        window.scheduleFrame();
+        PlatformDispatcher.instance.scheduleFrame();
         break;
     }
     return null;

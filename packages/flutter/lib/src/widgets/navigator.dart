@@ -215,7 +215,7 @@ abstract class Route<T> {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      if (navigator?.widget.requestFocus == true) {
+      if (navigator?.widget.requestFocus ?? false) {
         navigator!.focusScopeNode.requestFocus();
       }
     });
@@ -231,7 +231,7 @@ abstract class Route<T> {
   @protected
   @mustCallSuper
   void didAdd() {
-    if (navigator?.widget.requestFocus == true) {
+    if (navigator?.widget.requestFocus ?? false) {
       // This TickerFuture serves two purposes. First, we want to make sure
       // that animations triggered by other operations will finish before focusing the
       // navigator. Second, navigator.focusScopeNode might acquire more focused
@@ -514,7 +514,7 @@ abstract class Route<T> {
     return _navigator!._history.cast<_RouteEntry?>().firstWhere(
       (_RouteEntry? e) => e != null && _RouteEntry.isRoutePredicate(this)(e),
       orElse: () => null,
-    )?.isPresent == true;
+    )?.isPresent ?? false;
   }
 }
 
@@ -568,10 +568,10 @@ abstract class Page<T> extends RouteSettings {
   /// The [arguments] argument must not be null.
   const Page({
     this.key,
-    String? name,
-    Object? arguments,
+    super.name,
+    super.arguments,
     this.restorationId,
-  }) : super(name: name, arguments: arguments);
+  });
 
   /// The key associated with this page.
   ///
@@ -665,19 +665,17 @@ class NavigatorObserver {
 class HeroControllerScope extends InheritedWidget {
   /// Creates a widget to host the input [controller].
   const HeroControllerScope({
-    Key? key,
+    super.key,
     required HeroController this.controller,
-    required Widget child,
-  }) : assert(controller != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(controller != null);
 
   /// Creates a widget to prevent the subtree from receiving the hero controller
   /// above.
   const HeroControllerScope.none({
-    Key? key,
-    required Widget child,
-  }) : controller = null,
-       super(key: key, child: child);
+    super.key,
+    required super.child,
+  }) : controller = null;
 
   /// The hero controller that is hosted inside this widget.
   final HeroController? controller;
@@ -1338,7 +1336,7 @@ class Navigator extends StatefulWidget {
   ///
   /// If the [pages] is not empty, the [onPopPage] must not be null.
   const Navigator({
-    Key? key,
+    super.key,
     this.pages = const <Page<dynamic>>[],
     this.onPopPage,
     this.initialRoute,
@@ -1354,8 +1352,7 @@ class Navigator extends StatefulWidget {
        assert(onGenerateInitialRoutes != null),
        assert(transitionDelegate != null),
        assert(observers != null),
-       assert(reportsRouteUpdateToEngine != null),
-       super(key: key);
+       assert(reportsRouteUpdateToEngine != null);
 
   /// The list of pages with which to populate the history.
   ///
@@ -1534,13 +1531,15 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the route.
   ///
   /// To use [pushNamed], an [Navigator.onGenerateRoute] callback must be
   /// provided,
+  /// {@endtemplate}
+  ///
+  /// {@template flutter.widgets.navigator.pushNamed.returnValue}
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
   /// {@endtemplate}
   ///
   /// {@template flutter.widgets.Navigator.pushNamed}
@@ -1702,15 +1701,14 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the type of the return value of the old route.
   ///
   /// To use [pushReplacementNamed], a [Navigator.onGenerateRoute] callback must
   /// be provided.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -1796,15 +1794,13 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the return value type of the old route.
   ///
   /// To use [popAndPushNamed], a [Navigator.onGenerateRoute] callback must be provided.
-  ///
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -1901,14 +1897,13 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route.
   ///
   /// To use [pushNamedAndRemoveUntil], an [Navigator.onGenerateRoute] callback
   /// must be provided.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -1985,11 +1980,10 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -2071,12 +2065,11 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -2158,11 +2151,10 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -2801,7 +2793,7 @@ class _RouteEntry extends RouteTransitionRecord {
   bool get hasPage => route.settings is Page;
 
   bool canUpdateFrom(Page<dynamic> page) {
-    if (currentState.index > _RouteLifecycle.idle.index)
+    if (!willBePresent)
       return false;
     if (!hasPage)
       return false;
@@ -3131,9 +3123,9 @@ abstract class _NavigatorObservation {
 
 class _NavigatorPushObservation extends _NavigatorObservation {
   _NavigatorPushObservation(
-    Route<dynamic> primaryRoute,
-    Route<dynamic>? secondaryRoute,
-  ) : super(primaryRoute, secondaryRoute);
+    super.primaryRoute,
+    super.secondaryRoute,
+  );
 
   @override
   void notify(NavigatorObserver observer) {
@@ -3143,9 +3135,9 @@ class _NavigatorPushObservation extends _NavigatorObservation {
 
 class _NavigatorPopObservation extends _NavigatorObservation {
   _NavigatorPopObservation(
-    Route<dynamic> primaryRoute,
-    Route<dynamic>? secondaryRoute,
-  ) : super(primaryRoute, secondaryRoute);
+    super.primaryRoute,
+    super.secondaryRoute,
+  );
 
   @override
   void notify(NavigatorObserver observer) {
@@ -3155,9 +3147,9 @@ class _NavigatorPopObservation extends _NavigatorObservation {
 
 class _NavigatorRemoveObservation extends _NavigatorObservation {
   _NavigatorRemoveObservation(
-    Route<dynamic> primaryRoute,
-    Route<dynamic>? secondaryRoute,
-  ) : super(primaryRoute, secondaryRoute);
+    super.primaryRoute,
+    super.secondaryRoute,
+  );
 
   @override
   void notify(NavigatorObserver observer) {
@@ -3167,9 +3159,9 @@ class _NavigatorRemoveObservation extends _NavigatorObservation {
 
 class _NavigatorReplaceObservation extends _NavigatorObservation {
   _NavigatorReplaceObservation(
-    Route<dynamic> primaryRoute,
-    Route<dynamic>? secondaryRoute,
-  ) : super(primaryRoute, secondaryRoute);
+    super.primaryRoute,
+    super.secondaryRoute,
+  );
 
   @override
   void notify(NavigatorObserver observer) {
@@ -3349,7 +3341,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           // controller at the end of the build.
           if (newHeroController.navigator != null) {
             final NavigatorState previousOwner = newHeroController.navigator!;
-            ServicesBinding.instance!.addPostFrameCallback((Duration timestamp) {
+            ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
               // We only check if this navigator still owns the hero controller.
               if (_heroControllerFromScope == newHeroController) {
                 final bool hasHeroControllerOwnerShip = _heroControllerFromScope!._navigator == this;
@@ -3635,6 +3627,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // Scans middle of the old entries and records the page key to old entry map.
     int oldEntriesBottomToScan = oldEntriesBottom;
     final Map<LocalKey, _RouteEntry> pageKeyToOldEntry = <LocalKey, _RouteEntry>{};
+    // This set contains entries that are transitioning out but are still in
+    // the route stack.
+    final Set<_RouteEntry> phantomEntries = <_RouteEntry>{};
     while (oldEntriesBottomToScan <= oldEntriesTop) {
       final _RouteEntry oldEntry = _history[oldEntriesBottomToScan];
       oldEntriesBottomToScan += 1;
@@ -3650,9 +3645,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       assert(oldEntry.hasPage);
 
       final Page<dynamic> page = oldEntry.route.settings as Page<dynamic>;
+
       if (page.key == null)
         continue;
 
+      if (!oldEntry.willBePresent) {
+        phantomEntries.add(oldEntry);
+        continue;
+      }
       assert(!pageKeyToOldEntry.containsKey(page.key));
       pageKeyToOldEntry[page.key!] = oldEntry;
     }
@@ -3703,21 +3703,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             () => <_RouteEntry>[],
           );
         pagelessRoutes.add(potentialEntryToRemove);
-        if (previousOldPageRouteEntry!.isWaitingForExitingDecision && potentialEntryToRemove.isPresent)
+        if (previousOldPageRouteEntry!.isWaitingForExitingDecision && potentialEntryToRemove.willBePresent)
           potentialEntryToRemove.markNeedsExitingDecision();
         continue;
       }
 
       final Page<dynamic> potentialPageToRemove = potentialEntryToRemove.route.settings as Page<dynamic>;
       // Marks for transition delegate to remove if this old page does not have
-      // a key or was not taken during updating the middle of new page.
-      if (
-        potentialPageToRemove.key == null ||
-        pageKeyToOldEntry.containsKey(potentialPageToRemove.key)
-      ) {
+      // a key, was not taken during updating the middle of new page, or is
+      // already transitioning out.
+      if (potentialPageToRemove.key == null ||
+          pageKeyToOldEntry.containsKey(potentialPageToRemove.key) ||
+          phantomEntries.contains(potentialEntryToRemove)) {
         locationToExitingPageRoute[previousOldPageRouteEntry] = potentialEntryToRemove;
         // We only need a decision if it has not already been popped.
-        if (potentialEntryToRemove.isPresent)
+        if (potentialEntryToRemove.willBePresent)
           potentialEntryToRemove.markNeedsExitingDecision();
       }
       previousOldPageRouteEntry = potentialEntryToRemove;
@@ -4073,6 +4073,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
+  ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
@@ -4139,6 +4141,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// finished animating in.
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -4210,6 +4214,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
+  ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
@@ -4272,6 +4278,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// the previous routes until the `predicate` returns true.
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -4340,6 +4348,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Push the given route onto the navigator.
   ///
   /// {@macro flutter.widgets.navigator.push}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4488,6 +4498,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -4572,6 +4584,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// routes until the `predicate` returns true.
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -5015,11 +5029,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     bool? wasDebugLocked;
     assert(() { wasDebugLocked = _debugLocked; _debugLocked = true; return true; }());
     assert(_history.where(_RouteEntry.isRoutePredicate(route)).length == 1);
-    final _RouteEntry entry =  _history.firstWhere(_RouteEntry.isRoutePredicate(route));
-    // For page-based route, the didPop can be called on any life cycle above
-    // pop.
-    assert(entry.currentState == _RouteLifecycle.popping ||
-          (entry.hasPage && entry.currentState.index < _RouteLifecycle.pop.index));
+    final int index = _history.indexWhere(_RouteEntry.isRoutePredicate(route));
+    final _RouteEntry entry =  _history[index];
+    // For page-based route with zero transition, the finalizeRoute can be
+    // called on any life cycle above pop.
+    if (entry.hasPage && entry.currentState.index < _RouteLifecycle.pop.index) {
+      _observedRouteDeletions.add(_NavigatorPopObservation(route, _getRouteBefore(index - 1, _RouteEntry.willBePresentPredicate)?.route));
+    } else {
+      assert(entry.currentState == _RouteLifecycle.popping);
+    }
     entry.finalize();
     // finalizeRoute can be called during _flushHistoryUpdates if a pop
     // finishes synchronously.
@@ -5108,7 +5126,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   void _cancelActivePointers() {
     // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
-    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.idle) {
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
       // If we're between frames (SchedulerPhase.idle) then absorb any
       // subsequent pointers from this frame. The absorbing flag will be
       // reset in the next frame, see build().
@@ -5119,7 +5137,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         // to false on the next frame.
       });
     }
-    _activePointers.toList().forEach(WidgetsBinding.instance!.cancelPointer);
+    _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
   }
 
   @override
@@ -5166,7 +5184,7 @@ abstract class _RestorationInformation {
     required int restorationScopeId,
   }) = _NamedRestorationInformation;
   factory _RestorationInformation.anonymous({
-    required RestorableRouteBuilder routeBuilder,
+    required RestorableRouteBuilder<Object?> routeBuilder,
     required Object? arguments,
     required int restorationScopeId,
   }) = _AnonymousRestorationInformation;
@@ -5265,7 +5283,7 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
 
   factory _AnonymousRestorationInformation.fromSerializableData(List<Object?> data) {
     assert(data.length > 1);
-    final RestorableRouteBuilder routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder;
+    final RestorableRouteBuilder<Object?> routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder;
     return _AnonymousRestorationInformation(
       restorationScopeId: data[0]! as int,
       routeBuilder: routeBuilder,
@@ -5292,7 +5310,7 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
 
   @override
   final int restorationScopeId;
-  final RestorableRouteBuilder routeBuilder;
+  final RestorableRouteBuilder<Object?> routeBuilder;
   final Object? arguments;
 
   @override
@@ -5347,7 +5365,7 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
       }
 
       assert(!entry.hasPage);
-      restorationEnabled = restorationEnabled && entry.restorationInformation?.isRestorable == true;
+      restorationEnabled = restorationEnabled && (entry.restorationInformation?.isRestorable ?? false);
       entry.restorationEnabled = restorationEnabled;
       if (restorationEnabled) {
         assert(entry.restorationId != null);

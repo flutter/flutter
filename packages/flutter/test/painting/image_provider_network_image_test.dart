@@ -16,10 +16,10 @@ import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding();
+  TestRenderingFlutterBinding.ensureInitialized();
 
-  Future<Codec>  _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-    return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+  Future<Codec>  basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   }
 
   late _FakeHttpClient httpClient;
@@ -31,8 +31,8 @@ void main() {
 
   tearDown(() {
     debugNetworkImageHttpClientProvider = null;
-    PaintingBinding.instance!.imageCache!.clear();
-    PaintingBinding.instance!.imageCache!.clearLiveImages();
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
   });
 
   test('Expect thrown exception with statusCode - evicts from cache and drains', () async {
@@ -44,13 +44,13 @@ void main() {
     final Completer<dynamic> caughtError = Completer<dynamic>();
 
     final ImageProvider imageProvider = NetworkImage(nonconst(requestUrl));
-    expect(imageCache!.pendingImageCount, 0);
-    expect(imageCache!.statusForKey(imageProvider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache.statusForKey(imageProvider).untracked, true);
 
     final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
 
-    expect(imageCache!.pendingImageCount, 1);
-    expect(imageCache!.statusForKey(imageProvider).pending, true);
+    expect(imageCache.pendingImageCount, 1);
+    expect(imageCache.statusForKey(imageProvider).pending, true);
 
     result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
     }, onError: (dynamic error, StackTrace? stackTrace) {
@@ -59,8 +59,8 @@ void main() {
 
     final dynamic err = await caughtError.future;
 
-    expect(imageCache!.pendingImageCount, 0);
-    expect(imageCache!.statusForKey(imageProvider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache.statusForKey(imageProvider).untracked, true);
 
     expect(
       err,
@@ -77,7 +77,7 @@ void main() {
 
     Future<void> loadNetworkImage() async {
       final NetworkImage networkImage = NetworkImage(nonconst('foo'));
-      final ImageStreamCompleter completer = networkImage.load(networkImage, _basicDecoder);
+      final ImageStreamCompleter completer = networkImage.load(networkImage, basicDecoder);
       completer.addListener(ImageStreamListener(
         (ImageInfo image, bool synchronousCall) { },
         onError: (dynamic error, StackTrace? stackTrace) {
@@ -163,13 +163,13 @@ void main() {
     debugNetworkImageHttpClientProvider = () => mockHttpClient;
 
     final ImageProvider imageProvider = NetworkImage(nonconst('testing.url'));
-    expect(imageCache!.pendingImageCount, 0);
-    expect(imageCache!.statusForKey(imageProvider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache.statusForKey(imageProvider).untracked, true);
 
     final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
 
-    expect(imageCache!.pendingImageCount, 1);
-    expect(imageCache!.statusForKey(imageProvider).pending, true);
+    expect(imageCache.pendingImageCount, 1);
+    expect(imageCache.statusForKey(imageProvider).pending, true);
     final Completer<dynamic> caughtError = Completer<dynamic>();
     result.addListener(ImageStreamListener(
       (ImageInfo info, bool syncCall) {},
@@ -182,14 +182,14 @@ void main() {
 
     expect(err, isA<SocketException>());
 
-    expect(imageCache!.pendingImageCount, 0);
-    expect(imageCache!.statusForKey(imageProvider).untracked, true);
-    expect(imageCache!.containsKey(result), isFalse);
+    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache.statusForKey(imageProvider).untracked, true);
+    expect(imageCache.containsKey(result), isFalse);
 
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
-  Future<Codec> _decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
@@ -207,7 +207,7 @@ void main() {
 
     const NetworkImage provider = NetworkImage(url);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, url);
   });

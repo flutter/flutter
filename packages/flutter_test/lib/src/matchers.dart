@@ -37,6 +37,7 @@ import 'widget_tester.dart' show WidgetTester;
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
 
 /// Asserts that the [Finder] locates at least one widget in the widget tree.
@@ -52,6 +53,7 @@ const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
 
 /// Asserts that the [Finder] locates at exactly one widget in the widget tree.
@@ -67,6 +69,7 @@ const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 
 /// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
@@ -82,7 +85,24 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
+
+/// Asserts that the [Finder] locates at least a number of widgets in the widget tree.
+///
+/// ## Sample code
+///
+/// ```dart
+/// expect(find.text('Save'), findsAtLeastNWidgets(2));
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsWidgets], when you want the finder to find one or more widgets.
+///  * [findsOneWidget], when you want the finder to find exactly one widget.
+///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+Matcher findsAtLeastNWidgets(int n) => _FindsWidgetMatcher(n, null);
 
 /// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
@@ -354,6 +374,61 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// ```
 /// {@end-tool}
 ///
+/// {@template flutter.flutter_test.matchesGoldenFile.custom_fonts}
+/// ## Including Fonts
+///
+/// Custom fonts may render differently across different platforms, or
+/// between different versions of Flutter. For example, a golden file generated
+/// on Windows with fonts will likely differ from the one produced by another
+/// operating system. Even on the same platform, if the generated golden is
+/// tested with a different Flutter version, the test may fail and require an
+/// updated image.
+///
+/// By default, the Flutter framework uses a font called 'Ahem' which shows
+/// squares instead of characters, however, it is possible to render images using
+/// custom fonts. For example, this is how to load the 'Roboto' font for a
+/// golden test:
+///
+/// {@tool snippet}
+/// How to load a custom font for golden images.
+/// ```dart
+/// testWidgets('Creating a golden image with a custom font', (tester) async {
+///   // Assuming the 'Roboto.ttf' file is declared in the pubspec.yaml file
+///   final font = rootBundle.load('path/to/font-file/Roboto.ttf');
+///
+///   final fontLoader = FontLoader('Roboto')..addFont(font);
+///   await fontLoader.load();
+///
+///   await tester.pumpWidget(const SomeWidget());
+///
+///   await expectLater(
+///     find.byType(SomeWidget),
+///     matchesGoldenFile('someWidget.png'),
+///   );
+/// });
+/// ```
+/// {@end-tool}
+///
+/// The example above loads the desired font only for that specific test. To load
+/// a font for all golden file tests, the `FontLoader.load()` call could be
+/// moved in the `flutter_test_config.dart`. In this way, the font will always be
+/// loaded before a test:
+///
+/// {@tool snippet}
+/// Loading a custom font from the flutter_test_config.dart file.
+/// ```dart
+/// Future<void> testExecutable(FutureOr<void> Function() testMain) async {
+///   setUpAll(() async {
+///     final fontLoader = FontLoader('SomeFont')..addFont(someFont);
+///     await fontLoader.load();
+///   });
+///
+///   await testMain();
+/// });
+/// ```
+/// {@end-tool}
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [GoldenFileComparator], which acts as the backend for this matcher.
@@ -363,8 +438,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher
-matchesGoldenFile(Object key, {int? version}) {
+AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
   if (key is Uri) {
     return MatchesGoldenFile(key, version);
   } else if (key is String) {
@@ -423,7 +497,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// expect(tester.getSemantics(find.text('hello')), matchesSemanticsNode(label: 'hello'));
+/// expect(tester.getSemantics(find.text('hello')), matchesSemantics(label: 'hello'));
 /// handle.dispose();
 /// ```
 ///
@@ -440,6 +514,7 @@ Matcher matchesSemantics({
   String? increasedValue,
   AttributedString? attributedIncreasedValue,
   String? decreasedValue,
+  String? tooltip,
   AttributedString? attributedDecreasedValue,
   TextDirection? textDirection,
   Rect? rect,
@@ -529,7 +604,7 @@ Matcher matchesSemantics({
     if (hasToggledState) SemanticsFlag.hasToggledState,
     if (isToggled) SemanticsFlag.isToggled,
     if (hasImplicitScrolling) SemanticsFlag.hasImplicitScrolling,
-    if (isSlider) SemanticsFlag.isSlider
+    if (isSlider) SemanticsFlag.isSlider,
   ];
 
   final List<SemanticsAction> actions = <SemanticsAction>[
@@ -571,6 +646,7 @@ Matcher matchesSemantics({
     value: value,
     attributedValue: attributedValue,
     increasedValue: increasedValue,
+    tooltip: tooltip,
     attributedIncreasedValue: attributedIncreasedValue,
     decreasedValue: decreasedValue,
     attributedDecreasedValue: attributedDecreasedValue,
@@ -609,6 +685,7 @@ Matcher matchesSemantics({
 ///   * [androidTapTargetGuideline], for Android minimum tappable area guidelines.
 ///   * [iOSTapTargetGuideline], for iOS minimum tappable area guidelines.
 ///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
+///   * [labeledTapTargetGuideline], for enforcing labels on tappable areas.
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
   return _MatchesAccessibilityGuideline(guideline);
 }
@@ -1688,7 +1765,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
       imageFuture = captureImage(elements.single);
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
       final ByteData? bytes = await image.toByteData();
@@ -1728,6 +1805,7 @@ class _MatchesSemanticsData extends Matcher {
     this.attributedIncreasedValue,
     this.decreasedValue,
     this.attributedDecreasedValue,
+    this.tooltip,
     this.flags,
     this.actions,
     this.textDirection,
@@ -1753,6 +1831,7 @@ class _MatchesSemanticsData extends Matcher {
   final AttributedString? attributedIncreasedValue;
   final String? decreasedValue;
   final AttributedString? attributedDecreasedValue;
+  final String? tooltip;
   final SemanticsHintOverrides? hintOverrides;
   final List<SemanticsAction>? actions;
   final List<CustomSemanticsAction>? customActions;
@@ -1790,6 +1869,8 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with decreasedValue: $decreasedValue ');
     if (attributedDecreasedValue != null)
       description.add(' with attributedDecreasedValue: $attributedDecreasedValue');
+    if (tooltip != null)
+      description.add(' with tooltip: $tooltip');
     if (actions != null)
       description.add(' with actions: ').addDescriptionOf(actions);
     if (flags != null)
@@ -1887,6 +1968,8 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(
           matchState, 'attributedDecreasedValue was: ${data.attributedDecreasedValue}');
     }
+    if (tooltip != null && tooltip != data.tooltip)
+      return failWithDescription(matchState, 'tooltip was: ${data.tooltip}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
     if (rect != null && rect != data.rect)

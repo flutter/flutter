@@ -30,7 +30,7 @@ enum _FloatingActionButtonType {
   extended,
 }
 
-/// A material design floating action button.
+/// A Material Design floating action button.
 ///
 /// A floating action button is a circular icon button that hovers over content
 /// to promote a primary action in the application. Floating action buttons are
@@ -69,6 +69,21 @@ enum _FloatingActionButtonType {
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
 /// {@end-tool}
 ///
+/// Material Design 3 introduced new types of floating action buttons.
+/// {@tool dartpad}
+/// This sample shows the creation of [FloatingActionButton] widget in the typical location in a Scaffold,
+/// as described in: https://m3.material.io/components/floating-action-button/overview
+///
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of all the variants of [FloatingActionButton] widget as
+/// described in: https://m3.material.io/components/floating-action-button/overview
+///
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.
@@ -81,7 +96,7 @@ class FloatingActionButton extends StatelessWidget {
   /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
   /// must be non-negative.
   const FloatingActionButton({
-    Key? key,
+    super.key,
     this.child,
     this.tooltip,
     this.foregroundColor,
@@ -118,8 +133,7 @@ class FloatingActionButton extends StatelessWidget {
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
-       extendedTextStyle = null,
-       super(key: key);
+       extendedTextStyle = null;
 
   /// Creates a small circular floating action button.
   ///
@@ -131,7 +145,7 @@ class FloatingActionButton extends StatelessWidget {
   /// [highlightElevation], and [disabledElevation] (if specified) must be
   /// non-negative.
   const FloatingActionButton.small({
-    Key? key,
+    super.key,
     this.child,
     this.tooltip,
     this.foregroundColor,
@@ -166,8 +180,7 @@ class FloatingActionButton extends StatelessWidget {
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
-       extendedTextStyle = null,
-       super(key: key);
+       extendedTextStyle = null;
 
   /// Creates a large circular floating action button.
   ///
@@ -179,7 +192,7 @@ class FloatingActionButton extends StatelessWidget {
   /// [highlightElevation], and [disabledElevation] (if specified) must be
   /// non-negative.
   const FloatingActionButton.large({
-    Key? key,
+    super.key,
     this.child,
     this.tooltip,
     this.foregroundColor,
@@ -214,8 +227,7 @@ class FloatingActionButton extends StatelessWidget {
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
-       extendedTextStyle = null,
-       super(key: key);
+       extendedTextStyle = null;
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
@@ -224,7 +236,7 @@ class FloatingActionButton extends StatelessWidget {
   /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
   /// (if specified) must be non-negative.
   const FloatingActionButton.extended({
-    Key? key,
+    super.key,
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
@@ -262,8 +274,7 @@ class FloatingActionButton extends StatelessWidget {
        mini = false,
        _floatingActionButtonType = _FloatingActionButtonType.extended,
        child = icon,
-       _extendedLabel = label,
-       super(key: key);
+       _extendedLabel = label;
 
   /// The widget below this widget in the tree.
   ///
@@ -320,7 +331,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this is not explicitly set, then there can only be one
   /// [FloatingActionButton] per route (that is, per screen), since otherwise
   /// there would be a tag conflict (multiple heroes on one route can't have the
-  /// same tag). The material design specification recommends only using one
+  /// same tag). The Material Design specification recommends only using one
   /// floating action button per screen.
   final Object? heroTag;
 
@@ -330,6 +341,8 @@ class FloatingActionButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -654,9 +667,8 @@ class FloatingActionButton extends StatelessWidget {
 // and MainAxisSize.min, to be as wide as their label and icon.
 class _ChildOverflowBox extends SingleChildRenderObjectWidget {
   const _ChildOverflowBox({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   @override
   _RenderChildOverflowBox createRenderObject(BuildContext context) {
@@ -673,9 +685,8 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
 class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   _RenderChildOverflowBox({
-    RenderBox? child,
-    TextDirection? textDirection,
-  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
+    super.textDirection,
+  }) : super(alignment: Alignment.center);
 
   @override
   double computeMinIntrinsicWidth(double height) => 0.0;
@@ -720,7 +731,30 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 class _M2Defaults extends FloatingActionButtonThemeData {
   _M2Defaults(BuildContext context, this.type, this.hasChild)
       : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme;
+        _colors = Theme.of(context).colorScheme,
+        super(
+          elevation: 6,
+          focusElevation: 6,
+          hoverElevation: 8,
+          highlightElevation: 12,
+          enableFeedback: true,
+          sizeConstraints: const BoxConstraints.tightFor(
+            width: 56.0,
+            height: 56.0,
+          ),
+          smallSizeConstraints: const BoxConstraints.tightFor(
+            width: 40.0,
+            height: 40.0,
+          ),
+          largeSizeConstraints: const BoxConstraints.tightFor(
+            width: 96.0,
+            height: 96.0,
+          ),
+          extendedSizeConstraints: const BoxConstraints.tightFor(
+            height: 48.0,
+          ),
+          extendedIconLabelSpacing: 8.0,
+        );
 
   final _FloatingActionButtonType type;
   final bool hasChild;
@@ -735,38 +769,9 @@ class _M2Defaults extends FloatingActionButtonThemeData {
   @override Color? get focusColor => _theme.focusColor;
   @override Color? get hoverColor => _theme.hoverColor;
   @override Color? get splashColor => _theme.splashColor;
-  @override double? get elevation => 6;
-  @override double? get focusElevation => 6;
-  @override double? get hoverElevation => 8;
-  @override double? get highlightElevation => 12;
   @override ShapeBorder? get shape => _isExtended ? const StadiumBorder() : const CircleBorder();
-  @override bool? get enableFeedback => true;
   @override double? get iconSize => _isLarge ? 36.0 : 24.0;
 
-  @override
-  BoxConstraints? get sizeConstraints => const BoxConstraints.tightFor(
-    width: 56.0,
-    height: 56.0,
-  );
-
-  @override
-  BoxConstraints? get smallSizeConstraints => const BoxConstraints.tightFor(
-    width: 40.0,
-    height: 40.0,
-  );
-
-  @override
-  BoxConstraints? get largeSizeConstraints => const BoxConstraints.tightFor(
-    width: 96.0,
-    height: 96.0,
-  );
-
-  @override
-  BoxConstraints? get extendedSizeConstraints => const BoxConstraints.tightFor(
-    height: 48.0,
-  );
-
-  @override double? get extendedIconLabelSpacing => 8.0;
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => _theme.textTheme.button!.copyWith(letterSpacing: 1.2);
 }
@@ -777,45 +782,60 @@ class _M2Defaults extends FloatingActionButtonThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0.74, 2022-01-06
+// Generated version v0_92
 class _M3Defaults extends FloatingActionButtonThemeData {
   _M3Defaults(this.context, this.type, this.hasChild)
-    : _colors = Theme.of(context).colorScheme,
-      _textTheme = Theme.of(context).textTheme;
+    : super(
+        elevation: 6.0,
+        focusElevation: 6.0,
+        hoverElevation: 8.0,
+        highlightElevation: 6.0,
+        enableFeedback: true,
+        sizeConstraints: const BoxConstraints.tightFor(
+          width: 56.0,
+          height: 56.0,
+        ),
+        smallSizeConstraints: const BoxConstraints.tightFor(
+          width: 40.0,
+          height: 40.0,
+        ),
+        largeSizeConstraints: const BoxConstraints.tightFor(
+          width: 96.0,
+          height: 96.0,
+        ),
+        extendedSizeConstraints: const BoxConstraints.tightFor(
+          height: 56.0,
+        ),
+        extendedIconLabelSpacing: 8.0,
+      );
 
   final BuildContext context;
   final _FloatingActionButtonType type;
   final bool hasChild;
-  final ColorScheme _colors;
-  final TextTheme _textTheme;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   bool get _isExtended => type == _FloatingActionButtonType.extended;
 
   @override Color? get foregroundColor => _colors.onPrimaryContainer;
   @override Color? get backgroundColor => _colors.primaryContainer;
   @override Color? get splashColor => _colors.onPrimaryContainer.withOpacity(0.12);
-  @override double get elevation => 6.0;
   @override Color? get focusColor => _colors.onPrimaryContainer.withOpacity(0.12);
-  @override double get focusElevation => 6.0;
   @override Color? get hoverColor => _colors.onPrimaryContainer.withOpacity(0.08);
-  @override double get hoverElevation => 8.0;
-  @override double get highlightElevation => 6.0;
 
   @override
   ShapeBorder? get shape {
     switch (type) {
       case _FloatingActionButtonType.regular:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
       case _FloatingActionButtonType.small:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0)));
       case _FloatingActionButtonType.large:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0)));
       case _FloatingActionButtonType.extended:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
      }
   }
-
-  @override bool? get enableFeedback => true;
 
   @override
   double? get iconSize {
@@ -827,30 +847,6 @@ class _M3Defaults extends FloatingActionButtonThemeData {
     }
   }
 
-  @override
-  BoxConstraints? get sizeConstraints => const BoxConstraints.tightFor(
-    width: 56.0,
-    height: 56.0,
-  );
-
-  @override
-  BoxConstraints? get smallSizeConstraints => const BoxConstraints.tightFor(
-    width: 40.0,
-    height: 40.0,
-  );
-
-  @override
-  BoxConstraints? get largeSizeConstraints => const BoxConstraints.tightFor(
-    width: 96.0,
-    height: 96.0,
-  );
-
-  @override
-  BoxConstraints? get extendedSizeConstraints => const BoxConstraints.tightFor(
-    height: 56.0,
-  );
-
-  @override double? get extendedIconLabelSpacing => 8.0;
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => _textTheme.labelLarge;
 }

@@ -78,7 +78,7 @@ void main() {
         kBuildMode: 'debug',
       },
       inputs: <String, String>{
-        kBundleSkSLPath: 'bundle.sksl'
+        kBundleSkSLPath: 'bundle.sksl',
       },
       processManager: processManager,
       artifacts: artifacts,
@@ -93,8 +93,8 @@ void main() {
         'platform': 'android',
         'data': <String, Object>{
           'A': 'B',
-        }
-      }
+        },
+      },
     ));
 
     // create pre-requisites.
@@ -265,7 +265,7 @@ void main() {
         '--snapshot_kind=app-aot-elf',
         '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
         '--strip',
-        environment.buildDir.childFile('app.dill').path
+        environment.buildDir.childFile('app.dill').path,
       ],
     ));
     environment.buildDir.createSync(recursive: true);
@@ -303,7 +303,7 @@ void main() {
         'bar',
         '--snapshot_kind=app-aot-elf',
         '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
-        environment.buildDir.childFile('app.dill').path
+        environment.buildDir.childFile('app.dill').path,
       ],
     ));
     environment.buildDir.createSync(recursive: true);

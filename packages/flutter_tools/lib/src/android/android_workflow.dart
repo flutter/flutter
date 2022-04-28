@@ -63,7 +63,7 @@ class AndroidWorkflow implements Workflow {
   @override
   bool get canLaunchDevices => appliesToHostPlatform && _androidSdk != null
     && _androidSdk?.adbPath != null
-    && _androidSdk?.validateSdkWellFormed().isEmpty == true;
+    && (_androidSdk?.validateSdkWellFormed().isEmpty ?? false);
 
   @override
   bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;
@@ -186,11 +186,13 @@ class AndroidValidator extends DoctorValidator {
 
     messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
 
+    _task = 'Validating Android SDK command line tools are available';
     if (!androidSdk.cmdlineToolsAvailable) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingCmdTools));
       return ValidationResult(ValidationType.missing, messages);
     }
 
+    _task = 'Validating Android SDK licenses';
     if (androidSdk.licensesAvailable && !androidSdk.platformToolsAvailable) {
       messages.add(ValidationMessage.hint(_userMessages.androidSdkLicenseOnly(kAndroidHome)));
       return ValidationResult(ValidationType.partial, messages);
@@ -227,6 +229,7 @@ class AndroidValidator extends DoctorValidator {
       messages.add(ValidationMessage('$kAndroidSdkRoot = $androidSdkRoot'));
     }
 
+    _task = 'Validating Android SDK';
     final List<String> validationResult = androidSdk.validateSdkWellFormed();
 
     if (validationResult.isNotEmpty) {
@@ -238,6 +241,7 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
+    _task = 'Finding Java binary';
     // Now check for the JDK.
     final String? javaBinary = AndroidSdk.findJavaBinary(
       androidStudio: _androidStudio,
@@ -362,7 +366,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   Future<LicensesAccepted> get licensesAccepted async {
     LicensesAccepted? status;
 
-    void _handleLine(String line) {
+    void handleLine(String line) {
       if (licenseCounts.hasMatch(line)) {
         final Match? match = licenseCounts.firstMatch(line);
         if (match?.group(1) != match?.group(2)) {
@@ -395,12 +399,12 @@ class AndroidLicenseValidator extends DoctorValidator {
       final Future<void> output = process.stdout
         .transform<String>(const Utf8Decoder(reportErrors: false))
         .transform<String>(const LineSplitter())
-        .listen(_handleLine)
+        .listen(handleLine)
         .asFuture<void>(null);
       final Future<void> errors = process.stderr
         .transform<String>(const Utf8Decoder(reportErrors: false))
         .transform<String>(const LineSplitter())
-        .listen(_handleLine)
+        .listen(handleLine)
         .asFuture<void>(null);
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;

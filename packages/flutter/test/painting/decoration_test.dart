@@ -127,7 +127,7 @@ class MultiImageCompleter extends ImageStreamCompleter {
 }
 
 void main() {
-  TestRenderingFlutterBinding(); // initializes the imageCache
+  TestRenderingFlutterBinding.ensureInitialized();
 
   test('Decoration.lerp()', () {
     const BoxDecoration a = BoxDecoration(color: Color(0xFFFFFFFF));
@@ -697,11 +697,11 @@ void main() {
     final ImageStream stream = provider.resolve(ImageConfiguration.empty);
 
     final Completer<ImageInfo> infoCompleter = Completer<ImageInfo>();
-    void _listener(ImageInfo image, bool syncCall) {
+    void listener(ImageInfo image, bool syncCall) {
       assert(!infoCompleter.isCompleted);
       infoCompleter.complete(image);
     }
-    stream.addListener(ImageStreamListener(_listener));
+    stream.addListener(ImageStreamListener(listener));
 
     final ImageInfo info = await infoCompleter.future;
     final int baselineRefCount = info.image.debugGetOpenHandleStackTraces()!.length;

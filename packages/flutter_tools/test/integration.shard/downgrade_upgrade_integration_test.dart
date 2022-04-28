@@ -14,7 +14,7 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 const String _kInitialVersion = 'v1.9.1';
-const String _kBranch = 'dev';
+const String _kBranch = 'beta';
 
 final Stdio stdio = Stdio();
 final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(
@@ -86,7 +86,7 @@ void main() {
       flutterBin,
       'upgrade',
       '--verbose',
-      '--working-directory=${testDirectory.path}'
+      '--working-directory=${testDirectory.path}',
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
@@ -107,7 +107,7 @@ void main() {
        flutterBin,
       'downgrade',
       '--no-prompt',
-      '--working-directory=${testDirectory.path}'
+      '--working-directory=${testDirectory.path}',
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 

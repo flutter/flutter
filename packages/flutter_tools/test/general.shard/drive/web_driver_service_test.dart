@@ -45,15 +45,15 @@ void main() {
           '--no-default-browser-check',
           '--no-sandbox',
           '--no-first-run',
-          '--headless'
+          '--headless',
         ],
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
           'devtools.timeline,'
-              'v8,blink.console,benchmark,blink,'
-              'blink.user_timing'
-        }
-      }
+          'v8,blink.console,benchmark,blink,'
+          'blink.user_timing',
+        },
+      },
     };
 
     expect(getDesiredCapabilities(Browser.chrome, true), expected);
@@ -85,10 +85,10 @@ void main() {
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
           'devtools.timeline,'
-              'v8,blink.console,benchmark,blink,'
-              'blink.user_timing'
-        }
-      }
+          'v8,blink.console,benchmark,blink,'
+          'blink.user_timing',
+        },
+      },
     };
 
     expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary), expected);
@@ -109,10 +109,10 @@ void main() {
           'media.gmp-provider.enabled': false,
           'network.captive-portal-service.enabled': false,
           'security.insecure_field_warning.contextual.enabled': false,
-          'test.currentTimeOffsetSeconds': 11491200
+          'test.currentTimeOffsetSeconds': 11491200,
         },
-        'log': <String, String>{'level': 'trace'}
-      }
+        'log': <String, String>{'level': 'trace'},
+      },
     };
 
     expect(getDesiredCapabilities(Browser.firefox, true), expected);
@@ -132,10 +132,10 @@ void main() {
           'media.gmp-provider.enabled': false,
           'network.captive-portal-service.enabled': false,
           'security.insecure_field_warning.contextual.enabled': false,
-          'test.currentTimeOffsetSeconds': 11491200
+          'test.currentTimeOffsetSeconds': 11491200,
         },
-        'log': <String, String>{'level': 'trace'}
-      }
+        'log': <String, String>{'level': 'trace'},
+      },
     };
 
     expect(getDesiredCapabilities(Browser.firefox, false), expected);
@@ -162,7 +162,7 @@ void main() {
     final Map<String, dynamic> expected = <String, dynamic>{
       'platformName': 'ios',
       'browserName': 'safari',
-      'safari:useSimulator': true
+      'safari:useSimulator': true,
     };
 
     expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
@@ -174,7 +174,7 @@ void main() {
       'platformName': 'android',
       'goog:chromeOptions': <String, dynamic>{
         'androidPackage': 'com.android.chrome',
-        'args': <String>['--disable-fullscreen']
+        'args': <String>['--disable-fullscreen'],
       },
     };
 

@@ -212,7 +212,7 @@ void main() {
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         // This is the value of `<int>[1, 2, 3, 4, 5]` run through `osUtils.gzipLevel1Stream`.
-        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (List<int> chunk in expectedEncoded) ...chunk])
+        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (List<int> chunk in expectedEncoded) ...chunk]),
       ]),
       uploadRetryThrottle: Duration.zero,
     );
@@ -519,7 +519,7 @@ void main() {
           } else if (boundaryKey != null && stringData.startsWith(boundaryKey)) {
             yield utf8.encode('result abc2\nline1\nline2\nabc2\nabc2 lib/foo.txt.dill 0\n');
           } else {
-            throw 'Saw $data ($stringData)';
+            throw Exception('Saw $data ($stringData)');
           }
           processed++;
         }

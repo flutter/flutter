@@ -21,14 +21,14 @@ import 'updater.dart';
 
 class GalleryApp extends StatefulWidget {
   const GalleryApp({
-    Key? key,
+    super.key,
     this.updateUrlFetcher,
     this.enablePerformanceOverlay = true,
     this.enableRasterCacheImagesCheckerboard = true,
     this.enableOffscreenLayersCheckerboard = true,
     this.onSendFeedback,
     this.testMode = false,
-  }) : super(key: key);
+  });
 
   final UpdateUrlFetcher? updateUrlFetcher;
   final bool enablePerformanceOverlay;

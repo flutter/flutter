@@ -80,9 +80,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   @override
   void dispose() {
-    super.dispose();
     backdropNode.dispose();
     foregroundNode.dispose();
+    super.dispose();
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {

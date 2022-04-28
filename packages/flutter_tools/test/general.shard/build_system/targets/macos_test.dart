@@ -51,8 +51,10 @@ void main() {
     );
 
     binary = environment.outputDir
-        .childDirectory('FlutterMacOS.framework')
-        .childFile('FlutterMacOS');
+      .childDirectory('FlutterMacOS.framework')
+      .childDirectory('Versions')
+      .childDirectory('A')
+      .childFile('FlutterMacOS');
 
     copyFrameworkCommand = FakeCommand(
       command: <String>[
@@ -109,7 +111,7 @@ void main() {
       throwsA(isException.having(
         (Exception exception) => exception.toString(),
         'description',
-        contains('FlutterMacOS.framework/FlutterMacOS does not exist, cannot thin'),
+        contains('FlutterMacOS.framework/Versions/A/FlutterMacOS does not exist, cannot thin'),
       )),
     );
   }, overrides: <Type, Generator>{
@@ -155,7 +157,7 @@ void main() {
 
     await const DebugUnpackMacOS().build(environment);
 
-    expect(logger.traceText, contains('Skipping lipo for non-fat file /FlutterMacOS.framework/FlutterMacOS'));
+    expect(logger.traceText, contains('Skipping lipo for non-fat file /FlutterMacOS.framework/Versions/A/FlutterMacOS'));
   });
 
   testUsingContext('thins fat framework', () async {
@@ -227,8 +229,8 @@ void main() {
         'platform': 'ios',
         'data': <String, Object>{
           'A': 'B',
-        }
-      }
+        },
+      },
     ));
 
     final String inputKernel = '${environment.buildDir.path}/app.dill';
@@ -382,30 +384,30 @@ void main() {
 
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        'Artifact.genSnapshot.TargetPlatform.darwin.release',
+        'Artifact.genSnapshot.TargetPlatform.darwin.release_arm64',
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
         '--strip',
-        environment.buildDir.childFile('app.dill').path
+        environment.buildDir.childFile('app.dill').path,
       ]),
       FakeCommand(command: <String>[
-        'Artifact.genSnapshot.TargetPlatform.darwin.release',
+        'Artifact.genSnapshot.TargetPlatform.darwin.release_x64',
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',
         '--strip',
-        environment.buildDir.childFile('app.dill').path
+        environment.buildDir.childFile('app.dill').path,
       ]),
       FakeCommand(command: <String>[
         'xcrun', 'cc',  '-arch', 'arm64',
         '-c', environment.buildDir.childFile('arm64/snapshot_assembly.S').path,
-        '-o', environment.buildDir.childFile('arm64/snapshot_assembly.o').path
+        '-o', environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
       ]),
       FakeCommand(command: <String>[
         'xcrun', 'cc',  '-arch', 'x86_64',
         '-c', environment.buildDir.childFile('x86_64/snapshot_assembly.S').path,
-        '-o', environment.buildDir.childFile('x86_64/snapshot_assembly.o').path
+        '-o', environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
       ]),
       FakeCommand(command: <String>[
         'xcrun', 'clang', '-arch', 'arm64', '-dynamiclib', '-Xlinker', '-rpath',
@@ -413,7 +415,7 @@ void main() {
         '-Xlinker', '@loader_path/Frameworks',
         '-install_name', '@rpath/App.framework/App',
         '-o', environment.buildDir.childFile('arm64/App.framework/App').path,
-        environment.buildDir.childFile('arm64/snapshot_assembly.o').path
+        environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
       ]),
       FakeCommand(command: <String>[
         'xcrun', 'clang', '-arch', 'x86_64', '-dynamiclib', '-Xlinker', '-rpath',
@@ -421,7 +423,7 @@ void main() {
         '-Xlinker', '@loader_path/Frameworks',
         '-install_name', '@rpath/App.framework/App',
         '-o', environment.buildDir.childFile('x86_64/App.framework/App').path,
-        environment.buildDir.childFile('x86_64/snapshot_assembly.o').path
+        environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
       ]),
       FakeCommand(command: <String>[
         'lipo',

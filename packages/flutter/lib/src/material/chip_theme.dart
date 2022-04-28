@@ -44,12 +44,11 @@ class ChipTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   const ChipTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -99,7 +98,7 @@ class ChipTheme extends InheritedTheme {
   bool updateShouldNotify(ChipTheme oldWidget) => data != oldWidget.data;
 }
 
-/// Holds the color, shape, and text styles for a material design chip theme.
+/// Holds the color, shape, and text styles for a Material Design chip theme.
 ///
 /// Use this class to configure a [ChipTheme] widget, or to set the
 /// [ThemeData.chipTheme] for a [Theme] widget.
@@ -502,27 +501,25 @@ class ChipThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      deleteIconColor,
-      disabledColor,
-      selectedColor,
-      secondarySelectedColor,
-      shadowColor,
-      selectedShadowColor,
-      checkmarkColor,
-      labelPadding,
-      padding,
-      side,
-      shape,
-      labelStyle,
-      secondaryLabelStyle,
-      brightness,
-      elevation,
-      pressElevation,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    deleteIconColor,
+    disabledColor,
+    selectedColor,
+    secondarySelectedColor,
+    shadowColor,
+    selectedShadowColor,
+    checkmarkColor,
+    labelPadding,
+    padding,
+    side,
+    shape,
+    labelStyle,
+    secondaryLabelStyle,
+    brightness,
+    elevation,
+    pressElevation,
+  );
 
   @override
   bool operator ==(Object other) {

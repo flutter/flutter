@@ -33,7 +33,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   List<Color> colors = <Color>[
     CupertinoColors.systemYellow,
     CupertinoColors.systemOrange,
-    CupertinoColors.systemPink
+    CupertinoColors.systemPink,
   ];
   List<Widget> items = <Widget>[
     Container(color: CupertinoColors.systemPink, height: 100.0),

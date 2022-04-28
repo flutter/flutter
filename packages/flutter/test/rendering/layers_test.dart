@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('non-painted layers are detached', () {
     RenderObject boundary, inner;
     final RenderOpacity root = RenderOpacity(
@@ -167,13 +169,25 @@ void main() {
   test('switching layer link of an attached leader layer should not crash', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: window);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
     leaderLayer.attach(view);
     final LayerLink link2 = LayerLink();
     leaderLayer.link = link2;
     // This should not crash.
     leaderLayer.detach();
     expect(leaderLayer.link, link2);
+  });
+
+  test('layer link attach/detach order should not crash app.', () {
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
+    final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    leaderLayer1.attach(view);
+    leaderLayer2.attach(view);
+    leaderLayer2.detach();
+    leaderLayer1.detach();
+    expect(link.leader, isNull);
   });
 
   test('leader layers not dirty when connected to follower layer', () {
@@ -319,7 +333,7 @@ void main() {
     expect(layer.debugSubtreeNeedsAddToScene, true);
   }
 
-  List<String> _getDebugInfo(Layer layer) {
+  List<String> getDebugInfo(Layer layer) {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     layer.debugFillProperties(builder);
     return builder.properties
@@ -328,27 +342,35 @@ void main() {
   }
 
   test('ClipRectLayer prints clipBehavior in debug info', () {
-    expect(_getDebugInfo(ClipRectLayer()), contains('clipBehavior: Clip.hardEdge'));
+    expect(getDebugInfo(ClipRectLayer()), contains('clipBehavior: Clip.hardEdge'));
     expect(
-      _getDebugInfo(ClipRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      getDebugInfo(ClipRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
       contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
     );
   });
 
   test('ClipRRectLayer prints clipBehavior in debug info', () {
-    expect(_getDebugInfo(ClipRRectLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(getDebugInfo(ClipRRectLayer()), contains('clipBehavior: Clip.antiAlias'));
     expect(
-      _getDebugInfo(ClipRRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      getDebugInfo(ClipRRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
       contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
     );
   });
 
   test('ClipPathLayer prints clipBehavior in debug info', () {
-    expect(_getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
     expect(
-      _getDebugInfo(ClipPathLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      getDebugInfo(ClipPathLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
       contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
     );
+  });
+
+  test('BackdropFilterLayer prints filter and blendMode in debug info', () {
+    final ImageFilter filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
+    final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
+    final List<String> info = getDebugInfo(layer);
+    expect(info, contains(isBrowser ? 'filter: ImageFilter.blur(1, 1, TileMode.repeated)' : 'filter: ImageFilter.blur(1.0, 1.0, repeated)'));
+    expect(info, contains('blendMode: clear'));
   });
 
   test('PictureLayer prints picture, raster cache hints in debug info', () {
@@ -360,7 +382,7 @@ void main() {
     layer.picture = picture;
     layer.isComplexHint = true;
     layer.willChangeHint = false;
-    final List<String> info = _getDebugInfo(layer);
+    final List<String> info = getDebugInfo(layer);
     expect(info, contains('picture: ${describeIdentity(picture)}'));
     expect(info, isNot(contains('engine layer: ${describeIdentity(null)}')));
     expect(info, contains('raster cache hints: isComplex = true, willChange = false'));
@@ -368,11 +390,11 @@ void main() {
 
   test('Layer prints engineLayer if it is not null in debug info', () {
     final ConcreteLayer layer = ConcreteLayer();
-    List<String> info = _getDebugInfo(layer);
+    List<String> info = getDebugInfo(layer);
     expect(info, isNot(contains('engine layer: ${describeIdentity(null)}')));
 
     layer.engineLayer = FakeEngineLayer();
-    info = _getDebugInfo(layer);
+    info = getDebugInfo(layer);
     expect(info, contains('engine layer: ${describeIdentity(layer.engineLayer)}'));
   });
 
@@ -734,27 +756,28 @@ class FakeSceneBuilder extends Fake implements SceneBuilder {
   }
 
   bool pushedOpacity = false;
-  @override
-  OpacityEngineLayer pushOpacity(int alpha, {Offset? offset = Offset.zero, OpacityEngineLayer? oldLayer}) {
-    pushedOpacity = true;
-    return FakeOpacityEngineLayer();
-  }
-
   bool pushedOffset = false;
-  @override
-  OffsetEngineLayer pushOffset(double x, double y, {OffsetEngineLayer? oldLayer}) {
-    pushedOffset = true;
-    return FakeOffsetEngineLayer();
-  }
-
   bool addedPicture = false;
-  @override
-  void addPicture(Offset offset, Picture picture, {bool isComplexHint = false, bool willChangeHint = false}) {
-    addedPicture = true;
-  }
 
   @override
-  void pop() {}
+  dynamic noSuchMethod(Invocation invocation) {
+    // Use noSuchMethod forwarding instead of override these methods to make it easier
+    // for these methods to add new optional arguments in the future.
+    switch (invocation.memberName) {
+      case #pushOpacity:
+        pushedOpacity = true;
+        return FakeOpacityEngineLayer();
+      case #pushOffset:
+        pushedOffset = true;
+        return FakeOffsetEngineLayer();
+      case #addPicture:
+        addedPicture = true;
+        return;
+      case #pop:
+        return;
+    }
+    super.noSuchMethod(invocation);
+  }
 }
 
 class FakeOpacityEngineLayer extends FakeEngineLayer implements OpacityEngineLayer {}

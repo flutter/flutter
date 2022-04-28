@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
 
 void main() {
   BufferLogger logger;
@@ -29,6 +30,7 @@ void main() {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       dartExecutable: 'dart',
       logger: logger,
+      botDetector: const FakeBotDetector(false),
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
@@ -52,6 +54,7 @@ void main() {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       dartExecutable: 'dart',
       logger: logger,
+      botDetector: const FakeBotDetector(false),
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
@@ -83,7 +86,7 @@ void main() {
           'devtools',
           '--no-launch-browser',
           '--vm-uri=localhost:8181/abcdefg',
-          '--profile-memory=foo'
+          '--profile-memory=foo',
         ],
         stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
       ),
@@ -91,6 +94,7 @@ void main() {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       dartExecutable: 'dart',
       logger: logger,
+      botDetector: const FakeBotDetector(false),
       processManager: processManager,
     );
 
@@ -104,6 +108,7 @@ void main() {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       dartExecutable: 'dart',
       logger: logger,
+      botDetector: const FakeBotDetector(false),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -113,12 +118,37 @@ void main() {
             '--vm-uri=http://127.0.0.1:1234/abcdefg',
           ],
           exception: ProcessException('pub', <String>[]),
-        )
+        ),
       ]),
     );
 
     await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
 
     expect(logger.errorText, contains('Failed to launch DevTools: ProcessException'));
+  });
+
+  testWithoutContext('DevtoolsLauncher handles failure of DevTools process on a bot', () async {
+    final Completer<void> completer = Completer<void>();
+    final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
+      dartExecutable: 'dart',
+      logger: logger,
+      botDetector: const FakeBotDetector(true),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'dart',
+            'devtools',
+            '--no-launch-browser',
+          ],
+          stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
+          completer: completer,
+          exitCode: 255,
+        ),
+      ]),
+    );
+
+    await launcher.launch(null);
+    completer.complete();
+    expect(launcher.devToolsProcessExit, throwsToolExit());
   });
 }

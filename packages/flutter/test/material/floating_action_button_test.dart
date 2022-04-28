@@ -670,7 +670,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Tooltip is used as semantics label', (WidgetTester tester) async {
+  testWidgets('Tooltip is used as semantics tooltip', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -697,7 +697,7 @@ void main() {
                   ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Add Photo',
+                      tooltip: 'Add Photo',
                       actions: <SemanticsAction>[
                         SemanticsAction.tap,
                       ],
@@ -837,7 +837,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -855,7 +855,7 @@ void main() {
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -872,7 +872,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -889,7 +889,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
@@ -897,11 +897,9 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: FloatingActionButton(
-            focusNode: focusNode,
-            onPressed: () { /* to make sure the button is enabled */ },
-          ),
+        child: FloatingActionButton(
+          focusNode: focusNode,
+          onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
     );

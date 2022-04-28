@@ -81,13 +81,15 @@ class TestCompositingBitsTree {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('objects can be detached and re-attached: layout', () {
     final TestTree testTree = TestTree();
     // Lay out
     layout(testTree.root);
     expect(testTree.child.size, equals(const Size(20.0, 20.0)));
     // Remove testTree from the custom render view
-    renderer.renderView.child = null;
+    TestRenderingFlutterBinding.instance.renderView.child = null;
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
     testTree.child.additionalConstraints =
@@ -102,7 +104,7 @@ void main() {
     layout(testTree.root, phase: EnginePhase.paint);
     expect(testTree.painted, isTrue);
     // Remove testTree from the custom render view
-    renderer.renderView.child = null;
+    TestRenderingFlutterBinding.instance.renderView.child = null;
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
     testTree.compositor._alwaysComposite = true;
@@ -118,7 +120,7 @@ void main() {
     layout(testTree.root, phase: EnginePhase.paint);
     expect(testTree.painted, isTrue);
     // Remove testTree from the custom render view
-    renderer.renderView.child = null;
+    TestRenderingFlutterBinding.instance.renderView.child = null;
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
     testTree.child.markNeedsPaint();
@@ -130,7 +132,7 @@ void main() {
   test('objects can be detached and re-attached: semantics (no change)', () {
     final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
-    final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
       },
@@ -139,7 +141,7 @@ void main() {
     layout(testTree.root, phase: EnginePhase.flushSemantics);
     expect(semanticsUpdateCount, 1);
     // Remove testTree from the custom render view
-    renderer.renderView.child = null;
+    TestRenderingFlutterBinding.instance.renderView.child = null;
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
     semanticsUpdateCount = 0;
@@ -153,7 +155,7 @@ void main() {
   test('objects can be detached and re-attached: semantics (with change)', () {
     final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
-    final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
       },
@@ -162,7 +164,7 @@ void main() {
     layout(testTree.root, phase: EnginePhase.flushSemantics);
     expect(semanticsUpdateCount, 1);
     // Remove testTree from the custom render view
-    renderer.renderView.child = null;
+    TestRenderingFlutterBinding.instance.renderView.child = null;
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
     semanticsUpdateCount = 0;

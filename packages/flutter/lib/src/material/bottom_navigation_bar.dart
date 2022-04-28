@@ -14,6 +14,7 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -137,7 +138,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// If [selectedLabelStyle].color and [unselectedLabelStyle].color values
   /// are non-null, they will be used instead of [selectedItemColor] and
-  /// [unselectedItemColor].
+  /// [unselectedItemColor] to style the label color.
   ///
   /// If custom [IconThemeData]s are used, you must provide both
   /// [selectedIconTheme] and [unselectedIconTheme], and both
@@ -160,7 +161,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// [BottomNavigationBarType.fixed] and `false` when [type] is
   /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
-    Key? key,
+    super.key,
     required this.items,
     this.onTap,
     this.currentIndex = 0,
@@ -197,8 +198,7 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       selectedItemColor = selectedItemColor ?? fixedColor,
-       super(key: key);
+       selectedItemColor = selectedItemColor ?? fixedColor;
 
   /// Defines the appearance of the button items that are arrayed within the
   /// bottom navigation bar.
@@ -311,9 +311,20 @@ class BottomNavigationBar extends StatefulWidget {
   final bool? showSelectedLabels;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// tiles.
+  /// items.
   ///
-  /// If this property is null, [SystemMouseCursors.click] will be used.
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///
+  /// If null, then the value of [BottomNavigationBarThemeData.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -373,7 +384,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.animation,
     this.iconSize, {
     this.onTap,
-    this.colorTween,
+    this.itemColorTween,
     this.flex,
     this.selected = false,
     required this.selectedLabelStyle,
@@ -399,7 +410,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final Animation<double> animation;
   final double iconSize;
   final VoidCallback? onTap;
-  final ColorTween? colorTween;
+  final ColorTween? itemColorTween;
   final double? flex;
   final bool selected;
   final IconThemeData? selectedIconTheme;
@@ -502,7 +513,7 @@ class _BottomNavigationTile extends StatelessWidget {
         child: _Tile(
           layout: layout,
           icon: _TileIcon(
-            colorTween: colorTween!,
+            itemColorTween: itemColorTween!,
             animation: animation,
             iconSize: iconSize,
             selected: selected,
@@ -511,7 +522,7 @@ class _BottomNavigationTile extends StatelessWidget {
             unselectedIconTheme: unselectedIconTheme,
           ),
           label: _Label(
-            colorTween: colorTween!,
+            itemColorTween: itemColorTween!,
             animation: animation,
             item: item,
             selectedLabelStyle: selectedLabelStyle,
@@ -560,11 +571,10 @@ class _BottomNavigationTile extends StatelessWidget {
 // icon-label column.
 class _Tile extends StatelessWidget {
  const  _Tile({
-    Key? key,
     required this.layout,
     required this.icon,
     required this.label
-  }) : super(key: key);
+  });
 
   final BottomNavigationBarLandscapeLayout layout;
   final Widget icon;
@@ -592,8 +602,7 @@ class _Tile extends StatelessWidget {
 
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
-    Key? key,
-    required this.colorTween,
+    required this.itemColorTween,
     required this.animation,
     required this.iconSize,
     required this.selected,
@@ -601,10 +610,9 @@ class _TileIcon extends StatelessWidget {
     required this.selectedIconTheme,
     required this.unselectedIconTheme,
   }) : assert(selected != null),
-       assert(item != null),
-       super(key: key);
+       assert(item != null);
 
-  final ColorTween colorTween;
+  final ColorTween itemColorTween;
   final Animation<double> animation;
   final double iconSize;
   final bool selected;
@@ -614,7 +622,7 @@ class _TileIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color? iconColor = colorTween.evaluate(animation);
+    final Color? iconColor = itemColorTween.evaluate(animation);
     final IconThemeData defaultIconTheme = IconThemeData(
       color: iconColor,
       size: iconSize,
@@ -638,24 +646,22 @@ class _TileIcon extends StatelessWidget {
 
 class _Label extends StatelessWidget {
   const _Label({
-    Key? key,
-    required this.colorTween,
+    required this.itemColorTween,
     required this.animation,
     required this.item,
     required this.selectedLabelStyle,
     required this.unselectedLabelStyle,
     required this.showSelectedLabels,
     required this.showUnselectedLabels,
-  }) : assert(colorTween != null),
+  }) : assert(itemColorTween != null),
        assert(animation != null),
        assert(item != null),
        assert(selectedLabelStyle != null),
        assert(unselectedLabelStyle != null),
        assert(showSelectedLabels != null),
-       assert(showUnselectedLabels != null),
-       super(key: key);
+       assert(showUnselectedLabels != null);
 
-  final ColorTween colorTween;
+  final ColorTween itemColorTween;
   final Animation<double> animation;
   final BottomNavigationBarItem item;
   final TextStyle selectedLabelStyle;
@@ -673,10 +679,16 @@ class _Label extends StatelessWidget {
       selectedLabelStyle,
       animation.value,
     )!;
+    final ColorTween labelColor = ColorTween(
+      begin: unselectedLabelStyle.color
+        ?? itemColorTween.begin,
+      end: selectedLabelStyle.color
+        ?? itemColorTween.end,
+    );
     Widget text = DefaultTextStyle.merge(
       style: customStyle.copyWith(
         fontSize: selectedFontSize,
-        color: colorTween.evaluate(animation),
+        color: labelColor.evaluate(animation),
       ),
       // The font size should grow here when active, but because of the way
       // font rendering works, it doesn't grow smoothly if we just animate
@@ -917,10 +929,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
     }
 
-    final ColorTween colorTween;
+    final ColorTween itemColorTween;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
-        colorTween = ColorTween(
+        itemColorTween = ColorTween(
           begin: widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.unselectedWidgetColor,
@@ -931,7 +943,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
         break;
       case BottomNavigationBarType.shifting:
-        colorTween = ColorTween(
+        itemColorTween = ColorTween(
           begin: widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.colorScheme.surface,
@@ -941,10 +953,17 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
         break;
     }
-    final MouseCursor effectiveMouseCursor = widget.mouseCursor ?? SystemMouseCursors.click;
 
     final List<Widget> tiles = <Widget>[];
     for (int i = 0; i < widget.items.length; i++) {
+      final Set<MaterialState> states = <MaterialState>{
+        if (i == widget.currentIndex) MaterialState.selected,
+      };
+
+      final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+        ?? bottomTheme.mouseCursor?.resolve(states)
+        ?? MaterialStateMouseCursor.clickable.resolve(states);
+
       tiles.add(_BottomNavigationTile(
         _effectiveType,
         widget.items[i],
@@ -958,7 +977,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         onTap: () {
           widget.onTap?.call(i);
         },
-        colorTween: colorTween,
+        itemColorTween: itemColorTween,
         flex: _evaluateFlex(_animations[i]),
         selected: i == widget.currentIndex,
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels ?? true,
@@ -1035,12 +1054,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 // BottomNavigationBarLandscapeLayout.centered
 class _Bar extends StatelessWidget {
   const _Bar({
-    Key? key,
     required this.child,
     required this.layout,
     required this.elevation,
     required this.color,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final BottomNavigationBarLandscapeLayout layout;

@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Directory;
 import 'dart:typed_data';
-import 'dart:ui' show hashValues, hashList;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -23,11 +22,12 @@ import 'json_templates.dart';
 const String _kFlutterRoot = '/flutter';
 
 // 1x1 transparent pixel
-const List<int> _kTestPngBytes =
-<int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+const List<int> _kTestPngBytes = <int>[
+  137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
   1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
   120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
-  78, 68, 174, 66, 96, 130];
+  78, 68, 174, 66, 96, 130,
+];
 
 void main() {
   late MemoryFileSystem fs;
@@ -466,6 +466,27 @@ void main() {
       expect(key, Uri.parse('foo.png'));
     });
 
+    test('adds namePrefix', () async {
+      const String libraryName = 'sidedishes';
+      const String namePrefix = 'tomatosalad';
+      const String fileName = 'lettuce.png';
+      final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
+      final Directory basedir = fs.directory('flutter/test/$libraryName/')
+        ..createSync(recursive: true);
+      final FlutterGoldenFileComparator comparator = FlutterPostSubmitFileComparator(
+        basedir.uri,
+        fakeSkiaClient,
+        fs: fs,
+        platform: platform,
+        namePrefix: namePrefix,
+      );
+      await comparator.compare(
+        Uint8List.fromList(_kTestPngBytes),
+        Uri.parse(fileName),
+      );
+      expect(fakeSkiaClient.testNames.single, '$namePrefix.$libraryName.$fileName');
+    });
+
     group('Post-Submit', () {
       late FakeSkiaGoldClient fakeSkiaClient;
 
@@ -478,6 +499,26 @@ void main() {
           fakeSkiaClient,
           fs: fs,
           platform: platform,
+        );
+      });
+
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
         );
       });
 
@@ -507,7 +548,7 @@ void main() {
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -521,7 +562,7 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -535,9 +576,9 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
-              'GOLD_TRYJOB' : 'git/ref/12345/head'
+              'GOLD_TRYJOB' : 'git/ref/12345/head',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -552,9 +593,9 @@ void main() {
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '',
               'CIRRUS_BRANCH': 'master',
-              'GOLD_SERVICE_ACCOUNT': 'service account...'
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -576,6 +617,26 @@ void main() {
           fakeSkiaClient,
           fs: fs,
           platform: platform,
+        );
+      });
+
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
         );
       });
 
@@ -604,9 +665,9 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
-              'GOLD_TRYJOB' : 'git/ref/12345/head'
+              'GOLD_TRYJOB' : 'git/ref/12345/head',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -619,7 +680,7 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -632,9 +693,9 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
-              'GOLD_TRYJOB' : 'git/ref/12345/head'
+              'GOLD_TRYJOB' : 'git/ref/12345/head',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -649,7 +710,7 @@ void main() {
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -664,9 +725,9 @@ void main() {
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '',
               'CIRRUS_BRANCH': 'master',
-              'GOLD_SERVICE_ACCOUNT': 'service account...'
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -684,7 +745,7 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'CIRRUS_CI' : 'yep',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
@@ -711,7 +772,7 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterSkippingFileComparator.isAvailableForEnvironment(
@@ -735,7 +796,7 @@ void main() {
           fs: fs,
           platform: FakePlatform(
             environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           ),
         );
 
@@ -743,6 +804,26 @@ void main() {
         fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
         fakeSkiaClient.imageBytesValues[hash] =_kTestPngBytes;
         fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
+      });
+
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
+        );
       });
 
       test('passes when bytes match', () async {
@@ -792,7 +873,7 @@ class RunInvocation {
   final String? workingDirectory;
 
   @override
-  int get hashCode => hashValues(hashList(command), workingDirectory);
+  int get hashCode => Object.hash(Object.hashAll(command), workingDirectory);
 
   bool _commandEquals(List<String> other) {
     if (other == command) {
@@ -866,11 +947,16 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   @override
   Future<void> auth() async {}
 
+  final List<String> testNames = <String>[];
+
   int initCalls = 0;
   @override
   Future<void> imgtestInit() async => initCalls += 1;
   @override
-  Future<bool> imgtestAdd(String testName, File goldenFile) async => true;
+  Future<bool> imgtestAdd(String testName, File goldenFile) async {
+    testNames.add(testName);
+    return true;
+  }
 
   int tryInitCalls = 0;
   @override

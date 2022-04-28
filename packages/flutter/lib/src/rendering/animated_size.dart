@@ -79,17 +79,16 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     required Duration duration,
     Duration? reverseDuration,
     Curve curve = Curves.linear,
-    AlignmentGeometry alignment = Alignment.center,
-    TextDirection? textDirection,
-    RenderBox? child,
+    super.alignment,
+    super.textDirection,
+    super.child,
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(vsync != null),
        assert(duration != null),
        assert(curve != null),
        assert(clipBehavior != null),
        _vsync = vsync,
-       _clipBehavior = clipBehavior,
-       super(child: child, alignment: alignment, textDirection: textDirection) {
+       _clipBehavior = clipBehavior {
     _controller = AnimationController(
       vsync: vsync,
       duration: duration,
@@ -172,6 +171,22 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       return;
     _vsync = value;
     _controller.resync(vsync);
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    switch (state) {
+      case RenderAnimatedSizeState.start:
+      case RenderAnimatedSizeState.stable:
+        break;
+      case RenderAnimatedSizeState.changed:
+      case RenderAnimatedSizeState.unstable:
+        // Call markNeedsLayout in case the RenderObject isn't marked dirty
+        // already, to resume interrupted resizing animation.
+        markNeedsLayout();
+        break;
+    }
   }
 
   @override

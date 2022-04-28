@@ -274,7 +274,7 @@ class TestAsyncUtils {
     if (_scopeStack.isNotEmpty) {
       final List<DiagnosticsNode> information = <DiagnosticsNode>[
         ErrorSummary('Asynchronous call to guarded function leaked.'),
-        ErrorHint('You must use "await" with all Future-returning test APIs.')
+        ErrorHint('You must use "await" with all Future-returning test APIs.'),
       ];
       for (final _AsyncScope scope in _scopeStack) {
         final _StackEntry? guarder = _findResponsibleMethod(scope.creationStack, 'guard', information);

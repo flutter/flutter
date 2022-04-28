@@ -38,6 +38,13 @@ const double _kOverAndUnderCenterOpacity = 0.447;
 ///
 /// By default, descendent texts are shown with [CupertinoTextThemeData.pickerTextStyle].
 ///
+/// {@tool dartpad}
+/// This example shows a [CupertinoPicker] that displays a list of fruits on a wheel for
+/// selection.
+///
+/// ** See code in examples/api/lib/cupertino/picker/cupertino_picker.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListWheelScrollView], the generic widget backing this picker without
@@ -63,7 +70,7 @@ class CupertinoPicker extends StatefulWidget {
   /// will loop the list back to the beginning.  If set to false, the list will
   /// stop scrolling when you reach the end or the beginning.
   CupertinoPicker({
-    Key? key,
+    super.key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor,
     this.offAxisFraction = 0.0,
@@ -86,8 +93,7 @@ class CupertinoPicker extends StatefulWidget {
        assert(squeeze > 0),
        childDelegate = looping
                        ? ListWheelChildLoopingListDelegate(children: children)
-                       : ListWheelChildListDelegate(children: children),
-       super(key: key);
+                       : ListWheelChildListDelegate(children: children);
 
   /// Creates a picker from an [IndexedWidgetBuilder] callback where the builder
   /// is dynamically invoked during layout.
@@ -107,7 +113,7 @@ class CupertinoPicker extends StatefulWidget {
   /// (i.e. the picker is going to have a completely transparent background), to match
   /// the native UIPicker and UIDatePicker.
   CupertinoPicker.builder({
-    Key? key,
+    super.key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor,
     this.offAxisFraction = 0.0,
@@ -128,8 +134,7 @@ class CupertinoPicker extends StatefulWidget {
        assert(itemExtent > 0),
        assert(squeeze != null),
        assert(squeeze > 0),
-       childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
-       super(key: key);
+       childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
   ///
@@ -218,13 +223,13 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   @override
   void didUpdateWidget(CupertinoPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.scrollController != null && oldWidget.scrollController == null) {
       _controller = null;
     } else if (widget.scrollController == null && oldWidget.scrollController != null) {
       assert(_controller == null);
       _controller = FixedExtentScrollController();
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -324,7 +329,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 /// rectangle that spans the entire multi-column picker.
 /// To achieve the same effect using [CupertinoPickerDefaultSelectionOverlay],
 /// the additional margin and corner radii on the left or the right side can be
-/// disabled by turning off [capLeftEdge] and [capRightEdge], so this selection
+/// disabled by turning off [capStartEdge] and [capEndEdge], so this selection
 /// overlay visually connects with selection overlays of adjoining
 /// [CupertinoPicker]s (i.e., other "column"s).
 ///
@@ -340,25 +345,24 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
   /// The [background] argument default value is [CupertinoColors.tertiarySystemFill].
   /// It must be non-null.
   ///
-  /// The [capLeftEdge] and [capRightEdge] arguments decide whether to add a
+  /// The [capStartEdge] and [capEndEdge] arguments decide whether to add a
   /// default margin and use rounded corners on the left and right side of the
   /// rectangular overlay.
   /// Default to true and must not be null.
   const CupertinoPickerDefaultSelectionOverlay({
-    Key? key,
+    super.key,
     this.background = CupertinoColors.tertiarySystemFill,
-    this.capLeftEdge = true,
-    this.capRightEdge = true,
+    this.capStartEdge = true,
+    this.capEndEdge = true,
   }) : assert(background != null),
-       assert(capLeftEdge != null),
-       assert(capRightEdge != null),
-       super(key: key);
+       assert(capStartEdge != null),
+       assert(capEndEdge != null);
 
-  /// Whether to use the default use rounded corners and margin on the left side.
-  final bool capLeftEdge;
+  /// Whether to use the default use rounded corners and margin on the start side.
+  final bool capStartEdge;
 
-  /// Whether to use the default use rounded corners and margin on the right side.
-  final bool capRightEdge;
+  /// Whether to use the default use rounded corners and margin on the end side.
+  final bool capEndEdge;
 
   /// The color to fill in the background of the [CupertinoPickerDefaultSelectionOverlay].
   /// It Support for use [CupertinoDynamicColor].
@@ -379,14 +383,14 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
     const Radius radius = Radius.circular(_defaultSelectionOverlayRadius);
 
     return Container(
-      margin: EdgeInsets.only(
-        left: capLeftEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
-        right: capRightEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
+      margin: EdgeInsetsDirectional.only(
+        start: capStartEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
+        end: capEndEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.horizontal(
-          left: capLeftEdge ? radius : Radius.zero,
-          right: capRightEdge ? radius : Radius.zero,
+        borderRadius: BorderRadiusDirectional.horizontal(
+          start: capStartEdge ? radius : Radius.zero,
+          end: capEndEdge ? radius : Radius.zero,
         ),
         color: CupertinoDynamicColor.resolve(background, context),
       ),
@@ -402,10 +406,9 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
 // scroll controller.
 class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   const _CupertinoPickerSemantics({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.scrollController,
-  }) : super(key: key, child: child);
+  });
 
   final FixedExtentScrollController scrollController;
 

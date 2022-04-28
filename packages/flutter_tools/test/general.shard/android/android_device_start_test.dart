@@ -198,9 +198,9 @@ void main() {
         '-r',
         '--user',
         '10',
-        'app.apk'
+        'app.apk',
       ],
-      stdout: '\n\nObservatory listening on http://127.0.0.1:456\n\n',
+      stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
     ));
     processManager.addCommand(kShaCommand);
     processManager.addCommand(const FakeCommand(

@@ -17,7 +17,7 @@ const double _kOnAxisDelta = 2.0;
 ///
 /// This class specializes the interpolation of [Tween<Offset>] so that instead
 /// of a straight line, the intermediate points follow the arc of a circle in a
-/// manner consistent with material design principles.
+/// manner consistent with Material Design principles.
 ///
 /// The arc's radius is related to the bounding box that contains the [begin]
 /// and [end] points. If the bounding box is taller than it is wide, then the
@@ -36,9 +36,9 @@ class MaterialPointArcTween extends Tween<Offset> {
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
   MaterialPointArcTween({
-    Offset? begin,
-    Offset? end,
-  }) : super(begin: begin, end: end);
+    super.begin,
+    super.end,
+  });
 
   bool _dirty = true;
 
@@ -218,7 +218,7 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
 ///
 /// This class specializes the interpolation of [Tween<Rect>] so that instead of
 /// growing or shrinking linearly, opposite corners of the rectangle follow arcs
-/// in a manner consistent with material design principles.
+/// in a manner consistent with Material Design principles.
 ///
 /// Specifically, the rectangle corners whose diagonals are closest to the overall
 /// direction of the animation follow arcs defined with [MaterialPointArcTween].
@@ -239,9 +239,9 @@ class MaterialRectArcTween extends RectTween {
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
   MaterialRectArcTween({
-    Rect? begin,
-    Rect? end,
-  }) : super(begin: begin, end: end);
+    super.begin,
+    super.end,
+  });
 
   bool _dirty = true;
 
@@ -354,9 +354,9 @@ class MaterialRectCenterArcTween extends RectTween {
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
   MaterialRectCenterArcTween({
-    Rect? begin,
-    Rect? end,
-  }) : super(begin: begin, end: end);
+    super.begin,
+    super.end,
+  });
 
   bool _dirty = true;
 

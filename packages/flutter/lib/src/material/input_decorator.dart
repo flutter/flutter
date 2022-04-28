@@ -55,7 +55,7 @@ class _InputBorderGap extends ChangeNotifier {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
-  int get hashCode => hashValues(start, extent);
+  int get hashCode => Object.hash(start, extent);
 
   @override
   String toString() => describeIdentity(this);
@@ -63,7 +63,7 @@ class _InputBorderGap extends ChangeNotifier {
 
 // Used to interpolate between two InputBorders.
 class _InputBorderTween extends Tween<InputBorder> {
-  _InputBorderTween({InputBorder? begin, InputBorder? end}) : super(begin: begin, end: end);
+  _InputBorderTween({super.begin, super.end});
 
   @override
   InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t)! as InputBorder;
@@ -138,7 +138,6 @@ class _InputBorderPainter extends CustomPainter {
 // _InputBorder's paint method.
 class _BorderContainer extends StatefulWidget {
   const _BorderContainer({
-    Key? key,
     required this.border,
     required this.gap,
     required this.gapAnimation,
@@ -147,8 +146,7 @@ class _BorderContainer extends StatefulWidget {
     required this.isHovering,
   }) : assert(border != null),
        assert(gap != null),
-       assert(fillColor != null),
-       super(key: key);
+       assert(fillColor != null);
 
   final InputBorder border;
   final _InputBorderGap gap;
@@ -255,10 +253,9 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
 // when the errorText first appears.
 class _Shaker extends AnimatedWidget {
   const _Shaker({
-    Key? key,
     required Animation<double> animation,
     this.child,
-  }) : super(key: key, listenable: animation);
+  }) : super(listenable: animation);
 
   final Widget? child;
 
@@ -289,7 +286,6 @@ class _Shaker extends AnimatedWidget {
 // slides upwards a little when it first appears.
 class _HelperError extends StatefulWidget {
   const _HelperError({
-    Key? key,
     this.textAlign,
     this.helperText,
     this.helperStyle,
@@ -297,7 +293,7 @@ class _HelperError extends StatefulWidget {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-  }) : super(key: key);
+  });
 
   final TextAlign? textAlign;
   final String? helperText;
@@ -637,30 +633,28 @@ class _Decoration {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      contentPadding,
-      floatingLabelHeight,
-      floatingLabelProgress,
-      floatingLabelAlignment,
-      border,
-      borderGap,
-      alignLabelWithHint,
-      isDense,
-      visualDensity,
-      icon,
-      input,
-      label,
-      hint,
-      prefix,
-      suffix,
-      prefixIcon,
-      suffixIcon,
-      helperError,
-      counter,
-      container,
-    );
-  }
+  int get hashCode => Object.hash(
+    contentPadding,
+    floatingLabelHeight,
+    floatingLabelProgress,
+    floatingLabelAlignment,
+    border,
+    borderGap,
+    alignLabelWithHint,
+    isDense,
+    visualDensity,
+    icon,
+    input,
+    label,
+    hint,
+    prefix,
+    suffix,
+    prefixIcon,
+    suffixIcon,
+    helperError,
+    counter,
+    container,
+  );
 }
 
 // A container for the layout values computed by _RenderDecoration._layout.
@@ -1563,7 +1557,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
 class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DecorationSlot> {
   const _Decorator({
-    Key? key,
     required this.textAlignVertical,
     required this.decoration,
     required this.textDirection,
@@ -1573,8 +1566,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
-       assert(expands != null),
-       super(key: key);
+       assert(expands != null);
 
   final _Decoration decoration;
   final TextDirection textDirection;
@@ -1694,7 +1686,7 @@ class InputDecorator extends StatefulWidget {
   /// The [isFocused], [isHovering], [expands], and [isEmpty] arguments must not
   /// be null.
   const InputDecorator({
-    Key? key,
+    super.key,
     required this.decoration,
     this.baseStyle,
     this.textAlign,
@@ -1708,8 +1700,7 @@ class InputDecorator extends StatefulWidget {
        assert(isFocused != null),
        assert(isHovering != null),
        assert(expands != null),
-       assert(isEmpty != null),
-       super(key: key);
+       assert(isEmpty != null);
 
   /// The text and styles to use when decorating the child.
   ///
@@ -1964,7 +1955,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getIconColor(ThemeData themeData) {
-    Color _resolveIconColor(Set<MaterialState> states) {
+    Color resolveIconColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused))
         return themeData.disabledColor;
 
@@ -1979,7 +1970,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       }
     }
     return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
-      ?? MaterialStateProperty.resolveWith(_resolveIconColor).resolve(materialState);
+      ?? MaterialStateProperty.resolveWith(resolveIconColor).resolve(materialState);
   }
 
   Color _getPrefixIconColor(ThemeData themeData) {
@@ -2095,7 +2086,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ? _getDefaultBorderColor(themeData)
         : themeData.errorColor;
     } else {
-      borderColor = (decoration!.filled == true && decoration!.border?.isOutline != true)
+      borderColor = ((decoration!.filled ?? false) && !(decoration!.border?.isOutline ?? false))
         ? Colors.transparent
         : themeData.disabledColor;
     }
@@ -2188,7 +2179,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
 
-    final bool decorationIsDense = decoration!.isDense == true; // isDense == null, same as false
+    final bool decorationIsDense = decoration!.isDense ?? false;
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
 
     final Widget? icon = decoration!.icon == null ? null :
@@ -2284,7 +2275,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
-      if (decoration!.filled == true) { // filled == null same as filled == false
+      if (decoration!.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
           : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
@@ -2853,10 +2844,10 @@ class InputDecoration {
   ///
   /// The prefix icon is constrained with a minimum size of 48px by 48px, but
   /// can be expanded beyond that. Anything larger than 24px will require
-  /// additional padding to ensure it matches the material spec of 12px padding
-  /// between the left edge of the input and leading edge of the prefix icon.
-  /// The following snippet shows how to pad the leading edge of the prefix
-  /// icon:
+  /// additional padding to ensure it matches the Material Design spec of 12px
+  /// padding between the left edge of the input and leading edge of the prefix
+  /// icon. The following snippet shows how to pad the leading edge of the
+  /// prefix icon:
   ///
   /// ```dart
   /// prefixIcon: Padding(
@@ -2975,10 +2966,10 @@ class InputDecoration {
   ///
   /// The suffix icon is constrained with a minimum size of 48px by 48px, but
   /// can be expanded beyond that. Anything larger than 24px will require
-  /// additional padding to ensure it matches the material spec of 12px padding
-  /// between the right edge of the input and trailing edge of the prefix icon.
-  /// The following snippet shows how to pad the trailing edge of the suffix
-  /// icon:
+  /// additional padding to ensure it matches the Material Design spec of 12px
+  /// padding between the right edge of the input and trailing edge of the
+  /// prefix icon. The following snippet shows how to pad the trailing edge of
+  /// the suffix icon:
   ///
   /// ```dart
   /// suffixIcon: Padding(
@@ -3592,8 +3583,6 @@ class InputDecoration {
       fillColor,
       focusColor,
       hoverColor,
-      border,
-      enabled,
       prefixIcon,
       prefixIconColor,
       prefix,
@@ -3620,7 +3609,7 @@ class InputDecoration {
       alignLabelWithHint,
       constraints,
     ];
-    return hashList(values);
+    return Object.hashAll(values);
   }
 
   @override
@@ -3658,7 +3647,7 @@ class InputDecoration {
       if (counter != null) 'counter: $counter',
       if (counterText != null) 'counterText: $counterText',
       if (counterStyle != null) 'counterStyle: $counterStyle',
-      if (filled == true) 'filled: true', // filled == null same as filled == false
+      if (filled ?? false) 'filled: true',
       if (fillColor != null) 'fillColor: $fillColor',
       if (focusColor != null) 'focusColor: $focusColor',
       if (hoverColor != null) 'hoverColor: $hoverColor',
@@ -4163,27 +4152,27 @@ class InputDecorationTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashList(<dynamic>[
-      labelStyle,
-      floatingLabelStyle,
-      helperStyle,
-      helperMaxLines,
-      hintStyle,
-      errorStyle,
-      errorMaxLines,
-      floatingLabelBehavior,
-      floatingLabelAlignment,
-      isDense,
-      contentPadding,
-      isCollapsed,
-      iconColor,
-      prefixStyle,
-      prefixIconColor,
-      suffixStyle,
-      suffixIconColor,
-      counterStyle,
-      filled,
+  int get hashCode => Object.hash(
+    labelStyle,
+    floatingLabelStyle,
+    helperStyle,
+    helperMaxLines,
+    hintStyle,
+    errorStyle,
+    errorMaxLines,
+    floatingLabelBehavior,
+    floatingLabelAlignment,
+    isDense,
+    contentPadding,
+    isCollapsed,
+    iconColor,
+    prefixStyle,
+    prefixIconColor,
+    suffixStyle,
+    suffixIconColor,
+    counterStyle,
+    filled,
+    Object.hash(
       fillColor,
       focusColor,
       hoverColor,
@@ -4195,8 +4184,8 @@ class InputDecorationTheme with Diagnosticable {
       border,
       alignLabelWithHint,
       constraints,
-    ]);
-  }
+    ),
+  );
 
   @override
   bool operator ==(Object other) {

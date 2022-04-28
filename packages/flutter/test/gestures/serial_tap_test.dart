@@ -12,7 +12,7 @@ import 'gesture_tester.dart';
 final Duration kSerialTapDelay = kDoubleTapTimeout ~/ 2;
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   late List<String> events;
   late SerialTapGestureRecognizer serial;
@@ -112,7 +112,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
 
     events.clear();
@@ -121,7 +121,7 @@ void main() {
     tester.closeArena(2);
     tester.route(down2);
     tester.route(up2);
-    GestureBinding.instance!.gestureArena.sweep(2);
+    GestureBinding.instance.gestureArena.sweep(2);
     expect(events, <String>['down#2', 'up#2']);
 
     events.clear();
@@ -130,7 +130,7 @@ void main() {
     tester.closeArena(3);
     tester.route(down3);
     tester.route(up3);
-    GestureBinding.instance!.gestureArena.sweep(3);
+    GestureBinding.instance.gestureArena.sweep(3);
     expect(events, <String>['down#3', 'up#3']);
   });
 
@@ -152,7 +152,7 @@ void main() {
     tester.route(down1);
     tester.async.elapse(kPressTimeout); // To register the possible single tap.
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
     expect(recognizedSingleTap, isFalse);
     expect(canceledSingleTap, isTrue);
@@ -175,7 +175,7 @@ void main() {
     tester.route(down1);
     tester.async.elapse(kPressTimeout); // To register the possible single tap.
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
     expect(recognizedSingleTap, isFalse);
     expect(canceledSingleTap, isTrue);
@@ -193,7 +193,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'cancel#1']);
     expect(recognizedRelease, isTrue);
   });
@@ -210,7 +210,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
     expect(recognizedRelease, isFalse);
   });
@@ -222,7 +222,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'cancel#1']);
   });
 
@@ -238,7 +238,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
     expect(recognizedDoubleTap, isFalse);
 
@@ -249,7 +249,7 @@ void main() {
     tester.closeArena(2);
     tester.route(down2);
     tester.route(up2);
-    GestureBinding.instance!.gestureArena.sweep(2);
+    GestureBinding.instance.gestureArena.sweep(2);
     expect(events, <String>['down#2', 'up#2']);
     expect(recognizedDoubleTap, isFalse);
 
@@ -259,7 +259,7 @@ void main() {
     tester.closeArena(3);
     tester.route(down3);
     tester.route(up3);
-    GestureBinding.instance!.gestureArena.sweep(3);
+    GestureBinding.instance.gestureArena.sweep(3);
     expect(events, <String>['down#3', 'up#3']);
   });
 
@@ -275,7 +275,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
     expect(recognizedDoubleTap, isFalse);
 
@@ -286,7 +286,7 @@ void main() {
     tester.closeArena(2);
     tester.route(down2);
     tester.route(up2);
-    GestureBinding.instance!.gestureArena.sweep(2);
+    GestureBinding.instance.gestureArena.sweep(2);
     expect(events, <String>['down#2', 'up#2']);
     expect(recognizedDoubleTap, isFalse);
 
@@ -297,7 +297,7 @@ void main() {
     tester.closeArena(3);
     tester.route(down3);
     tester.route(up3);
-    GestureBinding.instance!.gestureArena.sweep(3);
+    GestureBinding.instance.gestureArena.sweep(3);
     expect(events, <String>['down#3', 'up#3']);
   });
 
@@ -306,7 +306,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(cancel1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'cancel#1']);
 
     events.clear();
@@ -315,7 +315,7 @@ void main() {
     tester.closeArena(2);
     tester.route(down2);
     tester.route(up2);
-    GestureBinding.instance!.gestureArena.sweep(2);
+    GestureBinding.instance.gestureArena.sweep(2);
     expect(events, <String>['down#1', 'up#1']);
   });
 
@@ -325,7 +325,7 @@ void main() {
     tester.route(down5);
     tester.route(move5);
     tester.route(up5);
-    GestureBinding.instance!.gestureArena.sweep(5);
+    GestureBinding.instance.gestureArena.sweep(5);
     expect(events, <String>['down#1', 'cancel#1']);
 
     events.clear();
@@ -334,7 +334,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
   });
 
@@ -343,7 +343,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
 
     events.clear();
@@ -352,7 +352,7 @@ void main() {
     tester.closeArena(2);
     tester.route(down2);
     tester.route(up2);
-    GestureBinding.instance!.gestureArena.sweep(2);
+    GestureBinding.instance.gestureArena.sweep(2);
     expect(events, <String>['down#1', 'up#1']);
   });
 
@@ -361,7 +361,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
 
     events.clear();
@@ -370,7 +370,7 @@ void main() {
     tester.closeArena(4);
     tester.route(down4);
     tester.route(up4);
-    GestureBinding.instance!.gestureArena.sweep(4);
+    GestureBinding.instance.gestureArena.sweep(4);
     expect(events, <String>['down#1', 'up#1']);
   });
 
@@ -379,7 +379,7 @@ void main() {
     tester.closeArena(1);
     tester.route(down1);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1', 'up#1']);
 
     events.clear();
@@ -388,7 +388,7 @@ void main() {
     tester.closeArena(6);
     tester.route(down6);
     tester.route(up6);
-    GestureBinding.instance!.gestureArena.sweep(6);
+    GestureBinding.instance.gestureArena.sweep(6);
     expect(events, <String>['down#1', 'up#1']);
   });
 
@@ -402,9 +402,9 @@ void main() {
     tester.route(down2);
 
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     tester.route(up2);
-    GestureBinding.instance!.gestureArena.sweep(2);
+    GestureBinding.instance.gestureArena.sweep(2);
     expect(events, <String>['down#1', 'cancel#1', 'down#1', 'up#1']);
   });
 
@@ -415,7 +415,7 @@ void main() {
     tester.route(down1);
     expect(serial.isTrackingPointer, isFalse);
     tester.route(up1);
-    GestureBinding.instance!.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>[]);
   });
 
@@ -424,7 +424,7 @@ void main() {
     tester.closeArena(6);
     tester.route(down6);
     tester.route(up6);
-    GestureBinding.instance!.gestureArena.sweep(6);
+    GestureBinding.instance.gestureArena.sweep(6);
     expect(events, <String>['down#1', 'up#1']);
   });
 }

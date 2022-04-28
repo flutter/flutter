@@ -73,7 +73,7 @@ Future<void> main() async {
         'params': <String, dynamic>{
           'emulatorId': words[1],
           if (words.contains('coldBoot'))
-            'coldBoot': true
+            'coldBoot': true,
         },
       });
     } else if (line == 'enable') {

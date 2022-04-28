@@ -55,7 +55,7 @@ void main() {
         '-l',
         '[fe80::ec4:7aff:fecc:ea8f%eno2]:43819',
         '-c',
-        '2'
+        '2',
       ]));
 
       await FuchsiaPM().serve('<repo>', 'fe80::ec4:7aff:fecc:ea8f%eno2', 43819);

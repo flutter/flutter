@@ -1240,7 +1240,7 @@ class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
 }
 
 class FakeExistsFile extends Fake implements File {
-  late Object error;
+  late Exception error;
   int existsCount = 0;
 
 

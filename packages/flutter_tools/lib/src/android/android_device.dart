@@ -56,7 +56,7 @@ const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
 /// map to specify that they are actually physical devices.
 class AndroidDevice extends Device {
   AndroidDevice(
-    String id, {
+    super.id, {
     this.productID,
     required this.modelID,
     this.deviceCodeName,
@@ -74,7 +74,6 @@ class AndroidDevice extends Device {
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(
-         id,
          category: Category.mobile,
          platformType: PlatformType.android,
          ephemeral: true,
@@ -228,7 +227,6 @@ class AndroidDevice extends Device {
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_uwp_x64:
       case TargetPlatform.windows_x64:
         throw UnsupportedError('Invalid target platform for Android');
     }
@@ -244,7 +242,6 @@ class AndroidDevice extends Device {
 
   AdbLogReader? _logReader;
   AdbLogReader? _pastLogReader;
-  AndroidDevicePortForwarder? _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
     return <String>[_androidSdk.adbPath!, '-s', id, ...args];
@@ -383,7 +380,7 @@ class AndroidDevice extends Device {
         'packages',
         if (userIdentifier != null)
           ...<String>['--user', userIdentifier],
-        app.id
+        app.id,
       ]);
       return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
     } on Exception catch (error) {
@@ -450,7 +447,7 @@ class AndroidDevice extends Device {
         '-r',
         if (userIdentifier != null)
           ...<String>['--user', userIdentifier],
-        app.applicationPackage.path
+        app.applicationPackage.path,
       ]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
@@ -497,7 +494,8 @@ class AndroidDevice extends Device {
           'uninstall',
           if (userIdentifier != null)
             ...<String>['--user', userIdentifier],
-          app.id]),
+          app.id,
+        ]),
         throwOnError: true,
       );
       uninstallOut = uninstallResult.stdout;
@@ -567,7 +565,6 @@ class AndroidDevice extends Device {
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_uwp_x64:
       case TargetPlatform.windows_x64:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
@@ -809,7 +806,7 @@ class AndroidDevice extends Device {
     RunResult output;
     try {
       output = await runAdbCheckedAsync(<String>[
-        'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
+        'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
       ]);
     } on Exception catch (error) {
       _logger.printError('Failed to extract the most recent timestamp from the Android log: $error.');
@@ -845,7 +842,6 @@ class AndroidDevice extends Device {
   Future<void> dispose() async {
     _logReader?._stop();
     _pastLogReader?._stop();
-    await _portForwarder?.dispose();
   }
 }
 

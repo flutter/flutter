@@ -19,7 +19,7 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: '>=2.2.2 <3.0.0'
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -190,7 +190,7 @@ void main() {
           'sky_engine: ',
           'gallery: ',
           'flutter_test: ',
-          'flutter_goldens: '
+          'flutter_goldens: ',
         }));
     expect(
         pubspecYaml.dependencies
@@ -202,7 +202,7 @@ void main() {
           'typed_data: 1.1.6',
           'vector_math: 2.0.8',
           'sky_engine: ',
-          'gallery: '
+          'gallery: ',
         }));
   });
 }
