@@ -240,7 +240,7 @@ void on_pre_engine_restart_destroy_notify(gpointer user_data) {
 
 // Checks restarting the engine invokes the correct callback.
 TEST(FlEngineTest, OnPreEngineRestart) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlEngine* engine = make_mock_engine();
   FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
   OnPreEngineRestartCallback callback;
@@ -271,7 +271,10 @@ TEST(FlEngineTest, OnPreEngineRestart) {
 
   int count = 0;
 
-  // Set a handler, and the call should has an effect.
+  // Set handler so that:
+  //
+  //  * When the engine restarts, count += 1;
+  //  * When the engine is freed, count += 10.
   fl_engine_set_on_pre_engine_restart_handler(
       engine, on_pre_engine_restart_cb, &count,
       on_pre_engine_restart_destroy_notify);
