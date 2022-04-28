@@ -1,5 +1,6 @@
 dart_aot_runner_package_manifest.json
 dart_jit_runner_package_manifest.json
+dart_runner_tests_package_manifest.json
 embedder_tests_package_manifest.json
 flow_tests_package_manifest.json
 flutter_aot_runner_package_manifest.json
