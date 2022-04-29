@@ -735,7 +735,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
 
     for (final String dependee in dependees) {
-      final Package package = nameToPackage[dependee]!;
+      final Package? package = nameToPackage[dependee];
+      if (package == null) {
+        globals.printError('The package $dependee is a new dependency and cannot be located in the PUB_CACHE, skipping...');
+        continue;
+      }
       final Directory root = globals.fs.directory(package.root);
       final File pubspecFile = root.childFile('pubspec.yaml');
       final String pubspecString = await pubspecFile.readAsString();
