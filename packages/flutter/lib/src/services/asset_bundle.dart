@@ -249,16 +249,18 @@ class PlatformAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+  Future<ui.ImmutableBuffer> loadBuffer(String key) {
     if (kIsWeb) {
-      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List((await load(key)).buffer.asUint8List());
-      return buffer;
+      return load(key)
+        .then((ByteData data) {
+          return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+        });
     }
     final ui.ImmutableBuffer? result = ui.ImmutableBuffer.fromAsset(key);
     if (result == null) {
       throw FlutterError('Unable to load asset: $key');
     }
-    return result;
+    return SynchronousFuture<ui.ImmutableBuffer>(result);
   }
 }
 
