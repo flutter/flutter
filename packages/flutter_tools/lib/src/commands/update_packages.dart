@@ -296,6 +296,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         newDeps: newDependencies,
         tree: tree!,
         packageConfig: packageConfig,
+        specialDependencies: specialDependencies,
       );
       if (!upgradeOnly) {
         throwToolExit(
@@ -314,6 +315,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     required Map<String, PubspecDependency> newDeps,
     required PubDependencyTree tree,
     required PackageConfig packageConfig,
+    required Set<String> specialDependencies,
   }) async {
     bool ok = true;
     for (final PubspecDependency dep in oldDeps.values) {
@@ -336,6 +338,7 @@ class UpdatePackagesCommand extends FlutterCommand {
               tree: tree,
               packageConfig: packageConfig,
               packageName: dep.name,
+              packageDenyList: specialDependencies,
             );
           }
         }
@@ -704,35 +707,20 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _describeAllPackages({
-    required PubDependencyTree tree,
-    required PackageConfig packageConfig,
-  }) async {
-    final List<MapEntry<String, Set<String>>> entries =
-        tree._dependencyTree.entries.toList();
-    // alphabetically sort entries so the results can be diffed
-    entries.sort((MapEntry<String, Set<String>> first,
-        MapEntry<String, Set<String>> second) {
-      return first.key.compareTo(second.key);
-    });
-    for (final MapEntry<String, Set<String>> packageEntry in entries) {
-      await _describePackage(
-        tree: tree,
-        packageConfig: packageConfig,
-        packageName: packageEntry.key,
-      );
-    }
-  }
-
   Future<void> _describePackage({
     required PubDependencyTree tree,
     required PackageConfig packageConfig,
     required String packageName,
+    Set<String>? packageDenyList,
   }) async {
     globals.printStatus(
       'package:$packageName is resolved as ${tree.versionFor(packageName)}',
     );
-    final Iterable<String> dependees = tree.getDependees(packageName);
+    final Set<String> dependees = tree.getDependees(packageName).toSet();
+    // Remove specialDependencies
+    if (packageDenyList != null) {
+      dependees.removeWhere((String dependee) => packageDenyList.contains(dependee));
+    }
     if (dependees.isEmpty) {
       globals.printStatus('\tNo packages constrain package:$packageName.\n');
       return;
@@ -746,7 +734,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     for (final String dependee in dependees) {
       final Package? package = nameToPackage[dependee];
       if (package == null) {
-        globals.printStatus('package:$dependee not found in pub_cache, skipping...');
+        globals.printStatus('\tpackage:$dependee not found in pub_cache, skipping...');
         continue;
       }
       final Directory root = globals.fs.directory(package.root);
