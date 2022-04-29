@@ -157,9 +157,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
                 int32_t device_id) override;
 
   // |WindowBindingHandlerDelegate|
-  void OnPlatformBrightnessChanged() override;
-
-  // |WindowBindingHandlerDelegate|
   virtual void OnUpdateSemanticsEnabled(bool enabled) override;
 
   // |WindowBindingHandlerDelegate|
@@ -308,9 +305,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // needed before passing on to engine.
   void SendPointerEventWithData(const FlutterPointerEvent& event_data,
                                 PointerState* state);
-
-  // Reports platform brightness change to Flutter engine.
-  void SendPlatformBrightnessChanged();
 
   // Currently configured WindowsRenderTarget for this view used by
   // surface_manager for creation of render surfaces and bound to the physical

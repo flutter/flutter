@@ -118,11 +118,6 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
       winrt::Windows::Foundation::IInspectable const&,
       winrt::Windows::UI::Core::CharacterReceivedEventArgs const& args);
 
-  // Notifies current |WindowBindingHandlerDelegate| of color values changed
-  // events.
-  void OnColorValuesChanged(winrt::Windows::Foundation::IInspectable const&,
-                            winrt::Windows::Foundation::IInspectable const&);
-
   // Converts from logical point to physical X value.
   double GetPosX(winrt::Windows::UI::Core::PointerEventArgs const& args);
 
@@ -167,9 +162,6 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
   // Compositor object that represents the render target binding the backing
   // SwapChain to the CoreWindow.
   winrt::Windows::UI::Composition::SpriteVisual render_target_{nullptr};
-
-  // UISettings for observing the color change.
-  winrt::Windows::UI::ViewManagement::UISettings ui_settings_;
 
   // GamepadCursorWinUWP object used to manage an emulated cursor visual driven
   // by gamepad.
