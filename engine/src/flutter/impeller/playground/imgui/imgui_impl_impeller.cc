@@ -9,6 +9,8 @@
 #include <memory>
 #include <vector>
 
+#include "impeller/geometry/scalar.h"
+#include "impeller/geometry/vector.h"
 #include "impeller/playground/imgui/mtl/imgui_raster.frag.h"
 #include "impeller/playground/imgui/mtl/imgui_raster.vert.h"
 #include "third_party/imgui/imgui.h"
@@ -126,7 +128,7 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
   auto* bd = ImGui_ImplImpeller_GetBackendData();
   IM_ASSERT(bd != nullptr && "Did you call ImGui_ImplImpeller_Init()?");
 
-  size_t total_vtx_bytes = draw_data->TotalVtxCount * sizeof(ImDrawVert);
+  size_t total_vtx_bytes = draw_data->TotalVtxCount * sizeof(VS::PerVertexData);
   size_t total_idx_bytes = draw_data->TotalIdxCount * sizeof(ImDrawIdx);
   if (!total_vtx_bytes || !total_idx_bytes) {
     return;  // Nothing to render.
@@ -150,14 +152,30 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
        draw_list_i++) {
     const ImDrawList* cmd_list = draw_data->CmdLists[draw_list_i];
 
+    // Convert ImGui's per-vertex data (`ImDrawVert`) into the per-vertex data
+    // required by the shader (`VS::PerVectexData`). The only difference is that
+    // `ImDrawVert` uses an `int` for the color and the impeller shader uses 4
+    // floats.
+
+    // TODO(102778): Remove the need for this by adding support for attribute
+    //               mapping of uint32s host-side to vec4s shader-side in
+    //               impellerc.
+    std::vector<VS::PerVertexData> vtx_data;
+    vtx_data.reserve(cmd_list->VtxBuffer.size());
+    for (const auto& v : cmd_list->VtxBuffer) {
+      ImVec4 color = ImGui::ColorConvertU32ToFloat4(v.col);
+      vtx_data.push_back({{v.pos.x, v.pos.y},  //
+                          {v.uv.x, v.uv.y},    //
+                          {color.x, color.y, color.z, color.w}});
+    }
+
     auto draw_list_vtx_bytes =
-        static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes());
+        static_cast<size_t>(vtx_data.size() * sizeof(VS::PerVertexData));
     auto draw_list_idx_bytes =
         static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes());
-
-    if (!buffer->CopyHostBuffer(
-            reinterpret_cast<uint8_t*>(cmd_list->VtxBuffer.Data),
-            impeller::Range{0, draw_list_vtx_bytes}, vertex_buffer_offset)) {
+    if (!buffer->CopyHostBuffer(reinterpret_cast<uint8_t*>(vtx_data.data()),
+                                impeller::Range{0, draw_list_vtx_bytes},
+                                vertex_buffer_offset)) {
       IM_ASSERT(false && "Could not copy vertices to buffer.");
     }
     if (!buffer->CopyHostBuffer(
