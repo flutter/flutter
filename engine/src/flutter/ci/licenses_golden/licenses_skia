@@ -1,4 +1,4 @@
-Signature: d2572ace40e6a61beb0e7b4e61c4d225
+Signature: 9c79af045b36f7b5e34555c1528f8a42
 
 UNUSED LICENSES:
 
@@ -167,31 +167,6 @@ liability incurred by, or claims asserted against, such Contributor by
 reason of your accepting any such warranty or additional liability.
 
 END OF TERMS AND CONDITIONS
-====================================================================================================
-
-====================================================================================================
-ORIGIN: ../../../third_party/skia/third_party/vulkanmemoryallocator/include/LICENSE.txt
-TYPE: LicenseType.mit
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2017-2018 Advanced Micro Devices, Inc. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
 ====================================================================================================
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 USED LICENSES:
@@ -8206,31 +8181,4 @@ Materials are furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Materials.
 ====================================================================================================
-
-====================================================================================================
-LIBRARY: vulkanmemoryallocator
-ORIGIN: ../../../third_party/skia/third_party/vulkanmemoryallocator/include/vk_mem_alloc.h
-TYPE: LicenseType.mit
-FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/include/vk_mem_alloc.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2017-2022 Advanced Micro Devices, Inc. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-====================================================================================================
-Total license count: 70
+Total license count: 68
