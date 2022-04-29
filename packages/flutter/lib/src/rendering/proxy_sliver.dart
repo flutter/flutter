@@ -167,14 +167,16 @@ class RenderSliverOpacity extends RenderProxySliver {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(
+      layer = context.pushOpacityLayer(
+        needsCompositing,
+        null,
         offset,
         _alpha,
         super.paint,
         oldLayer: layer as OpacityLayer?,
       );
       assert(() {
-        layer!.debugCreator = debugCreator;
+        layer?.debugCreator = debugCreator;
         return true;
       }());
     }

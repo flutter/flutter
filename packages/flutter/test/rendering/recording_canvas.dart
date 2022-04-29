@@ -174,7 +174,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   @override
   OpacityLayer? pushOpacityLayer(
     bool needsCompositing,
-    Size size,
+    Size? size,
     Offset offset,
     int alpha,
     PaintingContextCallback painter, {
@@ -183,7 +183,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     if (alpha == 0) {
       return null;
     }
-    canvas.saveLayer(offset & size,  Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
+    canvas.saveLayer(size != null ? offset & size : null,  Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
     painter(this, offset);
     canvas.restore();
     return null;

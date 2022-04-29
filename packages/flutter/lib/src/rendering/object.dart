@@ -692,6 +692,9 @@ class PaintingContext extends ClipContext {
   /// The [offset] argument indicates an offset to apply to all the children
   /// (the rendering created by [painter]).
   ///
+  /// The [size] is used to compute the painting bounds if a save layer is used.
+  /// If the [size] is not provided, no estimate is used.
+  ///
   /// The [alpha] argument is the alpha value to use when blending the painting
   /// done by [painter]. An alpha value of 0 means the painting is fully
   /// transparent and an alpha value of 255 means the painting is fully opaque.
@@ -703,7 +706,7 @@ class PaintingContext extends ClipContext {
   /// [alpha] is greater than 0 and less than 255.
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
-  OpacityLayer? pushOpacityLayer(bool needsCompositing, Size size, Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
+  OpacityLayer? pushOpacityLayer(bool needsCompositing, Size? size, Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
     if (alpha == 0) {
       return null;
     }
@@ -726,7 +729,7 @@ class PaintingContext extends ClipContext {
         return null;
       }
     }
-    canvas.saveLayer(offset & size, Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
+    canvas.saveLayer(size != null ? offset & size : null, Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
     painter(this, offset);
     canvas.restore();
     return null;
