@@ -59,7 +59,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     final WidgetsBinding binding = WidgetsBinding.instance;
 
     if (binding.renderViewElement != null) {
-      binding.buildOwner!.reassemble(binding.renderViewElement!);
+      binding.buildOwner!.reassemble(binding.renderViewElement!, null);
     }
   }
 
