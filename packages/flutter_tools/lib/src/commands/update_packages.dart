@@ -310,7 +310,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (dep.version != newDep.version) {
           final semver.Version oldVersion = semver.Version.parse(dep.version);
           final semver.Version newVersion = semver.Version.parse(newDep.version);
-          if (newVersion > oldVersion) {
+          if (oldVersion > newVersion) {
             globals.printError('package:${dep.name} was downgraded from $oldVersion to $newVersion');
             ok = false;
           }
