@@ -615,6 +615,8 @@ class UpdatePackagesCommand extends FlutterCommand {
     required PubDependencyTree tree,
     required PackageConfig packageConfig,
   }) async {
+    tree._dependencyTree.keys.forEach(print);
+    throw 'yolo';
     final List<MapEntry<String, Set<String>>> entries = tree._dependencyTree.entries.toList();
     // alphabetically sort entries so the results can be diffed
     entries.sort((MapEntry<String, Set<String>> first, MapEntry<String, Set<String>> second) {
@@ -640,9 +642,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         Object? constraint = (pubspec['dependencies'] as YamlMap?)?[packageName];
         constraint ??= (pubspec['dev_dependencies'] as YamlMap?)?[packageName];
 
-        // This is an sdk constraint, ignore
         if (constraint is YamlMap) {
-          continue;
+          // We don't need to parse SDK constraints
+          if (constraint.containsKey('sdk')) {
+            continue;
+          }
+          throw constraint; // what is this?
         }
 
         if (constraint == null) {
@@ -652,8 +657,8 @@ class UpdatePackagesCommand extends FlutterCommand {
         // name and its version
         globals.printStatus('\t${root.basename} constrains $packageName with $constraint');
       }
-
-      globals.printStatus(''); // newline
+      // Extra newline between packages
+      globals.printStatus('');
     }
   }
 }
