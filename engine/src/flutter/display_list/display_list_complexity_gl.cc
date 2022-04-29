@@ -658,7 +658,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawTextBlob(
 
 void DisplayListGLComplexityCalculator::GLHelper::drawShadow(
     const SkPath& path,
-    const SkColor color,
+    const DlColor color,
     const SkScalar elevation,
     bool transparent_occluder,
     SkScalar dpr) {

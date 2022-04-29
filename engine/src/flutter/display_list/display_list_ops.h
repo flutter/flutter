@@ -77,17 +77,17 @@ DEFINE_SET_BOOL_OP(InvertColors)
 #undef DEFINE_SET_BOOL_OP
 
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
-#define DEFINE_SET_ENUM_OP(name)                                        \
-  struct SetStroke##name##Op final : DLOp {                             \
-    static const auto kType = DisplayListOpType::kSetStroke##name;      \
-                                                                        \
-    explicit SetStroke##name##Op(SkPaint::name value) : value(value) {} \
-                                                                        \
-    const SkPaint::name value;                                          \
-                                                                        \
-    void dispatch(Dispatcher& dispatcher) const {                       \
-      dispatcher.setStroke##name(value);                                \
-    }                                                                   \
+#define DEFINE_SET_ENUM_OP(name)                                         \
+  struct SetStroke##name##Op final : DLOp {                              \
+    static const auto kType = DisplayListOpType::kSetStroke##name;       \
+                                                                         \
+    explicit SetStroke##name##Op(DlStroke##name value) : value(value) {} \
+                                                                         \
+    const DlStroke##name value;                                          \
+                                                                         \
+    void dispatch(Dispatcher& dispatcher) const {                        \
+      dispatcher.setStroke##name(value);                                 \
+    }                                                                    \
   };
 DEFINE_SET_ENUM_OP(Cap)
 DEFINE_SET_ENUM_OP(Join)
@@ -97,9 +97,9 @@ DEFINE_SET_ENUM_OP(Join)
 struct SetStyleOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetStyle;
 
-  explicit SetStyleOp(SkPaint::Style style) : style(style) {}
+  explicit SetStyleOp(DlDrawStyle style) : style(style) {}
 
-  const SkPaint::Style style;
+  const DlDrawStyle style;
 
   void dispatch(Dispatcher& dispatcher) const { dispatcher.setStyle(style); }
 };
@@ -107,9 +107,9 @@ struct SetStyleOp final : DLOp {
 struct SetStrokeWidthOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetStrokeWidth;
 
-  explicit SetStrokeWidthOp(SkScalar width) : width(width) {}
+  explicit SetStrokeWidthOp(float width) : width(width) {}
 
-  const SkScalar width;
+  const float width;
 
   void dispatch(Dispatcher& dispatcher) const {
     dispatcher.setStrokeWidth(width);
@@ -119,9 +119,9 @@ struct SetStrokeWidthOp final : DLOp {
 struct SetStrokeMiterOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetStrokeMiter;
 
-  explicit SetStrokeMiterOp(SkScalar limit) : limit(limit) {}
+  explicit SetStrokeMiterOp(float limit) : limit(limit) {}
 
-  const SkScalar limit;
+  const float limit;
 
   void dispatch(Dispatcher& dispatcher) const {
     dispatcher.setStrokeMiter(limit);
@@ -132,9 +132,9 @@ struct SetStrokeMiterOp final : DLOp {
 struct SetColorOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetColor;
 
-  explicit SetColorOp(SkColor color) : color(color) {}
+  explicit SetColorOp(DlColor color) : color(color) {}
 
-  const SkColor color;
+  const DlColor color;
 
   void dispatch(Dispatcher& dispatcher) const { dispatcher.setColor(color); }
 };
@@ -479,9 +479,9 @@ struct DrawPaintOp final : DLOp {
 struct DrawColorOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawColor;
 
-  DrawColorOp(SkColor color, DlBlendMode mode) : color(color), mode(mode) {}
+  DrawColorOp(DlColor color, DlBlendMode mode) : color(color), mode(mode) {}
 
-  const SkColor color;
+  const DlColor color;
   const DlBlendMode mode;
 
   void dispatch(Dispatcher& dispatcher) const {
@@ -757,7 +757,7 @@ struct DrawImageLatticeOp final : DLOp {
 // Each of these is then followed by a number of lists.
 // SkRSXform list is a multiple of 16 bytes so it is always packed well
 // SkRect list is also a multiple of 16 bytes so it also packs well
-// SkColor list only packs well if the count is even, otherwise there
+// DlColor list only packs well if the count is even, otherwise there
 // can be 4 unusued bytes at the end.
 struct DrawAtlasBaseOp : DLOp {
   DrawAtlasBaseOp(const sk_sp<DlImage> atlas,
@@ -802,8 +802,8 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
   void dispatch(Dispatcher& dispatcher) const {
     const SkRSXform* xform = reinterpret_cast<const SkRSXform*>(this + 1);
     const SkRect* tex = reinterpret_cast<const SkRect*>(xform + count);
-    const SkColor* colors =
-        has_colors ? reinterpret_cast<const SkColor*>(tex + count) : nullptr;
+    const DlColor* colors =
+        has_colors ? reinterpret_cast<const DlColor*>(tex + count) : nullptr;
     const DlBlendMode mode = static_cast<DlBlendMode>(mode_index);
     dispatcher.drawAtlas(atlas, xform, tex, colors, count, mode, sampling,
                          nullptr, render_with_attributes);
@@ -837,8 +837,8 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
   void dispatch(Dispatcher& dispatcher) const {
     const SkRSXform* xform = reinterpret_cast<const SkRSXform*>(this + 1);
     const SkRect* tex = reinterpret_cast<const SkRect*>(xform + count);
-    const SkColor* colors =
-        has_colors ? reinterpret_cast<const SkColor*>(tex + count) : nullptr;
+    const DlColor* colors =
+        has_colors ? reinterpret_cast<const DlColor*>(tex + count) : nullptr;
     const DlBlendMode mode = static_cast<DlBlendMode>(mode_index);
     dispatcher.drawAtlas(atlas, xform, tex, colors, count, mode, sampling,
                          &cull_rect, render_with_attributes);
@@ -925,12 +925,12 @@ struct DrawTextBlobOp final : DLOp {
     static const auto kType = DisplayListOpType::kDraw##name;             \
                                                                           \
     Draw##name##Op(const SkPath& path,                                    \
-                   SkColor color,                                         \
+                   DlColor color,                                         \
                    SkScalar elevation,                                    \
                    SkScalar dpr)                                          \
         : color(color), elevation(elevation), dpr(dpr), path(path) {}     \
                                                                           \
-    const SkColor color;                                                  \
+    const DlColor color;                                                  \
     const SkScalar elevation;                                             \
     const SkScalar dpr;                                                   \
     const SkPath path;                                                    \

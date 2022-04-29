@@ -110,12 +110,12 @@ TEST(DisplayListComplexity, StrokeWidth) {
 
 TEST(DisplayListComplexity, Style) {
   DisplayListBuilder builder_filled;
-  builder_filled.setStyle(SkPaint::Style::kFill_Style);
+  builder_filled.setStyle(DlDrawStyle::kFill);
   builder_filled.drawRect(SkRect::MakeXYWH(10, 10, 80, 80));
   auto display_list_filled = builder_filled.Build();
 
   DisplayListBuilder builder_stroked;
-  builder_stroked.setStyle(SkPaint::Style::kStroke_Style);
+  builder_stroked.setStyle(DlDrawStyle::kStroke);
   builder_stroked.drawRect(SkRect::MakeXYWH(10, 10, 80, 80));
   auto display_list_stroked = builder_stroked.Build();
 

@@ -39,15 +39,15 @@ static const SkMatrix TestMatrix2 =
                       0, 0, 1);
 // clang-format on
 static constexpr int kTestStopCount = 3;
-static constexpr SkColor TestColors[kTestStopCount] = {
-    SK_ColorRED,
-    SK_ColorGREEN,
-    SK_ColorBLUE,
+static constexpr DlColor TestColors[kTestStopCount] = {
+    DlColor::kRed(),
+    DlColor::kGreen(),
+    DlColor::kBlue(),
 };
-static constexpr SkColor TestAlphaColors[kTestStopCount] = {
-    SkColorSetA(SK_ColorBLUE, 0x7f),
-    SkColorSetA(SK_ColorRED, 0x2f),
-    SkColorSetA(SK_ColorGREEN, 0xcf),
+static const DlColor TestAlphaColors[kTestStopCount] = {
+    DlColor::kBlue().withAlpha(0x7F),
+    DlColor::kRed().withAlpha(0x2F),
+    DlColor::kGreen().withAlpha(0xCF),
 };
 static constexpr float TestStops[kTestStopCount] = {
     0.0f,
@@ -133,8 +133,9 @@ TEST(DisplayListColorSource, FromSkiaImageShader) {
 TEST(DisplayListColorSource, FromSkiaLinearGradient) {
   // We can read back all of the parameters of a Linear gradient
   // except for matrix.
+  const SkColor* sk_colors = reinterpret_cast<const SkColor*>(TestColors);
   sk_sp<SkShader> shader = SkGradientShader::MakeLinear(
-      TestPoints, TestColors, TestStops, kTestStopCount, SkTileMode::kClamp);
+      TestPoints, sk_colors, TestStops, kTestStopCount, SkTileMode::kClamp);
   std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
   std::shared_ptr<DlColorSource> dl_source =
       DlColorSource::MakeLinear(TestPoints[0], TestPoints[1], kTestStopCount,
@@ -162,8 +163,9 @@ TEST(DisplayListColorSource, FromSkiaLinearGradient) {
 TEST(DisplayListColorSource, FromSkiaRadialGradient) {
   // We can read back all of the parameters of a Radial gradient
   // except for matrix.
+  const SkColor* sk_colors = reinterpret_cast<const SkColor*>(TestColors);
   sk_sp<SkShader> shader =
-      SkGradientShader::MakeRadial(TestPoints[0], 10.0, TestColors, TestStops,
+      SkGradientShader::MakeRadial(TestPoints[0], 10.0, sk_colors, TestStops,
                                    kTestStopCount, SkTileMode::kClamp);
   std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
   std::shared_ptr<DlColorSource> dl_source =
@@ -192,8 +194,9 @@ TEST(DisplayListColorSource, FromSkiaRadialGradient) {
 TEST(DisplayListColorSource, FromSkiaConicalGradient) {
   // We can read back all of the parameters of a Conical gradient
   // except for matrix.
+  const SkColor* sk_colors = reinterpret_cast<const SkColor*>(TestColors);
   sk_sp<SkShader> shader = SkGradientShader::MakeTwoPointConical(
-      TestPoints[0], 10.0, TestPoints[1], 20.0, TestColors, TestStops,
+      TestPoints[0], 10.0, TestPoints[1], 20.0, sk_colors, TestStops,
       kTestStopCount, SkTileMode::kClamp);
   std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
   std::shared_ptr<DlColorSource> dl_source = DlColorSource::MakeConical(
@@ -224,9 +227,9 @@ TEST(DisplayListColorSource, FromSkiaConicalGradient) {
 TEST(DisplayListColorSource, FromSkiaSweepGradient) {
   // We can read back all of the parameters of a Sweep gradient
   // except for matrix and the start/stop angles.
-  sk_sp<SkShader> shader =
-      SkGradientShader::MakeSweep(TestPoints[0].fX, TestPoints[0].fY,
-                                  TestColors, TestStops, kTestStopCount);
+  const SkColor* sk_colors = reinterpret_cast<const SkColor*>(TestColors);
+  sk_sp<SkShader> shader = SkGradientShader::MakeSweep(
+      TestPoints[0].fX, TestPoints[0].fY, sk_colors, TestStops, kTestStopCount);
   std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
   std::shared_ptr<DlColorSource> dl_source =
       DlColorSource::MakeSweep(TestPoints[0], 0, 360, kTestStopCount,
