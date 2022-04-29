@@ -81,24 +81,24 @@ class RouteInformation {
 /// delegates into a single object to configure a [Router].
 ///
 /// The [routerDelegate] must not be null. The [backButtonDispatcher],
-/// [routerInformationProvider], and [routerInformationProvider] are optional.
+/// [routeInformationProvider], and [routeInformationProvider] are optional.
 ///
-/// If [routerInformationProvider] is not null, [routeInformationParser] must
-/// also not be null.
+/// The [routeInformationProvider] and [routeInformationParser] must
+/// both be provided or not provided.
 class RouterConfig<T> {
   /// Creates a [RouterConfig].
   ///
   /// The [routerDelegate] must not be null. The [backButtonDispatcher],
   /// [routeInformationProvider], and [routeInformationParser] are optional.
   ///
-  /// If [routeInformationProvider] is not null, [routeInformationParser] must
-  /// also not be null.
+  /// The [routeInformationProvider] and [routeInformationParser] must
+  /// both be provided or not provided.
   const RouterConfig({
     this.routeInformationProvider,
     this.routeInformationParser,
     required this.routerDelegate,
     this.backButtonDispatcher,
-  }) : assert(routeInformationProvider == null || routeInformationParser != null);
+  }) : assert((routeInformationProvider == null) == (routeInformationParser == null));
 
   /// The [RouteInformationProvider] that is used to configure the [Router].
   final RouteInformationProvider? routeInformationProvider;
@@ -315,8 +315,8 @@ class Router<T> extends StatefulWidget {
   /// router does not depend on route information. A common example is a sub router
   /// that builds its content completely based on the app state.
   ///
-  /// If the [routeInformationProvider] is not null, then
-  /// [routeInformationParser] must also not be null.
+  /// The [routeInformationProvider] and [routeInformationParser] must
+  /// both be provided or not provided.
   ///
   /// The [routerDelegate] must not be null.
   const Router({
@@ -327,8 +327,8 @@ class Router<T> extends StatefulWidget {
     this.backButtonDispatcher,
     this.restorationScopeId,
   }) : assert(
-         routeInformationProvider == null || routeInformationParser != null,
-         'A routeInformationParser must be provided when a routeInformationProvider is specified.',
+         (routeInformationProvider == null) == (routeInformationParser == null),
+         'The routeInformationParser and routeInformationProvider must both be provided or not provided.',
        ),
        assert(routerDelegate != null);
 
@@ -366,8 +366,8 @@ class Router<T> extends StatefulWidget {
   /// it notifies.
   ///
   /// This can be null if this router does not rely on the route information
-  /// to build its content. In such case, the [routeInformationParser] can also be
-  /// null.
+  /// to build its content. In such case, the [routeInformationParser] must also
+  /// be null.
   final RouteInformationProvider? routeInformationProvider;
 
   /// The route information parser for the router.

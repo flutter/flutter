@@ -202,7 +202,7 @@ void main() {
       throwsA(isAssertionError.having(
         (AssertionError e) => e.message,
         'message',
-        'A routeInformationParser must be provided when a routeInformationProvider is specified.',
+        'The routeInformationParser and routeInformationProvider must both be provided or not provided.',
       )),
     );
   });
@@ -1288,7 +1288,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     expect(find.text('Current route: /404'), findsOneWidget);
     expect(reportedRouteInformation[1].location, '/404');
   });
-  
+
   testWidgets('RouterInformationParser can look up dependencies and reparse', (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     provider.value = const RouteInformation(
