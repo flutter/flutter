@@ -725,9 +725,13 @@ class UpdatePackagesCommand extends FlutterCommand {
     required String packageName,
   }) async {
     globals.printStatus(
-      'Package $packageName is resolved as ${tree.versionFor(packageName)}',
+      'package:$packageName is resolved as ${tree.versionFor(packageName)}',
     );
     final Iterable<String> dependees = tree.getDependees(packageName);
+    if (dependees.isEmpty) {
+      globals.printStatus('\tNo packages constrain package:$packageName.\n');
+      return;
+    }
 
     final Map<String, Package> nameToPackage = <String, Package>{};
     for (final Package package in packageConfig.packages) {
@@ -766,7 +770,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
     // Extra newline between packages
     globals.printStatus('');
-
   }
 }
 
