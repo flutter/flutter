@@ -726,8 +726,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     globals.printStatus(
         'Package $packageName is resolved as ${tree.versionFor(packageName)}');
     final Iterable<String> dependees = tree.getDependees(packageName);
-    globals.printStatus(
-        'Found ${dependees.length} packages depending on $packageName:');
 
     final Map<String, Package> nameToPackage = <String, Package>{};
     for (final Package package in packageConfig.packages) {
@@ -737,7 +735,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     for (final String dependee in dependees) {
       final Package? package = nameToPackage[dependee];
       if (package == null) {
-        globals.printError('The package $dependee is a new dependency and cannot be located in the PUB_CACHE, skipping...');
         continue;
       }
       final Directory root = globals.fs.directory(package.root);
