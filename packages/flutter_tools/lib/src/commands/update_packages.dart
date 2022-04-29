@@ -643,7 +643,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (constraint == null) {
         throw StateError('Could not find dependency $packageName in $pubspecFile');
       }
-      globals.printStatus('\t${package.root.pathSegments.last} constrains $packageName with $constraint');
+      globals.printStatus('\t${root.basename} constrains $packageName with $constraint');
     }
   }
 }
