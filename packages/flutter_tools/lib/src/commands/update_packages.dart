@@ -255,7 +255,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
 
     if (describeGraph) {
-      await _describePackage(
+      await _describeAllPackages(
         tree: tree!,
         packageConfig: packageConfig,
       );
@@ -290,13 +290,26 @@ class UpdatePackagesCommand extends FlutterCommand {
         doUpgrade: false,
       );
 
-      final bool upgradeOnly = _verifyUpgrade(allDependencies, newDependencies);
+      final bool upgradeOnly = _verifyUpgrade(
+        oldDeps: allDependencies,
+        newDeps: newDependencies,
+        tree: tree!,
+        packageConfig: packageConfig,
+      );
+      if (!upgradeOnly) {
+        return FlutterCommandResult.fail();
+      }
     }
 
     return FlutterCommandResult.success();
   }
 
-  bool _verifyUpgrade(Map<String, PubspecDependency> oldDeps, Map<String, PubspecDependency> newDeps) {
+  bool _verifyUpgrade({
+    required Map<String, PubspecDependency> oldDeps,
+    required Map<String, PubspecDependency> newDeps,
+    required PubDependencyTree tree,
+    required PackageConfig packageConfig,
+  }) {
     bool ok = true;
     for (final PubspecDependency dep in oldDeps.values) {
       PubspecDependency? newDep;
@@ -311,8 +324,13 @@ class UpdatePackagesCommand extends FlutterCommand {
           final semver.Version oldVersion = semver.Version.parse(dep.version);
           final semver.Version newVersion = semver.Version.parse(newDep.version);
           if (oldVersion > newVersion) {
-            globals.printError('package:${dep.name} was downgraded from $oldVersion to $newVersion');
             ok = false;
+            globals.printError('package:${dep.name}\twas downgraded from $oldVersion -> $newVersion');
+            _describePackage(
+              tree: tree,
+              packageConfig: packageConfig,
+              packageName: dep.name,
+            );
           }
         }
       }
@@ -621,8 +639,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       await queue.tasksComplete;
       status.stop();
       // The exception is rethrown, so don't catch only Exceptions.
-    } catch (exception) {
-      // ignore: avoid_catches_without_on_clauses
+    } catch (exception) { // ignore: avoid_catches_without_on_clauses
       status.cancel();
       rethrow;
     }
@@ -681,7 +698,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _describePackage({
+  Future<void> _describeAllPackages({
     required PubDependencyTree tree,
     required PackageConfig packageConfig,
   }) async {
@@ -693,48 +710,60 @@ class UpdatePackagesCommand extends FlutterCommand {
       return first.key.compareTo(second.key);
     });
     for (final MapEntry<String, Set<String>> packageEntry in entries) {
-      final String packageName = packageEntry.key;
-      globals.printStatus(
-          'Package $packageName is resolved as ${tree.versionFor(packageName)}');
-      final Iterable<String> dependees = tree.getDependees(packageName);
-      globals.printStatus(
-          'Found ${dependees.length} packages depending on $packageName:');
-
-      final Map<String, Package> nameToPackage = <String, Package>{};
-      for (final Package package in packageConfig.packages) {
-        nameToPackage[package.name] = package;
-      }
-
-      for (final String dependee in dependees) {
-        final Package package = nameToPackage[dependee]!;
-        final Directory root = globals.fs.directory(package.root);
-        final File pubspecFile = root.childFile('pubspec.yaml');
-        final String pubspecString = await pubspecFile.readAsString();
-        final YamlMap pubspec = loadYaml(pubspecString) as YamlMap;
-        Object? constraint =
-            (pubspec['dependencies'] as YamlMap?)?[packageName];
-        constraint ??= (pubspec['dev_dependencies'] as YamlMap?)?[packageName];
-
-        if (constraint is YamlMap) {
-          // We don't need to parse SDK constraints
-          if (constraint.containsKey('sdk')) {
-            continue;
-          }
-          throw StateError('Unrecognized constraint $constraint');
-        }
-
-        if (constraint == null) {
-          throw StateError(
-              'Could not find dependency $packageName in $pubspecFile');
-        }
-        // [root.basename] will be the pub-cache dir, with encodes the package
-        // name and its version
-        globals.printStatus(
-            '\t${root.basename} constrains $packageName with $constraint');
-      }
-      // Extra newline between packages
-      globals.printStatus('');
+      await _describePackage(
+        tree: tree,
+        packageConfig: packageConfig,
+        packageName: packageEntry.key,
+      );
     }
+  }
+
+  Future<void> _describePackage({
+    required PubDependencyTree tree,
+    required PackageConfig packageConfig,
+    required String packageName,
+  }) async {
+    globals.printStatus(
+        'Package $packageName is resolved as ${tree.versionFor(packageName)}');
+    final Iterable<String> dependees = tree.getDependees(packageName);
+    globals.printStatus(
+        'Found ${dependees.length} packages depending on $packageName:');
+
+    final Map<String, Package> nameToPackage = <String, Package>{};
+    for (final Package package in packageConfig.packages) {
+      nameToPackage[package.name] = package;
+    }
+
+    for (final String dependee in dependees) {
+      final Package package = nameToPackage[dependee]!;
+      final Directory root = globals.fs.directory(package.root);
+      final File pubspecFile = root.childFile('pubspec.yaml');
+      final String pubspecString = await pubspecFile.readAsString();
+      final YamlMap pubspec = loadYaml(pubspecString) as YamlMap;
+      Object? constraint =
+          (pubspec['dependencies'] as YamlMap?)?[packageName];
+      constraint ??= (pubspec['dev_dependencies'] as YamlMap?)?[packageName];
+
+      if (constraint is YamlMap) {
+        // We don't need to parse SDK constraints
+        if (constraint.containsKey('sdk')) {
+          continue;
+        }
+        throw StateError('Unrecognized constraint $constraint');
+      }
+
+      if (constraint == null) {
+        throw StateError(
+            'Could not find dependency $packageName in $pubspecFile');
+      }
+      // [root.basename] will be the pub-cache dir, with encodes the package
+      // name and its version
+      globals.printStatus(
+          '\t${root.basename} constrains $packageName with $constraint');
+    }
+    // Extra newline between packages
+    globals.printStatus('');
+
   }
 }
 
