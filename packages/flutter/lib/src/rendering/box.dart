@@ -2379,8 +2379,11 @@ abstract class RenderBox extends RenderObject {
 
   @override
   void layout(Constraints constraints, {bool parentUsesSize = false}) {
-    if (hasSize && constraints != this.constraints) {
-      _clearCachedData();
+    if (hasSize && constraints != this.constraints &&
+        _cachedBaselines != null && _cachedBaselines!.isNotEmpty) {
+      // The cached baselines data may need update if the constraints change.
+      _cachedBaselines?.clear();
+      _notifyParentIfDirty = true;
     }
     super.layout(constraints, parentUsesSize: parentUsesSize);
   }
