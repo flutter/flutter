@@ -95,8 +95,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       )
       ..addFlag(
         'crash',
-        help:
-            'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
+        help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
         negatable: false,
       )
       ..addOption(
@@ -105,9 +104,9 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'Causes the "pub get" runs to happen concurrently on this many '
             'CPUs. Defaults to the number of CPUs that this machine has.',
       )
-      ..addFlag(
-        'describe-graph',
-        help: 'Describe the constraints of all packages in the graph.',
+      ..addOption(
+        'describe-package',
+        help: 'Describe all the other packages that constrain the version of the given package',
       );
   }
 
@@ -165,11 +164,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
-    final bool describeGraph = boolArg('describe-graph');
+    final String? describePackage = stringArg('describe-package');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
-    if (doUpgrade && describeGraph) {
+    if (doUpgrade && describePackage != null) {
       throwToolExit(
-        '--describe-graph cannot be used while upgrading dependencies',
+        '--describe-package cannot be used while upgrading dependencies',
       );
     }
 
@@ -240,7 +239,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     // honoring all their constraints. If not upgrading the pub tool will only
     // attempt to download any necessary package versions to the pub cache to
     // warm the cache.
-    final PubDependencyTree? tree = (doUpgrade || describeGraph)
+    final PubDependencyTree? tree = (doUpgrade || describePackage != null)
         ? PubDependencyTree()
         : null; // object to collect results
     final Directory tempDir = globals.fs.systemTempDirectory
@@ -254,10 +253,11 @@ class UpdatePackagesCommand extends FlutterCommand {
       doUpgrade: doUpgrade,
     );
 
-    if (describeGraph) {
-      await _describeAllPackages(
+    if (describePackage != null) {
+      await _describePackage(
         tree: tree!,
         packageConfig: packageConfig,
+        packageName: describePackage,
       );
       return FlutterCommandResult.success();
     }
@@ -299,11 +299,13 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (!upgradeOnly) {
         return FlutterCommandResult.fail();
       }
+      print(upgradeOnly);
     }
 
     return FlutterCommandResult.success();
   }
 
+  /// Determine if any dependencies were downgraded.
   Future<bool> _verifyUpgrade({
     required Map<String, PubspecDependency> oldDeps,
     required Map<String, PubspecDependency> newDeps,
