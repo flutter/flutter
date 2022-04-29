@@ -16,7 +16,7 @@ import 'text_selection_toolbar_text_button.dart';
 class MaterialSpellCheckService implements SpellCheckService {
   late MethodChannel spellCheckChannel;
 
-  StreamController<List<SpellCheckerSuggestionSpan>> controller = StreamController<List<SpellCheckerSuggestionSpan>>.broadcast();
+  StreamController<List<dynamic>> controller = StreamController<List<dynamic>>.broadcast();
 
   MaterialSpellCheckService() {
     spellCheckChannel = SystemChannels.spellCheck;    
@@ -31,6 +31,8 @@ class MaterialSpellCheckService implements SpellCheckService {
       //TODO(camillesimon): Rename all spellcheckER names to spellcheck
       case 'SpellCheck.updateSpellCheckResults':
         List<String> results = args.cast<String>();
+        String text = results.removeAt(0);
+        print("************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] Text: ${text} *************************************************************");
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
         
         // print("************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] Raw spell check results received: *************************************************************");
@@ -38,12 +40,12 @@ class MaterialSpellCheckService implements SpellCheckService {
         results.forEach((String result) {
           List<String> resultParsed = result.split(".");
 
-          // print("************************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] ${resultParsed} *************************************************************************");
+          print("************************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] ${resultParsed} *************************************************************************");
 
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split("\n")));
         });
 
-        controller.sink.add(spellCheckerSuggestionSpans);
+        controller.sink.add(List<dynamic>[text, spellCheckerSuggestionSpans]);
         break;
       default:
         throw MissingPluginException();
@@ -51,7 +53,7 @@ class MaterialSpellCheckService implements SpellCheckService {
   }
 
     @override
-    Future<List<SpellCheckerSuggestionSpan>> fetchSpellCheckSuggestions(Locale locale, TextEditingValue value) async {
+    Future<List<dynamic>> fetchSpellCheckSuggestions(Locale locale, TextEditingValue value) async {
     assert(locale != null);
     assert(value.text != null);
 
@@ -61,7 +63,7 @@ class MaterialSpellCheckService implements SpellCheckService {
       // print("************************************************************* [FRAMEWORK][fetchSpellCheckSuggestions] Spell check requested for |${value.text}| with no valid composing region *************************************************************");
     }
 
-    List<SpellCheckerSuggestionSpan> spellCheckResults = <SpellCheckerSuggestionSpan>[];
+    List<dynamic> spellCheckResults = <dynamic>[];
 
     spellCheckChannel.invokeMethod<void>(
         'SpellCheck.initiateSpellCheck',
@@ -69,23 +71,11 @@ class MaterialSpellCheckService implements SpellCheckService {
       );
     
     await for (final result in controller.stream) {
-      TextRange composingRange = value.composing;
-
-      if (value.isComposingRangeValid) {
-        // print("************************************************************* [FRAMEWORK][fetchSpellCheckSuggestions] Modified spell check results for |${value.text}| with composing region |${value.composing.textInside(value.text)}| *************************************************************");
-      } else {
-        // print("************************************************************* [FRAMEWORK][fetchSpellCheckSuggestions] Modified spell check results for |${value.text}| with no valid composing region *************************************************************");
-      }
-        
-
-      result.forEach((SpellCheckerSuggestionSpan span) {
+      spellCheckResults.add(result[0]);
+      
+      result[1].forEach((SpellCheckerSuggestionSpan span) {
         bool isWithinComposingRegion = composingRange.start == span.start && composingRange.end == span.end;
-
-        // if (!isWithinComposingRegion) {
-          // print("************************************************************************* [FRAMEWORK][fetchSpellCheckSuggestions] Span start: ${span.start}, Span end: ${span.end}, Span suggestions: ${span.replacementSuggestions} *************************************************************************");
-
-          spellCheckResults.add(span);
-        // }
+        spellCheckResults.add(span);
       });
 
 

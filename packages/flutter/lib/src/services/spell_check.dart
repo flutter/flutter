@@ -45,6 +45,9 @@ class SpellCheckConfiguration {
     /// Spell check results to pass from spellCheckService to spellCheckSuggestionsHandler
     List<SpellCheckerSuggestionSpan>? spellCheckResults;
 
+    /// Text that spellCheckResults correspond to
+    String? spellCheckResultsText;
+
     SpellCheckConfiguration({
         this.spellCheckService,
         this.spellCheckSuggestionsHandler
@@ -113,72 +116,85 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
             );
         }
 
-   // An attempt to fix the asynchronny issue. Assumes only one addition or one deletion can occur at a time.
-   List<SpellCheckerSuggestionSpan>? correctSpellCheckResults(List<SpellCheckerSuggestionSpan> rawSpellCheckResults, String text) {
-       List<SpellCheckerSuggestionSpan>? correctedSpellCheckResults = <SpellCheckerSuggestionSpan>[];
+   // Provides a generous guesss of the spell check results for the current text if the spell check results for this text has not been received by the framework yet.
+   // Assumes: [1] order of results matches that of the text, [2] only a shift/deletion occurs at a time (this is verifiable)
+   List<SpellCheckerSuggestionSpan> correctSpellCheckResults(String newText, String resultsText, List<SpellCheckerSuggestionSpan> results) {
+       List<SpellCheckerSuggestionSpan> correctedSpellCheckResults = <SpellCheckerSuggestionSpan>[];
+
+       // STEP 1: Find first bad spell check span
        int span_pointer = 0;
        bool foundBadSpan = false;
 
-       String spanText;
-       String currentText = "";
+       SpellCheckerSuggestionSpan currentSpan;
+       String oldSpanText;
+       String newSpanText;
+       int spanLength;
+       int? newStart;
+       int searchStart = 0;
 
-       // Look for bad spell check suggestion spans, if there are any.
-       while (!foundBadSpan && span_pointer < rawSpellCheckResults.length) {
-           SpellCheckerSuggestionSpan currentSpan = rawSpellCheckResults[span_pointer];
-           spanText = lastUsedText.substring(currentSpan.start, currentSpan.end);
-           currentText = text.substring(currentSpan.start, currentSpan.end);
+       int? start_index;
+       int? end_index;
+       bool spanWithinTextRange = true;
 
-           if (spanText != currentText) {
-               foundBadSpan = true;
-           } else {
+       while(span_pointer < results.length) {
+           currentSpan = results[span_pointer];
+           currentSpanStart = currentSpan.start;
+           currentSpanEnd = currentSpan.end;
+
+           start_index = currentSpanStart < newText.length ? currentSpanStart : null;
+           end_index = currentSpanEnd < newText.length ? currentSpanEnd : null;
+
+           spanWithinTextRange = start_index != null && end_index != null;
+
+           oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1); // off by one potential
+           newSpanText = newText.substring(currentSpanStart, currentSpanEnd + 1); // off by one potential, also might be out of range
+
+           if (!spanWIthinTextRange) {
+               // No more of the spell check results will be within the range of the text
+               break;
+           }
+           else if (oldSpanText == newSpanText) {
+               searchStart = currentSpanEnd + 1; // off by one potential
                correctedSpellCheckResults.add(currentSpan);
-                          span_pointer += 1;
-
            }
+           else {
+               newStart = findBadSpan(newText[searchStart:], oldSpanText); // off by one potential
 
-       }
-
-       if (foundBadSpan) {
-           // Handle deletion case as a proof of concept:
-            SpellCheckerSuggestionSpan currentSpan = rawSpellCheckResults[span_pointer];
-
-           int j = currentSpan.start + 1;
-           int spanLength = currentSpan.end - currentSpan.start;
-           bool foundWord = false;
-
-           while (!foundWord && j+spanLength-1 < lastUsedText.length) {
-               spanText = lastUsedText.substring(j, j + spanLength-1);
-
-               if (spanText == currentText) {
-                   foundWord = true;
-               }
-
-               j += 1;
-           }
-
-           if (!foundWord) {
-               while (span_pointer < rawSpellCheckResults.length) {
-                   currentSpan = rawSpellCheckResults[span_pointer];
-                   currentSpan.start = (j-1) - spanLength;
-                   currentSpan.end = currentSpan.start + spanLength;
-
-                   correctedSpellCheckResults.add(currentSpan);
-
-                    span_pointer += 1;
+            // STEP 2: Shift it or throw it out
+               if (newStart != null) {
+                   spanLength = currentSpanEnd - currentSpanStart; // off by one potential
+                   correctedSpellCheckResults.add(SpellCheckerSuggestionSpan(newStart, newStart + spanLength, currentSpan.replacementSuggestions)); // off by one potential
+                   searchStart = newStart + spanLength;
                }
            }
 
+          // STEP 3: Repeat
+           span_pointer += 1;
        }
 
-      for (SpellCheckerSuggestionSpan span in correctedSpellCheckResults) {
-          print("${span.start}, ${span.end}, ${span.replacementSuggestions}");
-      }
        return correctedSpellCheckResults;
+   }
+
+   // pretty sure this can be replaced with a String method
+   int? findBadSpan(String text, String spanText) {
+       bool foundSpan = false;
+       int text_pointer = 0;
+
+       while (!foundSpan && text_pointer + spanLength < text.length) {
+           int end = text_pointer + spanText.length;
+
+           if (text.substring(text_pointer, end) == spanText) {
+               return text_pointer;
+           }
+
+           text_pointer += 1;
+       }
+
    }     
 
   @override
   TextSpan buildTextSpanWithSpellCheckSuggestions(
-      List<SpellCheckerSuggestionSpan>? rawSpellCheckResults,
+      List<SpellCheckerSuggestionSpan>? rawSpellCheckResults, String? spellCheckResultsText,
       TextEditingValue value, TextStyle? style, bool composingWithinCurrentTextRange) {
       scssSpans_consumed_index = 0;
       text_consumed_index = 0;
@@ -186,8 +202,8 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
       String text = value.text;
       List<SpellCheckerSuggestionSpan>? spellCheckResults;
 
-      if (lastUsedText.length > value.text.length && rawSpellCheckResults != null) {
-        spellCheckResults = correctSpellCheckResults(rawSpellCheckResults, value.text);
+      if (spellCheckResultsText != value.text) {
+        spellCheckResults = correctSpellCheckResults(value.text, rawSpellCheckResultsText, rawSpellCheckResults);
       } else {
         spellCheckResults = rawSpellCheckResults;
       }

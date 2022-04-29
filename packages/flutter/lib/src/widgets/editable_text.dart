@@ -175,11 +175,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing; // this is poorly named -- this is if composing range is out of range for current text
 
     if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null && spellCheckConfiguration.spellCheckResults!.length > 0) {
-        // print("******************************* [FRAMEWORK][BTS] Building text span with spell check results. Composing region out of range = ${composingWithinCurrentTextRange}. Text = |${value.text}|. Spell check results: *******************************");
-        spellCheckConfiguration.spellCheckResults!.forEach((SpellCheckerSuggestionSpan span) {
-          // print("******************************* [FRAMEWORK][BTS][RESULT] SPAN START: ${span.start}, SPAN END: ${span.end}, REPLACEMENT SUGGESTIONS: ${span.replacementSuggestions} *******************************");
-        });
-        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(spellCheckConfiguration.spellCheckResults, value, style, composingWithinCurrentTextRange);
+        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(spellCheckConfiguration.spellCheckResults, spellCheckConfiguration.spellCheckResultsText, value, style, composingWithinCurrentTextRange);
 
     }
     else {
@@ -2679,7 +2675,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (_spellCheckEnabled! && value.text.length > 0 && _value.text != value.text) {
           // print("CURRENT WORD: ${renderEditable.getWordBoundary(TextPosition(offset: value.text.length-1)).textInside(value.text)}"); // this works in _handleselecionchanged
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          Future<List<SpellCheckerSuggestionSpan>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value);
+          Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value);
           // print("REQUESTING SPELL CHECK RESULTS |${value.text}|");
           final String foo = value.text;
           spellCheckResultsFuture.then((results) {
@@ -2687,7 +2683,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             // results.forEach((SpellCheckerSuggestionSpan result) {
             //   print(result.replacementSuggestions);
             // });
-            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
+            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results[1];
+            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResultsText = results[0];
             // print("${renderEditable.getWordBoundary(foo.length)}")
             renderEditable.text = buildTextSpan();
       });
