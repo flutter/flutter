@@ -166,6 +166,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool offline = boolArg('offline');
     final String? describePackage = stringArg('describe-package');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
+
     if (doUpgrade && describePackage != null) {
       throwToolExit(
         '--describe-package cannot be used while upgrading dependencies',
@@ -297,8 +298,10 @@ class UpdatePackagesCommand extends FlutterCommand {
         packageConfig: packageConfig,
       );
       if (!upgradeOnly) {
-        print(upgradeOnly);
-        return FlutterCommandResult.fail();
+        throwToolExit(
+          'Packages were downgraded! If this is acceptable you can still '
+          'commit your changes, however please note the downgrades in your PR.',
+        );
       }
     }
 
