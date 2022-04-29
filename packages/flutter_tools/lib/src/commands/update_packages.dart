@@ -747,6 +747,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (constraint is YamlMap) {
         // We don't need to parse SDK constraints
         if (constraint.containsKey('sdk')) {
+          print('skipping $dependee because its constraint is $constraint');
           continue;
         }
         throw StateError('Unrecognized constraint $constraint');
