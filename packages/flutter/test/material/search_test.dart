@@ -554,8 +554,13 @@ void main() {
     await tester.pumpAndSettle();
 
     final Text hintText = tester.widget(find.text(searchHintText));
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
     expect(hintText.style?.color, delegate.searchFieldStyle?.color);
     expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+    expect(textField.style?.color, delegate.searchFieldStyle?.color);
+    expect(textField.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+
   });
 
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
