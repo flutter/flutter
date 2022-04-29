@@ -191,7 +191,7 @@ void main() {
       return layer;
     });
     layout(boxNoCompositing, phase: EnginePhase.paint);
-  });
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/48417
 
   test('RenderObject.dispose sets debugDisposed to true', () {
     final TestRenderObject renderObject = TestRenderObject();
