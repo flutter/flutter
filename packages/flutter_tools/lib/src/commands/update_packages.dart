@@ -290,7 +290,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         doUpgrade: false,
       );
 
-      final bool upgradeOnly = _verifyUpgrade(
+      final bool upgradeOnly = await _verifyUpgrade(
         oldDeps: allDependencies,
         newDeps: newDependencies,
         tree: tree!,
@@ -304,12 +304,12 @@ class UpdatePackagesCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  bool _verifyUpgrade({
+  Future<bool> _verifyUpgrade({
     required Map<String, PubspecDependency> oldDeps,
     required Map<String, PubspecDependency> newDeps,
     required PubDependencyTree tree,
     required PackageConfig packageConfig,
-  }) {
+  }) async {
     bool ok = true;
     for (final PubspecDependency dep in oldDeps.values) {
       PubspecDependency? newDep;
@@ -326,7 +326,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           if (oldVersion > newVersion) {
             ok = false;
             globals.printError('package:${dep.name}\twas downgraded from $oldVersion -> $newVersion');
-            _describePackage(
+            await _describePackage(
               tree: tree,
               packageConfig: packageConfig,
               packageName: dep.name,
@@ -735,20 +735,18 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
 
     for (final String dependee in dependees) {
-      print('meep in $dependee');
       final Package package = nameToPackage[dependee]!;
       final Directory root = globals.fs.directory(package.root);
       final File pubspecFile = root.childFile('pubspec.yaml');
       final String pubspecString = await pubspecFile.readAsString();
       final YamlMap pubspec = loadYaml(pubspecString) as YamlMap;
-      Object? constraint =
-          (pubspec['dependencies'] as YamlMap?)?[packageName];
+      Object? constraint = (pubspec['dependencies'] as YamlMap?)?[packageName];
       constraint ??= (pubspec['dev_dependencies'] as YamlMap?)?[packageName];
 
       if (constraint is YamlMap) {
         // We don't need to parse SDK constraints
         if (constraint.containsKey('sdk')) {
-          print('skipping $dependee because its constraint is $constraint');
+          //print('skipping $dependee because its constraint is $constraint'); // TODO
           continue;
         }
         throw StateError('Unrecognized constraint $constraint');
