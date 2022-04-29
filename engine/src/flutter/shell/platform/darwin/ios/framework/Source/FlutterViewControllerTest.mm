@@ -939,6 +939,9 @@ typedef enum UIAccessibilityContrast : NSInteger {
   FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
                                                                         nibName:nil
                                                                          bundle:nil];
+  id flutterViewControllerClassMOCK = OCMClassMock([FlutterViewController class]);
+  [[[flutterViewControllerClassMOCK stub] andReturnValue:@YES] isUIAccessibilityIsVoiceOverRunning];
+
   XCTAssertFalse(realVC.view.accessibilityElementsHidden);
   [[NSNotificationCenter defaultCenter]
       postNotificationName:UIApplicationWillResignActiveNotification
@@ -949,6 +952,32 @@ typedef enum UIAccessibilityContrast : NSInteger {
                     object:nil];
   XCTAssertFalse(realVC.view.accessibilityElementsHidden);
   engine.viewController = nil;
+
+  [flutterViewControllerClassMOCK stopMocking];
+}
+
+- (void)testDontHideA11yElementsWhenVoiceOverIsOff {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id flutterViewControllerClassMOCK = OCMClassMock([FlutterViewController class]);
+  [[[flutterViewControllerClassMOCK stub] andReturnValue:@NO] isUIAccessibilityIsVoiceOverRunning];
+
+  XCTAssertFalse(realVC.view.accessibilityElementsHidden);
+  [[NSNotificationCenter defaultCenter]
+      postNotificationName:UIApplicationWillResignActiveNotification
+                    object:nil];
+  XCTAssertFalse(realVC.view.accessibilityElementsHidden);
+  [[NSNotificationCenter defaultCenter]
+      postNotificationName:UIApplicationDidBecomeActiveNotification
+                    object:nil];
+  XCTAssertFalse(realVC.view.accessibilityElementsHidden);
+  engine.viewController = nil;
+
+  [flutterViewControllerClassMOCK stopMocking];
 }
 
 - (void)testNotifyLowMemory {
