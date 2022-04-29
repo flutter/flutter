@@ -303,6 +303,8 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (newDep != null) {
         if (dep.version != newDep.version) {
           throw Exception('old: ${dep.version} => new: ${newDep.version}');
+        } else {
+          print('old: ${dep.version} => new: ${newDep.version}');
         }
       }
     }
@@ -815,15 +817,12 @@ class PubspecYaml {
   /// pubspec.yaml and parse it into a line-by-line form.
   factory PubspecYaml(Directory directory) {
     final File file = _pubspecFor(directory);
-    final File lockFile = _pubspecLockFor(directory);
-    return _parse(file, lockFile);
+    return _parse(file);
   }
 
-  PubspecYaml._(this.file, this.name, this.version, this.inputData,
-      this.checksum, this.lockFile);
+  PubspecYaml._(this.file, this.name, this.version, this.inputData, this.checksum);
 
   final File file; // The actual pubspec.yaml file.
-  final PubspecLock lockFile; // The pubspec.lock file.
 
   /// The package name.
   final String name;
@@ -845,7 +844,7 @@ class PubspecYaml {
   /// objects). We don't just use a YAML parser because we care about comments
   /// and also because we can just define the style of pubspec.yaml files we care
   /// about (since they're all under our control).
-  static PubspecYaml _parse(File file, File lockFile) {
+  static PubspecYaml _parse(File file) {
     final List<String> lines = file.readAsLinesSync();
     final String filename = file.path;
     String? packageName;
@@ -1006,7 +1005,7 @@ class PubspecYaml {
       }
     }
     return PubspecYaml._(file, packageName!, packageVersion, result,
-        checksum ?? PubspecChecksum(null, ''), PubspecLock.parseFile(lockFile));
+        checksum ?? PubspecChecksum(null, ''));
   }
 
   /// This returns all the explicit dependencies that this pubspec.yaml lists under dependencies.
@@ -1592,12 +1591,6 @@ class PubspecDependency extends PubspecLine {
 File _pubspecFor(Directory directory) {
   return directory.fileSystem
       .file(directory.fileSystem.path.join(directory.path, 'pubspec.yaml'));
-}
-
-/// Generates the File object for the pubspec.yaml file of a given Directory.
-File _pubspecLockFor(Directory directory) {
-  return directory.fileSystem
-      .file(directory.fileSystem.path.join(directory.path, 'pubspec.lock'));
 }
 
 /// Generates the source of a fake pubspec.yaml file given a list of
