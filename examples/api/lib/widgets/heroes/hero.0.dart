@@ -38,7 +38,7 @@ class HeroExample extends StatelessWidget {
         ListTile(
           leading: Hero(
             tag: 'hero-rectangle',
-            child: _blueBox(const Size(50, 50)),
+            child: _box(const Size(50, 50)),
           ),
           onTap: () => _gotoDetailsPage(context),
           title: const Text(
@@ -49,7 +49,7 @@ class HeroExample extends StatelessWidget {
     );
   }
 
-  Widget _blueBox(Size size) {
+  Widget _box(Size size) {
     return Container(
       width: size.width,
       height: size.height,
@@ -69,7 +69,7 @@ class HeroExample extends StatelessWidget {
             children: <Widget>[
               Hero(
                 tag: 'hero-rectangle',
-                child: _blueBox(const Size(200, 200)),
+                child: _box(const Size(200, 200)),
               ),
             ],
           ),

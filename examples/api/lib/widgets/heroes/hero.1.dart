@@ -35,16 +35,14 @@ class HeroExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ListTile(
           leading: Hero(
             tag: 'hero-default-tween',
-            child: _blueRectangle(size: 50.0, color: Colors.red[700]!.withOpacity(0.5)),
+            child: _box(size: 50.0, color: Colors.red[700]!.withOpacity(0.5)),
           ),
-          onTap: () => _gotoDetailsPage(context),
           title: const Text(
-            'Tap on the icon to view hero flight animation with default rect tween',
+            'This red icon will use a default rect tween during the hero flight.',
           ),
         ),
         const SizedBox(height: 10.0),
@@ -54,21 +52,24 @@ class HeroExample extends StatelessWidget {
             createRectTween: (Rect? begin, Rect? end) {
               return MaterialRectCenterArcTween(begin: begin, end: end);
             },
-            child: _blueRectangle(size: 50.0, color: Colors.blue[700]!.withOpacity(0.5)),
+            child: _box(size: 50.0, color: Colors.blue[700]!.withOpacity(0.5)),
           ),
-          onTap: () => _gotoDetailsPage(context),
           title: const Text(
-              'Tap on the icon to view hero flight animation with custom rect tween'),
+            'This blue icon will use a custom rect tween during the hero flight.',
+          ),
+        ),
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () => _gotoDetailsPage(context),
+          child: const Text('Tap to trigger hero flight'),
         ),
       ],
     );
   }
 
-  Widget _blueRectangle({double? size, Color? color}) {
+  Widget _box({double? size, Color? color}) {
     return Container(
-      decoration: BoxDecoration(
-        color: color,
-      ),
+      color: color,
       child: FlutterLogo(size: size),
     );
   }
@@ -88,11 +89,17 @@ class HeroExample extends StatelessWidget {
                 createRectTween: (Rect? begin, Rect? end) {
                   return MaterialRectCenterArcTween(begin: begin, end: end);
                 },
-                child: _blueRectangle(size: 400.0, color: Colors.blue[700]!.withOpacity(0.5)),
+                child: _box(
+                  size: 400.0,
+                  color: Colors.blue[700]!.withOpacity(0.5),
+                ),
               ),
               Hero(
                 tag: 'hero-default-tween',
-                child: _blueRectangle(size: 400.0, color: Colors.red[700]!.withOpacity(0.5)),
+                child: _box(
+                  size: 400.0,
+                  color: Colors.red[700]!.withOpacity(0.5),
+                ),
               ),
             ],
           ),

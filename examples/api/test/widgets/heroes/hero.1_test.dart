@@ -13,7 +13,7 @@ void main() {
     );
 
     expect(find.text('Hero Sample'), findsOneWidget);
-    await tester.tap(find.byType(Container).first);
+    await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
 
     Size heroSize = tester.getSize(find.byType(Container).first);
@@ -76,7 +76,7 @@ void main() {
     );
 
     expect(find.text('Hero Sample'), findsOneWidget);
-    await tester.tap(find.byType(Container).last);
+    await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
 
     Size heroSize = tester.getSize(find.byType(Container).last);
