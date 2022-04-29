@@ -25,9 +25,6 @@ class ProjectValidatorResult {
 
   @override
   String toString() {
-    if (status == StatusProjectValidator.error) {
-      return 'Error: $value';
-    }
     if (warning != null) {
       return '$name: $value (warning: $warning)';
     }

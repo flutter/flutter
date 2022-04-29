@@ -40,7 +40,7 @@ class ProjectValidatorSecondDummy extends ProjectValidator {
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async{
     return <ProjectValidatorResult>[
       const ProjectValidatorResult(name: 'second', value: 'pass', status: StatusProjectValidator.success),
-      const ProjectValidatorResult(name: 'second fail', value: 'second fail', status: StatusProjectValidator.error),
+      const ProjectValidatorResult(name: 'other fail', value: 'second fail', status: StatusProjectValidator.error),
     ];
   }
 
@@ -93,11 +93,13 @@ void main() {
 
       const String expected = '\n'
           '┌──────────────────────────────────────────┐\n'
+          '│ First Dummy                              │\n'
           '│ [✓] pass: value                          │\n'
-          '│ [✗] Error: my error                      │\n'
+          '│ [✗] fail: my error                       │\n'
           '│ [!] pass two: pass (warning: my warning) │\n'
+          '│ Second Dummy                             │\n'
           '│ [✓] second: pass                         │\n'
-          '│ [✗] Error: second fail                   │\n'
+          '│ [✗] other fail: second fail              │\n'
           '└──────────────────────────────────────────┘\n';
 
       expect(loggerTest.statusText, contains(expected));

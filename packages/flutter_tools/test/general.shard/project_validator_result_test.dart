@@ -74,7 +74,7 @@ void main() {
         value: 'my error',
         status: StatusProjectValidator.error,
       );
-      expect(result.toString(), 'Error: my error');
+      expect(result.toString(), 'name: my error');
       expect(result.status, StatusProjectValidator.error);
     });
   });
@@ -91,7 +91,7 @@ void main() {
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       final List<ProjectValidatorResult> results = await task.start(project);
       expect(results.length, 3);
-      expect(results[0].toString(), 'Error: this is an error');
+      expect(results[0].toString(), 'result_1: this is an error');
       expect(results[1].toString(), 'result_2: correct');
       expect(results[2].toString(), 'result_3: this passed (warning: with a warning)');
     });

@@ -37,39 +37,42 @@ class ValidateProjectCommand extends FlutterCommand {
     final Directory workingDirectory = userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
 
     final FlutterProject project =  FlutterProject.fromDirectory(workingDirectory);
-    final List<Future<List<ProjectValidatorResult>>> results = <Future<List<ProjectValidatorResult>>>[];
-    final Set<ProjectValidator> ranValidators = <ProjectValidator>{};
+    final Map<ProjectValidator, Future<List<ProjectValidatorResult>>> results = <ProjectValidator, Future<List<ProjectValidatorResult>>>{};
 
     bool hasCrash = false;
     for (final ProjectValidator validator in allProjectValidators) {
-      if (!ranValidators.contains(validator) && validator.supportsProject(project)) {
-          results.add(validator.start(project).catchError((Object exception, StackTrace trace) {
-            hasCrash = true;
-            return <ProjectValidatorResult>[ProjectValidatorResult.crash(exception, trace)];
-          }));
-        ranValidators.add(validator);
+      if (!results.containsKey(validator) && validator.supportsProject(project)) {
+        results[validator] = validator.start(project).catchError((Object exception, StackTrace trace) {
+          hasCrash = true;
+          return <ProjectValidatorResult>[ProjectValidatorResult.crash(exception, trace)];
+        });
       }
     }
 
-    printResults(await Future.wait(results));
+    final StringBuffer buffer = StringBuffer();
+    final List<String> resultsString = <String>[];
+    for (final ProjectValidator validator in results.keys) {
+      if (results[validator] != null) {
+        resultsString.add(validator.title);
+        addResultString(validator.title, await results[validator], resultsString);
+      }
+    }
+    buffer.writeAll(resultsString, '\n');
+    logger.printBox(buffer.toString());
+
     if (hasCrash) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
     return const FlutterCommandResult(ExitStatus.success);
   }
 
-  void printResults(final List<List<ProjectValidatorResult>> futureResults) {
-    final StringBuffer buffer = StringBuffer();
-    final List<String> resultsString = <String>[];
 
-    for (final List<ProjectValidatorResult> resultList in futureResults) {
-      for (final ProjectValidatorResult result in resultList) {
+  void addResultString(final String title, final List<ProjectValidatorResult>? results, final List<String> resultsString) {
+    if (results != null) {
+      for (final ProjectValidatorResult result in results) {
         resultsString.add(getStringResult(result));
       }
     }
-
-    buffer.writeAll(resultsString, '\n');
-    logger.printBox(buffer.toString());
   }
 
   String getStringResult(ProjectValidatorResult result) {
