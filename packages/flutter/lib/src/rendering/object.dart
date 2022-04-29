@@ -707,7 +707,7 @@ class PaintingContext extends ClipContext {
     if (alpha == 0) {
       return null;
     }
-    if (alpha == 255 || debugDisableOpacityLayers) {
+    if (alpha == 255) {
       painter(this, offset);
       return null;
     }
@@ -718,6 +718,13 @@ class PaintingContext extends ClipContext {
         ..offset = offset;
       pushLayer(layer, painter, Offset.zero);
       return layer;
+    }
+
+    if (!kReleaseMode) {
+      if (debugDisableOpacityLayers) {
+        painter(this, offset);
+        return null;
+      }
     }
     canvas.saveLayer(offset & size, Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
     painter(this, offset);
