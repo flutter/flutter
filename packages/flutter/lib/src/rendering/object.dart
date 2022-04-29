@@ -714,7 +714,9 @@ class PaintingContext extends ClipContext {
       painter(this, offset);
       return null;
     }
-    if (needsCompositing) {
+    // Due to https://github.com/flutter/flutter/issues/48417 this will always need to be
+    // composited on the web.
+    if (needsCompositing || kIsWeb) {
       final OpacityLayer layer = oldLayer ?? OpacityLayer();
       layer
         ..alpha = alpha
