@@ -70,7 +70,7 @@ class DisplayListGLComplexityCalculator
                       SkScalar x,
                       SkScalar y) override;
     void drawShadow(const SkPath& path,
-                    const SkColor color,
+                    const DlColor color,
                     const SkScalar elevation,
                     bool transparent_occluder,
                     SkScalar dpr) override;

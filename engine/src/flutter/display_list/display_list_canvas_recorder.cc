@@ -200,7 +200,8 @@ void DisplayListCanvasRecorder::onDrawAtlas2(const SkImage* image,
   if (paint != nullptr) {
     builder_->setAttributesFromPaint(*paint, kDrawAtlasWithPaintFlags);
   }
-  builder_->drawAtlas(DlImage::Make(image), xform, src, colors, count,
+  const DlColor* dl_colors = reinterpret_cast<const DlColor*>(colors);
+  builder_->drawAtlas(DlImage::Make(image), xform, src, dl_colors, count,
                       ToDl(mode), sampling, cull, paint != nullptr);
 }
 

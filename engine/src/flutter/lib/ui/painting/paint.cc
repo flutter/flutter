@@ -267,7 +267,7 @@ bool Paint::sync_to(DisplayListBuilder* builder,
 
   if (flags.applies_style()) {
     uint32_t style = uint_data[kStyleIndex];
-    builder->setStyle(static_cast<SkPaint::Style>(style));
+    builder->setStyle(static_cast<DlDrawStyle>(style));
   }
 
   if (flags.is_stroked(builder->getStyle())) {
@@ -278,10 +278,10 @@ bool Paint::sync_to(DisplayListBuilder* builder,
     builder->setStrokeMiter(stroke_miter_limit + kStrokeMiterLimitDefault);
 
     uint32_t stroke_cap = uint_data[kStrokeCapIndex];
-    builder->setStrokeCap(static_cast<SkPaint::Cap>(stroke_cap));
+    builder->setStrokeCap(static_cast<DlStrokeCap>(stroke_cap));
 
     uint32_t stroke_join = uint_data[kStrokeJoinIndex];
-    builder->setStrokeJoin(static_cast<SkPaint::Join>(stroke_join));
+    builder->setStrokeJoin(static_cast<DlStrokeJoin>(stroke_join));
   }
 
   if (flags.applies_color_filter()) {

@@ -18,6 +18,7 @@ source_set("display_list") {
     "display_list_canvas_dispatcher.h",
     "display_list_canvas_recorder.cc",
     "display_list_canvas_recorder.h",
+    "display_list_color.h",
     "display_list_color_filter.cc",
     "display_list_color_filter.h",
     "display_list_color_source.cc",
@@ -86,6 +87,7 @@ if (enable_unittests) {
     sources = [
       "display_list_color_filter_unittests.cc",
       "display_list_color_source_unittests.cc",
+      "display_list_color_unittests.cc",
       "display_list_complexity_unittests.cc",
       "display_list_enum_unittests.cc",
       "display_list_image_filter_unittests.cc",

@@ -28,10 +28,10 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void setDither(bool dither) override;
 
   // |flutter::Dispatcher|
-  void setStyle(SkPaint::Style style) override;
+  void setStyle(flutter::DlDrawStyle style) override;
 
   // |flutter::Dispatcher|
-  void setColor(SkColor color) override;
+  void setColor(flutter::DlColor color) override;
 
   // |flutter::Dispatcher|
   void setStrokeWidth(SkScalar width) override;
@@ -40,10 +40,10 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void setStrokeMiter(SkScalar limit) override;
 
   // |flutter::Dispatcher|
-  void setStrokeCap(SkPaint::Cap cap) override;
+  void setStrokeCap(flutter::DlStrokeCap cap) override;
 
   // |flutter::Dispatcher|
-  void setStrokeJoin(SkPaint::Join join) override;
+  void setStrokeJoin(flutter::DlStrokeJoin join) override;
 
   // |flutter::Dispatcher|
   void setColorSource(const flutter::DlColorSource* source) override;
@@ -130,7 +130,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
 
   // |flutter::Dispatcher|
-  void drawColor(SkColor color, flutter::DlBlendMode mode) override;
+  void drawColor(flutter::DlColor color, flutter::DlBlendMode mode) override;
 
   // |flutter::Dispatcher|
   void drawPaint() override;
@@ -207,7 +207,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void drawAtlas(const sk_sp<flutter::DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
-                 const SkColor colors[],
+                 const flutter::DlColor colors[],
                  int count,
                  flutter::DlBlendMode mode,
                  const SkSamplingOptions& sampling,
@@ -229,7 +229,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
 
   // |flutter::Dispatcher|
   void drawShadow(const SkPath& path,
-                  const SkColor color,
+                  const flutter::DlColor color,
                   const SkScalar elevation,
                   bool transparent_occluder,
                   SkScalar dpr) override;

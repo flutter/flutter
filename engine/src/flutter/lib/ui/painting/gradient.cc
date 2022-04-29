@@ -60,8 +60,7 @@ void CanvasGradient::initLinear(const tonic::Float32List& end_points,
 
   SkPoint p0 = SkPoint::Make(end_points[0], end_points[1]);
   SkPoint p1 = SkPoint::Make(end_points[2], end_points[3]);
-  const uint32_t* colors_array =
-      reinterpret_cast<const uint32_t*>(colors.data());
+  const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeLinear(
       p0, p1, colors.num_elements(), colors_array, color_stops.data(),
@@ -87,8 +86,7 @@ void CanvasGradient::initRadial(double center_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  const uint32_t* colors_array =
-      reinterpret_cast<const uint32_t*>(colors.data());
+  const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeRadial(
       SkPoint::Make(center_x, center_y), radius, colors.num_elements(),
@@ -116,8 +114,7 @@ void CanvasGradient::initSweep(double center_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  const uint32_t* colors_array =
-      reinterpret_cast<const uint32_t*>(colors.data());
+  const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeSweep(
       SkPoint::Make(center_x, center_y), start_angle * 180.0 / M_PI,
@@ -147,8 +144,7 @@ void CanvasGradient::initTwoPointConical(double start_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  const uint32_t* colors_array =
-      reinterpret_cast<const uint32_t*>(colors.data());
+  const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeConical(
       SkPoint::Make(start_x, start_y), start_radius,            //

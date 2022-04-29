@@ -124,7 +124,7 @@ TEST(DisplayListImageFilter, FromSkiaColorFilterImageFilter) {
   sk_sp<SkImageFilter> sk_image_filter =
       SkImageFilters::ColorFilter(sk_color_filter, nullptr);
   std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
-  DlBlendColorFilter dl_color_filter(SK_ColorRED, SkBlendMode::kSrcIn);
+  DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcIn);
   DlColorFilterImageFilter dl_image_filter(dl_color_filter.shared());
 
   ASSERT_EQ(filter->type(), DlImageFilterType::kColorFilter);
@@ -414,19 +414,19 @@ TEST(DisplayListImageFilter, ComposeNotEquals) {
 }
 
 TEST(DisplayListImageFilter, ColorFilterConstructor) {
-  DlBlendColorFilter dl_color_filter(SK_ColorRED, SkBlendMode::kLighten);
+  DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter(dl_color_filter);
 }
 
 TEST(DisplayListImageFilter, ColorFilterShared) {
-  DlBlendColorFilter dl_color_filter(SK_ColorRED, SkBlendMode::kLighten);
+  DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter(dl_color_filter);
 
   ASSERT_EQ(*filter.shared(), filter);
 }
 
 TEST(DisplayListImageFilter, ColorFilterAsColorFilter) {
-  DlBlendColorFilter dl_color_filter(SK_ColorRED, SkBlendMode::kLighten);
+  DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter(dl_color_filter);
 
   ASSERT_NE(filter.asColorFilter(), nullptr);
@@ -434,30 +434,30 @@ TEST(DisplayListImageFilter, ColorFilterAsColorFilter) {
 }
 
 TEST(DisplayListImageFilter, ColorFilterContents) {
-  DlBlendColorFilter dl_color_filter(SK_ColorRED, SkBlendMode::kLighten);
+  DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter(dl_color_filter);
 
   ASSERT_EQ(*filter.color_filter().get(), dl_color_filter);
 }
 
 TEST(DisplayListImageFilter, ColorFilterEquals) {
-  DlBlendColorFilter dl_color_filter1(SK_ColorRED, SkBlendMode::kLighten);
+  DlBlendColorFilter dl_color_filter1(DlColor::kRed(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter1(dl_color_filter1);
 
-  DlBlendColorFilter dl_color_filter2(SK_ColorRED, SkBlendMode::kLighten);
+  DlBlendColorFilter dl_color_filter2(DlColor::kRed(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter2(dl_color_filter2);
 
   TestEquals(filter1, filter2);
 }
 
 TEST(DisplayListImageFilter, ColorFilterNotEquals) {
-  DlBlendColorFilter dl_color_filter1(SK_ColorRED, SkBlendMode::kLighten);
+  DlBlendColorFilter dl_color_filter1(DlColor::kRed(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter1(dl_color_filter1);
 
-  DlBlendColorFilter dl_color_filter2(SK_ColorBLUE, SkBlendMode::kLighten);
+  DlBlendColorFilter dl_color_filter2(DlColor::kBlue(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter2(dl_color_filter2);
 
-  DlBlendColorFilter dl_color_filter3(SK_ColorRED, SkBlendMode::kDarken);
+  DlBlendColorFilter dl_color_filter3(DlColor::kRed(), DlBlendMode::kDarken);
   DlColorFilterImageFilter filter3(dl_color_filter3);
 
   TestNotEquals(filter1, filter2, "Color differs");

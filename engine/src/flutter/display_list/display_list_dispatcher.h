@@ -12,6 +12,7 @@
 #include "flutter/display_list/display_list_image.h"
 #include "flutter/display_list/display_list_image_filter.h"
 #include "flutter/display_list/display_list_mask_filter.h"
+#include "flutter/display_list/display_list_paint.h"
 #include "flutter/display_list/display_list_vertices.h"
 
 namespace flutter {
@@ -36,12 +37,12 @@ class Dispatcher {
   // attributes is not affected by |save| and |restore|.
   virtual void setAntiAlias(bool aa) = 0;
   virtual void setDither(bool dither) = 0;
-  virtual void setStyle(SkPaint::Style style) = 0;
-  virtual void setColor(SkColor color) = 0;
-  virtual void setStrokeWidth(SkScalar width) = 0;
-  virtual void setStrokeMiter(SkScalar limit) = 0;
-  virtual void setStrokeCap(SkPaint::Cap cap) = 0;
-  virtual void setStrokeJoin(SkPaint::Join join) = 0;
+  virtual void setStyle(DlDrawStyle style) = 0;
+  virtual void setColor(DlColor color) = 0;
+  virtual void setStrokeWidth(float width) = 0;
+  virtual void setStrokeMiter(float limit) = 0;
+  virtual void setStrokeCap(DlStrokeCap cap) = 0;
+  virtual void setStrokeJoin(DlStrokeJoin join) = 0;
   virtual void setColorSource(const DlColorSource* source) = 0;
   virtual void setColorFilter(const DlColorFilter* filter) = 0;
   // setInvertColors does not exist in SkPaint, but is a quick way to set
@@ -190,7 +191,7 @@ class Dispatcher {
   // method, the methods here will generally offer a boolean parameter
   // which specifies whether to honor the attributes of the display list
   // stream, or assume default attributes.
-  virtual void drawColor(SkColor color, DlBlendMode mode) = 0;
+  virtual void drawColor(DlColor color, DlBlendMode mode) = 0;
   virtual void drawPaint() = 0;
   virtual void drawLine(const SkPoint& p0, const SkPoint& p1) = 0;
   virtual void drawRect(const SkRect& rect) = 0;
@@ -232,7 +233,7 @@ class Dispatcher {
   virtual void drawAtlas(const sk_sp<DlImage> atlas,
                          const SkRSXform xform[],
                          const SkRect tex[],
-                         const SkColor colors[],
+                         const DlColor colors[],
                          int count,
                          DlBlendMode mode,
                          const SkSamplingOptions& sampling,
@@ -246,7 +247,7 @@ class Dispatcher {
                             SkScalar x,
                             SkScalar y) = 0;
   virtual void drawShadow(const SkPath& path,
-                          const SkColor color,
+                          const DlColor color,
                           const SkScalar elevation,
                           bool transparent_occluder,
                           SkScalar dpr) = 0;

@@ -283,7 +283,7 @@ void Canvas::drawPaint(const Paint& paint, const PaintData& paint_data) {
   FML_DCHECK(paint.isNotNull());
   if (display_list_recorder_) {
     paint.sync_to(builder(), kDrawPaintFlags);
-    std::shared_ptr<DlImageFilter> filter = builder()->getImageFilter();
+    std::shared_ptr<const DlImageFilter> filter = builder()->getImageFilter();
     if (filter && !filter->asColorFilter()) {
       // drawPaint does an implicit saveLayer if an SkImageFilter is
       // present that cannot be replaced by an SkColorFilter.
@@ -646,7 +646,7 @@ void Canvas::drawAtlas(const Paint& paint,
     builder()->drawAtlas(
         dl_image, reinterpret_cast<const SkRSXform*>(transforms.data()),
         reinterpret_cast<const SkRect*>(rects.data()),
-        reinterpret_cast<const SkColor*>(colors.data()),
+        reinterpret_cast<const DlColor*>(colors.data()),
         rects.num_elements() / 4,  // SkRect have four floats.
         blend_mode, sampling, reinterpret_cast<const SkRect*>(cull_rect.data()),
         with_attributes);

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_FLAGS_H_
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_FLAGS_H_
 
+#include "flutter/display_list/display_list_paint.h"
 #include "flutter/display_list/types.h"
 #include "flutter/fml/logging.h"
 
@@ -216,10 +217,9 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
 
   bool is_geometric() const { return has_any(kIsAnyGeometryMask_); }
   bool always_stroked() const { return has_any(kIsStrokedGeometry_); }
-  bool is_stroked(SkPaint::Style style = SkPaint::Style::kStroke_Style) const {
-    return (
-        has_any(kIsStrokedGeometry_) ||
-        (style != SkPaint::Style::kFill_Style && has_any(kIsDrawnGeometry_)));
+  bool is_stroked(DlDrawStyle style = DlDrawStyle::kStroke) const {
+    return (has_any(kIsStrokedGeometry_) ||
+            (style != DlDrawStyle::kFill && has_any(kIsDrawnGeometry_)));
   }
 
   bool is_flood() const { return has_any(kFloodsSurface_); }

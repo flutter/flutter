@@ -33,13 +33,13 @@ void DisplayListDispatcher::setAntiAlias(bool aa) {
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setDither(bool dither) {}
 
-static Paint::Style ToStyle(SkPaint::Style style) {
+static Paint::Style ToStyle(flutter::DlDrawStyle style) {
   switch (style) {
-    case SkPaint::kFill_Style:
+    case flutter::DlDrawStyle::kFill:
       return Paint::Style::kFill;
-    case SkPaint::kStroke_Style:
+    case flutter::DlDrawStyle::kStroke:
       return Paint::Style::kStroke;
-    case SkPaint::kStrokeAndFill_Style:
+    case flutter::DlDrawStyle::kStrokeAndFill:
       UNIMPLEMENTED;
       break;
   }
@@ -47,17 +47,17 @@ static Paint::Style ToStyle(SkPaint::Style style) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setStyle(SkPaint::Style style) {
+void DisplayListDispatcher::setStyle(flutter::DlDrawStyle style) {
   paint_.style = ToStyle(style);
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setColor(SkColor color) {
+void DisplayListDispatcher::setColor(flutter::DlColor color) {
   paint_.color = {
-      SkColorGetR(color) / 255.0f,  // red
-      SkColorGetG(color) / 255.0f,  // green
-      SkColorGetB(color) / 255.0f,  // blue
-      SkColorGetA(color) / 255.0f   // alpha
+      color.getRedF(),
+      color.getGreenF(),
+      color.getBlueF(),
+      color.getAlphaF(),
   };
 }
 
@@ -72,30 +72,30 @@ void DisplayListDispatcher::setStrokeMiter(SkScalar limit) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setStrokeCap(SkPaint::Cap cap) {
+void DisplayListDispatcher::setStrokeCap(flutter::DlStrokeCap cap) {
   switch (cap) {
-    case SkPaint::kButt_Cap:
+    case flutter::DlStrokeCap::kButt:
       paint_.stroke_cap = SolidStrokeContents::Cap::kButt;
       break;
-    case SkPaint::kRound_Cap:
+    case flutter::DlStrokeCap::kRound:
       paint_.stroke_cap = SolidStrokeContents::Cap::kRound;
       break;
-    case SkPaint::kSquare_Cap:
+    case flutter::DlStrokeCap::kSquare:
       paint_.stroke_cap = SolidStrokeContents::Cap::kSquare;
       break;
   }
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setStrokeJoin(SkPaint::Join join) {
+void DisplayListDispatcher::setStrokeJoin(flutter::DlStrokeJoin join) {
   switch (join) {
-    case SkPaint::kMiter_Join:
+    case flutter::DlStrokeJoin::kMiter:
       paint_.stroke_join = SolidStrokeContents::Join::kMiter;
       break;
-    case SkPaint::kRound_Join:
+    case flutter::DlStrokeJoin::kRound:
       paint_.stroke_join = SolidStrokeContents::Join::kRound;
       break;
-    case SkPaint::kBevel_Join:
+    case flutter::DlStrokeJoin::kBevel:
       paint_.stroke_join = SolidStrokeContents::Join::kBevel;
       break;
   }
@@ -501,7 +501,7 @@ void DisplayListDispatcher::clipPath(const SkPath& path,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawColor(SkColor color,
+void DisplayListDispatcher::drawColor(flutter::DlColor color,
                                       flutter::DlBlendMode dl_mode) {
   Paint paint;
   paint.color = ToColor(color);
@@ -682,7 +682,7 @@ void DisplayListDispatcher::drawImageLattice(
 void DisplayListDispatcher::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                                       const SkRSXform xform[],
                                       const SkRect tex[],
-                                      const SkColor colors[],
+                                      const flutter::DlColor colors[],
                                       int count,
                                       flutter::DlBlendMode mode,
                                       const SkSamplingOptions& sampling,
@@ -724,7 +724,7 @@ void DisplayListDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawShadow(const SkPath& path,
-                                       const SkColor color,
+                                       const flutter::DlColor color,
                                        const SkScalar elevation,
                                        bool transparent_occluder,
                                        SkScalar dpr) {

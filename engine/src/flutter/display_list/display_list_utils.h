@@ -47,12 +47,12 @@ class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
   void setAntiAlias(bool aa) override {}
   void setDither(bool dither) override {}
   void setInvertColors(bool invert) override {}
-  void setStrokeCap(SkPaint::Cap cap) override {}
-  void setStrokeJoin(SkPaint::Join join) override {}
-  void setStyle(SkPaint::Style style) override {}
-  void setStrokeWidth(SkScalar width) override {}
-  void setStrokeMiter(SkScalar limit) override {}
-  void setColor(SkColor color) override {}
+  void setStrokeCap(DlStrokeCap cap) override {}
+  void setStrokeJoin(DlStrokeJoin join) override {}
+  void setStyle(DlDrawStyle style) override {}
+  void setStrokeWidth(float width) override {}
+  void setStrokeMiter(float limit) override {}
+  void setColor(DlColor color) override {}
   void setBlendMode(DlBlendMode mode) override {}
   void setBlender(sk_sp<SkBlender> blender) override {}
   void setColorSource(const DlColorSource* source) override {}
@@ -98,7 +98,7 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
   void saveLayer(const SkRect* bounds,
                  const SaveLayerOptions options) override {}
   void restore() override {}
-  void drawColor(SkColor color, DlBlendMode mode) override {}
+  void drawColor(DlColor color, DlBlendMode mode) override {}
   void drawPaint() override {}
   void drawLine(const SkPoint& p0, const SkPoint& p1) override {}
   void drawRect(const SkRect& rect) override {}
@@ -140,7 +140,7 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
-                 const SkColor colors[],
+                 const DlColor colors[],
                  int count,
                  DlBlendMode mode,
                  const SkSamplingOptions& sampling,
@@ -154,7 +154,7 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
                     SkScalar x,
                     SkScalar y) override {}
   void drawShadow(const SkPath& path,
-                  const SkColor color,
+                  const DlColor color,
                   const SkScalar elevation,
                   bool transparent_occluder,
                   SkScalar dpr) override {}
@@ -174,12 +174,12 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
 
   void setAntiAlias(bool aa) override;
   void setDither(bool dither) override;
-  void setStyle(SkPaint::Style style) override;
-  void setColor(SkColor color) override;
+  void setStyle(DlDrawStyle style) override;
+  void setColor(DlColor color) override;
   void setStrokeWidth(SkScalar width) override;
   void setStrokeMiter(SkScalar limit) override;
-  void setStrokeCap(SkPaint::Cap cap) override;
-  void setStrokeJoin(SkPaint::Join join) override;
+  void setStrokeCap(DlStrokeCap cap) override;
+  void setStrokeJoin(DlStrokeJoin join) override;
   void setColorSource(const DlColorSource* source) override;
   void setColorFilter(const DlColorFilter* filter) override;
   void setInvertColors(bool invert) override;
@@ -395,9 +395,9 @@ class DisplayListBoundsCalculator final
   // The flag should never be set if a cull_rect is provided.
   explicit DisplayListBoundsCalculator(const SkRect* cull_rect = nullptr);
 
-  void setStrokeCap(SkPaint::Cap cap) override;
-  void setStrokeJoin(SkPaint::Join join) override;
-  void setStyle(SkPaint::Style style) override;
+  void setStrokeCap(DlStrokeCap cap) override;
+  void setStrokeJoin(DlStrokeJoin join) override;
+  void setStyle(DlDrawStyle style) override;
   void setStrokeWidth(SkScalar width) override;
   void setStrokeMiter(SkScalar limit) override;
   void setBlendMode(DlBlendMode mode) override;
@@ -412,7 +412,7 @@ class DisplayListBoundsCalculator final
   void restore() override;
 
   void drawPaint() override;
-  void drawColor(SkColor color, DlBlendMode mode) override;
+  void drawColor(DlColor color, DlBlendMode mode) override;
   void drawLine(const SkPoint& p0, const SkPoint& p1) override;
   void drawRect(const SkRect& rect) override;
   void drawOval(const SkRect& bounds) override;
@@ -453,7 +453,7 @@ class DisplayListBoundsCalculator final
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
-                 const SkColor colors[],
+                 const DlColor colors[],
                  int count,
                  DlBlendMode mode,
                  const SkSamplingOptions& sampling,
@@ -467,7 +467,7 @@ class DisplayListBoundsCalculator final
                     SkScalar x,
                     SkScalar y) override;
   void drawShadow(const SkPath& path,
-                  const SkColor color,
+                  const DlColor color,
                   const SkScalar elevation,
                   bool transparent_occluder,
                   SkScalar dpr) override;
@@ -578,7 +578,7 @@ class DisplayListBoundsCalculator final
 
   SkScalar half_stroke_width_ = kMinStrokeWidth;
   SkScalar miter_limit_ = 4.0;
-  SkPaint::Style style_ = SkPaint::Style::kFill_Style;
+  DlDrawStyle style_ = DlDrawStyle::kFill;
   bool join_is_miter_ = true;
   bool cap_is_square_ = false;
   std::shared_ptr<DlImageFilter> image_filter_;

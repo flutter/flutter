@@ -131,7 +131,7 @@ void DisplayListCanvasDispatcher::drawPaint() {
   }
   canvas_->drawPaint(sk_paint);
 }
-void DisplayListCanvasDispatcher::drawColor(SkColor color, DlBlendMode mode) {
+void DisplayListCanvasDispatcher::drawColor(DlColor color, DlBlendMode mode) {
   // SkCanvas::drawColor(SkColor) does the following conversion anyway
   // We do it here manually to increase precision on applying opacity
   SkColor4f color4f = SkColor4f::FromColor(color);
@@ -234,7 +234,7 @@ void DisplayListCanvasDispatcher::drawImageLattice(
 void DisplayListCanvasDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
                                             const SkRSXform xform[],
                                             const SkRect tex[],
-                                            const SkColor colors[],
+                                            const DlColor colors[],
                                             int count,
                                             DlBlendMode mode,
                                             const SkSamplingOptions& sampling,
@@ -247,7 +247,8 @@ void DisplayListCanvasDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
   if (!skia_atlas) {
     return;
   }
-  canvas_->drawAtlas(skia_atlas.get(), xform, tex, colors, count, ToSk(mode),
+  const SkColor* sk_colors = reinterpret_cast<const SkColor*>(colors);
+  canvas_->drawAtlas(skia_atlas.get(), xform, tex, sk_colors, count, ToSk(mode),
                      sampling, cullRect, safe_paint(render_with_attributes));
 }
 void DisplayListCanvasDispatcher::drawPicture(const sk_sp<SkPicture> picture,
@@ -288,7 +289,7 @@ SkRect DisplayListCanvasDispatcher::ComputeShadowBounds(const SkPath& path,
 
 void DisplayListCanvasDispatcher::DrawShadow(SkCanvas* canvas,
                                              const SkPath& path,
-                                             SkColor color,
+                                             DlColor color,
                                              float elevation,
                                              bool transparentOccluder,
                                              SkScalar dpr) {
@@ -311,7 +312,7 @@ void DisplayListCanvasDispatcher::DrawShadow(SkCanvas* canvas,
 }
 
 void DisplayListCanvasDispatcher::drawShadow(const SkPath& path,
-                                             const SkColor color,
+                                             const DlColor color,
                                              const SkScalar elevation,
                                              bool transparent_occluder,
                                              SkScalar dpr) {

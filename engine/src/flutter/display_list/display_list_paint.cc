@@ -14,8 +14,8 @@ DlPaint::DlPaint()
       isAntiAlias_(false),
       isDither_(false),
       isInvertColors_(false),
-      strokeWidth_(0.0),
-      strokeMiter_(4.0) {}
+      strokeWidth_(kDefaultWidth),
+      strokeMiter_(kDefaultMiter) {}
 
 bool DlPaint::operator==(DlPaint const& other) const {
   return blendMode_ == other.blendMode_ &&            //

@@ -48,7 +48,7 @@ TEST_P(DisplayListTest, CanDrawImage) {
 TEST_P(DisplayListTest, CanDrawCapsAndJoins) {
   flutter::DisplayListBuilder builder;
 
-  builder.setStyle(SkPaint::Style::kStroke_Style);
+  builder.setStyle(flutter::DlDrawStyle::kStroke);
   builder.setStrokeWidth(30);
   builder.setColor(SK_ColorRED);
 
@@ -57,8 +57,8 @@ TEST_P(DisplayListTest, CanDrawCapsAndJoins) {
 
   builder.translate(100, 100);
   {
-    builder.setStrokeCap(SkPaint::Cap::kButt_Cap);
-    builder.setStrokeJoin(SkPaint::Join::kMiter_Join);
+    builder.setStrokeCap(flutter::DlStrokeCap::kButt);
+    builder.setStrokeJoin(flutter::DlStrokeJoin::kMiter);
     builder.setStrokeMiter(4);
     builder.drawPath(path);
   }
@@ -75,15 +75,15 @@ TEST_P(DisplayListTest, CanDrawCapsAndJoins) {
 
   builder.translate(150, 0);
   {
-    builder.setStrokeCap(SkPaint::Cap::kSquare_Cap);
-    builder.setStrokeJoin(SkPaint::Join::kBevel_Join);
+    builder.setStrokeCap(flutter::DlStrokeCap::kSquare);
+    builder.setStrokeJoin(flutter::DlStrokeJoin::kBevel);
     builder.drawPath(path);
   }
 
   builder.translate(150, 0);
   {
-    builder.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    builder.setStrokeJoin(SkPaint::Join::kRound_Join);
+    builder.setStrokeCap(flutter::DlStrokeCap::kRound);
+    builder.setStrokeJoin(flutter::DlStrokeJoin::kRound);
     builder.drawPath(path);
   }
 
@@ -113,9 +113,9 @@ TEST_P(DisplayListTest, CanDrawArc) {
         Point(200, 200), Point(400, 400), 20, Color::White(), Color::White());
 
     flutter::DisplayListBuilder builder;
-    builder.setStyle(SkPaint::Style::kStroke_Style);
-    builder.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    builder.setStrokeJoin(SkPaint::Join::kMiter_Join);
+    builder.setStyle(flutter::DlDrawStyle::kStroke);
+    builder.setStrokeCap(flutter::DlStrokeCap::kRound);
+    builder.setStrokeJoin(flutter::DlStrokeJoin::kMiter);
     builder.setStrokeMiter(10);
     auto rect = SkRect::MakeLTRB(p1.x, p1.y, p2.x, p2.y);
     builder.setColor(SK_ColorGREEN);
@@ -133,7 +133,7 @@ TEST_P(DisplayListTest, CanDrawArc) {
 TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
   flutter::DisplayListBuilder builder;
   builder.setColor(SK_ColorRED);
-  builder.setStyle(SkPaint::Style::kStroke_Style);
+  builder.setStyle(flutter::DlDrawStyle::kStroke);
   builder.setStrokeWidth(10);
 
   // Rectangle
@@ -162,7 +162,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
 
   // Contour with duplicate end points
   {
-    builder.setStrokeCap(SkPaint::Cap::kRound_Cap);
+    builder.setStrokeCap(flutter::DlStrokeCap::kRound);
     builder.translate(150, 0);
     SkPath path;
     path.moveTo(0, 0);

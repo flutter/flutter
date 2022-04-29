@@ -303,8 +303,8 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
   SkRect opacity_bounds;
   expected_layer_bounds.makeOffset(-layer_offset.fX, -layer_offset.fY)
       .roundOut(&opacity_bounds);
-  DlPaint save_paint = DlPaint().setColor(DlColor(alpha_half << 24));
-  DlPaint child_dl_paint = DlPaint().setColor(DlColor(SK_ColorGREEN));
+  DlPaint save_paint = DlPaint().setAlpha(alpha_half);
+  DlPaint child_dl_paint = DlPaint().setColor(DlColor::kGreen());
 
   auto expected_builder = DisplayListBuilder();
   expected_builder.save();

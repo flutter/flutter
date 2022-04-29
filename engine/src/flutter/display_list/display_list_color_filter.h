@@ -6,6 +6,8 @@
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_COLOR_FILTER_H_
 
 #include "flutter/display_list/display_list_attributes.h"
+#include "flutter/display_list/display_list_blend_mode.h"
+#include "flutter/display_list/display_list_color.h"
 #include "flutter/display_list/types.h"
 #include "flutter/fml/logging.h"
 
@@ -75,7 +77,7 @@ class DlColorFilter
 // filter is then used to combine those colors.
 class DlBlendColorFilter final : public DlColorFilter {
  public:
-  DlBlendColorFilter(SkColor color, SkBlendMode mode)
+  DlBlendColorFilter(DlColor color, DlBlendMode mode)
       : color_(color), mode_(mode) {}
   DlBlendColorFilter(const DlBlendColorFilter& filter)
       : DlBlendColorFilter(filter.color_, filter.mode_) {}
@@ -96,13 +98,13 @@ class DlBlendColorFilter final : public DlColorFilter {
   }
 
   sk_sp<SkColorFilter> skia_object() const override {
-    return SkColorFilters::Blend(color_, mode_);
+    return SkColorFilters::Blend(color_, ToSk(mode_));
   }
 
   const DlBlendColorFilter* asBlend() const override { return this; }
 
-  SkColor color() const { return color_; }
-  SkBlendMode mode() const { return mode_; }
+  DlColor color() const { return color_; }
+  DlBlendMode mode() const { return mode_; }
 
  protected:
   bool equals_(DlColorFilter const& other) const override {
@@ -112,8 +114,8 @@ class DlBlendColorFilter final : public DlColorFilter {
   }
 
  private:
-  SkColor color_;
-  SkBlendMode mode_;
+  DlColor color_;
+  DlBlendMode mode_;
 };
 
 // The Matrix type of ColorFilter which runs every pixel drawn by

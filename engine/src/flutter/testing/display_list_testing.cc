@@ -169,31 +169,31 @@ static std::ostream& operator<<(std::ostream& os, const SkClipOp& op) {
   }
 }
 
-static std::ostream& operator<<(std::ostream& os, const SkPaint::Cap& cap) {
+static std::ostream& operator<<(std::ostream& os, const DlStrokeCap& cap) {
   switch (cap) {
-    case SkPaint::kButt_Cap:   return os << "Cap::kButt";
-    case SkPaint::kRound_Cap:  return os << "Cap::kRound";
-    case SkPaint::kSquare_Cap: return os << "Cap::kSquare";
+    case DlStrokeCap::kButt:   return os << "Cap::kButt";
+    case DlStrokeCap::kRound:  return os << "Cap::kRound";
+    case DlStrokeCap::kSquare: return os << "Cap::kSquare";
 
     default: return os << "Cap::????";
   }
 }
 
-static std::ostream& operator<<(std::ostream& os, const SkPaint::Join& join) {
+static std::ostream& operator<<(std::ostream& os, const DlStrokeJoin& join) {
   switch (join) {
-    case SkPaint::kMiter_Join: return os << "Join::kMiter";
-    case SkPaint::kRound_Join: return os << "Join::kRound";
-    case SkPaint::kBevel_Join: return os << "Join::kBevel";
+    case DlStrokeJoin::kMiter: return os << "Join::kMiter";
+    case DlStrokeJoin::kRound: return os << "Join::kRound";
+    case DlStrokeJoin::kBevel: return os << "Join::kBevel";
 
     default: return os << "Join::????";
   }
 }
 
-static std::ostream& operator<<(std::ostream& os, const SkPaint::Style& style) {
+static std::ostream& operator<<(std::ostream& os, const DlDrawStyle& style) {
   switch (style) {
-    case SkPaint::kFill_Style:          return os << "Style::kFill";
-    case SkPaint::kStroke_Style:        return os << "Style::kStroke";
-    case SkPaint::kStrokeAndFill_Style: return os << "Style::kStrokeAnFill";
+    case DlDrawStyle::kFill:          return os << "Style::kFill";
+    case DlDrawStyle::kStroke:        return os << "Style::kStroke";
+    case DlDrawStyle::kStrokeAndFill: return os << "Style::kStrokeAnFill";
 
     default: return os << "Style::????";
   }
@@ -230,14 +230,8 @@ static std::ostream& operator<<(std::ostream& os, const SkFilterMode& mode) {
   }
 }
 
-class SK_Color {
- public:
-  explicit SK_Color(SkColor color) : color(color) {}
-  SkColor color;
-};
-
-static std::ostream& operator<<(std::ostream& os, const SK_Color& color) {
-  return os << "SkColor(" << std::hex << color.color << std::dec << ")";
+static std::ostream& operator<<(std::ostream& os, const DlColor& color) {
+  return os << "DlColor(" << std::hex << color.argb << std::dec << ")";
 }
 
 static std::ostream& operator<<(std::ostream& os,
@@ -308,8 +302,8 @@ std::ostream& DisplayListStreamDispatcher::startl() {
 
 template <class T>
 std::ostream& DisplayListStreamDispatcher::out_array(std::string name,
-                                                      int count,
-                                                      const T array[]) {
+                                                     int count,
+                                                     const T array[]) {
   if (array == nullptr || count < 0) {
     return os_ << "no " << name;
   }
@@ -325,35 +319,17 @@ std::ostream& DisplayListStreamDispatcher::out_array(std::string name,
   return os_;
 }
 
-std::ostream& DisplayListStreamDispatcher::out_colors(std::string name,
-                                                      int count,
-                                                      const SkColor colors[]) {
-  if (colors == nullptr || count < 0) {
-    return os_ << "no " << name;
-  }
-  os_ << name << "[" << count << "] = [" << std::endl;
-  indent();
-  indent();
-  for (int i = 0; i < count; i++) {
-    startl() << SK_Color(colors[i]) << "," << std::endl;
-  }
-  outdent();
-  startl() << "]";
-  outdent();
-  return os_;
-}
-
 void DisplayListStreamDispatcher::setAntiAlias(bool aa) {
   startl() << "setAntiAlias(" << aa << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::setDither(bool dither) {
   startl() << "setDither(" << dither << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::setStyle(SkPaint::Style style) {
+void DisplayListStreamDispatcher::setStyle(DlDrawStyle style) {
   startl() << "setStyle(" << style << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::setColor(SkColor color) {
-  startl() << "setColor(" << SK_Color(color) << ");" << std::endl;
+void DisplayListStreamDispatcher::setColor(DlColor color) {
+  startl() << "setColor(" << color << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::setStrokeWidth(SkScalar width) {
   startl() << "setStrokeWidth(" << width << ");" << std::endl;
@@ -361,10 +337,10 @@ void DisplayListStreamDispatcher::setStrokeWidth(SkScalar width) {
 void DisplayListStreamDispatcher::setStrokeMiter(SkScalar limit) {
   startl() << "setStrokeMiter(" << limit << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::setStrokeCap(SkPaint::Cap cap) {
+void DisplayListStreamDispatcher::setStrokeCap(DlStrokeCap cap) {
   startl() << "setStrokeCap(" << cap << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::setStrokeJoin(SkPaint::Join join) {
+void DisplayListStreamDispatcher::setStrokeJoin(DlStrokeJoin join) {
   startl() << "setStrokeJoin(" << join << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
@@ -397,7 +373,7 @@ void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
       os_ << "DlLinearGradientSource("
                                  << "start: " << linear_src->start_point()
                                  << ", end: " << linear_src->end_point() << ", ";
-                                 out_colors("colors", linear_src->stop_count(), linear_src->colors()) << ", ";
+                                 out_array("colors", linear_src->stop_count(), linear_src->colors()) << ", ";
                                  out_array("stops", linear_src->stop_count(), linear_src->stops()) << ", "
                                  << linear_src->tile_mode() << ", " << linear_src->matrix_ptr() << ")";
       break;
@@ -408,7 +384,7 @@ void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
       os_ << "DlRadialGradientSource("
                                  << "center: " << radial_src->center()
                                  << ", radius: " << radial_src->radius() << ", ";
-                                 out_colors("colors", radial_src->stop_count(), radial_src->colors()) << ", ";
+                                 out_array("colors", radial_src->stop_count(), radial_src->colors()) << ", ";
                                  out_array("stops", radial_src->stop_count(), radial_src->stops()) << ", "
                                  << radial_src->tile_mode() << ", " << radial_src->matrix_ptr() << ")";
       break;
@@ -421,7 +397,7 @@ void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
                                  << ", start radius: " << conical_src->start_radius()
                                  << ", end center: " << conical_src->end_center()
                                  << ", end radius: " << conical_src->end_radius() << ", ";
-                                 out_colors("colors", conical_src->stop_count(), conical_src->colors()) << ", ";
+                                 out_array("colors", conical_src->stop_count(), conical_src->colors()) << ", ";
                                  out_array("stops", conical_src->stop_count(), conical_src->stops()) << ", "
                                  << conical_src->tile_mode() << ", " << conical_src->matrix_ptr() << ")";
       break;
@@ -433,7 +409,7 @@ void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
                                  << "center: " << sweep_src->center()
                                  << ", start: " << sweep_src->start() << ", "
                                  << ", end: " << sweep_src->end() << ", ";
-                                 out_colors("colors", sweep_src->stop_count(), sweep_src->colors()) << ", ";
+                                 out_array("colors", sweep_src->stop_count(), sweep_src->colors()) << ", ";
                                  out_array("stops", sweep_src->stop_count(), sweep_src->stops()) << ", "
                                  << sweep_src->tile_mode() << ", " << sweep_src->matrix_ptr() << ")";
       break;
@@ -449,7 +425,7 @@ void DisplayListStreamDispatcher::out(const DlColorFilter* filter) {
     case DlColorFilterType::kBlend: {
       const DlBlendColorFilter* blend = filter->asBlend();
       FML_DCHECK(blend);
-      os_ << "DlBlendColorFilter(" << SK_Color(blend->color()) << ", "
+      os_ << "DlBlendColorFilter(" << blend->color() << ", "
                                    << static_cast<int>(blend->mode()) << ")";
       break;
     }
@@ -680,9 +656,9 @@ void DisplayListStreamDispatcher::clipPath(const SkPath& path, SkClipOp clip_op,
            << ");" << std::endl;
 }
 
-void DisplayListStreamDispatcher::drawColor(SkColor color, DlBlendMode mode) {
+void DisplayListStreamDispatcher::drawColor(DlColor color, DlBlendMode mode) {
   startl() << "drawColor("
-           << SK_Color(color) << ", "
+           << color << ", "
            << mode
            << ");" << std::endl;
 }
@@ -793,7 +769,7 @@ void DisplayListStreamDispatcher::drawImageLattice(const sk_sp<DlImage> image,
 void DisplayListStreamDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
                                             const SkRSXform xform[],
                                             const SkRect tex[],
-                                            const SkColor colors[],
+                                            const DlColor colors[],
                                             int count,
                                             DlBlendMode mode,
                                             const SkSamplingOptions& sampling,
@@ -802,7 +778,7 @@ void DisplayListStreamDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
   startl() << "drawAtlas(" << atlas.get() << ", ";
                    out_array("xforms", count, xform) << ", ";
                    out_array("tex_coords", count, tex) << ", ";
-                   out_colors("colors", count, colors) << ", "
+                   out_array("colors", count, colors) << ", "
                    << mode << ", " << sampling << ", cull: " << cull_rect << ", "
                    << "with attributes: " << render_with_attributes
            << ");" << std::endl;
@@ -828,13 +804,13 @@ void DisplayListStreamDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
            << x << ", " << y << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::drawShadow(const SkPath& path,
-                                             const SkColor color,
+                                             const DlColor color,
                                              const SkScalar elevation,
                                              bool transparent_occluder,
                                              SkScalar dpr) {
   startl() << "drawShadow("
            << path << ", "
-           << SK_Color(color) << ", "
+           << color << ", "
            << elevation << ", "
            << transparent_occluder << ", "
            << dpr

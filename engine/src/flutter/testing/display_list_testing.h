@@ -42,12 +42,12 @@ class DisplayListStreamDispatcher final : public Dispatcher {
 
   void setAntiAlias(bool aa) override;
   void setDither(bool dither) override;
-  void setStyle(SkPaint::Style style) override;
-  void setColor(SkColor color) override;
+  void setStyle(DlDrawStyle style) override;
+  void setColor(DlColor color) override;
   void setStrokeWidth(SkScalar width) override;
   void setStrokeMiter(SkScalar limit) override;
-  void setStrokeCap(SkPaint::Cap cap) override;
-  void setStrokeJoin(SkPaint::Join join) override;
+  void setStrokeCap(DlStrokeCap cap) override;
+  void setStrokeJoin(DlStrokeJoin join) override;
   void setColorSource(const DlColorSource* source) override;
   void setColorFilter(const DlColorFilter* filter) override;
   void setInvertColors(bool invert) override;
@@ -80,7 +80,7 @@ class DisplayListStreamDispatcher final : public Dispatcher {
   void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
   void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
 
-  void drawColor(SkColor color, DlBlendMode mode) override;
+  void drawColor(DlColor color, DlBlendMode mode) override;
   void drawPaint() override;
   void drawLine(const SkPoint& p0, const SkPoint& p1) override;
   void drawRect(const SkRect& rect) override;
@@ -122,7 +122,7 @@ class DisplayListStreamDispatcher final : public Dispatcher {
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
-                 const SkColor colors[],
+                 const DlColor colors[],
                  int count,
                  DlBlendMode mode,
                  const SkSamplingOptions& sampling,
@@ -136,7 +136,7 @@ class DisplayListStreamDispatcher final : public Dispatcher {
                     SkScalar x,
                     SkScalar y) override;
   void drawShadow(const SkPath& path,
-                  const SkColor color,
+                  const DlColor color,
                   const SkScalar elevation,
                   bool transparent_occluder,
                   SkScalar dpr) override;
@@ -151,9 +151,6 @@ class DisplayListStreamDispatcher final : public Dispatcher {
 
   template <class T>
   std::ostream& out_array(std::string name, int count, const T array[]);
-
-  // colors must be handled separately otherwise we just get a list of ints
-  std::ostream& out_colors(std::string name, int count, const SkColor colors[]);
 
   std::ostream& startl();
 

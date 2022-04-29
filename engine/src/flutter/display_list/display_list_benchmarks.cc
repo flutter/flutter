@@ -698,7 +698,7 @@ std::shared_ptr<DlVertices> GetTestVertices(SkPoint center,
       GetPolygonPoints(outer_vertex_count, center, radius);
 
   std::vector<SkPoint> vertices;
-  std::vector<SkColor> colors;
+  std::vector<DlColor> colors;
 
   switch (mode) {
     case DlVertexMode::kTriangleFan:
