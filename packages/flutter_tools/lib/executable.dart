@@ -148,12 +148,6 @@ List<FlutterCommand> generateCommands({
     terminal: globals.terminal,
     artifacts: globals.artifacts,
   ),
-  ValidateProjectCommand(
-    fileSystem: globals.fs,
-    logger: globals.logger,
-    allProjectValidators: ProjectValidator.allProjectValidators,
-    verbose: verbose,
-  ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),
   BuildCommand(verboseHelp: verboseHelp),
