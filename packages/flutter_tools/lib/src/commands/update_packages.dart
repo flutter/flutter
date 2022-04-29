@@ -158,7 +158,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool offline = boolArg('offline');
     final bool describeGraph = boolArg('describe-graph');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
-    if (doUpgrade && describeGraph != null) {
+    if (doUpgrade && describeGraph) {
       throwToolExit(
           '--describe-graph cannot be used while upgrading dependencies',
       );
