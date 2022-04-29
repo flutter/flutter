@@ -598,7 +598,9 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.routerConfig}
   /// An object to configure the underlying [Router].
   ///
-  /// {@macro flutter.widgets.WidgetsApp.router}
+  /// If the [routerConfig] is provided, the other router related delegates,
+  /// [routeInformationParser], [routeInformationProvider], [routerDelegate],
+  /// and [backButtonDispatcher], must all be null.
   ///
   /// See also:
   ///

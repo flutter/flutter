@@ -202,7 +202,7 @@ void main() {
       throwsA(isAssertionError.having(
         (AssertionError e) => e.message,
         'message',
-        'The routeInformationParser and routeInformationProvider must both be provided or not provided.',
+        'A routeInformationParser must be provided when a routeInformationProvider is specified.',
       )),
     );
   });

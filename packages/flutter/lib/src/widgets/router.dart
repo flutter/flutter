@@ -327,8 +327,8 @@ class Router<T> extends StatefulWidget {
     this.backButtonDispatcher,
     this.restorationScopeId,
   }) : assert(
-         (routeInformationProvider == null) == (routeInformationParser == null),
-         'The routeInformationParser and routeInformationProvider must both be provided or not provided.',
+         routeInformationProvider == null || routeInformationParser != null,
+         'A routeInformationParser must be provided when a routeInformationProvider is specified.',
        ),
        assert(routerDelegate != null);
 
