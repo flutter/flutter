@@ -1674,7 +1674,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies,
           globals
               .printStatus('Skipping $package because it was not transitive');
         }
-        return;
+        //return;
       }
       result.writeln('  $package: $version');
       if (verbose) {
