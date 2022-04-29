@@ -6,6 +6,7 @@ import 'dart:collection';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:pub_semver/pub_semver.dart' as semver;
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
@@ -165,8 +166,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
     final bool describeGraph = boolArg('describe-graph');
-    final bool doUpgrade =
-        forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
+    final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
     if (doUpgrade && describeGraph) {
       throwToolExit(
         '--describe-graph cannot be used while upgrading dependencies',
@@ -278,33 +278,42 @@ class UpdatePackagesCommand extends FlutterCommand {
 
     await _runPubGetOnPackages(packages);
 
-    if (doUpgrade && newPubspec != null) {
-      final bool onlyUpgrade = _verifyUpgrade(oldPubspec!, newPubspec!);
-      if (!onlyUpgrade) {
-        globals.printError('yikes!');
-      }
+    if (doUpgrade) {
+      final Map<String, PubspecDependency> newDependencies = <String, PubspecDependency>{};
+      // we want to collect the upgraded dependencies to catch any downgrades
+      _collectDependencies(
+        packages: packages,
+        pubspecs: <PubspecYaml>[],
+        explicitDependencies: <String, PubspecDependency>{},
+        allDependencies: newDependencies,
+        specialDependencies: <String>{},
+        doUpgrade: false,
+      );
+
+      final bool upgradeOnly = _verifyUpgrade(allDependencies, newDependencies);
     }
 
     return FlutterCommandResult.success();
   }
 
-  bool _verifyUpgrade(PubspecYaml oldPubspec, PubspecYaml newPubspec) {
+  bool _verifyUpgrade(Map<String, PubspecDependency> oldDeps, Map<String, PubspecDependency> newDeps) {
     bool ok = true;
-    final Set<PubspecDependency> oldDeps = oldPubspec.allDependencies.toSet();
-    final Set<PubspecDependency> newDeps = newPubspec.allDependencies.toSet();
-    for (final PubspecDependency dep in oldDeps) {
+    for (final PubspecDependency dep in oldDeps.values) {
       PubspecDependency? newDep;
       try {
-        newDep = newDeps.firstWhere(
+        newDep = newDeps.values.firstWhere(
             (PubspecDependency currentDep) => dep.name == currentDep.name);
       } on StateError {
         // this means no match found
       }
       if (newDep != null) {
         if (dep.version != newDep.version) {
-          throw Exception('old: ${dep.version} => new: ${newDep.version}');
-        } else {
-          print('package:${dep.name}: old: ${dep.version} => new: ${newDep.version}');
+          final semver.Version oldVersion = semver.Version.parse(dep.version);
+          final semver.Version newVersion = semver.Version.parse(newDep.version);
+          if (newVersion > oldVersion) {
+            globals.printError('package:${dep.name} was downgraded from $oldVersion to $newVersion');
+            ok = false;
+          }
         }
       }
     }
@@ -438,9 +447,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
   }
 
-  PubspecYaml? oldPubspec;
-  PubspecYaml? newPubspec;
-
   /// Generate a synthetic Dart package with the given dependencies.
   Future<PackageConfig> _generateFakePackage({
     required Directory tempDir,
@@ -470,8 +476,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
 
-      oldPubspec = PubspecYaml(tempDir);
-
       // Next we run "pub get" on it in order to force the download of any
       // needed packages to the pub cache, upgrading if requested.
       await pub.get(
@@ -487,11 +491,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         temporaryFlutterSdk?.deleteSync(recursive: true);
       } on FileSystemException {
         // Failed to delete temporary SDK.
-      }
-
-      // If we didn't upgrade we don't need to track a new PubspecYaml
-      if (doUpgrade) {
-        newPubspec = PubspecYaml(tempDir);
       }
 
       if (tree != null) {
@@ -802,7 +801,10 @@ const String kDependencyChecksum = '# PUBSPEC CHECKSUM: ';
 class PubspecLock {
   PubspecLock._(this.yamlMap);
 
-  factory PubspecLock.parseFile(File file) {
+  static PubspecLock? parseFile(File file) {
+    if (!file.existsSync()) {
+      return null;
+    }
     final YamlMap yamlMap = loadYaml(file.readAsStringSync()) as YamlMap;
     return PubspecLock._(yamlMap);
   }
@@ -817,12 +819,21 @@ class PubspecYaml {
   /// pubspec.yaml and parse it into a line-by-line form.
   factory PubspecYaml(Directory directory) {
     final File file = _pubspecFor(directory);
-    return _parse(file);
+    final File lock = _pubspecLockFor(directory);
+    return _parse(file, PubspecLock.parseFile(lock));
   }
 
-  PubspecYaml._(this.file, this.name, this.version, this.inputData, this.checksum);
+  PubspecYaml._(
+    this.file,
+    this.name,
+    this.version,
+    this.inputData,
+    this.checksum,
+    this.lock,
+  );
 
   final File file; // The actual pubspec.yaml file.
+  final PubspecLock? lock;
 
   /// The package name.
   final String name;
@@ -844,7 +855,7 @@ class PubspecYaml {
   /// objects). We don't just use a YAML parser because we care about comments
   /// and also because we can just define the style of pubspec.yaml files we care
   /// about (since they're all under our control).
-  static PubspecYaml _parse(File file) {
+  static PubspecYaml _parse(File file, PubspecLock? lock) {
     final List<String> lines = file.readAsLinesSync();
     final String filename = file.path;
     String? packageName;
@@ -1004,8 +1015,14 @@ class PubspecYaml {
         lastDependency = null;
       }
     }
-    return PubspecYaml._(file, packageName!, packageVersion, result,
-        checksum ?? PubspecChecksum(null, ''));
+    return PubspecYaml._(
+      file,
+      packageName!,
+      packageVersion,
+      result,
+      checksum ?? PubspecChecksum(null, ''),
+      lock,
+    );
   }
 
   /// This returns all the explicit dependencies that this pubspec.yaml lists under dependencies.
@@ -1592,6 +1609,13 @@ File _pubspecFor(Directory directory) {
   return directory.fileSystem
       .file(directory.fileSystem.path.join(directory.path, 'pubspec.yaml'));
 }
+
+/// Generates the File object for the pubspec.yaml file of a given Directory.
+File _pubspecLockFor(Directory directory) {
+  return directory.fileSystem
+      .file(directory.fileSystem.path.join(directory.path, 'pubspec.lock'));
+}
+
 
 /// Generates the source of a fake pubspec.yaml file given a list of
 /// dependencies.
