@@ -157,13 +157,6 @@ abstract class BindingBase {
   static Type? _debugInitializedType;
   static bool _debugServiceExtensionsRegistered = false;
 
-  /// Additional configuration used by the framework during hot reload.
-  ///
-  /// See also:
-  ///
-  ///  * [DebugReassembleConfig], which describes the configuration.
-  static DebugReassembleConfig? debugReassembleConfig;
-
   /// The main window to which this binding is bound.
   ///
   /// A number of additional bindings are defined as extensions of
@@ -877,24 +870,4 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
   exit(0);
-}
-
-/// Additional configuration used for hot reload reassemble optimizations.
-///
-/// Do not extend, implement, or mixin this class. This may only be instantiated
-/// in debug mode.
-class DebugReassembleConfig {
-  /// Create a new [DebugReassembleConfig].
-  ///
-  /// Throws a [FlutterError] if this is called in profile or release mode.
-  DebugReassembleConfig({
-    this.widgetName,
-  }) {
-    if (!kDebugMode) {
-      throw FlutterError('Cannot instantiate DebugReassembleConfig in profile or release mode.');
-    }
-  }
-
-  /// The name of the widget that was modified, or `null` if the change was elsewhere.
-  final String? widgetName;
 }
