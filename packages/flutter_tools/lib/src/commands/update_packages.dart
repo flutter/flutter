@@ -627,13 +627,14 @@ class UpdatePackagesCommand extends FlutterCommand {
     final Iterable<String> dependees = tree.getDependees(packageName);
     globals.printStatus('Found ${dependees.length} packages depending on $packageName:');
 
-    final Map<String, Uri> packageToRoot = <String, Uri>{};
+    final Map<String, Package> nameToPackage = <String, Package>{};
     for (final Package package in packageConfig.packages) {
-      packageToRoot[package.name] = package.root;
+      nameToPackage[package.name] = package;
     }
 
     for (final String dependee in dependees) {
-      final Directory root = globals.fs.directory(packageToRoot[dependee]);
+      final Package package = nameToPackage[dependee]!;
+      final Directory root = globals.fs.directory(package.root);
       final File pubspecFile = root.childFile('pubspec.yaml');
       final String pubspecString = await pubspecFile.readAsString();
       final YamlMap pubspec = loadYaml(pubspecString) as YamlMap;
@@ -642,7 +643,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (constraint == null) {
         throw StateError('Could not find dependency $packageName in $pubspecFile');
       }
-      globals.printStatus('\t$dependee constrains $packageName with $constraint');
+      globals.printStatus('\t${package.root.pathSegments.last} constrains $packageName with $constraint');
     }
   }
 }
