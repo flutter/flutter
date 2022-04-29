@@ -315,7 +315,8 @@ class UpdatePackagesCommand extends FlutterCommand {
       PubspecDependency? newDep;
       try {
         newDep = newDeps.values.firstWhere(
-            (PubspecDependency currentDep) => dep.name == currentDep.name);
+          (PubspecDependency currentDep) => dep.name == currentDep.name,
+        );
       } on StateError {
         // this means no match found
       }
@@ -325,7 +326,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           final semver.Version newVersion = semver.Version.parse(newDep.version);
           if (oldVersion > newVersion) {
             ok = false;
-            globals.printError('package:${dep.name}\twas downgraded from $oldVersion -> $newVersion');
+            globals.printError('package:${dep.name} was downgraded from $oldVersion -> $newVersion');
             await _describePackage(
               tree: tree,
               packageConfig: packageConfig,
@@ -724,7 +725,8 @@ class UpdatePackagesCommand extends FlutterCommand {
     required String packageName,
   }) async {
     globals.printStatus(
-        'Package $packageName is resolved as ${tree.versionFor(packageName)}');
+      'Package $packageName is resolved as ${tree.versionFor(packageName)}',
+    );
     final Iterable<String> dependees = tree.getDependees(packageName);
 
     final Map<String, Package> nameToPackage = <String, Package>{};
@@ -735,6 +737,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     for (final String dependee in dependees) {
       final Package? package = nameToPackage[dependee];
       if (package == null) {
+        // This is probably a special dependency
         continue;
       }
       final Directory root = globals.fs.directory(package.root);
@@ -747,7 +750,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (constraint is YamlMap) {
         // We don't need to parse SDK constraints
         if (constraint.containsKey('sdk')) {
-          //print('skipping $dependee because its constraint is $constraint'); // TODO
           continue;
         }
         throw StateError('Unrecognized constraint $constraint');
