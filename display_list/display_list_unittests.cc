@@ -23,10 +23,10 @@ constexpr SkPoint end_points[] = {
     {0, 0},
     {100, 100},
 };
-constexpr SkColor colors[] = {
-    SK_ColorGREEN,
-    SK_ColorYELLOW,
-    SK_ColorBLUE,
+const DlColor colors[] = {
+    DlColor::kGreen(),
+    DlColor::kYellow(),
+    DlColor::kBlue(),
 };
 constexpr float stops[] = {
     0.0,
@@ -130,12 +130,12 @@ static const std::shared_ptr<DlColorSource> TestSource5 =
                              colors,
                              stops,
                              DlTileMode::kDecal);
-static const DlBlendColorFilter TestBlendColorFilter1(SK_ColorRED,
-                                                      SkBlendMode::kDstATop);
-static const DlBlendColorFilter TestBlendColorFilter2(SK_ColorBLUE,
-                                                      SkBlendMode::kDstATop);
-static const DlBlendColorFilter TestBlendColorFilter3(SK_ColorRED,
-                                                      SkBlendMode::kDstIn);
+static const DlBlendColorFilter TestBlendColorFilter1(DlColor::kRed(),
+                                                      DlBlendMode::kDstATop);
+static const DlBlendColorFilter TestBlendColorFilter2(DlColor::kBlue(),
+                                                      DlBlendMode::kDstATop);
+static const DlBlendColorFilter TestBlendColorFilter3(DlColor::kRed(),
+                                                      DlBlendMode::kDstIn);
 static const DlMatrixColorFilter TestMatrixColorFilter1(rotate_color_matrix);
 static const DlMatrixColorFilter TestMatrixColorFilter2(invert_color_matrix);
 static const DlBlurImageFilter TestBlurImageFilter1(5.0,
@@ -339,21 +339,21 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "SetStrokeCap", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kRound_Cap);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kSquare_Cap);}},
-      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kButt_Cap);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(DlStrokeCap::kRound);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(DlStrokeCap::kSquare);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(DlStrokeCap::kButt);}},
     }
   },
   { "SetStrokeJoin", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kBevel_Join);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kRound_Join);}},
-      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kMiter_Join);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(DlStrokeJoin::kBevel);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(DlStrokeJoin::kRound);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(DlStrokeJoin::kMiter);}},
     }
   },
   { "SetStyle", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kStroke_Style);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kStrokeAndFill_Style);}},
-      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kFill_Style);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(DlDrawStyle::kStroke);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(DlDrawStyle::kStrokeAndFill);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStyle(DlDrawStyle::kFill);}},
     }
   },
   { "SetStrokeWidth", {
@@ -789,13 +789,13 @@ std::vector<DisplayListInvocationGroup> allGroups = {
       {1, 40 + 32 + 32 + 8, -1, 40 + 32 + 32 + 8, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
-        static SkColor colors[] = { SK_ColorBLUE, SK_ColorGREEN };
+        static DlColor colors[] = { DlColor::kBlue(), DlColor::kGreen() };
         b.drawAtlas(TestImage1, xforms, texs, colors, 2, DlBlendMode::kSrcIn,
                     NearestSampling, nullptr, false);}},
       {1, 56 + 32 + 32 + 8, -1, 56 + 32 + 32 + 8, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
-        static SkColor colors[] = { SK_ColorBLUE, SK_ColorGREEN };
+        static DlColor colors[] = { DlColor::kBlue(), DlColor::kGreen() };
         static SkRect cullRect = { 0, 0, 200, 200 };
         b.drawAtlas(TestImage1, xforms, texs, colors, 2, DlBlendMode::kSrcIn,
                     NearestSampling, &cullRect, false);}},

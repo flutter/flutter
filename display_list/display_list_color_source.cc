@@ -49,6 +49,7 @@ std::shared_ptr<DlColorSource> DlColorSource::From(SkShader* sk_shader) {
     FML_DCHECK(count == info.fColorCount);
   }
   DlTileMode mode = ToDl(info.fTileMode);
+  DlColor* dl_colors = reinterpret_cast<DlColor*>(info.fColors);
   std::shared_ptr<DlColorSource> source;
   switch (type) {
     case SkShader::kNone_GradientType:
@@ -59,19 +60,19 @@ std::shared_ptr<DlColorSource> DlColorSource::From(SkShader* sk_shader) {
       break;
     case SkShader::kLinear_GradientType:
       source = MakeLinear(info.fPoint[0], info.fPoint[1], info.fColorCount,
-                          info.fColors, info.fColorOffsets, mode);
+                          dl_colors, info.fColorOffsets, mode);
       break;
     case SkShader::kRadial_GradientType:
       source = MakeRadial(info.fPoint[0], info.fRadius[0], info.fColorCount,
-                          info.fColors, info.fColorOffsets, mode);
+                          dl_colors, info.fColorOffsets, mode);
       break;
     case SkShader::kConical_GradientType:
       source = MakeConical(info.fPoint[0], info.fRadius[0], info.fPoint[1],
-                           info.fRadius[1], info.fColorCount, info.fColors,
+                           info.fRadius[1], info.fColorCount, dl_colors,
                            info.fColorOffsets, mode);
       break;
     case SkShader::kSweep_GradientType:
-      source = MakeSweep(info.fPoint[0], 0, 360, info.fColorCount, info.fColors,
+      source = MakeSweep(info.fPoint[0], 0, 360, info.fColorCount, dl_colors,
                          info.fColorOffsets, mode);
       break;
   }
@@ -97,7 +98,7 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeLinear(
     const SkPoint start_point,
     const SkPoint end_point,
     uint32_t stop_count,
-    const uint32_t* colors,
+    const DlColor* colors,
     const float* stops,
     DlTileMode tile_mode,
     const SkMatrix* matrix) {
@@ -118,7 +119,7 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeRadial(
     SkPoint center,
     SkScalar radius,
     uint32_t stop_count,
-    const uint32_t* colors,
+    const DlColor* colors,
     const float* stops,
     DlTileMode tile_mode,
     const SkMatrix* matrix) {
@@ -140,7 +141,7 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeConical(
     SkPoint end_center,
     SkScalar end_radius,
     uint32_t stop_count,
-    const uint32_t* colors,
+    const DlColor* colors,
     const float* stops,
     DlTileMode tile_mode,
     const SkMatrix* matrix) {
@@ -162,7 +163,7 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeSweep(
     SkScalar start,
     SkScalar end,
     uint32_t stop_count,
-    const uint32_t* colors,
+    const DlColor* colors,
     const float* stops,
     DlTileMode tile_mode,
     const SkMatrix* matrix) {

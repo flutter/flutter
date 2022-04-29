@@ -4,6 +4,8 @@
 
 #include "flutter/display_list/display_list_color_filter.h"
 
+#include "flutter/display_list/display_list_color.h"
+
 namespace flutter {
 
 std::shared_ptr<DlColorFilter> DlColorFilter::From(SkColorFilter* sk_filter) {
@@ -22,7 +24,7 @@ std::shared_ptr<DlColorFilter> DlColorFilter::From(SkColorFilter* sk_filter) {
     SkColor color;
     SkBlendMode mode;
     if (sk_filter->asAColorMode(&color, &mode)) {
-      return std::make_shared<DlBlendColorFilter>(color, mode);
+      return std::make_shared<DlBlendColorFilter>(color, ToDl(mode));
     }
   }
   {

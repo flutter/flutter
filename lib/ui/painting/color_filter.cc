@@ -41,7 +41,7 @@ fml::RefPtr<ColorFilter> ColorFilter::Create() {
 
 void ColorFilter::initMode(int color, int blend_mode) {
   filter_ = std::make_shared<DlBlendColorFilter>(
-      static_cast<SkColor>(color), static_cast<SkBlendMode>(blend_mode));
+      static_cast<DlColor>(color), static_cast<DlBlendMode>(blend_mode));
 }
 
 void ColorFilter::initMatrix(const tonic::Float32List& color_matrix) {

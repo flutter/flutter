@@ -5,6 +5,7 @@
 #ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_VERTICES_H_
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_VERTICES_H_
 
+#include "flutter/display_list/display_list_color.h"
 #include "flutter/display_list/types.h"
 
 namespace flutter {
@@ -144,7 +145,16 @@ class DlVertices {
     ///
     /// fails if colors have already been supplied or if they were not
     /// promised by the flags.has_colors.
-    void store_colors(const SkColor colors[]);
+    void store_colors(const DlColor colors[]);
+
+    /// @brief Copies the indicated list of unsigned ints as vertex colors
+    ///        in the 32-bit RGBA format.
+    ///
+    /// fails if colors have already been supplied or if they were not
+    /// promised by the flags.has_colors.
+    void store_colors(const uint32_t colors[]) {
+      store_colors(reinterpret_cast<const DlColor*>(colors));
+    }
 
     /// @brief Copies the indicated list of 16-bit indices as vertex indices.
     ///
@@ -178,7 +188,7 @@ class DlVertices {
                                           int vertex_count,
                                           const SkPoint vertices[],
                                           const SkPoint texture_coordinates[],
-                                          const SkColor colors[],
+                                          const DlColor colors[],
                                           int index_count = 0,
                                           const uint16_t indices[] = nullptr);
 
@@ -209,8 +219,8 @@ class DlVertices {
 
   /// Returns a pointer to the vertex colors
   /// or null if none were provided.
-  const SkColor* colors() const {
-    return static_cast<const SkColor*>(pod(colors_offset_));
+  const DlColor* colors() const {
+    return static_cast<const DlColor*>(pod(colors_offset_));
   }
 
   /// Returns a pointer to the count of vertex indices
@@ -239,7 +249,7 @@ class DlVertices {
              int vertex_count,
              const SkPoint vertices[],
              const SkPoint texture_coordinates[],
-             const SkColor colors[],
+             const DlColor colors[],
              int index_count,
              const uint16_t indices[],
              const SkRect* bounds = nullptr);

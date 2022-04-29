@@ -47,14 +47,14 @@ void SkPaintDispatchHelper::setInvertColors(bool invert) {
   invert_colors_ = invert;
   paint_.setColorFilter(makeColorFilter());
 }
-void SkPaintDispatchHelper::setStrokeCap(SkPaint::Cap cap) {
-  paint_.setStrokeCap(cap);
+void SkPaintDispatchHelper::setStrokeCap(DlStrokeCap cap) {
+  paint_.setStrokeCap(ToSk(cap));
 }
-void SkPaintDispatchHelper::setStrokeJoin(SkPaint::Join join) {
-  paint_.setStrokeJoin(join);
+void SkPaintDispatchHelper::setStrokeJoin(DlStrokeJoin join) {
+  paint_.setStrokeJoin(ToSk(join));
 }
-void SkPaintDispatchHelper::setStyle(SkPaint::Style style) {
-  paint_.setStyle(style);
+void SkPaintDispatchHelper::setStyle(DlDrawStyle style) {
+  paint_.setStyle(ToSk(style));
 }
 void SkPaintDispatchHelper::setStrokeWidth(SkScalar width) {
   paint_.setStrokeWidth(width);
@@ -62,7 +62,7 @@ void SkPaintDispatchHelper::setStrokeWidth(SkScalar width) {
 void SkPaintDispatchHelper::setStrokeMiter(SkScalar limit) {
   paint_.setStrokeMiter(limit);
 }
-void SkPaintDispatchHelper::setColor(SkColor color) {
+void SkPaintDispatchHelper::setColor(DlColor color) {
   current_color_ = color;
   paint_.setColor(color);
   if (has_opacity()) {
@@ -243,13 +243,13 @@ DisplayListBoundsCalculator::DisplayListBoundsCalculator(
   layer_infos_.emplace_back(std::make_unique<LayerData>(nullptr));
   accumulator_ = layer_infos_.back()->layer_accumulator();
 }
-void DisplayListBoundsCalculator::setStrokeCap(SkPaint::Cap cap) {
-  cap_is_square_ = (cap == SkPaint::kSquare_Cap);
+void DisplayListBoundsCalculator::setStrokeCap(DlStrokeCap cap) {
+  cap_is_square_ = (cap == DlStrokeCap::kSquare);
 }
-void DisplayListBoundsCalculator::setStrokeJoin(SkPaint::Join join) {
-  join_is_miter_ = (join == SkPaint::kMiter_Join);
+void DisplayListBoundsCalculator::setStrokeJoin(DlStrokeJoin join) {
+  join_is_miter_ = (join == DlStrokeJoin::kMiter);
 }
-void DisplayListBoundsCalculator::setStyle(SkPaint::Style style) {
+void DisplayListBoundsCalculator::setStyle(DlDrawStyle style) {
   style_ = style;
 }
 void DisplayListBoundsCalculator::setStrokeWidth(SkScalar width) {
@@ -377,7 +377,7 @@ void DisplayListBoundsCalculator::restore() {
 void DisplayListBoundsCalculator::drawPaint() {
   AccumulateUnbounded();
 }
-void DisplayListBoundsCalculator::drawColor(SkColor color, DlBlendMode mode) {
+void DisplayListBoundsCalculator::drawColor(DlColor color, DlBlendMode mode) {
   AccumulateUnbounded();
 }
 void DisplayListBoundsCalculator::drawLine(const SkPoint& p0,
@@ -504,7 +504,7 @@ void DisplayListBoundsCalculator::drawImageLattice(
 void DisplayListBoundsCalculator::drawAtlas(const sk_sp<DlImage> atlas,
                                             const SkRSXform xform[],
                                             const SkRect tex[],
-                                            const SkColor colors[],
+                                            const DlColor colors[],
                                             int count,
                                             DlBlendMode mode,
                                             const SkSamplingOptions& sampling,
@@ -551,7 +551,7 @@ void DisplayListBoundsCalculator::drawTextBlob(const sk_sp<SkTextBlob> blob,
   AccumulateOpBounds(blob->bounds().makeOffset(x, y), kDrawTextBlobFlags);
 }
 void DisplayListBoundsCalculator::drawShadow(const SkPath& path,
-                                             const SkColor color,
+                                             const DlColor color,
                                              const SkScalar elevation,
                                              bool transparent_occluder,
                                              SkScalar dpr) {

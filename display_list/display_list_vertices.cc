@@ -28,7 +28,7 @@ static size_t bytes_needed(int vertex_count, Flags flags, int index_count) {
     needed += vertex_count * sizeof(SkPoint);
   }
   if (flags.has_colors) {
-    needed += vertex_count * sizeof(SkColor);
+    needed += vertex_count * sizeof(DlColor);
   }
   if (index_count > 0) {
     needed += index_count * sizeof(uint16_t);
@@ -41,7 +41,7 @@ std::shared_ptr<DlVertices> DlVertices::Make(
     int vertex_count,
     const SkPoint vertices[],
     const SkPoint texture_coordinates[],
-    const SkColor colors[],
+    const DlColor colors[],
     int index_count,
     const uint16_t indices[]) {
   if (!vertices || vertex_count <= 0) {
@@ -97,7 +97,7 @@ DlVertices::DlVertices(DlVertexMode mode,
                        int unchecked_vertex_count,
                        const SkPoint* vertices,
                        const SkPoint* texture_coordinates,
-                       const SkColor* colors,
+                       const DlColor* colors,
                        int unchecked_index_count,
                        const uint16_t* indices,
                        const SkRect* bounds)
@@ -166,7 +166,7 @@ DlVertices::DlVertices(DlVertexMode mode,
   texture_coordinates_offset_ = advance(
       sizeof(SkPoint), flags.has_texture_coordinates ? vertex_count_ : 0);
   colors_offset_ =
-      advance(sizeof(SkColor), flags.has_colors ? vertex_count_ : 0);
+      advance(sizeof(DlColor), flags.has_colors ? vertex_count_ : 0);
   indices_offset_ = advance(sizeof(uint16_t), index_count_);
   FML_DCHECK(offset == bytes_needed(vertex_count_, flags, index_count_));
   FML_DCHECK((vertex_count_ != 0) == (vertices() != nullptr));
@@ -177,8 +177,9 @@ DlVertices::DlVertices(DlVertexMode mode,
 }
 
 sk_sp<SkVertices> DlVertices::skia_object() const {
+  const SkColor* sk_colors = reinterpret_cast<const SkColor*>(colors());
   return SkVertices::MakeCopy(ToSk(mode_), vertex_count_, vertices(),
-                              texture_coordinates(), colors(), index_count_,
+                              texture_coordinates(), sk_colors, index_count_,
                               indices());
 }
 
@@ -265,7 +266,7 @@ void DlVertices::Builder::store_texture_coordinates(const float coords[]) {
   needs_texture_coords_ = false;
 }
 
-void DlVertices::Builder::store_colors(const SkColor colors[]) {
+void DlVertices::Builder::store_colors(const DlColor colors[]) {
   FML_CHECK(is_valid());
   FML_CHECK(needs_colors_);
   char* pod = reinterpret_cast<char*>(vertices_.get());

@@ -6,23 +6,13 @@
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_PAINT_H_
 
 #include "flutter/display_list/display_list_blend_mode.h"
+#include "flutter/display_list/display_list_color.h"
 #include "flutter/display_list/display_list_color_filter.h"
 #include "flutter/display_list/display_list_color_source.h"
 #include "flutter/display_list/display_list_image_filter.h"
 #include "flutter/display_list/display_list_mask_filter.h"
 
 namespace flutter {
-
-class DlColor {
- public:
-  DlColor() : argb(0xFF000000) {}
-  DlColor(uint32_t argb) : argb(argb) {}
-
-  uint32_t argb;
-
-  bool operator==(DlColor const& other) const { return argb == other.argb; }
-  bool operator!=(DlColor const& other) const { return argb != other.argb; }
-};
 
 enum class DlDrawStyle {
   kFill,           //!< fills interior of shapes
@@ -77,6 +67,10 @@ inline SkPaint::Join ToSk(DlStrokeJoin join) {
 
 class DlPaint {
  public:
+  static constexpr DlColor kDefaultColor = DlColor::kBlack();
+  static constexpr float kDefaultWidth = 0.0;
+  static constexpr float kDefaultMiter = 4.0;
+
   DlPaint();
 
   bool isAntiAlias() const { return isAntiAlias_; }
@@ -99,7 +93,7 @@ class DlPaint {
 
   DlColor getColor() const { return color_; }
   DlPaint& setColor(DlColor color) {
-    color_.argb = color.argb;
+    color_ = color;
     return *this;
   }
 
@@ -153,27 +147,55 @@ class DlPaint {
     return *this;
   }
 
-  std::shared_ptr<DlColorSource> getColorSource() const { return colorSource_; }
-  DlPaint& setColorSource(std::shared_ptr<DlColorSource> source) {
+  std::shared_ptr<const DlColorSource> getColorSource() const {
+    return colorSource_;
+  }
+  const DlColorSource* getColorSourcePtr() const { return colorSource_.get(); }
+  DlPaint& setColorSource(std::shared_ptr<const DlColorSource> source) {
     colorSource_ = source;
     return *this;
   }
-
-  std::shared_ptr<DlColorFilter> getColorFilter() const { return colorFilter_; }
-  DlPaint& setColorFilter(std::shared_ptr<DlColorFilter> filter) {
-    colorFilter_ = filter;
+  DlPaint& setColorSource(const DlColorSource* source) {
+    colorSource_ = source ? source->shared() : nullptr;
     return *this;
   }
 
-  std::shared_ptr<DlImageFilter> getImageFilter() const { return imageFilter_; }
+  std::shared_ptr<const DlColorFilter> getColorFilter() const {
+    return colorFilter_;
+  }
+  const DlColorFilter* getColorFilterPtr() const { return colorFilter_.get(); }
+  DlPaint& setColorFilter(std::shared_ptr<DlColorFilter> filter) {
+    colorFilter_ = filter ? filter->shared() : nullptr;
+    return *this;
+  }
+  DlPaint& setColorFilter(const DlColorFilter* filter) {
+    colorFilter_ = filter ? filter->shared() : nullptr;
+    return *this;
+  }
+
+  std::shared_ptr<const DlImageFilter> getImageFilter() const {
+    return imageFilter_;
+  }
+  const DlImageFilter* getImageFilterPtr() const { return imageFilter_.get(); }
   DlPaint& setImageFilter(std::shared_ptr<DlImageFilter> filter) {
     imageFilter_ = filter;
     return *this;
   }
+  DlPaint& setImageFilter(const DlImageFilter* filter) {
+    imageFilter_ = filter ? filter->shared() : nullptr;
+    return *this;
+  }
 
-  std::shared_ptr<DlMaskFilter> getMaskFilter() const { return maskFilter_; }
+  std::shared_ptr<const DlMaskFilter> getMaskFilter() const {
+    return maskFilter_;
+  }
+  const DlMaskFilter* getMaskFilterPtr() const { return maskFilter_.get(); }
   DlPaint& setMaskFilter(std::shared_ptr<DlMaskFilter> filter) {
     maskFilter_ = filter;
+    return *this;
+  }
+  DlPaint& setMaskFilter(const DlMaskFilter* filter) {
+    maskFilter_ = filter ? filter->shared() : nullptr;
     return *this;
   }
 
@@ -210,10 +232,10 @@ class DlPaint {
   float strokeWidth_;
   float strokeMiter_;
 
-  std::shared_ptr<DlColorSource> colorSource_;
-  std::shared_ptr<DlColorFilter> colorFilter_;
-  std::shared_ptr<DlImageFilter> imageFilter_;
-  std::shared_ptr<DlMaskFilter> maskFilter_;
+  std::shared_ptr<const DlColorSource> colorSource_;
+  std::shared_ptr<const DlColorFilter> colorFilter_;
+  std::shared_ptr<const DlImageFilter> imageFilter_;
+  std::shared_ptr<const DlMaskFilter> maskFilter_;
   // missing (as compared to SkPaint):
   // DlPathEffect - waiting for https://github.com/flutter/engine/pull/32159
   // DlBlender - not planning on using that object in a pure DisplayList world
