@@ -300,7 +300,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         print(upgradeOnly);
         return FlutterCommandResult.fail();
       }
-      print(upgradeOnly);
     }
 
     return FlutterCommandResult.success();
