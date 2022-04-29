@@ -41,7 +41,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'shelf': '1.1.4',
   'video_player': '2.2.11',
   'vm_service': '8.2.2', // TODO debug
-  'analyzer': '4.0.0', // TODO debug
+  'dwds': '13.1.0', // TODO debug
+  //'analyzer': '4.0.0', // TODO debug
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
