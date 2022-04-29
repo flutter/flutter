@@ -297,6 +297,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         packageConfig: packageConfig,
       );
       if (!upgradeOnly) {
+        print(upgradeOnly);
         return FlutterCommandResult.fail();
       }
       print(upgradeOnly);
