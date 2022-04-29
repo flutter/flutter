@@ -911,7 +911,7 @@ mixin WidgetInspectorService {
   Future<void> forceRebuild() {
     final WidgetsBinding binding = WidgetsBinding.instance;
     if (binding.renderViewElement != null) {
-      binding.buildOwner!.reassemble(binding.renderViewElement!, null);
+      binding.buildOwner!.reassemble(binding.renderViewElement!);
       return binding.endOfFrame;
     }
     return Future<void>.value();
