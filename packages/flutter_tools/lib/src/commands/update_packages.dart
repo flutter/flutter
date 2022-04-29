@@ -304,7 +304,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (dep.version != newDep.version) {
           throw Exception('old: ${dep.version} => new: ${newDep.version}');
         } else {
-          print('old: ${dep.version} => new: ${newDep.version}');
+          print('package:${dep.name}: old: ${dep.version} => new: ${newDep.version}');
         }
       }
     }
