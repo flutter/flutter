@@ -90,8 +90,8 @@ class Card extends StatelessWidget {
 
   /// The color used as an overlay on [color] to indicate elevation.
   ///
-  /// If this is null, no overlay will be applied. Otherwise the this
-  /// color will be composited on top of [color] with an opacity related
+  /// If this is null, no overlay will be applied. Otherwise this color
+  /// will be composited on top of [color] with an opacity related
   /// to [elevation] and used to paint the background of the card.
   ///
   /// The default is null.
