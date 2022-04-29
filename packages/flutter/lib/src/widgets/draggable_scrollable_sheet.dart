@@ -795,8 +795,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
 /// See also:
 ///
 ///  * [_DraggableScrollableSheetScrollController], which uses this as its [ScrollPosition].
-class _DraggableScrollableSheetScrollPosition
-    extends ScrollPositionWithSingleContext {
+class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleContext {
   _DraggableScrollableSheetScrollPosition({
     required super.physics,
     required super.context,
@@ -805,16 +804,18 @@ class _DraggableScrollableSheetScrollPosition
   });
 
   VoidCallback? _dragCancelCallback;
-  VoidCallback? _ballisticCancelCallback;
   final _DraggableSheetExtent Function() getExtent;
+  final Set<AnimationController> _ballisticControllers = <AnimationController>{};
   bool get listShouldScroll => pixels > 0.0;
 
   _DraggableSheetExtent get extent => getExtent();
 
   @override
   void beginActivity(ScrollActivity? newActivity) {
-    // Cancel the running ballistic simulation, if there is one.
-    _ballisticCancelCallback?.call();
+    // Cancel the running ballistic simulations
+    for (final AnimationController ballisticController in _ballisticControllers) {
+      ballisticController.stop();
+    }
     super.beginActivity(newActivity);
   }
 
@@ -852,8 +853,10 @@ class _DraggableScrollableSheetScrollPosition
 
   @override
   void dispose() {
-    // Stop the animation before dispose.
-    _ballisticCancelCallback?.call();
+    for (final AnimationController ballisticController in _ballisticControllers) {
+      ballisticController.dispose();
+    }
+    _ballisticControllers.clear();
     super.dispose();
   }
 
@@ -873,10 +876,11 @@ class _DraggableScrollableSheetScrollPosition
     if (extent.snap) {
       // Snap is enabled, simulate snapping instead of clamping scroll.
       simulation = _SnappingSimulation(
-          position: extent.currentPixels,
-          initialVelocity: velocity,
-          pixelSnapSize: extent.pixelSnapSizes,
-          tolerance: physics.tolerance);
+        position: extent.currentPixels,
+        initialVelocity: velocity,
+        pixelSnapSize: extent.pixelSnapSizes,
+        tolerance: physics.tolerance,
+      );
     } else {
       // The iOS bouncing simulation just isn't right here - once we delegate
       // the ballistic back to the ScrollView, it will use the right simulation.
@@ -892,9 +896,8 @@ class _DraggableScrollableSheetScrollPosition
       debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
       vsync: context.vsync,
     );
-    // Stop the ballistic animation if a new activity starts.
-    // See: [beginActivity].
-    _ballisticCancelCallback = ballisticController.stop;
+    _ballisticControllers.add(ballisticController);
+
     double lastPosition = extent.currentPixels;
     void tick() {
       final double delta = ballisticController.value - lastPosition;
@@ -916,8 +919,10 @@ class _DraggableScrollableSheetScrollPosition
       ..addListener(tick)
       ..animateWith(simulation).whenCompleteOrCancel(
         () {
-          _ballisticCancelCallback = null;
-          ballisticController.dispose();
+          if (_ballisticControllers.contains(ballisticController)) {
+            _ballisticControllers.remove(ballisticController);
+            ballisticController.dispose();
+          }
         },
       );
   }
