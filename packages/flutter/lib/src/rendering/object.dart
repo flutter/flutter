@@ -707,7 +707,7 @@ class PaintingContext extends ClipContext {
     if (alpha == 0) {
       return null;
     }
-    if (alpha == 255) {
+    if (alpha == 255 || debugDisableOpacityLayers) {
       painter(this, offset);
       return null;
     }
