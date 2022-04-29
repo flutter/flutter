@@ -59,6 +59,7 @@ class NavigationBar extends StatelessWidget {
     required this.destinations,
     this.onDestinationSelected,
     this.backgroundColor,
+    this.surfaceTintColor,
     this.elevation,
     this.height,
     this.labelBehavior,
@@ -95,9 +96,19 @@ class NavigationBar extends StatelessWidget {
   /// The color of the [NavigationBar] itself.
   ///
   /// If null, [NavigationBarThemeData.backgroundColor] is used. If that
-  /// is also null, the default blends [ColorScheme.surface] and
-  /// [ColorScheme.onSurface] using an [ElevationOverlay].
+  /// is also null, then if [ThemeData.useMaterial3] is true, the value is
+  /// [ColorScheme.surface]. If that is false, the default blends [ColorScheme.surface]
+  /// and [ColorScheme.onSurface] using an [ElevationOverlay].
   final Color? backgroundColor;
+
+  /// The color used as an overlay on [backgroundColor] to indicate elevation.
+  ///
+  /// If null, [NavigationBarThemeData.surfaceTintColor] is used. If that
+  /// is also null, the default value is [ColorScheme.surfaceTint].
+  ///
+  /// See [Material.surfaceTintColor] for more details on how this
+  /// overlay is applied.
+  final Color? surfaceTintColor;
 
   /// The elevation of the [NavigationBar] itself.
   ///
@@ -152,6 +163,7 @@ class NavigationBar extends StatelessWidget {
       color: backgroundColor
         ?? navigationBarTheme.backgroundColor
         ?? defaults.backgroundColor!,
+      surfaceTintColor: surfaceTintColor ?? navigationBarTheme.surfaceTintColor ?? defaults.surfaceTintColor,
       elevation: elevation ?? navigationBarTheme.elevation ?? defaults.elevation!,
       child: SafeArea(
         child: SizedBox(
@@ -1214,11 +1226,9 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
-  // With Material 3, the NavigationBar uses an overlay blend for the
-  // default color regardless of light/dark mode. This should be handled
-  // in the Material widget based off of elevation, but for now we will do
-  // it here in the defaults.
-  @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.primary, 3.0);
+  @override Color? get backgroundColor => _colors.surface;
+
+  @override Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
