@@ -172,7 +172,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
-  OpacityLayer? pushOpacityLayer(
+  OpacityLayer? pushOpacityValue(
     bool needsCompositing,
     Size? size,
     Offset offset,

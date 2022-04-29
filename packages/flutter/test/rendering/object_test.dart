@@ -141,20 +141,20 @@ void main() {
 
   test('PaintingContext.pushOpacityLayer reuses the layer', () {
     _testPaintingContextLayerReuse<OpacityLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      return context.pushOpacityLayer(true, const Size(100, 100), offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
+      return context.pushOpacityValue(true, const Size(100, 100), offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
     });
   });
 
   test('PaintingContext.pushOpacityLayer does not create a layer if alpha is 0', () {
     final _TestCustomLayerBox boxCompositing = _TestCustomLayerBox((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      final Layer? layer = context.pushOpacityLayer(true, const Size(100, 100), offset, 0, painter, oldLayer: oldLayer as OpacityLayer?);
+      final Layer? layer = context.pushOpacityValue(true, const Size(100, 100), offset, 0, painter, oldLayer: oldLayer as OpacityLayer?);
       expect(layer, isNull);
       return layer;
     });
     layout(boxCompositing, phase: EnginePhase.paint);
 
     final _TestCustomLayerBox boxNoCompositing = _TestCustomLayerBox((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      final Layer? layer = context.pushOpacityLayer(false, const Size(100, 100), offset, 0, painter, oldLayer: oldLayer as OpacityLayer?);
+      final Layer? layer = context.pushOpacityValue(false, const Size(100, 100), offset, 0, painter, oldLayer: oldLayer as OpacityLayer?);
       expect(layer, isNull);
       return layer;
     });
@@ -163,14 +163,14 @@ void main() {
 
   test('PaintingContext.pushOpacityLayer does not create a layer if alpha is 255', () {
     final _TestCustomLayerBox boxCompositing = _TestCustomLayerBox((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      final Layer? layer = context.pushOpacityLayer(true, const Size(100, 100), offset, 255, painter, oldLayer: oldLayer as OpacityLayer?);
+      final Layer? layer = context.pushOpacityValue(true, const Size(100, 100), offset, 255, painter, oldLayer: oldLayer as OpacityLayer?);
       expect(layer, isNull);
       return layer;
     });
     layout(boxCompositing, phase: EnginePhase.paint);
 
     final _TestCustomLayerBox boxNoCompositing = _TestCustomLayerBox((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      final Layer? layer = context.pushOpacityLayer(false, const Size(100, 100), offset, 255, painter, oldLayer: oldLayer as OpacityLayer?);
+      final Layer? layer = context.pushOpacityValue(false, const Size(100, 100), offset, 255, painter, oldLayer: oldLayer as OpacityLayer?);
       expect(layer, isNull);
       return layer;
     });
@@ -179,14 +179,14 @@ void main() {
 
   test('PaintingContext.pushOpacityLayer creates a layer if needs compositing', () {
     final _TestCustomLayerBox boxCompositing = _TestCustomLayerBox((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      final Layer? layer = context.pushOpacityLayer(true, const Size(100, 100), offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
+      final Layer? layer = context.pushOpacityValue(true, const Size(100, 100), offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
       expect(layer, isNotNull);
       return layer;
     });
     layout(boxCompositing, phase: EnginePhase.paint);
 
     final _TestCustomLayerBox boxNoCompositing = _TestCustomLayerBox((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      final Layer? layer = context.pushOpacityLayer(false, const Size(100, 100), offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
+      final Layer? layer = context.pushOpacityValue(false, const Size(100, 100), offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
       expect(layer, isNull);
       return layer;
     });

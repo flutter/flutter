@@ -970,7 +970,7 @@ class RenderListWheelViewport
 
     // Paint child cylindrically, with [overAndUnderCenterOpacity].
     void opacityPainter(PaintingContext context, Offset offset) {
-      context.pushOpacityLayer(needsCompositing, size, offset, (overAndUnderCenterOpacity * 255).round(), painter);
+      context.pushOpacityValue(needsCompositing, size, offset, (overAndUnderCenterOpacity * 255).round(), painter);
     }
 
     context.pushTransform(
