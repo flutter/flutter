@@ -494,6 +494,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   Object? _currentRouterTransaction;
   RouteInformationReportingType? _currentIntentionToReport;
   final _RestorableRouteInformation _routeInformation = _RestorableRouteInformation();
+  late bool _routeParsePending;
 
   @override
   String? get restorationId => widget.restorationScopeId;
@@ -580,7 +581,15 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
   @override
   void didChangeDependencies() {
+    _routeParsePending = true;
     super.didChangeDependencies();
+    // The super.didChangeDependencies may have parsed the route information.
+    // This can happen if the didChangeDependencies is triggered by state
+    // restoration or first build.
+    if (widget.routeInformationProvider != null && _routeParsePending) {
+      _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
+    }
+    _routeParsePending = false;
     _maybeNeedToReportRouteInformation();
   }
 
@@ -621,9 +630,11 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   }
 
   void _processRouteInformation(RouteInformation information, ValueGetter<_RouteSetter<T>> delegateRouteSetter) {
+    assert(_routeParsePending);
+    _routeParsePending = false;
     _currentRouterTransaction = Object();
     widget.routeInformationParser!
-      .parseRouteInformation(information)
+      .parseRouteInformationWithDependencies(information, context)
       .then<void>(_processParsedRouteInformation(_currentRouterTransaction, delegateRouteSetter));
   }
 
@@ -641,6 +652,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
   void _handleRouteInformationProviderNotification() {
     assert(widget.routeInformationProvider!.value != null);
+    _routeParsePending = true;
     _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
   }
 
@@ -685,8 +697,10 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
         routerDelegate: widget.routerDelegate,
         routerState: this,
         child: Builder(
-          // We use a Builder so that the build method below
-          // will have a BuildContext that contains the _RouterScope.
+          // Use a Builder so that the build method below will have a
+          // BuildContext that contains the _RouterScope. This also prevents
+          // dependencies look ups in routerDelegate from rebuilding Router
+          // widget that may result in re-parsing the route information.
           builder: widget.routerDelegate.build,
         ),
       ),
@@ -1079,11 +1093,16 @@ class _BackButtonListenerState extends State<BackButtonListener> {
 /// route information from [Router.routeInformationProvider] and any subsequent
 /// new route notifications from it. The [Router] widget calls the [parseRouteInformation]
 /// with the route information from [Router.routeInformationProvider].
+///
+/// One of the [parseRouteInformation] or
+/// [parseRouteInformationWithDependencies] must be implemented, otherwise a
+/// runtime error will be thrown.
 abstract class RouteInformationParser<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const RouteInformationParser();
 
+  /// {@template flutter.widgets.RouteInformationParser.parseRouteInformation}
   /// Converts the given route information into parsed data to pass to a
   /// [RouterDelegate].
   ///
@@ -1094,7 +1113,30 @@ abstract class RouteInformationParser<T> {
   /// Consider using a [SynchronousFuture] if the result can be computed
   /// synchronously, so that the [Router] does not need to wait for the next
   /// microtask to pass the data to the [RouterDelegate].
-  Future<T> parseRouteInformation(RouteInformation routeInformation);
+  /// {@endtemplate}
+  ///
+  /// One can implement [parseRouteInformationWithDependencies] instead if
+  /// the parsing depends on other dependencies from the [BuildContext].
+  Future<T> parseRouteInformation(RouteInformation routeInformation) {
+    throw UnimplementedError(
+      'One of the parseRouteInformation or '
+      'parseRouteInformationWithDependencies must be implemented'
+    );
+  }
+
+  /// {@macro flutter.widgets.RouteInformationParser.parseRouteInformation}
+  ///
+  /// The input [BuildContext] can be used for looking up [InheritedWidget]s
+  /// If one uses [BuildContext.dependOnInheritedWidgetOfExactType], a
+  /// dependency will be created. The [Router] will reparse the
+  /// [RouteInformation] from its [RouteInformationProvider] if the dependency
+  /// notifies its listeners.
+  ///
+  /// One can also use [BuildContext.getElementForInheritedWidgetOfExactType] to
+  /// look up [InheritedWidget]s without creating dependencies.
+  Future<T> parseRouteInformationWithDependencies(RouteInformation routeInformation, BuildContext context) {
+    return parseRouteInformation(routeInformation);
+  }
 
   /// Restore the route information from the given configuration.
   ///

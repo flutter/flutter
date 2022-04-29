@@ -1308,6 +1308,168 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     expect(find.text('Current route: /404'), findsOneWidget);
     expect(reportedRouteInformation[1].location, '/404');
   });
+
+  testWidgets('RouterInformationParser can look up dependencies and reparse', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final BackButtonDispatcher dispatcher = RootBackButtonDispatcher();
+    int expectedMaxLines = 1;
+    bool parserCalled = false;
+    final Widget router = Router<RouteInformation>(
+      routeInformationProvider: provider,
+      routeInformationParser: CustomRouteInformationParser((RouteInformation information, BuildContext context) {
+        parserCalled = true;
+        final DefaultTextStyle style = DefaultTextStyle.of(context);
+        return RouteInformation(location: '${style.maxLines}');
+      }),
+      routerDelegate: SimpleRouterDelegate(
+        builder: (BuildContext context, RouteInformation? information) {
+          return Text(information!.location!);
+        },
+        onPopRoute: () {
+          provider.value = const RouteInformation(
+            location: 'popped',
+          );
+          return SynchronousFuture<bool>(true);
+        },
+      ),
+      backButtonDispatcher: dispatcher,
+    );
+    await tester.pumpWidget(buildBoilerPlate(
+      DefaultTextStyle(
+        style: const TextStyle(),
+        maxLines: expectedMaxLines,
+        child: router,
+      ),
+    ));
+
+    expect(find.text('$expectedMaxLines'), findsOneWidget);
+    expect(parserCalled, isTrue);
+
+    parserCalled = false;
+    expectedMaxLines = 2;
+    await tester.pumpWidget(buildBoilerPlate(
+      DefaultTextStyle(
+        style: const TextStyle(),
+        maxLines: expectedMaxLines,
+        child: router,
+      ),
+    ));
+    await tester.pump();
+    expect(find.text('$expectedMaxLines'), findsOneWidget);
+    expect(parserCalled, isTrue);
+  });
+
+  testWidgets('RouterInformationParser can look up dependencies without reparsing', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final BackButtonDispatcher dispatcher = RootBackButtonDispatcher();
+    const int expectedMaxLines = 1;
+    bool parserCalled = false;
+    final Widget router = Router<RouteInformation>(
+      routeInformationProvider: provider,
+      routeInformationParser: CustomRouteInformationParser((RouteInformation information, BuildContext context) {
+        parserCalled = true;
+        final DefaultTextStyle style = context.getElementForInheritedWidgetOfExactType<DefaultTextStyle>()!.widget as DefaultTextStyle;
+        return RouteInformation(location: '${style.maxLines}');
+      }),
+      routerDelegate: SimpleRouterDelegate(
+        builder: (BuildContext context, RouteInformation? information) {
+          return Text(information!.location!);
+        },
+        onPopRoute: () {
+          provider.value = const RouteInformation(
+            location: 'popped',
+          );
+          return SynchronousFuture<bool>(true);
+        },
+      ),
+      backButtonDispatcher: dispatcher,
+    );
+    await tester.pumpWidget(buildBoilerPlate(
+      DefaultTextStyle(
+        style: const TextStyle(),
+        maxLines: expectedMaxLines,
+        child: router,
+      ),
+    ));
+
+    expect(find.text('$expectedMaxLines'), findsOneWidget);
+    expect(parserCalled, isTrue);
+
+    parserCalled = false;
+    const int newMaxLines = 2;
+    // This rebuild should not trigger re-parsing.
+    await tester.pumpWidget(buildBoilerPlate(
+      DefaultTextStyle(
+        style: const TextStyle(),
+        maxLines: newMaxLines,
+        child: router,
+      ),
+    ));
+    await tester.pump();
+    expect(find.text('$newMaxLines'), findsNothing);
+    expect(find.text('$expectedMaxLines'), findsOneWidget);
+    expect(parserCalled, isFalse);
+  });
+
+  testWidgets('Looks up dependencies in RouterDelegate does not trigger re-parsing', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final BackButtonDispatcher dispatcher = RootBackButtonDispatcher();
+    int expectedMaxLines = 1;
+    bool parserCalled = false;
+    final Widget router = Router<RouteInformation>(
+      routeInformationProvider: provider,
+      routeInformationParser: CustomRouteInformationParser((RouteInformation information, BuildContext context) {
+        parserCalled = true;
+        return information;
+      }),
+      routerDelegate: SimpleRouterDelegate(
+        builder: (BuildContext context, RouteInformation? information) {
+          final DefaultTextStyle style = DefaultTextStyle.of(context);
+          return Text('${style.maxLines}');
+        },
+        onPopRoute: () {
+          provider.value = const RouteInformation(
+            location: 'popped',
+          );
+          return SynchronousFuture<bool>(true);
+        },
+      ),
+      backButtonDispatcher: dispatcher,
+    );
+    await tester.pumpWidget(buildBoilerPlate(
+      DefaultTextStyle(
+        style: const TextStyle(),
+        maxLines: expectedMaxLines,
+        child: router,
+      ),
+    ));
+
+    expect(find.text('$expectedMaxLines'), findsOneWidget);
+    // Initial route will be parsed regardless.
+    expect(parserCalled, isTrue);
+
+    parserCalled = false;
+    expectedMaxLines = 2;
+    await tester.pumpWidget(buildBoilerPlate(
+      DefaultTextStyle(
+        style: const TextStyle(),
+        maxLines: expectedMaxLines,
+        child: router,
+      ),
+    ));
+    await tester.pump();
+    expect(find.text('$expectedMaxLines'), findsOneWidget);
+    expect(parserCalled, isFalse);
+  });
 }
 
 Widget buildBoilerPlate(Widget child) {
@@ -1322,6 +1484,7 @@ typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInforma
 typedef SimpleRouterDelegatePopRoute = Future<bool> Function();
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result);
 typedef RouterReportRouterInformation = void Function(RouteInformation, RouteInformationReportingType);
+typedef CustomRouteInformationParserCallback = RouteInformation Function(RouteInformation, BuildContext);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
@@ -1329,6 +1492,22 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
   @override
   Future<RouteInformation> parseRouteInformation(RouteInformation information) {
     return SynchronousFuture<RouteInformation>(information);
+  }
+
+  @override
+  RouteInformation restoreRouteInformation(RouteInformation configuration) {
+    return configuration;
+  }
+}
+
+class CustomRouteInformationParser extends RouteInformationParser<RouteInformation> {
+  const CustomRouteInformationParser(this.callback);
+
+  final CustomRouteInformationParserCallback callback;
+
+  @override
+  Future<RouteInformation> parseRouteInformationWithDependencies(RouteInformation information, BuildContext context) {
+    return SynchronousFuture<RouteInformation>(callback(information, context));
   }
 
   @override
