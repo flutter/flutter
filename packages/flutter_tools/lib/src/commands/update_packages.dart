@@ -5,6 +5,8 @@
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
+import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -95,6 +97,10 @@ class UpdatePackagesCommand extends FlutterCommand {
         abbr: 'j',
         help: 'Causes the "pub get" runs to happen concurrently on this many '
               'CPUs. Defaults to the number of CPUs that this machine has.',
+      )
+      ..addOption(
+        'describe-package',
+        help: 'Describe why a particular package is included in the global version solve.',
       );
   }
 
@@ -150,7 +156,13 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
+    final String? describePackage = stringArg('describe-package');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
+    if (doUpgrade && describePackage != null) {
+      throwToolExit(
+          '--describe-package cannot be used while upgrading dependencies',
+      );
+    }
 
     if (boolArg('crash')) {
       throw StateError('test crash please ignore.');
@@ -213,9 +225,12 @@ class UpdatePackagesCommand extends FlutterCommand {
     // honoring all their constraints. If not upgrading the pub tool will only
     // attempt to download any necessary package versions to the pub cache to
     // warm the cache.
-    final PubDependencyTree tree = PubDependencyTree(); // object to collect results
+    PubDependencyTree? tree; // object to collect results
+    if (doUpgrade || describePackage != null) {
+      tree = PubDependencyTree();
+    }
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
-    await _generateFakePackage(
+    final PackageConfig packageConfig = await _generateFakePackage(
       tempDir: tempDir,
       dependencies: doUpgrade ? explicitDependencies.values : allDependencies.values,
       pubspecs: pubspecs,
@@ -223,9 +238,18 @@ class UpdatePackagesCommand extends FlutterCommand {
       doUpgrade: doUpgrade,
     );
 
+    if (describePackage != null) {
+      await _describePackage(
+        packageName: describePackage,
+        tree: tree!,
+        packageConfig: packageConfig,
+      );
+      return FlutterCommandResult.success();
+    }
+
     if (doUpgrade) {
       final bool done = _upgradePubspecs(
-        tree: tree,
+        tree: tree!,
         pubspecs: pubspecs,
         explicitDependencies: explicitDependencies,
         specialDependencies: specialDependencies,
@@ -368,12 +392,13 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _generateFakePackage({
+  /// Generate a synthetic Dart package with the given dependencies.
+  Future<PackageConfig> _generateFakePackage({
     required Directory tempDir,
     required Iterable<PubspecDependency> dependencies,
     required List<PubspecYaml> pubspecs,
-    required PubDependencyTree tree,
     required bool doUpgrade,
+    PubDependencyTree? tree,
   }) async {
     try {
       final File fakePackage = _pubspecFor(tempDir);
@@ -405,6 +430,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         offline: boolArg('offline'),
         flutterRootOverride: temporaryFlutterSdk?.path,
       );
+
       // Cleanup the temporary SDK
       try {
         temporaryFlutterSdk?.deleteSync(recursive: true);
@@ -412,7 +438,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         // Failed to delete temporary SDK.
       }
 
-      if (doUpgrade) {
+      if (tree != null) {
         // If upgrading, we run "pub deps --style=compact" on the result. We
         // pipe all the output to tree.fill(), which parses it so that it can
         // create a graph of all the dependencies so that we can figure out the
@@ -426,6 +452,11 @@ class UpdatePackagesCommand extends FlutterCommand {
           retry: false, // errors here are usually fatal since we're not hitting the network
         );
       }
+      final String packageConfigString = await tempDir.childDirectory('.dart_tool').childFile('package_config.json').readAsString();
+      return PackageConfig.parseString(
+        packageConfigString,
+        tempDir.uri,
+      );
     } finally {
       tempDir.deleteSync(recursive: true);
     }
@@ -581,6 +612,37 @@ class UpdatePackagesCommand extends FlutterCommand {
 
     if (paths.isEmpty) {
       globals.printStatus('No paths found from $from to $to');
+    }
+  }
+
+  Future<void> _describePackage({
+    required String packageName,
+    required PubDependencyTree tree,
+    required PackageConfig packageConfig,
+  }) async {
+    if (!tree.contains(packageName)) {
+      throwToolExit('Package $packageName not found in the dependency tree.');
+    }
+    globals.printStatus('Package $packageName is resolved as ${tree.versionFor(packageName)}');
+    final Iterable<String> dependees = tree.getDependees(packageName);
+    globals.printStatus('Found ${dependees.length} packages depending on $packageName:');
+
+    final Map<String, Uri> packageToRoot = <String, Uri>{};
+    for (final Package package in packageConfig.packages) {
+      packageToRoot[package.name] = package.root;
+    }
+
+    for (final String dependee in dependees) {
+      final Directory root = globals.fs.directory(packageToRoot[dependee]);
+      final File pubspecFile = root.childFile('pubspec.yaml');
+      final String pubspecString = await pubspecFile.readAsString();
+      final YamlMap pubspec = loadYaml(pubspecString) as YamlMap;
+      String? constraint = (pubspec['dependencies'] as YamlMap?)?[packageName] as String?;
+      constraint ??= (pubspec['dev_dependencies'] as YamlMap?)?[packageName] as String?;
+      if (constraint == null) {
+        throw StateError('Could not find dependency $packageName in $pubspecFile');
+      }
+      globals.printStatus('\t$dependee constrains $packageName with $constraint');
     }
   }
 }
@@ -1519,9 +1581,29 @@ class PubDependencyTree {
     return result;
   }
 
+  /// Get the set of packages that depend on [package].
+  Set<String> getDependees(String package) {
+    final Set<String> dependees = <String>{};
+    for (final MapEntry<String, Set<String>> entry in _dependencyTree.entries) {
+      if (entry.value.contains(package)) {
+        dependees.add(entry.key);
+      }
+    }
+    return dependees;
+  }
+
   /// The version that a particular package ended up with.
   String versionFor(String package) {
     return _versions[package]!;
+  }
+
+  @override
+  String toString() {
+    final StringBuffer buffer = StringBuffer();
+    for (final MapEntry<String, Set<String>> entry in _dependencyTree.entries) {
+      buffer.writeln('${entry.key} -> ${entry.value.join(', ')}');
+    }
+    return buffer.toString();
   }
 }
 
