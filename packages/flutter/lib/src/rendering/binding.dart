@@ -514,14 +514,16 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   Future<void> performReassemble() async {
     await super.performReassemble();
-    if (!kReleaseMode) {
-      Timeline.startSync('Preparing Hot Reload (layout)');
-    }
-    try {
-      renderView.reassemble();
-    } finally {
+    if (BindingBase.debugReassembleConfig?.widgetName == null) {
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        Timeline.startSync('Preparing Hot Reload (layout)');
+      }
+      try {
+        renderView.reassemble();
+      } finally {
+        if (!kReleaseMode) {
+          Timeline.finishSync();
+        }
       }
     }
     scheduleWarmUpFrame();
