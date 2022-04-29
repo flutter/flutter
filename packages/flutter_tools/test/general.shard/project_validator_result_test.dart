@@ -39,6 +39,9 @@ class ProjectValidatorTaskImpl extends ProjectValidator {
   bool supportsProject(FlutterProject project) {
     return true;
   }
+
+  @override
+  String get title => 'Impl';
 }
 
 void main() {

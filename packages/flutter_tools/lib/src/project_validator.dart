@@ -6,6 +6,7 @@ import 'project.dart';
 import 'project_validator_result.dart';
 
 abstract class ProjectValidator {
+  String get title;
   bool supportsProject(FlutterProject project);
   /// Can return more than one result in case a file/command have a lot of info to share to the user
   Future<List<ProjectValidatorResult>> start(FlutterProject project);

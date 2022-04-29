@@ -30,6 +30,9 @@ class ProjectValidatorDummy extends ProjectValidator {
   bool supportsProject(FlutterProject project) {
     return true;
   }
+
+  @override
+  String get title => 'First Dummy';
 }
 
 class ProjectValidatorSecondDummy extends ProjectValidator {
@@ -45,6 +48,9 @@ class ProjectValidatorSecondDummy extends ProjectValidator {
   bool supportsProject(FlutterProject project) {
     return true;
   }
+
+  @override
+  String get title => 'Second Dummy';
 }
 
 class ProjectValidatorCrash extends ProjectValidator {
@@ -57,6 +63,9 @@ class ProjectValidatorCrash extends ProjectValidator {
   bool supportsProject(FlutterProject project) {
     return true;
   }
+
+  @override
+  String get title => 'Crash';
 }
 
 void main() {
