@@ -180,6 +180,14 @@ FLUTTER_DARWIN_EXPORT
 - (id<FlutterPluginRegistry>)pluginRegistry;
 
 /**
+ * A wrapper around UIAccessibilityIsVoiceOverRunning().
+ *
+ * As a C function, UIAccessibilityIsVoiceOverRunning() cannot be mocked in testing. Mock
+ * this class method to testing features depends on UIAccessibilityIsVoiceOverRunning().
+ */
++ (BOOL)isUIAccessibilityIsVoiceOverRunning;
+
+/**
  * True if at least one frame has rendered and the ViewController has appeared.
  *
  * This property is reset to false when the ViewController disappears. It is

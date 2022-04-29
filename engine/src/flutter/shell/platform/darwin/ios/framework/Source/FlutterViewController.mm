@@ -826,7 +826,9 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)applicationWillResignActive:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationWillResignActive");
-  self.view.accessibilityElementsHidden = YES;
+  if ([FlutterViewController isUIAccessibilityIsVoiceOverRunning]) {
+    self.view.accessibilityElementsHidden = YES;
+  }
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
@@ -1716,6 +1718,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (id<FlutterPluginRegistry>)pluginRegistry {
   return _engine;
+}
+
++ (BOOL)isUIAccessibilityIsVoiceOverRunning {
+  return UIAccessibilityIsVoiceOverRunning();
 }
 
 #pragma mark - FlutterPluginRegistry
