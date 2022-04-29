@@ -71,7 +71,6 @@ enum HeroFlightDirection {
   pop,
 }
 
-
 /// A widget that marks its child as being a candidate for
 /// [hero animations](https://flutter.dev/docs/development/ui/animations/hero-animations).
 ///
@@ -114,6 +113,13 @@ enum HeroFlightDirection {
 /// animation.
 ///
 /// ** See code in examples/api/lib/widgets/heroes/hero.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows [Hero] flight animations using default tween
+/// and custom rect tween.
+///
+/// ** See code in examples/api/lib/widgets/heroes/hero.1.dart **
 /// {@end-tool}
 ///
 /// ## Discussion

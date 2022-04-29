@@ -2649,7 +2649,6 @@ Future<void> main() async {
       end: const Size(100, 100),
     ).chain(CurveTween(curve: Curves.fastOutSlowIn));
 
-
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: navigator,
