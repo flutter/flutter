@@ -1936,6 +1936,8 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
       return _RepositoryDartDirectory(this, entry);
     if (entry.name == 'expat')
       return _RepositoryExpatDirectory(this, entry);
+    if (entry.name == 'externals')
+      return _RepositoryThirdPartyExternalsDirectory(this, entry);
     if (entry.name == 'freetype-android')
       throw '//third_party/freetype-android is no longer part of this client: remove it';
     if (entry.name == 'freetype2')
@@ -1979,6 +1981,29 @@ class _RepositoryThirdPartyWebDependenciesDirectory extends _RepositoryDirectory
   @override
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'canvaskit' // redundant; covered by Skia dependencies
+        && super.shouldRecurse(entry);
+  }
+}
+
+/// Corresponds to the `src/third_party/externals` directory
+class _RepositoryThirdPartyExternalsDirectory extends _RepositoryDirectory {
+  _RepositoryThirdPartyExternalsDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'vulkanmemoryallocator')
+      return _RepositoryVulkanMemoryAllocatorDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class _RepositoryVulkanMemoryAllocatorDirectory extends _RepositoryDirectory {
+  _RepositoryVulkanMemoryAllocatorDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    // Flutter only uses the headers in the include directory.
+    return entry.name == 'include'
         && super.shouldRecurse(entry);
   }
 }
