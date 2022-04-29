@@ -27,7 +27,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   # OCMock is for testing only so there is no google clone
   'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
-  'skia_revision': '294aaf9457577b5966bf45b9135b7e0d12bacb37',
+  'skia_revision': '4230297004399d21bd3c27bdba3bde1266103a1b',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -421,6 +421,10 @@ deps = {
    # Upstream Khronos Vulkan Headers (v1.1.130)
    'src/third_party/vulkan-headers':
    Var('github_git') + '/KhronosGroup/Vulkan-Headers.git' + '@' + '0e57fc1cfa56a203efe43e4dfb9b3c9e9b105593',
+
+   # Skia VMA dependency.
+  'src/third_party/externals/vulkanmemoryallocator':
+   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git' + '@' + '7de5cc00de50e71a3aab22dea52fbb7ff4efceb6',
 
    # Downstream Fuchsia Vulkan Headers (v1.2.198)
   'src/third_party/fuchsia-vulkan':
