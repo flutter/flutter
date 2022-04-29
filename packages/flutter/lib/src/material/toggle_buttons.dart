@@ -28,6 +28,12 @@ import 'toggle_buttons_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
 ///
+/// {@tool dartpad}
+/// This example showcase [ToggleButtons] in various configurations.
+///
+/// ** See code in examples/api/lib/material/toggle_buttons/toggle_buttons.0.dart **
+/// {@end-tool}
+///
 /// ## Customizing toggle buttons
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
 /// can update the [isSelected] list however it wants to.
