@@ -1,5 +1,8 @@
 gcp_credentials: ENCRYPTED[!2c88dee9c9d9805b214c9f7ad8f3bc8fae936cdb0f881d562101151c408c7e024a41222677d5831df90c60d2dd6cd80a!]
 
+# Don't run on 'master' since it's a mirror of 'main'.
+only_if: $CIRRUS_BRANCH != 'master'
+
 # LINUX
 task:
   gke_container:
