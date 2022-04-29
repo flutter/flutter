@@ -45,7 +45,7 @@ import 'ticker_provider.dart';
 /// if widgets in an overlay entry with [maintainState] set to true repeatedly
 /// call [State.setState], the user's battery will be drained unnecessarily.
 ///
-/// [OverlayEntry] is a [ChangeNotifier] that notifies when the widget built by
+/// [OverlayEntry] is a [Listenable] that notifies when the widget built by
 /// [builder] is mounted or unmounted, whose exact state can be queried by
 /// [mounted]. After the owner of the [OverlayEntry] calls [remove] and then
 /// [dispose], the widget may not be immediately removed from the widget tree.
@@ -58,7 +58,7 @@ import 'ticker_provider.dart';
 ///  * [OverlayState]
 ///  * [WidgetsApp]
 ///  * [MaterialApp]
-class OverlayEntry extends ChangeNotifier {
+class OverlayEntry implements Listenable {
   /// Creates an overlay entry.
   ///
   /// To insert the entry into an [Overlay], first find the overlay using
@@ -182,8 +182,9 @@ class OverlayEntry extends ChangeNotifier {
   }
 
   void _didUnmount() {
-    if (_disposedByOwner && !mounted) {
-      super.dispose();
+    assert(!mounted);
+    if (_disposedByOwner) {
+      _overlayStateMounted.dispose();
     }
   }
 
@@ -201,13 +202,12 @@ class OverlayEntry extends ChangeNotifier {
   /// tree.
   ///
   /// This method should only be called by the object's owner.
-  @override
   void dispose() {
     assert(!_disposedByOwner);
     assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
     _disposedByOwner = true;
     if (!mounted) {
-      super.dispose();
+      _overlayStateMounted.dispose();
     }
   }
 
