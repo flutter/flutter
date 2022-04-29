@@ -1,4 +1,4 @@
-Signature: 196d1fb1e997f73ac24720c2553327d7
+Signature: d2572ace40e6a61beb0e7b4e61c4d225
 
 UNUSED LICENSES:
 
@@ -6216,6 +6216,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/Sampler.h
 FILE: ../../../third_party/skia/src/gpu/graphite/TextureProxyView.h
 FILE: ../../../third_party/skia/src/gpu/graphite/TextureUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/TextureUtils.h
+FILE: ../../../third_party/skia/src/gpu/graphite/UploadBufferManager.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/UploadBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.h
