@@ -509,7 +509,7 @@ class FloatingActionButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
     final FloatingActionButtonThemeData defaults = theme.useMaterial3
-      ? _M3Defaults(context, _floatingActionButtonType, child != null)
+      ? _TokenDefaultsM3(context, _floatingActionButtonType, child != null)
       : _M2Defaults(context, _floatingActionButtonType, child != null);
 
     final Color foregroundColor = this.foregroundColor
@@ -783,8 +783,8 @@ class _M2Defaults extends FloatingActionButtonThemeData {
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // Generated version v0_92
-class _M3Defaults extends FloatingActionButtonThemeData {
-  _M3Defaults(this.context, this.type, this.hasChild)
+class _TokenDefaultsM3 extends FloatingActionButtonThemeData {
+  _TokenDefaultsM3(this.context, this.type, this.hasChild)
     : super(
         elevation: 6.0,
         focusElevation: 6.0,
