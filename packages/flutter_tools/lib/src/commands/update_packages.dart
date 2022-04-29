@@ -735,6 +735,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
 
     for (final String dependee in dependees) {
+      print('meep in $dependee');
       final Package package = nameToPackage[dependee]!;
       final Directory root = globals.fs.directory(package.root);
       final File pubspecFile = root.childFile('pubspec.yaml');
