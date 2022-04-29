@@ -236,10 +236,6 @@ void FlutterWindowsView::OnScroll(double x,
              device_id);
 }
 
-void FlutterWindowsView::OnPlatformBrightnessChanged() {
-  SendPlatformBrightnessChanged();
-}
-
 void FlutterWindowsView::OnUpdateSemanticsEnabled(bool enabled) {
   engine_->UpdateSemanticsEnabled(enabled);
 }
@@ -478,11 +474,6 @@ void FlutterWindowsView::SendPointerEventWithData(
     }
   }
 }
-
-void FlutterWindowsView::SendPlatformBrightnessChanged() {
-  engine_->task_runner()->RunNowOrPostTask(
-      [this]() { engine_->ReloadPlatformBrightness(); });
-};
 
 bool FlutterWindowsView::MakeCurrent() {
   return engine_->surface_manager()->MakeCurrent();

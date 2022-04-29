@@ -74,10 +74,6 @@ void FlutterEngine::ReloadSystemFonts() {
   FlutterDesktopEngineReloadSystemFonts(engine_);
 }
 
-void FlutterEngine::ReloadPlatformBrightness() {
-  FlutterDesktopEngineReloadPlatformBrightness(engine_);
-}
-
 FlutterDesktopPluginRegistrarRef FlutterEngine::GetRegistrarForPlugin(
     const std::string& plugin_name) {
   if (!engine_) {

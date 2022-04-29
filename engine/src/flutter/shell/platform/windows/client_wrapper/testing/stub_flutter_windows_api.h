@@ -65,9 +65,6 @@ class StubFlutterWindowsApi {
   // Called for FlutterDesktopEngineReloadSystemFonts.
   virtual void EngineReloadSystemFonts() {}
 
-  // Called for FlutterDesktopEngineReloadPlatformBrightness.
-  virtual void EngineReloadPlatformBrightness() {}
-
   // Called for FlutterDesktopViewGetHWND.
   virtual HWND ViewGetHWND() { return reinterpret_cast<HWND>(1); }
 

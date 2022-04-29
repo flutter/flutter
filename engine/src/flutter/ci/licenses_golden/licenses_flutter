@@ -2227,6 +2227,8 @@ FILE: ../../../flutter/shell/platform/windows/display_helper_winuwp.h
 FILE: ../../../flutter/shell/platform/windows/dpi_utils_win32.cc
 FILE: ../../../flutter/shell/platform/windows/dpi_utils_win32.h
 FILE: ../../../flutter/shell/platform/windows/dpi_utils_win32_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/event_watcher_win32.cc
+FILE: ../../../flutter/shell/platform/windows/event_watcher_win32.h
 FILE: ../../../flutter/shell/platform/windows/external_texture_gl.cc
 FILE: ../../../flutter/shell/platform/windows/external_texture_gl.h
 FILE: ../../../flutter/shell/platform/windows/flutter_key_map.cc
@@ -2283,6 +2285,13 @@ FILE: ../../../flutter/shell/platform/windows/public/flutter_windows.h
 FILE: ../../../flutter/shell/platform/windows/sequential_id_generator.cc
 FILE: ../../../flutter/shell/platform/windows/sequential_id_generator.h
 FILE: ../../../flutter/shell/platform/windows/sequential_id_generator_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/settings_plugin.cc
+FILE: ../../../flutter/shell/platform/windows/settings_plugin.h
+FILE: ../../../flutter/shell/platform/windows/settings_plugin_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/settings_plugin_win32.cc
+FILE: ../../../flutter/shell/platform/windows/settings_plugin_win32.h
+FILE: ../../../flutter/shell/platform/windows/settings_plugin_winuwp.cc
+FILE: ../../../flutter/shell/platform/windows/settings_plugin_winuwp.h
 FILE: ../../../flutter/shell/platform/windows/system_utils.h
 FILE: ../../../flutter/shell/platform/windows/system_utils_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/system_utils_win32.cc
