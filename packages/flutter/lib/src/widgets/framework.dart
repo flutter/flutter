@@ -3980,7 +3980,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // implementation to decide whether to rebuild based on whether we had
       // dependencies here.
     }
-    _inheritedWidgets = null;
+    _inheritedAncestor = null;
     _lifecycleState = _ElementLifecycle.inactive;
   }
 
@@ -4172,7 +4172,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  Map<Type, InheritedElement>? _inheritedWidgets;
+  InheritedElement? _inheritedAncestor;
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -4213,8 +4213,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
-    assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    final InheritedElement? ancestor = getElementForInheritedWidgetOfExactType<T>();
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4225,8 +4224,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
-    return ancestor;
+    return _inheritedAncestor?._lookup<T>();
   }
 
   /// Called in [Element.mount] and [Element.activate] to register this element in
@@ -4245,7 +4243,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedWidgets = _parent?._inheritedWidgets;
+    _inheritedAncestor = _parent is InheritedElement?
+        ? _parent as InheritedElement?
+        : _parent?._inheritedAncestor;
   }
 
   @override
@@ -5238,16 +5238,33 @@ class InheritedElement extends ProxyElement {
   InheritedElement(InheritedWidget super.widget);
 
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
+  final Map<Type, InheritedElement> _lookupTable = HashMap<Type, InheritedElement>();
+
+  @pragma('vm:prefer-inline')
+  void _updateLookupTable() {
+    if (_lookupTable.isNotEmpty) {
+      return;
+    }
+    _lookupTable[widget.runtimeType] = this;
+    InheritedElement? ancestor = _inheritedAncestor;
+    while (ancestor != null) {
+      // Reading out the ancestor's lookup table is slower than just running
+      // up the tree based on local experiments.
+      _lookupTable.putIfAbsent(ancestor.widget.runtimeType, () => ancestor!);
+      ancestor = ancestor._inheritedAncestor;
+    }
+  }
+
+  @pragma('vm:prefer-inline')
+  InheritedElement? _lookup<T extends InheritedWidget>() {
+    _updateLookupTable();
+    return _lookupTable[T];
+  }
 
   @override
-  void _updateInheritance() {
-    assert(_lifecycleState == _ElementLifecycle.active);
-    final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
-    if (incomingWidgets != null)
-      _inheritedWidgets = HashMap<Type, InheritedElement>.of(incomingWidgets);
-    else
-      _inheritedWidgets = HashMap<Type, InheritedElement>();
-    _inheritedWidgets![widget.runtimeType] = this;
+  void deactivate() {
+    _lookupTable.clear();
+    super.deactivate();
   }
 
   @override
