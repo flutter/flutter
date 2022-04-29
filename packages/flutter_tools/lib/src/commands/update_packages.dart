@@ -746,7 +746,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     for (final String dependee in dependees) {
       final Package? package = nameToPackage[dependee];
       if (package == null) {
-        // This is probably a special dependency
+        globals.printStatus('package:$dependee not found in pub_cache, skipping...');
         continue;
       }
       final Directory root = globals.fs.directory(package.root);
