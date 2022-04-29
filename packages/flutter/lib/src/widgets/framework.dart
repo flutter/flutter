@@ -4173,6 +4173,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   InheritedElement? _inheritedAncestor;
+  InheritedElement? get _thisOrParentAsInherited => _inheritedAncestor;
+
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -4243,9 +4245,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedAncestor = _parent is InheritedElement?
-        ? _parent as InheritedElement?
-        : _parent?._inheritedAncestor;
+    _inheritedAncestor = _parent?._thisOrParentAsInherited;
   }
 
   @override
@@ -5240,6 +5240,9 @@ class InheritedElement extends ProxyElement {
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
   final Map<Type, InheritedElement> _lookupTable = HashMap<Type, InheritedElement>();
 
+  @override
+  InheritedElement? get _thisOrParentAsInherited => this;
+
   @pragma('vm:prefer-inline')
   void _updateLookupTable() {
     if (_lookupTable.isNotEmpty) {
@@ -5250,7 +5253,7 @@ class InheritedElement extends ProxyElement {
     while (ancestor != null) {
       // Reading out the ancestor's lookup table is slower than just running
       // up the tree based on local experiments.
-      _lookupTable.putIfAbsent(ancestor.widget.runtimeType, () => ancestor!);
+      _lookupTable[ancestor.widget.runtimeType] ??= ancestor;
       ancestor = ancestor._inheritedAncestor;
     }
   }
@@ -5262,9 +5265,36 @@ class InheritedElement extends ProxyElement {
   }
 
   @override
-  void deactivate() {
+  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
+    assert(_debugCheckStateIsActiveForAncestorLookup());
+    if (runtimeType == T) {
+      return this;
+    }
+    return _lookup<T>();
+  }
+
+  @override
+  void activate() {
+    // This may have stale entries after being moved in the tree. We can't clear
+    // in deactivate because dependencies (like FocusScopes) may still want to
+    // look up an inherited widget while being moved to make sure they stay
+    // attached to the same one after they are moved. Clearing once we activate
+    // is necessary to make sure we have no stale dependencies left.
+    // Also clear in unmount so that we do not retain references when we will
+    // never get inserted into the tree.
+    // See also _FocusState.deactivate.
     _lookupTable.clear();
-    super.deactivate();
+    super.activate();
+  }
+
+  @override
+  void unmount() {
+    // See comment in activate.
+    // We can't do this in deactivate because dependencies may rely on us while
+    // getting moved around in the tree - but at this point, we will never go
+    // back in the tree so it is safe.
+    _lookupTable.clear();
+    super.unmount();
   }
 
   @override
