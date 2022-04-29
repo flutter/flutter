@@ -375,6 +375,8 @@ bool FileExists(const fml::UniqueFD& base_directory, const char* path) {
          INVALID_FILE_ATTRIBUTES;
 }
 
+// TODO(jonahwilliams): https://github.com/flutter/flutter/issues/102838 this is
+// not atomic on Windows.
 bool WriteAtomically(const fml::UniqueFD& base_directory,
                      const char* file_name,
                      const Mapping& mapping) {
@@ -383,12 +385,8 @@ bool WriteAtomically(const fml::UniqueFD& base_directory,
   }
 
   auto file_path = GetAbsolutePath(base_directory, file_name);
-  std::stringstream stream;
-  stream << file_path << ".temp";
-  auto temp_file_path = stream.str();
-
   auto temp_file =
-      OpenFile(temp_file_path.c_str(), true, FilePermission::kReadWrite);
+      OpenFile(file_path.c_str(), true, FilePermission::kReadWrite);
 
   if (!temp_file.is_valid()) {
     FML_DLOG(ERROR) << "Could not create temporary file.";
@@ -435,15 +433,6 @@ bool WriteAtomically(const fml::UniqueFD& base_directory,
   }
 
   temp_file.reset();
-
-  if (!::MoveFile(Utf8ToWideString(temp_file_path).c_str(),
-                  Utf8ToWideString(file_path).c_str())) {
-    FML_DLOG(ERROR)
-        << "Could not replace temp file at correct path. File path: "
-        << file_path << ". Temp file path: " << temp_file_path << " "
-        << GetLastErrorMessage();
-    return false;
-  }
 
   return true;
 }

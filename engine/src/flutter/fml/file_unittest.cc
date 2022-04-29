@@ -228,11 +228,6 @@ TEST(FileTest, CanStopVisitEarly) {
   ASSERT_TRUE(fml::UnlinkDirectory(dir.fd(), "a"));
 }
 
-#if FML_OS_WIN
-#define AtomicWriteTest DISABLED_AtomicWriteTest
-#else
-#define AtomicWriteTest AtomicWriteTest
-#endif
 TEST(FileTest, AtomicWriteTest) {
   fml::ScopedTemporaryDirectory dir;
 
