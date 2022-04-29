@@ -378,12 +378,6 @@ targets:
       add_recipes_cq: "true"
     timeout: 75
 
-  - name: Windows UWP Engine
-    recipe: engine/engine
-    properties:
-      build_windows_uwp: "true"
-    timeout: 60
-
   - name: Windows Web Engine
     recipe: engine/web_engine
     properties:
