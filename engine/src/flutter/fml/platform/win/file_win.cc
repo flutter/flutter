@@ -34,11 +34,29 @@ static std::string GetFullHandlePath(const fml::UniqueFD& handle) {
   return WideStringToUtf8({buffer, buffer_size});
 }
 
+static bool IsAbsolutePath(const char* path) {
+  if (path == nullptr || strlen(path) == 0) {
+    return false;
+  }
+
+  auto wpath = Utf8ToWideString({path});
+  if (wpath.size() == 0) {
+    return false;
+  }
+
+  return ::PathIsRelative(wpath.c_str()) == FALSE;
+}
+
 static std::string GetAbsolutePath(const fml::UniqueFD& base_directory,
                                    const char* subpath) {
-  std::stringstream stream;
-  stream << GetFullHandlePath(base_directory) << "\\" << subpath;
-  auto path = stream.str();
+  std::string path;
+  if (IsAbsolutePath(subpath)) {
+    path = subpath;
+  } else {
+    std::stringstream stream;
+    stream << GetFullHandlePath(base_directory) << "\\" << subpath;
+    path = stream.str();
+  }
   std::replace(path.begin(), path.end(), '/', '\\');
   return path;
 }
@@ -82,7 +100,7 @@ static DWORD GetFileAttributesForUtf8Path(const char* absolute_path) {
 
 static DWORD GetFileAttributesForUtf8Path(const fml::UniqueFD& base_directory,
                                           const char* path) {
-  std::string full_path = GetFullHandlePath(base_directory) + "\\" + path;
+  std::string full_path = GetAbsolutePath(base_directory, path);
   return GetFileAttributesForUtf8Path(full_path.c_str());
 }
 
