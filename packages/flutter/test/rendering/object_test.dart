@@ -141,7 +141,7 @@ void main() {
 
   test('PaintingContext.pushOpacityLayer reuses the layer', () {
     _testPaintingContextLayerReuse<OpacityLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      return context.pushOpacityValue(true, const Size(100, 100), offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
+      return context.pushOpacityValue(true, const Size(100, 100), offset, 0.5, painter, oldLayer: oldLayer as OpacityLayer?);
     });
   });
 
