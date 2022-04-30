@@ -397,6 +397,7 @@ class DataTable extends StatelessWidget {
     required this.rows,
     this.checkboxHorizontalMargin,
     this.border,
+    this.sortIcon,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -623,6 +624,9 @@ class DataTable extends StatelessWidget {
   /// The style to use when painting the boundary and interior divisions of the table.
   final TableBorder? border;
 
+  ///
+  final Icon? sortIcon;
+
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
   final int? _onlyTextColumn;
@@ -748,6 +752,7 @@ class DataTable extends StatelessWidget {
               visible: sorted,
               up: sorted ? ascending : null,
               duration: _sortArrowAnimationDuration,
+              sortIcon: sortIcon,
             ),
             const SizedBox(width: _sortArrowPadding),
           ],
@@ -1121,6 +1126,7 @@ class _SortArrow extends StatefulWidget {
     required this.visible,
     required this.up,
     required this.duration,
+    this.sortIcon,
   });
 
   final bool visible;
@@ -1128,6 +1134,8 @@ class _SortArrow extends StatefulWidget {
   final bool? up;
 
   final Duration duration;
+
+  final Icon? sortIcon;
 
   @override
   _SortArrowState createState() => _SortArrowState();
@@ -1230,7 +1238,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
         transform: Matrix4.rotationZ(_orientationOffset + _orientationAnimation.value)
                              ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),
         alignment: Alignment.center,
-        child: const Icon(
+        child: widget.sortIcon ?? const Icon(
           Icons.arrow_upward,
           size: _arrowIconSize,
         ),

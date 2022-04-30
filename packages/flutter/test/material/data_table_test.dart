@@ -1893,4 +1893,55 @@ void main() {
     // Go without crashes.
 
   });
+
+  testWidgets('DataTable sorting icon test', (WidgetTester tester) async {
+    const Icon sortIcon = Icon(Icons.arrow_drop_up_rounded, size: 16.0);
+
+     Widget buildTable({bool sortAscending = true, Icon? sortIcon}) {
+      return DataTable(
+        sortIcon: sortIcon,
+        sortColumnIndex: 0,
+        sortAscending: sortAscending,
+        columns: <DataColumn>[
+          DataColumn(
+            label: const Text('Name'),
+            tooltip: 'Name',
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: Scaffold(body: buildTable(sortIcon: sortIcon))),
+    ));
+
+    Finder iconFinder = find.byWidget(sortIcon);
+    expect(iconFinder, findsOneWidget);
+
+    final Icon icon = tester.widget(iconFinder);
+    expect(icon, equals(sortIcon));
+
+    DataTable dataTable = tester.widget(find.byType(DataTable));
+    expect(dataTable.sortIcon, equals(sortIcon));
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: Scaffold(body: buildTable())),
+    ));
+
+    iconFinder = find.byWidget(sortIcon);
+    expect(iconFinder, findsNothing);
+
+    dataTable = tester.widget(find.byType(DataTable));
+    expect(dataTable.sortIcon, equals(null));
+  });
 }
