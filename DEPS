@@ -631,30 +631,6 @@ deps = {
      'condition': 'host_os == "linux" and not download_fuchsia_sdk',
      'dep_type': 'cipd',
    },
-
-  # Windows SDK
-  'src/third_party/windows_sdk': {
-    'packages': [
-      {
-        'package': 'flutter/windows/windows-sdk',
-        'version': 'build:10.0.19041.0'
-      }
-    ],
-    'condition': 'download_windows_deps',
-    'dep_type': 'cipd',
-  },
-  # CppWinRT tooling for UWP builds
-  'src/third_party/cppwinrt': {
-    'packages': [
-      {
-        'package': 'flutter/cppwinrt/win-amd64',
-        'version': 'build:2.0.210505.3'
-      }
-    ],
-    'condition': 'download_windows_deps',
-    'dep_type': 'cipd',
-  },
-
 }
 
 hooks = [
@@ -715,17 +691,6 @@ hooks = [
     'action': [
       'python3',
       'src/flutter/tools/pub_get_offline.py',
-    ]
-  },
-  {
-    # This must run whenever the cppwinrt dependency is updated
-    # to regenerate winrt headers
-    'name': 'Generate winrt headers',
-    'pattern': '.',
-    'condition': 'download_windows_deps',
-    'action': [
-      'python3',
-      'src/build/win/generate_winrt_headers.py',
     ]
   },
   {
