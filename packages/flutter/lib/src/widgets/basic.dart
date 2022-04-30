@@ -5319,6 +5319,8 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// A widget that sizes and positions children efficiently, according to the
 /// logic in a [FlowDelegate].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=NG6pvXpnIso}
+///
 /// Flow layouts are optimized for repositioning children using transformation
 /// matrices.
 ///
@@ -6409,6 +6411,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
 
 /// A widget that creates a separate display list for its child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=cVAGLDuc2xE}
+///
 /// This widget creates a separate display list for its child, which
 /// can improve performance if the subtree repaints at different times than
 /// the surrounding parts of the tree.
@@ -7407,6 +7411,8 @@ class Builder extends StatelessWidget {
 typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=syvT63CosNE}
 ///
 /// The [StateSetter] function passed to the [builder] is used to invoke a
 /// rebuild instead of a typical [State]'s [State.setState].
