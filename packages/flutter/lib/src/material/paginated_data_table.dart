@@ -74,6 +74,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.dataRowHeight = kMinInteractiveDimension,
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
+    this.topBottomRowPadding = 0.0,
     this.columnSpacing = 56.0,
     this.showCheckboxColumn = true,
     this.showFirstLastButtons = false,
@@ -148,9 +149,13 @@ class PaginatedDataTable extends StatefulWidget {
   final ValueSetter<bool?>? onSelectAll;
 
   /// The height of each row (excluding the row that contains column headings).
+  /// If, for any cell in the row, the cell content plus 2 * [topBottomRowPadding] is larger than the [dataRowHeight], 
+  /// then the height of that row will exceed [dataRowHeight].
   ///
   /// This value is optional and defaults to kMinInteractiveDimension if not
   /// specified.
+  /// 
+  /// Also see [DataTable.topBottomRowPadding].
   final double dataRowHeight;
 
   /// The height of the heading row.
@@ -170,6 +175,15 @@ class PaginatedDataTable extends StatefulWidget {
   /// margin between the edge of the table and the checkbox, as well as the
   /// margin between the checkbox and the content in the first data column.
   final double horizontalMargin;
+
+  /// {@template flutter.material.dataTable.topBottomRowPadding}
+  /// The minimum padding between the content of each data cell and the top and bottom of the data row.
+  /// 
+  /// If null, [DataTableThemeData.topBottomRowPadding] is used. This value
+  /// defaults to 0.0.
+  /// 
+  /// Also see [PaginatedDataTable.dataRowHeight].
+  final double topBottomRowPadding;
 
   /// The horizontal margin between the contents of each data column.
   ///
@@ -516,6 +530,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     dataRowHeight: widget.dataRowHeight,
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
+                    topBottomRowPadding: widget.topBottomRowPadding,
                     checkboxHorizontalMargin: widget.checkboxHorizontalMargin,
                     columnSpacing: widget.columnSpacing,
                     showCheckboxColumn: widget.showCheckboxColumn,

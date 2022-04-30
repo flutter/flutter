@@ -390,6 +390,7 @@ class DataTable extends StatelessWidget {
     this.headingRowHeight,
     this.headingTextStyle,
     this.horizontalMargin,
+    this.topBottomRowPadding,
     this.columnSpacing,
     this.showCheckboxColumn = true,
     this.showBottomBorder = false,
@@ -491,11 +492,15 @@ class DataTable extends StatelessWidget {
 
   /// {@template flutter.material.dataTable.dataRowHeight}
   /// The height of each row (excluding the row that contains column headings).
+  /// If, for any cell in the row, the cell content plus 2 * [topBottomRowPadding] is larger than the [dataRowHeight], 
+  /// then the height of that row will exceed [dataRowHeight].
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.dataRowHeight] is used. This value defaults
   /// to [kMinInteractiveDimension] to adhere to the Material Design
   /// specifications.
+  /// 
+  /// Also see [DataTable.topBottomRowPadding].
   final double? dataRowHeight;
 
   /// {@template flutter.material.dataTable.dataTextStyle}
@@ -568,6 +573,15 @@ class DataTable extends StatelessWidget {
   /// margin between the edge of the table and the checkbox, as well as the
   /// margin between the checkbox and the content in the first data column.
   final double? horizontalMargin;
+
+  /// {@template flutter.material.dataTable.topBottomRowPadding}
+  /// The minimum padding between the content of each data cell and the top and bottom of the data row.
+  /// 
+  /// If null, [DataTableThemeData.topBottomRowPadding] is used. This value
+  /// defaults to 0.0.
+  /// 
+  /// Also see [DataTable.dataRowHeight].
+  final double? topBottomRowPadding;
 
   /// {@template flutter.material.dataTable.columnSpacing}
   /// The horizontal margin between the contents of each data column.
@@ -666,6 +680,9 @@ class DataTable extends StatelessWidget {
   /// The default horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
   static const double _horizontalMargin = 24.0;
+
+  /// The default minimum padding between the content of each data cell and the top and bottom of the data row.
+  static const double _topBottomRowPadding = 0.0;
 
   /// The default horizontal margin between the contents of each data column.
   static const double _columnSpacing = 56.0;
@@ -821,13 +838,14 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.dataTextStyle
       ?? themeData.dataTableTheme.dataTextStyle
       ?? themeData.textTheme.bodyText2!;
-    final double effectiveDataRowHeight = dataRowHeight
+    final double minDataRowHeight = dataRowHeight
       ?? dataTableTheme.dataRowHeight
       ?? themeData.dataTableTheme.dataRowHeight
       ?? kMinInteractiveDimension;
+
     label = Container(
       padding: padding,
-      height: effectiveDataRowHeight,
+      constraints: BoxConstraints(minHeight: minDataRowHeight),
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
         style: effectiveDataTextStyle.copyWith(
@@ -904,6 +922,9 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.columnSpacing
       ?? theme.dataTableTheme.columnSpacing
       ?? _columnSpacing;
+    final double effectivetopBottomRowPadding = topBottomRowPadding 
+      ?? theme.dataTableTheme.topBottomRowPadding
+      ?? _topBottomRowPadding;
 
     final List<TableColumnWidth> tableColumns = List<TableColumnWidth>.filled(columns.length + (displayCheckboxColumn ? 1 : 0), const _NullTableColumnWidth());
     final List<TableRow> tableRows = List<TableRow>.generate(
@@ -990,9 +1011,15 @@ class DataTable extends StatelessWidget {
         paddingEnd = effectiveColumnSpacing / 2.0;
       }
 
-      final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
+      final EdgeInsetsDirectional headingPadding = EdgeInsetsDirectional.only(
         start: paddingStart,
         end: paddingEnd,
+      );
+      final EdgeInsetsDirectional cellPadding = EdgeInsetsDirectional.only(
+        start: paddingStart,
+        end: paddingEnd,
+        top: effectivetopBottomRowPadding,
+        bottom: effectivetopBottomRowPadding,
       );
       if (dataColumnIndex == _onlyTextColumn) {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);
@@ -1001,7 +1028,7 @@ class DataTable extends StatelessWidget {
       }
       tableRows[0].children![displayColumnIndex] = _buildHeadingCell(
         context: context,
-        padding: padding,
+        padding: headingPadding,
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
@@ -1015,7 +1042,7 @@ class DataTable extends StatelessWidget {
         final DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children![displayColumnIndex] = _buildDataCell(
           context: context,
-          padding: padding,
+          padding: cellPadding,
           label: cell.child,
           numeric: column.numeric,
           placeholder: cell.placeholder,
@@ -1040,6 +1067,7 @@ class DataTable extends StatelessWidget {
         type: MaterialType.transparency,
         child: Table(
           columnWidths: tableColumns.asMap(),
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: tableRows,
           border: border,
         ),

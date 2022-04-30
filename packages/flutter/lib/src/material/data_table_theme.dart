@@ -43,6 +43,7 @@ class DataTableThemeData with Diagnosticable {
     this.headingRowHeight,
     this.headingTextStyle,
     this.horizontalMargin,
+    this.topBottomRowPadding,
     this.columnSpacing,
     this.dividerThickness,
     this.checkboxHorizontalMargin,
@@ -73,6 +74,9 @@ class DataTableThemeData with Diagnosticable {
 
   /// {@macro flutter.material.dataTable.horizontalMargin}
   final double? horizontalMargin;
+
+  /// {@macro flutter.material.dataTable.topBottomRowPadding}
+  final double? topBottomRowPadding;
 
   /// {@macro flutter.material.dataTable.columnSpacing}
   final double? columnSpacing;
@@ -107,6 +111,7 @@ class DataTableThemeData with Diagnosticable {
       headingRowHeight: headingRowHeight ?? this.headingRowHeight,
       headingTextStyle: headingTextStyle ?? this.headingTextStyle,
       horizontalMargin: horizontalMargin ?? this.horizontalMargin,
+      topBottomRowPadding: topBottomRowPadding ?? this.topBottomRowPadding,
       columnSpacing: columnSpacing ?? this.columnSpacing,
       dividerThickness: dividerThickness ?? this.dividerThickness,
       checkboxHorizontalMargin: checkboxHorizontalMargin ?? this.checkboxHorizontalMargin,
@@ -129,6 +134,7 @@ class DataTableThemeData with Diagnosticable {
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
       headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
+      topBottomRowPadding: lerpDouble(a.topBottomRowPadding, b.topBottomRowPadding, t),
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
       dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t),
       checkboxHorizontalMargin: lerpDouble(a.checkboxHorizontalMargin, b.checkboxHorizontalMargin, t),
@@ -145,6 +151,7 @@ class DataTableThemeData with Diagnosticable {
     headingRowHeight,
     headingTextStyle,
     horizontalMargin,
+    topBottomRowPadding,
     columnSpacing,
     dividerThickness,
     checkboxHorizontalMargin,
@@ -165,6 +172,7 @@ class DataTableThemeData with Diagnosticable {
       && other.headingRowHeight == headingRowHeight
       && other.headingTextStyle == headingTextStyle
       && other.horizontalMargin == horizontalMargin
+      && other.topBottomRowPadding == topBottomRowPadding
       && other.columnSpacing == columnSpacing
       && other.dividerThickness == dividerThickness
       && other.checkboxHorizontalMargin == checkboxHorizontalMargin;
@@ -181,6 +189,7 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
+    properties.add(DoubleProperty('topBottomRowPadding', topBottomRowPadding, defaultValue: null));
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
     properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));

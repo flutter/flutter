@@ -734,6 +734,119 @@ void main() {
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 56.0);
   });
 
+  testWidgets('DataTable custom topBottomRowPadding when DataCell height is smaller than dataRowHeight', (WidgetTester tester) async {
+    Widget buildCustomTable({
+      required double? dataRowHeight,
+      required double? topBottomRowPadding,
+    }) {
+      return DataTable(
+        dataRowHeight: dataRowHeight,
+        topBottomRowPadding: topBottomRowPadding,
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Name'),
+          ),
+          DataColumn(
+            label: Text('Calories'),
+            numeric: true
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: ValueKey<String>(dessert.name),
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
+
+    // DEFAULT VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowHeight: 60.0, topBottomRowPadding: null)),
+    ));
+    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 60.0);
+
+    // CUSTOM VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowHeight: 60.0, topBottomRowPadding: 5.0)),
+    ));
+    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 60.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowHeight: 60.0, topBottomRowPadding: 28.0)),
+    ));
+    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, greaterThan(60.0));
+  });
+
+  testWidgets('DataTable custom topBottomRowPadding when DataCell height is larger than dataRowHeight', (WidgetTester tester) async {
+    Widget buildCustomTable({
+      required double? dataRowHeight,
+      required double? topBottomRowPadding,
+    }) {
+      return DataTable(
+        dataRowHeight: dataRowHeight,
+        topBottomRowPadding: topBottomRowPadding,
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Name'),
+          ),
+          DataColumn(
+            label: Text('Calories'),
+            numeric: true
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: ValueKey<String>(dessert.name),
+            cells: <DataCell>[
+              DataCell(Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                  Text(dessert.name),
+                  Text(dessert.name),
+                  Text(dessert.name),
+                  Text(dessert.name),
+                ]),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowHeight: 20.0, topBottomRowPadding: null)),
+    ));
+    final double actualContainerHeightNoPadding = tester.getSize(findFirstContainerFor('Frozen yogurt')).height;
+    expect(actualContainerHeightNoPadding, greaterThan(20.0));
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowHeight: 20.0, topBottomRowPadding: 0.0)),
+    ));
+    final double actualContainerHeightNoPadding2 = tester.getSize(findFirstContainerFor('Frozen yogurt')).height;
+    expect(actualContainerHeightNoPadding, actualContainerHeightNoPadding2);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowHeight: 20.0, topBottomRowPadding: 5.0)),
+    ));
+    final double actualContainerHeightWithPadding = tester.getSize(findFirstContainerFor('Frozen yogurt')).height;
+    expect(actualContainerHeightWithPadding, greaterThan(actualContainerHeightNoPadding));
+  });
+
   testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
     const double defaultHorizontalMargin = 24.0;
     const double defaultColumnSpacing = 56.0;

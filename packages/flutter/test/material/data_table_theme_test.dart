@@ -22,6 +22,7 @@ void main() {
     expect(themeData.headingRowHeight, null);
     expect(themeData.headingTextStyle, null);
     expect(themeData.horizontalMargin, null);
+    expect(themeData.topBottomRowPadding, null);
     expect(themeData.columnSpacing, null);
     expect(themeData.dividerThickness, null);
     expect(themeData.checkboxHorizontalMargin, null);
@@ -35,6 +36,7 @@ void main() {
     expect(theme.data.headingRowHeight, null);
     expect(theme.data.headingTextStyle, null);
     expect(theme.data.horizontalMargin, null);
+    expect(theme.data.topBottomRowPadding, null);
     expect(theme.data.columnSpacing, null);
     expect(theme.data.dividerThickness, null);
     expect(theme.data.checkboxHorizontalMargin, null);
@@ -67,6 +69,7 @@ void main() {
       headingRowHeight: 52.0,
       headingTextStyle:  const TextStyle(fontSize: 14.0),
       horizontalMargin: 3.0,
+      topBottomRowPadding: 3.5,
       columnSpacing: 4.0,
       dividerThickness: 5.0,
       checkboxHorizontalMargin: 6.0,
@@ -85,9 +88,10 @@ void main() {
     expect(description[5], 'headingRowHeight: 52.0');
     expect(description[6], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
     expect(description[7], 'horizontalMargin: 3.0');
-    expect(description[8], 'columnSpacing: 4.0');
-    expect(description[9], 'dividerThickness: 5.0');
-    expect(description[10], 'checkboxHorizontalMargin: 6.0');
+    expect(description[8], 'topBottomRowPadding: 3.5');
+    expect(description[9], 'columnSpacing: 4.0');
+    expect(description[10], 'dividerThickness: 5.0');
+    expect(description[11], 'checkboxHorizontalMargin: 6.0');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
@@ -99,6 +103,7 @@ void main() {
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
+    const double topBottomRowPadding = 3.5;
     const double columnSpacing = 4.0;
     const double dividerThickness = 5.0;
 
@@ -114,6 +119,7 @@ void main() {
             headingRowHeight: headingRowHeight,
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
+            topBottomRowPadding: topBottomRowPadding,
             columnSpacing: columnSpacing,
             dividerThickness: dividerThickness,
           ),
@@ -166,6 +172,7 @@ void main() {
     const double themeHeadingRowHeight = 51.0;
     const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double themeHorizontalMargin = 2.0;
+    const double themetopBottomRowPadding = 10.0;
     const double themeColumnSpacing = 3.0;
     const double themeDividerThickness = 4.0;
 
@@ -177,6 +184,7 @@ void main() {
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
+    const double topBottomRowPadding = 3.5;
     const double columnSpacing = 4.0;
     const double dividerThickness = 5.0;
     await tester.pumpWidget(
@@ -191,6 +199,7 @@ void main() {
             headingRowHeight: themeHeadingRowHeight,
             headingTextStyle: themeHeadingTextStyle,
             horizontalMargin: themeHorizontalMargin,
+            topBottomRowPadding: themetopBottomRowPadding,
             columnSpacing: themeColumnSpacing,
             dividerThickness: themeDividerThickness,
           ),
@@ -205,6 +214,7 @@ void main() {
             headingRowHeight: headingRowHeight,
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
+            topBottomRowPadding: topBottomRowPadding,
             columnSpacing: columnSpacing,
             dividerThickness: dividerThickness,
             sortColumnIndex: 0,
@@ -253,6 +263,7 @@ void main() {
     const double globalThemeHeadingRowHeight = 51.0;
     const TextStyle globalThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double globalThemeHorizontalMargin = 2.0;
+    const double globalThemetopBottomRowPadding = 10.0;
     const double globalThemeColumnSpacing = 3.0;
     const double globalThemeDividerThickness = 4.0;
 
@@ -264,6 +275,7 @@ void main() {
     const double localThemeHeadingRowHeight = 52.0;
     const TextStyle localThemeHeadingTextStyle = TextStyle(fontSize: 14.5);
     const double localThemeHorizontalMargin = 3.0;
+    const double localThemetopBottomRowPadding = 7.0;
     const double localThemeColumnSpacing = 4.0;
     const double localThemeDividerThickness = 5.0;
 
@@ -279,6 +291,7 @@ void main() {
             headingRowHeight: globalThemeHeadingRowHeight,
             headingTextStyle: globalThemeHeadingTextStyle,
             horizontalMargin: globalThemeHorizontalMargin,
+            topBottomRowPadding: globalThemetopBottomRowPadding,
             columnSpacing: globalThemeColumnSpacing,
             dividerThickness: globalThemeDividerThickness,
           ),
@@ -294,6 +307,7 @@ void main() {
               headingRowHeight: localThemeHeadingRowHeight,
               headingTextStyle: localThemeHeadingTextStyle,
               horizontalMargin: localThemeHorizontalMargin,
+              topBottomRowPadding: localThemetopBottomRowPadding,
               columnSpacing: localThemeColumnSpacing,
               dividerThickness: localThemeDividerThickness,
             ),
