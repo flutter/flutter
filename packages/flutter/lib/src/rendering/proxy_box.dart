@@ -861,7 +861,7 @@ class RenderOpacity extends RenderProxyBox {
     final bool wasVisible = _opacity > 0.0;
     _opacity = value;
     markNeedsPaint();
-    if (wasVisible != (_opacity >= 0.0) && !alwaysIncludeSemantics)
+    if (wasVisible != (_opacity > 0.0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
 
