@@ -908,7 +908,7 @@ class RenderOpacity extends RenderProxyBox {
 /// layout models, e.g. the way that [RenderAnimatedOpacity] uses it for [RenderBox]
 /// and [RenderSliverAnimatedOpacity] uses it for [RenderSliver].
 mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChildMixin<T> {
-  late double _opacityValue;
+  double? _opacityValue;
 
   @override
   bool get isRepaintBoundary => child != null && _currentlyIsRepaintBoundary!;
@@ -917,7 +917,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   @override
   OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
     final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
-    final Color color = Color.fromRGBO(0, 0, 0, _opacityValue);
+    final Color color = Color.fromRGBO(0, 0, 0, _opacityValue!);
     updatedLayer.alpha = color.alpha;
     return updatedLayer;
   }
@@ -977,22 +977,22 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   }
 
   void _updateOpacity() {
-    final double oldOpacity = _opacityValue;
+    final double? oldOpacity = _opacityValue;
     _opacityValue = opacity.value;
     if (oldOpacity != _opacityValue) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _opacityValue > 0;
+      _currentlyIsRepaintBoundary = _opacityValue! > 0;
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary)
         markNeedsCompositingBitsUpdate();
       markNeedsCompositedLayerUpdate();
-      if ((oldOpacity == null || oldOpacity <= 0) || _opacityValue <= 0)
+      if ((oldOpacity == null || oldOpacity <= 0) || _opacityValue! <= 0)
         markNeedsSemanticsUpdate();
     }
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_opacityValue != null && _opacityValue <= 0.0) {
+    if (_opacityValue != null && _opacityValue! <= 0.0) {
       return;
     }
     super.paint(context, offset);
@@ -1000,7 +1000,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && (_opacityValue >= 0 || alwaysIncludeSemantics))
+    if (child != null && (_opacityValue! >= 0 || alwaysIncludeSemantics))
       visitor(child!);
   }
 
