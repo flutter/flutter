@@ -98,6 +98,7 @@ class DataTableThemeData with Diagnosticable {
     double? headingRowHeight,
     TextStyle? headingTextStyle,
     double? horizontalMargin,
+    double? topBottomRowPadding,
     double? columnSpacing,
     double? dividerThickness,
     double? checkboxHorizontalMargin,
