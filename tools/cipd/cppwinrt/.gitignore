@@ -1,5 +1,0 @@
-# Temp directory into which we unpack the .nupkg archive
-tmp
-
-# nupkg archives
-*.nupkg
