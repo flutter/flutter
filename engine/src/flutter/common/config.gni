@@ -71,7 +71,7 @@ if (is_ios || is_mac) {
 _platform_name = host_os
 if (_platform_name == "mac") {
   _platform_name = "darwin"
-} else if (_platform_name == "win" || _platform_name == "winuwp") {
+} else if (_platform_name == "win") {
   _platform_name = "windows"
 }
 
@@ -80,8 +80,7 @@ full_platform_name = "$_platform_name-$host_cpu"
 _platform_target_name = target_os
 if (_platform_target_name == "mac") {
   _platform_target_name = "darwin"
-} else if (_platform_target_name == "win" ||
-           _platform_target_name == "winuwp") {
+} else if (_platform_target_name == "win") {
   _platform_target_name = "windows"
 }
 
@@ -93,14 +92,14 @@ if (flutter_prebuilt_dart_sdk) {
   _target_os_name = target_os
   if (_target_os_name == "mac") {
     _target_os_name = "macos"
-  } else if (_target_os_name == "win" || _target_os_name == "winuwp") {
+  } else if (_target_os_name == "win") {
     _target_os_name = "windows"
   }
 
   _host_os_name = host_os
   if (_host_os_name == "mac") {
     _host_os_name = "macos"
-  } else if (_host_os_name == "win" || _host_os_name == "winuwp") {
+  } else if (_host_os_name == "win") {
     _host_os_name = "windows"
   }
 

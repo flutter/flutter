@@ -19,8 +19,8 @@ class DartProject {
   // - icu_data_path: Path to the icudtl.dat file.
   // - aot_library_path: Path to the AOT snapshot file.
   //
-  // The paths must be absolute in a UWP app. In a win32 app, they can be
-  // relative to the directory containing the running executable.
+  // The paths may either be absolute or relative to the directory containing
+  // the running executable.
   explicit DartProject(const std::wstring& assets_path,
                        const std::wstring& icu_data_path,
                        const std::wstring& aot_library_path) {
@@ -29,7 +29,6 @@ class DartProject {
     aot_library_path_ = aot_library_path;
   }
 
-#ifndef WINUWP
   // Creates a DartProject from a directory path. The directory should contain
   // the following top-level items:
   // - icudtl.dat (provided as a resource by the Flutter tool)
@@ -43,7 +42,6 @@ class DartProject {
     icu_data_path_ = path + L"\\icudtl.dat";
     aot_library_path_ = path + L"\\app.so";
   }
-#endif
 
   ~DartProject() = default;
 

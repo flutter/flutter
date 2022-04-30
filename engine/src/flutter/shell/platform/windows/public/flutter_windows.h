@@ -13,11 +13,6 @@
 #include "flutter_messenger.h"
 #include "flutter_plugin_registrar.h"
 
-#ifdef WINUWP
-#include <windows.applicationmodel.activation.h>
-#include <windows.ui.core.h>
-#endif
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -76,22 +71,13 @@ typedef struct {
 // The caller owns the returned reference, and is responsible for calling
 // FlutterDesktopViewControllerDestroy. Returns a null pointer in the event of
 // an error.
-#ifdef WINUWP
-// The CoreApplicationView implementation accepts a pointer to the host
-// CoreApplicationView and view hookup is performed in the construction path.
-FLUTTER_EXPORT FlutterDesktopViewControllerRef
-FlutterDesktopViewControllerCreateFromCoreApplicationView(
-    ABI::Windows::ApplicationModel::Core::CoreApplicationView* window,
-    ABI::Windows::ApplicationModel::Activation::IActivatedEventArgs* args,
-    FlutterDesktopEngineRef engine);
-#else  //! WINUWP
-// The Win32 implementation accepts width, height
-// with view hookup explicitly performed using the caller using HWND parenting.
+//
+// The Win32 implementation accepts width, height with view hookup explicitly
+// performed using the caller using HWND parenting.
 FLUTTER_EXPORT FlutterDesktopViewControllerRef
 FlutterDesktopViewControllerCreate(int width,
                                    int height,
                                    FlutterDesktopEngineRef engine);
-#endif
 
 // Shuts down the engine instance associated with |controller|, and cleans up
 // associated state.
@@ -114,7 +100,6 @@ FlutterDesktopViewControllerGetView(FlutterDesktopViewControllerRef controller);
 FLUTTER_EXPORT void FlutterDesktopViewControllerForceRedraw(
     FlutterDesktopViewControllerRef controller);
 
-#ifndef WINUWP
 // Allows the Flutter engine and any interested plugins an opportunity to
 // handle the given message.
 //
@@ -127,7 +112,6 @@ FLUTTER_EXPORT bool FlutterDesktopViewControllerHandleTopLevelWindowProc(
     WPARAM wparam,
     LPARAM lparam,
     LRESULT* result);
-#endif
 
 // ========== Engine ==========
 
@@ -157,7 +141,6 @@ FLUTTER_EXPORT bool FlutterDesktopEngineDestroy(FlutterDesktopEngineRef engine);
 FLUTTER_EXPORT bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
                                             const char* entry_point);
 
-#ifndef WINUWP
 // DEPRECATED: This is no longer necessary to call, Flutter will take care of
 // processing engine messages transparently through DispatchMessage.
 //
@@ -169,7 +152,6 @@ FLUTTER_EXPORT bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
 // last return value from this function.
 FLUTTER_EXPORT uint64_t
 FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine);
-#endif
 
 FLUTTER_EXPORT void FlutterDesktopEngineReloadSystemFonts(
     FlutterDesktopEngineRef engine);
@@ -192,15 +174,8 @@ FlutterDesktopEngineGetTextureRegistrar(
 
 // ========== View ==========
 
-#ifdef WINUWP
-// Return backing CoreApplicationView for manipulation of CoreWindow and
-// CoreTitleBar in host application.
-FLUTTER_EXPORT ABI::Windows::ApplicationModel::Core::CoreApplicationView*
-FlutterDesktopViewGetCoreApplicationView(FlutterDesktopViewRef view);
-#else
 // Return backing HWND for manipulation in host application.
 FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
-#endif
 
 // ========== Plugin Registrar (extensions) ==========
 // These are Windows-specific extensions to flutter_plugin_registrar.h
@@ -224,7 +199,6 @@ typedef bool (*FlutterDesktopWindowProcCallback)(HWND /* hwnd */,
 FLUTTER_EXPORT FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetView(
     FlutterDesktopPluginRegistrarRef registrar);
 
-#ifndef WINUWP
 FLUTTER_EXPORT void
 FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(
     FlutterDesktopPluginRegistrarRef registrar,
@@ -235,7 +209,6 @@ FLUTTER_EXPORT void
 FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopWindowProcCallback delegate);
-#endif
 
 // ========== Freestanding Utilities ==========
 

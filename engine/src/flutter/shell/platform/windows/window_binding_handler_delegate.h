@@ -54,11 +54,9 @@ class WindowBindingHandlerDelegate {
   // Typically called by currently configured WindowBindingHandler
   virtual void OnText(const std::u16string&) = 0;
 
-  // TODO(clarkezone) refactor delegate to avoid needing win32 magic values in
-  // UWP implementation https://github.com/flutter/flutter/issues/70202 Notifies
-  // delegate that backing window size has received key press. Should return
-  // true if the event was handled and should not be propagated. Typically
-  // called by currently configured WindowBindingHandler.
+  // Notifies delegate that backing window size has received key press. Should
+  // return true if the event was handled and should not be propagated.
+  // Typically called by currently configured WindowBindingHandler.
   virtual void OnKey(int key,
                      int scancode,
                      int action,

@@ -17,11 +17,6 @@
 #include "plugin_registrar.h"
 #include "plugin_registry.h"
 
-#ifdef WINUWP
-#include <windows.applicationmodel.activation.h>
-#include <windows.ui.core.h>
-#endif
-
 namespace flutter {
 
 // A controller for a view displaying Flutter content.
@@ -31,7 +26,6 @@ namespace flutter {
 // methods in the C API directly, as this class will do that internally.
 class FlutterViewController {
  public:
-#ifndef WINUWP
   // Creates a FlutterView that can be parented into a Windows View hierarchy
   // either using HWNDs.
   //
@@ -39,19 +33,6 @@ class FlutterViewController {
   explicit FlutterViewController(int width,
                                  int height,
                                  const DartProject& project);
-#else
-  // Creates a FlutterView that can be parented into a Windows View hierarchy
-  // either using CoreWindow.
-  //
-  // |dart_project| will be used to configure the engine backing this view.
-  // |IActivatedEventArgs| will be used to configure the engine switches.  Can
-  // be set to nullptr.
-  explicit FlutterViewController(
-      ABI::Windows::ApplicationModel::Core::CoreApplicationView*
-          applicationview,
-      ABI::Windows::ApplicationModel::Activation::IActivatedEventArgs* args,
-      const DartProject& project);
-#endif
 
   virtual ~FlutterViewController();
 
@@ -65,7 +46,6 @@ class FlutterViewController {
   // Returns the view managed by this controller.
   FlutterView* view() { return view_.get(); }
 
-#ifndef WINUWP
   // Allows the Flutter engine and any interested plugins an opportunity to
   // handle the given message.
   //
@@ -75,7 +55,6 @@ class FlutterViewController {
                                                   UINT message,
                                                   WPARAM wparam,
                                                   LPARAM lparam);
-#endif
 
  private:
   // Handle for interacting with the C API's view controller, if any.
