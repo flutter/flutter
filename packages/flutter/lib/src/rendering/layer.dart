@@ -1774,7 +1774,7 @@ class OpacityLayer extends OffsetLayer {
     assert(value != null);
     assert(value! >= 0.0 && value <= 1.0);
     if (value != _opacity) {
-      if (value! >= 1.0 || _opacity! >= 1.0) {
+      if (value! >= 1.0 || (_opacity != null && _opacity! >= 1.0)) {
         engineLayer = null;
       }
       _opacity = value;
