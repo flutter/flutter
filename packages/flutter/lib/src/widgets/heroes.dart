@@ -997,6 +997,8 @@ class HeroController extends NavigatorObserver {
 
 /// Enables or disables [Hero]es in the widget subtree.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=AaIASk2u1C0}
+///
 /// When [enabled] is false, all [Hero] widgets in this subtree will not be
 /// involved in hero animations.
 ///
