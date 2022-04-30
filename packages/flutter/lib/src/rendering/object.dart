@@ -717,11 +717,10 @@ class PaintingContext extends ClipContext {
     }
     // Due to https://github.com/flutter/flutter/issues/48417 this will always need to be
     // composited on the web.
-    final Color color = Color.fromRGBO(0, 0, 0, opacity);
     if (needsCompositing || kIsWeb) {
       final OpacityLayer layer = oldLayer ?? OpacityLayer();
       layer
-        ..alpha = color.alpha
+        ..opacity = opacity
         ..offset = offset;
       pushLayer(layer, painter, Offset.zero);
       return layer;
@@ -733,6 +732,7 @@ class PaintingContext extends ClipContext {
         return null;
       }
     }
+    final Color color = Color.fromRGBO(0, 0, 0, opacity);
     canvas.saveLayer(size != null ? offset & size : null, Paint()..color = color);
     painter(this, offset);
     canvas.restore();

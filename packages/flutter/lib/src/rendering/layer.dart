@@ -1732,12 +1732,16 @@ class TransformLayer extends OffsetLayer {
 class OpacityLayer extends OffsetLayer {
   /// Creates an opacity layer.
   ///
-  /// The [alpha] property must be non-null before the compositing phase of
+  /// Either the [alpha] or [opacity] property must be non-null before the compositing phase of
   /// the pipeline.
   OpacityLayer({
-    int? alpha,
+    @Deprecated(
+      'Prefer using opacity instead of alpha. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    ) int? alpha,
+    double? opacity,
     super.offset,
-  }) : _alpha = alpha;
+  }) : _opacity = opacity ?? (alpha != null ? alpha / 255.0 : null);
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1746,15 +1750,34 @@ class OpacityLayer extends OffsetLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  int? get alpha => _alpha;
-  int? _alpha;
+  @Deprecated(
+    'Prefer using opacity instead of alpha. '
+    'This feature was deprecated after v2.13.0-0.0.pre.'
+  )
+  int? get alpha => _opacity == null ? null : (_opacity! * 255).round();
   set alpha(int? value) {
     assert(value != null);
-    if (value != _alpha) {
-      if (value == 255 || _alpha == 255) {
+    final double valueAsOpacity = value! / 255.0;
+    opacity = valueAsOpacity;
+  }
+
+  /// The opacity to composite with child layers.
+  ///
+  /// The opacity is expressed as a double from 0.0 to 1.0, where 00 is fully
+  /// transparent and 1.0 is fully opaque.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  double? get opacity => _opacity;
+  double? _opacity;
+  set opacity(double? value) {
+    assert(value != null);
+    assert(value! >= 0.0 && value <= 1.0);
+    if (value != _opacity) {
+      if (value! >= 1.0 || _opacity! >= 1.0) {
         engineLayer = null;
       }
-      _alpha = value;
+      _opacity = value;
       markNeedsAddToScene();
     }
   }
@@ -1802,7 +1825,7 @@ class OpacityLayer extends OffsetLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('alpha', alpha));
+    properties.add(DoubleProperty('opacity', opacity));
   }
 }
 
