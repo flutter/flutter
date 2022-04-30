@@ -248,6 +248,33 @@ TEST(FileTest, AtomicWriteTest) {
   ASSERT_TRUE(fml::UnlinkFile(dir.fd(), "precious_data"));
 }
 
+TEST(FileTest, IgnoreBaseDirWhenPathIsAbsolute) {
+  fml::ScopedTemporaryDirectory dir;
+
+  // Make an absolute path.
+  std::string filename = "filename.txt";
+  std::string full_path =
+      fml::paths::AbsolutePath(fml::paths::JoinPaths({dir.path(), filename}));
+
+  const std::string contents = "These are my contents.";
+  auto data = std::make_unique<fml::DataMapping>(
+      std::vector<uint8_t>{contents.begin(), contents.end()});
+
+  // Write.
+  ASSERT_TRUE(fml::WriteAtomically(dir.fd(), full_path.c_str(), *data));
+
+  // Test existence.
+  ASSERT_TRUE(fml::FileExists(dir.fd(), full_path.c_str()));
+
+  // Read and verify.
+  ASSERT_EQ(contents,
+            ReadStringFromFile(fml::OpenFile(dir.fd(), full_path.c_str(), false,
+                                             fml::FilePermission::kRead)));
+
+  // Cleanup.
+  ASSERT_TRUE(fml::UnlinkFile(dir.fd(), full_path.c_str()));
+}
+
 TEST(FileTest, EmptyMappingTest) {
   fml::ScopedTemporaryDirectory dir;
 
