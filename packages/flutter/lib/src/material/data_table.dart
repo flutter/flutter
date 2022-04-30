@@ -625,7 +625,7 @@ class DataTable extends StatelessWidget {
   final TableBorder? border;
 
   /// The icon to customize sorting icon in header.
-  /// 
+  ///
   /// By default uses Icon(Icons.arrow_upward,size: 16.0)
   final Icon? sortIcon;
 
