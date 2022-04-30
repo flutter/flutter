@@ -784,6 +784,8 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// shows the currently selected item as well as an arrow that opens a menu for
 /// selecting another item.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ZzQ_PWrFihg}
+///
 /// One ancestor must be a [Material] widget and typically this is
 /// provided by the app's [Scaffold].
 ///
