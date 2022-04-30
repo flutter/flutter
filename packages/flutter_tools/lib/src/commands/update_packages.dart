@@ -101,7 +101,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       )
       ..addOption(
         'describe-package',
-        help: 'Describe all the other packages that constrain the version of the given package',
+        help: 'Describe all the other packages that constrain the version of the given package.',
       )
       ..addFlag(
         'diagnose-downgrades',
