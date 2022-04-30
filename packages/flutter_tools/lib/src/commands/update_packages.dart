@@ -40,8 +40,9 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // removed when a new major version of shelf is published.
   'shelf': '1.1.4',
   'video_player': '2.2.11',
-  'vm_service': '8.2.2', // TODO debug
-  'dwds': '13.1.0', // TODO debug
+  'dds': '2.2.0', // TODO debug
+  //'vm_service': '8.2.2', // TODO debug
+  //'dwds': '13.1.0', // TODO debug
   //'analyzer': '4.0.0', // TODO debug
 };
 
