@@ -2,33 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/external_texture_gl.h"
+#include "flutter/shell/platform/windows/external_texture_pixelbuffer.h"
 
 namespace flutter {
 
-struct ExternalTextureGLState {
+struct ExternalTexturePixelBufferState {
   GLuint gl_texture = 0;
 };
 
-ExternalTextureGL::ExternalTextureGL(
+ExternalTexturePixelBuffer::ExternalTexturePixelBuffer(
     FlutterDesktopPixelBufferTextureCallback texture_callback,
     void* user_data,
     const GlProcs& gl_procs)
-    : state_(std::make_unique<ExternalTextureGLState>()),
+    : state_(std::make_unique<ExternalTexturePixelBufferState>()),
       texture_callback_(texture_callback),
       user_data_(user_data),
       gl_(gl_procs) {}
 
-ExternalTextureGL::~ExternalTextureGL() {
-  const auto& gl = GlProcs();
+ExternalTexturePixelBuffer::~ExternalTexturePixelBuffer() {
   if (state_->gl_texture != 0) {
     gl_.glDeleteTextures(1, &state_->gl_texture);
   }
 }
 
-bool ExternalTextureGL::PopulateTexture(size_t width,
-                                        size_t height,
-                                        FlutterOpenGLTexture* opengl_texture) {
+bool ExternalTexturePixelBuffer::PopulateTexture(
+    size_t width,
+    size_t height,
+    FlutterOpenGLTexture* opengl_texture) {
   if (!CopyPixelBuffer(width, height)) {
     return false;
   }
@@ -45,7 +45,8 @@ bool ExternalTextureGL::PopulateTexture(size_t width,
   return true;
 }
 
-bool ExternalTextureGL::CopyPixelBuffer(size_t& width, size_t& height) {
+bool ExternalTexturePixelBuffer::CopyPixelBuffer(size_t& width,
+                                                 size_t& height) {
   const FlutterDesktopPixelBuffer* pixel_buffer =
       texture_callback_(width, height, user_data_);
   if (!pixel_buffer || !pixel_buffer->buffer) {

@@ -4,10 +4,17 @@
 
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
 
-#include "flutter/shell/platform/windows/flutter_windows_engine.h"
-
 #include <iostream>
 #include <mutex>
+
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
+#include "flutter/shell/platform/windows/external_texture_d3d.h"
+#include "flutter/shell/platform/windows/external_texture_pixelbuffer.h"
+#include "flutter/shell/platform/windows/flutter_windows_engine.h"
+
+namespace {
+static constexpr int64_t kInvalidTexture = -1;
+}
 
 namespace flutter {
 
@@ -19,28 +26,48 @@ FlutterWindowsTextureRegistrar::FlutterWindowsTextureRegistrar(
 int64_t FlutterWindowsTextureRegistrar::RegisterTexture(
     const FlutterDesktopTextureInfo* texture_info) {
   if (!gl_procs_.valid) {
-    return -1;
+    return kInvalidTexture;
   }
 
-  if (texture_info->type != kFlutterDesktopPixelBufferTexture) {
-    std::cerr << "Attempted to register texture of unsupport type."
-              << std::endl;
-    return -1;
+  if (texture_info->type == kFlutterDesktopPixelBufferTexture) {
+    if (!texture_info->pixel_buffer_config.callback) {
+      std::cerr << "Invalid pixel buffer texture callback." << std::endl;
+      return kInvalidTexture;
+    }
+
+    return EmplaceTexture(std::make_unique<flutter::ExternalTexturePixelBuffer>(
+        texture_info->pixel_buffer_config.callback,
+        texture_info->pixel_buffer_config.user_data, gl_procs_));
+  } else if (texture_info->type == kFlutterDesktopGpuSurfaceTexture) {
+    const FlutterDesktopGpuSurfaceTextureConfig* gpu_surface_config =
+        &texture_info->gpu_surface_config;
+    auto surface_type = SAFE_ACCESS(gpu_surface_config, type,
+                                    kFlutterDesktopGpuSurfaceTypeNone);
+    if (surface_type == kFlutterDesktopGpuSurfaceTypeDxgiSharedHandle ||
+        surface_type == kFlutterDesktopGpuSurfaceTypeD3d11Texture2D) {
+      auto callback = SAFE_ACCESS(gpu_surface_config, callback, nullptr);
+      if (!callback) {
+        std::cerr << "Invalid GPU surface descriptor callback." << std::endl;
+        return kInvalidTexture;
+      }
+
+      auto user_data = SAFE_ACCESS(gpu_surface_config, user_data, nullptr);
+      return EmplaceTexture(std::make_unique<flutter::ExternalTextureD3d>(
+          surface_type, callback, user_data, engine_->surface_manager(),
+          gl_procs_));
+    }
   }
 
-  if (!texture_info->pixel_buffer_config.callback) {
-    std::cerr << "Invalid pixel buffer texture callback." << std::endl;
-    return -1;
-  }
+  std::cerr << "Attempted to register texture of unsupport type." << std::endl;
+  return kInvalidTexture;
+}
 
-  auto texture_gl = std::make_unique<flutter::ExternalTextureGL>(
-      texture_info->pixel_buffer_config.callback,
-      texture_info->pixel_buffer_config.user_data, gl_procs_);
-  int64_t texture_id = texture_gl->texture_id();
-
+int64_t FlutterWindowsTextureRegistrar::EmplaceTexture(
+    std::unique_ptr<ExternalTexture> texture) {
+  int64_t texture_id = texture->texture_id();
   {
     std::lock_guard<std::mutex> lock(map_mutex_);
-    textures_[texture_id] = std::move(texture_gl);
+    textures_[texture_id] = std::move(texture);
   }
 
   engine_->task_runner()->RunNowOrPostTask([engine = engine_, texture_id]() {
@@ -79,7 +106,7 @@ bool FlutterWindowsTextureRegistrar::PopulateTexture(
     size_t width,
     size_t height,
     FlutterOpenGLTexture* opengl_texture) {
-  flutter::ExternalTextureGL* texture;
+  flutter::ExternalTexture* texture;
   {
     std::lock_guard<std::mutex> lock(map_mutex_);
     auto it = textures_.find(texture_id);

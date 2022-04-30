@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_GL_FUNCTIONS_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_GL_FUNCTIONS_H_
 
-#include "flutter/shell/platform/windows/external_texture_gl.h"
+#include "flutter/shell/platform/windows/external_texture.h"
 
 namespace flutter {
 namespace testing {
