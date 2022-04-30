@@ -1738,7 +1738,8 @@ class OpacityLayer extends OffsetLayer {
     @Deprecated(
       'Prefer using opacity instead of alpha. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
-    ) int? alpha,
+    )
+    int? alpha,
     double? opacity,
     super.offset,
   }) : _opacity = opacity ?? (alpha != null ? alpha / 255.0 : null);
