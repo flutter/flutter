@@ -8,6 +8,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:memory_tools/leak_detector.dart' as leak_detector;
 
 import 'binding.dart';
 import 'debug.dart';
@@ -15,8 +16,6 @@ import 'focus_manager.dart';
 import 'inherited_model.dart';
 import 'notification_listener.dart';
 import 'widget_inspector.dart';
-
-import 'package:memory_tools/leak_detector.dart' as leak_detector;
 
 export 'package:flutter/foundation.dart'
     show
