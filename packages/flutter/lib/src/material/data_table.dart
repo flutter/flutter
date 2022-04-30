@@ -624,7 +624,9 @@ class DataTable extends StatelessWidget {
   /// The style to use when painting the boundary and interior divisions of the table.
   final TableBorder? border;
 
-  ///
+  /// The icon to customize sorting icon in header.
+  /// 
+  /// By default uses Icon(Icons.arrow_upward,size: 16.0)
   final Icon? sortIcon;
 
   // Set by the constructor to the index of the only Column that is
