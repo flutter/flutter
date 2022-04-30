@@ -858,7 +858,7 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
-    final bool wasVisible = _opacity >= 0.0;
+    final bool wasVisible = _opacity > 0.0;
     _opacity = value;
     markNeedsPaint();
     if (wasVisible != (_opacity >= 0.0) && !alwaysIncludeSemantics)
