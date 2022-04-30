@@ -6,7 +6,6 @@
 # More information at:
 #  * https://github.com/flutter/cocoon/blob/main/CI_YAML.md
 enabled_branches:
-  - main
   - master
   - flutter-\d+\.\d+-candidate\.\d+
 
