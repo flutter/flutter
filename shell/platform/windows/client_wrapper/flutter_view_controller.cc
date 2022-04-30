@@ -9,22 +9,6 @@
 
 namespace flutter {
 
-#ifdef WINUWP
-FlutterViewController::FlutterViewController(
-    ABI::Windows::ApplicationModel::Core::CoreApplicationView* applicationview,
-    ABI::Windows::ApplicationModel::Activation::IActivatedEventArgs* args,
-    const DartProject& project) {
-  engine_ = std::make_unique<FlutterEngine>(project);
-  controller_ = FlutterDesktopViewControllerCreateFromCoreApplicationView(
-      applicationview, args, engine_->RelinquishEngine());
-  if (!controller_) {
-    std::cerr << "Failed to create view controller." << std::endl;
-    return;
-  }
-  view_ = std::make_unique<FlutterView>(
-      FlutterDesktopViewControllerGetView(controller_));
-}
-#else
 FlutterViewController::FlutterViewController(int width,
                                              int height,
                                              const DartProject& project) {
@@ -38,7 +22,6 @@ FlutterViewController::FlutterViewController(int width,
   view_ = std::make_unique<FlutterView>(
       FlutterDesktopViewControllerGetView(controller_));
 }
-#endif
 
 FlutterViewController::~FlutterViewController() {
   if (controller_) {
@@ -46,7 +29,6 @@ FlutterViewController::~FlutterViewController() {
   }
 }
 
-#ifndef WINUWP
 std::optional<LRESULT> FlutterViewController::HandleTopLevelWindowProc(
     HWND hwnd,
     UINT message,
@@ -57,6 +39,5 @@ std::optional<LRESULT> FlutterViewController::HandleTopLevelWindowProc(
       controller_, hwnd, message, wparam, lparam, &result);
   return handled ? result : std::optional<LRESULT>(std::nullopt);
 }
-#endif
 
 }  // namespace flutter

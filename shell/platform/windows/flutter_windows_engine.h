@@ -22,12 +22,9 @@
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/settings_plugin.h"
 #include "flutter/shell/platform/windows/task_runner.h"
+#include "flutter/shell/platform/windows/window_proc_delegate_manager_win32.h"
 #include "flutter/shell/platform/windows/window_state.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
-
-#ifndef WINUWP
-#include "flutter/shell/platform/windows/window_proc_delegate_manager_win32.h"  // nogncheck
-#endif
 
 namespace flutter {
 
@@ -127,11 +124,9 @@ class FlutterWindowsEngine {
     return accessibility_bridge_;
   }
 
-#ifndef WINUWP
   WindowProcDelegateManagerWin32* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
   }
-#endif
 
   // Informs the engine that the window metrics have changed.
   void SendWindowMetricsEvent(const FlutterWindowMetricsEvent& event);
@@ -264,10 +259,8 @@ class FlutterWindowsEngine {
 
   std::shared_ptr<AccessibilityBridge> accessibility_bridge_;
 
-#ifndef WINUWP
   // The manager for WindowProc delegate registration and callbacks.
   std::unique_ptr<WindowProcDelegateManagerWin32> window_proc_delegate_manager_;
-#endif
 };
 
 }  // namespace flutter

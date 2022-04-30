@@ -335,11 +335,6 @@ void KeyboardKeyEmbedderHandler::UpdateLastSeenCritialKey(
 void KeyboardKeyEmbedderHandler::SynchronizeCritialToggledStates(
     int this_virtual_key,
     bool is_down_event) {
-  // TODO(dkwingsmt) consider adding support for synchronizing key state for UWP
-  // https://github.com/flutter/flutter/issues/70202
-#ifdef WINUWP
-  return;
-#else
   for (auto& kv : critical_keys_) {
     UINT virtual_key = kv.first;
     CriticalKey& key_info = kv.second;
@@ -381,17 +376,11 @@ void KeyboardKeyEmbedderHandler::SynchronizeCritialToggledStates(
       key_info.toggled_on = should_toggled;
     }
   }
-#endif
 }
 
 void KeyboardKeyEmbedderHandler::SynchronizeCritialPressedStates(
     int this_virtual_key,
     bool pressed_state_will_change) {
-  // TODO(dkwingsmt) consider adding support for synchronizing key state for UWP
-  // https://github.com/flutter/flutter/issues/70202
-#ifdef WINUWP
-  return;
-#else
   for (auto& kv : critical_keys_) {
     UINT virtual_key = kv.first;
     CriticalKey& key_info = kv.second;
@@ -424,7 +413,6 @@ void KeyboardKeyEmbedderHandler::SynchronizeCritialPressedStates(
       }
     }
   }
-#endif
 }
 
 void KeyboardKeyEmbedderHandler::HandleResponse(bool handled, void* user_data) {
@@ -435,11 +423,6 @@ void KeyboardKeyEmbedderHandler::HandleResponse(bool handled, void* user_data) {
 
 void KeyboardKeyEmbedderHandler::InitCriticalKeys(
     MapVirtualKeyToScanCode map_virtual_key_to_scan_code) {
-  // TODO(dkwingsmt) consider adding support for synchronizing key state for UWP
-  // https://github.com/flutter/flutter/issues/70202
-#ifdef WINUWP
-  return;
-#else
   auto createCheckedKey = [this, &map_virtual_key_to_scan_code](
                               UINT virtual_key, bool extended,
                               bool check_pressed,
@@ -479,7 +462,6 @@ void KeyboardKeyEmbedderHandler::InitCriticalKeys(
                          createCheckedKey(VK_SCROLL, false, true, true));
   critical_keys_.emplace(VK_NUMLOCK,
                          createCheckedKey(VK_NUMLOCK, true, true, true));
-#endif
 }
 
 void KeyboardKeyEmbedderHandler::ConvertUtf32ToUtf8_(char* out, char32_t ch) {

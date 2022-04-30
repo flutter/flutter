@@ -86,11 +86,7 @@ void FlutterProjectBundle::SetSwitches(
 }
 
 const std::vector<std::string> FlutterProjectBundle::GetSwitches() {
-#if WINUWP
-  return engine_switches_;
-#else
   return GetSwitchesFromEnvironment();
-#endif
 }
 
 }  // namespace flutter
