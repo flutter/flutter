@@ -629,7 +629,8 @@ struct DrawSkVerticesOp final : DLOp {
   }
 };
 
-// 4 byte header + 36 byte payload packs efficiently into 40 bytes
+// 4 byte header + 40 byte payload uses 44 bytes but is rounded up to 48 bytes
+// (4 bytes unused)
 #define DEFINE_DRAW_IMAGE_OP(name, with_attributes)                    \
   struct name##Op final : DLOp {                                       \
     static const auto kType = DisplayListOpType::k##name;              \
@@ -651,7 +652,8 @@ DEFINE_DRAW_IMAGE_OP(DrawImage, false)
 DEFINE_DRAW_IMAGE_OP(DrawImageWithAttr, true)
 #undef DEFINE_DRAW_IMAGE_OP
 
-// 4 byte header + 68 byte payload packs efficiently into 72 bytes
+// 4 byte header + 72 byte payload uses 76 bytes but is rounded up to 80 bytes
+// (4 bytes unused)
 struct DrawImageRectOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawImageRect;
 
@@ -753,7 +755,8 @@ struct DrawImageLatticeOp final : DLOp {
   }
 };
 
-// 4 byte header + 36 byte common payload packs efficiently into 40 bytes
+// 4 byte header + 40 byte payload uses 44 bytes but is rounded up to 48 bytes
+// (4 bytes unused)
 // Each of these is then followed by a number of lists.
 // SkRSXform list is a multiple of 16 bytes so it is always packed well
 // SkRect list is also a multiple of 16 bytes so it also packs well
@@ -781,7 +784,7 @@ struct DrawAtlasBaseOp : DLOp {
   const sk_sp<DlImage> atlas;
 };
 
-// Packs as efficiently into 40 bytes as per DrawAtlasBaseOp
+// Packs into 48 bytes as per DrawAtlasBaseOp
 // with array data following the struct also as per DrawAtlasBaseOp
 struct DrawAtlasOp final : DrawAtlasBaseOp {
   static const auto kType = DisplayListOpType::kDrawAtlas;
@@ -810,7 +813,7 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
   }
 };
 
-// Packs efficiently into the same 40 bytes as DrawAtlasBaseOp plus
+// Packs into 48 bytes as per DrawAtlasBaseOp plus
 // an additional 16 bytes for the cull rect resulting in a total
 // of 56 bytes for the Culled drawAtlas.
 // Also with array data following the struct as per DrawAtlasBaseOp
@@ -881,7 +884,7 @@ struct DrawSkPictureMatrixOp final : DLOp {
   }
 };
 
-// 4 byte header + ptr aligned payload uses 12 bytes rounde up to 16
+// 4 byte header + ptr aligned payload uses 12 bytes round up to 16
 // (4 bytes unused)
 struct DrawDisplayListOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawDisplayList;
