@@ -40,15 +40,7 @@ static void WaitForRaster(Shell* shell) {
   raster_task_finished.get_future().wait();
 }
 
-TEST_F(PersistentCacheTest,
-#if defined(WINUWP)
-       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
-       DISABLED_CacheSkSLWorks
-#else
-       CacheSkSLWorks
-#endif  // defined(WINUWP)
-) {
-
+TEST_F(PersistentCacheTest, CacheSkSLWorks) {
   // Create a temp dir to store the persistent cache
   fml::ScopedTemporaryDirectory dir;
   PersistentCache::SetCacheDirectoryPath(dir.path());
@@ -211,15 +203,7 @@ static void CheckTwoSkSLsAreLoaded() {
   ASSERT_EQ(shaders.size(), 2u);
 }
 
-TEST_F(PersistentCacheTest,
-#if defined(WINUWP)
-       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
-       DISABLED_CanLoadSkSLsFromAsset
-#else
-       CanLoadSkSLsFromAsset
-#endif  // defined(WINUWP)
-) {
-
+TEST_F(PersistentCacheTest, CanLoadSkSLsFromAsset) {
   // Avoid polluting unit tests output by hiding INFO level logging.
   fml::LogSettings warning_only = {fml::LOG_WARNING};
   fml::ScopedSetLogSettings scoped_set_log_settings(warning_only);
@@ -283,15 +267,7 @@ TEST_F(PersistentCacheTest,
   fml::UnlinkFile(asset_dir.fd(), PersistentCache::kAssetFileName);
 }
 
-TEST_F(PersistentCacheTest,
-#if defined(WINUWP)
-       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
-       DISABLED_CanRemoveOldPersistentCache
-#else
-       CanRemoveOldPersistentCache
-#endif  // defined(WINUWP)
-) {
-
+TEST_F(PersistentCacheTest, CanRemoveOldPersistentCache) {
   fml::ScopedTemporaryDirectory base_dir;
   ASSERT_TRUE(base_dir.fd().is_valid());
 
@@ -321,15 +297,7 @@ TEST_F(PersistentCacheTest,
   fml::RemoveFilesInDirectory(base_dir.fd());
 }
 
-TEST_F(PersistentCacheTest,
-#if defined(WINUWP)
-       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
-       DISABLED_CanPurgePersistentCache
-#else
-       CanPurgePersistentCache
-#endif  // defined(WINUWP)
-) {
-
+TEST_F(PersistentCacheTest, CanPurgePersistentCache) {
   fml::ScopedTemporaryDirectory base_dir;
   ASSERT_TRUE(base_dir.fd().is_valid());
   auto cache_dir = fml::CreateDirectory(
@@ -361,15 +329,7 @@ TEST_F(PersistentCacheTest,
   DestroyShell(std::move(shell));
 }
 
-TEST_F(PersistentCacheTest,
-#if defined(WINUWP)
-       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
-       DISABLED_PurgeAllowsFutureSkSLCache
-#else
-       PurgeAllowsFutureSkSLCache
-#endif  // defined(WINUWP)
-) {
-
+TEST_F(PersistentCacheTest, PurgeAllowsFutureSkSLCache) {
   sk_sp<SkData> shader_key = SkData::MakeWithCString("key");
   sk_sp<SkData> shader_value = SkData::MakeWithCString("value");
   std::string shader_filename = PersistentCache::SkKeyToFilePath(*shader_key);

@@ -15,12 +15,8 @@
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 
-#if defined(WINUWP)
-#include "flutter/shell/platform/windows/accessibility_bridge_delegate_winuwp.h"
-#else
 #include <dwmapi.h>
 #include "flutter/shell/platform/windows/accessibility_bridge_delegate_win32.h"
-#endif  // defined(WINUWP)
 
 // winbase.h defines GetCurrentTime as a macro.
 #undef GetCurrentTime
@@ -186,10 +182,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   texture_registrar_ =
       std::make_unique<FlutterWindowsTextureRegistrar>(this, gl_procs_);
   surface_manager_ = AngleSurfaceManager::Create();
-#ifndef WINUWP
   window_proc_delegate_manager_ =
       std::make_unique<WindowProcDelegateManagerWin32>();
-#endif
 
   // Set up internal channels.
   // TODO: Replace this with an embedder.h API. See
@@ -376,7 +370,6 @@ std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval() {
   }
   uint64_t interval = 16600000;
 
-#ifndef WINUWP
   DWM_TIMING_INFO timing_info = {};
   timing_info.cbSize = sizeof(timing_info);
   HRESULT result = DwmGetCompositionTimingInfo(NULL, &timing_info);
@@ -386,7 +379,6 @@ std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval() {
                                    1000000000.0) /
                static_cast<double>(timing_info.rateRefresh.uiNumerator);
   }
-#endif
 
   return std::chrono::nanoseconds(interval);
 }
@@ -527,11 +519,7 @@ bool FlutterWindowsEngine::DispatchSemanticsAction(
 }
 
 void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
-#if defined(WINUWP)
-  using AccessibilityBridgeDelegateWindows = AccessibilityBridgeDelegateWinUWP;
-#else
   using AccessibilityBridgeDelegateWindows = AccessibilityBridgeDelegateWin32;
-#endif  // defined(WINUWP)
 
   if (engine_ && semantics_enabled_ != enabled) {
     semantics_enabled_ = enabled;

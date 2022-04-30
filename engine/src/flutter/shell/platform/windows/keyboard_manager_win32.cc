@@ -43,36 +43,24 @@ static constexpr int kMaxPendingEvents = 1000;
 // where the CtrlLeft is released early; the later, real, CtrlLeft up event will
 // be ignored.
 static bool IsKeyDownAltRight(int action, int virtual_key, bool extended) {
-#ifdef WINUWP
-  return false;
-#else
   return virtual_key == VK_RMENU && extended &&
          (action == WM_KEYDOWN || action == WM_SYSKEYDOWN);
-#endif
 }
 
 // Returns true if this key is a key up event of AltRight.
 //
 // This is used to assist a corner case described in |IsKeyDownAltRight|.
 static bool IsKeyUpAltRight(int action, int virtual_key, bool extended) {
-#ifdef WINUWP
-  return false;
-#else
   return virtual_key == VK_RMENU && extended &&
          (action == WM_KEYUP || action == WM_SYSKEYUP);
-#endif
 }
 
 // Returns true if this key is a key down event of CtrlLeft.
 //
 // This is used to assist a corner case described in |IsKeyDownAltRight|.
 static bool IsKeyDownCtrlLeft(int action, int virtual_key) {
-#ifdef WINUWP
-  return false;
-#else
   return virtual_key == VK_LCONTROL &&
          (action == WM_KEYDOWN || action == WM_SYSKEYDOWN);
-#endif
 }
 
 // Returns if a character sent by Win32 is a dead key.

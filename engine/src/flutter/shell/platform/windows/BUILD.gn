@@ -49,15 +49,25 @@ source_set("flutter_windows_headers") {
 source_set("flutter_windows_source") {
   # Common Windows sources.
   sources = [
+    "accessibility_bridge_delegate_win32.cc",
+    "accessibility_bridge_delegate_win32.h",
     "angle_surface_manager.cc",
     "angle_surface_manager.h",
     "cursor_handler.cc",
     "cursor_handler.h",
+    "dpi_utils_win32.cc",
+    "dpi_utils_win32.h",
+    "event_watcher_win32.cc",
+    "event_watcher_win32.h",
     "external_texture_gl.cc",
     "external_texture_gl.h",
     "flutter_key_map.cc",
+    "flutter_platform_node_delegate_win32.cc",
+    "flutter_platform_node_delegate_win32.h",
     "flutter_project_bundle.cc",
     "flutter_project_bundle.h",
+    "flutter_window_win32.cc",
+    "flutter_window_win32.h",
     "flutter_windows.cc",
     "flutter_windows_engine.cc",
     "flutter_windows_engine.h",
@@ -65,6 +75,7 @@ source_set("flutter_windows_source") {
     "flutter_windows_texture_registrar.h",
     "flutter_windows_view.cc",
     "flutter_windows_view.h",
+    "flutter_windows_win32.cc",
     "keyboard_handler_base.h",
     "keyboard_key_channel_handler.cc",
     "keyboard_key_channel_handler.h",
@@ -77,84 +88,39 @@ source_set("flutter_windows_source") {
     "keyboard_win32_common.h",
     "platform_handler.cc",
     "platform_handler.h",
+    "platform_handler_win32.cc",
+    "platform_handler_win32.h",
     "sequential_id_generator.cc",
     "sequential_id_generator.h",
     "settings_plugin.cc",
     "settings_plugin.h",
+    "settings_plugin_win32.cc",
+    "settings_plugin_win32.h",
     "system_utils.h",
+    "system_utils_win32.cc",
     "task_runner.cc",
     "task_runner.h",
+    "task_runner_win32.cc",
+    "task_runner_win32.h",
+    "task_runner_win32_window.cc",
+    "task_runner_win32_window.h",
+    "text_input_manager_win32.cc",
+    "text_input_manager_win32.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
     "window_binding_handler.h",
     "window_binding_handler_delegate.h",
+    "window_proc_delegate_manager_win32.cc",
+    "window_proc_delegate_manager_win32.h",
     "window_state.h",
+    "window_win32.cc",
+    "window_win32.h",
   ]
 
-  # Target-specific sources.
-  if (target_os == "winuwp") {
-    sources += [
-      "accessibility_bridge_delegate_winuwp.cc",
-      "accessibility_bridge_delegate_winuwp.h",
-      "display_helper_winuwp.cc",
-      "display_helper_winuwp.h",
-      "flutter_platform_node_delegate_winuwp.cc",
-      "flutter_platform_node_delegate_winuwp.h",
-      "flutter_window_winuwp.cc",
-      "flutter_window_winuwp.h",
-      "flutter_windows_winuwp.cc",
-      "game_pad_cursor_winuwp.cc",
-      "game_pad_cursor_winuwp.h",
-      "game_pad_winuwp.cc",
-      "game_pad_winuwp.h",
-      "platform_handler_winuwp.cc",
-      "platform_handler_winuwp.h",
-      "settings_plugin_winuwp.cc",
-      "settings_plugin_winuwp.h",
-      "system_utils_winuwp.cc",
-      "task_runner_winuwp.cc",
-      "task_runner_winuwp.h",
-    ]
-  } else {
-    sources += [
-      "accessibility_bridge_delegate_win32.cc",
-      "accessibility_bridge_delegate_win32.h",
-      "dpi_utils_win32.cc",
-      "dpi_utils_win32.h",
-      "event_watcher_win32.cc",
-      "event_watcher_win32.h",
-      "flutter_platform_node_delegate_win32.cc",
-      "flutter_platform_node_delegate_win32.h",
-      "flutter_window_win32.cc",
-      "flutter_window_win32.h",
-      "flutter_windows_win32.cc",
-      "platform_handler_win32.cc",
-      "platform_handler_win32.h",
-      "settings_plugin_win32.cc",
-      "settings_plugin_win32.h",
-      "system_utils_win32.cc",
-      "task_runner_win32.cc",
-      "task_runner_win32.h",
-      "task_runner_win32_window.cc",
-      "task_runner_win32_window.h",
-      "text_input_manager_win32.cc",
-      "text_input_manager_win32.h",
-      "window_proc_delegate_manager_win32.cc",
-      "window_proc_delegate_manager_win32.h",
-      "window_win32.cc",
-      "window_win32.h",
-    ]
-
-    libs = [
-      "dwmapi.lib",
-      "imm32.lib",
-    ]
-  }
-
-  if (target_os == "winuwp") {
-    configs += [ ":cppwinrt_defs" ]
-    cflags = [ "/EHsc" ]
-  }
+  libs = [
+    "dwmapi.lib",
+    "imm32.lib",
+  ]
 
   configs += [
     "//flutter/shell/platform/common:desktop_library_implementation",
@@ -163,14 +129,7 @@ source_set("flutter_windows_source") {
 
   public_configs = [ ":relative_angle_headers" ]
 
-  if (target_os == "winuwp") {
-    defines = [
-      "_SILENCE_CLANG_COROUTINE_MESSAGE",
-      "FLUTTER_ENGINE_NO_PROTOTYPES",
-    ]
-  } else {
-    defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
-  }
+  defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
 
   public_deps = [
     "//flutter/fml:string_conversion",
@@ -209,12 +168,6 @@ shared_library("flutter_windows") {
   public_configs = [ "//flutter:config" ]
 }
 
-shared_library("flutter_windows_winuwp") {
-  deps = [ ":flutter_windows_source" ]
-  libs = [ "windowsapp.lib" ]
-  public_configs = [ "//flutter:config" ]
-}
-
 test_fixtures("flutter_windows_fixtures") {
   fixtures = []
 }
@@ -222,63 +175,45 @@ test_fixtures("flutter_windows_fixtures") {
 executable("flutter_windows_unittests") {
   testonly = true
 
-  if (target_os == "winuwp") {
-    libs = [
-      "windowsapp.lib",
-      "user32.lib",
-    ]
-  }
-
   # Common Windows test sources.
   sources = [
     # "flutter_project_bundle_unittests.cc", //TODO failing due to switches test failing.  Blocked on https://github.com/flutter/flutter/issues/74153
     # "flutter_windows_engine_unittests.cc", //TODO failing to send / receive platform message get plugins working first.  Blocked on https://github.com/flutter/flutter/issues/74155
+    "accessibility_bridge_delegate_win32_unittests.cc",
+    "dpi_utils_win32_unittests.cc",
+    "flutter_project_bundle_unittests.cc",
+    "flutter_window_win32_unittests.cc",
+    "flutter_windows_engine_unittests.cc",
+    "flutter_windows_texture_registrar_unittests.cc",
+    "flutter_windows_view_unittests.cc",
+    "keyboard_key_channel_handler_unittests.cc",
+    "keyboard_key_embedder_handler_unittests.cc",
+    "keyboard_key_handler_unittests.cc",
+    "keyboard_win32_unittests.cc",
+    "platform_handler_unittests.cc",
     "sequential_id_generator_unittests.cc",
     "settings_plugin_unittests.cc",
     "system_utils_unittests.cc",
     "task_runner_unittests.cc",
     "testing/engine_modifier.h",
+    "testing/flutter_window_win32_test.cc",
+    "testing/flutter_window_win32_test.h",
     "testing/mock_gl_functions.h",
+    "testing/mock_text_input_manager_win32.cc",
+    "testing/mock_text_input_manager_win32.h",
+    "testing/mock_window_binding_handler.cc",
+    "testing/mock_window_binding_handler.h",
+    "testing/mock_window_win32.cc",
+    "testing/mock_window_win32.h",
+    "testing/test_keyboard.cc",
+    "testing/test_keyboard.h",
+    "testing/test_keyboard_unittests.cc",
+    "testing/wm_builders.cc",
+    "testing/wm_builders.h",
+    "text_input_plugin_unittest.cc",
+    "window_proc_delegate_manager_win32_unittests.cc",
+    "window_win32_unittests.cc",
   ]
-
-  # Target-specific sources.
-  if (target_os == "winuwp") {
-    sources += [ "uwptool_utils_unittests.cc" ]
-    # TODO(clarkezone) add UWP tests
-    # https://github.com/flutter/flutter/issues/70197
-  } else {
-    sources += [
-      # TODO move first two tests to common once above TODO's unblocked.
-      "accessibility_bridge_delegate_win32_unittests.cc",
-      "dpi_utils_win32_unittests.cc",
-      "flutter_project_bundle_unittests.cc",
-      "flutter_window_win32_unittests.cc",
-      "flutter_windows_engine_unittests.cc",
-      "flutter_windows_texture_registrar_unittests.cc",
-      "flutter_windows_view_unittests.cc",
-      "keyboard_key_channel_handler_unittests.cc",
-      "keyboard_key_embedder_handler_unittests.cc",
-      "keyboard_key_handler_unittests.cc",
-      "keyboard_win32_unittests.cc",
-      "platform_handler_unittests.cc",
-      "testing/flutter_window_win32_test.cc",
-      "testing/flutter_window_win32_test.h",
-      "testing/mock_text_input_manager_win32.cc",
-      "testing/mock_text_input_manager_win32.h",
-      "testing/mock_window_binding_handler.cc",
-      "testing/mock_window_binding_handler.h",
-      "testing/mock_window_win32.cc",
-      "testing/mock_window_win32.h",
-      "testing/test_keyboard.cc",
-      "testing/test_keyboard.h",
-      "testing/test_keyboard_unittests.cc",
-      "testing/wm_builders.cc",
-      "testing/wm_builders.h",
-      "text_input_plugin_unittest.cc",
-      "window_proc_delegate_manager_win32_unittests.cc",
-      "window_win32_unittests.cc",
-    ]
-  }
 
   public_configs = [ "//flutter:config" ]
 
@@ -292,10 +227,6 @@ executable("flutter_windows_unittests") {
     "//flutter/testing",
     "//third_party/rapidjson",
   ]
-
-  if (target_os == "winuwp") {
-    deps += [ ":uwptool_utils" ]
-  }
 }
 
 shared_library("flutter_windows_glfw") {
@@ -314,64 +245,13 @@ group("windows_glfw") {
 }
 
 group("windows") {
-  if (target_os == "winuwp") {
-    deps = [
-      ":flutter_windows_winuwp",
-      ":publish_headers_windows",
-      ":uwptool",
-      "//flutter/shell/platform/windows/client_wrapper:publish_wrapper_windows",
-    ]
-  } else {
-    deps = [
-      ":flutter_windows",
-      ":publish_headers_windows",
-      "//flutter/shell/platform/windows/client_wrapper:publish_wrapper_windows",
-    ]
-  }
+  deps = [
+    ":flutter_windows",
+    ":publish_headers_windows",
+    "//flutter/shell/platform/windows/client_wrapper:publish_wrapper_windows",
+  ]
 
   if (build_glfw_shell) {
     deps += [ ":windows_glfw" ]
   }
-}
-
-# uwptool utilities.
-source_set("uwptool_utils") {
-  if (target_os == "winuwp") {
-    configs += [ ":cppwinrt_defs" ]
-    cflags = [ "/EHsc" ]
-  }
-
-  sources = [
-    "uwptool_commands.cc",
-    "uwptool_commands.h",
-    "uwptool_utils.cc",
-    "uwptool_utils.h",
-  ]
-
-  deps = [ "//flutter/fml:string_conversion" ]
-
-  defines = [ "_SILENCE_CLANG_COROUTINE_MESSAGE" ]
-}
-
-# Command-line tool used by the flutter tool that serves a similar purpose to
-# adb for Android or libimobiledevice for iOS apps. Supports installing,
-# uninstalling, launching apps.
-executable("uwptool") {
-  if (target_os == "winuwp") {
-    configs += [ ":cppwinrt_defs" ]
-    cflags = [ "/EHsc" ]
-    libs = [
-      "windowsapp.lib",
-      "user32.lib",
-    ]
-  }
-
-  sources = [ "uwptool_main.cc" ]
-  deps = [
-    ":uwptool_utils",
-    "//flutter/fml:command_line",
-    "//flutter/fml:string_conversion",
-  ]
-
-  defines = [ "_SILENCE_CLANG_COROUTINE_MESSAGE" ]
 }

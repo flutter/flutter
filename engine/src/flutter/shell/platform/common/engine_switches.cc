@@ -16,7 +16,6 @@ std::vector<std::string> GetSwitchesFromEnvironment() {
   // Read engine switches from the environment in debug/profile. If release mode
   // support is needed in the future, it should likely use a whitelist.
 #ifndef FLUTTER_RELEASE
-#ifndef WINUWP
   const char* switch_count_key = "FLUTTER_ENGINE_SWITCHES";
   const int kMaxSwitchCount = 50;
   const char* switch_count_string = std::getenv(switch_count_key);
@@ -37,7 +36,6 @@ std::vector<std::string> GetSwitchesFromEnvironment() {
                 << ", but " << switch_key.str() << " is missing." << std::endl;
     }
   }
-#endif  // !WINUWP
 #endif  // !FLUTTER_RELEASE
   return switches;
 }
