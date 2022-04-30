@@ -993,11 +993,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   @mustCallSuper
   void initState() {
-    leak_detector.startLeakDetector(this, token: token);
+    leak_detector.startLeakDetector(this, token: _token);
     assert(_debugLifecycleState == _StateLifecycle.created);
   }
 
-  Object get token {
+  Object get _token {
     return '$runtimeType.${identityHashCode(this)}';
   }
 
@@ -1230,7 +1230,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   @mustCallSuper
   void dispose() {
-    leak_detector.registerDisposal(this, token: token);
+    leak_detector.registerDisposal(this, token: _token);
     assert(_debugLifecycleState == _StateLifecycle.ready);
     assert(() {
       _debugLifecycleState = _StateLifecycle.defunct;
@@ -3213,7 +3213,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Typically called by an override of [Widget.createElement].
   Element(Widget widget)
       : assert(widget != null),
-        _widget = widget;
+        _widget = widget {
+    leak_detector.startLeakDetector(this, token: _token);
+  }
+
+  Object get _token {
+    return '$runtimeType.${identityHashCode(this)}';
+  }
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
@@ -4104,6 +4110,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// method, as in `super.unmount()`.
   @mustCallSuper
   void unmount() {
+    leak_detector.registerDisposal(this, token: _token);
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(_widget !=
         null); // Use the private property to avoid a CastError during hot reload.
