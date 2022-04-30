@@ -109,7 +109,7 @@ class RenderSliverOpacity extends RenderProxySliver {
   }
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_opacity > 0.0);
+  bool get alwaysNeedsCompositing => child != null && _opacity > 0.0;
 
   /// The fraction to scale the child's alpha value.
   ///
@@ -129,12 +129,12 @@ class RenderSliverOpacity extends RenderProxySliver {
     if (_opacity == value)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
-    final bool wasVisible = _opacity >= 0.0;
+    final bool wasVisible = _opacity > 0.0;
     _opacity = value;
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
     markNeedsPaint();
-    if (wasVisible != (_opacity >= 0.0) && !alwaysIncludeSemantics)
+    if (wasVisible != (_opacity > 0.0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
 
@@ -172,7 +172,7 @@ class RenderSliverOpacity extends RenderProxySliver {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && (_opacity >= 0.0 || alwaysIncludeSemantics))
+    if (child != null && (_opacity > 0.0 || alwaysIncludeSemantics))
       visitor(child!);
   }
 
