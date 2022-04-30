@@ -114,8 +114,6 @@ def can_use_prebuilt_dart(args):
     prebuilt = 'linux-%s' % args.linux_cpu
   elif args.target_os == 'mac' and args.mac_cpu in ['x64', 'arm64']:
     prebuilt = 'macos-%s' % args.mac_cpu
-  elif args.target_os in ['win', 'winuwp'] and args.windows_cpu == 'x64':
-    prebuilt = 'windows-%s' % args.windows_cpu
 
   prebuilts_dir = None
   if prebuilt != None:
@@ -158,8 +156,6 @@ def to_gn_args(args):
       else:
         gn_args['skia_use_harfbuzz'] = True
         gn_args['icu_use_data_file'] = False
-    if args.target_os == 'winuwp':
-      gn_args['skia_enable_winuwp'] = True
     gn_args['is_official_build'] = True    # Disable Skia test utilities.
     gn_args['is_debug'] = args.unoptimized
     gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
@@ -205,8 +201,6 @@ def to_gn_args(args):
         gn_args['target_os'] = 'fuchsia'
     elif args.target_os == 'wasm':
         gn_args['target_os'] = 'wasm'
-    elif args.target_os == 'winuwp':
-        gn_args['target_os'] = 'winuwp'
     elif args.target_os is not None:
         gn_args['target_os'] = args.target_os
 
@@ -459,7 +453,7 @@ def parse_args(args):
   parser.add_argument('--full-dart-debug', default=False, action='store_true', help='Implies --dart-debug ' +
       'and also disables optimizations in the Dart VM making it easier to step through VM code in the debugger.')
 
-  parser.add_argument('--target-os', type=str, choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win', 'winuwp'])
+  parser.add_argument('--target-os', type=str, choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument('--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64'], default='arm')
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
@@ -471,7 +465,6 @@ def parse_args(args):
   parser.add_argument('--fuchsia', dest='target_os', action='store_const', const='fuchsia')
   parser.add_argument('--wasm', dest='target_os', action='store_const', const='wasm')
   parser.add_argument('--windows', dest='target_os', action='store_const', const='win')
-  parser.add_argument('--winuwp', dest='target_os', action='store_const', const='winuwp')
 
   parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
   parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
