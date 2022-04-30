@@ -185,7 +185,8 @@ class UpdatePackagesCommand extends FlutterCommand {
     if (isConsumerOnly) {
       if (!isPrintTransitiveClosure) {
         throwToolExit(
-            '--consumer-only can only be used with the --transitive-closure flag');
+          '--consumer-only can only be used with the --transitive-closure flag',
+        );
       }
       // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
       const List<String> consumerPackages = <String>[
@@ -305,8 +306,10 @@ class UpdatePackagesCommand extends FlutterCommand {
       );
       if (!upgradeOnly) {
         throwToolExit(
-          'Packages were downgraded! If this is acceptable you can still '
-          'commit your changes, however please note the downgrades in your PR.',
+          'Packages were downgraded! You can diagnose this with `flutter '
+          'update-packages --diagnose-downgrades`. If this is acceptable you '
+          'can still commit your changes, however please note the downgrades '
+          'in your PR.',
         );
       }
     }
