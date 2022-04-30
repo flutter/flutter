@@ -129,12 +129,12 @@ class RenderSliverOpacity extends RenderProxySliver {
     if (_opacity == value)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
-    final bool wasVisible = _opacity != 0.0;
+    final bool wasVisible = _opacity >= 0.0;
     _opacity = value;
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
     markNeedsPaint();
-    if (wasVisible != (_opacity != 0.0) && !alwaysIncludeSemantics)
+    if (wasVisible != (_opacity >= 0.0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
 
@@ -155,11 +155,6 @@ class RenderSliverOpacity extends RenderProxySliver {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && child!.geometry!.visible) {
-      if (_opacity == 0.0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
       assert(needsCompositing);
       layer = context.pushOpacityValue(
         needsCompositing,
@@ -178,7 +173,7 @@ class RenderSliverOpacity extends RenderProxySliver {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && (_opacity != 0.0 || alwaysIncludeSemantics))
+    if (child != null && (_opacity >= 0.0 || alwaysIncludeSemantics))
       visitor(child!);
   }
 

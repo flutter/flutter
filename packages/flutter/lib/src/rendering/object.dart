@@ -708,10 +708,10 @@ class PaintingContext extends ClipContext {
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   OpacityLayer? pushOpacityValue(bool needsCompositing, Size? size, Offset offset, double opacity, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
     assert(opacity >= 0 && opacity <= 1);
-    if (opacity == 0) {
+    if (opacity <= 0) {
       return null;
     }
-    if (opacity == 1.0) {
+    if (opacity >= 1.0) {
       painter(this, offset);
       return null;
     }

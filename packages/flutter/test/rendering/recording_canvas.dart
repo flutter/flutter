@@ -180,7 +180,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     PaintingContextCallback painter, {
     OpacityLayer? oldLayer,
   }) {
-    if (opacity == 0.0) {
+    if (opacity <= 0.0) {
       return null;
     }
     final Color color = Color.fromRGBO(0, 0, 0, opacity);

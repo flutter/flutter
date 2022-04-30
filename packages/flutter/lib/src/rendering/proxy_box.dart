@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
+import 'dart:ui' as ui show ImageFilter, Gradient, Image;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -858,10 +858,10 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
-    final bool wasVisible = _opacity != 0.0;
+    final bool wasVisible = _opacity >= 0.0;
     _opacity = value;
     markNeedsPaint();
-    if (wasVisible != (_opacity != 0.0) && !alwaysIncludeSemantics)
+    if (wasVisible != (_opacity >= 0.0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
 
@@ -890,7 +890,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && (_opacity != 0.0 || alwaysIncludeSemantics))
+    if (child != null && (_opacity >= 0.0 || alwaysIncludeSemantics))
       visitor(child!);
   }
 
@@ -908,7 +908,7 @@ class RenderOpacity extends RenderProxyBox {
 /// layout models, e.g. the way that [RenderAnimatedOpacity] uses it for [RenderBox]
 /// and [RenderSliverAnimatedOpacity] uses it for [RenderSliver].
 mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChildMixin<T> {
-  int? _alpha;
+  late double _opacityValue;
 
   @override
   bool get isRepaintBoundary => child != null && _currentlyIsRepaintBoundary!;
@@ -917,7 +917,8 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   @override
   OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
     final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
-    updatedLayer.alpha = _alpha;
+    final Color color = Color.fromRGBO(0, 0, 0, _opacityValue);
+    updatedLayer.alpha = color.alpha;
     return updatedLayer;
   }
 
@@ -976,22 +977,22 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   }
 
   void _updateOpacity() {
-    final int? oldAlpha = _alpha;
-    _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
-    if (oldAlpha != _alpha) {
+    final double oldOpacity = _opacityValue;
+    _opacityValue = opacity.value;
+    if (oldOpacity != _opacityValue) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _alpha! > 0;
+      _currentlyIsRepaintBoundary = _opacityValue > 0;
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary)
         markNeedsCompositingBitsUpdate();
       markNeedsCompositedLayerUpdate();
-      if (oldAlpha == 0 || _alpha == 0)
+      if ((oldOpacity == null || oldOpacity <= 0) || _opacityValue <= 0)
         markNeedsSemanticsUpdate();
     }
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_alpha == 0) {
+    if (_opacityValue != null && _opacityValue <= 0.0) {
       return;
     }
     super.paint(context, offset);
@@ -999,7 +1000,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
+    if (child != null && (_opacityValue >= 0 || alwaysIncludeSemantics))
       visitor(child!);
   }
 
