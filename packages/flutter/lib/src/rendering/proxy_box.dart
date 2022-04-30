@@ -890,7 +890,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && (_opacity >= 0.0 || alwaysIncludeSemantics))
+    if (child != null && (_opacity > 0.0 || alwaysIncludeSemantics))
       visitor(child!);
   }
 
