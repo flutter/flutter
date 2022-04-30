@@ -174,6 +174,9 @@ bool AngleSurfaceManager::Initialize() {
 void AngleSurfaceManager::CleanUp() {
   EGLBoolean result = EGL_FALSE;
 
+  // Needs to be reset before destroying the EGLContext.
+  resolved_device_.Reset();
+
   if (egl_display_ != EGL_NO_DISPLAY && egl_context_ != EGL_NO_CONTEXT) {
     result = eglDestroyContext(egl_display_, egl_context_);
     egl_context_ = EGL_NO_CONTEXT;
@@ -286,6 +289,46 @@ bool AngleSurfaceManager::MakeResourceCurrent() {
 
 EGLBoolean AngleSurfaceManager::SwapBuffers() {
   return (eglSwapBuffers(egl_display_, render_surface_));
+}
+
+EGLSurface AngleSurfaceManager::CreateSurfaceFromHandle(
+    EGLenum handle_type,
+    EGLClientBuffer handle,
+    const EGLint* attributes) const {
+  return eglCreatePbufferFromClientBuffer(egl_display_, handle_type, handle,
+                                          egl_config_, attributes);
+}
+
+bool AngleSurfaceManager::GetDevice(ID3D11Device** device) {
+  using Microsoft::WRL::ComPtr;
+
+  if (!resolved_device_) {
+    PFNEGLQUERYDISPLAYATTRIBEXTPROC egl_query_display_attrib_EXT =
+        reinterpret_cast<PFNEGLQUERYDISPLAYATTRIBEXTPROC>(
+            eglGetProcAddress("eglQueryDisplayAttribEXT"));
+
+    PFNEGLQUERYDEVICEATTRIBEXTPROC egl_query_device_attrib_EXT =
+        reinterpret_cast<PFNEGLQUERYDEVICEATTRIBEXTPROC>(
+            eglGetProcAddress("eglQueryDeviceAttribEXT"));
+
+    if (!egl_query_display_attrib_EXT || !egl_query_device_attrib_EXT) {
+      return false;
+    }
+
+    EGLAttrib egl_device = 0;
+    EGLAttrib angle_device = 0;
+    if (egl_query_display_attrib_EXT(egl_display_, EGL_DEVICE_EXT,
+                                     &egl_device) == EGL_TRUE) {
+      if (egl_query_device_attrib_EXT(
+              reinterpret_cast<EGLDeviceEXT>(egl_device),
+              EGL_D3D11_DEVICE_ANGLE, &angle_device) == EGL_TRUE) {
+        resolved_device_ = reinterpret_cast<ID3D11Device*>(angle_device);
+      }
+    }
+  }
+
+  resolved_device_.CopyTo(device);
+  return (resolved_device_ != nullptr);
 }
 
 }  // namespace flutter

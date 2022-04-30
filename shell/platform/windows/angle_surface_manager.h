@@ -13,7 +13,9 @@
 #include <GLES2/gl2ext.h>
 
 // Windows platform specific includes
+#include <d3d11.h>
 #include <windows.h>
+#include <wrl/client.h>
 #include <memory>
 
 #include "window_binding_handler.h"
@@ -69,14 +71,24 @@ class AngleSurfaceManager {
   // not null.
   EGLBoolean SwapBuffers();
 
- private:
-  bool Initialize();
-  void CleanUp();
+  // Creates a |EGLSurface| from the provided handle.
+  EGLSurface CreateSurfaceFromHandle(EGLenum handle_type,
+                                     EGLClientBuffer handle,
+                                     const EGLint* attributes) const;
+
+  // Gets the |EGLDisplay|.
+  EGLDisplay egl_display() const { return egl_display_; };
+
+  // Gets the |ID3D11Device| chosen by ANGLE.
+  bool GetDevice(ID3D11Device** device);
 
  private:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
   AngleSurfaceManager();
+
+  bool Initialize();
+  void CleanUp();
 
   // Attempts to initialize EGL using ANGLE.
   bool InitializeEGL(
@@ -107,6 +119,9 @@ class AngleSurfaceManager {
   // Requested dimensions for current surface
   EGLint surface_width_ = 0;
   EGLint surface_height_ = 0;
+
+  // The current D3D device.
+  Microsoft::WRL::ComPtr<ID3D11Device> resolved_device_;
 
   // Number of active instances of AngleSurfaceManager
   static int instance_count_;

@@ -2227,8 +2227,11 @@ FILE: ../../../flutter/shell/platform/windows/dpi_utils_win32.h
 FILE: ../../../flutter/shell/platform/windows/dpi_utils_win32_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/event_watcher_win32.cc
 FILE: ../../../flutter/shell/platform/windows/event_watcher_win32.h
-FILE: ../../../flutter/shell/platform/windows/external_texture_gl.cc
-FILE: ../../../flutter/shell/platform/windows/external_texture_gl.h
+FILE: ../../../flutter/shell/platform/windows/external_texture.h
+FILE: ../../../flutter/shell/platform/windows/external_texture_d3d.cc
+FILE: ../../../flutter/shell/platform/windows/external_texture_d3d.h
+FILE: ../../../flutter/shell/platform/windows/external_texture_pixelbuffer.cc
+FILE: ../../../flutter/shell/platform/windows/external_texture_pixelbuffer.h
 FILE: ../../../flutter/shell/platform/windows/flutter_key_map.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_platform_node_delegate_win32.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_platform_node_delegate_win32.h
