@@ -706,20 +706,22 @@ class PaintingContext extends ClipContext {
   /// [alpha] is greater than 0 and less than 255.
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
-  OpacityLayer? pushOpacityValue(bool needsCompositing, Size? size, Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
-    if (alpha == 0) {
+  OpacityLayer? pushOpacityValue(bool needsCompositing, Size? size, Offset offset, double opacity, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
+    assert(opacity >= 0 && opacity <= 1);
+    if (opacity == 0) {
       return null;
     }
-    if (alpha == 255) {
+    if (opacity == 1.0) {
       painter(this, offset);
       return null;
     }
     // Due to https://github.com/flutter/flutter/issues/48417 this will always need to be
     // composited on the web.
+    final Color color = Color.fromRGBO(0, 0, 0, opacity);
     if (needsCompositing || kIsWeb) {
       final OpacityLayer layer = oldLayer ?? OpacityLayer();
       layer
-        ..alpha = alpha
+        ..alpha = color.alpha
         ..offset = offset;
       pushLayer(layer, painter, Offset.zero);
       return layer;
@@ -731,7 +733,7 @@ class PaintingContext extends ClipContext {
         return null;
       }
     }
-    canvas.saveLayer(size != null ? offset & size : null, Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
+    canvas.saveLayer(size != null ? offset & size : null, Paint()..color = color);
     painter(this, offset);
     canvas.restore();
     return null;

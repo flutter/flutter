@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Color;
-
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -364,7 +362,7 @@ class RenderFlow extends RenderBox
     if (opacity == 1.0) {
       _paintingContext!.pushTransform(needsCompositing, _paintingOffset!, transform, painter);
     } else {
-      _paintingContext!.pushOpacityValue(needsCompositing, size, _paintingOffset!, ui.Color.getAlphaFromOpacity(opacity), (PaintingContext context, Offset offset) {
+      _paintingContext!.pushOpacityValue(needsCompositing, size, _paintingOffset!, opacity, (PaintingContext context, Offset offset) {
         context.pushTransform(needsCompositing, offset, transform!, painter);
       });
     }

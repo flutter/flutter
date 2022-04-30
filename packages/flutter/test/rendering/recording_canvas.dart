@@ -176,14 +176,15 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     bool needsCompositing,
     Size? size,
     Offset offset,
-    int alpha,
+    double opacity,
     PaintingContextCallback painter, {
     OpacityLayer? oldLayer,
   }) {
-    if (alpha == 0) {
+    if (opacity == 0.0) {
       return null;
     }
-    canvas.saveLayer(size != null ? offset & size : null,  Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
+    final Color color = Color.fromRGBO(0, 0, 0, opacity);
+    canvas.saveLayer(size != null ? offset & size : null,  Paint()..color = color);
     painter(this, offset);
     canvas.restore();
     return null;

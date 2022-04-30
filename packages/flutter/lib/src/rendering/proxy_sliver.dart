@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Color;
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -106,15 +104,12 @@ class RenderSliverOpacity extends RenderProxySliver {
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        assert(alwaysIncludeSemantics != null),
        _opacity = opacity,
-       _alwaysIncludeSemantics = alwaysIncludeSemantics,
-       _alpha = ui.Color.getAlphaFromOpacity(opacity) {
+       _alwaysIncludeSemantics = alwaysIncludeSemantics {
     child = sliver;
   }
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
-
-  int _alpha;
+  bool get alwaysNeedsCompositing => child != null && (_opacity > 0.0);
 
   /// The fraction to scale the child's alpha value.
   ///
@@ -134,13 +129,12 @@ class RenderSliverOpacity extends RenderProxySliver {
     if (_opacity == value)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
-    final bool wasVisible = _alpha != 0;
+    final bool wasVisible = _opacity != 0.0;
     _opacity = value;
-    _alpha = ui.Color.getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
     markNeedsPaint();
-    if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
+    if (wasVisible != (_opacity != 0.0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
 
@@ -161,7 +155,7 @@ class RenderSliverOpacity extends RenderProxySliver {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && child!.geometry!.visible) {
-      if (_alpha == 0) {
+      if (_opacity == 0.0) {
         // No need to keep the layer. We'll create a new one if necessary.
         layer = null;
         return;
@@ -171,7 +165,7 @@ class RenderSliverOpacity extends RenderProxySliver {
         needsCompositing,
         null,
         offset,
-        _alpha,
+        _opacity,
         super.paint,
         oldLayer: layer as OpacityLayer?,
       );
@@ -184,7 +178,7 @@ class RenderSliverOpacity extends RenderProxySliver {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
+    if (child != null && (_opacity != 0.0 || alwaysIncludeSemantics))
       visitor(child!);
   }
 
