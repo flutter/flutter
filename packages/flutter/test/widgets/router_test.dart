@@ -202,27 +202,7 @@ void main() {
       throwsA(isAssertionError.having(
         (AssertionError e) => e.message,
         'message',
-        'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.',
-      )),
-    );
-  });
-
-  testWidgets('Router throw when passing restorationId without routeInformationParser', (WidgetTester tester) async {
-    expect(
-      () {
-        Router<RouteInformation>(
-          restorationScopeId: 'foo',
-          routerDelegate: SimpleRouterDelegate(
-            builder: (BuildContext context, RouteInformation? information) {
-              return Text(information!.location!);
-            },
-          ),
-        );
-      },
-      throwsA(isAssertionError.having(
-        (AssertionError e) => e.message,
-        'message',
-        'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.',
+        'A routeInformationParser must be provided when a routeInformationProvider is specified.',
       )),
     );
   });
@@ -1469,6 +1449,27 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await tester.pump();
     expect(find.text('$expectedMaxLines'), findsOneWidget);
     expect(parserCalled, isFalse);
+  });
+
+  testWidgets('Router can initialize with RouterConfig', (WidgetTester tester) async {
+    const String expected = 'text';
+    final RouterConfig<RouteInformation> config = RouterConfig<RouteInformation>(
+      routeInformationProvider: SimpleRouteInformationProvider()..value = const RouteInformation(location: '/'),
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: SimpleRouterDelegate(
+        builder: (_, __) => const Text(expected),
+      ),
+      backButtonDispatcher: RootBackButtonDispatcher(),
+    );
+    final Router<RouteInformation> router = Router<RouteInformation>.withConfig(config: config);
+    expect(router.routerDelegate, config.routerDelegate);
+    expect(router.routeInformationParser, config.routeInformationParser);
+    expect(router.routeInformationProvider, config.routeInformationProvider);
+    expect(router.backButtonDispatcher, config.backButtonDispatcher);
+
+    await tester.pumpWidget(buildBoilerPlate(router));
+
+    expect(find.text(expected), findsOneWidget);
   });
 }
 
