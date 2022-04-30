@@ -492,14 +492,14 @@ class DataTable extends StatelessWidget {
 
   /// {@template flutter.material.dataTable.dataRowHeight}
   /// The height of each row (excluding the row that contains column headings).
-  /// If, for any cell in the row, the cell content plus 2 * [topBottomRowPadding] is larger than the [dataRowHeight], 
+  /// If, for any cell in the row, the cell content plus 2 * [topBottomRowPadding] is larger than the [dataRowHeight],
   /// then the height of that row will exceed [dataRowHeight].
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.dataRowHeight] is used. This value defaults
   /// to [kMinInteractiveDimension] to adhere to the Material Design
   /// specifications.
-  /// 
+  ///
   /// Also see [DataTable.topBottomRowPadding].
   final double? dataRowHeight;
 
@@ -576,10 +576,10 @@ class DataTable extends StatelessWidget {
 
   /// {@template flutter.material.dataTable.topBottomRowPadding}
   /// The minimum padding between the content of each data cell and the top and bottom of the data row.
-  /// 
+  ///
   /// If null, [DataTableThemeData.topBottomRowPadding] is used. This value
   /// defaults to 0.0.
-  /// 
+  ///
   /// Also see [DataTable.dataRowHeight].
   final double? topBottomRowPadding;
 
@@ -922,7 +922,7 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.columnSpacing
       ?? theme.dataTableTheme.columnSpacing
       ?? _columnSpacing;
-    final double effectivetopBottomRowPadding = topBottomRowPadding 
+    final double effectivetopBottomRowPadding = topBottomRowPadding
       ?? theme.dataTableTheme.topBottomRowPadding
       ?? _topBottomRowPadding;
 
