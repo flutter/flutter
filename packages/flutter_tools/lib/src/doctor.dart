@@ -381,7 +381,7 @@ class Doctor {
       }
 
       for (final ValidationMessage message in result.messages) {
-        if (message.type != ValidationMessageType.information || verbose == true) {
+        if (!message.isInformation || verbose == true) {
           int hangingIndent = 2;
           int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;
@@ -467,20 +467,36 @@ class FlutterValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    ValidationType valid = ValidationType.installed;
     String? versionChannel;
     String? frameworkVersion;
+    String? repositoryUrl;
+    VersionCheckError? upstreamValidationError;
 
     try {
       final FlutterVersion version = _flutterVersion();
+      final String? gitUrl = _platform.environment['FLUTTER_GIT_URL'];
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
-      messages.add(ValidationMessage(_userMessages.flutterVersion(
-        frameworkVersion,
-        _flutterRoot(),
-      )));
-      messages.add(ValidationMessage(_userMessages.flutterUpstreamRepositoryUrl(version.repositoryUrl ?? 'unknown')));
-      final String? gitUrl = _platform.environment['FLUTTER_GIT_URL'];
+      repositoryUrl = version.repositoryUrl;
+      upstreamValidationError = VersionUpstreamValidator(version: version, platform: _platform).run();
+
+      final String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
+      messages.add(
+        versionChannel == 'unknown' || frameworkVersion == '0.0.0-unknown'
+          ? ValidationMessage.hint(flutterVersionMessage)
+          : ValidationMessage(flutterVersionMessage)
+      );
+      if (repositoryUrl == null) {
+        messages.add(ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown')));
+      } else if (upstreamValidationError != null) {
+        if (gitUrl != null) {
+          messages.add(ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlEnvMismatch(repositoryUrl)));
+        } else {
+          messages.add(ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlNonStandard(repositoryUrl)));
+        }
+      } else {
+        messages.add(ValidationMessage(_userMessages.flutterUpstreamRepositoryUrl(repositoryUrl)));
+      }
       if (gitUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterGitUrl(gitUrl)));
       }
@@ -502,7 +518,6 @@ class FlutterValidator extends DoctorValidator {
       }
     } on VersionCheckError catch (e) {
       messages.add(ValidationMessage.error(e.message));
-      valid = ValidationType.partial;
     }
 
     // Check that the binaries we downloaded for this platform actually run on it.
@@ -516,8 +531,11 @@ class FlutterValidator extends DoctorValidator {
         buffer.writeln(_userMessages.flutterBinariesLinuxRepairCommands);
       }
       messages.add(ValidationMessage.error(buffer.toString()));
-      valid = ValidationType.partial;
     }
+
+    final ValidationType valid = messages.every((ValidationMessage message) => message.isInformation)
+      ? ValidationType.installed
+      : ValidationType.partial;
 
     return ValidationResult(
       valid,
