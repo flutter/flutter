@@ -169,7 +169,7 @@ fml::UniqueFD OpenFile(const char* path,
   }
 
   const DWORD creation_disposition =
-      create_if_necessary ? CREATE_NEW : OPEN_EXISTING;
+      create_if_necessary ? OPEN_ALWAYS : OPEN_EXISTING;
 
   const DWORD flags = FILE_ATTRIBUTE_NORMAL;
 
