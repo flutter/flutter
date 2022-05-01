@@ -576,6 +576,7 @@ class DataTable extends StatelessWidget {
 
   /// {@template flutter.material.dataTable.topBottomRowPadding}
   /// The minimum padding between the content of each data cell and the top and bottom of the data row.
+  /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.topBottomRowPadding] is used. This value
   /// defaults to 0.0.
