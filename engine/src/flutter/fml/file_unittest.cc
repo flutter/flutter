@@ -75,30 +75,35 @@ TEST(FileTest, CanTruncateAndWrite) {
 
   std::string contents = "some contents here";
 
-  {
-    auto fd = fml::OpenFile(dir.fd(), "some.txt", true,
-                            fml::FilePermission::kReadWrite);
-    ASSERT_TRUE(fd.is_valid());
+  // On the first iteration, this tests writing and then reading a file that
+  // didn't exist yet. On the second iteration it tests truncating, writing,
+  // and reading a file that already existed.
+  for (int i = 0; i < 2; i++) {
+    {
+      auto fd = fml::OpenFile(dir.fd(), "some.txt", true,
+                              fml::FilePermission::kReadWrite);
+      ASSERT_TRUE(fd.is_valid());
 
-    ASSERT_TRUE(fml::TruncateFile(fd, contents.size()));
+      ASSERT_TRUE(fml::TruncateFile(fd, contents.size()));
 
-    fml::FileMapping mapping(fd, {fml::FileMapping::Protection::kWrite});
-    ASSERT_EQ(mapping.GetSize(), contents.size());
-    ASSERT_NE(mapping.GetMutableMapping(), nullptr);
+      fml::FileMapping mapping(fd, {fml::FileMapping::Protection::kWrite});
+      ASSERT_EQ(mapping.GetSize(), contents.size());
+      ASSERT_NE(mapping.GetMutableMapping(), nullptr);
 
-    ::memcpy(mapping.GetMutableMapping(), contents.data(), contents.size());
-  }
+      ::memcpy(mapping.GetMutableMapping(), contents.data(), contents.size());
+    }
 
-  {
-    auto fd =
-        fml::OpenFile(dir.fd(), "some.txt", false, fml::FilePermission::kRead);
-    ASSERT_TRUE(fd.is_valid());
+    {
+      auto fd = fml::OpenFile(dir.fd(), "some.txt", false,
+                              fml::FilePermission::kRead);
+      ASSERT_TRUE(fd.is_valid());
 
-    fml::FileMapping mapping(fd);
-    ASSERT_EQ(mapping.GetSize(), contents.size());
+      fml::FileMapping mapping(fd);
+      ASSERT_EQ(mapping.GetSize(), contents.size());
 
-    ASSERT_EQ(0,
-              ::memcmp(mapping.GetMapping(), contents.data(), contents.size()));
+      ASSERT_EQ(
+          0, ::memcmp(mapping.GetMapping(), contents.data(), contents.size()));
+    }
   }
 
   fml::UnlinkFile(dir.fd(), "some.txt");
