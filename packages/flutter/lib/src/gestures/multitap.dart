@@ -24,18 +24,18 @@ typedef GestureDoubleTapCallback = void Function();
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that might
 /// cause a tap has contacted the screen at a particular location.
-typedef GestureMultiTapDownCallback = void Function(int pointer, TapDownDetails details);
+typedef GestureMultiTapDownCallback = void Function(PointerId pointer, TapDownDetails details);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that will
 /// trigger a tap has stopped contacting the screen at a particular location.
-typedef GestureMultiTapUpCallback = void Function(int pointer, TapUpDetails details);
+typedef GestureMultiTapUpCallback = void Function(PointerId pointer, TapUpDetails details);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a tap has occurred.
-typedef GestureMultiTapCallback = void Function(int pointer);
+typedef GestureMultiTapCallback = void Function(PointerId pointer);
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureMultiTapDownCallback] will not end up causing a tap.
-typedef GestureMultiTapCancelCallback = void Function(int pointer);
+typedef GestureMultiTapCancelCallback = void Function(PointerId pointer);
 
 /// CountdownZoned tracks whether the specified duration has elapsed since
 /// creation, honoring [Zone].
@@ -71,7 +71,7 @@ class _TapTracker {
        _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
   final DeviceGestureSettings? gestureSettings;
-  final int pointer;
+  final PointerId pointer;
   final GestureArenaEntry entry;
   final Offset _initialGlobalPosition;
   final int initialButtons;
@@ -265,10 +265,10 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) { }
+  void acceptGesture(PointerId pointer) { }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     _TapTracker? tracker = _trackers[pointer];
     // If tracker isn't in the list, check if this is the first tap tracker
     if (tracker == null &&
@@ -523,26 +523,26 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     assert(_gestureMap.containsKey(pointer));
     _gestureMap[pointer]!.accept();
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     assert(_gestureMap.containsKey(pointer));
     _gestureMap[pointer]!.reject();
     assert(!_gestureMap.containsKey(pointer));
   }
 
-  void _dispatchCancel(int pointer) {
+  void _dispatchCancel(PointerId pointer) {
     assert(_gestureMap.containsKey(pointer));
     _gestureMap.remove(pointer);
     if (onTapCancel != null)
       invokeCallback<void>('onTapCancel', () => onTapCancel!(pointer));
   }
 
-  void _dispatchTap(int pointer, OffsetPair position) {
+  void _dispatchTap(PointerId pointer, OffsetPair position) {
     assert(_gestureMap.containsKey(pointer));
     _gestureMap.remove(pointer);
     if (onTapUp != null)
@@ -557,7 +557,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       invokeCallback<void>('onTap', () => onTap!(pointer));
   }
 
-  void _dispatchLongTap(int pointer, OffsetPair lastPosition) {
+  void _dispatchLongTap(PointerId pointer, OffsetPair lastPosition) {
     assert(_gestureMap.containsKey(pointer));
     if (onLongTapDown != null)
       invokeCallback<void>('onLongTapDown', () {
@@ -903,14 +903,14 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     assert(_pendingTap != null);
     assert(_pendingTap!.pointer == pointer);
     _gestureResolutions[pointer] = GestureDisposition.accepted;
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     _gestureResolutions[pointer] = GestureDisposition.rejected;
     _reset();
   }

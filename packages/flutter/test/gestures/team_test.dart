@@ -117,7 +117,7 @@ class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'passive';
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
+  void didStopTrackingLastPointer(PointerId pointer) {
     resolve(GestureDisposition.rejected);
   }
 
@@ -129,10 +129,10 @@ class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     onGestureAccepted?.call();
   }
 
   @override
-  void rejectGesture(int pointer) { }
+  void rejectGesture(PointerId pointer) { }
 }

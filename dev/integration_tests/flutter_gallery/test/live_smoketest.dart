@@ -11,7 +11,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart' show kPrimaryButton;
+import 'package:flutter/gestures.dart' show PointerId, kPrimaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -131,7 +131,7 @@ class _LiveWidgetController extends LiveWidgetController {
   }
 
   @override
-  Future<void> tap(Finder finder, { int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true }) async {
+  Future<void> tap(Finder finder, { PointerId? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true }) async {
     await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons, warnIfMissed: warnIfMissed);
   }
 

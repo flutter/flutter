@@ -202,10 +202,10 @@ class TestGestureRecognizer extends GestureRecognizer {
   void addPointer(PointerDownEvent event) { }
 
   @override
-  void acceptGesture(int pointer) { }
+  void acceptGesture(PointerId pointer) { }
 
   @override
-  void rejectGesture(int pointer) { }
+  void rejectGesture(PointerId pointer) { }
 }
 
 /// Gesture recognizer that adds itself to the gesture arena but never
@@ -217,10 +217,10 @@ class IndefiniteGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) { }
+  void acceptGesture(PointerId pointer) { }
 
   @override
-  void rejectGesture(int pointer) { }
+  void rejectGesture(PointerId pointer) { }
 
   @override
   String get debugDescription => 'Unresolving';
@@ -242,7 +242,7 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
   final VoidCallback? onRejectGesture;
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     super.acceptGesture(pointer);
     if (onAcceptGesture != null) {
       onAcceptGesture!();
@@ -250,7 +250,7 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     super.rejectGesture(pointer);
     if (onRejectGesture != null) {
       onRejectGesture!();

@@ -94,7 +94,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 
   /// Holds a mapping between pointer IDs and the kind of devices they are
   /// coming from.
-  final Map<int, PointerDeviceKind> _pointerToKind = <int, PointerDeviceKind>{};
+  final Map<PointerId, PointerDeviceKind> _pointerToKind = <PointerId, PointerDeviceKind>{};
 
   /// Registers a new pointer pan/zoom that might be relevant to this gesture
   /// detector.
@@ -201,7 +201,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// The pointer ID is expected to be a valid one i.e. an event was received
   /// with that pointer ID.
   @protected
-  PointerDeviceKind getKindForPointer(int pointer) {
+  PointerDeviceKind getKindForPointer(PointerId pointer) {
     assert(_pointerToKind.containsKey(pointer));
     return _pointerToKind[pointer]!;
   }
@@ -328,17 +328,17 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void handleEvent(PointerEvent event);
 
   @override
-  void acceptGesture(int pointer) { }
+  void acceptGesture(PointerId pointer) { }
 
   @override
-  void rejectGesture(int pointer) { }
+  void rejectGesture(PointerId pointer) { }
 
   /// Called when the number of pointers this recognizer is tracking changes from one to zero.
   ///
   /// The given pointer ID is the ID of the last pointer this recognizer was
   /// tracking.
   @protected
-  void didStopTrackingLastPointer(int pointer);
+  void didStopTrackingLastPointer(PointerId pointer);
 
   /// Resolves this recognizer's participation in each gesture arena with the
   /// given disposition.
@@ -355,7 +355,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// the given disposition.
   @protected
   @mustCallSuper
-  void resolvePointer(int pointer, GestureDisposition disposition) {
+  void resolvePointer(PointerId pointer, GestureDisposition disposition) {
     final GestureArenaEntry? entry = _entries[pointer];
     if (entry != null) {
       _entries.remove(pointer);
@@ -366,7 +366,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @override
   void dispose() {
     resolve(GestureDisposition.rejected);
-    for (final int pointer in _trackedPointers)
+    for (final PointerId pointer in _trackedPointers)
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.clear();
     assert(_entries.isEmpty);
@@ -394,7 +394,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     _team = value;
   }
 
-  GestureArenaEntry _addPointerToArena(int pointer) {
+  GestureArenaEntry _addPointerToArena(PointerId pointer) {
     if (_team != null)
       return _team!.add(pointer, this);
     return GestureBinding.instance.gestureArena.add(pointer, this);
@@ -415,7 +415,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   ///
   /// This is called by [OneSequenceGestureRecognizer.addAllowedPointer].
   @protected
-  void startTrackingPointer(int pointer, [Matrix4? transform]) {
+  void startTrackingPointer(PointerId pointer, [Matrix4? transform]) {
     GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent, transform);
     _trackedPointers.add(pointer);
     assert(!_entries.containsValue(pointer));
@@ -429,7 +429,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   ///
   /// Use [startTrackingPointer] to add the routes in the first place.
   @protected
-  void stopTrackingPointer(int pointer) {
+  void stopTrackingPointer(PointerId pointer) {
     if (_trackedPointers.contains(pointer)) {
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
       _trackedPointers.remove(pointer);
@@ -632,7 +632,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     if (pointer == primaryPointer) {
       _stopTimer();
       _gestureAccepted = true;
@@ -640,7 +640,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
       _stopTimer();
       _state = GestureRecognizerState.defunct;
@@ -648,7 +648,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
+  void didStopTrackingLastPointer(PointerId pointer) {
     assert(state != GestureRecognizerState.ready);
     _stopTimer();
     _state = GestureRecognizerState.ready;

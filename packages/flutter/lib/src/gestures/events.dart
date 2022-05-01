@@ -210,6 +210,9 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///    the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
+/// Type of pointer id.
+typedef PointerId = int;
+
 /// Base class for touch, stylus, or mouse events.
 ///
 /// Pointer events operate in the coordinate space of the screen, scaled to
@@ -281,7 +284,7 @@ abstract class PointerEvent with Diagnosticable {
 
   /// Unique identifier for the pointer, not reused. Changes for each new
   /// pointer down event.
-  final int pointer;
+  final PointerId pointer;
 
   /// The kind of input device for which the event was generated.
   final PointerDeviceKind kind;
@@ -531,7 +534,7 @@ abstract class PointerEvent with Diagnosticable {
   /// event based on the current [transform] and the provided properties.
   PointerEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -758,7 +761,7 @@ mixin _CopyPointerAddedEvent on PointerEvent {
   @override
   PointerAddedEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -854,7 +857,7 @@ mixin _CopyPointerRemovedEvent on PointerEvent {
   @override
   PointerRemovedEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -945,7 +948,7 @@ mixin _CopyPointerHoverEvent on PointerEvent {
   @override
   PointerHoverEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -1062,7 +1065,7 @@ mixin _CopyPointerEnterEvent on PointerEvent {
   @override
   PointerEnterEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -1206,7 +1209,7 @@ mixin _CopyPointerExitEvent on PointerEvent {
   @override
   PointerExitEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -1351,7 +1354,7 @@ mixin _CopyPointerDownEvent on PointerEvent {
   @override
   PointerDownEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -1459,7 +1462,7 @@ mixin _CopyPointerMoveEvent on PointerEvent {
   @override
   PointerMoveEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -1576,7 +1579,7 @@ mixin _CopyPointerUpEvent on PointerEvent {
   @override
   PointerUpEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -1716,7 +1719,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
   @override
   PointerScrollEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -1822,7 +1825,7 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
   @override
   PointerPanZoomStartEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -1920,7 +1923,7 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
   @override
   PointerPanZoomUpdateEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -2058,7 +2061,7 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
   @override
   PointerPanZoomEndEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,
@@ -2143,7 +2146,7 @@ mixin _CopyPointerCancelEvent on PointerEvent {
   @override
   PointerCancelEvent copyWith({
     Duration? timeStamp,
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind? kind,
     int? device,
     Offset? position,

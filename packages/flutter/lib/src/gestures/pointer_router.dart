@@ -23,7 +23,7 @@ class PointerRouter {
   ///
   /// Routes added reentrantly within [PointerRouter.route] will take effect when
   /// routing the next event.
-  void addRoute(int pointer, PointerRoute route, [Matrix4? transform]) {
+  void addRoute(PointerId pointer, PointerRoute route, [Matrix4? transform]) {
     final Map<PointerRoute, Matrix4?> routes = _routeMap.putIfAbsent(
       pointer,
       () => <PointerRoute, Matrix4?>{},
@@ -39,7 +39,7 @@ class PointerRouter {
   ///
   /// Routes removed reentrantly within [PointerRouter.route] will take effect
   /// immediately.
-  void removeRoute(int pointer, PointerRoute route) {
+  void removeRoute(PointerId pointer, PointerRoute route) {
     assert(_routeMap.containsKey(pointer));
     final Map<PointerRoute, Matrix4?> routes = _routeMap[pointer]!;
     assert(routes.containsKey(route));

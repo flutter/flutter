@@ -16,7 +16,7 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind, kSecondaryMouseButton, kDoubleTapTimeout;
+import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind, PointerId, kSecondaryMouseButton, kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -2715,7 +2715,7 @@ void main() {
 
     final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       textFieldStart + const Offset(150.0, 5.0),
@@ -2755,7 +2755,7 @@ void main() {
 
     final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       textFieldStart + const Offset(150.0, 5.0),

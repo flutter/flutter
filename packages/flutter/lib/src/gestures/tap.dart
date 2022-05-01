@@ -218,7 +218,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 
   @override
   @protected
-  void startTrackingPointer(int pointer, [Matrix4? transform]) {
+  void startTrackingPointer(PointerId pointer, [Matrix4? transform]) {
     // The recognizer should never track any pointers when `_down` is null,
     // because calling `_checkDown` in this state will throw exception.
     assert(_down != null);
@@ -261,7 +261,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     super.acceptGesture(pointer);
     if (pointer == primaryPointer) {
       _checkDown();
@@ -271,7 +271,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     super.rejectGesture(pointer);
     if (pointer == primaryPointer) {
       // Another gesture won the arena.

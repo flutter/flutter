@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
-import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
+import 'package:flutter/gestures.dart' show PointerDeviceKind, PointerId, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -203,7 +203,7 @@ void main() {
   testWidgets('a force press initiates a force press', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
 
@@ -285,7 +285,7 @@ void main() {
   testWidgets('a tap and then force press initiates a force press and not a double tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
       forcePressOffset,
@@ -338,7 +338,7 @@ void main() {
   testWidgets('a long press from a touch device is recognized as a long single tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -356,7 +356,7 @@ void main() {
   testWidgets('a long press from a mouse is just a tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -375,7 +375,7 @@ void main() {
   testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -397,7 +397,7 @@ void main() {
   testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,
@@ -420,7 +420,7 @@ void main() {
   testWidgets('a slow mouse drag is still recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: pointerValue,

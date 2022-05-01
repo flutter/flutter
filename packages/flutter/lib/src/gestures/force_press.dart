@@ -286,7 +286,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     if (_state == _ForceState.possible)
       _state = _ForceState.accepted;
 
@@ -300,7 +300,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
+  void didStopTrackingLastPointer(PointerId pointer) {
     final bool wasAccepted = _state == _ForceState.started || _state == _ForceState.peaked;
     if (_state == _ForceState.possible) {
       resolve(GestureDisposition.rejected);
@@ -319,7 +319,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     stopTrackingPointer(pointer);
     didStopTrackingLastPointer(pointer);
   }

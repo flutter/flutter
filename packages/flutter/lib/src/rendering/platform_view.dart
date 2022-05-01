@@ -480,7 +480,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'UIKit view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) { }
+  void didStopTrackingLastPointer(PointerId pointer) { }
 
   @override
   void handleEvent(PointerEvent event) {
@@ -488,12 +488,12 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     controller.acceptGesture();
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     controller.rejectGesture();
   }
 
@@ -567,7 +567,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'Platform view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) { }
+  void didStopTrackingLastPointer(PointerId pointer) { }
 
   @override
   void handleEvent(PointerEvent event) {
@@ -580,13 +580,13 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     _flushPointerCache(pointer);
     forwardedPointers.add(pointer);
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     stopTrackingPointer(pointer);
     cachedEvents.remove(pointer);
   }
@@ -598,12 +598,12 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     cachedEvents[event.pointer]!.add(event);
   }
 
-  void _flushPointerCache(int pointer) {
+  void _flushPointerCache(PointerId pointer) {
     cachedEvents.remove(pointer)?.forEach(_handlePointerEvent);
   }
 
   @override
-  void stopTrackingPointer(int pointer) {
+  void stopTrackingPointer(PointerId pointer) {
     super.stopTrackingPointer(pointer);
     forwardedPointers.remove(pointer);
   }

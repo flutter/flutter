@@ -513,7 +513,7 @@ void main() {
       gotError = true;
     };
 
-    const int pointer = 1;
+    const PointerId pointer = 1;
     tap.addPointer(const PointerDownEvent(pointer: pointer));
     tester.closeArena(pointer);
     tester.async.elapse(const Duration(milliseconds: 500));

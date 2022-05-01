@@ -36,7 +36,7 @@ void main() {
     force.onUpdate = (ForcePressDetails details) => updated += 1;
     force.onEnd = (ForcePressDetails details) => ended += 1;
 
-    const int pointerValue = 1;
+    const PointerId pointerValue = 1;
     final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
@@ -119,7 +119,7 @@ void main() {
       force.onUpdate = (ForcePressDetails details) => updated += 1;
       force.onEnd = (ForcePressDetails details) => ended += 1;
 
-      const int pointerValue = 1;
+      const PointerId pointerValue = 1;
       final TestPointer pointer = TestPointer();
       final PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: const Offset(10.0, 10.0), pressure: 0, pressureMin: 0, pressureMax: pressureMax);
       pointer.setDownInfo(down, const Offset(10.0, 10.0));
@@ -173,7 +173,7 @@ void main() {
     force.onUpdate = (_) => updated += 1;
     force.onEnd = (_) => ended += 1;
 
-    const int pointerValue = 1;
+    const PointerId pointerValue = 1;
     final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
@@ -224,7 +224,7 @@ void main() {
     int didStartPan = 0;
     drag.onStart = (_) => didStartPan += 1;
 
-    const int pointerValue = 1;
+    const PointerId pointerValue = 1;
     final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
@@ -296,7 +296,7 @@ void main() {
     int didStartPan = 0;
     drag.onStart = (_) => didStartPan += 1;
 
-    const int pointerValue = 1;
+    const PointerId pointerValue = 1;
     final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
@@ -341,7 +341,7 @@ void main() {
     int didStartPan = 0;
     drag.onStart = (_) => didStartPan += 1;
 
-    const int pointerValue = 1;
+    const PointerId pointerValue = 1;
     final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
@@ -404,7 +404,7 @@ void main() {
     force.onUpdate = (ForcePressDetails details) => updated += 1;
     force.onEnd = (ForcePressDetails details) => ended += 1;
 
-    const int pointerValue = 1;
+    const PointerId pointerValue = 1;
     final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
@@ -494,7 +494,7 @@ void main() {
     force.onUpdate = (_) => updated += 1;
     force.onEnd = (_) => ended += 1;
 
-    const int pointerValue = 1;
+    const PointerId pointerValue = 1;
     final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
@@ -542,7 +542,7 @@ void main() {
     force.onUpdate = (_) => updated += 1;
     force.onEnd = (_) => ended += 1;
 
-    const int pointerValue = 1;
+    const PointerId pointerValue = 1;
     final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));

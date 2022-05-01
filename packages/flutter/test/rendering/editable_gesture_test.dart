@@ -59,13 +59,13 @@ class FakeEditableTextState extends Fake implements TextSelectionDelegate { }
 class _PointerRouterSpy extends PointerRouter {
   int routeCount = 0;
   @override
-  void addRoute(int pointer, PointerRoute route, [Matrix4? transform]) {
+  void addRoute(PointerId pointer, PointerRoute route, [Matrix4? transform]) {
     super.addRoute(pointer, route, transform);
     routeCount++;
   }
 
   @override
-  void removeRoute(int pointer, PointerRoute route) {
+  void removeRoute(PointerId pointer, PointerRoute route) {
     super.removeRoute(pointer, route);
     routeCount--;
   }

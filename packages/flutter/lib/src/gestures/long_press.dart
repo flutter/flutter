@@ -833,7 +833,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     // Winning the arena isn't important here since it may happen from a sweep.
     // Explicitly exceeding the deadline puts the gesture in accepted state.
   }

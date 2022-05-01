@@ -1833,7 +1833,7 @@ class _LiveTestPointerRecord {
     this.position,
   ) : color = HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
       decay = 1;
-  final int pointer;
+  final PointerId pointer;
   final Color color;
   Offset position;
   int decay; // >0 means down, <0 means up, increases by one each time, removed at 0
@@ -1890,7 +1890,7 @@ class _LiveTestRenderView extends RenderView {
         ..strokeWidth = radius / 10.0
         ..style = PaintingStyle.stroke;
       bool dirty = false;
-      for (final int pointer in _pointers.keys) {
+      for (final PointerId pointer in _pointers.keys) {
         final _LiveTestPointerRecord record = _pointers[pointer]!;
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position), paint);
@@ -1900,7 +1900,7 @@ class _LiveTestRenderView extends RenderView {
       }
       _pointers
         .keys
-        .where((int pointer) => _pointers[pointer]!.decay == 0)
+        .where((PointerId pointer) => _pointers[pointer]!.decay == 0)
         .toList()
         .forEach(_pointers.remove);
       if (dirty && onNeedPaint != null)

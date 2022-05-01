@@ -499,7 +499,7 @@ void main() {
         ),
       ),
     );
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.downWithCustomEvent(
@@ -599,7 +599,7 @@ void main() {
       ),
     );
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
     const double maxPressure = 6.0;
 
     final TestGesture gesture = await tester.createGesture();
@@ -664,7 +664,7 @@ void main() {
       ),
     );
 
-    final int pointerValue = tester.nextPointer;
+    final PointerId pointerValue = tester.nextPointer;
 
     final TestGesture gesture = await tester.createGesture();
 

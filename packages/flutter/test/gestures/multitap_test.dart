@@ -18,11 +18,11 @@ void main() {
 
     final List<String> log = <String>[];
 
-    tap.onTapDown = (int pointer, TapDownDetails details) { log.add('tap-down $pointer'); };
-    tap.onTapUp = (int pointer, TapUpDetails details) { log.add('tap-up $pointer'); };
-    tap.onTap = (int pointer) { log.add('tap $pointer'); };
-    tap.onLongTapDown = (int pointer, TapDownDetails details) { log.add('long-tap-down $pointer'); };
-    tap.onTapCancel = (int pointer) { log.add('tap-cancel $pointer'); };
+    tap.onTapDown = (PointerId pointer, TapDownDetails details) { log.add('tap-down $pointer'); };
+    tap.onTapUp = (PointerId pointer, TapUpDetails details) { log.add('tap-up $pointer'); };
+    tap.onTap = (PointerId pointer) { log.add('tap $pointer'); };
+    tap.onLongTapDown = (PointerId pointer, TapDownDetails details) { log.add('long-tap-down $pointer'); };
+    tap.onTapCancel = (PointerId pointer) { log.add('tap-cancel $pointer'); };
 
 
     final TestPointer pointer5 = TestPointer(5);
@@ -79,11 +79,11 @@ void main() {
 
     final List<String> log = <String>[];
 
-    tap.onTapDown = (int pointer, TapDownDetails details) { log.add('tap-down $pointer'); };
-    tap.onTapUp = (int pointer, TapUpDetails details) { log.add('tap-up $pointer'); };
-    tap.onTap = (int pointer) { log.add('tap $pointer'); };
-    tap.onLongTapDown = (int pointer, TapDownDetails details) { log.add('long-tap-down $pointer'); };
-    tap.onTapCancel = (int pointer) { log.add('tap-cancel $pointer'); };
+    tap.onTapDown = (PointerId pointer, TapDownDetails details) { log.add('tap-down $pointer'); };
+    tap.onTapUp = (PointerId pointer, TapUpDetails details) { log.add('tap-up $pointer'); };
+    tap.onTap = (PointerId pointer) { log.add('tap $pointer'); };
+    tap.onLongTapDown = (PointerId pointer, TapDownDetails details) { log.add('long-tap-down $pointer'); };
+    tap.onTapCancel = (PointerId pointer) { log.add('tap-cancel $pointer'); };
 
 
     final TestPointer touchPointer5 = TestPointer(5);

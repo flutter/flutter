@@ -251,11 +251,11 @@ class _LineBetweenPointers {
 
   // The location and the id of the pointer that marks the start of the line.
   final Offset pointerStartLocation;
-  final int pointerStartId;
+  final PointerId pointerStartId;
 
   // The location and the id of the pointer that marks the end of the line.
   final Offset pointerEndLocation;
-  final int pointerEndId;
+  final PointerId pointerEndId;
 
 }
 
@@ -339,7 +339,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   _LineBetweenPointers? _initialLine;
   _LineBetweenPointers? _currentLine;
   final Map<int, Offset> _pointerLocations = <int, Offset>{};
-  final List<int> _pointerQueue = <int>[]; // A queue to sort pointers in order of entrance
+  final List<PointerId> _pointerQueue = <PointerId>[]; // A queue to sort pointers in order of entrance
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
   late Offset _delta;
   final Map<int, _PointerPanZoomData> _pointerPanZooms = <int, _PointerPanZoomData>{};
@@ -497,7 +497,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
     // Compute the focal point
     Offset focalPoint = Offset.zero;
-    for (final int pointer in _pointerLocations.keys)
+    for (final PointerId pointer in _pointerLocations.keys)
       focalPoint += _pointerLocations[pointer]!;
     for (final _PointerPanZoomData p in _pointerPanZooms.values)
       focalPoint += p.focalPoint;
@@ -521,7 +521,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     final int count = _pointerLocations.keys.length;
 
     Offset pointerFocalPoint = Offset.zero;
-    for (final int pointer in _pointerLocations.keys)
+    for (final PointerId pointer in _pointerLocations.keys)
       pointerFocalPoint += _pointerLocations[pointer]!;
     if (count > 0)
       pointerFocalPoint = pointerFocalPoint / count.toDouble();
@@ -532,7 +532,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     double totalDeviation = 0.0;
     double totalHorizontalDeviation = 0.0;
     double totalVerticalDeviation = 0.0;
-    for (final int pointer in _pointerLocations.keys) {
+    for (final PointerId pointer in _pointerLocations.keys) {
       totalDeviation += (pointerFocalPoint - _pointerLocations[pointer]!).distance;
       totalHorizontalDeviation += (pointerFocalPoint.dx - _pointerLocations[pointer]!.dx).abs();
       totalVerticalDeviation += (pointerFocalPoint.dy - _pointerLocations[pointer]!.dy).abs();
@@ -572,7 +572,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  bool _reconfigure(int pointer) {
+  bool _reconfigure(PointerId pointer) {
     _initialFocalPoint = _currentFocalPoint!;
     _initialSpan = _currentSpan;
     _initialLine = _currentLine;
@@ -651,7 +651,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     if (_state == _ScaleState.possible) {
       _state = _ScaleState.started;
       _dispatchOnStartCallbackIfNeeded();
@@ -673,7 +673,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     _pointerPanZooms.remove(pointer);
     _pointerLocations.remove(pointer);
     _pointerQueue.remove(pointer);
@@ -681,7 +681,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
+  void didStopTrackingLastPointer(PointerId pointer) {
     switch (_state) {
       case _ScaleState.possible:
         resolve(GestureDisposition.rejected);

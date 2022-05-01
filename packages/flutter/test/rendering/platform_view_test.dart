@@ -228,7 +228,7 @@ ui.PointerData _pointerData(
   Offset logicalPosition, {
   int device = 0,
   PointerDeviceKind kind = PointerDeviceKind.mouse,
-  int pointer = 0,
+  PointerId pointer = 0,
 }) {
   return ui.PointerData(
     pointerIdentifier: pointer,

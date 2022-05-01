@@ -12,7 +12,7 @@ class GestureTester {
 
   final FakeAsync async;
 
-  void closeArena(int pointer) {
+  void closeArena(PointerId pointer) {
     GestureBinding.instance.gestureArena.close(pointer);
   }
 

@@ -5,6 +5,7 @@
 
 import 'arena.dart';
 import 'binding.dart';
+import 'events.dart' show PointerId;
 
 class _CombiningGestureArenaEntry implements GestureArenaEntry {
   _CombiningGestureArenaEntry(this._combiner, this._member);
@@ -23,14 +24,14 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 
   final GestureArenaTeam _owner;
   final List<GestureArenaMember> _members = <GestureArenaMember>[];
-  final int _pointer;
+  final PointerId _pointer;
 
   bool _resolved = false;
   GestureArenaMember? _winner;
   GestureArenaEntry? _entry;
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     assert(_pointer == pointer);
     assert(_winner != null || _members.isNotEmpty);
     _close();
@@ -43,7 +44,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     assert(_pointer == pointer);
     _close();
     for (final GestureArenaMember member in _members)
@@ -57,7 +58,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(combiner == this);
   }
 
-  GestureArenaEntry _add(int pointer, GestureArenaMember member) {
+  GestureArenaEntry _add(PointerId pointer, GestureArenaMember member) {
     assert(!_resolved);
     assert(_pointer == pointer);
     _members.add(member);
@@ -141,7 +142,7 @@ class GestureArenaTeam {
   ///
   /// To assign a gesture recognizer to a team, see
   /// [OneSequenceGestureRecognizer.team].
-  GestureArenaEntry add(int pointer, GestureArenaMember member) {
+  GestureArenaEntry add(PointerId pointer, GestureArenaMember member) {
     final _CombiningGestureArenaMember combiner = _combiners.putIfAbsent(
       pointer,
       () => _CombiningGestureArenaMember(this, pointer),

@@ -348,7 +348,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   final Set<int> _acceptedActivePointers = <int>{};
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
     if (_state != _DragState.accepted) {
@@ -396,12 +396,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     _giveUpPointer(pointer);
   }
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
+  void didStopTrackingLastPointer(PointerId pointer) {
     assert(_state != _DragState.ready);
     switch(_state) {
       case _DragState.ready:
@@ -421,7 +421,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _state = _DragState.ready;
   }
 
-  void _giveUpPointer(int pointer) {
+  void _giveUpPointer(PointerId pointer) {
     stopTrackingPointer(pointer);
     // If we never accepted the pointer, we reject it since we are no longer
     // interested in winning the gesture arena for it.
@@ -440,7 +440,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  void _checkStart(Duration timestamp, int pointer) {
+  void _checkStart(Duration timestamp, PointerId pointer) {
     assert(_initialButtons == kPrimaryButton);
     if (onStart != null) {
       final DragStartDetails details = DragStartDetails(
@@ -473,7 +473,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  void _checkEnd(int pointer) {
+  void _checkEnd(PointerId pointer) {
     assert(_initialButtons == kPrimaryButton);
     if (onEnd == null)
       return;

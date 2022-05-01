@@ -269,12 +269,12 @@ abstract class WidgetController {
   /// For example, a test that verifies that tapping a disabled button does not
   /// trigger the button would set `warnIfMissed` to false, because the button
   /// would ignore the tap.
-  Future<void> tap(Finder finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
+  Future<void> tap(Finder finder, {PointerId? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
     return tapAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'), pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
-  Future<void> tapAt(Offset location, {int? pointer, int buttons = kPrimaryButton}) {
+  Future<void> tapAt(Offset location, {PointerId? pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
       await gesture.up();
@@ -294,7 +294,7 @@ abstract class WidgetController {
   ///  * [tap], which presses and releases a pointer at the given location.
   ///  * [longPress], which presses and releases a pointer with a gap in
   ///    between long enough to trigger the long-press gesture.
-  Future<TestGesture> press(Finder finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
+  Future<TestGesture> press(Finder finder, {PointerId? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
     return TestAsyncUtils.guard<TestGesture>(() {
       return startGesture(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'), pointer: pointer, buttons: buttons);
     });
@@ -312,13 +312,13 @@ abstract class WidgetController {
   /// later verify that long-pressing the same location (using the same finder)
   /// has no effect (since the widget is now obscured), setting `warnIfMissed`
   /// to false on that second call.
-  Future<void> longPress(Finder finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
+  Future<void> longPress(Finder finder, {PointerId? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
     return longPressAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'), pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location with
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
-  Future<void> longPressAt(Offset location, {int? pointer, int buttons = kPrimaryButton}) {
+  Future<void> longPressAt(Offset location, {PointerId? pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
       await pump(kLongPressTimeout + kPressTimeout);
@@ -366,7 +366,7 @@ abstract class WidgetController {
     Finder finder,
     Offset offset,
     double speed, {
-    int? pointer,
+    PointerId? pointer,
     int buttons = kPrimaryButton,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
@@ -396,7 +396,7 @@ abstract class WidgetController {
     Offset startLocation,
     Offset offset,
     double speed, {
-    int? pointer,
+    PointerId? pointer,
     int buttons = kPrimaryButton,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
@@ -525,7 +525,7 @@ abstract class WidgetController {
   Future<void> drag(
     Finder finder,
     Offset offset, {
-    int? pointer,
+    PointerId? pointer,
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
@@ -557,7 +557,7 @@ abstract class WidgetController {
   Future<void> dragFrom(
     Offset startLocation,
     Offset offset, {
-    int? pointer,
+    PointerId? pointer,
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
@@ -658,7 +658,7 @@ abstract class WidgetController {
     Finder finder,
     Offset offset,
     Duration duration, {
-    int? pointer,
+    PointerId? pointer,
     int buttons = kPrimaryButton,
     double frequency = 60.0,
     bool warnIfMissed = true,
@@ -685,7 +685,7 @@ abstract class WidgetController {
     Offset startLocation,
     Offset offset,
     Duration duration, {
-    int? pointer,
+    PointerId? pointer,
     int buttons = kPrimaryButton,
     double frequency = 60.0,
   }) {
@@ -746,12 +746,12 @@ abstract class WidgetController {
   ///
   /// This is the default pointer identifier that will be used the next time the
   /// [startGesture] method is called without an explicit pointer identifier.
-  int get nextPointer => _nextPointer;
+  PointerId get nextPointer => _nextPointer;
 
-  static int _nextPointer = 1;
+  static PointerId _nextPointer = 1;
 
-  static int _getNextPointer() {
-    final int result = _nextPointer;
+  static PointerId _getNextPointer() {
+    final PointerId result = _nextPointer;
     _nextPointer += 1;
     return result;
   }
@@ -762,7 +762,7 @@ abstract class WidgetController {
   /// You can use [startGesture] instead if your gesture begins with a down
   /// event.
   Future<TestGesture> createGesture({
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
@@ -782,7 +782,7 @@ abstract class WidgetController {
   /// down gesture.
   Future<TestGesture> startGesture(
     Offset downLocation, {
-    int? pointer,
+    PointerId? pointer,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {

@@ -41,7 +41,7 @@ class PointerEventResampler {
   Offset _position = Offset.zero;
   bool _isTracked = false;
   bool _isDown = false;
-  int _pointerIdentifier = 0;
+  PointerId _pointerIdentifier = 0;
   int _hasButtons = 0;
 
   PointerEvent _toHoverEvent(
@@ -79,7 +79,7 @@ class PointerEventResampler {
     PointerEvent event,
     Offset position,
     Offset delta,
-    int pointerIdentifier,
+    PointerId pointerIdentifier,
     Duration timeStamp,
     int buttons,
   ) {
@@ -113,7 +113,7 @@ class PointerEventResampler {
     PointerEvent event,
     Offset position,
     Offset delta,
-    int pointerIdentifier,
+    PointerId pointerIdentifier,
     Duration timeStamp,
     bool isDown,
     int buttons,
@@ -227,7 +227,7 @@ class PointerEventResampler {
       }
 
       // Current pointer identifier.
-      final int pointerIdentifier = event.pointer;
+      final PointerId pointerIdentifier = event.pointer;
 
       // Initialize pointer identifier for `move` events.
       // Identifier is expected to be the same while `down`.

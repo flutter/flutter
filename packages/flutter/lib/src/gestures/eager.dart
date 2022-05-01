@@ -36,7 +36,7 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'eager';
 
   @override
-  void didStopTrackingLastPointer(int pointer) { }
+  void didStopTrackingLastPointer(PointerId pointer) { }
 
   @override
   void handleEvent(PointerEvent event) { }

@@ -273,7 +273,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(PointerId pointer) {
     assert(_pointers != null);
     final MultiDragPointerState? state = _pointers![pointer];
     if (state == null)
@@ -281,7 +281,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     state.accepted((Offset initialPosition) => _startDrag(initialPosition, pointer));
   }
 
-  Drag? _startDrag(Offset initialPosition, int pointer) {
+  Drag? _startDrag(Offset initialPosition, PointerId pointer) {
     assert(_pointers != null);
     final MultiDragPointerState state = _pointers![pointer]!;
     assert(state != null);
@@ -298,7 +298,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(PointerId pointer) {
     assert(_pointers != null);
     if (_pointers!.containsKey(pointer)) {
       final MultiDragPointerState state = _pointers![pointer]!;
@@ -308,7 +308,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     } // else we already preemptively forgot about it (e.g. we got an up event)
   }
 
-  void _removeState(int pointer) {
+  void _removeState(PointerId pointer) {
     if (_pointers == null) {
       // We've already been disposed. It's harmless to skip removing the state
       // for the given pointer because dispose() has already removed it.

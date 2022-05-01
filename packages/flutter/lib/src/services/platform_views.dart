@@ -551,7 +551,7 @@ class _AndroidMotionEventConverter {
     );
   }
 
-  void _remove(int pointer) {
+  void _remove(PointerId pointer) {
     pointerPositions.remove(pointer);
     usedAndroidPointerIds.remove(pointerProperties[pointer]!.id);
     pointerProperties.remove(pointer);
@@ -630,7 +630,7 @@ class _AndroidMotionEventConverter {
     );
   }
 
-  AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
+  AndroidPointerProperties propertiesFor(PointerEvent event, PointerId pointerId) {
     int toolType = AndroidPointerProperties.kToolTypeUnknown;
     switch (event.kind) {
       case PointerDeviceKind.touch:
@@ -745,8 +745,8 @@ abstract class AndroidViewController extends PlatformViewController {
   }
 
   /// Creates a masked Android MotionEvent action value for an indexed pointer.
-  static int pointerAction(int pointerId, int action) {
-    return ((pointerId << 8) & 0xff00) | (action & 0xff);
+  static int pointerAction(int pointerIdx, int action) {
+    return ((pointerIdx << 8) & 0xff00) | (action & 0xff);
   }
 
   /// Sends the message to dispose the platform view.
