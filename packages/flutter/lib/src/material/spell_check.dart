@@ -32,7 +32,7 @@ class MaterialSpellCheckService implements SpellCheckService {
       case 'SpellCheck.updateSpellCheckResults':
         List<String> results = args.cast<String>();
         String text = results.removeAt(0);
-        print("************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] Text: ${text} *************************************************************");
+        // print("************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] Text: ${text} *************************************************************");
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
         
         // print("************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] Raw spell check results received: *************************************************************");
@@ -40,12 +40,12 @@ class MaterialSpellCheckService implements SpellCheckService {
         results.forEach((String result) {
           List<String> resultParsed = result.split(".");
 
-          print("************************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] ${resultParsed} *************************************************************************");
+          // print("************************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] ${resultParsed} *************************************************************************");
 
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split("\n")));
         });
 
-        controller.sink.add(List<dynamic>[text, spellCheckerSuggestionSpans]);
+        controller.sink.add(<dynamic>[text, spellCheckerSuggestionSpans]);
         break;
       default:
         throw MissingPluginException();
@@ -72,11 +72,13 @@ class MaterialSpellCheckService implements SpellCheckService {
     
     await for (final result in controller.stream) {
       spellCheckResults.add(result[0]);
-      
-      result[1].forEach((SpellCheckerSuggestionSpan span) {
-        bool isWithinComposingRegion = composingRange.start == span.start && composingRange.end == span.end;
-        spellCheckResults.add(span);
-      });
+      spellCheckResults.add(result[1]);
+
+
+      // result[1].forEach((SpellCheckerSuggestionSpan span) {
+      //   // bool isWithinComposingRegion = composingRange.start == span.start && composingRange.end == span.end;
+      //   spellCheckResults.add(span);
+      // });
 
 
       return spellCheckResults;

@@ -2683,10 +2683,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             // results.forEach((SpellCheckerSuggestionSpan result) {
             //   print(result.replacementSuggestions);
             // });
+            if (results.length > 1) {
             _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results[1];
             _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResultsText = results[0];
             // print("${renderEditable.getWordBoundary(foo.length)}")
             renderEditable.text = buildTextSpan();
+            }
       });
         }
       } catch (exception, stack) {
