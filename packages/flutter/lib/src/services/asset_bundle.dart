@@ -256,11 +256,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
           return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
         });
     }
-    final ui.ImmutableBuffer? result = ui.ImmutableBuffer.fromAsset(key);
-    if (result == null) {
-      throw FlutterError('Unable to load asset: $key');
-    }
-    return SynchronousFuture<ui.ImmutableBuffer>(result);
+    return ui.ImmutableBuffer.fromAsset(key);
   }
 }
 
