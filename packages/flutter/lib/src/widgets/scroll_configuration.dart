@@ -306,7 +306,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
-  
+
   @override
   bool get usePrimaryScrollController => _usePrimaryScrollController ?? delegate.usePrimaryScrollController;
 
