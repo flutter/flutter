@@ -14,8 +14,8 @@ import 'framework.dart';
 /// a group of [Selectable]s
 ///
 /// The render object of this container is a single selectable and will register
-/// itself to the [registrar]. The containers handles the [SelectionEvent]s from
-/// the [registrar] and delegates the events to the [delegate].
+/// itself to the [registrar]. The containers handle the [SelectionEvent]s from
+/// the [registrar] and delegate the events to the [delegate].
 ///
 /// This widget uses [SelectionRegistrarScope] to host the [delegate] as the
 /// [SelectionRegistrar] for the subtree to collect the [Selectable]s, and
@@ -28,9 +28,15 @@ import 'framework.dart';
 /// subclass of [SelectionContainerDelegate] to decide how the selections are
 /// handled.
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to create a select-all-or-none container
+///
+/// ** See code in examples/api/lib/material/selection_area/custom_container.dart **
+/// {@end-tool}
+///
 /// See also:
-///  * [SelectionArea]: which provides an overview of the selection system.
-///  * [SelectionRegistrarScope.disabled]: which disable selection for a
+///  * [SelectableRegion], which provides an overview of the selection system.
+///  * [SelectionRegistrarScope.disabled], which disable selection for a
 ///    subtree.
 class SelectionContainer extends StatefulWidget {
   /// Creates a selection container to collect the [Selectable]s in the subtree.
@@ -149,8 +155,10 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
 /// Use [SelectionRegistrarScope.maybeOf] to get the SelectionRegistrar from
 /// a context.
 ///
-/// To disable selection for the subtree, wrap the subtree with
-/// [SelectionRegistrarScope.disabled]
+/// This widget is automatically created as part of [SelectionContainer] and
+/// is generally not used directly, except for disabling selection for a part
+/// of subtree. In that case, one can wrap the subtree with
+/// [SelectionRegistrarScope.disabled].
 class SelectionRegistrarScope extends InheritedWidget {
   /// Creates a selection registrar scope that host the [registrar].
   const SelectionRegistrarScope({
@@ -184,7 +192,6 @@ class SelectionRegistrarScope extends InheritedWidget {
     return oldWidget.registrar != registrar;
   }
 }
-
 
 /// A delegate to handle selection events for a [SelectionContainer].
 ///

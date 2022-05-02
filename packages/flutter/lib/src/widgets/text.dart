@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'default_selection_style.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'media_query.dart';
@@ -347,34 +348,20 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// ## Selections
 ///
 /// [Text] is selectable by default if it is under a [SelectionArea]. To disable
-/// the selection, wraps the Text or part of the subtree with
+/// the selection, wrap the Text or part of the subtree with
 /// [SelectionRegistrarScope.disabled].
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text in a Column.
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
-///
-/// ```dart
-/// SelectionArea(
-///   selectionControls: materialTextSelectionControls,
-///   child: Column(
-///     children: const <Widget>[
-///       Text('Selectable text'),
-///       SelectionRegistrarScope.disabled(child: Text('Non-selectable text 1')),
-///       Text('Selectable text'),
-///     ],
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/selection_area/disable_partial_selection.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [RichText], which gives you more control over the text styles.
 ///  * [DefaultTextStyle], which sets default styles for [Text] widgets.
-///  * [SelectionArea], which provides an overview of the selection system.
+///  * [SelectableRegion], which provides an overview of the selection system.
 class Text extends StatelessWidget {
   /// Creates a text widget.
   ///
@@ -401,7 +388,7 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
-    this.selectionColor = const Color(0xAF6694e8),
+    this.selectionColor,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -433,7 +420,7 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
-    this.selectionColor = const Color(0xAF6694e8),
+    this.selectionColor,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -567,7 +554,7 @@ class Text extends StatelessWidget {
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
       selectionRegistrar: registrar,
-      selectionColor: selectionColor,
+      selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

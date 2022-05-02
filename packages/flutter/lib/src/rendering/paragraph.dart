@@ -123,6 +123,7 @@ class RenderParagraph extends RenderBox
       child.parentData = TextParentData();
   }
 
+  static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
   AttributedString? _cachedAttributedLabel;
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
@@ -217,9 +218,8 @@ class RenderParagraph extends RenderBox
     final String plainText = text.toPlainText(includeSemanticsLabels: false);
     final List<_SelectableFragment> result = <_SelectableFragment>[];
     int start = 0;
-    final String placeholderChar = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
     while (start < plainText.length) {
-      int end = plainText.indexOf(placeholderChar, start);
+      int end = plainText.indexOf(_placeholderCharacter, start);
       if (start != end) {
         if (end == -1)
           end = plainText.length;
@@ -249,8 +249,8 @@ class RenderParagraph extends RenderBox
   @override
   void dispose() {
     _removeSelectionRegistrarSubscription();
-    // _lastSelectableFragments may hold references to this RenderParagraph
-    // release them manually to avoid retain cycles.
+    // _lastSelectableFragments may hold references to this RenderParagraph.
+    // Release them manually to avoid retain cycles.
     _lastSelectableFragments = null;
     super.dispose();
   }
@@ -1218,7 +1218,7 @@ class RenderParagraph extends RenderBox
   }
 }
 
-/// A continuous selectable piece of paragraph.
+/// A continuous, selectable piece of paragraph.
 ///
 /// Since the selections in [PlaceHolderSpan] are handle independently in its
 /// subtree, a selection in [RenderParagraph] can't continue across a
@@ -1293,19 +1293,24 @@ class _SelectableFragment with Selectable, ChangeNotifier {
     late final SelectionResult result;
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
-    if (event is SelectionStartEdgeUpdateEvent) {
-      result = _updateSelectionEdge(event.globalPosition, isEnd: false);
-    } else if (event is SelectionEndEdgeUpdateEvent) {
-      result = _updateSelectionEdge(event.globalPosition, isEnd: true);
-    } else if (event is SelectAllSelectionEvent) {
-      result = _handleSelectAll();
-    } else if (event is ClearSelectionEvent) {
-      result = _handleClearSelection();
-    } else if (event is SelectWordSelectionEvent) {
-      result = _handleSelectWord(event.globalPosition);
-    } else {
-      result = SelectionResult.none;
+    switch (event.type) {
+      case SelectionEventType.startEdgeUpdate:
+      case SelectionEventType.endEdgeUpdate:
+        final SelectionEdgeUpdateEvent edgeUpdate = event as SelectionEdgeUpdateEvent;
+        result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+        break;
+      case SelectionEventType.clear:
+        result = _handleClearSelection();
+        break;
+      case SelectionEventType.selectAll:
+        result = _handleSelectAll();
+        break;
+      case SelectionEventType.selectWord:
+        final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
+        result = _handleSelectWord(selectWord.globalPosition);
+        break;
     }
+
     if (existingSelectionStart != _textSelectionStart ||
         existingSelectionEnd != _textSelectionEnd) {
       _didChangeSelection();
@@ -1363,7 +1368,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
   }
 
   TextPosition _clampTextPosition(TextPosition position) {
-    // Affinity of range.start is upstream.
+    // Affinity of range.end is upstream.
     if (position.offset > range.end ||
         (position.offset == range.end && position.affinity == TextAffinity.downstream)) {
       return TextPosition(offset: range.end, affinity: TextAffinity.upstream);
@@ -1400,12 +1405,56 @@ class _SelectableFragment with Selectable, ChangeNotifier {
     // Fragments are separated by placeholder span, the word boundary shouldn't
     // expand across fragments.
     assert(word.start >= range.start && word.end <= range.end);
+    late TextPosition start;
+    late TextPosition end;
     if (position.offset >= word.end) {
-      _textSelectionStart = _textSelectionEnd = TextPosition(offset: position.offset);
+      start = end = TextPosition(offset: position.offset);
+    } else {
+      start = TextPosition(offset: word.start);
+      end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
     }
-    _textSelectionStart = TextPosition(offset: word.start);
-    _textSelectionEnd = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
+    if (!_newSelectionWithinCurrent(start, end)) {
+      _textSelectionStart = start;
+      _textSelectionEnd = end;
+    }
     return SelectionResult.end;
+  }
+
+  /// Whether the given selection text range is contained in current selection
+  /// range.
+  ///
+  /// The parameters `start` must be smaller than `end`.
+  bool _newSelectionWithinCurrent(TextPosition start, TextPosition end) {
+    assert(_compareTextPositions(start, end) >= 0);
+    if (_textSelectionStart == null || _textSelectionEnd == null)
+      return false;
+    // Normalize current selection.
+    late TextPosition currentStart;
+    late TextPosition currentEnd;
+    if (_compareTextPositions(_textSelectionStart!, _textSelectionEnd!) > 0) {
+      currentStart = _textSelectionStart!;
+      currentEnd = _textSelectionEnd!;
+    } else {
+      currentStart = _textSelectionEnd!;
+      currentEnd = _textSelectionStart!;
+    }
+    return _compareTextPositions(currentStart, start) >= 0 && _compareTextPositions(currentEnd, end) <= 0;
+  }
+
+  /// Compares two text positions.
+  ///
+  /// Returns 1 if `position` < `otherPosition`, -1 if `position` > `otherPosition`,
+  /// or 0 if they are equal.
+  int _compareTextPositions(TextPosition position, TextPosition otherPosition) {
+    if (position.offset < otherPosition.offset) {
+      return 1;
+    } else if (position.offset > otherPosition.offset) {
+      return -1;
+    } else if (position.affinity == otherPosition.affinity){
+      return 0;
+    } else {
+      return position.affinity == TextAffinity.upstream ? 1 : -1;
+    }
   }
 
   Matrix4 getTransformToParagraph() {

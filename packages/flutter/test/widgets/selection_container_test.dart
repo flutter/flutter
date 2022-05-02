@@ -2,16 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('SelectionContainer', () {
-    testWidgets('works', (WidgetTester tester) async {
+
+    Future<void> pumpContainer(WidgetTester tester, Widget child) async {
+      await tester.pumpWidget(
+        DefaultSelectionStyle(
+          selectionColor: Colors.red,
+          child: child,
+        ),
+      );
+    }
+
+    testWidgets('updates its registrar and delegate based on the number of selectables', (WidgetTester tester) async {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final TestContainerDelegate delegate = TestContainerDelegate();
-      await tester.pumpWidget(
+      await pumpContainer(
+        tester,
         SelectionContainer(
           registrar: registrar,
           delegate: delegate,
@@ -31,7 +42,8 @@ void main() {
     testWidgets('disabled container', (WidgetTester tester) async {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final TestContainerDelegate delegate = TestContainerDelegate();
-      await tester.pumpWidget(
+      await pumpContainer(
+        tester,
         SelectionContainer(
           registrar: registrar,
           delegate: delegate,
@@ -53,7 +65,8 @@ void main() {
     testWidgets('selection container register itself if there is a selectable child', (WidgetTester tester) async {
       final TestSelectionRegistrar registrar = TestSelectionRegistrar();
       final TestContainerDelegate delegate = TestContainerDelegate();
-      await tester.pumpWidget(
+      await pumpContainer(
+        tester,
         SelectionContainer(
           registrar: registrar,
           delegate: delegate,
@@ -63,7 +76,8 @@ void main() {
       );
       expect(registrar.selectables.length, 0);
 
-      await tester.pumpWidget(
+      await pumpContainer(
+        tester,
         SelectionContainer(
           registrar: registrar,
           delegate: delegate,
@@ -76,7 +90,8 @@ void main() {
       );
       expect(registrar.selectables.length, 1);
 
-      await tester.pumpWidget(
+      await pumpContainer(
+        tester,
         SelectionContainer(
           registrar: registrar,
           delegate: delegate,

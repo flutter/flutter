@@ -236,17 +236,53 @@ class SelectionUtil {
   }
 }
 
+/// The type of selection event.
+///
+/// Used by [SelectionEvent.type] to distinguish different types of events.
+enum SelectionEventType {
+  /// An event to indicate the selection start edge has changed.
+  ///
+  /// Used by [SelectionEdgeUpdateEvent].
+  startEdgeUpdate,
+
+  /// An event to indicate the selection end edge has changed.
+  ///
+  /// Used by [SelectionEdgeUpdateEvent].
+  endEdgeUpdate,
+
+  /// An event to clear the current selection.
+  ///
+  /// Used by [ClearSelectionEvent].
+  clear,
+
+  /// An event to select all the available content.
+  ///
+  /// Used by [SelectAllSelectionEvent].
+  selectAll,
+
+  /// An event to select a word at the location.
+  ///
+  /// Used by [SelectWordSelectionEvent].
+  selectWord,
+}
+
 /// An abstract base class for selection events.
 ///
 /// This should not be directly used. To handle a selection event, it should
-/// be downcast to a specific subclass.
+/// be downcast to a specific subclass. One can use [type] to look up which
+/// subclasses to downcast to.
 ///
 /// See also:
-///
-/// * [SelectionEdgeUpdateEvent], which is the abstract base class for all of the
-///   mouse selection or selection handles update event.
+/// * [SelectAllSelectionEvent], for events to select all contents.
+/// * [ClearSelectionEvent], for events to clear selections.
+/// * [SelectWordSelectionEvent], for events to select words at the locations.
+/// * [SelectionEdgeUpdateEvent], for events to update selection edges.
+/// * [SelectionEventType], for determining the subclass types.
 abstract class SelectionEvent {
-  const SelectionEvent._();
+  const SelectionEvent._(this.type);
+
+  /// The type of this selection event.
+  final SelectionEventType type;
 }
 
 /// Selects all selectable contents.
@@ -255,14 +291,14 @@ abstract class SelectionEvent {
 /// ctrl + A, or cmd + A in macOS.
 class SelectAllSelectionEvent extends SelectionEvent {
   /// Creates a select all selection event.
-  const SelectAllSelectionEvent(): super._();
+  const SelectAllSelectionEvent(): super._(SelectionEventType.selectAll);
 }
 
 /// Clear the selection from the [Selectable] and remove any existing
 /// highlight as if there is no selection at all.
 class ClearSelectionEvent extends SelectionEvent {
   /// Create a clear selection event.
-  const ClearSelectionEvent(): super._();
+  const ClearSelectionEvent(): super._(SelectionEventType.clear);
 }
 
 /// Select the whole word at the location.
@@ -270,7 +306,7 @@ class ClearSelectionEvent extends SelectionEvent {
 /// This event can be sent as the result of mobile long press selection.
 class SelectWordSelectionEvent extends SelectionEvent {
   /// Creates a select word event at the [globalPosition].
-  const SelectWordSelectionEvent({required this.globalPosition}): super._();
+  const SelectWordSelectionEvent({required this.globalPosition}): super._(SelectionEventType.selectWord);
 
   /// The position in global coordinates to select word at.
   final Offset globalPosition;
@@ -278,11 +314,24 @@ class SelectWordSelectionEvent extends SelectionEvent {
 
 /// An abstract subclass for all of the selection edge related selection events.
 ///
-/// This should not be directly used. To handle a selection edge update event,
-/// it should be downcast to a specific subclass, i.e.
-/// [SelectionStartEdgeUpdateEvent] or [SelectionEndEdgeUpdateEvent].
-abstract class SelectionEdgeUpdateEvent extends SelectionEvent {
-  const SelectionEdgeUpdateEvent._(this.globalPosition) : super._();
+/// This event is dispatched when the framework detects [DragStartDetails] in
+/// [SelectionArea]'s gesture recognizer for mouse devices, or the selection
+/// handles have been dragged to a new location. The [globalPosition]
+/// contains the location of the selection edge.
+class SelectionEdgeUpdateEvent extends SelectionEvent {
+  /// Creates a selection start edge update event.
+  ///
+  /// The [globalPosition] contains the location of the selection start edge.
+  const SelectionEdgeUpdateEvent.forStart({
+    required this.globalPosition
+  }) : super._(SelectionEventType.startEdgeUpdate);
+
+  /// Creates a selection end edge update event.
+  ///
+  /// The [globalPosition] contains the new location of the selection end edge.
+  const SelectionEdgeUpdateEvent.forEnd({
+    required this.globalPosition
+  }) : super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
@@ -293,34 +342,7 @@ abstract class SelectionEdgeUpdateEvent extends SelectionEvent {
   }
 }
 
-/// An event to indicate the selection start edge has changed.
-///
-/// This event is dispatched when the framework detects [DragStartDetails] in
-/// [SelectionArea]'s gesture recognizer for mouse devices, or the start
-/// selection handle has been dragged to a new location. The [globalPosition]
-/// contains the location of selection start edge.
-class SelectionStartEdgeUpdateEvent extends SelectionEdgeUpdateEvent {
-  /// Creates a selection start edge update event.
-  ///
-  /// The [globalPosition] contains the location of the selection start edge.
-  const SelectionStartEdgeUpdateEvent({required Offset globalPosition}) : super._(globalPosition);
-}
-
-/// An event to indicate the selection end edge has changed.
-///
-/// This event is dispatched when the framework detects [DragUpdateDetails] in
-/// [SelectionArea]'s gesture recognizer for mouse devices, or the end selection
-/// handle has been dragged to a new location. The [globalPosition] contains the
-/// new location of the selection end edge.
-class SelectionEndEdgeUpdateEvent extends SelectionEdgeUpdateEvent {
-  /// Creates a selection end edge update event.
-  ///
-  /// The [globalPosition] contains the new location of the selection end edge.
-  const SelectionEndEdgeUpdateEvent({required Offset globalPosition}) : super._(globalPosition);
-}
-
-
-/// An registrar that keeps track of [Selectable]s in the subtree.
+/// A registrar that keeps track of [Selectable]s in the subtree.
 ///
 /// A [Selectable] is only included in the selection event loop if they are
 /// registered with its immediate [SelectionRegistrar] in its ancestor chain.
@@ -329,10 +351,10 @@ class SelectionEndEdgeUpdateEvent extends SelectionEdgeUpdateEvent {
 /// in the ancestor chain above the build context.
 ///
 /// See also:
-///  * [SelectionRegistrarScope]: which host the [SelectionRegistrar] for the
+///  * [SelectionRegistrarScope], which hosts the [SelectionRegistrar] for the
 ///    subtree.
-///  * [SelectionRegistrant]: auto register to its
-///    [SelectionRegistrant.registrar].
+///  * [SelectionRegistrant], which auto registers the object with the mixin to
+///    [SelectionRegistrar].
 abstract class SelectionRegistrar {
   /// Adds the [selectable] into the registrar.
   ///
@@ -369,11 +391,11 @@ enum SelectionStatus {
   none,
 }
 
-/// The geometry of current selection.
+/// The geometry of the current selection.
 ///
-/// This includes detail, such as the location of the selection start or end,
+/// This includes details such as the location of the selection start or end,
 /// line height, etc. This information is used for drawing selection handles
-/// for mobile platform.
+/// for mobile platforms.
 ///
 /// The positions in geometry are in local coordinate.
 @immutable
@@ -391,7 +413,7 @@ class SelectionGeometry {
   /// The geometry information at the selection start.
   ///
   /// This information is used for drawing mobile selections. The
-  /// [SelectionPoint.localPosition] of selection start is usually at the start
+  /// [SelectionPoint.localPosition] of the selection start is usually at the start
   /// of the selection highlight at where the start selection handle should be
   /// drawn.
   ///
@@ -399,14 +421,14 @@ class SelectionGeometry {
   /// for forward selection or [TextSelectionHandleType.right] for backward
   /// selection in most cases.
   ///
-  /// Can be null if the selection end is offstage, for example, the selection
-  /// is outside of viewport or is kept alive by a scrollable.
+  /// Can be null if the selection end is offstage, for example, when the
+  /// selection is outside of the viewport or is kept alive by a scrollable.
   final SelectionPoint? startSelectionPoint;
 
   /// The geometry information at the selection end.
   ///
   /// This information is used for drawing mobile selections. The
-  /// [SelectionPoint.localPosition] of selection end is usually at the end
+  /// [SelectionPoint.localPosition] of the selection end is usually at the end
   /// of the selection highlight at where the end selection handle should be
   /// drawn.
   ///
@@ -414,20 +436,21 @@ class SelectionGeometry {
   /// for forward selection or [TextSelectionHandleType.left] for backward
   /// selection in most cases.
   ///
-  /// Can be null if the selection end is offstage, for example, the selection
-  /// is outside of viewport or is kept alive by a scrollable.
+  /// Can be null if the selection end is offstage, for example, when the
+  /// selection is outside of the viewport or is kept alive by a scrollable.
   final SelectionPoint? endSelectionPoint;
 
-  /// The status of ongoing selection.
+  /// The status of ongoing selection in the [Selectable] or [SelectionHandler].
   final SelectionStatus status;
 
-  /// Whether there is any selectable content.
+  /// Whether there is any selectable content in the [Selectable] or
+  /// [SelectionHandler].
   final bool hasContent;
 
   /// Whether there is an ongoing selection.
   bool get hasSelection => status != SelectionStatus.none;
 
-  /// Makes a copy of this object with updated value.
+  /// Makes a copy of this object with the given values updated.
   SelectionGeometry copyWith({
     SelectionPoint? startSelectionPoint,
     SelectionPoint? endSelectionPoint,
@@ -476,9 +499,11 @@ class SelectionPoint {
     required this.localPosition,
     required this.lineHeight,
     required this.handleType,
-  });
+  }) : assert(localPosition != null),
+       assert(lineHeight != null),
+       assert(handleType != null);
 
-  /// The position of the selection point in the local coordinate of the
+  /// The position of the selection point in the local coordinates of the
   /// containing [Selectable].
   final Offset localPosition;
 
@@ -512,7 +537,7 @@ class SelectionPoint {
   }
 }
 
-/// Which type of selection handle to be displayed.
+/// The type of selection handle to be displayed.
 ///
 /// With mixed-direction text, both handles may be the same type. Examples:
 ///

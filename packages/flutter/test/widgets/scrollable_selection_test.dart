@@ -34,7 +34,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgets('mouse can select multiple widget', (WidgetTester tester) async {
+  testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -71,7 +71,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('mouse can select multiple widget - horizontal', (WidgetTester tester) async {
+  testWidgets('mouse can select multiple widgets - horizontal', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -338,7 +338,7 @@ void main() {
     expect(paragraph50.selections[0], const TextSelection(baseOffset: 2, extentOffset: 4));
   });
 
-  testWidgets('can select all non-mac', (WidgetTester tester) async {
+  testWidgets('can select all non-Apple', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -367,7 +367,7 @@ void main() {
     expect(find.text('Item 13'), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
-  testWidgets('can select all mac', (WidgetTester tester) async {
+  testWidgets('can select all - Apple', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -382,7 +382,18 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
+    node.requestFocus();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump();
 
+    for (int i = 0; i < 13; i += 1) {
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item $i'), matching: find.byType(RichText)));
+      expect(paragraph.selections[0], TextSelection(baseOffset: 0, extentOffset: 'Item $i'.length));
+    }
+    expect(find.text('Item 13'), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('select to scroll by dragging selection handles forward', (WidgetTester tester) async {
@@ -442,7 +453,7 @@ void main() {
   });
 
   group('Complex cases', () {
-    testWidgets('selection start outside of the scrollable', (WidgetTester tester) async {
+    testWidgets('selection starts outside of the scrollable', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       await tester.pumpWidget(MaterialApp(
         home: SelectionArea(
@@ -550,7 +561,7 @@ void main() {
       expect(innerParagraph24.selections[0], const TextSelection(baseOffset: 0, extentOffset: 2));
     });
 
-    testWidgets('can copy off screen selection - mac', (WidgetTester tester) async {
+    testWidgets('can copy off screen selection - Apple', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(MaterialApp(
@@ -594,7 +605,7 @@ void main() {
       expect(clipboardData['text'], 'em 0It');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-    testWidgets('can copy off screen selection - non-mac', (WidgetTester tester) async {
+    testWidgets('can copy off screen selection - non-Apple', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(MaterialApp(

@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'clipboard_utils.dart';
+import '../widgets/clipboard_utils.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -53,18 +53,18 @@ void main() {
 
       await gesture.moveTo(const Offset(200.0, 100.0));
       expect(renderSelectionSpy.events.length, 2);
-      expect(renderSelectionSpy.events[0], isA<SelectionStartEdgeUpdateEvent>());
-      final SelectionStartEdgeUpdateEvent startEdge = renderSelectionSpy.events[0] as SelectionStartEdgeUpdateEvent;
+      expect(renderSelectionSpy.events[0].type, SelectionEventType.startEdgeUpdate);
+      final SelectionEdgeUpdateEvent startEdge = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(startEdge.globalPosition, const Offset(200.0, 200.0));
-      expect(renderSelectionSpy.events[1], isA<SelectionEndEdgeUpdateEvent>());
-      SelectionEndEdgeUpdateEvent endEdge = renderSelectionSpy.events[1] as SelectionEndEdgeUpdateEvent;
+      expect(renderSelectionSpy.events[1].type, SelectionEventType.endEdgeUpdate);
+      SelectionEdgeUpdateEvent endEdge = renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent;
       expect(endEdge.globalPosition, const Offset(200.0, 100.0));
       renderSelectionSpy.events.clear();
 
       await gesture.moveTo(const Offset(100.0, 100.0));
       expect(renderSelectionSpy.events.length, 1);
-      expect(renderSelectionSpy.events[0], isA<SelectionEndEdgeUpdateEvent>());
-      endEdge = renderSelectionSpy.events[0] as SelectionEndEdgeUpdateEvent;
+      expect(renderSelectionSpy.events[0].type, SelectionEventType.endEdgeUpdate);
+      endEdge = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(endEdge.globalPosition, const Offset(100.0, 100.0));
 
       await gesture.up();
@@ -127,10 +127,9 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
-      expect(renderSelectionSpy.events.length, 2);
-      expect(renderSelectionSpy.events[0], isA<ClearSelectionEvent>());
-      expect(renderSelectionSpy.events[1], isA<SelectWordSelectionEvent>());
-      final SelectWordSelectionEvent selectionEvent = renderSelectionSpy.events[1] as SelectWordSelectionEvent;
+      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
+      final SelectWordSelectionEvent selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
@@ -150,18 +149,17 @@ void main() {
       final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0));
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
-      expect(renderSelectionSpy.events.length, 2);
-      expect(renderSelectionSpy.events[0], isA<ClearSelectionEvent>());
-      expect(renderSelectionSpy.events[1], isA<SelectWordSelectionEvent>());
-      final SelectWordSelectionEvent selectionEvent = renderSelectionSpy.events[1] as SelectWordSelectionEvent;
+      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
+      final SelectWordSelectionEvent selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
 
       renderSelectionSpy.events.clear();
       await gesture.moveTo(const Offset(200.0, 50.0));
       await gesture.up();
       expect(renderSelectionSpy.events.length, 1);
-      expect(renderSelectionSpy.events[0], isA<SelectionEndEdgeUpdateEvent>());
-      final SelectionEndEdgeUpdateEvent edgeEvent = renderSelectionSpy.events[0] as SelectionEndEdgeUpdateEvent;
+      expect(renderSelectionSpy.events[0].type, SelectionEventType.endEdgeUpdate);
+      final SelectionEdgeUpdateEvent edgeEvent = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(edgeEvent.globalPosition, const Offset(200.0, 50.0));
     });
 
@@ -187,105 +185,6 @@ void main() {
         isTrue
       );
     });
-
-    testWidgets('keyboard copy non-mac', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(
-          MaterialApp(
-            home: SelectionArea(
-              focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
-              child: SelectionSpy(key: spy),
-            ),
-          )
-      );
-      focusNode.requestFocus();
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-
-      final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
-      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], renderSelectionSpy.getSelectedContent()!.plainText);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
-
-    testWidgets('keyboard copy mac', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(
-          MaterialApp(
-            home: SelectionArea(
-              focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
-              child: SelectionSpy(key: spy),
-            ),
-          )
-      );
-      focusNode.requestFocus();
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
-
-      final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
-      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], renderSelectionSpy.getSelectedContent()!.plainText);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
-
-    testWidgets('keyboard select-all sends correct events non-mac', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(
-          MaterialApp(
-            home: SelectionArea(
-              focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
-              child: SelectionSpy(key: spy),
-            ),
-          )
-      );
-      // Tap to focus the selection area.
-      focusNode.requestFocus();
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-
-      final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
-      expect(renderSelectionSpy.events.length, 2);
-      expect(renderSelectionSpy.events[0], isA<ClearSelectionEvent>());
-      expect(renderSelectionSpy.events[1], isA<SelectAllSelectionEvent>());
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
-
-    testWidgets('keyboard select-all sends correct events mac', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(
-          MaterialApp(
-            home: SelectionArea(
-              focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
-              child: SelectionSpy(key: spy),
-            ),
-          )
-      );
-      focusNode.requestFocus();
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
-
-      final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
-      expect(renderSelectionSpy.events.length, 2);
-      expect(renderSelectionSpy.events[0], isA<ClearSelectionEvent>());
-      expect(renderSelectionSpy.events[1], isA<SelectAllSelectionEvent>());
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
   group('SelectionArea integration', () {
@@ -331,7 +230,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('mouse can select multiple widget', (WidgetTester tester) async {
+    testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectionArea(
@@ -553,6 +452,46 @@ void main() {
         final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Good, and you?Fine');
       },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgets('widget span is ignored if it does not contain text', (WidgetTester tester) async {
+      final UniqueKey outerText = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectionArea(
+            selectionControls: materialTextSelectionControls,
+            child: Center(
+              child: Text.rich(
+                const TextSpan(
+                    children: <InlineSpan>[
+                      TextSpan(text: 'How are you?'),
+                      WidgetSpan(child: Placeholder()),
+                      TextSpan(text: 'Fine, thank you.'),
+                    ]
+                ),
+                key: outerText,
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(textOffsetToPosition(paragraph, 17)); // right after `Fine`.
+      await gesture.up();
+
+      // keyboard copy.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      expect(clipboardData['text'], 'w are you?Fine');
+    },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
@@ -864,7 +803,6 @@ class SelectionSpy extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
-
 }
 
 class RenderSelectionSpy extends RenderProxyBox

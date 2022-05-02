@@ -820,12 +820,12 @@ void main() {
     void selectionParagraph(RenderParagraph paragraph, TextPosition start, TextPosition end) {
       for (final Selectable selectable in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
         selectable.dispatchSelectionEvent(
-          SelectionStartEdgeUpdateEvent(
+          SelectionEdgeUpdateEvent.forStart(
             globalPosition: paragraph.getOffsetForCaret(start, Rect.zero),
           ),
         );
         selectable.dispatchSelectionEvent(
-          SelectionEndEdgeUpdateEvent(
+          SelectionEdgeUpdateEvent.forEnd(
             globalPosition: paragraph.getOffsetForCaret(end, Rect.zero),
           ),
         );

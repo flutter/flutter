@@ -29,7 +29,7 @@ import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
-import 'selection_area.dart';
+import 'selectable_region.dart';
 import 'selection_container.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
@@ -895,7 +895,7 @@ class EdgeDraggingAutoScroller {
 
   /// Called when a scroll view is scrolled.
   ///
-  /// The scroll view may be scrolled multiple times in a roll until the drag
+  /// The scroll view may be scrolled multiple times in a row until the drag
   /// target no longer triggers the auto scroll. This callback will be called
   /// in between each scroll.
   final VoidCallback? onScrollViewScrolled;
@@ -939,7 +939,7 @@ class EdgeDraggingAutoScroller {
   /// to the edge of the [scrollable]; otherwise, it remains stationary.
   ///
   /// If the scrollable is already scrolling, calling this method updates the
-  /// previous dragTarget to the new value and continue scrolling if necessary.
+  /// previous dragTarget to the new value and continues scrolling if necessary.
   void startAutoScrollIfNecessary(Rect dragTarget) {
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(scrollable);
     _dragTargetRelatedToScrollOrigin = dragTarget.translate(deltaToOrigin.dx, deltaToOrigin.dy);
@@ -1010,13 +1010,13 @@ class EdgeDraggingAutoScroller {
   }
 }
 
-/// This updater handles the case where the selectables changes frequently, and
+/// This updater handles the case where the selectables change frequently, and
 /// it optimizes toward scrolling updates.
 ///
 /// This updater keeps track of the drag start offset related to scroll origin
 /// for every selectable. The records are used to determine whether the
-/// selection is up to date with the scroll position when it sends drag update
-/// event to a selectable.
+/// selection is up to date with the scroll position when it sends the drag
+/// update event to a selectable.
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _ScrollableSelectionContainerDelegate({
     required this.state,
@@ -1035,7 +1035,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   Offset? _currentDragStartRelatedToOrigin;
   Offset? _currentDragEndRelatedToOrigin;
 
-  // The scrollable only auto scroll if the selection starts in the scrollable.
+  // The scrollable only auto scrolls if the selection starts in the scrollable.
   bool _selectionStartsInScrollable = false;
 
   ScrollPosition get position => _position;
@@ -1106,18 +1106,18 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       _selectionStartsInScrollable = _globalPositionInScrollable(event.globalPosition);
     }
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
-    if (event is SelectionEndEdgeUpdateEvent) {
+    if (event.type == SelectionEventType.endEdgeUpdate) {
       _currentDragEndRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
       final Offset endOffset = _currentDragEndRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      event = SelectionEndEdgeUpdateEvent(globalPosition: endOffset);
+      event = SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset);
     } else {
       _currentDragStartRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
       final Offset startOffset = _currentDragStartRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      event = SelectionStartEdgeUpdateEvent(globalPosition: startOffset);
+      event = SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset);
     }
     final SelectionResult result = super.handleSelectionEdgeUpdate(event);
 
-    // Result may be pending if one of the selectable child is a scrollable, too.
+    // Result may be pending if one of the selectable child is also a scrollable.
     // In that case, the parent scrollable needs to wait for the child to finish
     // scrolling.
     if (result == SelectionResult.pending) {
@@ -1196,10 +1196,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     assert(!_selectionStartsInScrollable);
     _selectionStartsInScrollable = _globalPositionInScrollable(event.globalPosition);
     final SelectionResult result = super.handleSelectWord(event);
-    assert(currentSelectionStartIndex == currentSelectionEndIndex);
-    if (currentSelectionStartIndex != -1) {
-      _updateDragLocationsFromGeometries();
-    }
+    _updateDragLocationsFromGeometries();
     return result;
   }
 
@@ -1216,22 +1213,26 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
   @override
   SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
-    if (event is SelectionEdgeUpdateEvent) {
-      if (event is SelectionEndEdgeUpdateEvent) {
-        _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
-      }
-      if (event is SelectionStartEdgeUpdateEvent) {
+    switch (event.type) {
+      case SelectionEventType.startEdgeUpdate:
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
-      }
-      ensureChildUpdated(selectable);
-    } else if(event is SelectWordSelectionEvent || event is SelectAllSelectionEvent) {
-      _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
-      _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
-    } else if (event is ClearSelectionEvent) {
-      _selectableEndEdgeUpdateRecords.remove(selectable);
-      _selectableStartEdgeUpdateRecords.remove(selectable);
+        ensureChildUpdated(selectable);
+        break;
+      case SelectionEventType.endEdgeUpdate:
+        _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
+        ensureChildUpdated(selectable);
+        break;
+      case SelectionEventType.clear:
+        _selectableEndEdgeUpdateRecords.remove(selectable);
+        _selectableStartEdgeUpdateRecords.remove(selectable);
+        break;
+      case SelectionEventType.selectAll:
+      case SelectionEventType.selectWord:
+        _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
+        _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
+        break;
     }
-    return selectable.dispatchSelectionEvent(event);
+    return super.dispatchSelectionEventToChild(selectable, event);
   }
 
   @override
@@ -1243,7 +1244,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       // Make sure the selectable has up to date events.
       final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
       final Offset startOffset = _currentDragStartRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      selectable.dispatchSelectionEvent(SelectionStartEdgeUpdateEvent(globalPosition: startOffset));
+      selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset));
     }
     final double? previousEndRecord = _selectableEndEdgeUpdateRecords[selectable];
     if (_currentDragEndRelatedToOrigin != null &&
@@ -1251,7 +1252,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       // Make sure the selectable has up to date events.
       final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
       final Offset endOffset = _currentDragEndRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      selectable.dispatchSelectionEvent(SelectionEndEdgeUpdateEvent(globalPosition: endOffset));
+      selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset));
     }
   }
 
