@@ -1,4 +1,4 @@
-Signature: 7829262bb1c0aa61e3ffd6c90eb40d73
+Signature: bb68f53ce0eef2dd75be32eeb8f33a99
 
 UNUSED LICENSES:
 
@@ -1337,6 +1337,7 @@ FILE: ../../../third_party/skia/src/sksl/sksl_vert.sksl
 FILE: ../../../third_party/skia/src/sksl/tracing/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/transform/BUILD.bazel
 FILE: ../../../third_party/skia/src/svg/BUILD.bazel
+FILE: ../../../third_party/skia/src/text/gpu/BUILD.bazel
 FILE: ../../../third_party/skia/src/utils/BUILD.bazel
 FILE: ../../../third_party/skia/src/utils/mac/BUILD.bazel
 FILE: ../../../third_party/skia/src/utils/win/BUILD.bazel
@@ -7261,12 +7262,12 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrBufferAllocPool.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrClip.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrColor.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrFixedClip.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrGlyph.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/SkGr.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/geometry/GrRect.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/v1/Device_v1.h
 FILE: ../../../third_party/skia/src/ports/SkDebug_win.cpp
+FILE: ../../../third_party/skia/src/text/gpu/Glyph.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2010 Google Inc.
 
