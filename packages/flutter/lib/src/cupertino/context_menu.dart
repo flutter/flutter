@@ -47,11 +47,10 @@ typedef _ContextMenuPreviewBuilderChildless = Widget Function(
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
   final RenderBox renderBoxContainer = globalKey.currentContext!.findRenderObject()! as RenderBox;
-  return Rect.fromPoints(renderBoxContainer.localToGlobal(
+  final Offset containerOffset = renderBoxContainer.localToGlobal(
     renderBoxContainer.paintBounds.topLeft,
-  ), renderBoxContainer.localToGlobal(
-    renderBoxContainer.paintBounds.bottomRight
-  ));
+  );
+  return containerOffset & renderBoxContainer.paintBounds.size;
 }
 
 // The context menu arranges itself slightly differently based on the location
