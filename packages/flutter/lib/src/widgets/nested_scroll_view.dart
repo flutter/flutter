@@ -314,7 +314,10 @@ class NestedScrollView extends StatefulWidget {
       SliverFillRemaining(
         child: PrimaryScrollController(
           controller: innerController,
-          child: body,
+          child: ScrollConfiguration(
+            behavior: scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false, usePrimaryScrollController: true),
+            child: body
+          ),
         ),
       ),
     ];
