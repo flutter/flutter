@@ -92,12 +92,15 @@ const Feature flutterMacOSDesktopFeature = Feature(
   environmentOverride: 'FLUTTER_MACOS',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
 );
 
@@ -108,12 +111,15 @@ const Feature flutterLinuxDesktopFeature = Feature(
   environmentOverride: 'FLUTTER_LINUX',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
 );
 
