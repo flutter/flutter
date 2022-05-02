@@ -148,7 +148,10 @@ class CupertinoFormRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle textStyle = CupertinoTheme.of(context).textTheme.textStyle;
+    final CupertinoThemeData theme = CupertinoTheme.of(context);
+    final TextStyle textStyle = theme.textTheme.textStyle.copyWith(
+      color: CupertinoDynamicColor.maybeResolve(theme.textTheme.textStyle.color, context)
+    );
 
     return Padding(
       padding: padding ?? _kDefaultPadding,
