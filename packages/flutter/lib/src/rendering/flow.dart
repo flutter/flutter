@@ -362,9 +362,9 @@ class RenderFlow extends RenderBox
     if (opacity == 1.0) {
       _paintingContext!.pushTransform(needsCompositing, _paintingOffset!, transform, painter);
     } else {
-      _paintingContext!.pushOpacityValue(needsCompositing, size, _paintingOffset!, opacity, (PaintingContext context, Offset offset) {
+      _paintingContext!.pushOpacity(needsCompositing, _paintingOffset!, opacity, (PaintingContext context, Offset offset) {
         context.pushTransform(needsCompositing, offset, transform!, painter);
-      });
+      }, size: size);
     }
   }
 

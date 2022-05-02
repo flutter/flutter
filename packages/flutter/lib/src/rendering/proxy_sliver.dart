@@ -155,9 +155,8 @@ class RenderSliverOpacity extends RenderProxySliver {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && child!.geometry!.visible) {
-      layer = context.pushOpacityValue(
+      layer = context.pushOpacity(
         needsCompositing,
-        null,
         offset,
         _opacity,
         super.paint,

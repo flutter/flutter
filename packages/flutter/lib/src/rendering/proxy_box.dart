@@ -881,7 +881,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    layer = context.pushOpacityValue(needsCompositing, size, offset, _opacity, super.paint, oldLayer: layer as OpacityLayer?);
+    layer = context.pushOpacity(needsCompositing, offset, _opacity, super.paint, oldLayer: layer as OpacityLayer?, size: size);
     assert(() {
       layer?.debugCreator = debugCreator;
       return true;

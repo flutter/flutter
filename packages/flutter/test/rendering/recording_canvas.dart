@@ -159,26 +159,13 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
-  OpacityLayer pushOpacity(
-    Offset offset,
-    int alpha,
-    PaintingContextCallback painter, {
-    OpacityLayer? oldLayer,
-  }) {
-    canvas.saveLayer(null, Paint()); // TODO(ianh): Expose the alpha somewhere.
-    painter(this, offset);
-    canvas.restore();
-    return OpacityLayer();
-  }
-
-  @override
-  OpacityLayer? pushOpacityValue(
+  OpacityLayer? pushOpacity(
     bool needsCompositing,
-    Size? size,
     Offset offset,
     double opacity,
     PaintingContextCallback painter, {
     OpacityLayer? oldLayer,
+    Size? size,
   }) {
     if (opacity <= 0.0) {
       return null;

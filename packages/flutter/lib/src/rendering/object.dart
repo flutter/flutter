@@ -651,41 +651,7 @@ class PaintingContext extends ClipContext {
     }
   }
 
-  /// Blend further painting with an alpha value.
-  ///
-  /// Prefer using [pushOpacityValue], which can avoid compositing if it is
-  /// unnecessary.
-  ///
-  /// The `offset` argument indicates an offset to apply to all the children
-  /// (the rendering created by `painter`).
-  ///
-  /// The `alpha` argument is the alpha value to use when blending the painting
-  /// done by `painter`. An alpha value of 0 means the painting is fully
-  /// transparent and an alpha value of 255 means the painting is fully opaque.
-  ///
-  /// The `painter` callback will be called while the `alpha` is applied. It
-  /// is called synchronously during the call to [pushOpacity].
-  ///
-  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
-  ///
-  /// A [RenderObject] that uses this function is very likely to require its
-  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
-  /// ancestor render objects that this render object will include a composited
-  /// layer, which, for example, causes them to use composited clips.
-  @Deprecated(
-    'Use pushOpacityValue instead to avoid forced compositing. '
-    'This feature was deprecated after v2.13.0-0.0.pre.'
-  )
-  OpacityLayer pushOpacity(Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
-    final OpacityLayer layer = oldLayer ?? OpacityLayer();
-    layer
-      ..alpha = alpha
-      ..offset = offset;
-    pushLayer(layer, painter, Offset.zero);
-    return layer;
-  }
-
-  /// Blend further painting with an alpha value.
+  /// Blend further painting with an opacity value.
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
   ///
@@ -695,18 +661,18 @@ class PaintingContext extends ClipContext {
   /// The [size] is used to compute the painting bounds if a save layer is used.
   /// If the [size] is not provided, no estimate is used.
   ///
-  /// The [alpha] argument is the alpha value to use when blending the painting
-  /// done by [painter]. An alpha value of 0 means the painting is fully
-  /// transparent and an alpha value of 255 means the painting is fully opaque.
+  /// The [opacity] argument is the opacity value to use when blending the painting
+  /// done by [painter]. An opacity value of 0.0 means the painting is fully
+  /// transparent and an opacity value of 1.0 means the painting is fully opaque.
   ///
   /// The `painter` callback will be called while the [alpha] is applied. It
-  /// is called synchronously during the call to [pushOpacityValue].
+  /// is called synchronously during the call to [pushOpacity].
   ///
   /// This method will only create a layer if [needsCompositing] is `true` and
-  /// [alpha] is greater than 0 and less than 255.
+  /// [alpha] is greater than 0 and less than 1.0.
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
-  OpacityLayer? pushOpacityValue(bool needsCompositing, Size? size, Offset offset, double opacity, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
+  OpacityLayer? pushOpacity(bool needsCompositing, Offset offset, double opacity, PaintingContextCallback painter, { OpacityLayer? oldLayer, Size? size }) {
     assert(opacity >= 0 && opacity <= 1);
     if (opacity <= 0) {
       return null;
