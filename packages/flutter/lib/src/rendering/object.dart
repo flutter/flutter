@@ -669,7 +669,7 @@ class PaintingContext extends ClipContext {
   /// is called synchronously during the call to [pushOpacity].
   ///
   /// This method will only create a layer if [needsCompositing] is `true` and
-  /// [alpha] is greater than 0 and less than 1.0.
+  /// [opacity] is greater than 0 and less than 1.0.
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   OpacityLayer? pushOpacity(bool needsCompositing, Offset offset, double opacity, PaintingContextCallback painter, { OpacityLayer? oldLayer, Size? size }) {
