@@ -3073,7 +3073,6 @@ targets:
   - name: Mac_arm64_android hello_world_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/87508
     timeout: 60
     properties:
       tags: >
@@ -3103,7 +3102,6 @@ targets:
   - name: Mac_arm64_android integration_test_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/87508
     timeout: 60
     properties:
       tags: >
@@ -3144,7 +3142,6 @@ targets:
   - name: Mac_arm64_android run_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/87508
     runIf:
       - dev/**
     timeout: 60
