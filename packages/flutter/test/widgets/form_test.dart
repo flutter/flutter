@@ -815,7 +815,6 @@ void main() {
     expect(formKey.currentState!.validate(), isFalse);
   });
 
-
   testWidgets('invalidFields returns a list of all the invalid fields in a form', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
