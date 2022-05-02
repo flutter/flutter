@@ -1845,7 +1845,7 @@ void main() {
   });
 
   group('Overscrolling RenderShrinkWrappingViewport', () {
-    Widget _buildSimpleShrinkWrap({
+    Widget buildSimpleShrinkWrap({
       ScrollController? controller,
       Axis scrollDirection = Axis.vertical,
       ScrollPhysics? physics,
@@ -1867,7 +1867,7 @@ void main() {
       );
     }
 
-    Widget _buildClippingShrinkWrap(
+    Widget buildClippingShrinkWrap(
       ScrollController controller, {
       bool constrain = false,
     }) {
@@ -1912,7 +1912,7 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/89717
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildClippingShrinkWrap(controller, constrain: true)
+        buildClippingShrinkWrap(controller, constrain: true)
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
@@ -1939,7 +1939,7 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/89717
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildClippingShrinkWrap(controller)
+        buildClippingShrinkWrap(controller)
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
@@ -1967,7 +1967,7 @@ void main() {
       // Scrollables should overscroll by default on iOS and macOS
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildSimpleShrinkWrap(controller: controller),
+        buildSimpleShrinkWrap(controller: controller),
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
@@ -2006,7 +2006,7 @@ void main() {
       // Scrollables should overscroll by default on iOS and macOS
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildSimpleShrinkWrap(controller: controller, scrollDirection: Axis.horizontal),
+        buildSimpleShrinkWrap(controller: controller, scrollDirection: Axis.horizontal),
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
@@ -2045,7 +2045,7 @@ void main() {
       // Scrollables should overscroll when the scroll physics allow
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildSimpleShrinkWrap(controller: controller, physics: const BouncingScrollPhysics()),
+        buildSimpleShrinkWrap(controller: controller, physics: const BouncingScrollPhysics()),
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
@@ -2084,7 +2084,7 @@ void main() {
       // Scrollables should overscroll when the scroll physics allow
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildSimpleShrinkWrap(
+        buildSimpleShrinkWrap(
           controller: controller,
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),

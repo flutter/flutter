@@ -247,7 +247,7 @@ typedef _CheckContext = bool Function(BuildContext context);
 ///
 /// The [InkResponse] widget must have a [Material] widget as an ancestor. The
 /// [Material] widget is where the ink reactions are actually painted. This
-/// matches the material design premise wherein the [Material] is what is
+/// matches the Material Design premise wherein the [Material] is what is
 /// actually reacting to touches by spreading ink.
 ///
 /// If a Widget uses this class directly, it should include the following line
@@ -280,7 +280,7 @@ typedef _CheckContext = bool Function(BuildContext context);
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
-///  * [ElevatedButton] and [TextButton], two kinds of buttons in material design.
+///  * [ElevatedButton] and [TextButton], two kinds of buttons in Material Design.
 ///  * [IconButton], which combines [InkResponse] with an [Icon].
 class InkResponse extends StatelessWidget {
   /// Creates an area of a [Material] that responds to touch.
@@ -1147,7 +1147,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 ///
 /// The [InkWell] widget must have a [Material] widget as an ancestor. The
 /// [Material] widget is where the ink reactions are actually painted. This
-/// matches the material design premise wherein the [Material] is what is
+/// matches the Material Design premise wherein the [Material] is what is
 /// actually reacting to touches by spreading ink.
 ///
 /// If a Widget uses this class directly, it should include the following line
@@ -1211,7 +1211,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
-///  * [ElevatedButton] and [TextButton], two kinds of buttons in material design.
+///  * [ElevatedButton] and [TextButton], two kinds of buttons in Material Design.
 ///  * [InkResponse], a variant of [InkWell] that doesn't force a rectangular
 ///    shape on the ink reaction.
 class InkWell extends InkResponse {

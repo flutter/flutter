@@ -21,7 +21,7 @@ void main() {
     });
 
     // Assigns default values for a complete VS installation with necessary components.
-    void _configureMockVisualStudioAsInstalled() {
+    void configureMockVisualStudioAsInstalled() {
       fakeVisualStudio.isPrerelease = false;
       fakeVisualStudio.isRebootRequired = false;
       fakeVisualStudio.fullVersion = '16.2';
@@ -30,7 +30,7 @@ void main() {
     }
 
     // Assigns default values for a complete VS installation that is too old.
-    void _configureMockVisualStudioAsTooOld() {
+    void configureMockVisualStudioAsTooOld() {
       fakeVisualStudio.isAtLeastMinimumVersion = false;
       fakeVisualStudio.isPrerelease = false;
       fakeVisualStudio.isRebootRequired = false;
@@ -40,7 +40,7 @@ void main() {
     }
 
     // Assigns default values for a missing VS installation.
-    void _configureMockVisualStudioAsNotInstalled() {
+    void configureMockVisualStudioAsNotInstalled() {
       fakeVisualStudio.isInstalled = false;
       fakeVisualStudio.isAtLeastMinimumVersion = false;
       fakeVisualStudio.isPrerelease = false;
@@ -56,7 +56,7 @@ void main() {
         userMessages: userMessages,
         visualStudio: fakeVisualStudio,
       );
-      _configureMockVisualStudioAsInstalled();
+      configureMockVisualStudioAsInstalled();
       fakeVisualStudio.isPrerelease = true;
 
       final ValidationResult result = await validator.validate();
@@ -70,7 +70,7 @@ void main() {
         userMessages: userMessages,
         visualStudio: fakeVisualStudio,
       );
-      _configureMockVisualStudioAsInstalled();
+      configureMockVisualStudioAsInstalled();
       fakeVisualStudio.isComplete = false;
 
       final ValidationResult result = await validator.validate();
@@ -85,7 +85,7 @@ void main() {
         userMessages: userMessages,
         visualStudio: fakeVisualStudio,
       );
-      _configureMockVisualStudioAsInstalled();
+      configureMockVisualStudioAsInstalled();
       fakeVisualStudio.isRebootRequired = true;
 
       final ValidationResult result = await validator.validate();
@@ -100,7 +100,7 @@ void main() {
         userMessages: userMessages,
         visualStudio: fakeVisualStudio,
       );
-      _configureMockVisualStudioAsInstalled();
+      configureMockVisualStudioAsInstalled();
       fakeVisualStudio.isLaunchable = false;
 
       final ValidationResult result = await validator.validate();
@@ -115,7 +115,7 @@ void main() {
         userMessages: userMessages,
         visualStudio: fakeVisualStudio,
       );
-      _configureMockVisualStudioAsTooOld();
+      configureMockVisualStudioAsTooOld();
 
       final ValidationResult result = await validator.validate();
       final ValidationMessage expectedMessage = ValidationMessage.error(
@@ -134,7 +134,7 @@ void main() {
         userMessages: userMessages,
         visualStudio: fakeVisualStudio,
       );
-      _configureMockVisualStudioAsInstalled();
+      configureMockVisualStudioAsInstalled();
       fakeVisualStudio.hasNecessaryComponents = false;
       final ValidationResult result = await validator.validate();
 
@@ -146,7 +146,7 @@ void main() {
         userMessages: userMessages,
         visualStudio: fakeVisualStudio,
       );
-      _configureMockVisualStudioAsInstalled();
+      configureMockVisualStudioAsInstalled();
       fakeVisualStudio.windows10SDKVersion = null;
       final ValidationResult result = await validator.validate();
 
@@ -158,7 +158,7 @@ void main() {
         userMessages: userMessages,
         visualStudio: fakeVisualStudio,
       );
-      _configureMockVisualStudioAsInstalled();
+      configureMockVisualStudioAsInstalled();
 
       final ValidationResult result = await validator.validate();
       final ValidationMessage expectedDisplayNameMessage = ValidationMessage(
@@ -173,7 +173,7 @@ void main() {
         userMessages: userMessages,
         visualStudio: fakeVisualStudio,
       );
-      _configureMockVisualStudioAsNotInstalled();
+      configureMockVisualStudioAsNotInstalled();
 
       final ValidationResult result = await validator.validate();
       final ValidationMessage expectedMessage = ValidationMessage.error(

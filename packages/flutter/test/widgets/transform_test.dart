@@ -363,7 +363,7 @@ void main() {
     expect(pointerDown, isTrue);
   });
 
-  Widget _generateTransform(bool needsCompositing, double angle) {
+  Widget generateTransform(bool needsCompositing, double angle) {
     final Widget customPaint = CustomPaint(painter: TestRectPainter());
     return Transform(
       transform: MatrixUtils.createCylindricalProjectionTransform(
@@ -380,12 +380,12 @@ void main() {
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
       for (double angle = 0; angle <= math.pi/4; angle += 0.01) {
-        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(true, angle)));
+        await tester.pumpWidget(RepaintBoundary(child: generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
         final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
         final ui.Image imageWithCompositing = await layer.toImage(renderBox.paintBounds);
 
-        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(false, angle)));
+        await tester.pumpWidget(RepaintBoundary(child: generateTransform(false, angle)));
         await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
       }
     },

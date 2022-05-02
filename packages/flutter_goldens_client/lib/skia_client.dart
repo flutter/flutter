@@ -192,6 +192,7 @@ class SkiaGoldClient {
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
       '--passfail',
+      ..._getPixelMatchingArguments(),
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);
@@ -303,6 +304,7 @@ class SkiaGoldClient {
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
+      ..._getPixelMatchingArguments(),
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);
@@ -321,6 +323,51 @@ class SkiaGoldClient {
         ..writeln();
       throw Exception(buf.toString());
     }
+  }
+
+  // Constructs arguments for `goldctl` for controlling how pixels are compared.
+  //
+  // For AOT and CanvasKit exact pixel matching is used. For the HTML renderer
+  // on the web a fuzzy matching algorithm is used that allows very small deltas
+  // because Chromium cannot exactly reproduce the same golden on all computers.
+  // It seems to depend on the hardware/OS/driver combination. However, those
+  // differences are very small (typically not noticeable to human eye).
+  List<String> _getPixelMatchingArguments() {
+    // Only use fuzzy pixel matching in the HTML renderer.
+    if (!_isBrowserTest || _isBrowserCanvasKitTest) {
+      return const <String>[];
+    }
+
+    // The algorithm to be used when matching images. The available options are:
+    // - "fuzzy": Allows for customizing the thresholds of pixel differences.
+    // - "sobel": Same as "fuzzy" but performs edge detection before performing
+    //            a fuzzy match.
+    const String algorithm = 'fuzzy';
+
+    // The number of pixels in this image that are allowed to differ from the
+    // baseline.
+    //
+    // The chosen number - 20 - is arbitrary. Even for a small golden file, say
+    // 50 x 50, it would be less than 1% of the total number of pixels. This
+    // number should not grow too much. If it's growing, it is probably due to a
+    // larger issue that needs to be addressed at the infra level.
+    const int maxDifferentPixels = 20;
+
+    // The maximum acceptable difference per pixel.
+    //
+    // Uses the Manhattan distance using the RGBA color components as
+    // coordinates. The chosen number - 4 - is arbitrary. It's small enough to
+    // both not be noticeable and not trigger test flakes due to sub-pixel
+    // golden deltas. This number should not grow too much. If it's growing, it
+    // is probably due to a larger issue that needs to be addressed at the infra
+    // level.
+    const int pixelDeltaThreshold = 4;
+
+    return <String>[
+      '--add-test-optional-key', 'image_matching_algorithm:$algorithm',
+      '--add-test-optional-key', 'fuzzy_max_different_pixels:$maxDifferentPixels',
+      '--add-test-optional-key', 'fuzzy_pixel_delta_threshold:$pixelDeltaThreshold',
+    ];
   }
 
   /// Returns the latest positive digest for the given test known to Flutter
@@ -405,10 +452,10 @@ class SkiaGoldClient {
       'Platform' : platform.operatingSystem,
       'CI' : 'luci',
     };
-    if (platform.environment[_kTestBrowserKey] != null) {
-      keys['Browser'] = platform.environment[_kTestBrowserKey];
+    if (_isBrowserTest) {
+      keys['Browser'] = _browserKey;
       keys['Platform'] = '${keys['Platform']}-browser';
-      if (platform.environment[_kWebRendererKey] == 'canvaskit') {
+      if (_isBrowserCanvasKitTest) {
         keys['WebRenderer'] = 'canvaskit';
       }
     }
@@ -451,14 +498,27 @@ class SkiaGoldClient {
     ];
   }
 
+  bool get _isBrowserTest {
+    return platform.environment[_kTestBrowserKey] != null;
+  }
+
+  bool get _isBrowserCanvasKitTest {
+    return _isBrowserTest && platform.environment[_kWebRendererKey] == 'canvaskit';
+  }
+
+  String get _browserKey {
+    assert(_isBrowserTest);
+    return platform.environment[_kTestBrowserKey]!;
+  }
+
   /// Returns a trace id based on the current testing environment to lookup
   /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
   /// the image keys.
   String getTraceID(String testName) {
     final Map<String, dynamic> keys = <String, dynamic>{
-      if (platform.environment[_kTestBrowserKey] != null)
-        'Browser' : platform.environment[_kTestBrowserKey],
-      if (platform.environment[_kTestBrowserKey] != null && platform.environment[_kWebRendererKey] == 'canvaskit')
+      if (_isBrowserTest)
+        'Browser' : _browserKey,
+      if (_isBrowserCanvasKitTest)
         'WebRenderer' : 'canvaskit',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,

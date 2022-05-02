@@ -16,7 +16,7 @@ import 'theme.dart';
 import 'tooltip_theme.dart';
 import 'tooltip_visibility.dart';
 
-/// A material design tooltip.
+/// A Material Design tooltip.
 ///
 /// Tooltips provide text labels which help explain the function of a button or
 /// other user interface action. Wrap the button in a [Tooltip] widget and provide

@@ -19,9 +19,9 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [Dialog], a material dialog that can be customized using this [DialogTheme].
-///  * [AlertDialog], a material dialog that can be customized using this [DialogTheme].
-///  * [SimpleDialog], a material dialog that can be customized using this [DialogTheme].
+///  * [Dialog], a dialog that can be customized using this [DialogTheme].
+///  * [AlertDialog], a dialog that can be customized using this [DialogTheme].
+///  * [SimpleDialog], a dialog that can be customized using this [DialogTheme].
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 @immutable

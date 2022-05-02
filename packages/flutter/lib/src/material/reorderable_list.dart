@@ -38,7 +38,7 @@ import 'theme.dart';
 ///
 /// This example demonstrates using the [proxyDecorator] callback to customize
 /// the appearance of a list item while it's being dragged.
-/// {@tool snippet}
+/// {@tool dartpad}
 ///
 /// While a drag is underway, the widget returned by the [proxyDecorator]
 /// serves as a "proxy" (a substitute) for the item in the list. The proxy is

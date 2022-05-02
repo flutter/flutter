@@ -254,7 +254,7 @@ class WebAssetServer implements AssetReader {
 
     // Return a version string for all active modules. This is populated
     // along with the `moduleProvider` update logic.
-    Future<Map<String, String>> _digestProvider() async => digests;
+    Future<Map<String, String>> digestProvider() async => digests;
 
     // Ensure dwds is present and provide middleware to avoid trying to
     // load the through the isolate APIs.
@@ -295,7 +295,7 @@ class WebAssetServer implements AssetReader {
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
-        _digestProvider,
+        digestProvider,
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,

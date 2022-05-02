@@ -195,11 +195,23 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.VERIFY_RELEASE:
       return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
+      const String DISCORD_RELEASE_CHANNEL =
+          'https://discord.com/channels/608014603317936148/783492179922124850';
+      const String FLUTTER_RELEASE_HOTLINE =
+          'https://mail.google.com/chat/u/0/#chat/space/AAAA6RKcK2k';
+      const String HOTFIX_TO_STABLE_WIKI =
+          'https://github.com/flutter/flutter/wiki/Hotfixes-to-the-Stable-Channel';
+      const String FLUTTER_ANNOUNCE_GROUP =
+          'https://groups.google.com/g/flutter-announce';
+      const String DOCUMENTATION_BEST_PRACTICES =
+          'https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices';
       if (state.releaseChannel == 'beta') {
         return <String>[
           'Ensure the following post release steps are complete:',
           '\t 1. Post announcement to discord',
+          '\t\t Discord: $DISCORD_RELEASE_CHANNEL',
           '\t 2. Post announcement flutter release hotline chat room',
+          '\t\t Chatroom: $FLUTTER_RELEASE_HOTLINE',
           '-----------------------------------------------------------------------',
           'This release has been completed.',
         ].join('\n');
@@ -207,9 +219,14 @@ String phaseInstructions(pb.ConductorState state) {
       return <String>[
         'Ensure the following post release steps are complete:',
         '\t 1. Update hotfix to stable wiki following documentation best practices',
+        '\t\t Wiki link: $HOTFIX_TO_STABLE_WIKI',
+        '\t\t Best practices: $DOCUMENTATION_BEST_PRACTICES',
         '\t 2. Post announcement to flutter-announce group',
+        '\t\t Flutter Announce: $FLUTTER_ANNOUNCE_GROUP',
         '\t 3. Post announcement to discord',
+        '\t\t Discord: $DISCORD_RELEASE_CHANNEL',
         '\t 4. Post announcement flutter release hotline chat room',
+        '\t\t Chatroom: $FLUTTER_RELEASE_HOTLINE',
         '-----------------------------------------------------------------------',
         'This release has been completed.',
       ].join('\n');

@@ -1733,7 +1733,7 @@ void main() {
     const Key snackTarget = Key('snack-target');
     const Key transitionTarget = Key('transition-target');
 
-    Widget _buildApp() {
+    Widget buildApp() {
       return MaterialApp(
         routes: <String, WidgetBuilder> {
           '/': (BuildContext context) {
@@ -1765,7 +1765,7 @@ void main() {
         },
       );
     }
-    await tester.pumpWidget(_buildApp());
+    await tester.pumpWidget(buildApp());
 
     expect(find.text(snackBarText), findsNothing);
     expect(find.text(firstHeader), findsOneWidget);
@@ -1959,7 +1959,7 @@ void main() {
     expect(find.text(snackBars[2]), findsNothing);
   });
 
-  Widget _buildApp({
+  Widget doBuildApp({
     required SnackBarBehavior? behavior,
     EdgeInsetsGeometry? margin,
     double? width,
@@ -1993,7 +1993,7 @@ void main() {
 
   testWidgets('Setting SnackBarBehavior.fixed will still assert for margin', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(doBuildApp(
       behavior: SnackBarBehavior.fixed,
       margin: const EdgeInsets.all(8.0),
     ));
@@ -2010,7 +2010,7 @@ void main() {
 
   testWidgets('Default SnackBarBehavior will still assert for margin', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(doBuildApp(
       behavior: null,
       margin: const EdgeInsets.all(8.0),
     ));
@@ -2027,7 +2027,7 @@ void main() {
 
   testWidgets('Setting SnackBarBehavior.fixed will still assert for width', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(doBuildApp(
       behavior: SnackBarBehavior.fixed,
       width: 5.0,
     ));
@@ -2044,7 +2044,7 @@ void main() {
 
   testWidgets('Default SnackBarBehavior will still assert for width', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(doBuildApp(
       behavior: null,
       width: 5.0,
     ));

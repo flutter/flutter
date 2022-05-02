@@ -71,7 +71,6 @@ enum HeroFlightDirection {
   pop,
 }
 
-
 /// A widget that marks its child as being a candidate for
 /// [hero animations](https://flutter.dev/docs/development/ui/animations/hero-animations).
 ///
@@ -114,6 +113,13 @@ enum HeroFlightDirection {
 /// animation.
 ///
 /// ** See code in examples/api/lib/widgets/heroes/hero.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows [Hero] flight animations using default tween
+/// and custom rect tween.
+///
+/// ** See code in examples/api/lib/widgets/heroes/hero.1.dart **
 /// {@end-tool}
 ///
 /// ## Discussion
@@ -990,6 +996,8 @@ class HeroController extends NavigatorObserver {
 }
 
 /// Enables or disables [Hero]es in the widget subtree.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=AaIASk2u1C0}
 ///
 /// When [enabled] is false, all [Hero] widgets in this subtree will not be
 /// involved in hero animations.

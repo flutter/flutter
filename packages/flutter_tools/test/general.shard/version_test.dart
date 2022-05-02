@@ -274,7 +274,7 @@ void main() {
       });
 
       group('$VersionCheckStamp for $channel', () {
-        void _expectDefault(VersionCheckStamp stamp) {
+        void expectDefault(VersionCheckStamp stamp) {
           expect(stamp.lastKnownRemoteVersion, isNull);
           expect(stamp.lastTimeVersionWasChecked, isNull);
           expect(stamp.lastTimeWarningWasPrinted, isNull);
@@ -283,19 +283,19 @@ void main() {
         testWithoutContext('loads blank when stamp file missing', () async {
           cache.versionStamp = null;
 
-          _expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
+          expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads blank when stamp file is malformed JSON', () async {
           cache.versionStamp = '<';
 
-          _expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
+          expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads blank when stamp file is well-formed but invalid JSON', () async {
           cache.versionStamp = '[]';
 
-          _expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
+          expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads valid JSON', () async {
