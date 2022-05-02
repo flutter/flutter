@@ -1138,7 +1138,7 @@ abstract class WidgetController {
 
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
-  Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
+  Rect getRect(Finder finder) => Rect.fromPoints(getTopLeft(finder), getBottomRight(finder));
 
   /// Attempts to find the [SemanticsNode] of first result from `finder`.
   ///
