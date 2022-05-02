@@ -169,6 +169,7 @@ class IOSDeploy {
     required String bundlePath,
     required List<String> launchArguments,
     required IOSDeviceConnectionInterface interfaceType,
+    required bool uninstallFirst,
     Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
@@ -184,6 +185,8 @@ class IOSDeploy {
       ],
       if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
+      if (uninstallFirst)
+        '--uninstall',
       '--justlaunch',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',

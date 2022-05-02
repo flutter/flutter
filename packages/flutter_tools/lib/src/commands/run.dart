@@ -140,6 +140,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'this option multiple times each with one argument to pass '
               'multiple arguments to the Dart entrypoint. Currently this is '
               'only supported on desktop platforms.',
+      )
+      ..addFlag('uninstall-first',
+        hide: !verboseHelp,
+        help: 'Attempt to uninstall a previously installed app from the device '
+              'first before installing. This is normally not required and will '
+              'take longer. Currently only supported on iOS.',
     );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -166,6 +172,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get runningWithPrebuiltApplication => argResults[FlutterOptions.kUseApplicationBinary] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   bool get enableImpeller => boolArg('enable-impeller');
+  bool get uninstallFirst => boolArg('uninstall-first');
 
   @override
   bool get reportNullSafety => true;
