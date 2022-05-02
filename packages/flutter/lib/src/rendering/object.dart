@@ -665,7 +665,7 @@ class PaintingContext extends ClipContext {
   /// done by [painter]. An opacity value of 0.0 means the painting is fully
   /// transparent and an opacity value of 1.0 means the painting is fully opaque.
   ///
-  /// The `painter` callback will be called while the [alpha] is applied. It
+  /// The [painter] callback will be called while the [opacity] is applied. It
   /// is called synchronously during the call to [pushOpacity].
   ///
   /// This method will only create a layer if [needsCompositing] is `true` and
