@@ -599,8 +599,7 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
                                  damage.get()          // frame damage
         );
     if (raster_status == RasterStatus::kFailed ||
-        raster_status == RasterStatus::kSkipAndRetry ||
-        raster_status == RasterStatus::kDiscarded) {
+        raster_status == RasterStatus::kSkipAndRetry) {
       return raster_status;
     }
 

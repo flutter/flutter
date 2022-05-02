@@ -12,7 +12,6 @@ namespace flutter {
 
 std::optional<SkRect> FrameDamage::ComputeClipRect(
     flutter::LayerTree& layer_tree) {
-  TRACE_EVENT0("flutter", "FrameDamage::ComputeClipRect");
   if (layer_tree.root_layer()) {
     PaintRegionMap empty_paint_region_map;
     DiffContext context(layer_tree.frame_size(),
@@ -119,10 +118,6 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
   std::optional<SkRect> clip_rect =
       frame_damage ? frame_damage->ComputeClipRect(layer_tree) : std::nullopt;
 
-  if (frame_damage && frame_damage->GetFrameDamage() &&
-      frame_damage->GetFrameDamage()->isEmpty()) {
-    return RasterStatus::kDiscarded;
-  }
   bool root_needs_readback = layer_tree.Preroll(
       *this, ignore_raster_cache, clip_rect ? *clip_rect : kGiantRect);
   bool needs_save_layer = root_needs_readback && !surface_supports_readback();
