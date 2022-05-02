@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// ignore_for_file: only_throw_errors
+
 class MyPainter extends CustomPainter {
   const MyPainter({
     required this.color,
