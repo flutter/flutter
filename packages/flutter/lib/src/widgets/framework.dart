@@ -8,7 +8,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:memory_tools/leak_detector.dart' as leak_detector;
+import 'package:memory_tools/lib_leak_detector.dart' as leak_detector;
 
 import 'binding.dart';
 import 'debug.dart';
@@ -993,7 +993,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   @mustCallSuper
   void initState() {
-    leak_detector.startLeakDetector(this, token: _token);
+    leak_detector.startTracking(this, token: _token);
     assert(_debugLifecycleState == _StateLifecycle.created);
   }
 
@@ -3214,7 +3214,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Element(Widget widget)
       : assert(widget != null),
         _widget = widget {
-    leak_detector.startLeakDetector(this, token: _token);
+    leak_detector.startTracking(this, token: _token);
   }
 
   Object get _token {
