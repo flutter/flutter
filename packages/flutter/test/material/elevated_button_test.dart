@@ -1567,6 +1567,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ElevatedButton(
       onPressed: null,
+      style: ButtonStyle(),
       autofocus: true,
       clipBehavior: Clip.hardEdge,
       child: Text('A'),
@@ -1577,11 +1578,10 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description, <String>[
-      'disabled',
-      'autofocus: true',
-      'clipBehavior: Clip.hardEdge',
-    ]);
+    expect(description[0], 'disabled');
+    expect(description[1], equalsIgnoringHashCodes('style: ButtonStyle#00000'));
+    expect(description[2], 'autofocus: true');
+    expect(description[3], 'clipBehavior: Clip.hardEdge');
   });
 }
 

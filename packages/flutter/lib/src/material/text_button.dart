@@ -333,12 +333,14 @@ class TextButton extends ButtonStyleButton with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(DiagnosticsProperty<VoidCallback>('onLongPress', onLongPress, defaultValue: null));
-    properties.add(DiagnosticsProperty<ValueChanged<bool>>('onHover', onHover, defaultValue: null));
-    properties.add(DiagnosticsProperty<ValueChanged<bool>>('onFocusChange', onFocusChange, defaultValue: null));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+    properties.add(DiagnosticsProperty<Function>('onPressed', onPressed, defaultValue: null));
+    properties.add(DiagnosticsProperty<Function>('onLongPress', onLongPress, defaultValue: null));
+    properties.add(DiagnosticsProperty<Function>('onHover', onHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<Function>('onFocusChange', onFocusChange, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'true', ifFalse: 'false', showName: true, defaultValue: false));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
   }
 }
