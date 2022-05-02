@@ -3690,53 +3690,153 @@ void main() {
     final Key buttonKey = UniqueKey();
     const String hintText = 'hint';
 
+    // DropdownButton with `isExpanded: false` (default)
+    // AlignmentDirectional.centerStart (default)
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
       mediaSize: const Size(800, 600),
+      itemHeight: 100.0,
       hint: const Text(hintText)),
     );
     expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
-
+    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
+    // AlignmentDirectional.topStart
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      mediaSize: const Size(800, 600),
+      alignment: AlignmentDirectional.topStart,
+      itemHeight: 100.0,
+      hint: const Text(hintText)),
+    );
+    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
+    // AlignmentDirectional.bottomStart
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      mediaSize: const Size(800, 600),
+      alignment: AlignmentDirectional.bottomStart,
+      itemHeight: 100.0,
+      hint: const Text(hintText)),
+    );
+    expect(tester.getBottomLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
+    // AlignmentDirectional.center
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
       mediaSize: const Size(800, 600),
       alignment: AlignmentDirectional.center,
+      itemHeight: 100.0,
       hint: const Text(hintText)),
     );
-    expect(tester.getTopLeft(find.text(hintText)).dx, 356.0);
-
+    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
+    // AlignmentDirectional.topEnd
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      mediaSize: const Size(800, 600),
+      alignment: AlignmentDirectional.topEnd,
+      itemHeight: 100.0,
+      hint: const Text(hintText)),
+    );
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
+    // AlignmentDirectional.centerEnd
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
       mediaSize: const Size(800, 600),
       alignment: AlignmentDirectional.centerEnd,
+      itemHeight: 100.0,
       hint: const Text(hintText)),
     );
-    expect(tester.getTopLeft(find.text(hintText)).dx, 364.0);
-
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
+    // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
       mediaSize: const Size(800, 600),
+      alignment: AlignmentDirectional.bottomEnd,
+      itemHeight: 100.0,
+      hint: const Text(hintText)),
+    );
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 334.0);
+
+    // DropdownButton with `isExpanded: true`
+    // AlignmentDirectional.centerStart (default)
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      mediaSize: const Size(800, 600),
+      itemHeight: 100.0,
       isExpanded: true,
       hint: const Text(hintText)),
     );
     expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
-
+    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
+    // AlignmentDirectional.topStart
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
       mediaSize: const Size(800, 600),
+      itemHeight: 100.0,
+      isExpanded: true,
+      alignment: AlignmentDirectional.topStart,
+      hint: const Text(hintText)),
+    );
+    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
+    // AlignmentDirectional.bottomStart
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      mediaSize: const Size(800, 600),
+      itemHeight: 100.0,
+      isExpanded: true,
+      alignment: AlignmentDirectional.bottomStart,
+      hint: const Text(hintText)),
+    );
+    expect(tester.getBottomLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
+    // AlignmentDirectional.center
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      mediaSize: const Size(800, 600),
+      itemHeight: 100.0,
       isExpanded: true,
       alignment: AlignmentDirectional.center,
       hint: const Text(hintText)),
     );
-    expect(tester.getTopLeft(find.text(hintText)).dx, 356.0);
-
+    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
+    // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
       mediaSize: const Size(800, 600),
+      itemHeight: 100.0,
+      isExpanded: true,
+      alignment: AlignmentDirectional.topEnd,
+      hint: const Text(hintText)),
+    );
+    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
+    // AlignmentDirectional.centerEnd
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      mediaSize: const Size(800, 600),
+      itemHeight: 100.0,
       isExpanded: true,
       alignment: AlignmentDirectional.centerEnd,
       hint: const Text(hintText)),
     );
-    expect(tester.getTopLeft(find.text(hintText)).dx, 712.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
+    // AlignmentDirectional.bottomEnd
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      mediaSize: const Size(800, 600),
+      itemHeight: 100.0,
+      isExpanded: true,
+      alignment: AlignmentDirectional.bottomEnd,
+      hint: const Text(hintText)),
+    );
+    expect(tester.getBottomRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
   });
 }
