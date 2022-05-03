@@ -382,20 +382,32 @@ class IosProject extends XcodeBasedProject {
     }
 
     ErrorHandlingFileSystem.deleteIfExists(ephemeralModuleDirectory, recursive: true);
+
+    final String? iosDevelopmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+      processManager: globals.processManager,
+      platform: globals.platform,
+      logger: globals.logger,
+      config: globals.config,
+      terminal: globals.terminal,
+    );
+
     await _overwriteFromTemplate(
       globals.fs.path.join('module', 'ios', 'library'),
       ephemeralModuleDirectory,
+      iosDevelopmentTeam: iosDevelopmentTeam,
     );
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
       await _overwriteFromTemplate(
         globals.fs.path.join('module', 'ios', 'host_app_ephemeral'),
         ephemeralModuleDirectory,
+        iosDevelopmentTeam: iosDevelopmentTeam,
       );
       if (hasPlugins(parent)) {
         await _overwriteFromTemplate(
           globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
           ephemeralModuleDirectory,
+          iosDevelopmentTeam: iosDevelopmentTeam,
         );
       }
     }
@@ -443,7 +455,7 @@ class IosProject extends XcodeBasedProject {
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');
   }
 
-  Future<void> _overwriteFromTemplate(String path, Directory target) async {
+  Future<void> _overwriteFromTemplate(String path, Directory target, {String? iosDevelopmentTeam}) async {
     final Template template = await Template.fromName(
       path,
       fileSystem: globals.fs,
@@ -452,14 +464,6 @@ class IosProject extends XcodeBasedProject {
       templateRenderer: globals.templateRenderer,
     );
     final String iosBundleIdentifier = parent.manifest.iosBundleIdentifier ?? 'com.example.${parent.manifest.appName}';
-
-    final String? iosDevelopmentTeam = await getCodeSigningIdentityDevelopmentTeam(
-      processManager: globals.processManager,
-      platform: globals.platform,
-      logger: globals.logger,
-      config: globals.config,
-      terminal: globals.terminal,
-    );
 
     final String projectName = parent.manifest.appName;
 

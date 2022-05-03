@@ -219,10 +219,11 @@ dependencies:
 
       await inDirectory(projectDir, () async {
         await flutter('clean');
-      });
 
-      await inDirectory(projectDir, () async {
-        await flutter('pub', options: <String>['get']);
+        final String pubOutput = await evalFlutter('pub', options: <String>['get']);
+        if ('Signing iOS app for device deployment'.allMatches(pubOutput).length != 1) {
+          throw TaskResult.failure('Did not print iOS signing cert only once');
+        }
       });
 
       section('Add to existing iOS Objective-C app');
