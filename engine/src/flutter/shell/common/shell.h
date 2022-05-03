@@ -327,7 +327,7 @@ class Shell final : public PlatformView::Delegate,
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to reload the system fonts in
-  /// FontCollection.
+  ///             FontCollection.
   ///             It also clears the cached font families and send system
   ///             channel message to framework to rebuild affected widgets.
   ///

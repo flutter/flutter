@@ -108,7 +108,7 @@ class DefaultPointerDataDispatcher : public PointerDataDispatcher {
 ///
 /// It works as follows:
 ///
-/// When `DispatchPacket` is called while a preivous pointer data dispatch is
+/// When `DispatchPacket` is called while a previous pointer data dispatch is
 /// still in progress (its frame isn't finished yet), it means that an input
 /// event is delivered to us too fast. That potentially means a later event will
 /// be too late which could cause the missing of a frame. Hence we'll cache it

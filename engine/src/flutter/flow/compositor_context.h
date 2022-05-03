@@ -24,7 +24,7 @@ namespace flutter {
 class LayerTree;
 
 enum class RasterStatus {
-  // Frame has successfully rasterized.
+  // Frame has been successfully rasterized.
   kSuccess,
   // Frame is submitted twice. This is only used on Android when
   // switching the background surface to FlutterImageView.
@@ -77,8 +77,8 @@ class FrameDamage {
   }
 
   // Calculates clip rect for current rasterization. This is diff of layer tree
-  // and previous layer tree + any additional provideddamage.
-  // If previous layer tree is not specified, clip rect will be nulloptional,
+  // and previous layer tree + any additional provided damage.
+  // If previous layer tree is not specified, clip rect will be nullopt,
   // but the paint region of layer_tree will be calculated so that it can be
   // used for diffing of subsequent frames.
   std::optional<SkRect> ComputeClipRect(flutter::LayerTree& layer_tree);
