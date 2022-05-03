@@ -21,6 +21,7 @@ void main() {
       );
     }
 
-    expect(tester.layers.whereType<PhysicalModelLayer>, hasLength(2));
+    // One for the Scaffold's material, one for the material itself
+    expect(tester.layers.whereType<PhysicalModelLayer>(), hasLength(2));
   });
 }
