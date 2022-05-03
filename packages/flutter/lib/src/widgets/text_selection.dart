@@ -20,6 +20,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'scrollable.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -1285,7 +1286,10 @@ class TextSelectionGestureDetectorBuilder {
   /// The [delegate] must not be null.
   TextSelectionGestureDetectorBuilder({
     required this.delegate,
+    required this.context,
   }) : assert(delegate != null);
+
+  final BuildContext context;
 
   /// The delegate for this [TextSelectionGestureDetectorBuilder].
   ///
@@ -1390,7 +1394,11 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
 
-  // The viewport offset pixels of the [RenderEditable] at the last drag start.
+  /// The viewport offset pixels of any [Scrollable] containing the
+  /// [RenderEditable] at the last drag start.
+  double _dragStartScrollOffset = 0.0;
+
+  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
   double _dragStartViewportOffset = 0.0;
 
   // Returns true iff either shift key is currently down.
@@ -1711,6 +1719,11 @@ class TextSelectionGestureDetectorBuilder {
       );
     }
 
+    final ScrollableState? scrollableState = Scrollable.of(context);
+    _dragStartScrollOffset = scrollableState == null
+        ? 0.0
+        : scrollableState.position.pixels;
+
     _dragStartViewportOffset = renderEditable.offset.pixels;
   }
 
@@ -1730,12 +1743,19 @@ class TextSelectionGestureDetectorBuilder {
 
     if (!_isShiftTapping) {
       // Adjust the drag start offset for possible viewport offset changes.
-      final Offset startOffset = renderEditable.maxLines == 1
+      final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-
+      final ScrollableState? scrollableState = Scrollable.of(context);
+      final double currentScrollDy = scrollableState == null
+          ? 0.0
+          : scrollableState.position.pixels;
+      final Offset scrollableOffset = Offset(
+        0.0,
+        currentScrollDy - _dragStartScrollOffset,
+      );
       return renderEditable.selectPositionAt(
-        from: startDetails.globalPosition - startOffset,
+        from: startDetails.globalPosition - editableOffset - scrollableOffset,
         to: updateDetails.globalPosition,
         cause: SelectionChangedCause.drag,
       );
