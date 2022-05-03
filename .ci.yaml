@@ -10,6 +10,23 @@ enabled_branches:
   - flutter-\d+\.\d+-candidate\.\d+
 
 platform_properties:
+  linux_staging_build:
+    properties:
+      caches: >-
+        [
+          {"name": "builder_linux_framework", "path": "builder"},
+          {"name": "android_sdk", "path": "android"},
+          {"name": "chrome_and_driver_96", "path": "chrome"},
+          {"name": "flutter_sdk", "path": "flutter sdk"},
+          {"name": "openjdk_11", "path": "java"},
+          {"name": "pub_cache", "path": ".pub-cache"}
+        ]
+      dependencies: >-
+        [
+          {"dependency": "curl"}
+        ]
+      os: Ubuntu
+      device_type: none
   linux:
     properties:
       caches: >-
@@ -2398,6 +2415,47 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_lifecycles_test
+
+  - name: Linux_staging_build analyze
+    bringup: true
+    recipe: flutter/flutter
+    timeout: 60
+    properties:
+      tags: >
+        ["framework","hostonly"]
+      validation: analyze
+      validation_name: Analyze
+
+  - name: Linux_staging_build framework_tests_misc
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "goldctl"},
+          {"dependency": "clang"},
+          {"dependency": "cmake"},
+          {"dependency": "ninja"},
+          {"dependency": "open_jdk", "version": "11"},
+          {"dependency": "android_sdk", "version": "version:31v8"}
+        ]
+      shard: framework_tests
+      subshard: misc
+      tags: >
+        ["framework", "hostonly", "shard"]
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_driver/
+      - packages/integration_test/
+      - packages/flutter_localizations/
+      - packages/fuchsia_remote_debug_protocol/
+      - packages/flutter_test/
+      - packages/flutter_goldens/
+      - packages/flutter_tools/
+      - bin/
+      - .ci.yaml
 
   - name: Mac build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
