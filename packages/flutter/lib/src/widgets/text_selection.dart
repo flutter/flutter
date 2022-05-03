@@ -471,12 +471,14 @@ class TextSelectionOverlay {
     return endHandleRect?.height ?? renderObject.preferredLineHeight;
   }
 
+  bool _dragIsMouse = false;
   late Offset _dragEndPosition;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
+    _dragIsMouse = details.kind == PointerDeviceKind.mouse;
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
   }
 
@@ -485,6 +487,9 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
     if (_selection.isCollapsed) {
+      if (_dragIsMouse) {
+        return;
+      }
       _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: true);
       return;
     }
@@ -506,6 +511,7 @@ class TextSelectionOverlay {
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
+    _dragIsMouse = details.kind == PointerDeviceKind.mouse;
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
   }
 
@@ -514,6 +520,9 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     if (_selection.isCollapsed) {
+      if (_dragIsMouse) {
+        return;
+      }
       _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: false);
       return;
     }
