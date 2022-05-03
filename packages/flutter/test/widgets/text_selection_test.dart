@@ -696,9 +696,9 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // TODO(justinmc): Actually should be a selection.
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 10);
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 10);
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change', (WidgetTester tester) async {
