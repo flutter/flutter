@@ -94,7 +94,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     /// It is up to the caller to decide to re-purpose the running isolate,
     /// terminate it, or use another shell to host the new isolate. This is
     /// mostly used by embedders which have a fire-and-forget strategy to root
-    /// isolate launch. For example, the application may try to "launch" and
+    /// isolate launch. For example, the application may try to "launch" an
     /// isolate when the embedders launches or resumes from a paused state. That
     /// the isolate is running is not necessarily a failure condition for them.
     /// But from the engine's perspective, the run configuration was rejected.
@@ -111,7 +111,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     /// of sub-components. The engine will attempt to log the same when
     /// possible. With the aid of logs, the common causes of failure are:
     ///
-    /// * AOT assets give to JIT/DBC mode VM's and vice-versa.
+    /// * AOT assets were given to JIT/DBC mode VM's and vice-versa.
     /// * The assets could not be found in the asset manager. Callers must make
     ///   sure their run configuration asset managers have been correctly set
     ///   up.
@@ -150,7 +150,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///             platform task runner while the engine is running on the UI
     ///             task runner.
     ///
-    /// @see        `SemanticsNode`, `SemticsNodeUpdates`,
+    /// @see        `SemanticsNode`, `SemanticsNodeUpdates`,
     ///             `CustomAccessibilityActionUpdates`,
     ///             `PlatformView::UpdateSemantics`
     ///
@@ -480,7 +480,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///             The following (mis)behavior in the functioning of the method
   ///             will cause the jank in the Flutter application:
   ///             * The time taken by this method to create a layer-tree exceeds
-  ///               on frame interval (for example, 16.66 ms on a 60Hz display).
+  ///               one frame interval (for example, 16.66 ms on a 60Hz
+  ///               display).
   ///             * The time take by this method to generate a new layer-tree
   ///               causes the current layer-tree pipeline depth to change. To
   ///               illustrate this point, note that maximum pipeline depth used
@@ -591,7 +592,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   Dart_Port GetUIIsolateMainPort();
 
   //----------------------------------------------------------------------------
-  /// @brief      Gets the debug name of the root isolate. But default, the
+  /// @brief      Gets the debug name of the root isolate. By default, the
   ///             debug name of the isolate is derived from its advisory script
   ///             URI, advisory main entrypoint and its main port name. For
   ///             example, "main.dart$main-1234" where the script URI is
