@@ -14,6 +14,7 @@ import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 import 'browser.dart';
+import 'deprecated_features.dart';
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
 import 'service_worker_test.dart';
@@ -718,6 +719,15 @@ Future<void> _runFrameworkTests() async {
       path.join(flutterRoot, 'packages', 'flutter'),
       options: <String>['--dart-define=dart.vm.product=false', '--dart-define=dart.vm.profile=true', ...soundNullSafetyOptions],
       tests: <String>['test_profile${path.separator}'],
+    );
+    // Run reprecated mode tests (see packages/flutter/test_deprecated/README.md)
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>[
+        ...<String>[for (String feature in kDeprecatedFeatures) '--dart-define=$feature=true'],
+        ...soundNullSafetyOptions,
+      ],
+      tests: <String>['test_deprecated${path.separator}'],
     );
   }
 

@@ -24,6 +24,10 @@ export 'package:flutter/gestures.dart' show
   PointerUpEvent,
   PointerCancelEvent;
 
+// Allows opting into the old physical model behavior.
+// to use: `flutter run --dart-define=flutter.deprecated.physical_model_layer=true`.
+const bool _kForcePhysicalModeLayer = bool.fromEnvironment('flutter.deprecated.physical_model_layer');
+
 /// A base class for render boxes that resemble their children.
 ///
 /// A proxy box has a single child and simply mimics all the properties of that
@@ -1828,6 +1832,9 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 
   @override
+  bool get alwaysNeedsCompositing => _kForcePhysicalModeLayer;
+
+  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.elevation = elevation;
@@ -1955,6 +1962,22 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
       return true;
     }());
 
+    if (_kForcePhysicalModeLayer) {
+      layer ??= PhysicalModelLayer();
+      (layer! as PhysicalModelLayer)
+        ..clipPath = offsetRRectAsPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer!, super.paint, offset, childPaintBounds: offsetBounds);
+      assert(() {
+        layer?.debugCreator = debugCreator;
+        return true;
+      }());
+      return;
+    }
+
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
       // The drawShadow call doesn't add the region of the shadow to the
@@ -2079,6 +2102,22 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       }
       return true;
     }());
+
+    if (_kForcePhysicalModeLayer) {
+      layer ??= PhysicalModelLayer();
+      (layer! as PhysicalModelLayer)
+        ..clipPath = offsetPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer!, super.paint, offset, childPaintBounds: offsetBounds);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
+      return;
+    }
 
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
