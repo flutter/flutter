@@ -953,6 +953,140 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
+  testWidgets('SliverAppBar.medium defaults', (WidgetTester tester) async {
+    const double collapsedAppBarHeight = 64;
+    const double expandedAppBarHeight = 112;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar.medium(
+              title: const Text('AppBar Title'),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    final Finder collapsedTitle = find.text('AppBar Title').first;
+    final Finder collapsedTitleOpacity = find.ancestor(
+      of: collapsedTitle,
+      matching: find.byType(AnimatedOpacity),
+    );
+    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitleClip = find.ancestor(
+      of: expandedTitle,
+      matching: find.byType(ClipRect),
+    );
+
+    // Default, fully expanded app bar.
+    expect(controller.offset, 0);
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+
+    // Scroll the expanded app bar partially out of view.
+    controller.jumpTo(45);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight - 45);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
+
+    // Scroll so that it is completely collapsed.
+    controller.jumpTo(600);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), collapsedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
+    expect(tester.getSize(expandedTitleClip).height, 0);
+
+    // Scroll back to fully expanded.
+    controller.jumpTo(0);
+    await tester.pumpAndSettle();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+  });
+
+  testWidgets('SliverAppBar.large defaults', (WidgetTester tester) async {
+    const double collapsedAppBarHeight = 64;
+    const double expandedAppBarHeight = 152;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar.large(
+              title: const Text('AppBar Title'),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    final Finder collapsedTitle = find.text('AppBar Title').first;
+    final Finder collapsedTitleOpacity = find.ancestor(
+      of: collapsedTitle,
+      matching: find.byType(AnimatedOpacity),
+    );
+    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitleClip = find.ancestor(
+      of: expandedTitle,
+      matching: find.byType(ClipRect),
+    );
+
+    // Default, fully expanded app bar.
+    expect(controller.offset, 0);
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+
+    // Scroll the expanded app bar partially out of view.
+    controller.jumpTo(45);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight - 45);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
+
+    // Scroll so that it is completely collapsed.
+    controller.jumpTo(600);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), collapsedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
+    expect(tester.getSize(expandedTitleClip).height, 0);
+
+    // Scroll back to fully expanded.
+    controller.jumpTo(0);
+    await tester.pumpAndSettle();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+  });
+
   testWidgets('AppBar uses the specified elevation or defaults to 4.0', (WidgetTester tester) async {
     final bool useMaterial3 = ThemeData().useMaterial3;
 
