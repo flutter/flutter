@@ -2723,7 +2723,7 @@ class BuildOwner {
   Map<Element, Set<GlobalKey>>? _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans;
 
   void _debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans(Element node, GlobalKey key) {
-    _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans ??= HashMap<Element, Set<GlobalKey>>();
+    _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans ??= <Element, Set<GlobalKey>>{};
     final Set<GlobalKey> keys = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!
       .putIfAbsent(node, () => HashSet<GlobalKey>());
     keys.add(key);
@@ -2938,7 +2938,7 @@ class BuildOwner {
                 keys.addAll(_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans![element]!);
             }
             if (keys.isNotEmpty) {
-              final Map<String, int> keyStringCount = HashMap<String, int>();
+              final Map<String, int> keyStringCount = <String, int>{};
               for (final String key in keys.map<String>((GlobalKey key) => key.toString())) {
                 if (keyStringCount.containsKey(key)) {
                   keyStringCount.update(key, (int value) => value + 1);
@@ -2955,7 +2955,7 @@ class BuildOwner {
                 }
               });
               final Iterable<Element> elements = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!.keys;
-              final Map<String, int> elementStringCount = HashMap<String, int>();
+              final Map<String, int> elementStringCount = <String, int>{};
               for (final String element in elements.map<String>((Element element) => element.toString())) {
                 if (elementStringCount.containsKey(element)) {
                   elementStringCount.update(element, (int value) => value + 1);
@@ -5237,16 +5237,16 @@ class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedElement(InheritedWidget super.widget);
 
-  final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
+  final Map<Element, Object?> _dependents = <Element, Object?>{};
 
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
     final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
     if (incomingWidgets != null)
-      _inheritedWidgets = HashMap<Type, InheritedElement>.of(incomingWidgets);
+      _inheritedWidgets = Map<Type, InheritedElement>.of(incomingWidgets);
     else
-      _inheritedWidgets = HashMap<Type, InheritedElement>();
+      _inheritedWidgets = <Type, InheritedElement>{};
     _inheritedWidgets![widget.runtimeType] = this;
   }
 

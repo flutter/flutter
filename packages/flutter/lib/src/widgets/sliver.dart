@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show SplayTreeMap, HashMap;
+import 'dart:collection' show SplayTreeMap;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -1155,7 +1155,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(_currentlyUpdatingChildIndex == null);
     try {
       final SplayTreeMap<int, Element?> newChildren = SplayTreeMap<int, Element?>();
-      final Map<int, double> indexToLayoutOffset = HashMap<int, double>();
+      final Map<int, double> indexToLayoutOffset = <int, double>{};
       final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
       void processElement(int index) {
         _currentlyUpdatingChildIndex = index;

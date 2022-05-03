@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show HashMap;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -130,11 +128,11 @@ Locale basicLocaleListResolution(List<Locale>? preferredLocales, Iterable<Locale
   }
   // Hash the supported locales because apps can support many locales and would
   // be expensive to search through them many times.
-  final Map<String, Locale> allSupportedLocales = HashMap<String, Locale>();
-  final Map<String, Locale> languageAndCountryLocales = HashMap<String, Locale>();
-  final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
-  final Map<String, Locale> languageLocales = HashMap<String, Locale>();
-  final Map<String?, Locale> countryLocales = HashMap<String?, Locale>();
+  final Map<String, Locale> allSupportedLocales = <String, Locale>{};
+  final Map<String, Locale> languageAndCountryLocales = <String, Locale>{};
+  final Map<String, Locale> languageAndScriptLocales = <String, Locale>{};
+  final Map<String, Locale> languageLocales = <String, Locale>{};
+  final Map<String?, Locale> countryLocales = <String?, Locale>{};
   for (final Locale locale in supportedLocales) {
     allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
     languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;

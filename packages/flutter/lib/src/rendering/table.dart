@@ -386,7 +386,7 @@ class RenderTable extends RenderBox {
        _textDirection = textDirection,
        _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0),
        _rows = rows ?? 0,
-       _columnWidths = columnWidths ?? HashMap<int, TableColumnWidth>(),
+       _columnWidths = columnWidths ?? <int, TableColumnWidth>{},
        _defaultColumnWidth = defaultColumnWidth,
        _border = border,
        _textBaseline = textBaseline,
@@ -478,7 +478,7 @@ class RenderTable extends RenderBox {
       return;
     if (_columnWidths.isEmpty && value == null)
       return;
-    _columnWidths = value ?? HashMap<int, TableColumnWidth>();
+    _columnWidths = value ?? <int, TableColumnWidth>{};
     markNeedsLayout();
   }
 

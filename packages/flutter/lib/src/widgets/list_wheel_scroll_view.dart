@@ -804,7 +804,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   // Any time we do case 1, though, we reset the cache.
 
   /// A cache of widgets so that we don't have to rebuild every time.
-  final Map<int, Widget?> _childWidgets = HashMap<int, Widget?>();
+  final Map<int, Widget?> _childWidgets = <int, Widget?>{};
 
   /// The map containing all active child elements. SplayTreeMap is used so that
   /// we have all elements ordered and iterable by their keys.

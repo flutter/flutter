@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection' show HashMap;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
@@ -744,7 +743,7 @@ mixin WidgetInspectorService {
 
   List<String>? _pubRootDirectories;
   /// Memoization for [_isLocalCreationLocation].
-  final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
+  final Map<String, bool> _isLocalCreationCache = <String, bool>{};
 
   bool _trackRebuildDirtyWidgets = false;
   bool _trackRepaintWidgets = false;
