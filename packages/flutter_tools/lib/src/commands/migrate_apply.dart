@@ -41,6 +41,11 @@ class MigrateApplyCommand extends FlutterCommand {
             'This path can be absolute or relative to the flutter project root.',
       valueHelp: 'path',
     );
+    argParser.addOption(
+      'project-directory',
+      help: 'The root directory of the flutter project.',
+      valueHelp: 'path',
+    );
     argParser.addFlag(
       'force',
       abbr: 'f',
@@ -76,7 +81,9 @@ class MigrateApplyCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = FlutterProject.current();
+    final String? projectDirectory = stringArg('project-directory');
+    final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
+    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
 
     if (!await gitRepoExists(flutterProject.directory.path, logger, migrateUtils)) {
       logger.printStatus('No git repo found. Please run in a project with an initialized git repo or initialize one with:');

@@ -34,6 +34,7 @@ void main() {
   setUp(() {
     fileSystem = globals.localFileSystem;
     // fileSystem = MemoryFileSystem.test();
+    // appDir = fileSystem.directory('/');
     appDir = fileSystem.systemTempDirectory.createTempSync('apptestdir');
     logger = BufferLogger.test();
     platform = FakePlatform();
@@ -47,7 +48,7 @@ void main() {
     Cache.disableLocking();
   });
 
-  testUsingContext('Status succeeds', () async {
+  testUsingContext('Status produces all outputs', () async {
     final MigrateCommand command = MigrateCommand(
       verbose: true,
       logger: logger,
@@ -115,6 +116,7 @@ deleted_files:
         'migrate',
         'status',
         '--working-directory=${workingDir.path}',
+        '--project-directory=${appDir.path}',
       ]
     );
     expect(logger.statusText, contains('''
@@ -133,20 +135,74 @@ All conflicts resolved. Review changes above and apply the migration with:
 '''));
 
     expect(logger.statusText, contains('''
--name: flutter_tools
--description: Tools for building Flutter applications
--homepage: https://flutter.dev
--
+@@ -1,5 +1,5 @@
+-name: originalname
+-description: A new Flutter project.
 +name: newname
 +description: new description of the test project
-+version: 1.0.0+1
+ version: 1.0.0+1
  environment:
--  sdk: ">=2.17.0-0 <3.0.0"
--
-+  sdk: \'>=2.18.0-58.0.dev <3.0.0\''''));
+   sdk: '>=2.18.0-58.0.dev <3.0.0'
+@@ -10,4 +10,5 @@ dev_dependencies:
+   flutter_test:
+     sdk: flutter
+ flutter:
+-  uses-material-design: true
+\\ No newline at end of file
++  uses-material-design: false
++  EXTRALINE'''));
+
+    // Add conflict file
+    final File conflictFile = workingDir.childDirectory('conflict').childFile('conflict.file');
+    conflictFile.createSync(recursive: true);
+    conflictFile.writeAsStringSync('''
+line1
+<<<<<<< /conflcit/conflict.file
+line2
+=======
+linetwo
+>>>>>>> /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/flutter_tools.4Xdep8/generatedTargetTemplatetlN44S/conflict/conflict.file
+line3
+''', flush: true);
+    final File conflictFileOriginal = appDir.childDirectory('conflict').childFile('conflict.file');
+    conflictFileOriginal.createSync(recursive: true);
+    conflictFileOriginal.writeAsStringSync('''
+line1
+line2
+line3
+''', flush: true);
+
+    manifestFile.writeAsStringSync('''
+merged_files:
+  - pubspec.yaml
+conflict_files:
+  - conflict/conflict.file
+added_files:
+  - added.file
+deleted_files:
+''');
+
+    await createTestCommandRunner(command).run(
+      <String>[
+        'migrate',
+        'status',
+        '--working-directory=${workingDir.path}',
+        '--project-directory=${appDir.path}',
+      ]
+    );
+
+    expect(logger.statusText, contains('''
+@@ -1,3 +1,7 @@
+ line1
++<<<<<<< /conflcit/conflict.file
+ line2
++=======
++linetwo
++>>>>>>>'''));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => platform,
   });
+
 }

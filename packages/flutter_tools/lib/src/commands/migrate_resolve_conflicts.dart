@@ -32,6 +32,11 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       valueHelp: 'path',
     );
     argParser.addOption(
+      'project-directory',
+      help: 'The root directory of the flutter project.',
+      valueHelp: 'path',
+    );
+    argParser.addOption(
       'context-lines',
       defaultsTo: '5',
       help: 'The number of lines of context to show around the each conflict. Defaults to 5.',
@@ -67,7 +72,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject project = FlutterProject.current();
+    final String? projectDirectory = stringArg('project-directory');
+    final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
+    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
     if (customWorkingDirectoryPath != null) {
@@ -221,7 +228,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       result.trim();
 
       // Display conflict summary for this file and confirm with user if the changes should be commited.
-      if (boolArg('confirm-commit') && skipCount != conflicts.length) {
+      if (boolArg('confirm-commit')) {
         logger.printStatus(terminal.clearScreen(), newline: false);
         logger.printStatus('Conflicts in $localPath complete.\n');
         logger.printStatus('You chose to:\n  Skip $skipCount conflicts\n  Acccept the original lines for $originalCount conflicts\n  Accept the new lines for $newCount conflicts\n');

@@ -35,6 +35,11 @@ class MigrateAbandonCommand extends FlutterCommand {
             'This path can be absolute or relative to the flutter project root.',
       valueHelp: 'path',
     );
+    argParser.addOption(
+      'project-directory',
+      help: 'The root directory of the flutter project.',
+      valueHelp: 'path',
+    );
   }
 
   final Logger logger;
@@ -59,7 +64,9 @@ class MigrateAbandonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = FlutterProject.current();
+    final String? projectDirectory = stringArg('project-directory');
+    final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
+    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
     Directory workingDirectory = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
     if (customWorkingDirectoryPath != null) {

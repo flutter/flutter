@@ -189,8 +189,7 @@ Future<MigrateResult?> computeMigration({
   final fallbackRevision = _getFallbackBaseRevision(true, verbose, logger, status);
   if (revisionsList.contains(fallbackRevision) && baseRevision != fallbackRevision && metadataRevision != fallbackRevision) {
     status.pause();
-    logger.printStatus('Using Flutter v1.0.0 ($fallbackRevision) as the base revision since a valid base revision could not be found.', indent: 4, color: TerminalColor.grey);
-    logger.printStatus('This may result in more merge conflicts than normal expected.', indent: 4, color: TerminalColor.grey);
+    logger.printStatus('Using Flutter v1.0.0 ($fallbackRevision) as the base revision since a valid base revision could not be found in the .metadata file. This may result in more merge conflicts than normally expected.', indent: 4, color: TerminalColor.grey);
     status.resume();
   }
 
