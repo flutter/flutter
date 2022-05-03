@@ -7871,7 +7871,7 @@ void main() {
       // On web, we don't show the Flutter toolbar and instead rely on the browser
       // toolbar. Until we change that, this test should remain skipped.
       skip: kIsWeb, // [intended]
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS })
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })
   );
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
