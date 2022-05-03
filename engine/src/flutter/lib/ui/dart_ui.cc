@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/dart_ui.h"
 
+#include "flutter/common/settings.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_builder.h"
@@ -87,12 +88,25 @@ void DartUI::InitForGlobal() {
   }
 }
 
-void DartUI::InitForIsolate() {
+void DartUI::InitForIsolate(const Settings& settings) {
   FML_DCHECK(g_natives);
-  Dart_Handle result = Dart_SetNativeResolver(
-      Dart_LookupLibrary(ToDart("dart:ui")), GetNativeFunction, GetSymbol);
+
+  Dart_Handle dart_ui = Dart_LookupLibrary(ToDart("dart:ui"));
+  if (Dart_IsError(dart_ui)) {
+    Dart_PropagateError(dart_ui);
+  }
+
+  Dart_Handle result =
+      Dart_SetNativeResolver(dart_ui, GetNativeFunction, GetSymbol);
   if (Dart_IsError(result)) {
     Dart_PropagateError(result);
+  }
+
+  if (settings.enable_impeller) {
+    result = Dart_SetField(dart_ui, ToDart("_impellerEnabled"), Dart_True());
+    if (Dart_IsError(result)) {
+      Dart_PropagateError(result);
+    }
   }
 }
 

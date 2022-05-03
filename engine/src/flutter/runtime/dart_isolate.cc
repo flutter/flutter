@@ -462,7 +462,7 @@ bool DartIsolate::LoadLibraries() {
   DartIO::InitForIsolate(may_insecurely_connect_to_all_domains_,
                          domain_network_policy_);
 
-  DartUI::InitForIsolate();
+  DartUI::InitForIsolate(GetIsolateGroupData().GetSettings());
 
   const bool is_service_isolate = Dart_IsServiceIsolate(isolate());
 

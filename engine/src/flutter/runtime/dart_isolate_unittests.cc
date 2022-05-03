@@ -178,6 +178,76 @@ TEST_F(DartIsolateTest, CanRunDartCodeCodeSynchronously) {
   }));
 }
 
+TEST_F(DartIsolateTest, ImpellerFlagIsCorrectWhenTrue) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  auto vm_ref = DartVMRef::Create(settings);
+  TaskRunners task_runners(GetCurrentTestName(),    //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner()   //
+  );
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, task_runners, "main",
+                                      {}, GetDefaultKernelFilePath());
+
+  ASSERT_TRUE(isolate);
+  ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
+  ASSERT_TRUE(isolate->RunInIsolateScope([settings]() -> bool {
+    Dart_Handle dart_ui = ::Dart_LookupLibrary(tonic::ToDart("dart:ui"));
+    if (tonic::CheckAndHandleError(dart_ui)) {
+      return false;
+    }
+    Dart_Handle impeller_enabled =
+        ::Dart_GetField(dart_ui, tonic::ToDart("_impellerEnabled"));
+    if (tonic::CheckAndHandleError(impeller_enabled)) {
+      return false;
+    }
+    bool result;
+    if (tonic::CheckAndHandleError(
+            Dart_BooleanValue(impeller_enabled, &result))) {
+      return false;
+    }
+    return result == settings.enable_impeller;
+  }));
+}
+
+TEST_F(DartIsolateTest, ImpellerFlagIsCorrectWhenFalse) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  settings.enable_impeller = false;
+  auto vm_ref = DartVMRef::Create(settings);
+  TaskRunners task_runners(GetCurrentTestName(),    //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner()   //
+  );
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, task_runners, "main",
+                                      {}, GetDefaultKernelFilePath());
+
+  ASSERT_TRUE(isolate);
+  ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
+  ASSERT_TRUE(isolate->RunInIsolateScope([settings]() -> bool {
+    Dart_Handle dart_ui = ::Dart_LookupLibrary(tonic::ToDart("dart:ui"));
+    if (tonic::CheckAndHandleError(dart_ui)) {
+      return false;
+    }
+    Dart_Handle impeller_enabled =
+        ::Dart_GetField(dart_ui, tonic::ToDart("_impellerEnabled"));
+    if (tonic::CheckAndHandleError(impeller_enabled)) {
+      return false;
+    }
+    bool result;
+    if (tonic::CheckAndHandleError(
+            Dart_BooleanValue(impeller_enabled, &result))) {
+      return false;
+    }
+    return result == settings.enable_impeller;
+  }));
+}
+
 TEST_F(DartIsolateTest, CanRegisterNativeCallback) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   AddNativeCallback(

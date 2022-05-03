@@ -106,3 +106,8 @@ typedef _ScheduleImmediateClosure = void Function(void Function());
 // See also https://github.com/dart-lang/sdk/blob/main/sdk/lib/_internal/vm/lib/schedule_microtask_patch.dart
 @pragma('vm:entry-point')
 _ScheduleImmediateClosure _getScheduleMicrotaskClosure() => _scheduleMicrotask;
+
+// Used internally to indicate whether the Engine is using Impeller for
+// rendering
+@pragma('vm:entry-point')
+bool _impellerEnabled = false;
