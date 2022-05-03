@@ -62,6 +62,89 @@ void main() {
       );
     });
 
+    test('web HTML test', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'GOLDCTL': 'goldctl',
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'FLUTTER_TEST_BROWSER': 'Chrome',
+          'FLUTTER_WEB_RENDERER': 'html',
+        },
+        operatingSystem: 'macos'
+      );
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+          '--add-test-optional-key', 'image_matching_algorithm:fuzzy',
+          '--add-test-optional-key', 'fuzzy_max_different_pixels:20',
+          '--add-test-optional-key', 'fuzzy_pixel_delta_threshold:4',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+
+      expect(
+        await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
+        isTrue,
+      );
+    });
+
+    test('web CanvasKit test', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'GOLDCTL': 'goldctl',
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'FLUTTER_TEST_BROWSER': 'Chrome',
+          'FLUTTER_WEB_RENDERER': 'canvaskit',
+        },
+        operatingSystem: 'macos'
+      );
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+
+      expect(
+        await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
+        isTrue,
+      );
+    });
+
     test('auth performs minimal work if already authorized', () async {
       final File authFile = fs.file('/workDirectory/temp/auth_opt.json')
         ..createSync(recursive: true);

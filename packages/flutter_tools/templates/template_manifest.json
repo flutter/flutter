@@ -186,7 +186,6 @@
         "templates/module/ios/host_app_ephemeral/Config.tmpl/Debug.xcconfig",
         "templates/module/ios/host_app_ephemeral/Config.tmpl/Flutter.xcconfig",
         "templates/module/ios/host_app_ephemeral/Config.tmpl/Release.xcconfig",
-        "templates/module/ios/host_app_ephemeral/Flutter/engine/Flutter.podspec.tmpl",
         "templates/module/ios/host_app_ephemeral/Runner.tmpl/AppDelegate.h",
         "templates/module/ios/host_app_ephemeral/Runner.tmpl/AppDelegate.m",
         "templates/module/ios/host_app_ephemeral/Runner.tmpl/Assets.xcassets/AppIcon.appiconset/Contents.json",
@@ -228,7 +227,6 @@
         "templates/module/ios/host_app_ephemeral_cocoapods/Runner.tmpl/AppDelegate.m",
         "templates/module/ios/library/Flutter.tmpl/AppFrameworkInfo.plist",
         "templates/module/ios/library/Flutter.tmpl/podhelper.rb.tmpl",
-        "templates/module/ios/library/Flutter.tmpl/projectName.podspec.tmpl",
         "templates/module/ios/library/Flutter.tmpl/README.md",
         "templates/module/README.md",
 

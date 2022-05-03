@@ -13,8 +13,8 @@ class FABTemplate extends TokenTemplate {
   @override
   String generate() => '''
 // Generated version ${tokens["version"]}
-class _M3Defaults extends FloatingActionButtonThemeData {
-  _M3Defaults(this.context, this.type, this.hasChild)
+class _TokenDefaultsM3 extends FloatingActionButtonThemeData {
+  _TokenDefaultsM3(this.context, this.type, this.hasChild)
     : super(
         elevation: ${elevation("md.comp.fab.primary.container")},
         focusElevation: ${elevation("md.comp.fab.primary.focus.container")},
