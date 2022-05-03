@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_DART_UI_H_
 #define FLUTTER_LIB_UI_DART_UI_H_
 
+#include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 
 namespace flutter {
@@ -12,7 +13,7 @@ namespace flutter {
 class DartUI {
  public:
   static void InitForGlobal();
-  static void InitForIsolate();
+  static void InitForIsolate(const Settings& settings);
 
  private:
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartUI);
