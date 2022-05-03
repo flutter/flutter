@@ -1733,7 +1733,8 @@ class OpacityLayer extends OffsetLayer {
   /// Creates an opacity layer.
   ///
   /// Either the [alpha] or [opacity] property must be non-null before the compositing phase of
-  /// the pipeline.
+  /// the pipeline. Providing an [alpha] is deprecated and [opacity] should be used
+  /// instead.
   OpacityLayer({
     @Deprecated(
       'Prefer using opacity instead of alpha. '
@@ -1742,12 +1743,23 @@ class OpacityLayer extends OffsetLayer {
     int? alpha,
     double? opacity,
     super.offset,
-  }) : _opacity = opacity ?? (alpha != null ? alpha / 255.0 : null);
+  }) : _opacity = opacity ?? (alpha != null ? _alphaToOpacity(alpha) : null);
+
+  static double _alphaToOpacity(int value) {
+    return value / 255.0;
+  }
+
+  static int _alphaFromOpacity(double value) {
+    return (value * 255).round();
+  }
 
   /// The amount to multiply into the alpha channel.
   ///
   /// The opacity is expressed as an integer from 0 to 255, where 0 is fully
   /// transparent and 255 is fully opaque.
+  ///
+  /// Providing an [alpha] is deprecated and [opacity] should be used
+  /// instead.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
@@ -1755,16 +1767,15 @@ class OpacityLayer extends OffsetLayer {
     'Prefer using opacity instead of alpha. '
     'This feature was deprecated after v2.13.0-0.0.pre.'
   )
-  int? get alpha => _opacity == null ? null : (_opacity! * 255).round();
+  int? get alpha => _opacity == null ? null : _alphaFromOpacity(_opacity!);
   set alpha(int? value) {
     assert(value != null);
-    final double valueAsOpacity = value! / 255.0;
-    opacity = valueAsOpacity;
+    opacity = _alphaToOpacity(value!);
   }
 
   /// The opacity to composite with child layers.
   ///
-  /// The opacity is expressed as a double from 0.0 to 1.0, where 00 is fully
+  /// The opacity is expressed as a double from 0.0 to 1.0, where 0.0 is fully
   /// transparent and 1.0 is fully opaque.
   ///
   /// The scene must be explicitly recomposited after this property is changed

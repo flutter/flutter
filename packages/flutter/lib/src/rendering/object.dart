@@ -692,11 +692,11 @@ class PaintingContext extends ClipContext {
       return layer;
     }
 
-    if (!kReleaseMode) {
-      if (debugDisableOpacityLayers) {
-        painter(this, offset);
-        return null;
-      }
+    // debugDisableOpacityLayers is used by the SceneBuilder to remove opacity layers, but
+    // if the framework is not asked to composite will also need to remove the opacity here.
+    if (kDebugMode && debugDisableOpacityLayers) {
+      painter(this, offset);
+      return null;
     }
     final Color color = Color.fromRGBO(0, 0, 0, opacity);
     canvas.saveLayer(size != null ? offset & size : null, Paint()..color = color);
