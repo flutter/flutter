@@ -629,8 +629,7 @@ class PlatformView {
 
   //--------------------------------------------------------------------------
   /// @brief      Used by the embedder to notify the rasterizer that it will
-  /// no
-  ///             longer attempt to composite the specified texture within
+  ///             no longer attempt to composite the specified texture within
   ///             the layer tree. This allows the rasterizer to collect
   ///             associated resources.
   ///
@@ -821,7 +820,7 @@ class PlatformView {
   /// @details If this returns `null` that means PlatformMessages should be sent
   /// to the PlatformView.  That is to protect legacy behavior, any embedder
   /// that wants to support executing Platform Channel handlers on background
-  /// threads should be returing a thread-safe PlatformMessageHandler instead.
+  /// threads should be returning a thread-safe PlatformMessageHandler instead.
   virtual std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
       const;
 
