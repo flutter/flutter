@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:meta/meta.dart';
+
+import 'dom.dart';
 
 // iOS 15 launched WebGL 2.0, but there's something broken about it, which
 // leads to apps failing to load. For now, we're forcing WebGL 1 on iOS.
@@ -65,8 +65,8 @@ BrowserEngine get browserEngine {
 }
 
 BrowserEngine _detectBrowserEngine() {
-  final String vendor = html.window.navigator.vendor;
-  final String agent = html.window.navigator.userAgent.toLowerCase();
+  final String vendor = domWindow.navigator.vendor;
+  final String agent = domWindow.navigator.userAgent.toLowerCase();
   return detectBrowserEngineByVendorAgent(vendor, agent);
 }
 
@@ -167,14 +167,14 @@ OperatingSystem detectOperatingSystem({
   String? overrideUserAgent,
   int? overrideMaxTouchPoints,
 }) {
-  final String platform = overridePlatform ?? html.window.navigator.platform!;
-  final String userAgent = overrideUserAgent ?? html.window.navigator.userAgent;
+  final String platform = overridePlatform ?? domWindow.navigator.platform!;
+  final String userAgent = overrideUserAgent ?? domWindow.navigator.userAgent;
 
   if (platform.startsWith('Mac')) {
     // iDevices requesting a "desktop site" spoof their UA so it looks like a Mac.
     // This checks if we're in a touch device, or on a real mac.
     final int maxTouchPoints =
-        overrideMaxTouchPoints ?? html.window.navigator.maxTouchPoints ?? 0;
+        overrideMaxTouchPoints ?? domWindow.navigator.maxTouchPoints ?? 0;
     if (maxTouchPoints > 2) {
       return OperatingSystem.iOs;
     }
@@ -233,7 +233,7 @@ bool get isIOS15 {
     return debugIsIOS15!;
   }
   return operatingSystem == OperatingSystem.iOs &&
-      html.window.navigator.userAgent.contains('OS 15_');
+      domWindow.navigator.userAgent.contains('OS 15_');
 }
 
 /// Use in tests to simulate the detection of iOS 15.
@@ -256,7 +256,7 @@ int get webGLVersion =>
 ///
 /// Our CanvasKit backend is affected due to: https://github.com/emscripten-core/emscripten/issues/11819
 int _detectWebGLVersion() {
-  final html.CanvasElement canvas = html.CanvasElement(
+  final DomCanvasElement canvas = createDomCanvasElement(
     width: 1,
     height: 1,
   );
