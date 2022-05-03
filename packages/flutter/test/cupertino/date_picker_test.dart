@@ -1543,6 +1543,33 @@ void main() {
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });
+
+  testWidgets('TimerPicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+    Widget _buildTimerPicker(Brightness brightness) {
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness),
+        home: CupertinoTimerPicker(
+          mode: CupertinoTimerPickerMode.hm,
+          onTimerDurationChanged: (Duration newDuration) {},
+          initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+        ),
+      );
+    }
+
+    // CupertinoTimerPicker with light theme.
+    await tester.pumpWidget(_buildTimerPicker(Brightness.light));
+    RenderParagraph paragraph = tester.renderObject(find.text('hours'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+
+    // CupertinoTimerPicker with light theme.
+    await tester.pumpWidget(_buildTimerPicker(Brightness.dark));
+    paragraph = tester.renderObject(find.text('hours'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+  });
 }
 
 Widget _buildPicker({
