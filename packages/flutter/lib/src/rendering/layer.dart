@@ -1743,7 +1743,13 @@ class OpacityLayer extends OffsetLayer {
     int? alpha,
     double? opacity,
     super.offset,
-  }) : _opacity = opacity ?? (alpha != null ? _alphaToOpacity(alpha) : null);
+  }) : assert(
+      (alpha == null && opacity == null) ||
+      (alpha == null && opacity != null) ||
+      (alpha != null && opacity == null),
+      'Only one of alpha and opacity should be provided.'
+      ),
+      _opacity = opacity ?? (alpha != null ? _alphaToOpacity(alpha) : null);
 
   static double _alphaToOpacity(int value) {
     return value / 255.0;
