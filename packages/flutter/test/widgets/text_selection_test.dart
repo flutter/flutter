@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_utils.dart';
 
 void main() {
   late int tapCount;
@@ -628,7 +629,7 @@ void main() {
   });
 
   testWidgets('Mouse drag does not show handles nor toolbar', (WidgetTester tester) async {
-    // Regressing test for https://github.com/flutter/flutter/issues/69001
+    // Regression test for https://github.com/flutter/flutter/issues/69001
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -650,6 +651,54 @@ void main() {
     final EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+  });
+
+  // TODO(justinmc): Selection.
+  testWidgets('Mouse drag selects and cannot drag cursor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102928
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: EditableText(
+            controller: controller,
+            focusNode: FocusNode(),
+            backgroundCursorColor: Colors.white,
+            cursorColor: Colors.white,
+            style: const TextStyle(),
+            //selectionControls: CustomTextSelectionControls(),
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 10));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // TODO(justinmc): Actually should be a selection.
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 10);
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change', (WidgetTester tester) async {
