@@ -512,7 +512,10 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       computedMaxHeight = math.min(computedMaxHeight, menuMaxHeight!);
     }
     final double buttonTop = buttonRect.top;
-    final double buttonBottom = math.min(buttonRect.bottom, availableHeight);
+    double buttonBottom = math.min(buttonRect.bottom, availableHeight);
+    if (buttonRect.height < _kMenuItemHeight) {
+      buttonBottom = buttonRect.bottom - kMaterialListPadding.vertical;
+    }
     final double selectedItemOffset = getItemOffset(index);
 
     // If the button is placed on the bottom or top of the screen, its top or

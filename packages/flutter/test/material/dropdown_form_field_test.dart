@@ -1095,4 +1095,57 @@ void main() {
       selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
     );
   });
+
+  testWidgets(
+    'DropdownButtonFormField is aligned properly when button is positioned on edge',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/101575
+      final Widget dropdownFormField = DropdownButtonFormField<String>(
+        onChanged: onChanged,
+        value: menuItems.first,
+        decoration: const InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+          border: InputBorder.none,
+        ),
+        items: menuItems.map<DropdownMenuItem<String>>((String item) {
+          return DropdownMenuItem<String>(
+            value: item,
+            child: Text(item, key: ValueKey<String>('${item}Text')),
+          );
+        }).toList(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ListView(
+              children: <Widget>[
+                Container(
+                  height: 600,
+                  color: const Color(0xff00ff00),
+                ),
+                Center(
+                  child: SizedBox(
+                    width: 120.0,
+                    child: dropdownFormField,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.drag(find.byType(ListView), const Offset(0.0, -50.0), touchSlopY: 0, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('one'));
+      await tester.pumpAndSettle();
+
+      final RenderBox firstItem = tester.renderObjectList<RenderBox>(find.text('one')).toList()[1];
+      expect(tester.takeException(), null);
+      expect(firstItem.localToGlobal(Offset.zero).dx, equals(340.0));
+      expect(firstItem.localToGlobal(Offset.zero).dy, equals(412.0));
+  });
 }
