@@ -1,4 +1,4 @@
-Signature: aede2bd90825ebf21399aae303037ace
+Signature: 540435da6d9fc343bc7aaa79c3146382
 
 UNUSED LICENSES:
 
@@ -6089,8 +6089,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeTessellateOp.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrStrokeTessellationShader.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrStrokeTessellationShader.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrStrokeTessellationShader_HardwareImpl.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrStrokeTessellationShader_InstancedImpl.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrTessellationShader.h
 FILE: ../../../third_party/skia/src/opts/SkVM_opts.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp
