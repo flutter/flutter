@@ -93,7 +93,7 @@ class PlatformAdaptiveIcons implements Icons {
   // END GENERATED PLATFORM ADAPTIVE ICONS
 }
 
-/// Identifiers for the supported Material Icons.
+/// Identifiers for the supported [Material Icons](https://material.io/resources/icons).
 ///
 /// Use with the [Icon] class to show specific icons. Icons are identified by
 /// their name as listed below, e.g. [Icons.airplanemode_on].
