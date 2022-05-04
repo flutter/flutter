@@ -33,8 +33,8 @@ import 'text_field.dart';
 /// field changes or is submitted by the keyboard:
 ///
 /// {@tool dartpad}
-/// This examples shows how to be notified of the field changes or submitted text from
-/// [CupertinoSearchTextField] using a [ValueChanged<String>].
+/// This examples shows how to be notified of field changes or submitted text from
+/// a [CupertinoSearchTextField].
 ///
 /// ** See code in examples/api/lib/cupertino/search_field/cupertino_search_field.1.dart **
 /// {@end-tool}
