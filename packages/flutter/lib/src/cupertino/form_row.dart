@@ -35,8 +35,8 @@ const EdgeInsetsGeometry _kDefaultPadding =
 /// medium-weighted font.
 ///
 /// {@tool dartpad}
-/// Creates a [CupertinoFormSection] containing a [CupertinoFormRow] with the
-/// [prefix], [child], [helper] and [error] widgets.
+/// Creates a [CupertinoFormSection] containing a [CupertinoFormRow] with [prefix],
+/// [child], [helper] and [error] specified.
 ///
 /// ** See code in examples/api/lib/cupertino/form_row/cupertino_form_row.0.dart **
 /// {@end-tool}
