@@ -138,11 +138,11 @@ void Canvas::DrawCircle(Point center, Scalar radius, Paint paint) {
 }
 
 void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
-  GetCurrentPass().SetDelegate(
-      std::make_unique<PaintPassDelegate>(paint, bounds));
-
   Save(true);
   GetCurrentPass().SetBlendMode(paint.blend_mode);
+
+  GetCurrentPass().SetDelegate(
+      std::make_unique<PaintPassDelegate>(paint, bounds));
 
   if (bounds.has_value()) {
     // Render target switches due to a save layer can be elided. In such cases

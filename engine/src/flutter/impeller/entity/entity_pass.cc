@@ -59,7 +59,7 @@ std::optional<Rect> EntityPass::GetElementsCoverage() const {
       coverage = entity->GetCoverage();
     } else if (auto subpass =
                    std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-      coverage = subpass->get()->GetElementsCoverage();
+      coverage = GetSubpassCoverage(*subpass->get());
     } else {
       FML_UNREACHABLE();
     }
@@ -86,7 +86,7 @@ std::optional<Rect> EntityPass::GetSubpassCoverage(
 
   // The delegates don't have an opinion on what the entity coverage has to be.
   // Just use that as-is.
-  auto delegate_coverage = delegate_->GetCoverageRect();
+  auto delegate_coverage = subpass.delegate_->GetCoverageRect();
   if (!delegate_coverage.has_value()) {
     return entities_coverage;
   }
@@ -146,11 +146,11 @@ bool EntityPass::Render(ContentContext& renderer,
             std::get_if<std::unique_ptr<EntityPass>>(&element)) {
       auto subpass = subpass_ptr->get();
 
-      if (delegate_->CanElide()) {
+      if (subpass->delegate_->CanElide()) {
         continue;
       }
 
-      if (delegate_->CanCollapseIntoParentPass()) {
+      if (subpass->delegate_->CanCollapseIntoParentPass()) {
         // Directly render into the parent pass and move on.
         if (!subpass->Render(renderer, parent_pass, position)) {
           return false;
@@ -181,7 +181,7 @@ bool EntityPass::Render(ContentContext& renderer,
       }
 
       auto offscreen_texture_contents =
-          delegate_->CreateContentsForSubpassTarget(subpass_texture);
+          subpass->delegate_->CreateContentsForSubpassTarget(subpass_texture);
 
       if (!offscreen_texture_contents) {
         // This is an error because the subpass delegate said the pass couldn't
