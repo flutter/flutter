@@ -1540,6 +1540,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     double? menuMaxHeight,
     bool? enableFeedback,
     AlignmentGeometry alignment = AlignmentDirectional.centerStart,
+    BorderRadius? borderRadius,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1615,6 +1616,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                      menuMaxHeight: menuMaxHeight,
                      enableFeedback: enableFeedback,
                      alignment: alignment,
+                     borderRadius: borderRadius,
                    ),
                  ),
                );
