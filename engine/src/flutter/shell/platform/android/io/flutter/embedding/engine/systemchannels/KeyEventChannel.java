@@ -4,8 +4,6 @@
 
 package io.flutter.embedding.engine.systemchannels;
 
-import android.os.Build;
-import android.view.InputDevice;
 import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -72,17 +70,6 @@ public class KeyEventChannel {
       message.put("character", keyEvent.complexCharacter.toString());
     }
     message.put("source", keyEvent.event.getSource());
-    InputDevice device = InputDevice.getDevice(keyEvent.event.getDeviceId());
-    int vendorId = 0;
-    int productId = 0;
-    if (device != null) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        vendorId = device.getVendorId();
-        productId = device.getProductId();
-      }
-    }
-    message.put("vendorId", vendorId);
-    message.put("productId", productId);
     message.put("deviceId", keyEvent.event.getDeviceId());
     message.put("repeatCount", keyEvent.event.getRepeatCount());
     return message;

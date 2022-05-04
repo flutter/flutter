@@ -23,14 +23,18 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputMethodManager;
+import androidx.annotation.NonNull;
 import io.flutter.Log;
-import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 
-class InputConnectionAdaptor extends BaseInputConnection
+public class InputConnectionAdaptor extends BaseInputConnection
     implements ListenableEditingState.EditingStateWatcher {
   private static final String TAG = "InputConnectionAdaptor";
+
+  public interface KeyboardDelegate {
+    public boolean handleEvent(@NonNull KeyEvent keyEvent);
+  }
 
   private final View mFlutterView;
   private final int mClient;
@@ -44,7 +48,7 @@ class InputConnectionAdaptor extends BaseInputConnection
   private InputMethodManager mImm;
   private final Layout mLayout;
   private FlutterTextUtils flutterTextUtils;
-  private final KeyboardManager keyboardManager;
+  private final KeyboardDelegate keyboardDelegate;
   private int batchEditNestDepth = 0;
 
   @SuppressWarnings("deprecation")
@@ -52,7 +56,7 @@ class InputConnectionAdaptor extends BaseInputConnection
       View view,
       int client,
       TextInputChannel textInputChannel,
-      KeyboardManager keyboardManager,
+      KeyboardDelegate keyboardDelegate,
       ListenableEditingState editable,
       EditorInfo editorInfo,
       FlutterJNI flutterJNI) {
@@ -63,7 +67,7 @@ class InputConnectionAdaptor extends BaseInputConnection
     mEditable = editable;
     mEditable.addEditingStateListener(this);
     mEditorInfo = editorInfo;
-    this.keyboardManager = keyboardManager;
+    this.keyboardDelegate = keyboardDelegate;
     this.flutterTextUtils = new FlutterTextUtils(flutterJNI);
     // We create a dummy Layout with max width so that the selection
     // shifting acts as if all text were in one line.
@@ -83,10 +87,10 @@ class InputConnectionAdaptor extends BaseInputConnection
       View view,
       int client,
       TextInputChannel textInputChannel,
-      KeyboardManager keyboardManager,
+      KeyboardDelegate keyboardDelegate,
       ListenableEditingState editable,
       EditorInfo editorInfo) {
-    this(view, client, textInputChannel, keyboardManager, editable, editorInfo, new FlutterJNI());
+    this(view, client, textInputChannel, keyboardDelegate, editable, editorInfo, new FlutterJNI());
   }
 
   private ExtractedText getExtractedText(ExtractedTextRequest request) {
@@ -272,7 +276,7 @@ class InputConnectionAdaptor extends BaseInputConnection
   // occur, and need a chance to be handled by the framework.
   @Override
   public boolean sendKeyEvent(KeyEvent event) {
-    return keyboardManager.handleEvent(event);
+    return keyboardDelegate.handleEvent(event);
   }
 
   public boolean handleKeyEvent(KeyEvent event) {
