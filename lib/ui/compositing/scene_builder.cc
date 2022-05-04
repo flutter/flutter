@@ -33,7 +33,43 @@
 
 namespace flutter {
 
+static void SceneBuilder_constructor(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  DartCallConstructor(&SceneBuilder::create, args);
+}
+
 IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
+
+#define FOR_EACH_BINDING(V)                         \
+  V(SceneBuilder, pushOffset)                       \
+  V(SceneBuilder, pushTransform)                    \
+  V(SceneBuilder, pushClipRect)                     \
+  V(SceneBuilder, pushClipRRect)                    \
+  V(SceneBuilder, pushClipPath)                     \
+  V(SceneBuilder, pushOpacity)                      \
+  V(SceneBuilder, pushColorFilter)                  \
+  V(SceneBuilder, pushImageFilter)                  \
+  V(SceneBuilder, pushBackdropFilter)               \
+  V(SceneBuilder, pushShaderMask)                   \
+  V(SceneBuilder, pushPhysicalShape)                \
+  V(SceneBuilder, pop)                              \
+  V(SceneBuilder, addPlatformView)                  \
+  V(SceneBuilder, addRetained)                      \
+  V(SceneBuilder, addPicture)                       \
+  V(SceneBuilder, addTexture)                       \
+  V(SceneBuilder, addPerformanceOverlay)            \
+  V(SceneBuilder, setRasterizerTracingThreshold)    \
+  V(SceneBuilder, setCheckerboardOffscreenLayers)   \
+  V(SceneBuilder, setCheckerboardRasterCacheImages) \
+  V(SceneBuilder, build)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
+void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
+  natives->Register(
+      {{"SceneBuilder_constructor", SceneBuilder_constructor, 1, true},
+       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
+}
 
 SceneBuilder::SceneBuilder() {
   // Add a ContainerLayer as the root layer, so that AddLayer operations are

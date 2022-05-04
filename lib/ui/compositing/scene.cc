@@ -21,6 +21,12 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 
+#define FOR_EACH_BINDING(V) \
+  V(Scene, toImage)         \
+  V(Scene, dispose)
+
+DART_BIND_ALL(Scene, FOR_EACH_BINDING)
+
 void Scene::create(Dart_Handle scene_handle,
                    std::shared_ptr<flutter::Layer> rootLayer,
                    uint32_t rasterizerTracingThreshold,

@@ -12,6 +12,10 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/skia/include/core/SkImage.h"
 
+namespace tonic {
+class DartLibraryNatives;
+}  // namespace tonic
+
 namespace flutter {
 
 class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
@@ -38,6 +42,8 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   void set_image(sk_sp<DlImage> image) { image_ = image; }
 
   size_t GetAllocationSize() const override;
+
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   CanvasImage();

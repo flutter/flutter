@@ -44,9 +44,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
   ///         an `ImageGenerator` and read EXIF corrected dimensions from the
   ///         image data.
   /// @see    `ImageGeneratorRegistry`
-  static Dart_Handle initEncoded(Dart_Handle descriptor_handle,
-                                 ImmutableBuffer* immutable_buffer,
-                                 Dart_Handle callback_handle);
+  static void initEncoded(Dart_NativeArguments args);
 
   /// @brief  Synchronously initializes an `ImageDescriptor` for decompressed
   ///         image data as specified by the `PixelFormat`.
@@ -117,6 +115,8 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
   size_t GetAllocationSize() const override {
     return sizeof(ImageDescriptor) + sizeof(SkImageInfo) + buffer_->size();
   }
+
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   ImageDescriptor(sk_sp<SkData> buffer,
