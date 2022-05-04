@@ -9,7 +9,6 @@ import 'dart:html' as html;
 import '../../engine.dart' show kProfileMode;
 import '../browser_detection.dart';
 import '../configuration.dart';
-import '../dom.dart';
 import '../safe_browser_api.dart';
 import 'canvaskit_api.dart';
 import 'fonts.dart';
@@ -92,17 +91,15 @@ Future<void> _downloadCanvasKitJs({String? canvasKitBase}) {
       ? canvasKitBase + 'canvaskit.js'
       : canvasKitJavaScriptBindingsUrl;
 
-  final DomHTMLScriptElement canvasKitScript = createDomHTMLScriptElement();
+  final html.ScriptElement canvasKitScript = html.ScriptElement();
   canvasKitScript.src = canvasKitJavaScriptUrl;
 
   final Completer<void> canvasKitLoadCompleter = Completer<void>();
-  late DomEventListener callback;
-  void loadEventHandler(DomEvent _) {
+  late StreamSubscription<html.Event> loadSubscription;
+  loadSubscription = canvasKitScript.onLoad.listen((_) {
+    loadSubscription.cancel();
     canvasKitLoadCompleter.complete();
-    canvasKitScript.removeEventListener('load', callback);
-  }
-  callback = allowInterop(loadEventHandler);
-  canvasKitScript.addEventListener('load', callback);
+  });
 
   patchCanvasKitModule(canvasKitScript);
 
