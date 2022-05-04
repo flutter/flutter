@@ -53,7 +53,9 @@ const double _kTimerPickerColumnIntrinsicWidth = 106;
 
 TextStyle _themeTextStyle(BuildContext context, { bool isValid = true }) {
   final TextStyle style = CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
-  return isValid ? style : style.copyWith(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context));
+  return isValid
+    ? style.copyWith(color: CupertinoDynamicColor.maybeResolve(style.color, context))
+    : style.copyWith(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context));
 }
 
 void _animateColumnControllerToItem(FixedExtentScrollController controller, int targetItem) {
@@ -1972,6 +1974,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   TextStyle _textStyleFrom(BuildContext context, [double magnification = 1.0]) {
     final TextStyle textStyle = CupertinoTheme.of(context).textTheme.pickerTextStyle;
     return textStyle.copyWith(
+      color: CupertinoDynamicColor.maybeResolve(textStyle.color, context),
       fontSize: textStyle.fontSize! * magnification,
     );
   }
