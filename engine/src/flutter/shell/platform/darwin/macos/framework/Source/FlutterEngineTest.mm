@@ -357,7 +357,7 @@ TEST_F(FlutterEngineTest, ResetsAccessibilityBridgeWhenSetsNewViewController) {
 
 TEST_F(FlutterEngineTest, NativeCallbacks) {
   FlutterEngine* engine = GetFlutterEngine();
-  EXPECT_TRUE([engine runWithEntrypoint:@"native_callback"]);
+  EXPECT_TRUE([engine runWithEntrypoint:@"nativeCallback"]);
   EXPECT_TRUE(engine.running);
 
   fml::AutoResetWaitableEvent latch;
@@ -384,7 +384,7 @@ TEST(FlutterEngine, DISABLED_Compositor) {
   viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
   [engine setViewController:viewController];
 
-  EXPECT_TRUE([engine runWithEntrypoint:@"can_composite_platform_views"]);
+  EXPECT_TRUE([engine runWithEntrypoint:@"canCompositePlatformViews"]);
 
   // Latch to ensure the entire layer tree has been generated and presented.
   fml::AutoResetWaitableEvent latch;
