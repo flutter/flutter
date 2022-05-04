@@ -30,8 +30,7 @@ void main() {
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
     flutter = FlutterRunTestDriver(tempDir);
-    // logger = BufferLogger.test();
-    logger = globals.logger;
+    logger = BufferLogger.test();
     utils = MigrateUtils(
       logger: logger,
       fileSystem: fileSystem,
@@ -126,10 +125,8 @@ void main() {
 
     expect(tempDir.childFile('.metadata').readAsStringSync(), contains('migration:\n  platforms:\n    - platform: root\n'));
 
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png').existsSync(), true);
-    expect(tempDir.childFile('web/icons/Icon-192.png').existsSync(), true);
-    expect(tempDir.childFile('linux/main.cc').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/CMakeLists.txt').existsSync(), true);
+    expect(tempDir.childFile('android/app/src/main/res/values-night/styles.xml').existsSync(), true);
+    expect(tempDir.childFile('analysis_options.yaml').existsSync(), true);
   });
 
   // Migrates a clean untouched app generated with flutter create
@@ -315,9 +312,9 @@ class MyApp extends StatelessWidget {
       'apply',
       '--verbose',
     ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 1);
-    expect(result.stderr.toString(), contains('''Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:'''));
-    expect(result.stderr.toString(), contains(']   - pubspec.yaml'));
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('Conflicting files found. Resolve these conflicts and try again.'));
+    expect(result.stdout.toString(), contains(']   - pubspec.yaml'));
 
     result = await processManager.run(<String>[
       flutterBin,
@@ -468,45 +465,6 @@ flutter:
     expect(tempDir.childFile('lib/other.dart').existsSync(), true);
     expect(tempDir.childFile('lib/other.dart').readAsStringSync(), contains('class OtherWidget'));
 
-    expect(tempDir.childFile('macos/Runner.xcworkspace/contents.xcworkspacedata').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/DebugProfile.entitlements').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Base.lproj/MainMenu.xib').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/MainFlutterWindow.swift').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Configs/AppInfo.xcconfig').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Configs/Debug.xcconfig').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Configs/Release.xcconfig').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Configs/Warnings.xcconfig').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/AppDelegate.swift').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Info.plist').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner/Release.entitlements').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner.xcodeproj/project.pbxproj').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist').existsSync(), true);
-    expect(tempDir.childFile('macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme').existsSync(), true);
-    expect(tempDir.childFile('macos/Flutter/Flutter-Debug.xcconfig').existsSync(), true);
-    expect(tempDir.childFile('macos/Flutter/Flutter-Release.xcconfig').existsSync(), true);
-    expect(tempDir.childFile('macos/.gitignore').existsSync(), true);
-    expect(tempDir.childFile('web/index.html').existsSync(), true);
-    expect(tempDir.childFile('web/favicon.png').existsSync(), true);
-    expect(tempDir.childFile('web/icons/Icon-192.png').existsSync(), true);
-    expect(tempDir.childFile('web/icons/Icon-maskable-192.png').existsSync(), true);
-    expect(tempDir.childFile('web/icons/Icon-maskable-512.png').existsSync(), true);
-    expect(tempDir.childFile('web/icons/Icon-512.png').existsSync(), true);
-    expect(tempDir.childFile('web/manifest.json').existsSync(), true);
-    expect(tempDir.childFile('linux/main.cc').existsSync(), true);
-    expect(tempDir.childFile('linux/CMakeLists.txt').existsSync(), true);
-    expect(tempDir.childFile('linux/my_application.h').existsSync(), true);
-    expect(tempDir.childFile('linux/my_application.cc').existsSync(), true);
-    expect(tempDir.childFile('linux/flutter/CMakeLists.txt').existsSync(), true);
-    expect(tempDir.childFile('linux/.gitignore').existsSync(), true);
     expect(tempDir.childFile('android/app/src/main/res/values-night/styles.xml').existsSync(), true);
     expect(tempDir.childFile('analysis_options.yaml').existsSync(), true);
   });
