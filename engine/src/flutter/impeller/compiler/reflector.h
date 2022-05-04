@@ -19,14 +19,27 @@ namespace compiler {
 
 struct StructMember {
   std::string type;
+  std::string base_type;
   std::string name;
   size_t offset = 0u;
   size_t byte_length = 0u;
+
+  StructMember(std::string p_type,
+               std::string p_base_type,
+               std::string p_name,
+               size_t p_offset,
+               size_t p_byte_length)
+      : type(std::move(p_type)),
+        base_type(std::move(p_base_type)),
+        name(std::move(p_name)),
+        offset(p_offset),
+        byte_length(p_byte_length) {}
 };
 
 class Reflector {
  public:
   struct Options {
+    std::string entry_point_name;
     std::string shader_name;
     std::string header_file_name;
   };

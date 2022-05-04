@@ -40,13 +40,13 @@ class SurfaceMTL final : public Surface {
   // |Surface|
   ~SurfaceMTL() override;
 
-  // |Surface|
-  bool Present() const override;
-
  private:
   id<MTLDrawable> drawable_ = nil;
 
   SurfaceMTL(RenderTarget target, id<MTLDrawable> drawable);
+
+  // |Surface|
+  bool Present() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SurfaceMTL);
 };

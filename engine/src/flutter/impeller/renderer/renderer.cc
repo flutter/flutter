@@ -63,7 +63,7 @@ bool Renderer::Render(std::unique_ptr<Surface> surface,
     return false;
   }
 
-  if (!render_pass->EncodeCommands(*GetContext()->GetTransientsAllocator())) {
+  if (!render_pass->EncodeCommands(GetContext()->GetTransientsAllocator())) {
     return false;
   }
 

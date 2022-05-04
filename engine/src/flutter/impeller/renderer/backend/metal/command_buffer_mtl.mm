@@ -145,17 +145,12 @@ id<MTLCommandBuffer> CreateCommandBuffer(id<MTLCommandQueue> queue) {
 }
 
 CommandBufferMTL::CommandBufferMTL(id<MTLCommandQueue> queue)
-    : buffer_(CreateCommandBuffer(queue)) {
-  if (!buffer_) {
-    return;
-  }
-  is_valid_ = true;
-}
+    : buffer_(CreateCommandBuffer(queue)) {}
 
 CommandBufferMTL::~CommandBufferMTL() = default;
 
 bool CommandBufferMTL::IsValid() const {
-  return is_valid_;
+  return buffer_ != nil;
 }
 
 void CommandBufferMTL::SetLabel(const std::string& label) const {
@@ -179,8 +174,8 @@ static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
 }
 
 bool CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
-  if (!buffer_) {
-    // Already committed. This is caller error.
+  if (!IsValid()) {
+    // Already committed or was never valid. Either way, this is caller error.
     if (callback) {
       callback(Status::kError);
     }
@@ -198,10 +193,6 @@ bool CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
   [buffer_ waitUntilScheduled];
   buffer_ = nil;
   return true;
-}
-
-void CommandBufferMTL::ReserveSpotInQueue() {
-  [buffer_ enqueue];
 }
 
 std::shared_ptr<RenderPass> CommandBufferMTL::CreateRenderPass(

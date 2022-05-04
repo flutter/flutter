@@ -49,7 +49,7 @@ TEST_P(AiksTest, CanvasCanPushPopCTM) {
 TEST_P(AiksTest, CanRenderColoredRect) {
   Canvas canvas;
   Paint paint;
-  paint.color = Color::Red();
+  paint.color = Color::Blue();
   canvas.DrawPath(PathBuilder{}
                       .AddRect(Rect::MakeXYWH(100.0, 100.0, 100.0, 100.0))
                       .TakePath(),

@@ -50,6 +50,8 @@ impeller_component("renderer") {
     "sampler_library.h",
     "shader_function.cc",
     "shader_function.h",
+    "shader_key.cc",
+    "shader_key.h",
     "shader_library.cc",
     "shader_library.h",
     "shader_types.cc",
@@ -68,80 +70,6 @@ impeller_component("renderer") {
     "vertex_descriptor.h",
   ]
 
-  if (impeller_enable_metal) {
-    sources += [
-      "backend/metal/allocator_mtl.h",
-      "backend/metal/allocator_mtl.mm",
-      "backend/metal/command_buffer_mtl.h",
-      "backend/metal/command_buffer_mtl.mm",
-      "backend/metal/context_mtl.h",
-      "backend/metal/context_mtl.mm",
-      "backend/metal/device_buffer_mtl.h",
-      "backend/metal/device_buffer_mtl.mm",
-      "backend/metal/formats_mtl.h",
-      "backend/metal/formats_mtl.mm",
-      "backend/metal/pipeline_library_mtl.h",
-      "backend/metal/pipeline_library_mtl.mm",
-      "backend/metal/pipeline_mtl.h",
-      "backend/metal/pipeline_mtl.mm",
-      "backend/metal/render_pass_mtl.h",
-      "backend/metal/render_pass_mtl.mm",
-      "backend/metal/sampler_library_mtl.h",
-      "backend/metal/sampler_library_mtl.mm",
-      "backend/metal/sampler_mtl.h",
-      "backend/metal/sampler_mtl.mm",
-      "backend/metal/shader_function_mtl.h",
-      "backend/metal/shader_function_mtl.mm",
-      "backend/metal/shader_library_mtl.h",
-      "backend/metal/shader_library_mtl.mm",
-      "backend/metal/surface_mtl.h",
-      "backend/metal/surface_mtl.mm",
-      "backend/metal/texture_mtl.h",
-      "backend/metal/texture_mtl.mm",
-      "backend/metal/vertex_descriptor_mtl.h",
-      "backend/metal/vertex_descriptor_mtl.mm",
-    ]
-  }
-
-  if (impeller_enable_opengles) {
-    sources += [
-      "backend/gles/allocator_gles.cc",
-      "backend/gles/allocator_gles.h",
-      "backend/gles/command_buffer_gles.cc",
-      "backend/gles/command_buffer_gles.h",
-      "backend/gles/context_gles.cc",
-      "backend/gles/context_gles.h",
-      "backend/gles/device_buffer_gles.cc",
-      "backend/gles/device_buffer_gles.h",
-      "backend/gles/formats_gles.cc",
-      "backend/gles/formats_gles.h",
-      "backend/gles/pipeline_gles.cc",
-      "backend/gles/pipeline_gles.h",
-      "backend/gles/pipeline_library_gles.cc",
-      "backend/gles/pipeline_library_gles.h",
-      "backend/gles/proc_table_gles.cc",
-      "backend/gles/proc_table_gles.h",
-      "backend/gles/reactor_gles.cc",
-      "backend/gles/reactor_gles.h",
-      "backend/gles/render_pass_gles.cc",
-      "backend/gles/render_pass_gles.h",
-      "backend/gles/sampler_gles.cc",
-      "backend/gles/sampler_gles.h",
-      "backend/gles/sampler_library_gles.cc",
-      "backend/gles/sampler_library_gles.h",
-      "backend/gles/shader_function_gles.cc",
-      "backend/gles/shader_function_gles.h",
-      "backend/gles/shader_library_gles.cc",
-      "backend/gles/shader_library_gles.h",
-      "backend/gles/surface_gles.cc",
-      "backend/gles/surface_gles.h",
-      "backend/gles/texture_gles.cc",
-      "backend/gles/texture_gles.h",
-      "backend/gles/vertex_descriptor_gles.cc",
-      "backend/gles/vertex_descriptor_gles.h",
-    ]
-  }
-
   public_deps = [
     "../base",
     "../geometry",
@@ -150,14 +78,9 @@ impeller_component("renderer") {
   ]
 
   deps = [ "//flutter/fml" ]
-  frameworks = []
-
-  if (impeller_enable_metal) {
-    frameworks = [ "Metal.framework" ]
-  }
 }
 
-source_set("renderer_unittests") {
+impeller_component("renderer_unittests") {
   testonly = true
 
   sources = [

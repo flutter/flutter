@@ -4,6 +4,7 @@
 
 import("//build/compiled_action.gni")
 import("//flutter/common/config.gni")
+import("//flutter/testing/testing.gni")
 
 declare_args() {
   # Whether playgrounds are enabled for unit tests.
@@ -16,7 +17,7 @@ declare_args() {
   impeller_enable_metal = is_mac || is_ios
 
   # Whether the OpenGLES backend is enabled.
-  impeller_enable_opengles = is_mac
+  impeller_enable_opengles = is_mac || is_linux
 }
 
 declare_args() {
@@ -39,7 +40,11 @@ declare_args() {
 #                               target platform, this target is a no-op.
 #
 template("impeller_component") {
-  if (impeller_supports_platform) {
+  if (defined(invoker.testonly) && invoker.testonly && !enable_unittests) {
+    group(target_name) {
+      not_needed(invoker, "*")
+    }
+  } else if (impeller_supports_platform) {
     target_type = "source_set"
     if (defined(invoker.target_type)) {
       target_type = invoker.target_type
@@ -191,14 +196,15 @@ template("embed_blob") {
 }
 
 template("impellerc") {
-  # Optional: invoker.defines specifies a list of valueless macro definitions.
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.sl_file_extension),
          "The extension of the SL file must be specified (metal, glsl, etc..).")
-  assert(defined(invoker.intermediates_subdir),
-         "The subdirectory in which to put intermediates must be specified.")
   assert(defined(invoker.shader_target_flag),
          "The flag to impellerc for target selection must be specified.")
+
+  # Optional: invoker.defines specifies a list of valueless macro definitions.
+  # Optional: invoker.intermediates_subdir specifies the subdirectory in which
+  #           to put intermediates.
 
   sl_file_extension = invoker.sl_file_extension
 
@@ -206,18 +212,20 @@ template("impellerc") {
     tool = "//flutter/impeller/compiler:impellerc"
 
     sources = invoker.shaders
-    subdir = invoker.intermediates_subdir
+    if (defined(invoker.intermediates_subdir)) {
+      subdir = invoker.intermediates_subdir
+      generated_dir = "$target_gen_dir/$subdir"
+    } else {
+      generated_dir = "$target_gen_dir"
+    }
+
     shader_target_flag = invoker.shader_target_flag
 
-    sl_intermediate =
-        "$target_gen_dir/$subdir/{{source_file_part}}.$sl_file_extension"
-    spirv_intermediate = "$target_gen_dir/$subdir/{{source_file_part}}.spirv"
-    reflection_json_intermediate =
-        "$target_gen_dir/$subdir/{{source_file_part}}.json"
-    reflection_header_intermediate =
-        "$target_gen_dir/$subdir/{{source_file_part}}.h"
-    reflection_cc_intermediate =
-        "$target_gen_dir/$subdir/{{source_file_part}}.cc"
+    sl_intermediate = "$generated_dir/{{source_file_part}}.$sl_file_extension"
+    spirv_intermediate = "$generated_dir/{{source_file_part}}.spirv"
+    reflection_json_intermediate = "$generated_dir/{{source_file_part}}.json"
+    reflection_header_intermediate = "$generated_dir/{{source_file_part}}.h"
+    reflection_cc_intermediate = "$generated_dir/{{source_file_part}}.cc"
 
     outputs = [
       sl_intermediate,
@@ -225,7 +233,7 @@ template("impellerc") {
       reflection_cc_intermediate,
     ]
 
-    depfile_path = "$target_gen_dir/$subdir/{{source_file_part}}.d"
+    depfile_path = "$generated_dir/{{source_file_part}}.d"
 
     sl_intermediate_path = rebase_path(sl_intermediate, root_build_dir)
     spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
@@ -302,7 +310,6 @@ template("impeller_shaders_metal") {
   impellerc(impellerc_mtl) {
     shaders = invoker.shaders
     sl_file_extension = "metal"
-    intermediates_subdir = "mtl"
     shader_target_flag = ""
     defines = [ "IMPELLER_TARGET_METAL" ]
     if (is_ios) {
@@ -360,7 +367,7 @@ template("blobcat_library") {
     output_path_rebased = rebase_path(output_file, root_build_dir)
     args = [ "--output=$output_path_rebased" ]
     foreach(shader, invoker.shaders) {
-      shader_path = rebase_path(shader, root_out_dir)
+      shader_path = rebase_path(shader, root_build_dir)
       args += [ "--input=$shader_path" ]
     }
     deps = invoker.deps
@@ -380,8 +387,17 @@ template("impeller_shaders_gles") {
   impellerc(impellerc_gles) {
     shaders = invoker.shaders
     sl_file_extension = "gles"
-    intermediates_subdir = "gles"
-    shader_target_flag = "--opengl-es"
+
+    # Metal reflectors generate a superset of information.
+    if (impeller_enable_metal) {
+      intermediates_subdir = "gles"
+    }
+    if (is_mac) {
+      shader_target_flag = "--opengl-desktop"
+    } else {
+      shader_target_flag = "--opengl-es"
+    }
+
     defines = [ "IMPELLER_TARGET_OPENGLES" ]
   }
 
@@ -408,24 +424,29 @@ template("impeller_shaders_gles") {
   }
 
   group(target_name) {
-    public_deps = [
-      ":$embed_gles_lib",
-      ":$reflect_gles",
-    ]
+    public_deps = [ ":$embed_gles_lib" ]
+
+    if (!impeller_enable_metal) {
+      public_deps += [ ":$reflect_gles" ]
+    }
   }
 }
 
 template("impeller_shaders") {
-  mtl_shaders = "mtl_$target_name"
-  impeller_shaders_metal(mtl_shaders) {
-    name = invoker.name
-    shaders = invoker.shaders
+  if (impeller_enable_metal) {
+    mtl_shaders = "mtl_$target_name"
+    impeller_shaders_metal(mtl_shaders) {
+      name = invoker.name
+      shaders = invoker.shaders
+    }
   }
 
-  gles_shaders = "gles_$target_name"
-  impeller_shaders_gles(gles_shaders) {
-    name = invoker.name
-    shaders = invoker.shaders
+  if (impeller_enable_opengles) {
+    gles_shaders = "gles_$target_name"
+    impeller_shaders_gles(gles_shaders) {
+      name = invoker.name
+      shaders = invoker.shaders
+    }
   }
 
   group(target_name) {

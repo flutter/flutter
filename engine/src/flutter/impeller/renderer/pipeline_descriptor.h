@@ -5,11 +5,13 @@
 #pragma once
 
 #include <functional>
+#include <future>
 #include <map>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <unordered_map>
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
@@ -21,6 +23,7 @@ namespace impeller {
 
 class ShaderFunction;
 class VertexDescriptor;
+class Pipeline;
 
 class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
  public:
@@ -42,6 +45,9 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   const std::map<ShaderStage, std::shared_ptr<const ShaderFunction>>&
   GetStageEntrypoints() const;
 
+  std::shared_ptr<const ShaderFunction> GetEntrypointForStage(
+      ShaderStage stage) const;
+
   PipelineDescriptor& SetVertexDescriptor(
       std::shared_ptr<VertexDescriptor> vertex_descriptor);
 
@@ -59,6 +65,8 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   const std::map<size_t /* index */, ColorAttachmentDescriptor>&
   GetColorAttachmentDescriptors() const;
+
+  const ColorAttachmentDescriptor* GetLegacyCompatibleColorAttachment() const;
 
   PipelineDescriptor& SetDepthStencilAttachmentDescriptor(
       DepthAttachmentDescriptor desc);
@@ -78,6 +86,8 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   std::optional<StencilAttachmentDescriptor>
   GetBackStencilAttachmentDescriptor() const;
+
+  bool HasStencilAttachmentDescriptors() const;
 
   PipelineDescriptor& SetDepthPixelFormat(PixelFormat format);
 
@@ -110,5 +120,11 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   std::optional<StencilAttachmentDescriptor>
       back_stencil_attachment_descriptor_;
 };
+
+using PipelineMap =
+    std::unordered_map<PipelineDescriptor,
+                       std::shared_future<std::shared_ptr<Pipeline>>,
+                       ComparableHash<PipelineDescriptor>,
+                       ComparableEqual<PipelineDescriptor>>;
 
 }  // namespace impeller

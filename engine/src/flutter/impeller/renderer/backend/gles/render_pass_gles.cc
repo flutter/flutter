@@ -4,8 +4,416 @@
 
 #include "impeller/renderer/backend/gles/render_pass_gles.h"
 
+#include <algorithm>
+
+#include "flutter/fml/trace_event.h"
+#include "impeller/base/config.h"
+#include "impeller/base/validation.h"
+#include "impeller/renderer/backend/gles/device_buffer_gles.h"
+#include "impeller/renderer/backend/gles/formats_gles.h"
+#include "impeller/renderer/backend/gles/pipeline_gles.h"
+
 namespace impeller {
 
-//
+RenderPassGLES::RenderPassGLES(RenderTarget target, ReactorGLES::Ref reactor)
+    : RenderPass(std::move(target)),
+      reactor_(std::move(reactor)),
+      is_valid_(reactor_ && reactor_->IsValid()) {}
+
+// |RenderPass|
+RenderPassGLES::~RenderPassGLES() = default;
+
+// |RenderPass|
+bool RenderPassGLES::IsValid() const {
+  return is_valid_;
+}
+
+// |RenderPass|
+void RenderPassGLES::SetLabel(std::string label) {
+  // Cannot support.
+}
+
+void ConfigureBlending(const ProcTableGLES& gl,
+                       const ColorAttachmentDescriptor* color) {
+  if (!color->blending_enabled) {
+    gl.Disable(GL_BLEND);
+    return;
+  }
+
+  gl.Enable(GL_BLEND);
+  gl.BlendFuncSeparate(
+      ToBlendFactor(color->src_color_blend_factor),  // src color
+      ToBlendFactor(color->dst_color_blend_factor),  // dst color
+      ToBlendFactor(color->src_alpha_blend_factor),  // src alpha
+      ToBlendFactor(color->dst_alpha_blend_factor)   // dst alpha
+  );
+  gl.BlendEquationSeparate(
+      ToBlendOperation(color->color_blend_op),  // mode color
+      ToBlendOperation(color->alpha_blend_op)   // mode alpha
+  );
+  {
+    const auto is_set = [](std::underlying_type_t<ColorWriteMask> mask,
+                           ColorWriteMask check) -> GLboolean {
+      using RawType = decltype(mask);
+      return (static_cast<RawType>(mask) & static_cast<RawType>(mask))
+                 ? GL_TRUE
+                 : GL_FALSE;
+    };
+
+    gl.ColorMask(is_set(color->write_mask, ColorWriteMask::kRed),    // red
+                 is_set(color->write_mask, ColorWriteMask::kGreen),  // green
+                 is_set(color->write_mask, ColorWriteMask::kBlue),   // blue
+                 is_set(color->write_mask, ColorWriteMask::kAlpha)   // alpha
+    );
+  }
+}
+
+void ConfigureStencil(GLenum face,
+                      const ProcTableGLES& gl,
+                      const StencilAttachmentDescriptor& stencil,
+                      uint32_t stencil_reference) {
+  gl.StencilOpSeparate(
+      face,                                    // face
+      ToStencilOp(stencil.stencil_failure),    // stencil fail
+      ToStencilOp(stencil.depth_failure),      // depth fail
+      ToStencilOp(stencil.depth_stencil_pass)  // depth stencil pass
+  );
+  gl.StencilFuncSeparate(face,                                        // face
+                         ToCompareFunction(stencil.stencil_compare),  // func
+                         stencil_reference,                           // ref
+                         stencil.read_mask                            // mask
+  );
+  gl.StencilMaskSeparate(face, stencil.write_mask);
+}
+
+void ConfigureStencil(const ProcTableGLES& gl,
+                      const PipelineDescriptor& pipeline,
+                      uint32_t stencil_reference) {
+  if (!pipeline.HasStencilAttachmentDescriptors()) {
+    gl.Disable(GL_STENCIL_TEST);
+    return;
+  }
+
+  gl.Enable(GL_STENCIL_TEST);
+  const auto& front = pipeline.GetFrontStencilAttachmentDescriptor();
+  const auto& back = pipeline.GetBackStencilAttachmentDescriptor();
+  if (front == back) {
+    ConfigureStencil(GL_FRONT_AND_BACK, gl, *front, stencil_reference);
+  } else if (front.has_value()) {
+    ConfigureStencil(GL_FRONT, gl, *front, stencil_reference);
+  } else if (back.has_value()) {
+    ConfigureStencil(GL_BACK, gl, *back, stencil_reference);
+  } else {
+    FML_UNREACHABLE();
+  }
+}
+
+//------------------------------------------------------------------------------
+/// @brief      Encapsulates data that will be needed in the reactor for the
+///             encoding of commands for this render pass.
+///
+struct RenderPassData {
+  Viewport viewport;
+
+  Color clear_color;
+  uint32_t clear_stencil = 0u;
+  Scalar clear_depth = 1.0;
+
+  bool has_depth_attachment = false;
+  bool has_stencil_attachment = false;
+
+  bool clear_color_attachment = true;
+  bool clear_depth_attachment = true;
+  bool clear_stencil_attachment = true;
+
+  bool discard_color_attachment = true;
+  bool discard_depth_attachment = true;
+  bool discard_stencil_attachment = true;
+};
+
+[[nodiscard]] bool EncodeCommandsInReactor(
+    const RenderPassData& pass_data,
+    const std::shared_ptr<Allocator>& transients_allocator,
+    const ReactorGLES& reactor,
+    const std::vector<Command>& commands) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+
+  const auto& gl = reactor.GetProcTable();
+
+  gl.ClearColor(pass_data.clear_color.red,    // red
+                pass_data.clear_color.green,  // green
+                pass_data.clear_color.blue,   // blue
+                pass_data.clear_color.alpha   // alpha
+  );
+  if (pass_data.has_depth_attachment) {
+    gl.ClearDepthf(pass_data.clear_depth);
+  }
+  if (pass_data.has_stencil_attachment) {
+    gl.ClearStencil(pass_data.clear_stencil);
+  }
+
+  GLenum clear_bits = 0u;
+  if (pass_data.clear_color_attachment) {
+    clear_bits |= GL_COLOR_BUFFER_BIT;
+  }
+  if (pass_data.clear_depth_attachment) {
+    clear_bits |= GL_DEPTH_BUFFER_BIT;
+  }
+  if (pass_data.clear_stencil_attachment) {
+    clear_bits |= GL_STENCIL_BUFFER_BIT;
+  }
+  gl.Clear(clear_bits);
+
+  for (const auto& command : commands) {
+    if (command.instance_count != 1u) {
+      VALIDATION_LOG << "GLES backend does not support instanced rendering.";
+      return false;
+    }
+
+    if (!command.pipeline) {
+      VALIDATION_LOG << "Command has no pipeline specified.";
+      return false;
+    }
+
+    const auto& pipeline = PipelineGLES::Cast(*command.pipeline);
+
+    const auto* color_attachment =
+        pipeline.GetDescriptor().GetLegacyCompatibleColorAttachment();
+    if (!color_attachment) {
+      VALIDATION_LOG
+          << "Color attachment is too complicated for a legacy renderer.";
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    /// Configure blending.
+    ///
+    ConfigureBlending(gl, color_attachment);
+
+    //--------------------------------------------------------------------------
+    /// Setup stencil.
+    ///
+    ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference);
+
+    //--------------------------------------------------------------------------
+    /// Configure depth.
+    ///
+    if (auto depth =
+            pipeline.GetDescriptor().GetDepthStencilAttachmentDescriptor();
+        depth.has_value()) {
+      gl.Enable(GL_DEPTH_TEST);
+      gl.DepthFunc(ToCompareFunction(depth->depth_compare));
+      gl.DepthMask(depth->depth_write_enabled ? GL_TRUE : GL_FALSE);
+    } else {
+      gl.Disable(GL_DEPTH_TEST);
+    }
+
+    //--------------------------------------------------------------------------
+    /// Setup the viewport.
+    ///
+    const auto& viewport = command.viewport.value_or(pass_data.viewport);
+    gl.Viewport(viewport.rect.origin.x,    // x
+                viewport.rect.origin.y,    // y
+                viewport.rect.size.width,  // width
+                viewport.rect.size.height  // height
+    );
+    if (pass_data.has_depth_attachment) {
+      gl.DepthRangef(viewport.depth_range.z_near, viewport.depth_range.z_far);
+    }
+
+    //--------------------------------------------------------------------------
+    /// Setup the scissor rect.
+    ///
+    if (command.scissor.has_value()) {
+      const auto& scissor = command.scissor.value();
+      gl.Enable(GL_SCISSOR_TEST);
+      gl.Scissor(scissor.origin.x,    // x
+                 scissor.origin.y,    // y
+                 scissor.size.width,  // width
+                 scissor.size.width   // height
+      );
+    } else {
+      gl.Disable(GL_SCISSOR_TEST);
+    }
+
+    //--------------------------------------------------------------------------
+    /// Setup culling.
+    ///
+    switch (command.cull_mode) {
+      case CullMode::kNone:
+        gl.Disable(GL_CULL_FACE);
+        break;
+      case CullMode::kFrontFace:
+        gl.Enable(GL_CULL_FACE);
+        gl.CullFace(GL_FRONT);
+        break;
+      case CullMode::kBackFace:
+        gl.Enable(GL_CULL_FACE);
+        gl.CullFace(GL_BACK);
+        break;
+    }
+    //--------------------------------------------------------------------------
+    /// Setup winding order.
+    ///
+    switch (command.winding) {
+      case WindingOrder::kClockwise:
+        gl.FrontFace(GL_CW);
+        break;
+      case WindingOrder::kCounterClockwise:
+        gl.FrontFace(GL_CCW);
+        break;
+    }
+
+    if (command.index_type == IndexType::kUnknown) {
+      return false;
+    }
+
+    const auto& vertex_desc_gles = pipeline.GetBufferBindings();
+
+    //--------------------------------------------------------------------------
+    /// Bind vertex and index buffers.
+    ///
+    auto vertex_buffer_view = command.GetVertexBuffer();
+    auto index_buffer_view = command.index_buffer;
+
+    if (!vertex_buffer_view || !index_buffer_view) {
+      return false;
+    }
+
+    auto vertex_buffer =
+        vertex_buffer_view.buffer->GetDeviceBuffer(*transients_allocator);
+    auto index_buffer =
+        index_buffer_view.buffer->GetDeviceBuffer(*transients_allocator);
+
+    if (!vertex_buffer || !index_buffer) {
+      return false;
+    }
+
+    const auto& vertex_buffer_gles = DeviceBufferGLES::Cast(*vertex_buffer);
+    if (!vertex_buffer_gles.BindAndUploadDataIfNecessary(
+            DeviceBufferGLES::BindingType::kArrayBuffer)) {
+      return false;
+    }
+    const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
+    if (!index_buffer_gles.BindAndUploadDataIfNecessary(
+            DeviceBufferGLES::BindingType::kElementArrayBuffer)) {
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    /// Bind the pipeline program.
+    ///
+    if (!pipeline.BindProgram()) {
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    /// Bind vertex attribs.
+    ///
+    if (!vertex_desc_gles->BindVertexAttributes(
+            gl, vertex_buffer_view.range.offset)) {
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    /// Bind uniform data.
+    ///
+    if (!vertex_desc_gles->BindUniformData(gl,                        //
+                                           *transients_allocator,     //
+                                           command.vertex_bindings,   //
+                                           command.fragment_bindings  //
+                                           )) {
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    /// Finally! Invoke the draw call.
+    ///
+    gl.DrawElements(ToMode(command.primitive_type),   // mode
+                    command.index_count,              // count
+                    ToIndexType(command.index_type),  // type
+                    reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
+                        index_buffer_view.range.offset))  // indices
+    );
+
+    //--------------------------------------------------------------------------
+    /// Unbind vertex attribs.
+    ///
+    if (!vertex_desc_gles->UnbindVertexAttributes(gl)) {
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    /// Unbind the program pipeline.
+    ///
+    if (!pipeline.UnbindProgram()) {
+      return false;
+    }
+  }
+
+  // TODO(csg): Respect the discard flags using glDiscardFramebuffer. Vital for
+  //            mobile GPUs.
+
+  return true;
+}
+
+// |RenderPass|
+bool RenderPassGLES::EncodeCommands(
+    const std::shared_ptr<Allocator>& transients_allocator) const {
+  if (!IsValid()) {
+    return false;
+  }
+  if (commands_.empty()) {
+    return true;
+  }
+  const auto& render_target = GetRenderTarget();
+  if (!render_target.HasColorAttachment(0u)) {
+    return false;
+  }
+  const auto& color0 = render_target.GetColorAttachments().at(0u);
+  const auto& depth0 = render_target.GetDepthAttachment();
+  const auto& stencil0 = render_target.GetStencilAttachment();
+
+  auto pass_data = std::make_shared<RenderPassData>();
+  pass_data->viewport.rect = Rect::MakeSize(Size(GetRenderTargetSize()));
+
+  //----------------------------------------------------------------------------
+  /// Setup color data.
+  ///
+  pass_data->clear_color = color0.clear_color;
+  pass_data->clear_color_attachment = CanClearAttachment(color0.load_action);
+  pass_data->discard_color_attachment =
+      CanDiscardAttachmentWhenDone(color0.store_action);
+
+  //----------------------------------------------------------------------------
+  /// Setup depth data.
+  ///
+  if (depth0.has_value()) {
+    pass_data->has_depth_attachment = true;
+    pass_data->clear_depth = depth0->clear_depth;
+    pass_data->clear_depth_attachment = CanClearAttachment(depth0->load_action);
+    pass_data->discard_depth_attachment =
+        CanDiscardAttachmentWhenDone(depth0->store_action);
+  }
+
+  //----------------------------------------------------------------------------
+  /// Setup depth data.
+  ///
+  if (stencil0.has_value()) {
+    pass_data->has_stencil_attachment = true;
+    pass_data->clear_stencil = stencil0->clear_stencil;
+    pass_data->clear_stencil_attachment =
+        CanClearAttachment(stencil0->load_action);
+    pass_data->discard_stencil_attachment =
+        CanDiscardAttachmentWhenDone(stencil0->store_action);
+  }
+
+  return reactor_->AddOperation([pass_data, transients_allocator,
+                                 commands = commands_](const auto& reactor) {
+    auto result = EncodeCommandsInReactor(*pass_data, transients_allocator,
+                                          reactor, commands);
+    FML_CHECK(result) << "Must be able to encode GL commands without error.";
+  });
+}
 
 }  // namespace impeller

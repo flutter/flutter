@@ -39,11 +39,6 @@ using PipelineFuture = std::shared_future<std::shared_ptr<Pipeline>>;
 ///
 class Pipeline {
  public:
-  enum class Type {
-    kUnknown,
-    kRender,
-  };
-
   virtual ~Pipeline();
 
   virtual bool IsValid() const = 0;

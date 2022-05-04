@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
 
+#include "impeller/base/promise.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/pipeline_mtl.h"
 #include "impeller/renderer/backend/metal/shader_function_mtl.h"
@@ -73,11 +74,13 @@ PipelineFuture PipelineLibraryMTL::GetRenderPipeline(
     return found->second;
   }
 
+  if (device_ == nil) {
+    return RealizedFuture<std::shared_ptr<Pipeline>>(nullptr);
+  }
+
   auto promise = std::make_shared<std::promise<std::shared_ptr<Pipeline>>>();
   auto future = PipelineFuture{promise->get_future()};
-
   pipelines_[descriptor] = future;
-
   auto weak_this = weak_from_this();
 
   auto completion_handler =

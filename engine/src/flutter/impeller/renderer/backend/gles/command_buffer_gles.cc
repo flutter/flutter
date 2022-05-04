@@ -5,35 +5,53 @@
 #include "impeller/renderer/backend/gles/command_buffer_gles.h"
 
 #include "impeller/base/config.h"
+#include "impeller/renderer/backend/gles/render_pass_gles.h"
 
 namespace impeller {
 
-CommandBufferGLES::CommandBufferGLES() = default;
+CommandBufferGLES::CommandBufferGLES(ReactorGLES::Ref reactor)
+    : reactor_(std::move(reactor)),
+      is_valid_(reactor_ && reactor_->IsValid()) {}
 
 CommandBufferGLES::~CommandBufferGLES() = default;
 
 // |CommandBuffer|
-void CommandBufferGLES::SetLabel(const std::string& label) const {}
+void CommandBufferGLES::SetLabel(const std::string& label) const {
+  // Cannot support.
+}
 
 // |CommandBuffer|
 bool CommandBufferGLES::IsValid() const {
-  IMPELLER_UNIMPLEMENTED;
+  return is_valid_;
 }
 
 // |CommandBuffer|
 bool CommandBufferGLES::SubmitCommands(CompletionCallback callback) {
-  IMPELLER_UNIMPLEMENTED;
-}
+  if (!IsValid()) {
+    return false;
+  }
 
-// |CommandBuffer|
-void CommandBufferGLES::ReserveSpotInQueue() {
-  IMPELLER_UNIMPLEMENTED;
+  const auto result = reactor_->React();
+
+  if (callback) {
+    callback(result ? CommandBuffer::Status::kCompleted
+                    : CommandBuffer::Status::kError);
+  }
+  return result;
 }
 
 // |CommandBuffer|
 std::shared_ptr<RenderPass> CommandBufferGLES::CreateRenderPass(
     RenderTarget target) const {
-  IMPELLER_UNIMPLEMENTED;
+  if (!IsValid()) {
+    return nullptr;
+  }
+  auto pass = std::shared_ptr<RenderPassGLES>(
+      new RenderPassGLES(std::move(target), reactor_));
+  if (!pass->IsValid()) {
+    return nullptr;
+  }
+  return pass;
 }
 
 }  // namespace impeller

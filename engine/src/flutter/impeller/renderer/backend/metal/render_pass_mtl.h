@@ -22,8 +22,6 @@ class RenderPassMTL final : public RenderPass {
 
   id<MTLCommandBuffer> buffer_ = nil;
   MTLRenderPassDescriptor* desc_ = nil;
-  std::vector<Command> commands_;
-  std::shared_ptr<HostBuffer> transients_buffer_;
   std::string label_;
   bool is_valid_ = false;
 
@@ -36,15 +34,10 @@ class RenderPassMTL final : public RenderPass {
   void SetLabel(std::string label) override;
 
   // |RenderPass|
-  HostBuffer& GetTransientsBuffer() override;
+  bool EncodeCommands(
+      const std::shared_ptr<Allocator>& transients_allocator) const override;
 
-  // |RenderPass|
-  bool AddCommand(Command command) override;
-
-  // |RenderPass|
-  bool EncodeCommands(Allocator& transients_allocator) const override;
-
-  bool EncodeCommands(Allocator& transients_allocator,
+  bool EncodeCommands(const std::shared_ptr<Allocator>& transients_allocator,
                       id<MTLRenderCommandEncoder> pass) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPassMTL);

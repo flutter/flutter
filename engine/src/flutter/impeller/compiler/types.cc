@@ -55,9 +55,8 @@ std::string TargetPlatformToString(TargetPlatform platform) {
   FML_UNREACHABLE();
 }
 
-static std::string UniqueEntryPointFunctionNameFromSourceName(
-    const std::string& file_name,
-    SourceType type) {
+std::string EntryPointFunctionNameFromSourceName(const std::string& file_name,
+                                                 SourceType type) {
   std::stringstream stream;
   std::filesystem::path file_path(file_name);
   stream << ToUtf8(file_path.stem().native()) << "_";
@@ -74,22 +73,6 @@ static std::string UniqueEntryPointFunctionNameFromSourceName(
   }
   stream << "_main";
   return stream.str();
-}
-
-std::string EntryPointFunctionNameFromSourceName(const std::string& file_name,
-                                                 SourceType type,
-                                                 TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform::kMetalDesktop:
-    case TargetPlatform::kMetalIOS:
-      return UniqueEntryPointFunctionNameFromSourceName(file_name, type);
-    case TargetPlatform::kUnknown:
-    case TargetPlatform::kFlutterSPIRV:
-    case TargetPlatform::kOpenGLES:
-    case TargetPlatform::kOpenGLDesktop:
-      return "main";
-  }
-  FML_UNREACHABLE();
 }
 
 bool TargetPlatformNeedsSL(TargetPlatform platform) {

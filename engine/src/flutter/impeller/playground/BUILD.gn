@@ -17,6 +17,8 @@ impeller_component("playground") {
     "widgets.h",
   ]
 
+  deps = [ "../renderer/backend" ]
+
   if (impeller_enable_metal) {
     sources += [
       "backend/metal/playground_impl_mtl.h",

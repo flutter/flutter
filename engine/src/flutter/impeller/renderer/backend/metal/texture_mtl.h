@@ -20,6 +20,12 @@ class TextureMTL final : public Texture,
   // |Texture|
   ~TextureMTL() override;
 
+  id<MTLTexture> GetMTLTexture() const;
+
+ private:
+  id<MTLTexture> texture_ = nullptr;
+  bool is_valid_ = false;
+
   // |Texture|
   void SetLabel(const std::string_view& label) override;
 
@@ -31,12 +37,6 @@ class TextureMTL final : public Texture,
 
   // |Texture|
   ISize GetSize() const override;
-
-  id<MTLTexture> GetMTLTexture() const;
-
- private:
-  id<MTLTexture> texture_ = nullptr;
-  bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextureMTL);
 };

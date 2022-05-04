@@ -172,11 +172,13 @@ group("unittests") {
       public_deps += [ "//flutter/shell/platform/fuchsia:tests" ]
     }
 
+    if (is_mac || is_linux) {
+      public_deps += [ "//flutter/impeller:impeller_unittests" ]
+    }
+
     if (is_mac) {
-      public_deps += [
-        "//flutter/impeller:impeller_unittests",
-        "//flutter/shell/platform/darwin:flutter_channels_unittests",
-      ]
+      public_deps +=
+          [ "//flutter/shell/platform/darwin:flutter_channels_unittests" ]
     }
 
     if (!is_win && !is_fuchsia) {

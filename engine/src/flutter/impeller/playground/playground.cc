@@ -34,23 +34,89 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
   FML_UNREACHABLE();
 }
 
+struct Playground::GLFWInitializer {
+  GLFWInitializer() {
+    // This guard is a hack to work around a problem where glfwCreateWindow
+    // hangs when opening a second window after GLFW has been reinitialized (for
+    // example, when flipping through multiple playground tests).
+    //
+    // Explanation:
+    //  * glfwCreateWindow calls [NSApp run], which begins running the event
+    //    loop on the current thread.
+    //  * GLFW then immediately stops the loop when
+    //    applicationDidFinishLaunching is fired.
+    //  * applicationDidFinishLaunching is only ever fired once during the
+    //    application's lifetime, so subsequent calls to [NSApp run] will always
+    //    hang with this setup.
+    //  * glfwInit resets the flag that guards against [NSApp run] being
+    //    called a second time, which causes the subsequent `glfwCreateWindow`
+    //    to hang indefinitely in the event loop, because
+    //    applicationDidFinishLaunching is never fired.
+    static std::once_flag sOnceInitializer;
+    std::call_once(sOnceInitializer, []() {
+      FML_CHECK(::glfwInit() == GLFW_TRUE);
+      ::glfwSetErrorCallback([](int code, const char* description) {
+        FML_LOG(ERROR) << "GLFW Error '" << description << "'  (" << code
+                       << ").";
+      });
+    });
+  }
+};
+
 Playground::Playground()
-    : impl_(PlaygroundImpl::Create(GetParam())),
-      renderer_(impl_->CreateContext()),
-      is_valid_(renderer_.IsValid()) {}
+    : glfw_initializer_(std::make_unique<GLFWInitializer>()) {}
 
 Playground::~Playground() = default;
-
-bool Playground::IsValid() const {
-  return is_valid_;
-}
 
 PlaygroundBackend Playground::GetBackend() const {
   return GetParam();
 }
 
 std::shared_ptr<Context> Playground::GetContext() const {
-  return IsValid() ? renderer_.GetContext() : nullptr;
+  return renderer_ ? renderer_->GetContext() : nullptr;
+}
+
+static constexpr bool PlatformSupportsBackend(PlaygroundBackend backend) {
+  switch (backend) {
+    case PlaygroundBackend::kMetal:
+#if IMPELLER_ENABLE_METAL
+      return true;
+#else   // IMPELLER_ENABLE_METAL
+      return false;
+#endif  // IMPELLER_ENABLE_METAL
+    case PlaygroundBackend::kOpenGLES:
+#if IMPELLER_ENABLE_OPENGLES
+      return true;
+#else   // IMPELLER_ENABLE_OPENGLES
+      return false;
+#endif  // IMPELLER_ENABLE_OPENGLES
+  }
+  FML_UNREACHABLE();
+}
+
+void Playground::SetUp() {
+  if (!PlatformSupportsBackend(GetBackend())) {
+    GTEST_SKIP_("This backend is disabled or isn't supported on this platform");
+  }
+
+  impl_ = PlaygroundImpl::Create(GetParam());
+  if (!impl_) {
+    return;
+  }
+  auto context = impl_->GetContext();
+  if (!context) {
+    return;
+  }
+  auto renderer = std::make_unique<Renderer>(std::move(context));
+  if (!renderer->IsValid()) {
+    return;
+  }
+  renderer_ = std::move(renderer);
+}
+
+void Playground::TearDown() {
+  renderer_.reset();
+  impl_.reset();
 }
 
 static void PlaygroundKeyCallback(GLFWwindow* window,
@@ -87,15 +153,11 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     return true;
   }
 
-  if (!IsValid()) {
-    return false;
-  }
-
   if (!render_callback) {
     return true;
   }
 
-  if (!renderer_.IsValid()) {
+  if (!renderer_ || !renderer_->IsValid()) {
     return false;
   }
 
@@ -106,40 +168,12 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   ImGui::StyleColorsDark();
   ImGui::GetIO().IniFilename = nullptr;
 
-  // This guard is a hack to work around a problem where glfwCreateWindow
-  // hangs when opening a second window after GLFW has been reinitialized (for
-  // example, when flipping through multiple playground tests).
-  //
-  // Explanation:
-  //  * glfwCreateWindow calls [NSApp run], which begins running the event loop
-  //    on the current thread.
-  //  * GLFW then immediately stops the loop when applicationDidFinishLaunching
-  //    is fired.
-  //  * applicationDidFinishLaunching is only ever fired once during the
-  //    application's lifetime, so subsequent calls to [NSApp run] will always
-  //    hang with this setup.
-  //  * glfwInit resets the flag that guards against [NSApp run] being
-  //    called a second time, which causes the subsequent `glfwCreateWindow` to
-  //    hang indefinitely in the event loop, because
-  //    applicationDidFinishLaunching is never fired.
-  static bool first_run = true;
-  if (first_run) {
-    first_run = false;
-    if (::glfwInit() != GLFW_TRUE) {
-      return false;
-    }
-  }
-
-  ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-  auto window_title = GetWindowTitle(flutter::testing::GetCurrentTestName());
-  auto window =
-      ::glfwCreateWindow(GetWindowSize().width, GetWindowSize().height,
-                         window_title.c_str(), NULL, NULL);
+  auto window = reinterpret_cast<GLFWwindow*>(impl_->GetWindowHandle());
   if (!window) {
     return false;
   }
-
+  ::glfwSetWindowTitle(
+      window, GetWindowTitle(flutter::testing::GetCurrentTestName()).c_str());
   ::glfwSetWindowUserPointer(window, this);
   ::glfwSetWindowSizeCallback(
       window, [](GLFWwindow* window, int width, int height) -> void {
@@ -158,19 +192,15 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
         ->SetCursorPosition({static_cast<Scalar>(x), static_cast<Scalar>(y)});
   });
 
-  fml::ScopedCleanupClosure close_window(
-      [window]() { ::glfwDestroyWindow(window); });
-
   ImGui_ImplGlfw_InitForOther(window, true);
   fml::ScopedCleanupClosure shutdown_imgui([]() { ImGui_ImplGlfw_Shutdown(); });
 
-  ImGui_ImplImpeller_Init(renderer_.GetContext());
+  ImGui_ImplImpeller_Init(renderer_->GetContext());
   fml::ScopedCleanupClosure shutdown_imgui_impeller(
       []() { ImGui_ImplImpeller_Shutdown(); });
 
-  if (!impl_->SetupWindow(window, renderer_.GetContext())) {
-    return false;
-  }
+  ::glfwSetWindowSize(window, GetWindowSize().width, GetWindowSize().height);
+  ::glfwShowWindow(window);
 
   while (true) {
     ::glfwWaitEventsTimeout(1.0 / 30.0);
@@ -191,23 +221,21 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
       return result;
     };
 
-    if (!renderer_.Render(impl_->AcquireSurfaceFrame(renderer_.GetContext()),
-                          wrapped_callback)) {
+    if (!renderer_->Render(impl_->AcquireSurfaceFrame(renderer_->GetContext()),
+                           wrapped_callback)) {
       VALIDATION_LOG << "Could not render into the surface.";
       return false;
     }
   }
 
-  if (!impl_->TeardownWindow(window, renderer_.GetContext())) {
-    return false;
-  }
+  ::glfwHideWindow(window);
 
   return true;
 }
 
 std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     const char* fixture_name) const {
-  if (!IsValid()) {
+  if (!renderer_) {
     return nullptr;
   }
 
@@ -235,7 +263,7 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
   texture_descriptor.mip_count = 1u;
 
   auto texture =
-      renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
+      renderer_->GetContext()->GetPermanentsAllocator()->CreateTexture(
           StorageMode::kHostVisible, texture_descriptor);
   if (!texture) {
     VALIDATION_LOG << "Could not allocate texture for fixture " << fixture_name;

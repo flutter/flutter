@@ -72,6 +72,8 @@ BlobLibrary::BlobLibrary(std::shared_ptr<fml::Mapping> mapping)
   is_valid_ = true;
 }
 
+BlobLibrary::BlobLibrary(BlobLibrary&&) = default;
+
 BlobLibrary::~BlobLibrary() = default;
 
 bool BlobLibrary::IsValid() const {
@@ -89,6 +91,24 @@ std::shared_ptr<fml::Mapping> BlobLibrary::GetMapping(Blob::ShaderType type,
   key.name = name;
   auto found = blobs_.find(key);
   return found == blobs_.end() ? nullptr : found->second;
+}
+
+size_t BlobLibrary::IterateAllBlobs(
+    std::function<bool(Blob::ShaderType type,
+                       const std::string& name,
+                       const std::shared_ptr<fml::Mapping>& mapping)> callback)
+    const {
+  if (!IsValid() || !callback) {
+    return 0u;
+  }
+  size_t count = 0u;
+  for (const auto& blob : blobs_) {
+    count++;
+    if (!callback(blob.first.type, blob.first.name, blob.second)) {
+      break;
+    }
+  }
+  return count;
 }
 
 }  // namespace impeller

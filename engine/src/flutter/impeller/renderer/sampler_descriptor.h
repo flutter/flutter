@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "flutter/fml/macros.h"
 #include "impeller/base/comparable.h"
 #include "impeller/renderer/formats.h"
@@ -37,5 +39,10 @@ struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
            depth_address_mode == o.depth_address_mode;
   }
 };
+
+using SamplerMap = std::unordered_map<SamplerDescriptor,
+                                      std::shared_ptr<const Sampler>,
+                                      ComparableHash<SamplerDescriptor>,
+                                      ComparableEqual<SamplerDescriptor>>;
 
 }  // namespace impeller

@@ -89,29 +89,6 @@ std::shared_ptr<DeviceBuffer> AllocatorMTL::CreateBuffer(StorageMode mode,
       new DeviceBufferMTL(buffer, length, mode));
 }
 
-std::shared_ptr<DeviceBuffer> AllocatorMTL::CreateBufferWithCopy(
-    const uint8_t* buffer,
-    size_t length) {
-  auto new_buffer = CreateBuffer(StorageMode::kHostVisible, length);
-
-  if (!new_buffer) {
-    return nullptr;
-  }
-
-  auto entire_range = Range{0, length};
-
-  if (!new_buffer->CopyHostBuffer(buffer, entire_range)) {
-    return nullptr;
-  }
-
-  return new_buffer;
-}
-
-std::shared_ptr<DeviceBuffer> AllocatorMTL::CreateBufferWithCopy(
-    const fml::Mapping& mapping) {
-  return CreateBufferWithCopy(mapping.GetMapping(), mapping.GetSize());
-}
-
 std::shared_ptr<Texture> AllocatorMTL::CreateTexture(
     StorageMode mode,
     const TextureDescriptor& desc) {

@@ -15,7 +15,7 @@ namespace impeller {
 class PipelineMTL final : public Pipeline,
                           public BackendCast<PipelineMTL, Pipeline> {
  public:
-  // |PipelineMTL|
+  // |Pipeline|
   ~PipelineMTL() override;
 
   id<MTLRenderPipelineState> GetMTLRenderPipelineState() const;
@@ -25,7 +25,6 @@ class PipelineMTL final : public Pipeline,
  private:
   friend class PipelineLibraryMTL;
 
-  Type type_ = Type::kUnknown;
   id<MTLRenderPipelineState> pipeline_state_;
   id<MTLDepthStencilState> depth_stencil_state_;
   bool is_valid_ = false;
@@ -35,7 +34,7 @@ class PipelineMTL final : public Pipeline,
               id<MTLRenderPipelineState> state,
               id<MTLDepthStencilState> depth_stencil_state);
 
-  // |PipelineMTL|
+  // |Pipeline|
   bool IsValid() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineMTL);

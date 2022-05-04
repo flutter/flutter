@@ -6,8 +6,22 @@
 
 namespace impeller {
 
-DeviceBuffer::DeviceBuffer() = default;
+DeviceBuffer::DeviceBuffer(size_t size, StorageMode mode)
+    : size_(size), mode_(mode) {}
 
 DeviceBuffer::~DeviceBuffer() = default;
+
+// |Buffer|
+std::shared_ptr<const DeviceBuffer> DeviceBuffer::GetDeviceBuffer(
+    Allocator& allocator) const {
+  return shared_from_this();
+}
+
+BufferView DeviceBuffer::AsBufferView() const {
+  BufferView view;
+  view.buffer = shared_from_this();
+  view.range = {0u, size_};
+  return view;
+}
 
 }  // namespace impeller

@@ -16,6 +16,12 @@ class BackendCast {
   static const Sub& Cast(const Base& base) {
     return reinterpret_cast<const Sub&>(base);
   }
+
+  static Sub* Cast(Base* base) { return reinterpret_cast<Sub*>(base); }
+
+  static const Sub* Cast(const Base* base) {
+    return reinterpret_cast<const Sub*>(base);
+  }
 };
 
 }  // namespace impeller

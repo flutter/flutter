@@ -5,7 +5,7 @@
 uniform UniformBuffer {
   mat4 mvp;
 }
-uniforms;
+uniform_buffer;
 
 in vec2 vertex_position;
 in vec2 texture_coordinates;
@@ -15,7 +15,7 @@ out vec2 frag_texture_coordinates;
 out vec4 frag_vertex_color;
 
 void main() {
-  gl_Position = uniforms.mvp * vec4(vertex_position.xy, 0.0, 1.0);
+  gl_Position = uniform_buffer.mvp * vec4(vertex_position.xy, 0.0, 1.0);
   frag_texture_coordinates = texture_coordinates;
   frag_vertex_color = vertex_color;
 }

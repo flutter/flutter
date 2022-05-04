@@ -7,7 +7,6 @@
 #include <Metal/Metal.h>
 
 #include <memory>
-#include <unordered_map>
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
@@ -27,12 +26,8 @@ class SamplerLibraryMTL final
  private:
   friend class ContextMTL;
 
-  using CachedSamplers = std::unordered_map<SamplerDescriptor,
-                                            std::shared_ptr<const Sampler>,
-                                            ComparableHash<SamplerDescriptor>,
-                                            ComparableEqual<SamplerDescriptor>>;
   id<MTLDevice> device_ = nullptr;
-  CachedSamplers samplers_;
+  SamplerMap samplers_;
 
   SamplerLibraryMTL(id<MTLDevice> device);
 

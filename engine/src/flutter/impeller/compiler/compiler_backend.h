@@ -20,15 +20,22 @@ struct CompilerBackend {
   using GLSLCompiler = std::shared_ptr<spirv_cross::CompilerGLSL>;
   using Compiler = std::variant<MSLCompiler, GLSLCompiler>;
 
+  enum class Type {
+    kMSL,
+    kGLSL,
+  };
+
   CompilerBackend(MSLCompiler compiler);
 
   CompilerBackend(GLSLCompiler compiler);
 
-  CompilerBackend(Compiler compiler);
+  CompilerBackend(Type type, Compiler compiler);
 
   CompilerBackend();
 
   ~CompilerBackend();
+
+  Type GetType() const;
 
   const spirv_cross::Compiler* operator->() const;
 
@@ -46,6 +53,7 @@ struct CompilerBackend {
   spirv_cross::Compiler* GetCompiler();
 
  private:
+  Type type_ = Type::kMSL;
   Compiler compiler_;
 
   const spirv_cross::CompilerMSL* GetMSLCompiler() const;

@@ -19,6 +19,8 @@ class BlobLibrary {
  public:
   BlobLibrary(std::shared_ptr<fml::Mapping> mapping);
 
+  BlobLibrary(BlobLibrary&&);
+
   ~BlobLibrary();
 
   bool IsValid() const;
@@ -27,6 +29,11 @@ class BlobLibrary {
 
   std::shared_ptr<fml::Mapping> GetMapping(Blob::ShaderType type,
                                            std::string name) const;
+
+  size_t IterateAllBlobs(
+      std::function<bool(Blob::ShaderType type,
+                         const std::string& name,
+                         const std::shared_ptr<fml::Mapping>& mapping)>) const;
 
  private:
   struct BlobKey {

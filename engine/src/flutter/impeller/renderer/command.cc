@@ -16,25 +16,37 @@ bool Command::BindVertices(const VertexBuffer& buffer) {
     return false;
   }
 
-  vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] =
-      buffer.vertex_buffer;
+  vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] = {
+      nullptr, buffer.vertex_buffer};
   index_buffer = buffer.index_buffer;
   index_count = buffer.index_count;
   index_type = buffer.index_type;
   return true;
 }
 
-bool Command::BindResource(ShaderStage stage, size_t binding, BufferView view) {
+BufferView Command::GetVertexBuffer() const {
+  auto found = vertex_bindings.buffers.find(
+      VertexDescriptor::kReservedVertexBufferIndex);
+  if (found != vertex_bindings.buffers.end()) {
+    return found->second.resource;
+  }
+  return {};
+}
+
+bool Command::BindResource(ShaderStage stage,
+                           const ShaderUniformSlot& slot,
+                           const ShaderMetadata& metadata,
+                           BufferView view) {
   if (!view) {
     return false;
   }
 
   switch (stage) {
     case ShaderStage::kVertex:
-      vertex_bindings.buffers[binding] = view;
+      vertex_bindings.buffers[slot.binding] = {&metadata, view};
       return true;
     case ShaderStage::kFragment:
-      fragment_bindings.buffers[binding] = view;
+      fragment_bindings.buffers[slot.binding] = {&metadata, view};
       return true;
     case ShaderStage::kUnknown:
       return false;
@@ -45,6 +57,7 @@ bool Command::BindResource(ShaderStage stage, size_t binding, BufferView view) {
 
 bool Command::BindResource(ShaderStage stage,
                            const SampledImageSlot& slot,
+                           const ShaderMetadata& metadata,
                            std::shared_ptr<const Texture> texture) {
   if (!texture || !texture->IsValid()) {
     return false;
@@ -56,10 +69,10 @@ bool Command::BindResource(ShaderStage stage,
 
   switch (stage) {
     case ShaderStage::kVertex:
-      vertex_bindings.textures[slot.texture_index] = texture;
+      vertex_bindings.textures[slot.texture_index] = {&metadata, texture};
       return true;
     case ShaderStage::kFragment:
-      fragment_bindings.textures[slot.texture_index] = texture;
+      fragment_bindings.textures[slot.texture_index] = {&metadata, texture};
       return true;
     case ShaderStage::kUnknown:
       return false;
@@ -70,6 +83,7 @@ bool Command::BindResource(ShaderStage stage,
 
 bool Command::BindResource(ShaderStage stage,
                            const SampledImageSlot& slot,
+                           const ShaderMetadata& metadata,
                            std::shared_ptr<const Sampler> sampler) {
   if (!sampler || !sampler->IsValid()) {
     return false;
@@ -81,10 +95,10 @@ bool Command::BindResource(ShaderStage stage,
 
   switch (stage) {
     case ShaderStage::kVertex:
-      vertex_bindings.samplers[slot.sampler_index] = sampler;
+      vertex_bindings.samplers[slot.sampler_index] = {&metadata, sampler};
       return true;
     case ShaderStage::kFragment:
-      fragment_bindings.samplers[slot.sampler_index] = sampler;
+      fragment_bindings.samplers[slot.sampler_index] = {&metadata, sampler};
       return true;
     case ShaderStage::kUnknown:
       return false;
@@ -95,10 +109,11 @@ bool Command::BindResource(ShaderStage stage,
 
 bool Command::BindResource(ShaderStage stage,
                            const SampledImageSlot& slot,
+                           const ShaderMetadata& metadata,
                            std::shared_ptr<const Texture> texture,
                            std::shared_ptr<const Sampler> sampler) {
-  return BindResource(stage, slot, texture) &&
-         BindResource(stage, slot, sampler);
+  return BindResource(stage, slot, metadata, texture) &&
+         BindResource(stage, slot, metadata, sampler);
 }
 
 }  // namespace impeller

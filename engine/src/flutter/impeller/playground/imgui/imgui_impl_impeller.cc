@@ -11,8 +11,8 @@
 
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
-#include "impeller/playground/imgui/mtl/imgui_raster.frag.h"
-#include "impeller/playground/imgui/mtl/imgui_raster.vert.h"
+#include "impeller/playground/imgui/imgui_raster.frag.h"
+#include "impeller/playground/imgui/imgui_raster.vert.h"
 #include "third_party/imgui/imgui.h"
 
 #include "impeller/geometry/matrix.h"
@@ -201,12 +201,10 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
         impeller::IPoint clip_max(pcmd->ClipRect.z - draw_data->DisplayPos.x,
                                   pcmd->ClipRect.w - draw_data->DisplayPos.y);
         // Ensure the scissor never goes out of bounds.
-        clip_min.x = std::clamp(
-            clip_min.x, 0ll,
-            static_cast<decltype(clip_min.x)>(draw_data->DisplaySize.x));
-        clip_min.y = std::clamp(
-            clip_min.y, 0ll,
-            static_cast<decltype(clip_min.y)>(draw_data->DisplaySize.y));
+        clip_min.x = std::clamp<impeller::IPoint::Type>(
+            clip_min.x, 0ll, draw_data->DisplaySize.x);
+        clip_min.y = std::clamp<impeller::IPoint::Type>(
+            clip_min.y, 0ll, draw_data->DisplaySize.y);
         if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y) {
           continue;  // Nothing to render.
         }
@@ -217,9 +215,13 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
 
         cmd.viewport = viewport;
         cmd.scissor = impeller::IRect::MakeLTRB(
-            std::max(0ll, clip_min.x), std::max(0ll, clip_min.y),
-            std::min(render_pass.GetRenderTargetSize().width, clip_max.x),
-            std::min(render_pass.GetRenderTargetSize().height, clip_max.y));
+            std::max<impeller::IRect::Type>(0ll, clip_min.x),  //
+            std::max<impeller::IRect::Type>(0ll, clip_min.y),  //
+            std::min<impeller::IRect::Type>(
+                render_pass.GetRenderTargetSize().width, clip_max.x),  //
+            std::min<impeller::IRect::Type>(
+                render_pass.GetRenderTargetSize().height, clip_max.y)  //
+        );
 
         cmd.winding = impeller::WindingOrder::kClockwise;
         cmd.pipeline = bd->pipeline;

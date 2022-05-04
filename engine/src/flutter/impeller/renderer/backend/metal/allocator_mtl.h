@@ -42,14 +42,6 @@ class AllocatorMTL final : public Allocator {
       StorageMode mode,
       const TextureDescriptor& desc) override;
 
-  // |Allocator|
-  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(const uint8_t* buffer,
-                                                     size_t length) override;
-
-  // |Allocator|
-  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
-      const fml::Mapping& mapping) override;
-
   FML_DISALLOW_COPY_AND_ASSIGN(AllocatorMTL);
 };
 
