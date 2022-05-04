@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.12
+// @dart = 2.14
 part of dart.ui;
 
 // ignore_for_file: avoid_classes_with_only_static_members
@@ -20,7 +20,8 @@ class DartPluginRegistrant {
       _ensureInitialized();
     }
   }
-  static void _ensureInitialized() native 'DartPluginRegistrant_EnsureInitialized';
+  @FfiNative<Void Function()>('DartPluginRegistrant_EnsureInitialized')
+  external static void _ensureInitialized();
 }
 
 // Corelib 'print' implementation.
@@ -33,8 +34,11 @@ void _printDebug(Object? arg) {
 }
 
 class _Logger {
-  static void _printString(String? s) native 'Logger_PrintString';
-  static void _printDebugString(String? s) native 'Logger_PrintDebugString';
+  @FfiNative<Void Function(Handle)>('DartRuntimeHooks::Logger_PrintString')
+  external static void _printString(String? s);
+
+  @FfiNative<Void Function(Handle)>('DartRuntimeHooks::Logger_PrintDebugString')
+  external static void _printDebugString(String? s);
 }
 
 // If we actually run on big endian machines, we'll need to do something smarter
@@ -88,10 +92,14 @@ List<int> saveCompilationTrace() {
   throw UnimplementedError();
 }
 
-void _scheduleMicrotask(void Function() callback) native 'ScheduleMicrotask';
+@FfiNative<Void Function(Handle)>('DartRuntimeHooks::ScheduleMicrotask')
+external void _scheduleMicrotask(void Function() callback);
 
-int? _getCallbackHandle(Function closure) native 'GetCallbackHandle';
-Function? _getCallbackFromHandle(int handle) native 'GetCallbackFromHandle';
+@FfiNative<Handle Function(Handle)>('DartRuntimeHooks::GetCallbackHandle')
+external int? _getCallbackHandle(Function closure);
+
+@FfiNative<Handle Function(Int64)>('DartRuntimeHooks::GetCallbackFromHandle')
+external Function? _getCallbackFromHandle(int handle);
 
 typedef _PrintClosure = void Function(String line);
 

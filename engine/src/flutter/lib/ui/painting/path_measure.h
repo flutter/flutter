@@ -13,10 +13,6 @@
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
-namespace tonic {
-class DartLibraryNatives;
-}  // namespace tonic
-
 // Be sure that the client doesn't modify a path on us before Skia finishes
 // See AOSP's reasoning in PathMeasure.cpp
 
@@ -28,8 +24,9 @@ class CanvasPathMeasure : public RefCountedDartWrappable<CanvasPathMeasure> {
 
  public:
   ~CanvasPathMeasure() override;
-  static fml::RefPtr<CanvasPathMeasure> Create(const CanvasPath* path,
-                                               bool forceClosed);
+  static void Create(Dart_Handle wrapper,
+                     const CanvasPath* path,
+                     bool forceClosed);
 
   void setPath(const CanvasPath* path, bool isClosed);
   float getLength(int contour_index);
@@ -41,8 +38,6 @@ class CanvasPathMeasure : public RefCountedDartWrappable<CanvasPathMeasure> {
                   bool start_with_move_to);
   bool isClosed(int contour_index);
   bool nextContour();
-
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
   const SkContourMeasureIter& pathMeasure() const { return *path_measure_; }
 

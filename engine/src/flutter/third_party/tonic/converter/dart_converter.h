@@ -309,6 +309,9 @@ struct DartConverter<std::string> {
   }
 
   static NativeType FromDart(Dart_Handle handle) {
+    if (Dart_IsNull(handle)) {
+      return std::string();
+    }
     uint8_t* data = nullptr;
     intptr_t length = 0;
     if (Dart_IsError(Dart_StringToUTF8(handle, &data, &length)))
@@ -347,6 +350,9 @@ struct DartConverter<std::u16string> {
   }
 
   static NativeType FromDart(Dart_Handle handle) {
+    if (Dart_IsNull(handle)) {
+      return std::u16string();
+    }
     intptr_t length = 0;
     Dart_StringLength(handle, &length);
     std::vector<uint16_t> data(length);
@@ -378,6 +384,9 @@ struct DartConverter<const char*> {
   }
 
   static const char* FromDart(Dart_Handle handle) {
+    if (Dart_IsNull(handle)) {
+      return nullptr;
+    }
     const char* result = nullptr;
     Dart_StringToCString(handle, &result);
     return result;

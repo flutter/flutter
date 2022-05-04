@@ -15,24 +15,11 @@ using tonic::ToDart;
 
 namespace flutter {
 
-static void ImageShader_constructor(Dart_NativeArguments args) {
-  DartCallConstructor(&ImageShader::Create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImageShader);
 
-#define FOR_EACH_BINDING(V) V(ImageShader, initWithImage)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void ImageShader::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register(
-      {{"ImageShader_constructor", ImageShader_constructor, 1, true},
-       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
-fml::RefPtr<ImageShader> ImageShader::Create() {
-  return fml::MakeRefCounted<ImageShader>();
+void ImageShader::Create(Dart_Handle wrapper) {
+  auto res = fml::MakeRefCounted<ImageShader>();
+  res->AssociateWithDartWrapper(wrapper);
 }
 
 void ImageShader::initWithImage(CanvasImage* image,
@@ -62,9 +49,10 @@ void ImageShader::initWithImage(CanvasImage* image,
 }
 
 std::shared_ptr<DlColorSource> ImageShader::shader(
-    SkSamplingOptions& sampling) {
+    const SkSamplingOptions& sampling) {
   if (sampling_is_locked_) {
-    sampling = cached_shader_.skia_object()->sampling();
+    return cached_shader_.skia_object()->with_sampling(
+        cached_shader_.skia_object()->sampling());
   }
   // It might seem that if the sampling is locked we can just return the
   // cached version, but since we need to hold the cached shader in a

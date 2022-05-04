@@ -33,24 +33,6 @@ using tonic::ToDart;
 
 namespace flutter {
 
-#define REGISTER_FUNCTION(name, count) {"" #name, name, count, true},
-#define DECLARE_FUNCTION(name, count) \
-  extern void name(Dart_NativeArguments args);
-
-#define BUILTIN_NATIVE_LIST(V)                 \
-  V(Logger_PrintString, 1)                     \
-  V(Logger_PrintDebugString, 1)                \
-  V(DartPluginRegistrant_EnsureInitialized, 0) \
-  V(ScheduleMicrotask, 1)                      \
-  V(GetCallbackHandle, 1)                      \
-  V(GetCallbackFromHandle, 1)
-
-BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
-
-void DartRuntimeHooks::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({BUILTIN_NATIVE_LIST(REGISTER_FUNCTION)});
-}
-
 static void PropagateIfError(Dart_Handle result) {
   if (Dart_IsError(result)) {
     FML_LOG(ERROR) << "Dart Error: " << ::Dart_GetError(result);
@@ -156,32 +138,13 @@ void DartRuntimeHooks::Install(bool is_ui_isolate,
   InitDartIO(builtin, script_uri);
 }
 
-void Logger_PrintDebugString(Dart_NativeArguments args) {
+void DartRuntimeHooks::Logger_PrintDebugString(std::string message) {
 #ifndef NDEBUG
-  Logger_PrintString(args);
+  DartRuntimeHooks::Logger_PrintString(message);
 #endif
 }
 
-// Implementation of native functions which are used for some
-// test/debug functionality in standalone dart mode.
-void Logger_PrintString(Dart_NativeArguments args) {
-  // Obtain the log buffer from Dart code.
-  std::string message;
-  {
-    Dart_Handle str = Dart_GetNativeArgument(args, 0);
-    uint8_t* chars = nullptr;
-    intptr_t length = 0;
-    Dart_Handle result = Dart_StringToUTF8(str, &chars, &length);
-    if (Dart_IsError(result)) {
-      Dart_PropagateError(result);
-      return;
-    }
-    if (length > 0) {
-      message = std::string{reinterpret_cast<const char*>(chars),
-                            static_cast<size_t>(length)};
-    }
-  }
-
+void DartRuntimeHooks::Logger_PrintString(std::string message) {
   const auto& tag = UIDartState::Current()->logger_prefix();
   UIDartState::Current()->LogMessage(tag, message);
 
@@ -202,8 +165,7 @@ void Logger_PrintString(Dart_NativeArguments args) {
   }
 }
 
-void ScheduleMicrotask(Dart_NativeArguments args) {
-  Dart_Handle closure = Dart_GetNativeArgument(args, 0);
+void DartRuntimeHooks::ScheduleMicrotask(Dart_Handle closure) {
   UIDartState::Current()->ScheduleMicrotask(closure);
 }
 
@@ -280,8 +242,7 @@ static std::string GetFunctionName(Dart_Handle func) {
   return DartConverter<std::string>::FromDart(result);
 }
 
-void GetCallbackHandle(Dart_NativeArguments args) {
-  Dart_Handle func = Dart_GetNativeArgument(args, 0);
+Dart_Handle DartRuntimeHooks::GetCallbackHandle(Dart_Handle func) {
   std::string name = GetFunctionName(func);
   std::string class_name = GetFunctionClassName(func);
   std::string library_path = GetFunctionLibraryUrl(func);
@@ -291,21 +252,18 @@ void GetCallbackHandle(Dart_NativeArguments args) {
   // closures (e.g. `(int a, int b) => a + b;`) also cannot be used as
   // callbacks, so `func` must be a tear-off of a named static function.
   if (!Dart_IsTearOff(func) || name.empty()) {
-    Dart_SetReturnValue(args, Dart_Null());
-    return;
+    return Dart_Null();
   }
-  Dart_SetReturnValue(
-      args, DartConverter<int64_t>::ToDart(DartCallbackCache::GetCallbackHandle(
-                name, class_name, library_path)));
+  return DartConverter<int64_t>::ToDart(
+      DartCallbackCache::GetCallbackHandle(name, class_name, library_path));
 }
 
-void GetCallbackFromHandle(Dart_NativeArguments args) {
-  Dart_Handle h = Dart_GetNativeArgument(args, 0);
-  int64_t handle = DartConverter<int64_t>::FromDart(h);
-  Dart_SetReturnValue(args, DartCallbackCache::GetCallback(handle));
+Dart_Handle DartRuntimeHooks::GetCallbackFromHandle(int64_t handle) {
+  return DartCallbackCache::GetCallback(handle);
 }
 
-void DartPluginRegistrant_EnsureInitialized(Dart_NativeArguments args) {
+void DartPluginRegistrant_EnsureInitialized() {
+  tonic::DartApiScope api_scope;
   FindAndInvokeDartPluginRegistrant();
 }
 

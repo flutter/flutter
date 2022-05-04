@@ -9,10 +9,6 @@
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 
-namespace tonic {
-class DartLibraryNatives;
-}  // namespace tonic
-
 namespace flutter {
 
 class SemanticsUpdate : public RefCountedDartWrappable<SemanticsUpdate> {
@@ -30,8 +26,6 @@ class SemanticsUpdate : public RefCountedDartWrappable<SemanticsUpdate> {
   CustomAccessibilityActionUpdates takeActions();
 
   void dispose();
-
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit SemanticsUpdate(SemanticsNodeUpdates nodes,
