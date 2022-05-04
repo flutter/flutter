@@ -4,8 +4,9 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import 'constants.dart';
 
 const bool _kUseSimd = bool.fromEnvironment('flutter.simd') || !kIsWeb;
 
