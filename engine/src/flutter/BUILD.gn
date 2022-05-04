@@ -235,6 +235,14 @@ group("unittests") {
   }
 }
 
+if (build_engine_artifacts) {
+  group("archives") {
+    testonly = true
+
+    deps = [ "//flutter/build/archives:artifacts" ]
+  }
+}
+
 group("dist") {
   testonly = true
 
