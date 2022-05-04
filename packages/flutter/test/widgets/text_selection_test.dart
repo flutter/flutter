@@ -653,22 +653,31 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
   });
 
-  // TODO(justinmc): Selection.
   testWidgets('Mouse drag selects and cannot drag cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
     final TextEditingController controller = TextEditingController(
       text: 'I love flutter!',
     );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(delegate: delegate);
+
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: EditableText(
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: EditableText(
+            key: editableTextKey,
             controller: controller,
             focusNode: FocusNode(),
             backgroundCursorColor: Colors.white,
             cursorColor: Colors.white,
             style: const TextStyle(),
-            //selectionControls: CustomTextSelectionControls(),
             selectionControls: materialTextSelectionControls,
           ),
         ),
@@ -699,7 +708,7 @@ void main() {
     expect(controller.selection.isCollapsed, isFalse);
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 10);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
   testWidgets('test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);

@@ -359,6 +359,7 @@ class TextSelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.showHandles}
   void showHandles() {
     _updateSelectionOverlay();
+    // Desktop platforms don't have selection handles.
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.fuchsia:
