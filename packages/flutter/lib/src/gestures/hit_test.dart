@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import 'events.dart';
 
 /// An object that can hit-test pointers.
 abstract class HitTestable {
@@ -90,7 +90,7 @@ class _MatrixTransformPart extends _TransformPart {
 
   @override
   Matrix4 multiply(Matrix4 rhs) {
-    return MatrixUtils.multiplied(matrix, rhs);
+    return multiplied(matrix, rhs);
   }
 }
 
