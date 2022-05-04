@@ -18,7 +18,6 @@ class MaterialSpellCheckService implements SpellCheckService {
 
   MaterialSpellCheckService() {
     spellCheckChannel = SystemChannels.spellCheck;    
-    spellCheckChannel.setMethodCallHandler(_handleSpellCheckInvocation);
   }
 
     @override
