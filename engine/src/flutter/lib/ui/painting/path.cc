@@ -19,7 +19,53 @@ namespace flutter {
 
 typedef CanvasPath Path;
 
+static void Path_constructor(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  DartCallConstructor(&CanvasPath::CreateNew, args);
+}
+
 IMPLEMENT_WRAPPERTYPEINFO(ui, Path);
+
+#define FOR_EACH_BINDING(V)          \
+  V(Path, addArc)                    \
+  V(Path, addOval)                   \
+  V(Path, addPath)                   \
+  V(Path, addPolygon)                \
+  V(Path, addRect)                   \
+  V(Path, addRRect)                  \
+  V(Path, arcTo)                     \
+  V(Path, arcToPoint)                \
+  V(Path, close)                     \
+  V(Path, conicTo)                   \
+  V(Path, contains)                  \
+  V(Path, cubicTo)                   \
+  V(Path, extendWithPath)            \
+  V(Path, extendWithPathAndMatrix)   \
+  V(Path, getFillType)               \
+  V(Path, lineTo)                    \
+  V(Path, moveTo)                    \
+  V(Path, quadraticBezierTo)         \
+  V(Path, relativeArcToPoint)        \
+  V(Path, relativeConicTo)           \
+  V(Path, relativeCubicTo)           \
+  V(Path, relativeLineTo)            \
+  V(Path, relativeMoveTo)            \
+  V(Path, relativeQuadraticBezierTo) \
+  V(Path, reset)                     \
+  V(Path, setFillType)               \
+  V(Path, shift)                     \
+  V(Path, transform)                 \
+  V(Path, getBounds)                 \
+  V(Path, addPathWithMatrix)         \
+  V(Path, op)                        \
+  V(Path, clone)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
+void CanvasPath::RegisterNatives(tonic::DartLibraryNatives* natives) {
+  natives->Register({{"Path_constructor", Path_constructor, 1, true},
+                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
+}
 
 CanvasPath::CanvasPath()
     : path_tracker_(UIDartState::Current()->GetVolatilePathTracker()),
@@ -205,9 +251,7 @@ void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
 void CanvasPath::addPathWithMatrix(CanvasPath* path,
                                    double dx,
                                    double dy,
-                                   Dart_Handle matrix4_handle) {
-  tonic::Float64List matrix4(matrix4_handle);
-
+                                   tonic::Float64List& matrix4) {
   if (!path) {
     matrix4.Release();
     Dart_ThrowException(
@@ -236,9 +280,7 @@ void CanvasPath::extendWithPath(CanvasPath* path, double dx, double dy) {
 void CanvasPath::extendWithPathAndMatrix(CanvasPath* path,
                                          double dx,
                                          double dy,
-                                         Dart_Handle matrix4_handle) {
-  tonic::Float64List matrix4(matrix4_handle);
-
+                                         tonic::Float64List& matrix4) {
   if (!path) {
     matrix4.Release();
     Dart_ThrowException(
@@ -269,18 +311,17 @@ bool CanvasPath::contains(double x, double y) {
 }
 
 void CanvasPath::shift(Dart_Handle path_handle, double dx, double dy) {
-  fml::RefPtr<CanvasPath> path = Create(path_handle);
+  fml::RefPtr<CanvasPath> path = CanvasPath::Create(path_handle);
   auto& other_mutable_path = path->mutable_path();
   mutable_path().offset(dx, dy, &other_mutable_path);
   resetVolatility();
 }
 
 void CanvasPath::transform(Dart_Handle path_handle,
-                           Dart_Handle matrix4_handle) {
-  tonic::Float64List matrix4(matrix4_handle);
+                           tonic::Float64List& matrix4) {
   auto sk_matrix = ToSkMatrix(matrix4);
   matrix4.Release();
-  fml::RefPtr<CanvasPath> path = Create(path_handle);
+  fml::RefPtr<CanvasPath> path = CanvasPath::Create(path_handle);
   auto& other_mutable_path = path->mutable_path();
   mutable_path().transform(sk_matrix, &other_mutable_path);
 }
@@ -302,7 +343,7 @@ bool CanvasPath::op(CanvasPath* path1, CanvasPath* path2, int operation) {
 }
 
 void CanvasPath::clone(Dart_Handle path_handle) {
-  fml::RefPtr<CanvasPath> path = Create(path_handle);
+  fml::RefPtr<CanvasPath> path = CanvasPath::Create(path_handle);
   // per Skia docs, this will create a fast copy
   // data is shared until the source path or dest path are mutated
   path->mutable_path() = this->path();

@@ -264,7 +264,6 @@ compile_platform("strong_platform") {
   is_runtime_mode_release =
       flutter_runtime_mode == "release" || flutter_runtime_mode == "jit_release"
   args = [
-    "--enable-experiment=generic-metadata",
     "--nnbd-agnostic",
     "--target=flutter",
     "-Ddart.vm.product=$is_runtime_mode_release",

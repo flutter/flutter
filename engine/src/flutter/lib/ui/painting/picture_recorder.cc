@@ -14,12 +14,25 @@
 
 namespace flutter {
 
+static void PictureRecorder_constructor(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  DartCallConstructor(&PictureRecorder::Create, args);
+}
+
 IMPLEMENT_WRAPPERTYPEINFO(ui, PictureRecorder);
 
-void PictureRecorder::Create(Dart_Handle wrapper) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  auto res = fml::MakeRefCounted<PictureRecorder>();
-  res->AssociateWithDartWrapper(wrapper);
+#define FOR_EACH_BINDING(V) V(PictureRecorder, endRecording)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
+void PictureRecorder::RegisterNatives(tonic::DartLibraryNatives* natives) {
+  natives->Register(
+      {{"PictureRecorder_constructor", PictureRecorder_constructor, 1, true},
+       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
+}
+
+fml::RefPtr<PictureRecorder> PictureRecorder::Create() {
+  return fml::MakeRefCounted<PictureRecorder>();
 }
 
 PictureRecorder::PictureRecorder() {}

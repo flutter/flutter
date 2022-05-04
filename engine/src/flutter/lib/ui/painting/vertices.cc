@@ -14,22 +14,25 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Vertices);
 
+#define FOR_EACH_BINDING(V) V(Vertices, init)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
 Vertices::Vertices() {}
 
 Vertices::~Vertices() {}
 
+void Vertices::RegisterNatives(tonic::DartLibraryNatives* natives) {
+  natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
+}
+
 bool Vertices::init(Dart_Handle vertices_handle,
                     DlVertexMode vertex_mode,
-                    Dart_Handle positions_handle,
-                    Dart_Handle texture_coordinates_handle,
-                    Dart_Handle colors_handle,
-                    Dart_Handle indices_handle) {
+                    tonic::Float32List& positions,
+                    tonic::Float32List& texture_coordinates,
+                    tonic::Int32List& colors,
+                    tonic::Uint16List& indices) {
   UIDartState::ThrowIfUIOperationsProhibited();
-
-  tonic::Float32List positions(positions_handle);
-  tonic::Float32List texture_coordinates(texture_coordinates_handle);
-  tonic::Int32List colors(colors_handle);
-  tonic::Uint16List indices(indices_handle);
 
   if (!positions.data()) {
     return false;

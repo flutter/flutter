@@ -21,6 +21,143 @@
 namespace flutter {
 namespace {
 
+void DefaultRouteName(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  std::string routeName = UIDartState::Current()
+                              ->platform_configuration()
+                              ->client()
+                              ->DefaultRouteName();
+  Dart_SetReturnValue(args, tonic::StdStringToDart(routeName));
+}
+
+void ScheduleFrame(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  UIDartState::Current()->platform_configuration()->client()->ScheduleFrame();
+}
+
+void Render(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  Dart_Handle exception = nullptr;
+  Scene* scene =
+      tonic::DartConverter<Scene*>::FromArguments(args, 1, exception);
+  if (exception) {
+    Dart_ThrowException(exception);
+    return;
+  }
+  UIDartState::Current()->platform_configuration()->client()->Render(scene);
+}
+
+void UpdateSemantics(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  Dart_Handle exception = nullptr;
+  SemanticsUpdate* update =
+      tonic::DartConverter<SemanticsUpdate*>::FromArguments(args, 1, exception);
+  if (exception) {
+    Dart_ThrowException(exception);
+    return;
+  }
+  UIDartState::Current()->platform_configuration()->client()->UpdateSemantics(
+      update);
+}
+
+void SetIsolateDebugName(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  Dart_Handle exception = nullptr;
+  const std::string name =
+      tonic::DartConverter<std::string>::FromArguments(args, 1, exception);
+  if (exception) {
+    Dart_ThrowException(exception);
+    return;
+  }
+  UIDartState::Current()->SetDebugName(name);
+}
+
+void SetNeedsReportTimings(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  Dart_Handle exception = nullptr;
+  bool value = tonic::DartConverter<bool>::FromArguments(args, 1, exception);
+  UIDartState::Current()
+      ->platform_configuration()
+      ->client()
+      ->SetNeedsReportTimings(value);
+}
+
+Dart_Handle SendPlatformMessage(Dart_Handle window,
+                                const std::string& name,
+                                Dart_Handle callback,
+                                Dart_Handle data_handle) {
+  UIDartState* dart_state = UIDartState::Current();
+
+  if (!dart_state->platform_configuration()) {
+    return tonic::ToDart(
+        "Platform messages can only be sent from the main isolate");
+  }
+
+  fml::RefPtr<PlatformMessageResponse> response;
+  if (!Dart_IsNull(callback)) {
+    response = fml::MakeRefCounted<PlatformMessageResponseDart>(
+        tonic::DartPersistentValue(dart_state, callback),
+        dart_state->GetTaskRunners().GetUITaskRunner());
+  }
+  if (Dart_IsNull(data_handle)) {
+    dart_state->platform_configuration()->client()->HandlePlatformMessage(
+        std::make_unique<PlatformMessage>(name, response));
+  } else {
+    tonic::DartByteData data(data_handle);
+    const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
+    dart_state->platform_configuration()->client()->HandlePlatformMessage(
+        std::make_unique<PlatformMessage>(
+            name, fml::MallocMapping::Copy(buffer, data.length_in_bytes()),
+            response));
+  }
+
+  return Dart_Null();
+}
+
+void _SendPlatformMessage(Dart_NativeArguments args) {
+  tonic::DartCallStatic(&SendPlatformMessage, args);
+}
+
+void RespondToPlatformMessage(Dart_Handle window,
+                              int response_id,
+                              const tonic::DartByteData& data) {
+  if (Dart_IsNull(data.dart_handle())) {
+    UIDartState::Current()
+        ->platform_configuration()
+        ->CompletePlatformMessageEmptyResponse(response_id);
+  } else {
+    // TODO(engine): Avoid this copy.
+    const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
+    UIDartState::Current()
+        ->platform_configuration()
+        ->CompletePlatformMessageResponse(
+            response_id,
+            std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()));
+  }
+}
+
+void _RespondToPlatformMessage(Dart_NativeArguments args) {
+  tonic::DartCallStatic(&RespondToPlatformMessage, args);
+}
+
+void GetPersistentIsolateData(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+
+  auto persistent_isolate_data = UIDartState::Current()
+                                     ->platform_configuration()
+                                     ->client()
+                                     ->GetPersistentIsolateData();
+
+  if (!persistent_isolate_data) {
+    Dart_SetReturnValue(args, Dart_Null());
+    return;
+  }
+
+  Dart_SetReturnValue(
+      args, tonic::DartByteData::Create(persistent_isolate_data->GetMapping(),
+                                        persistent_isolate_data->GetSize()));
+}
+
 Dart_Handle ToByteData(const fml::Mapping& buffer) {
   return tonic::DartByteData::Create(buffer.GetMapping(), buffer.GetSize());
 }
@@ -271,105 +408,7 @@ void PlatformConfiguration::CompletePlatformMessageResponse(
   response->Complete(std::make_unique<fml::DataMapping>(std::move(data)));
 }
 
-void PlatformConfigurationNativeApi::Render(Scene* scene) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  UIDartState::Current()->platform_configuration()->client()->Render(scene);
-}
-
-void PlatformConfigurationNativeApi::SetNeedsReportTimings(bool value) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  UIDartState::Current()
-      ->platform_configuration()
-      ->client()
-      ->SetNeedsReportTimings(value);
-}
-
-Dart_Handle PlatformConfigurationNativeApi::SendPlatformMessage(
-    const std::string& name,
-    Dart_Handle callback,
-    Dart_Handle data_handle) {
-  UIDartState* dart_state = UIDartState::Current();
-
-  if (!dart_state->platform_configuration()) {
-    return tonic::ToDart(
-        "Platform messages can only be sent from the main isolate");
-  }
-
-  fml::RefPtr<PlatformMessageResponse> response;
-  if (!Dart_IsNull(callback)) {
-    response = fml::MakeRefCounted<PlatformMessageResponseDart>(
-        tonic::DartPersistentValue(dart_state, callback),
-        dart_state->GetTaskRunners().GetUITaskRunner());
-  }
-  if (Dart_IsNull(data_handle)) {
-    dart_state->platform_configuration()->client()->HandlePlatformMessage(
-        std::make_unique<PlatformMessage>(name, response));
-  } else {
-    tonic::DartByteData data(data_handle);
-    const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
-    dart_state->platform_configuration()->client()->HandlePlatformMessage(
-        std::make_unique<PlatformMessage>(
-            name, fml::MallocMapping::Copy(buffer, data.length_in_bytes()),
-            response));
-  }
-
-  return Dart_Null();
-}
-
-void PlatformConfigurationNativeApi::RespondToPlatformMessage(
-    int response_id,
-    const tonic::DartByteData& data) {
-  if (Dart_IsNull(data.dart_handle())) {
-    UIDartState::Current()
-        ->platform_configuration()
-        ->CompletePlatformMessageEmptyResponse(response_id);
-  } else {
-    // TODO(engine): Avoid this copy.
-    const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
-    UIDartState::Current()
-        ->platform_configuration()
-        ->CompletePlatformMessageResponse(
-            response_id,
-            std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()));
-  }
-}
-
-void PlatformConfigurationNativeApi::SetIsolateDebugName(
-    const std::string name) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  UIDartState::Current()->SetDebugName(name);
-}
-
-Dart_Handle PlatformConfigurationNativeApi::GetPersistentIsolateData() {
-  UIDartState::ThrowIfUIOperationsProhibited();
-
-  auto persistent_isolate_data = UIDartState::Current()
-                                     ->platform_configuration()
-                                     ->client()
-                                     ->GetPersistentIsolateData();
-
-  if (!persistent_isolate_data) {
-    return Dart_Null();
-  }
-
-  return tonic::DartByteData::Create(persistent_isolate_data->GetMapping(),
-                                     persistent_isolate_data->GetSize());
-}
-
-void PlatformConfigurationNativeApi::ScheduleFrame() {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  UIDartState::Current()->platform_configuration()->client()->ScheduleFrame();
-}
-
-void PlatformConfigurationNativeApi::UpdateSemantics(SemanticsUpdate* update) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  UIDartState::Current()->platform_configuration()->client()->UpdateSemantics(
-      update);
-}
-
-Dart_Handle PlatformConfigurationNativeApi::ComputePlatformResolvedLocale(
-    Dart_Handle supportedLocalesHandle) {
-  UIDartState::ThrowIfUIOperationsProhibited();
+Dart_Handle ComputePlatformResolvedLocale(Dart_Handle supportedLocalesHandle) {
   std::vector<std::string> supportedLocales =
       tonic::DartConverter<std::vector<std::string>>::FromDart(
           supportedLocalesHandle);
@@ -383,12 +422,33 @@ Dart_Handle PlatformConfigurationNativeApi::ComputePlatformResolvedLocale(
   return tonic::DartConverter<std::vector<std::string>>::ToDart(results);
 }
 
-std::string PlatformConfigurationNativeApi::DefaultRouteName() {
+static void _ComputePlatformResolvedLocale(Dart_NativeArguments args) {
   UIDartState::ThrowIfUIOperationsProhibited();
-  return UIDartState::Current()
-      ->platform_configuration()
-      ->client()
-      ->DefaultRouteName();
+  Dart_Handle result =
+      ComputePlatformResolvedLocale(Dart_GetNativeArgument(args, 1));
+  Dart_SetReturnValue(args, result);
+}
+
+void PlatformConfiguration::RegisterNatives(
+    tonic::DartLibraryNatives* natives) {
+  natives->Register({
+      {"PlatformConfiguration_defaultRouteName", DefaultRouteName, 1, true},
+      {"PlatformConfiguration_scheduleFrame", ScheduleFrame, 1, true},
+      {"PlatformConfiguration_sendPlatformMessage", _SendPlatformMessage, 4,
+       true},
+      {"PlatformConfiguration_respondToPlatformMessage",
+       _RespondToPlatformMessage, 3, true},
+      {"PlatformConfiguration_render", Render, 3, true},
+      {"PlatformConfiguration_updateSemantics", UpdateSemantics, 2, true},
+      {"PlatformConfiguration_setIsolateDebugName", SetIsolateDebugName, 2,
+       true},
+      {"PlatformConfiguration_setNeedsReportTimings", SetNeedsReportTimings, 2,
+       true},
+      {"PlatformConfiguration_getPersistentIsolateData",
+       GetPersistentIsolateData, 1, true},
+      {"PlatformConfiguration_computePlatformResolvedLocale",
+       _ComputePlatformResolvedLocale, 2, true},
+  });
 }
 
 }  // namespace flutter

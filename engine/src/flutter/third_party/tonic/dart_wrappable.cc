@@ -89,9 +89,6 @@ Dart_PersistentHandle DartWrappable::GetTypeForWrapper(
 }
 
 DartWrappable* DartConverterWrappable::FromDart(Dart_Handle handle) {
-  if (Dart_IsNull(handle)) {
-    return nullptr;
-  }
   intptr_t peer = 0;
   Dart_Handle result =
       Dart_GetNativeInstanceField(handle, DartWrappable::kPeerIndex, &peer);

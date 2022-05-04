@@ -30,16 +30,14 @@ class ImmutableBuffer : public RefCountedDartWrappable<ImmutableBuffer> {
 
   /// Initializes a new ImmutableData from a Dart Uint8List.
   ///
-  /// `buffer_handle` is the caller that will be registered as the Dart peer of
-  /// the native ImmutableBuffer object.
+  /// The zero indexed argument is the caller that will be registered as the
+  /// Dart peer of the native ImmutableBuffer object.
   ///
-  /// `data` is a tonic::Uint8List of bytes to copy.
+  /// The first indexed argumented is a tonic::Uint8List of bytes to copy.
   ///
-  /// `callback_handle` is expected to be a void callback to signal when the
-  /// copy has completed.
-  static Dart_Handle init(Dart_Handle buffer_handle,
-                          Dart_Handle data,
-                          Dart_Handle callback_handle);
+  /// The second indexed argument is expected to be a void callback to signal
+  /// when the copy has completed.
+  static void init(Dart_NativeArguments args);
 
   /// The length of the data in bytes.
   size_t length() const {
@@ -61,6 +59,8 @@ class ImmutableBuffer : public RefCountedDartWrappable<ImmutableBuffer> {
   }
 
   size_t GetAllocationSize() const override;
+
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit ImmutableBuffer(sk_sp<SkData> data) : data_(std::move(data)) {}

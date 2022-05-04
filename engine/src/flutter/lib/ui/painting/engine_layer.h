@@ -8,6 +8,10 @@
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 
+namespace tonic {
+class DartLibraryNatives;
+}  // namespace tonic
+
 namespace flutter {
 
 class EngineLayer;
@@ -23,6 +27,8 @@ class EngineLayer : public RefCountedDartWrappable<EngineLayer> {
     auto engine_layer = fml::MakeRefCounted<EngineLayer>(layer);
     engine_layer->AssociateWithDartWrapper(dart_handle);
   }
+
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
   void dispose();
 
