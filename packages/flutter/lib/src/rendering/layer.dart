@@ -1222,7 +1222,7 @@ class OffsetLayer extends ContainerLayer {
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
-    transform.multiply(Matrix4.translationValues(offset.dx, offset.dy, 0.0));
+    MatrixUtils.multiply(transform, Matrix4.translationValues(offset.dx, offset.dy, 0.0));
   }
 
   @override
@@ -1670,8 +1670,9 @@ class TransformLayer extends OffsetLayer {
     assert(transform != null);
     _lastEffectiveTransform = transform;
     if (offset != Offset.zero) {
-      _lastEffectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
-        ..multiply(_lastEffectiveTransform!);
+      final Matrix4 newEffectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0);
+      MatrixUtils.multiply(newEffectiveTransform, _lastEffectiveTransform!);
+      _lastEffectiveTransform = newEffectiveTransform;
     }
     engineLayer = builder.pushTransform(
       _lastEffectiveTransform!.storage,
@@ -1708,9 +1709,9 @@ class TransformLayer extends OffsetLayer {
     assert(transform != null);
     assert(_lastEffectiveTransform != null || this.transform != null);
     if (_lastEffectiveTransform == null) {
-      transform.multiply(this.transform!);
+      MatrixUtils.multiply(transform, this.transform!);
     } else {
-      transform.multiply(_lastEffectiveTransform!);
+      MatrixUtils.multiply(transform, _lastEffectiveTransform!);
     }
   }
 
@@ -2408,7 +2409,7 @@ class FollowerLayer extends ContainerLayer {
     if (_lastTransform == null)
       return null;
     final Matrix4 result = Matrix4.translationValues(-_lastOffset!.dx, -_lastOffset!.dy, 0.0);
-    result.multiply(_lastTransform!);
+    MatrixUtils.multiply(result, _lastTransform!);
     return result;
   }
 
@@ -2535,7 +2536,7 @@ class FollowerLayer extends ContainerLayer {
       return;
     }
     // Combine the matrices and store the result.
-    inverseTransform.multiply(forwardTransform);
+    MatrixUtils.multiply(inverseTransform, forwardTransform);
     _lastTransform = inverseTransform;
     _inverseDirty = true;
   }
@@ -2591,9 +2592,9 @@ class FollowerLayer extends ContainerLayer {
     assert(child != null);
     assert(transform != null);
     if (_lastTransform != null) {
-      transform.multiply(_lastTransform!);
+      MatrixUtils.multiply(transform, _lastTransform!);
     } else {
-      transform.multiply(Matrix4.translationValues(unlinkedOffset!.dx, unlinkedOffset!.dy, 0));
+      MatrixUtils.multiply(transform, Matrix4.translationValues(unlinkedOffset!.dx, unlinkedOffset!.dy, 0));
     }
   }
 

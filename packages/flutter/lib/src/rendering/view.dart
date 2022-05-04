@@ -212,7 +212,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     assert(_rootTransform != null);
-    transform.multiply(_rootTransform!);
+    MatrixUtils.multiply(transform, _rootTransform!);
     super.applyPaintTransform(child, transform);
   }
 

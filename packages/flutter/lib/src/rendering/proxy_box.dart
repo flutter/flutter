@@ -2453,7 +2453,7 @@ class RenderTransform extends RenderProxyBox {
       translation = resolvedAlignment.alongSize(size);
       result.translate(translation.dx, translation.dy);
     }
-    result.multiply(_transform!);
+    MatrixUtils.multiply(result, _transform!);
     if (resolvedAlignment != null)
       result.translate(-translation!.dx, -translation.dy);
     if (_origin != null)
@@ -2501,8 +2501,9 @@ class RenderTransform extends RenderProxyBox {
           layer = null;
         }
       } else {
-        final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
-          ..multiply(transform)..translate(-offset.dx, -offset.dy);
+        final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0);
+        MatrixUtils.multiply(effectiveTransform, transform);
+        transform.translate(-offset.dx, -offset.dy);
         final ui.ImageFilter filter = ui.ImageFilter.matrix(
           effectiveTransform.storage,
           filterQuality: filterQuality!,
@@ -2524,7 +2525,7 @@ class RenderTransform extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.multiply(_effectiveTransform!);
+     MatrixUtils.multiply(transform, _effectiveTransform!);
   }
 
   @override
@@ -2804,7 +2805,7 @@ class RenderFittedBox extends RenderProxyBox {
       transform.setZero();
     } else {
       _updatePaintData();
-      transform.multiply(_transform!);
+      MatrixUtils.multiply(transform, _transform!);
     }
   }
 

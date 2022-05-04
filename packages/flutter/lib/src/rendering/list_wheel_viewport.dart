@@ -1001,7 +1001,7 @@ class RenderListWheelViewport
       centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
       centerOriginTranslation.dy,
     );
-    result.multiply(originalMatrix);
+    MatrixUtils.multiply(result, originalMatrix);
     result.translate(
       -centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
       -centerOriginTranslation.dy,

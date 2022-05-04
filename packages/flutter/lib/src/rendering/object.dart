@@ -629,8 +629,9 @@ class PaintingContext extends ClipContext {
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   TransformLayer? pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter, { TransformLayer? oldLayer }) {
-    final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
-      ..multiply(transform)..translate(-offset.dx, -offset.dy);
+    final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0);
+    MatrixUtils.multiply(effectiveTransform, transform);
+    effectiveTransform.translate(-offset.dx, -offset.dy);
     if (needsCompositing) {
       final TransformLayer layer = oldLayer ?? TransformLayer();
       layer.transform = effectiveTransform;

@@ -140,7 +140,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     if (_paintTransform != null)
-      transform.multiply(_paintTransform!);
+      MatrixUtils.multiply(transform, _paintTransform!);
     super.applyPaintTransform(child, transform);
   }
 }
