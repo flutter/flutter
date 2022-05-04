@@ -14,22 +14,11 @@ namespace flutter {
 class DartRuntimeHooks {
  public:
   static void Install(bool is_ui_isolate, const std::string& script_uri);
-
-  static void Logger_PrintDebugString(std::string message);
-
-  static void Logger_PrintString(std::string message);
-
-  static void ScheduleMicrotask(Dart_Handle closure);
-
-  static Dart_Handle GetCallbackHandle(Dart_Handle func);
-
-  static Dart_Handle GetCallbackFromHandle(int64_t handle);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartRuntimeHooks);
 };
-
-void DartPluginRegistrant_EnsureInitialized();
 
 }  // namespace flutter
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.14
+// @dart = 2.12
 part of dart.ui;
 
 /// A view into which a Flutter [Scene] is drawn.
@@ -264,10 +264,8 @@ abstract class FlutterView {
   ///   scheduling of frames.
   /// * [RendererBinding], the Flutter framework class which manages layout and
   ///   painting.
-  void render(Scene scene) => _render(scene);
-
-  @FfiNative<Void Function(Pointer<Void>)>('PlatformConfigurationNativeApi::Render')
-  external static void _render(Scene scene);
+  void render(Scene scene) => _render(scene, this);
+  void _render(Scene scene, FlutterView view) native 'PlatformConfiguration_render';
 }
 
 /// A top-level platform window displaying a Flutter layer tree drawn from a

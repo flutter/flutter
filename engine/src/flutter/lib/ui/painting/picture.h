@@ -12,6 +12,10 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
+namespace tonic {
+class DartLibraryNatives;
+}  // namespace tonic
+
 namespace flutter {
 class Canvas;
 
@@ -39,6 +43,8 @@ class Picture : public RefCountedDartWrappable<Picture> {
   void dispose();
 
   size_t GetAllocationSize() const override;
+
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
   static Dart_Handle RasterizeToImage(sk_sp<SkPicture> picture,
                                       uint32_t width,

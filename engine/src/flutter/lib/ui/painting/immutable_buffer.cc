@@ -19,24 +19,34 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImmutableBuffer);
 
+#define FOR_EACH_BINDING(V)   \
+  V(ImmutableBuffer, dispose) \
+  V(ImmutableBuffer, length)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
 ImmutableBuffer::~ImmutableBuffer() {}
 
-Dart_Handle ImmutableBuffer::init(Dart_Handle buffer_handle,
-                                  Dart_Handle data,
-                                  Dart_Handle callback_handle) {
+void ImmutableBuffer::RegisterNatives(tonic::DartLibraryNatives* natives) {
+  natives->Register({{"ImmutableBuffer_init", ImmutableBuffer::init, 3, true},
+                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
+}
+
+void ImmutableBuffer::init(Dart_NativeArguments args) {
+  Dart_Handle callback_handle = Dart_GetNativeArgument(args, 2);
   if (!Dart_IsClosure(callback_handle)) {
-    return tonic::ToDart("Callback must be a function");
+    Dart_SetReturnValue(args, tonic::ToDart("Callback must be a function"));
+    return;
   }
 
-  tonic::Uint8List dataList = tonic::Uint8List(data);
+  Dart_Handle buffer_handle = Dart_GetNativeArgument(args, 0);
+  tonic::Uint8List data = tonic::Uint8List(Dart_GetNativeArgument(args, 1));
 
-  auto sk_data = MakeSkDataWithCopy(dataList.data(), dataList.num_elements());
-  dataList.Release();
+  auto sk_data = MakeSkDataWithCopy(data.data(), data.num_elements());
+  data.Release();
   auto buffer = fml::MakeRefCounted<ImmutableBuffer>(sk_data);
   buffer->AssociateWithDartWrapper(buffer_handle);
   tonic::DartInvoke(callback_handle, {Dart_TypeVoid()});
-
-  return Dart_Null();
 }
 
 size_t ImmutableBuffer::GetAllocationSize() const {

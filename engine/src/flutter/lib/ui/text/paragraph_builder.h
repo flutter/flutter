@@ -13,6 +13,10 @@
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
+namespace tonic {
+class DartLibraryNatives;
+}  // namespace tonic
+
 namespace flutter {
 
 class Paragraph;
@@ -22,19 +26,19 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
   FML_FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
 
  public:
-  static void Create(Dart_Handle wrapper,
-                     Dart_Handle encoded_handle,
-                     Dart_Handle strutData,
-                     const std::string& fontFamily,
-                     const std::vector<std::string>& strutFontFamilies,
-                     double fontSize,
-                     double height,
-                     const std::u16string& ellipsis,
-                     const std::string& locale);
+  static fml::RefPtr<ParagraphBuilder> create(
+      tonic::Int32List& encoded,
+      Dart_Handle strutData,
+      const std::string& fontFamily,
+      const std::vector<std::string>& strutFontFamilies,
+      double fontSize,
+      double height,
+      const std::u16string& ellipsis,
+      const std::string& locale);
 
   ~ParagraphBuilder() override;
 
-  void pushStyle(const tonic::Int32List& encoded,
+  void pushStyle(tonic::Int32List& encoded,
                  const std::vector<std::string>& fontFamilies,
                  double fontSize,
                  double letterSpacing,
@@ -68,8 +72,10 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
 
   void build(Dart_Handle paragraph_handle);
 
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
+
  private:
-  explicit ParagraphBuilder(Dart_Handle encoded,
+  explicit ParagraphBuilder(tonic::Int32List& encoded,
                             Dart_Handle strutData,
                             const std::string& fontFamily,
                             const std::vector<std::string>& strutFontFamilies,

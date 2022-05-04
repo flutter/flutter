@@ -17,7 +17,6 @@
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/lib/ui/window/window.h"
 #include "third_party/tonic/dart_persistent_value.h"
-#include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
 class FontCollection;
@@ -383,6 +382,15 @@ class PlatformConfiguration final {
   void ReportTimings(std::vector<int64_t> timings);
 
   //----------------------------------------------------------------------------
+  /// @brief      Registers the native handlers for Dart functions that this
+  ///             class handles.
+  ///
+  /// @param[in] natives The natives registry that the functions will be
+  ///                    registered with.
+  ///
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
+
+  //----------------------------------------------------------------------------
   /// @brief      Retrieves the Window with the given ID managed by the
   ///             `PlatformConfiguration`.
   ///
@@ -434,43 +442,6 @@ class PlatformConfiguration final {
   int next_response_id_ = 1;
   std::unordered_map<int, fml::RefPtr<PlatformMessageResponse>>
       pending_responses_;
-};
-
-//----------------------------------------------------------------------------
-// API exposed as FFI calls in Dart.
-//
-// These are probably not supposed to be called directly, and should instead
-// be called through their sibling API in `PlatformConfiguration` or
-// `PlatformConfigurationClient`.
-//
-// These are intentionally undocumented. Refer instead to the sibling methods
-// above.
-//----------------------------------------------------------------------------
-class PlatformConfigurationNativeApi {
- public:
-  static std::string DefaultRouteName();
-
-  static void ScheduleFrame();
-
-  static void Render(Scene* scene);
-
-  static void UpdateSemantics(SemanticsUpdate* update);
-
-  static void SetNeedsReportTimings(bool value);
-
-  static Dart_Handle GetPersistentIsolateData();
-
-  static Dart_Handle ComputePlatformResolvedLocale(
-      Dart_Handle supportedLocalesHandle);
-
-  static void SetIsolateDebugName(const std::string name);
-
-  static Dart_Handle SendPlatformMessage(const std::string& name,
-                                         Dart_Handle callback,
-                                         Dart_Handle data_handle);
-
-  static void RespondToPlatformMessage(int response_id,
-                                       const tonic::DartByteData& data);
 };
 
 }  // namespace flutter

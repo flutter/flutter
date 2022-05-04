@@ -17,6 +17,22 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImageDescriptor);
 
+#define FOR_EACH_BINDING(V)            \
+  V(ImageDescriptor, initRaw)          \
+  V(ImageDescriptor, instantiateCodec) \
+  V(ImageDescriptor, width)            \
+  V(ImageDescriptor, height)           \
+  V(ImageDescriptor, bytesPerPixel)    \
+  V(ImageDescriptor, dispose)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
+void ImageDescriptor::RegisterNatives(tonic::DartLibraryNatives* natives) {
+  natives->Register(
+      {{"ImageDescriptor_initEncoded", ImageDescriptor::initEncoded, 3, true},
+       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
+}
+
 const SkImageInfo ImageDescriptor::CreateImageInfo() const {
   FML_DCHECK(generator_);
   return generator_->GetInfo();
@@ -37,15 +53,22 @@ ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
       image_info_(CreateImageInfo()),
       row_bytes_(std::nullopt) {}
 
-Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
-                                         ImmutableBuffer* immutable_buffer,
-                                         Dart_Handle callback_handle) {
+void ImageDescriptor::initEncoded(Dart_NativeArguments args) {
+  Dart_Handle callback_handle = Dart_GetNativeArgument(args, 2);
   if (!Dart_IsClosure(callback_handle)) {
-    return tonic::ToDart("Callback must be a function");
+    Dart_SetReturnValue(args, tonic::ToDart("Callback must be a function"));
+    return;
   }
 
+  Dart_Handle descriptor_handle = Dart_GetNativeArgument(args, 0);
+  ImmutableBuffer* immutable_buffer =
+      tonic::DartConverter<ImmutableBuffer*>::FromDart(
+          Dart_GetNativeArgument(args, 1));
+
   if (!immutable_buffer) {
-    return tonic::ToDart("Buffer parameter must not be null");
+    Dart_SetReturnValue(args,
+                        tonic::ToDart("Buffer parameter must not be null"));
+    return;
   }
 
   // This has to be valid because this method is called from Dart.
@@ -53,10 +76,11 @@ Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
   auto registry = dart_state->GetImageGeneratorRegistry();
 
   if (!registry) {
-    return tonic::ToDart(
-        "Failed to access the internal image decoder "
-        "registry on this isolate. Please file a bug on "
-        "https://github.com/flutter/flutter/issues.");
+    Dart_SetReturnValue(
+        args, tonic::ToDart("Failed to access the internal image decoder "
+                            "registry on this isolate. Please file a bug on "
+                            "https://github.com/flutter/flutter/issues."));
+    return;
   }
 
   auto generator =
@@ -64,7 +88,8 @@ Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
 
   if (!generator) {
     // No compatible image decoder was found.
-    return tonic::ToDart("Invalid image data");
+    Dart_SetReturnValue(args, tonic::ToDart("Invalid image data"));
+    return;
   }
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
@@ -74,8 +99,6 @@ Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
 
   descriptor->AssociateWithDartWrapper(descriptor_handle);
   tonic::DartInvoke(callback_handle, {Dart_TypeVoid()});
-
-  return Dart_Null();
 }
 
 void ImageDescriptor::initRaw(Dart_Handle descriptor_handle,

@@ -26,26 +26,46 @@ Dart_Handle IsolateNameServerNatives::LookupPortByName(
   return Dart_NewSendPort(port);
 }
 
-bool IsolateNameServerNatives::RegisterPortWithName(Dart_Handle port_handle,
-                                                    const std::string& name) {
+Dart_Handle IsolateNameServerNatives::RegisterPortWithName(
+    Dart_Handle port_handle,
+    const std::string& name) {
   auto name_server = UIDartState::Current()->GetIsolateNameServer();
   if (!name_server) {
-    return false;
+    return Dart_False();
   }
   Dart_Port port = ILLEGAL_PORT;
   Dart_SendPortGetId(port_handle, &port);
   if (!name_server->RegisterIsolatePortWithName(port, name)) {
-    return false;
+    return Dart_False();
   }
-  return true;
+  return Dart_True();
 }
 
-bool IsolateNameServerNatives::RemovePortNameMapping(const std::string& name) {
+Dart_Handle IsolateNameServerNatives::RemovePortNameMapping(
+    const std::string& name) {
   auto name_server = UIDartState::Current()->GetIsolateNameServer();
-  if (!name_server || !name_server->RemoveIsolateNameMapping(name)) {
-    return false;
+  if (!name_server) {
+    return Dart_False();
   }
-  return true;
+  if (!name_server->RemoveIsolateNameMapping(name)) {
+    return Dart_False();
+  }
+  return Dart_True();
+}
+
+#define FOR_EACH_BINDING(V)                         \
+  V(IsolateNameServerNatives, LookupPortByName)     \
+  V(IsolateNameServerNatives, RegisterPortWithName) \
+  V(IsolateNameServerNatives, RemovePortNameMapping)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK_STATIC)
+
+#define DART_REGISTER_NATIVE_STATIC_(CLASS, METHOD) \
+  DART_REGISTER_NATIVE_STATIC(CLASS, METHOD),
+
+void IsolateNameServerNatives::RegisterNatives(
+    tonic::DartLibraryNatives* natives) {
+  natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE_STATIC_)});
 }
 
 }  // namespace flutter
