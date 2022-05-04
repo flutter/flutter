@@ -9,6 +9,8 @@
 #include "flutter/lib/ui/painting/codec.h"
 #include "flutter/lib/ui/painting/image_generator.h"
 
+using tonic::DartPersistentValue;
+
 namespace flutter {
 
 class MultiFrameCodec : public Codec {

@@ -434,8 +434,6 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     ::free(flags_error);
   }
 
-  DartUI::InitForGlobal();
-
   {
     TRACE_EVENT0("flutter", "Dart_Initialize");
     Dart_InitializeParams params = {};

@@ -77,8 +77,6 @@ class NativeStringAttribute
   /// Returns the c++ representataion of StringAttribute.
   const StringAttributePtr GetAttribute() const;
 
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
-
  private:
   NativeStringAttribute();
   StringAttributePtr attribute_;
