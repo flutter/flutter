@@ -121,7 +121,6 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
    List<SpellCheckerSuggestionSpan> correctSpellCheckResults(String newText, String resultsText, List<SpellCheckerSuggestionSpan> results) {
        List<SpellCheckerSuggestionSpan> correctedSpellCheckResults = <SpellCheckerSuggestionSpan>[];
 
-       // STEP 1: Find first bad spell check span
        int span_pointer = 0;
        bool foundBadSpan = false;
 
@@ -143,7 +142,6 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
            currentSpan = results[span_pointer];
            currentSpanStart = currentSpan.start;
            currentSpanEnd = currentSpan.end;
-           print("Current span: ${currentSpanStart}, ${currentSpanEnd}");
 
            start_index = currentSpanStart < newText.length ? currentSpanStart : null;
            end_index = currentSpanEnd < newText.length ? currentSpanEnd : null;
@@ -152,38 +150,29 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
 
            if (!spanWithinTextRange) {
                // No more of the spell check results will be within the range of the text
-               print("No more results found in range");
                break;
-           } else {
-           oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1);
-           newSpanText = newText.substring(currentSpanStart, currentSpanEnd + 1);
-
-           if (oldSpanText == newSpanText) {
-               print("Found it");
-               searchStart = currentSpanEnd + 1;
-               correctedSpellCheckResults.add(currentSpan);
-           }
+           } 
            else {
-               spanLength = currentSpanEnd - currentSpanStart; 
-               RegExp regex = RegExp('\\b$oldSpanText\\b');
-               int substring = newText.substring(searchStart).indexOf(regex);
-               newStart = substring + searchStart;
+              oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1);
+              newSpanText = newText.substring(currentSpanStart, currentSpanEnd + 1);
 
-               // STEP 2: Shift it or throw it out
-               if (substring >= 0) {
-                   print("Shifting it");
-                   correctedSpellCheckResults.add(SpellCheckerSuggestionSpan(newStart, newStart + spanLength, currentSpan.replacementSuggestions));
-                   print("New start: ${newStart}");
-                   print("New end: ${newStart + spanLength}");
-                   searchStart = newStart + spanLength;
-               }
-               else {
-                   print("Didn't find it at all; throwing it out");
-               }
+                if (oldSpanText == newSpanText) {
+                    searchStart = currentSpanEnd + 1;
+                    correctedSpellCheckResults.add(currentSpan);
+                }
+                else {
+                    spanLength = currentSpanEnd - currentSpanStart; 
+                    RegExp regex = RegExp('\\b$oldSpanText\\b');
+                    int substring = newText.substring(searchStart).indexOf(regex);
+                    newStart = substring + searchStart;
+
+                    if (substring >= 0) {
+                        correctedSpellCheckResults.add(SpellCheckerSuggestionSpan(newStart, newStart + spanLength, currentSpan.replacementSuggestions));
+                        searchStart = newStart + spanLength;
+                    }
+                }
            }
-           }
-            print("-------------------------------------");
-          // STEP 3: Repeat
+
            span_pointer += 1;
        }
 
