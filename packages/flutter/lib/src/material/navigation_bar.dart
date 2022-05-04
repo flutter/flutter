@@ -218,9 +218,9 @@ enum NavigationDestinationLabelBehavior {
 }
 
 /// A Material 3 [NavigationBar] destination.
-/// 
+///
 /// Displays a label below an icon. Use with [NavigationBar.destinations].
-/// 
+///
 /// See also:
 ///
 ///  * [NavigationBar], for an interactive code sample.
