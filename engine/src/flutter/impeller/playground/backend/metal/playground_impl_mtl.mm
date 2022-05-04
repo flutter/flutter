@@ -41,44 +41,54 @@ ShaderLibraryMappingsForPlayground() {
   };
 }
 
-PlaygroundImplMTL::PlaygroundImplMTL() : data_(std::make_unique<Data>()) {}
-
-PlaygroundImplMTL::~PlaygroundImplMTL() = default;
-
-std::shared_ptr<Context> PlaygroundImplMTL::CreateContext() const {
-  return ContextMTL::Create(ShaderLibraryMappingsForPlayground(),
-                            "Playground Library");
+void PlaygroundImplMTL::DestroyWindowHandle(WindowHandle handle) {
+  if (!handle) {
+    return;
+  }
+  ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
 }
 
-bool PlaygroundImplMTL::SetupWindow(WindowHandle handle,
-                                    std::shared_ptr<Context> context) {
-  if (handle_ != nullptr) {
-    return false;
+PlaygroundImplMTL::PlaygroundImplMTL()
+    : handle_(nullptr, &DestroyWindowHandle), data_(std::make_unique<Data>()) {
+  ::glfwDefaultWindowHints();
+  ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+  ::glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+  auto window = ::glfwCreateWindow(1, 1, "Test", nullptr, nullptr);
+  if (!window) {
+    return;
   }
-
-  handle_ = handle;
-
-  NSWindow* cocoa_window =
-      ::glfwGetCocoaWindow(reinterpret_cast<GLFWwindow*>(handle_));
+  auto context = ContextMTL::Create(ShaderLibraryMappingsForPlayground(),
+                                    "Playground Library");
+  if (!context) {
+    return;
+  }
+  NSWindow* cocoa_window = ::glfwGetCocoaWindow(window);
+  if (cocoa_window == nil) {
+    return;
+  }
   data_->metal_layer = [CAMetalLayer layer];
   data_->metal_layer.device = ContextMTL::Cast(*context).GetMTLDevice();
   // This pixel format is one of the documented supported formats.
   data_->metal_layer.pixelFormat = ToMTLPixelFormat(PixelFormat::kDefaultColor);
   cocoa_window.contentView.layer = data_->metal_layer;
   cocoa_window.contentView.wantsLayer = YES;
-  return true;
+
+  handle_.reset(window);
+  context_ = std::move(context);
 }
 
-bool PlaygroundImplMTL::TeardownWindow(WindowHandle handle,
-                                       std::shared_ptr<Context> context) {
-  if (handle_ != handle) {
-    return false;
-  }
-  handle_ = nullptr;
-  data_->metal_layer = nil;
-  return true;
+PlaygroundImplMTL::~PlaygroundImplMTL() = default;
+
+std::shared_ptr<Context> PlaygroundImplMTL::GetContext() const {
+  return context_;
 }
 
+// |PlaygroundImpl|
+PlaygroundImpl::WindowHandle PlaygroundImplMTL::GetWindowHandle() {
+  return handle_.get();
+}
+
+// |PlaygroundImpl|
 std::unique_ptr<Surface> PlaygroundImplMTL::AcquireSurfaceFrame(
     std::shared_ptr<Context> context) {
   if (!data_->metal_layer) {

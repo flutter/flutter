@@ -19,15 +19,11 @@ class PlaygroundImpl {
 
   virtual ~PlaygroundImpl();
 
-  virtual std::shared_ptr<Context> CreateContext() const = 0;
-
   using WindowHandle = void*;
 
-  virtual bool SetupWindow(WindowHandle handle,
-                           std::shared_ptr<Context> context) = 0;
+  virtual WindowHandle GetWindowHandle() = 0;
 
-  virtual bool TeardownWindow(WindowHandle handle,
-                              std::shared_ptr<Context> context) = 0;
+  virtual std::shared_ptr<Context> GetContext() const = 0;
 
   virtual std::unique_ptr<Surface> AcquireSurfaceFrame(
       std::shared_ptr<Context> context) = 0;

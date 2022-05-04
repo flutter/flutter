@@ -6,6 +6,12 @@
 
 namespace impeller {
 
-//
+SamplerGLES::SamplerGLES() = default;
+
+SamplerGLES::~SamplerGLES() = default;
+
+bool SamplerGLES::IsValid() const {
+  return true;
+}
 
 }  // namespace impeller

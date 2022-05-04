@@ -1,0 +1,79 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../../tools/impeller.gni")
+
+config("gles_config") {
+  # Generic GL/GLES/EGL/Vulkan headers. Any will do. We just pick one from Angle
+  # because they are there.
+  include_dirs = [ "//third_party/angle/include" ]
+}
+
+impeller_component("gles") {
+  public_configs = [ ":gles_config" ]
+
+  sources = [
+    "allocator_gles.cc",
+    "allocator_gles.h",
+    "buffer_bindings_gles.cc",
+    "buffer_bindings_gles.h",
+    "command_buffer_gles.cc",
+    "command_buffer_gles.h",
+    "context_gles.cc",
+    "context_gles.h",
+    "device_buffer_gles.cc",
+    "device_buffer_gles.h",
+    "formats_gles.cc",
+    "formats_gles.h",
+    "gl_description.cc",
+    "gl_description.h",
+    "gles.h",
+    "gles_handle.cc",
+    "gles_handle.h",
+    "pipeline_gles.cc",
+    "pipeline_gles.h",
+    "pipeline_library_gles.cc",
+    "pipeline_library_gles.h",
+    "proc_table_gles.cc",
+    "proc_table_gles.h",
+    "reactor_gles.cc",
+    "reactor_gles.h",
+    "render_pass_gles.cc",
+    "render_pass_gles.h",
+    "sampler_gles.cc",
+    "sampler_gles.h",
+    "sampler_library_gles.cc",
+    "sampler_library_gles.h",
+    "shader_function_gles.cc",
+    "shader_function_gles.h",
+    "shader_library_gles.cc",
+    "shader_library_gles.h",
+    "surface_gles.cc",
+    "surface_gles.h",
+    "texture_gles.cc",
+    "texture_gles.h",
+  ]
+
+  public_deps = [
+    "../../:renderer",
+    "../../../blobcat:blobcat_lib",
+    "//flutter/fml",
+  ]
+}
+
+impeller_component("gles_unittests") {
+  testonly = true
+
+  sources = [
+    "gles_test.cc",
+    "gles_test.h",
+    "gles_unittests.cc",
+  ]
+
+  deps = [
+    ":gles",
+    "//flutter/testing",
+    "//third_party/swiftshader_flutter:swiftshader_gl",
+  ]
+}

@@ -1,0 +1,47 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../../tools/impeller.gni")
+
+impeller_component("metal") {
+  sources = [
+    "allocator_mtl.h",
+    "allocator_mtl.mm",
+    "command_buffer_mtl.h",
+    "command_buffer_mtl.mm",
+    "context_mtl.h",
+    "context_mtl.mm",
+    "device_buffer_mtl.h",
+    "device_buffer_mtl.mm",
+    "formats_mtl.h",
+    "formats_mtl.mm",
+    "pipeline_library_mtl.h",
+    "pipeline_library_mtl.mm",
+    "pipeline_mtl.h",
+    "pipeline_mtl.mm",
+    "render_pass_mtl.h",
+    "render_pass_mtl.mm",
+    "sampler_library_mtl.h",
+    "sampler_library_mtl.mm",
+    "sampler_mtl.h",
+    "sampler_mtl.mm",
+    "shader_function_mtl.h",
+    "shader_function_mtl.mm",
+    "shader_library_mtl.h",
+    "shader_library_mtl.mm",
+    "surface_mtl.h",
+    "surface_mtl.mm",
+    "texture_mtl.h",
+    "texture_mtl.mm",
+    "vertex_descriptor_mtl.h",
+    "vertex_descriptor_mtl.mm",
+  ]
+
+  public_deps = [
+    "../../:renderer",
+    "//flutter/fml",
+  ]
+
+  frameworks = [ "Metal.framework" ]
+}

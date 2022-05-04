@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/mapping.h"
 
 namespace impeller {
 
@@ -38,5 +39,8 @@ class Allocation {
 
   FML_DISALLOW_COPY_AND_ASSIGN(Allocation);
 };
+
+std::shared_ptr<fml::Mapping> CreateMappingWithCopy(const uint8_t* contents,
+                                                    size_t length);
 
 }  // namespace impeller

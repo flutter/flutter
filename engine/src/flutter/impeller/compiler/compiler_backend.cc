@@ -7,14 +7,16 @@
 namespace impeller {
 namespace compiler {
 
-CompilerBackend::CompilerBackend(MSLCompiler compiler) : compiler_(compiler) {}
+CompilerBackend::CompilerBackend(MSLCompiler compiler)
+    : CompilerBackend(Type::kMSL, compiler) {}
 
-CompilerBackend::CompilerBackend(GLSLCompiler compiler) : compiler_(compiler) {}
+CompilerBackend::CompilerBackend(GLSLCompiler compiler)
+    : CompilerBackend(Type::kGLSL, compiler) {}
 
 CompilerBackend::CompilerBackend() = default;
 
-CompilerBackend::CompilerBackend(Compiler compiler)
-    : compiler_(std::move(compiler)){};
+CompilerBackend::CompilerBackend(Type type, Compiler compiler)
+    : type_(type), compiler_(std::move(compiler)){};
 
 CompilerBackend::~CompilerBackend() = default;
 
@@ -78,6 +80,10 @@ const spirv_cross::CompilerGLSL* CompilerBackend::GetGLSLCompiler() const {
 
 CompilerBackend::operator bool() const {
   return !!GetCompiler();
+}
+
+CompilerBackend::Type CompilerBackend::GetType() const {
+  return type_;
 }
 
 }  // namespace compiler

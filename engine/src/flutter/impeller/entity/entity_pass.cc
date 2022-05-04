@@ -217,7 +217,7 @@ bool EntityPass::Render(ContentContext& renderer,
         return false;
       }
 
-      if (!sub_renderpass->EncodeCommands(*context->GetTransientsAllocator())) {
+      if (!sub_renderpass->EncodeCommands(context->GetTransientsAllocator())) {
         return false;
       }
 

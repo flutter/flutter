@@ -157,7 +157,7 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
   }
 
   {
-    root["entrypoint"] = entrypoints.front().name;
+    root["entrypoint"] = options_.entry_point_name;
     root["shader_name"] = options_.shader_name;
     root["shader_stage"] =
         ExecutionModelToString(entrypoints.front().execution_model);
@@ -275,6 +275,16 @@ std::shared_ptr<fml::Mapping> Reflector::GenerateReflectionCC() const {
   return InflateTemplate(kReflectionCCTemplate);
 }
 
+static std::string ToString(CompilerBackend::Type type) {
+  switch (type) {
+    case CompilerBackend::Type::kMSL:
+      return "Metal Shading Language";
+    case CompilerBackend::Type::kGLSL:
+      return "OpenGL Shading Language";
+  }
+  FML_UNREACHABLE();
+}
+
 std::shared_ptr<fml::Mapping> Reflector::InflateTemplate(
     const std::string_view& tmpl) const {
   inja::Environment env;
@@ -288,6 +298,11 @@ std::shared_ptr<fml::Mapping> Reflector::InflateTemplate(
   env.add_callback("to_shader_stage", 1u, [](inja::Arguments& args) {
     return StringToShaderStage(args.at(0u)->get<std::string>());
   });
+
+  env.add_callback("get_generator_name", 0u,
+                   [type = compiler_.GetType()](inja::Arguments& args) {
+                     return ToString(type);
+                   });
 
   auto inflated_template =
       std::make_shared<std::string>(env.render(tmpl, *template_arguments_));
@@ -332,6 +347,18 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectType(
   result["bit_width"] = type.width;
   result["vec_size"] = type.vecsize;
   result["columns"] = type.columns;
+  auto& members = result["members"] = nlohmann::json::array_t{};
+  if (type.basetype == spirv_cross::SPIRType::BaseType::Struct) {
+    for (const auto& struct_member : ReadStructMembers(type_id)) {
+      auto member = nlohmann::json::object_t{};
+      member["name"] = struct_member.name;
+      member["type"] = struct_member.type;
+      member["base_type"] = struct_member.base_type;
+      member["offset"] = struct_member.offset;
+      member["size"] = struct_member.byte_length;
+      members.emplace_back(std::move(member));
+    }
+  }
 
   return result;
 }
@@ -429,11 +456,12 @@ std::vector<StructMember> Reflector::ReadStructMembers(
     if (struct_member_offset > current_byte_offset) {
       const auto alignment_pad = struct_member_offset - current_byte_offset;
       result.emplace_back(StructMember{
-          .type = TypeNameWithPaddingOfSize(alignment_pad),
-          .name = SPrintF("_PADDING_%s_",
-                          GetMemberNameAtIndex(struct_type, i).c_str()),
-          .offset = current_byte_offset,
-          .byte_length = alignment_pad,
+          TypeNameWithPaddingOfSize(alignment_pad),                 // type
+          BaseTypeToString(spirv_cross::SPIRType::BaseType::Void),  // basetype
+          SPrintF("_PADDING_%s_",
+                  GetMemberNameAtIndex(struct_type, i).c_str()),  // name
+          current_byte_offset,                                    // offset
+          alignment_pad                                           // byte_length
       });
       current_byte_offset += alignment_pad;
     }
@@ -452,10 +480,11 @@ std::vector<StructMember> Reflector::ReadStructMembers(
         member.vecsize == 4                                           //
     ) {
       result.emplace_back(StructMember{
-          .type = "Matrix",
-          .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = struct_member_offset,
-          .byte_length = sizeof(Matrix),
+          "Matrix",                              // type
+          BaseTypeToString(member.basetype),     // basetype
+          GetMemberNameAtIndex(struct_type, i),  // name
+          struct_member_offset,                  // offset
+          sizeof(Matrix)                         // byte_length
       });
       current_byte_offset += sizeof(Matrix);
       continue;
@@ -468,10 +497,11 @@ std::vector<StructMember> Reflector::ReadStructMembers(
         member.vecsize == 2                                           //
     ) {
       result.emplace_back(StructMember{
-          .type = "Point",
-          .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = struct_member_offset,
-          .byte_length = sizeof(Point),
+          "Point",                               // type
+          BaseTypeToString(member.basetype),     // basetype
+          GetMemberNameAtIndex(struct_type, i),  // name
+          struct_member_offset,                  // offset
+          sizeof(Point)                          // byte_length
       });
       current_byte_offset += sizeof(Point);
       continue;
@@ -484,10 +514,11 @@ std::vector<StructMember> Reflector::ReadStructMembers(
         member.vecsize == 3                                           //
     ) {
       result.emplace_back(StructMember{
-          .type = "Vector3",
-          .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = struct_member_offset,
-          .byte_length = sizeof(Vector3),
+          "Vector3",                             // type
+          BaseTypeToString(member.basetype),     // basetype
+          GetMemberNameAtIndex(struct_type, i),  // name
+          struct_member_offset,                  // offset
+          sizeof(Vector3)                        // byte_length
       });
       current_byte_offset += sizeof(Vector3);
       continue;
@@ -500,10 +531,11 @@ std::vector<StructMember> Reflector::ReadStructMembers(
         member.vecsize == 4                                           //
     ) {
       result.emplace_back(StructMember{
-          .type = "Vector4",
-          .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = struct_member_offset,
-          .byte_length = sizeof(Vector4),
+          "Vector4",                             // type
+          BaseTypeToString(member.basetype),     // basetype
+          GetMemberNameAtIndex(struct_type, i),  // name
+          struct_member_offset,                  // offset
+          sizeof(Vector4)                        // byte_length
       });
       current_byte_offset += sizeof(Vector4);
       continue;
@@ -518,10 +550,11 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       ) {
         // Add the type directly.
         result.emplace_back(StructMember{
-            .type = maybe_known_type.value().name,
-            .name = GetMemberNameAtIndex(struct_type, i),
-            .offset = struct_member_offset,
-            .byte_length = maybe_known_type.value().byte_size,
+            maybe_known_type.value().name,         // type
+            BaseTypeToString(member.basetype),     // basetype
+            GetMemberNameAtIndex(struct_type, i),  // name
+            struct_member_offset,                  // offset
+            maybe_known_type.value().byte_size     // byte_length
         });
         current_byte_offset += maybe_known_type.value().byte_size;
         continue;
@@ -534,10 +567,11 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       const size_t byte_length =
           (member.width * member.columns * member.vecsize) / 8u;
       result.emplace_back(StructMember{
-          .type = TypeNameWithPaddingOfSize(byte_length),
-          .name = GetMemberNameAtIndex(struct_type, i),
-          .offset = struct_member_offset,
-          .byte_length = byte_length,
+          TypeNameWithPaddingOfSize(byte_length),  // type
+          BaseTypeToString(member.basetype),       // basetype
+          GetMemberNameAtIndex(struct_type, i),    // name
+          struct_member_offset,                    // offset
+          byte_length                              // byte_length
       });
       current_byte_offset += byte_length;
       continue;
@@ -551,10 +585,12 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       if (excess != 0) {
         const auto padding = max_member_alignment - excess;
         result.emplace_back(StructMember{
-            .type = TypeNameWithPaddingOfSize(padding),
-            .name = "_PADDING_",
-            .offset = current_byte_offset,
-            .byte_length = padding,
+            TypeNameWithPaddingOfSize(padding),  // type
+            BaseTypeToString(
+                spirv_cross::SPIRType::BaseType::Void),  // basetype
+            "_PADDING_",                                 // name
+            current_byte_offset,                         // offset
+            padding                                      // byte_length
         });
       }
     }
@@ -595,6 +631,7 @@ nlohmann::json::object_t Reflector::EmitStructDefinition(
     auto& member = members.emplace_back(nlohmann::json::object_t{});
     member["name"] = struc_member.name;
     member["type"] = struc_member.type;
+    member["base_type"] = struc_member.base_type;
     member["offset"] = struc_member.offset;
     member["byte_length"] = struc_member.byte_length;
   }
@@ -603,6 +640,7 @@ nlohmann::json::object_t Reflector::EmitStructDefinition(
 
 struct VertexType {
   std::string type_name;
+  std::string base_type_name;
   std::string variable_name;
   size_t byte_length = 0u;
 };
@@ -612,7 +650,8 @@ static VertexType VertexTypeFromInputResource(
     const spirv_cross::Resource* resource) {
   VertexType result;
   result.variable_name = resource->name;
-  auto type = compiler.get_type(resource->type_id);
+  const auto type = compiler.get_type(resource->type_id);
+  result.base_type_name = BaseTypeToString(type.basetype);
   const auto total_size = type.columns * type.vecsize * type.width / 8u;
   result.byte_length = total_size;
 
@@ -700,11 +739,13 @@ Reflector::ReflectPerVertexStructDefinition(
     const auto vertex_type =
         VertexTypeFromInputResource(*compiler_.GetCompiler(), resource);
 
-    StructMember member;
-    member.name = vertex_type.variable_name;
-    member.type = vertex_type.type_name;
-    member.byte_length = vertex_type.byte_length;
-    member.offset = struc.byte_length;
+    auto member = StructMember{
+        vertex_type.type_name,       // type
+        vertex_type.base_type_name,  // base type
+        vertex_type.variable_name,   // name
+        struc.byte_length,           // offset
+        vertex_type.byte_length      // byte_length
+    };
     struc.byte_length += vertex_type.byte_length;
     struc.members.emplace_back(std::move(member));
   }

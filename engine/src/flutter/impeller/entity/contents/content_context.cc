@@ -52,7 +52,6 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
         std::move(color_attachments));
     clip_pipelines_[{}] =
         std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor);
-
   } else {
     return;
   }
@@ -93,7 +92,7 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
     return nullptr;
   }
 
-  if (!sub_renderpass->EncodeCommands(*context->GetTransientsAllocator())) {
+  if (!sub_renderpass->EncodeCommands(context->GetTransientsAllocator())) {
     return nullptr;
   }
 

@@ -9,11 +9,60 @@
 
 namespace impeller {
 
-ContextGLES::ContextGLES() {
-  auto reactor = std::make_shared<ReactorGLES>();
-  if (!reactor->IsValid()) {
+std::shared_ptr<Context> ContextGLES::Create(
+    std::unique_ptr<ProcTableGLES> gl,
+    std::vector<std::shared_ptr<fml::Mapping>> shader_libraries) {
+  return std::shared_ptr<Context>(
+      new ContextGLES(std::move(gl), std::move(shader_libraries)));
+}
+
+ContextGLES::ContextGLES(
+    std::unique_ptr<ProcTableGLES> gl,
+    std::vector<std::shared_ptr<fml::Mapping>> shader_libraries_mappings) {
+  reactor_ = std::make_shared<ReactorGLES>(std::move(gl));
+  if (!reactor_->IsValid()) {
     VALIDATION_LOG << "Could not create valid reactor.";
     return;
+  }
+
+  // Create the shader library.
+  {
+    auto library = std::shared_ptr<ShaderLibraryGLES>(
+        new ShaderLibraryGLES(std::move(shader_libraries_mappings)));
+    if (!library->IsValid()) {
+      VALIDATION_LOG << "Could not create valid shader library.";
+      return;
+    }
+    shader_library_ = std::move(library);
+  }
+
+  // Create the pipeline library.
+  {
+    pipeline_library_ =
+        std::shared_ptr<PipelineLibraryGLES>(new PipelineLibraryGLES(reactor_));
+  }
+
+  // Create all allocators.
+  {
+    permanents_allocator_ =
+        std::shared_ptr<AllocatorGLES>(new AllocatorGLES(reactor_));
+    if (!permanents_allocator_->IsValid()) {
+      VALIDATION_LOG << "Could not create permanents allocator.";
+      return;
+    }
+
+    transients_allocator_ =
+        std::shared_ptr<AllocatorGLES>(new AllocatorGLES(reactor_));
+    if (!transients_allocator_->IsValid()) {
+      VALIDATION_LOG << "Could not create transients allocator.";
+      return;
+    }
+  }
+
+  // Create the sampler library
+  {
+    sampler_library_ =
+        std::shared_ptr<SamplerLibraryGLES>(new SamplerLibraryGLES());
   }
 
   is_valid_ = true;
@@ -21,44 +70,42 @@ ContextGLES::ContextGLES() {
 
 ContextGLES::~ContextGLES() = default;
 
+const ReactorGLES::Ref ContextGLES::GetReactor() const {
+  return reactor_;
+}
+
 bool ContextGLES::IsValid() const {
   return is_valid_;
 }
 
 std::shared_ptr<Allocator> ContextGLES::GetPermanentsAllocator() const {
-  IMPELLER_UNIMPLEMENTED;
   return permanents_allocator_;
 }
 
 std::shared_ptr<Allocator> ContextGLES::GetTransientsAllocator() const {
-  IMPELLER_UNIMPLEMENTED;
   return transients_allocator_;
 }
 
 std::shared_ptr<ShaderLibrary> ContextGLES::GetShaderLibrary() const {
-  IMPELLER_UNIMPLEMENTED;
   return shader_library_;
 }
 
 std::shared_ptr<SamplerLibrary> ContextGLES::GetSamplerLibrary() const {
-  IMPELLER_UNIMPLEMENTED;
   return sampler_library_;
 }
 
 std::shared_ptr<PipelineLibrary> ContextGLES::GetPipelineLibrary() const {
-  IMPELLER_UNIMPLEMENTED;
   return pipeline_library_;
 }
 
 std::shared_ptr<CommandBuffer> ContextGLES::CreateRenderCommandBuffer() const {
-  IMPELLER_UNIMPLEMENTED;
-  return std::shared_ptr<CommandBufferGLES>(new CommandBufferGLES());
+  return std::shared_ptr<CommandBufferGLES>(new CommandBufferGLES(reactor_));
 }
 
 std::shared_ptr<CommandBuffer> ContextGLES::CreateTransferCommandBuffer()
     const {
-  IMPELLER_UNIMPLEMENTED;
-  return std::shared_ptr<CommandBufferGLES>(new CommandBufferGLES());
+  // There is no such concept. Just use a render command buffer.
+  return CreateRenderCommandBuffer();
 }
 
 }  // namespace impeller

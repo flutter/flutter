@@ -48,10 +48,10 @@ bool Main(const fml::CommandLine& command_line) {
   options.defines = switches.defines;
   options.entry_point_name = EntryPointFunctionNameFromSourceName(
       switches.source_file_name,
-      SourceTypeFromFileName(switches.source_file_name),
-      switches.target_platform);
+      SourceTypeFromFileName(switches.source_file_name));
 
   Reflector::Options reflector_options;
+  reflector_options.entry_point_name = options.entry_point_name;
   reflector_options.shader_name =
       InferShaderNameFromPath(switches.source_file_name);
   reflector_options.header_file_name =

@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <array>
 #include <cstddef>
 #include <string_view>
+#include <vector>
 
 #include "flutter/fml/hash_combine.h"
 #include "impeller/geometry/matrix.h"
@@ -41,17 +41,24 @@ enum class ShaderType {
   kSampler,
 };
 
-template <class T>
+struct ShaderStructMemberMetadata {
+  ShaderType type;
+  std::string name;
+  size_t offset;
+  size_t size;
+};
+
+struct ShaderMetadata {
+  std::string name;
+  std::vector<ShaderStructMemberMetadata> members;
+};
+
 struct ShaderUniformSlot {
-  using Type = T;
   const char* name;
   size_t binding;
 };
 
 struct ShaderStageIOSlot {
-  // Statically allocated const string containing advisory debug description.
-  // This may be absent in release modes and the runtime may not use this string
-  // for normal operation.
   const char* name;
   size_t location;
   size_t set;

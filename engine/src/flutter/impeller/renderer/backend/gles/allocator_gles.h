@@ -6,6 +6,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/allocator.h"
+#include "impeller/renderer/backend/gles/reactor_gles.h"
 
 namespace impeller {
 
@@ -17,7 +18,10 @@ class AllocatorGLES final : public Allocator {
  private:
   friend class ContextGLES;
 
-  AllocatorGLES();
+  ReactorGLES::Ref reactor_;
+  bool is_valid_ = false;
+
+  AllocatorGLES(ReactorGLES::Ref reactor);
 
   // |Allocator|
   bool IsValid() const;
@@ -30,14 +34,6 @@ class AllocatorGLES final : public Allocator {
   std::shared_ptr<Texture> CreateTexture(
       StorageMode mode,
       const TextureDescriptor& desc) override;
-
-  // |Allocator|
-  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(const uint8_t* buffer,
-                                                     size_t length) override;
-
-  // |Allocator|
-  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
-      const fml::Mapping& mapping) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AllocatorGLES);
 };

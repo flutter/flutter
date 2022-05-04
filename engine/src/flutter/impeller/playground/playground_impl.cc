@@ -4,18 +4,31 @@
 
 #include "impeller/playground/playground_impl.h"
 
-#include "impeller/playground/backend/gles/playground_impl_gles.h"
+#if IMPELLER_ENABLE_METAL
 #include "impeller/playground/backend/metal/playground_impl_mtl.h"
+#endif  // IMPELLER_ENABLE_METAL
+
+#if IMPELLER_ENABLE_OPENGLES
+#include "impeller/playground/backend/gles/playground_impl_gles.h"
+#endif  // IMPELLER_ENABLE_OPENGLES
 
 namespace impeller {
 
 std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
     PlaygroundBackend backend) {
   switch (backend) {
+#if IMPELLER_ENABLE_METAL
     case PlaygroundBackend::kMetal:
       return std::make_unique<PlaygroundImplMTL>();
+#endif  // IMPELLER_ENABLE_METAL
+#if IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kOpenGLES:
       return std::make_unique<PlaygroundImplGLES>();
+#endif  // IMPELLER_ENABLE_OPENGLES
+    default:
+      FML_CHECK(false) << "Attempted to create playground with backend that "
+                          "isn't available or was disabled on this platform: "
+                       << PlaygroundBackendToString(backend);
   }
   FML_UNREACHABLE();
 }

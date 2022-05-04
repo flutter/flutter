@@ -70,7 +70,7 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name) const {
   source_options.working_directory = std::make_shared<fml::UniqueFD>(
       flutter::testing::OpenFixturesDirectory());
   source_options.entry_point_name = EntryPointFunctionNameFromSourceName(
-      fixture_name, SourceTypeFromFileName(fixture_name), GetParam());
+      fixture_name, SourceTypeFromFileName(fixture_name));
 
   Reflector::Options reflector_options;
   reflector_options.header_file_name = ReflectionHeaderName(fixture_name);
