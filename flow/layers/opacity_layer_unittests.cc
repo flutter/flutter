@@ -543,7 +543,7 @@ TEST_F(OpacityLayerTest, OpacityInheritanceThroughImageFilter) {
   EXPECT_TRUE(opacityLayer->children_can_accept_opacity());
 }
 
-TEST_F(OpacityLayerTest, OpacityInheritanceNested) {
+TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithCompatibleChild) {
   SkPoint offset1 = SkPoint::Make(10, 20);
   SkPoint offset2 = SkPoint::Make(20, 10);
   SkPath mockPath = SkPath::Rect({10, 10, 20, 20});
@@ -591,6 +591,63 @@ TEST_F(OpacityLayerTest, OpacityInheritanceNested) {
               expected_builder.drawPath(mockPath);
             }
             expected_builder.restore();
+          }
+        }
+        expected_builder.restore();
+      }
+    }
+    expected_builder.restore();
+  }
+
+  opacityLayer1->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(expected_builder.Build(), display_list()));
+}
+
+TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithIncompatibleChild) {
+  SkPoint offset1 = SkPoint::Make(10, 20);
+  SkPoint offset2 = SkPoint::Make(20, 10);
+  SkPath mockPath = SkPath::Rect({10, 10, 20, 20});
+  auto opacityLayer1 = std::make_shared<OpacityLayer>(128, offset1);
+  auto opacityLayer2 = std::make_shared<OpacityLayer>(64, offset2);
+  auto mockLayer = MockLayer::Make(mockPath);
+  opacityLayer2->Add(mockLayer);
+  opacityLayer1->Add(opacityLayer2);
+
+  PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
+  opacityLayer1->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+  EXPECT_TRUE(opacityLayer1->children_can_accept_opacity());
+  EXPECT_FALSE(opacityLayer2->children_can_accept_opacity());
+
+  SkPaint saveLayerPaint;
+  SkScalar inheritedOpacity = 128 * 1.0 / SK_AlphaOPAQUE;
+  inheritedOpacity *= 64 * 1.0 / SK_AlphaOPAQUE;
+  saveLayerPaint.setAlphaf(inheritedOpacity);
+
+  DisplayListBuilder expected_builder;
+  /* opacityLayer1::Paint */ {
+    expected_builder.save();
+    {
+      expected_builder.translate(offset1.fX, offset1.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+      expected_builder.transformReset();
+      expected_builder.transform(SkM44::Translate(offset1.fX, offset1.fY));
+#endif
+      /* opacityLayer2::Paint */ {
+        expected_builder.save();
+        {
+          expected_builder.translate(offset2.fX, offset2.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+          expected_builder.transformReset();
+          expected_builder.transform(SkM44::Translate(offset1.fX + offset2.fX,
+                                                      offset1.fY + offset2.fY));
+#endif
+          expected_builder.setColor(saveLayerPaint.getAlpha() << 24);
+          expected_builder.saveLayer(&mockLayer->paint_bounds(), true);
+          /* mockLayer::Paint */ {
+            expected_builder.setColor(0xFF000000);
+            expected_builder.drawPath(mockPath);
           }
         }
         expected_builder.restore();

@@ -126,7 +126,9 @@ void OpacityLayer::Paint(PaintContext& context) const {
 
   Layer::AutoSaveLayer save_layer =
       Layer::AutoSaveLayer::Create(context, saveLayerBounds, &paint);
+  context.inherited_opacity = SK_Scalar1;
   PaintChildren(context);
+  context.inherited_opacity = inherited_opacity;
 }
 
 }  // namespace flutter
