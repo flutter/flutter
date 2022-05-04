@@ -37,7 +37,6 @@ import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
-import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
@@ -1111,7 +1110,6 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getAccessibilityChannel()).thenReturn(mock(AccessibilityChannel.class));
     when(engine.getActivityControlSurface()).thenReturn(mock(ActivityControlSurface.class));
     when(engine.getDartExecutor()).thenReturn(mock(DartExecutor.class));
-    when(engine.getKeyEventChannel()).thenReturn(mock(KeyEventChannel.class));
     when(engine.getLifecycleChannel()).thenReturn(mock(LifecycleChannel.class));
     when(engine.getLocalizationChannel()).thenReturn(mock(LocalizationChannel.class));
     when(engine.getLocalizationPlugin()).thenReturn(mock(LocalizationPlugin.class));
