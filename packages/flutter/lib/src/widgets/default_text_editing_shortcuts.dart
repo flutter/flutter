@@ -231,25 +231,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
 
   static final Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
 
-  // The following key combinations have no effect on text editing on this
-  // platform:
-  //   * End
-  //   * Home
-  //   * Meta + X
-  //   * Meta + C
-  //   * Meta + V
-  //   * Meta + A
-  //   * Meta + shift? + Z
-  //   * Meta + shift? + arrow down
-  //   * Meta + shift? + arrow left
-  //   * Meta + shift? + arrow right
-  //   * Meta + shift? + arrow up
-  //   * Shift + end
-  //   * Shift + home
-  //   * Meta + shift? + delete
-  //   * Meta + shift? + backspace
-  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _commonShortcuts;
-
   static final Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
@@ -341,6 +322,9 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Control + shift? + home
     //   * Control + shift? + Z
   };
+
+  // There is not documented complete iOS shortcuts. Use mac shortcuts for now.
+  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _macShortcuts;
 
   // The following key combinations have no effect on text editing on this
   // platform:
