@@ -43,7 +43,7 @@ void main() {
     tryToDelete(appDir);
   });
 
-  testUsingContext('abandon deletes working directory', () async {
+  testUsingContext('Status produces all outputs', () async {
     final MigrateCommand command = MigrateCommand(
       verbose: true,
       logger: logger,
@@ -71,27 +71,33 @@ dev_dependencies:
 flutter:
   uses-material-design: true''', flush: true);
 
-    expect(workingDir.existsSync(), false);
-    await createTestCommandRunner(command).run(
-      <String>[
-        'migrate',
-        'abandon',
-        '--working-directory=${workingDir.path}',
-        '--project-directory=${appDir.path}',
-      ]
-    );
-    expect(logger.errorText, contains('Provided working directory'));
-    expect(logger.errorText, contains('/migrate_working_dir` does not exist or is not valid.'));
+    final File gitignore = appDir.childFile('.gitignore');
+    gitignore.createSync();
+    gitignore.writeAsStringSync('migrate_working_dir', flush: true);
 
     logger.clear();
     await createTestCommandRunner(command).run(
       <String>[
         'migrate',
-        'abandon',
+        'apply',
+        '--working-directory=${workingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
-    expect(logger.statusText, contains('No migration in progress. Start a new migration with:'));
+    expect(logger.statusText, contains('Project is not a git repo. Please initialize a git repo and try again.'));
+    
+    await processManager.run(<String>['git', 'init'], workingDirectory: appDir.path);
+
+    logger.clear();
+    await createTestCommandRunner(command).run(
+      <String>[
+        'migrate',
+        'apply',
+        '--working-directory=${workingDir.path}',
+        '--project-directory=${appDir.path}',
+      ]
+    );
+    expect(logger.statusText, contains('No migration in progress. Please run:'));
 
     final File pubspecModified = workingDir.childFile('pubspec.yaml');
     pubspecModified.createSync(recursive: true);
@@ -109,7 +115,7 @@ dev_dependencies:
     sdk: flutter
 flutter:
   uses-material-design: false
-  EXTRALINE''', flush: true);
+  # EXTRALINE:''', flush: true);
 
     final File addedFile = workingDir.childFile('added.file');
     addedFile.createSync(recursive: true);
@@ -121,26 +127,103 @@ flutter:
 merged_files:
   - pubspec.yaml
 conflict_files:
+  - conflict/conflict.file
 added_files:
   - added.file
 deleted_files:
 ''');
 
-    expect(appDir.childFile('lib/main.dart').existsSync(), true);
+    // Add conflict file
+    final File conflictFile = workingDir.childDirectory('conflict').childFile('conflict.file');
+    conflictFile.createSync(recursive: true);
+    conflictFile.writeAsStringSync('''
+line1
+<<<<<<< /conflcit/conflict.file
+line2
+=======
+linetwo
+>>>>>>> /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/flutter_tools.4Xdep8/generatedTargetTemplatetlN44S/conflict/conflict.file
+line3
+''', flush: true);
 
-    expect(workingDir.existsSync(), true);
+    final File conflictFileOriginal = appDir.childDirectory('conflict').childFile('conflict.file');
+    conflictFileOriginal.createSync(recursive: true);
+    conflictFileOriginal.writeAsStringSync('''
+line1
+line2
+line3
+''', flush: true);
+
     logger.clear();
     await createTestCommandRunner(command).run(
       <String>[
         'migrate',
-        'abandon',
+        'apply',
         '--working-directory=${workingDir.path}',
         '--project-directory=${appDir.path}',
-        '--force',
       ]
     );
-    expect(logger.statusText, contains('Abandon complete. Start a new migration with:'));
-    expect(workingDir.existsSync(), false);
+    expect(logger.statusText, contains(r'''
+Added files:
+  - added.file
+Modified files:
+  - pubspec.yaml
+Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:
+  - conflict/conflict.file
+Conflicting files found. Resolve these conflicts and try again.
+Guided conflict resolution wizard:
+
+    $ flutter migrate resolve-conflicts'''));
+
+    conflictFile.writeAsStringSync('''
+line1
+linetwo
+line3
+''', flush: true);
+
+    logger.clear();
+    await createTestCommandRunner(command).run(
+      <String>[
+        'migrate',
+        'apply',
+        '--working-directory=${workingDir.path}',
+        '--project-directory=${appDir.path}',
+      ]
+    );
+    expect(logger.statusText, contains('There are uncommitted changes in your project. Please git commit, abandon, or stash your changes before trying again.'));
+
+    await processManager.run(<String>['git', 'add', '.'], workingDirectory: appDir.path);
+    await processManager.run(<String>['git', 'commit', '-m', 'Initial commit'], workingDirectory: appDir.path);
+
+    logger.clear();
+    await createTestCommandRunner(command).run(
+      <String>[
+        'migrate',
+        'apply',
+        '--working-directory=${workingDir.path}',
+        '--project-directory=${appDir.path}',
+      ]
+    );
+    expect(logger.statusText, contains(r'''
+Added files:
+  - added.file
+Modified files:
+  - conflict/conflict.file
+  - pubspec.yaml
+
+Applying migration.
+  Modifying 3 files.
+Writing pubspec.yaml
+Writing conflict/conflict.file
+Writing added.file
+Updating .migrate_configs
+Migration complete. You may use commands like `git status`, `git diff` and `git restore <file>` to continue working with the migrated files.'''));
+
+    expect(pubspecOriginal.readAsStringSync(), contains('# EXTRALINE'));
+    expect(conflictFileOriginal.readAsStringSync(), contains('linetwo'));
+    expect(appDir.childFile('added.file').existsSync(), true);
+    expect(appDir.childFile('added.file').readAsStringSync(), contains('new file contents'));
+
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
