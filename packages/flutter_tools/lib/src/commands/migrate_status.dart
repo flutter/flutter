@@ -119,9 +119,6 @@ class MigrateStatusCommand extends FlutterCommand {
       files.addAll(manifest.resolvedConflictFiles(workingDirectory));
       files.addAll(manifest.remainingConflictFiles(workingDirectory));
       for (final String localPath in files) {
-        logger.printStatus('@@@@@@@@@CHECKING FILES $localPath:');
-        logger.printStatus('@@@@@@@@@CHECKING FILES ${project.directory.childFile(localPath).path} ::: ${workingDirectory.childFile(localPath).path}:');
-        logger.printStatus('@@@@@@@@@CHECKING FILES ${project.directory.childFile(localPath).existsSync()} ::: ${workingDirectory.childFile(localPath).existsSync()}:');
         final DiffResult result = await migrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
         if (result.diff != '' && result.diff != null) {
           // Print with different colors for better visibility.
@@ -142,8 +139,6 @@ class MigrateStatusCommand extends FlutterCommand {
             }
             logger.printStatus(line, color: TerminalColor.grey);
           }
-        } else {
-          logger.printStatus('!!!!!!!!!!!!!!!${result.diffType} "${result.diff}"');
         }
       }
     }
