@@ -15,10 +15,10 @@ Float32x4List _loadMatrixIntoSimd(Matrix4 matrix) {
   assert(!kIsWeb);
   final Float32x4List result = Float32x4List(4);
   final Float64List storage = matrix.storage;
-  result[0] = Float32x4(storage[0], storage[4], storage[8], storage[12]);
-  result[1] = Float32x4(storage[1], storage[5], storage[9], storage[13]);
-  result[2] = Float32x4(storage[2], storage[6], storage[10], storage[14]);
-  result[3] = Float32x4(storage[3], storage[7], storage[11], storage[15]);
+  result[0] = Float32x4(storage[0], storage[1], storage[2], storage[3]);
+  result[1] = Float32x4(storage[4], storage[5], storage[6], storage[7]);
+  result[2] = Float32x4(storage[8], storage[9], storage[10], storage[11]);
+  result[3] = Float32x4(storage[12], storage[13], storage[14], storage[15]);
   return result;
 }
 
