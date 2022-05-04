@@ -7,7 +7,6 @@ import 'package:process/process.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/terminal.dart';
 import '../flutter_project_metadata.dart';
 import '../migrate/migrate_manifest.dart';
@@ -85,7 +84,7 @@ class MigrateApplyCommand extends FlutterCommand {
     final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
     final FlutterProject project = projectDirectory == null ? FlutterProject.current() : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
 
-    if (!await gitRepoExists(flutterProject.directory.path, logger, migrateUtils)) {
+    if (!await gitRepoExists(project.directory.path, logger, migrateUtils)) {
       logger.printStatus('No git repo found. Please run in a project with an initialized git repo or initialize one with:');
       printCommandText('git init', logger);
       return const FlutterCommandResult(ExitStatus.fail);
@@ -95,14 +94,14 @@ class MigrateApplyCommand extends FlutterCommand {
 
     terminal.usesTerminalUi = true;
 
-    Directory workingDirectory = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
     if (customWorkingDirectoryPath != null) {
       if (customWorkingDirectoryPath.startsWith(fileSystem.path.separator) || customWorkingDirectoryPath.startsWith('/')) {
         // Is an absolute path
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
       } else {
-        workingDirectory = flutterProject.directory.childDirectory(customWorkingDirectoryPath);
+        workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
       }
     }
     if (!workingDirectory.existsSync()) {
@@ -120,7 +119,7 @@ class MigrateApplyCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    if (await hasUncommittedChanges(flutterProject.directory.path, logger, migrateUtils) && !force) {
+    if (await hasUncommittedChanges(project.directory.path, logger, migrateUtils) && !force) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -138,7 +137,7 @@ class MigrateApplyCommand extends FlutterCommand {
         logger.printStatus('Writing $localPath');
       }
       final File workingFile = workingDirectory.childFile(localPath);
-      final File targetFile = flutterProject.directory.childFile(localPath);
+      final File targetFile = project.directory.childFile(localPath);
       if (!workingFile.existsSync()) {
         continue;
       }
@@ -165,12 +164,12 @@ class MigrateApplyCommand extends FlutterCommand {
     if (_verbose) {
       logger.printStatus('Updating .migrate_configs');
     }
-    final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
-    final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
+    final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.directory.childFile('.metadata'), logger);
+    final FlutterVersion version = FlutterVersion(workingDirectory: project.directory.absolute.path);
 
     final String currentGitHash = version.frameworkRevision;
     metadata.migrateConfig.populate(
-      projectDirectory: flutterProject.directory,
+      projectDirectory: project.directory,
       currentRevision: currentGitHash,
       logger: logger,
     );
@@ -181,17 +180,17 @@ class MigrateApplyCommand extends FlutterCommand {
     }
 
     // Detect pub dependency locking. Run flutter pub upgrade --major-versions
-    await updatePubspecDependencies(flutterProject);
+    await updatePubspecDependencies(project);
 
     // Detect gradle lockfiles in android directory. Delete lockfiles and regenerate with ./gradlew tasks (any gradle task that requires a build).
-    await updateGradleDependencyLocking(flutterProject);
+    await updateGradleDependencyLocking(project);
 
     logger.printStatus('Migration complete. You may use commands like `git status`, `git diff` and `git restore <file>` to continue working with the migrated files.');
     return const FlutterCommandResult(ExitStatus.success);
   }
 
-  Future<void> updatePubspecDependencies(FlutterProject flutterProject) async {
-    final File pubspecFile = flutterProject.directory.childFile('pubspec.yaml');
+  Future<void> updatePubspecDependencies(FlutterProject project) async {
+    final File pubspecFile = project.directory.childFile('pubspec.yaml');
     if (!pubspecFile.existsSync()) {
       return;
     }
@@ -215,7 +214,7 @@ class MigrateApplyCommand extends FlutterCommand {
     }
     if (selection == 'y') {
       // Runs `flutter pub upgrade --major-versions`
-      await migrateUtils.flutterPubUpgrade(flutterProject.directory.path);
+      await migrateUtils.flutterPubUpgrade(project.directory.path);
     }
   }
 

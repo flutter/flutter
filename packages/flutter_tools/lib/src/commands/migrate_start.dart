@@ -7,7 +7,6 @@ import 'package:process/process.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../migrate/migrate_compute.dart';
 import '../migrate/migrate_result.dart';
 import '../migrate/migrate_utils.dart';

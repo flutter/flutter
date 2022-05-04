@@ -2,13 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
-import '../base/terminal.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';

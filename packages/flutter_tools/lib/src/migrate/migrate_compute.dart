@@ -84,6 +84,8 @@ bool _skippedMerge(String localPath) {
 
 /// Computes the changes that migrates the current flutter project to the target revision.
 ///
+/// This is the entry point to the core migration computations.
+///
 /// This method attempts to find a base revision, which is the revision of the Flutter SDK
 /// the app was generated with or the last revision the app was migrated to. The base revision
 /// typically comes from the .metadata, but for legacy apps, the config may not exist. In
@@ -719,7 +721,7 @@ Future<void> computeMerge(
       if (result != null) {
         // Don't include if result is identical to the current file.
         if (result is StringMergeResult) {
-          if ((result as StringMergeResult).mergedString == currentFile.readAsStringSync()) {
+          if (result.mergedString == currentFile.readAsStringSync()) {
             status.pause();
             logger.printStatus('$localPath was merged with a $mergeType.');
             status.resume();
@@ -762,7 +764,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
     final File file = workingDir.childFile(result.localPath);
     file.createSync(recursive: true);
     if (result is StringMergeResult) {
-      file.writeAsStringSync((result as StringMergeResult).mergedString, flush: true);
+      file.writeAsStringSync(result.mergedString, flush: true);
     } else {
       file.writeAsBytesSync((result as BinaryMergeResult).mergedBytes, flush: true);
     }
