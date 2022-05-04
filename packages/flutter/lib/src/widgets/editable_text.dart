@@ -2466,6 +2466,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.updateForScroll();
   }
 
+  SelectionChangedCause? previousCause;
+
   @pragma('vm:notify-debugger-on-exception')
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
@@ -2544,22 +2546,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
 
-  //   if (_spellCheckEnabled! && _value.text.length > 0) {
-  // // print("CURRENT WORD: ${renderEditable.getWordBoundary(TextPosition(offset: value.text.length-1)).textInside(value.text)}"); // this works in _handleselecionchanged
-  // Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-  // Future<List<SpellCheckerSuggestionSpan>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value);
-  // // print("REQUESTING SPELL CHECK RESULTS |${value.text}|");
-  // // final String foo = value.text;
-  // spellCheckResultsFuture.then((results) {
-  //   // print("SPELL CHECK RESULTS GETTING UPDATED |${foo}|");
-  //   // results.forEach((SpellCheckerSuggestionSpan result) {
-  //   //   print(result.replacementSuggestions);
-  //   // });
-  //   _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
-  //   // print("${renderEditable.getWordBoundary(foo.length)}")
-  //   // renderEditable.text = buildTextSpan();
-  // });
-  // }
+    if (_spellCheckEnabled! && _value.text.length > 0 && (previousCause == null || cause == null || previousCause == SelectionChangedCause.keyboard && cause == SelectionChangedCause.tap)) {
+
+      Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+      Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value);
+
+      spellCheckResultsFuture.then((results) {
+        if (results.length > 1) {
+          _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results[1];
+          _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResultsText = results[0];
+
+          renderEditable.text = buildTextSpan();
+        }
+      });
+    }
+
+    previousCause = cause;
   }
 
   Rect? _currentCaretRect;
@@ -2675,7 +2677,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
           Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value);
 
-          final String foo = value.text;
           spellCheckResultsFuture.then((results) {
             if (results.length > 1) {
             _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results[1];

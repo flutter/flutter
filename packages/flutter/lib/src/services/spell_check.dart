@@ -155,24 +155,24 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
                print("No more results found in range");
                break;
            } else {
-           oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1); // off by one potential
-           newSpanText = newText.substring(currentSpanStart, currentSpanEnd + 1); // off by one potential, also might be out of range
+           oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1);
+           newSpanText = newText.substring(currentSpanStart, currentSpanEnd + 1);
 
            if (oldSpanText == newSpanText) {
                print("Found it");
-               searchStart = currentSpanEnd + 1; // off by one potential
+               searchStart = currentSpanEnd + 1;
                correctedSpellCheckResults.add(currentSpan);
            }
            else {
-               spanLength = currentSpanEnd - currentSpanStart; // off by one potential
+               spanLength = currentSpanEnd - currentSpanStart; 
                RegExp regex = RegExp('\\b$oldSpanText\\b');
-                int substring = newText.substring(searchStart).indexOf(regex);
-                newStart = substring + searchStart;
+               int substring = newText.substring(searchStart).indexOf(regex);
+               newStart = substring + searchStart;
 
-            // STEP 2: Shift it or throw it out
+               // STEP 2: Shift it or throw it out
                if (substring >= 0) {
                    print("Shifting it");
-                   correctedSpellCheckResults.add(SpellCheckerSuggestionSpan(newStart, newStart + spanLength, currentSpan.replacementSuggestions)); // off by one potential // NEED TO ADD SEARCH START TO THIS
+                   correctedSpellCheckResults.add(SpellCheckerSuggestionSpan(newStart, newStart + spanLength, currentSpan.replacementSuggestions));
                    print("New start: ${newStart}");
                    print("New end: ${newStart + spanLength}");
                    searchStart = newStart + spanLength;
@@ -234,13 +234,11 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
       }
 
       if (composingWithinCurrentTextRange) {
-          print("Composing within currenttextrange???");
           return TextSpan(
               style: style,
               children: buildSubtreesWithMisspelledWordsIndicated(spellCheckResults ?? <SpellCheckerSuggestionSpan>[], value.text, style, misspelledStyle, false)
           );
       } else {
-          print("Composing region: ${value.composing.textInside(value.text)}");
           return TextSpan(
               style: style,
               children: <TextSpan>[
