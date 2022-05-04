@@ -1397,6 +1397,7 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_semantics_integration_test
+    scheduler: luci
 
   - name: Linux_android android_stack_size_test
     recipe: devicelab/devicelab_drone
@@ -1437,6 +1438,7 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: animated_complex_opacity_perf__e2e_summary
+    scheduler: luci
 
   - name: Linux_android animated_placeholder_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2100,6 +2102,7 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: new_gallery__crane_perf
+    scheduler: luci
 
   - name: Linux_android new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2368,6 +2371,7 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: gradient_consistent_perf__e2e_summary
+    scheduler: luci
 
   - name: Linux_android gradient_static_perf__e2e_summary
     bringup: true
@@ -2378,6 +2382,7 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: gradient_static_perf__e2e_summary
+    scheduler: luci
 
   - name: Linux_android android_choreographer_do_frame_test
     recipe: devicelab/devicelab_drone
@@ -2398,6 +2403,7 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_lifecycles_test
+    scheduler: luci
 
   - name: Mac build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
@@ -3063,6 +3069,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+    scheduler: luci
 
   - name: Mac_android hello_world_android__compile
     recipe: devicelab/devicelab_drone
@@ -3082,6 +3089,7 @@ targets:
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: hello_world_android__compile
+    scheduler: luci
 
   - name: Mac_android hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
@@ -3153,6 +3161,7 @@ targets:
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: run_release_test
+    scheduler: luci
 
   - name: Mac_android flutter_gallery_mac__start_up
     recipe: devicelab/devicelab_drone
@@ -3267,6 +3276,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: cubic_bezier_perf_ios_sksl_warmup__timeline_summary
+    scheduler: luci
 
   - name: Mac_ios external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
@@ -3336,6 +3346,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_view_ios__start_up
+    scheduler: luci
 
   - name: Mac_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3510,6 +3521,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: large_image_changer_perf_ios
+    scheduler: luci
 
   - name: Mac_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
@@ -3550,6 +3562,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_ios__transition_perf
+    scheduler: luci
 
   - name: Mac_ios new_gallery_impeller_ios__transition_perf
     bringup: true # Flaky https://github.com/flutter/flutter/issues/96401
@@ -3560,6 +3573,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_impeller_ios__transition_perf
+    scheduler: luci
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3660,6 +3674,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
+    scheduler: luci
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3679,6 +3694,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: native_ui_tests_ios
+    scheduler: luci
 
   - name: Mac_arm64_ios native_ui_tests_ios
     recipe: devicelab/devicelab_drone
