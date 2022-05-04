@@ -7,7 +7,6 @@ import 'package:process/process.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_utils.dart';
 import '../project.dart';
@@ -35,6 +34,16 @@ class MigrateAbandonCommand extends FlutterCommand {
             'This path can be absolute or relative to the flutter project root.',
       valueHelp: 'path',
     );
+    argParser.addOption(
+      'project-directory',
+      help: 'The root directory of the flutter project.',
+      valueHelp: 'path',
+    );
+    argParser.addFlag(
+      'force',
+      abbr: 'f',
+      help: 'Delete the migrate working directory without asking for confirmation.',
+    );
   }
 
   final Logger logger;
@@ -59,18 +68,20 @@ class MigrateAbandonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = FlutterProject.current();
-    Directory workingDirectory = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    final String? projectDirectory = stringArg('project-directory');
+    final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
+    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
+    Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
     if (customWorkingDirectoryPath != null) {
       if (customWorkingDirectoryPath.startsWith(fileSystem.path.separator) || customWorkingDirectoryPath.startsWith('/')) {
         // Is an absolute path
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
       } else {
-        workingDirectory = flutterProject.directory.childDirectory(customWorkingDirectoryPath);
+        workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
       }
       if (!workingDirectory.existsSync()) {
-        logger.printError('Provided working directory `$customWorkingDirectoryPath` does not exist or is not a valid.');
+        logger.printError('Provided working directory `$customWorkingDirectoryPath` does not exist or is not valid.');
         return const FlutterCommandResult(ExitStatus.fail);
       }
     }
@@ -81,23 +92,26 @@ class MigrateAbandonCommand extends FlutterCommand {
     }
 
     logger.printStatus('\nAbandoning the existing migration will delete the migration working directory at ${workingDirectory.path}');
-    String selection = 'y';
-    terminal.usesTerminalUi = true;
-    try {
-      selection = await terminal.promptForCharInput(
-        <String>['y', 'n'],
-        logger: logger,
-        prompt: 'Are you sure you wish to continue with abandoning? (y)es, (N)o',
-        defaultChoiceIndex: 1,
-      );
-    } on StateError catch(e) {
-      logger.printError(
-        e.message,
-        indent: 0,
-      );
-    }
-    if (selection != 'y') {
-      return const FlutterCommandResult(ExitStatus.success);
+    final bool force = boolArg('force');
+    if (!force) {
+      String selection = 'y';
+      terminal.usesTerminalUi = true;
+      try {
+        selection = await terminal.promptForCharInput(
+          <String>['y', 'n'],
+          logger: logger,
+          prompt: 'Are you sure you wish to continue with abandoning? (y)es, (N)o',
+          defaultChoiceIndex: 1,
+        );
+      } on StateError catch(e) {
+        logger.printError(
+          e.message,
+          indent: 0,
+        );
+      }
+      if (selection != 'y') {
+        return const FlutterCommandResult(ExitStatus.success);
+      }
     }
 
     workingDirectory.deleteSync(recursive: true);
