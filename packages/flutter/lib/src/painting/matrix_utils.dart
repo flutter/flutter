@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' as matrix show multiply, multiplied;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic_types.dart';
@@ -43,10 +44,10 @@ class MatrixUtils {
   }
 
   /// Multiply [left] with [right], returning a new matrix.
-  static Matrix4 multiplied(Matrix4 left, Matrix4 right) => multiplied(left, right);
+  static Matrix4 multiplied(Matrix4 left, Matrix4 right) => matrix.multiplied(left, right);
 
   /// Multiply [left] with [right], returning the result into left.
-  static void multiply(Matrix4 left, Matrix4 right) => multiply(left, right);
+  static void multiply(Matrix4 left, Matrix4 right) => matrix.multiply(left, right);
 
   /// Returns the given [transform] matrix as a [double] describing a uniform
   /// scale, if the matrix is nothing but a symmetric 2D scale transform.
