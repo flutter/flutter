@@ -14,7 +14,7 @@ void main() {
 
     expect(find.byType(CupertinoFormSection), findsOneWidget);
     expect(find.byType(CupertinoFormRow), findsNWidgets(4));
-    expect(find.widgetWithText(CupertinoFormSection, 'Connectivty'), findsOneWidget);
+    expect(find.widgetWithText(CupertinoFormSection, 'Connectivity'), findsOneWidget);
     expect(find.widgetWithText(CupertinoFormRow, 'Airplane Mode'), findsOneWidget);
     expect(find.widgetWithText(CupertinoFormRow, 'Wi-Fi'), findsOneWidget);
     expect(find.widgetWithText(CupertinoFormRow, 'Bluetooth'), findsOneWidget);
