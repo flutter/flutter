@@ -55,6 +55,10 @@ class EntityPass {
 
   void SetBlendMode(Entity::BlendMode blend_mode);
 
+  std::optional<Rect> GetSubpassCoverage(const EntityPass& subpass) const;
+
+  std::optional<Rect> GetElementsCoverage() const;
+
  private:
   std::vector<Element> elements_;
 
@@ -66,10 +70,6 @@ class EntityPass {
       EntityPassDelegate::MakeDefault();
   std::shared_ptr<LazyGlyphAtlas> lazy_glyph_atlas_ =
       std::make_shared<LazyGlyphAtlas>();
-
-  std::optional<Rect> GetSubpassCoverage(const EntityPass& subpass) const;
-
-  std::optional<Rect> GetElementsCoverage() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPass);
 };
