@@ -393,7 +393,8 @@ void main() {
           '--uninstall-first',
         ]), isNull);
 
-        throw Exception('how to assert on passed flags?');
+        final DebuggingOptions options = await command.createDebuggingOptions(false);
+        expect(options.uninstallFirst, isTrue);
       }, overrides: <Type, Generator>{
         Artifacts: () => artifacts,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),

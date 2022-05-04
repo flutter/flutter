@@ -316,7 +316,6 @@ class IOSDevice extends Device {
     bool ipv6 = false,
     String? userIdentifier,
     @visibleForTesting Duration? discoveryTimeout,
-    bool uninstallFirst = false,
   }) async {
     String? packageId;
 
@@ -417,7 +416,7 @@ class IOSDevice extends Device {
           appDeltaDirectory: package.appDeltaDirectory,
           launchArguments: launchArguments,
           interfaceType: interfaceType,
-          uninstallFirst: uninstallFirst,
+          uninstallFirst: debuggingOptions.uninstallFirst,
         );
       } else {
         installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;

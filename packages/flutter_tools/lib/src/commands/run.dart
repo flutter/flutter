@@ -203,6 +203,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
         enableImpeller: enableImpeller,
+        uninstallFirst: uninstallFirst,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -247,6 +248,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
+        uninstallFirst: uninstallFirst,
       );
     }
   }
