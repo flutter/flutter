@@ -323,7 +323,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Control + shift? + Z
   };
 
-  // There is not documented complete iOS shortcuts. Use mac shortcuts for now.
+  // There is no complete documentation of iOS shortcuts. Use mac shortcuts for
+  // now.
   static final Map<ShortcutActivator, Intent> _iOSShortcuts = _macShortcuts;
 
   // The following key combinations have no effect on text editing on this
