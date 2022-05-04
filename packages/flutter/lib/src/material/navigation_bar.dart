@@ -217,16 +217,9 @@ enum NavigationDestinationLabelBehavior {
   onlyShowSelected,
 }
 
-/// Destination Widget for displaying Icons + labels in the Material 3
-/// Navigation Bars through [NavigationBar.destinations].
-///
-/// The destination this widget creates will look something like this:
-/// =======
-/// |
-/// |  ☆  <-- [icon] (or [selectedIcon])
-/// | text <-- [label]
-/// |
-/// =======
+/// A Material 3 [NavigationBar] destination.
+/// 
+/// Displays a label below an icon. Use with [NavigationBar.destinations].
 class NavigationDestination extends StatelessWidget {
   /// Creates a navigation bar destination with an icon and a label, to be used
   /// in the [NavigationBar.destinations].
