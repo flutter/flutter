@@ -48,7 +48,7 @@ const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 /// {@tool dartpad}
 /// This example shows a [CupertinoTabBar] placed in a [CupertinoTabScaffold].
 ///
-/// ** See code in examples/api/lib/cupertino/bottom_tab_bar/bottom_tab_bar.0.dart **
+/// ** See code in examples/api/lib/cupertino/bottom_tab_bar/cupertino_tab_bar.0.dart **
 /// {@end-tool}
 ///
 /// See also:
