@@ -12,10 +12,6 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
-namespace tonic {
-class DartLibraryNatives;
-}  // namespace tonic
-
 namespace flutter {
 
 class Scene : public RefCountedDartWrappable<Scene> {
@@ -37,8 +33,6 @@ class Scene : public RefCountedDartWrappable<Scene> {
                       Dart_Handle image_callback);
 
   void dispose();
-
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit Scene(std::shared_ptr<flutter::Layer> rootLayer,

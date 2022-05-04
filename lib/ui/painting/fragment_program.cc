@@ -15,27 +15,9 @@
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
-using tonic::ToDart;
-
 namespace flutter {
 
-static void FragmentProgram_constructor(Dart_NativeArguments args) {
-  DartCallConstructor(&FragmentProgram::Create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, FragmentProgram);
-
-#define FOR_EACH_BINDING(V) \
-  V(FragmentProgram, init)  \
-  V(FragmentProgram, shader)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void FragmentProgram::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register(
-      {{"FragmentProgram_constructor", FragmentProgram_constructor, 1, true},
-       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
 
 void FragmentProgram::init(std::string sksl, bool debugPrintSksl) {
   SkRuntimeEffect::Result result =
@@ -53,12 +35,12 @@ void FragmentProgram::init(std::string sksl, bool debugPrintSksl) {
   }
 }
 
-fml::RefPtr<FragmentShader> FragmentProgram::shader(
-    Dart_Handle shader,
-    tonic::Float32List& uniforms,
-    Dart_Handle samplers) {
+fml::RefPtr<FragmentShader> FragmentProgram::shader(Dart_Handle shader,
+                                                    Dart_Handle uniforms_handle,
+                                                    Dart_Handle samplers) {
   auto sampler_shaders =
       tonic::DartConverter<std::vector<ImageShader*>>::FromDart(samplers);
+  tonic::Float32List uniforms(uniforms_handle);
   size_t uniform_count = uniforms.num_elements();
   size_t uniform_data_size =
       (uniform_count + 2 * sampler_shaders.size()) * sizeof(float);
@@ -86,8 +68,9 @@ fml::RefPtr<FragmentShader> FragmentProgram::shader(
   return FragmentShader::Create(shader, std::move(sk_shader));
 }
 
-fml::RefPtr<FragmentProgram> FragmentProgram::Create() {
-  return fml::MakeRefCounted<FragmentProgram>();
+void FragmentProgram::Create(Dart_Handle wrapper) {
+  auto res = fml::MakeRefCounted<FragmentProgram>();
+  res->AssociateWithDartWrapper(wrapper);
 }
 
 FragmentProgram::FragmentProgram() = default;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.12
+// @dart = 2.14
 part of dart.ui;
 
 /// Signature of callbacks that have no arguments and return no data.
@@ -255,7 +255,7 @@ class PlatformDispatcher {
     assert(bounds.length / 4 == type.length, 'Bounds are rectangles, requiring 4 measurements each');
     assert(type.length == state.length);
     final List<DisplayFeature> result = <DisplayFeature>[];
-    for(int i = 0; i < type.length; i++){
+    for(int i = 0; i < type.length; i++) {
       final int rectOffset = i * 4;
       result.add(DisplayFeature(
         bounds: Rect.fromLTRB(
@@ -497,8 +497,11 @@ class PlatformDispatcher {
   }
 
   late _SetNeedsReportTimingsFunc _setNeedsReportTimings;
-  void _nativeSetNeedsReportTimings(bool value)
-      native 'PlatformConfiguration_setNeedsReportTimings';
+
+  void _nativeSetNeedsReportTimings(bool value) => __nativeSetNeedsReportTimings(value);
+
+  @FfiNative<Void Function(Bool)>('PlatformConfigurationNativeApi::SetNeedsReportTimings')
+  external static void __nativeSetNeedsReportTimings(bool value);
 
   // Called from the engine, via hooks.dart
   void _reportTimings(List<int> timings) {
@@ -526,8 +529,11 @@ class PlatformDispatcher {
       throw Exception(error);
   }
 
-  String? _sendPlatformMessage(String name, PlatformMessageResponseCallback? callback, ByteData? data)
-      native 'PlatformConfiguration_sendPlatformMessage';
+  String? _sendPlatformMessage(String name,PlatformMessageResponseCallback? callback, ByteData? data) =>
+      __sendPlatformMessage(name, callback, data);
+
+  @FfiNative<Handle Function(Handle, Handle, Handle)>('PlatformConfigurationNativeApi::SendPlatformMessage')
+  external static String? __sendPlatformMessage(String name, PlatformMessageResponseCallback? callback, ByteData? data);
 
   /// Called whenever this platform dispatcher receives a message from a
   /// platform-specific plugin.
@@ -553,8 +559,10 @@ class PlatformDispatcher {
   }
 
   /// Called by [_dispatchPlatformMessage].
-  void _respondToPlatformMessage(int responseId, ByteData? data)
-      native 'PlatformConfiguration_respondToPlatformMessage';
+  void _respondToPlatformMessage(int responseId, ByteData? data) => __respondToPlatformMessage(responseId, data);
+
+  @FfiNative<Void Function(IntPtr, Handle)>('PlatformConfigurationNativeApi::RespondToPlatformMessage')
+  external static void __respondToPlatformMessage(int responseId, ByteData? data);
 
   /// Wraps the given [callback] in another callback that ensures that the
   /// original callback is called in the zone it was registered in.
@@ -611,7 +619,10 @@ class PlatformDispatcher {
   /// This can be combined with flutter tools `--isolate-filter` flag to debug
   /// specific root isolates. For example: `flutter attach --isolate-filter=[name]`.
   /// Note that this does not rename any child isolates of the root.
-  void setIsolateDebugName(String name) native 'PlatformConfiguration_setIsolateDebugName';
+  void setIsolateDebugName(String name) => _setIsolateDebugName(name);
+
+  @FfiNative<Void Function(Handle)>('PlatformConfigurationNativeApi::SetIsolateDebugName')
+  external static void _setIsolateDebugName(String name);
 
   /// The embedder can specify data that the isolate can request synchronously
   /// on launch. This accessor fetches that data.
@@ -622,7 +633,10 @@ class PlatformDispatcher {
   ///
   /// For asynchronous communication between the embedder and isolate, a
   /// platform channel may be used.
-  ByteData? getPersistentIsolateData() native 'PlatformConfiguration_getPersistentIsolateData';
+  ByteData? getPersistentIsolateData() => _getPersistentIsolateData();
+
+  @FfiNative<Handle Function()>('PlatformConfigurationNativeApi::GetPersistentIsolateData')
+  external static ByteData? _getPersistentIsolateData();
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame] and
   /// [onDrawFrame] callbacks be invoked.
@@ -631,7 +645,10 @@ class PlatformDispatcher {
   ///
   ///  * [SchedulerBinding], the Flutter framework class which manages the
   ///    scheduling of frames.
-  void scheduleFrame() native 'PlatformConfiguration_scheduleFrame';
+  void scheduleFrame() => _scheduleFrame();
+
+  @FfiNative<Void Function()>('PlatformConfigurationNativeApi::ScheduleFrame')
+  external static void _scheduleFrame();
 
   /// Additional accessibility features that may be enabled by the platform.
   AccessibilityFeatures get accessibilityFeatures => configuration.accessibilityFeatures;
@@ -671,7 +688,10 @@ class PlatformDispatcher {
   ///
   /// In either case, this function disposes the given update, which means the
   /// semantics update cannot be used further.
-  void updateSemantics(SemanticsUpdate update) native 'PlatformConfiguration_updateSemantics';
+  void updateSemantics(SemanticsUpdate update) => _updateSemantics(update);
+
+  @FfiNative<Void Function(Pointer<Void>)>('PlatformConfigurationNativeApi::UpdateSemantics')
+  external static void _updateSemantics(SemanticsUpdate update);
 
   /// The system-reported default locale of the device.
   ///
@@ -729,7 +749,11 @@ class PlatformDispatcher {
     }
     return null;
   }
-  List<String> _computePlatformResolvedLocale(List<String?> supportedLocalesData) native 'PlatformConfiguration_computePlatformResolvedLocale';
+
+  List<String> _computePlatformResolvedLocale(List<String?> supportedLocalesData) => __computePlatformResolvedLocale(supportedLocalesData);
+
+  @FfiNative<Handle Function(Handle)>('PlatformConfigurationNativeApi::ComputePlatformResolvedLocale')
+  external static List<String> __computePlatformResolvedLocale(List<String?> supportedLocalesData);
 
   /// A callback that is invoked whenever [locale] changes value.
   ///
@@ -912,8 +936,7 @@ class PlatformDispatcher {
     data['platformBrightness']! as String == 'dark' ? Brightness.dark : Brightness.light;
     final String? systemFontFamily = data['systemFontFamily'] as String?;
     final PlatformConfiguration previousConfiguration = configuration;
-    final bool platformBrightnessChanged =
-        previousConfiguration.platformBrightness != platformBrightness;
+    final bool platformBrightnessChanged = previousConfiguration.platformBrightness != platformBrightness;
     final bool textScaleFactorChanged = previousConfiguration.textScaleFactor != textScaleFactor;
     final bool alwaysUse24HourFormatChanged =
         previousConfiguration.alwaysUse24HourFormat != alwaysUse24HourFormat;
@@ -1097,7 +1120,9 @@ class PlatformDispatcher {
   ///  * [SystemChannels.navigation], which handles subsequent navigation
   ///    requests from the embedder.
   String get defaultRouteName => _defaultRouteName();
-  String _defaultRouteName() native 'PlatformConfiguration_defaultRouteName';
+
+  @FfiNative<Handle Function()>('PlatformConfigurationNativeApi::DefaultRouteName')
+  external static String _defaultRouteName();
 }
 
 /// Configuration of the platform.
@@ -1505,7 +1530,7 @@ class FrameTiming {
   /// The frame key associated with this frame measurement.
   int get frameNumber => _data.last;
 
-  final List<int> _data;  // some elements in microseconds, some in bytes, some are counts
+  final List<int> _data; // some elements in microseconds, some in bytes, some are counts
 
   String _formatMS(Duration duration) => '${duration.inMicroseconds * 0.001}ms';
 
@@ -1670,8 +1695,10 @@ class DisplayFeature {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    return other is DisplayFeature && bounds == other.bounds &&
-        type == other.type && state == other.state;
+    return other is DisplayFeature
+        && bounds == other.bounds
+        && type == other.type
+        && state == other.state;
   }
 
   @override

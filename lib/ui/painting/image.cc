@@ -23,18 +23,6 @@ static const tonic::DartWrapperInfo kDartWrapperInfo_ui_Image = {
 const tonic::DartWrapperInfo& Image::dart_wrapper_info_ =
     kDartWrapperInfo_ui_Image;
 
-#define FOR_EACH_BINDING(V) \
-  V(Image, width)           \
-  V(Image, height)          \
-  V(Image, toByteData)      \
-  V(Image, dispose)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
-
-void CanvasImage::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-}
-
 CanvasImage::CanvasImage() = default;
 
 CanvasImage::~CanvasImage() = default;
