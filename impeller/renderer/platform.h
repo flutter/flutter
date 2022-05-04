@@ -17,7 +17,7 @@ constexpr size_t DefaultUniformAlignment() {
 #elif FML_OS_MACOSX
   return 256u;
 #else
-#error "Unsupported platform".
+  return 16u;
 #endif
 }
 

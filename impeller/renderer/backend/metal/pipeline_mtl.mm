@@ -16,7 +16,6 @@ PipelineMTL::PipelineMTL(std::weak_ptr<PipelineLibrary> library,
   if (!pipeline_state_) {
     return;
   }
-  type_ = Type::kRender;
   is_valid_ = true;
 }
 

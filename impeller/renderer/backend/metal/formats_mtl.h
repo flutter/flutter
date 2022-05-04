@@ -140,10 +140,6 @@ constexpr MTLBlendOperation ToMTLBlendOperation(BlendOperation type) {
       return MTLBlendOperationSubtract;
     case BlendOperation::kReverseSubtract:
       return MTLBlendOperationReverseSubtract;
-    case BlendOperation::kMin:
-      return MTLBlendOperationMin;
-    case BlendOperation::kMax:
-      return MTLBlendOperationMax;
   }
   return MTLBlendOperationAdd;
 };

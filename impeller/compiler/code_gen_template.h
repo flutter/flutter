@@ -13,14 +13,19 @@ constexpr std::string_view kReflectionHeaderTemplate =
 
 #pragma once
 
-// Note: The nogncheck decorations are only to make GN not mad at the template
-// this file is generated from. There are no GN rule violations in the generated
-// file itself.
-#include "impeller/renderer/buffer_view.h"   // nogncheck
-#include "impeller/renderer/command.h"       // nogncheck
-#include "impeller/renderer/sampler.h"       // nogncheck
-#include "impeller/renderer/shader_types.h"  // nogncheck
-#include "impeller/renderer/texture.h"       // nogncheck
+{# Note: The nogncheck decorations are only to make GN not mad at the template#}
+{# this file is generated from. There are no GN rule violations in the generated#}
+{# file itself and the no-check declarations will be stripped in generated files.#}
+#include "impeller/renderer/buffer_view.h"  {# // nogncheck #}
+
+#include "impeller/renderer/command.h"      {# // nogncheck #}
+
+#include "impeller/renderer/sampler.h"      {# // nogncheck #}
+
+#include "impeller/renderer/shader_types.h" {# // nogncheck #}
+
+#include "impeller/renderer/texture.h"      {# // nogncheck #}
+
 
 namespace impeller {
 
@@ -31,12 +36,14 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   static constexpr std::string_view kLabel = "{{camel_case(shader_name)}}";
   static constexpr std::string_view kEntrypointName = "{{entrypoint}}";
   static constexpr ShaderStage kShaderStage = {{to_shader_stage(shader_stage)}};
+  // The generator used to prepare these bindings. Metal generators may be used
+  // by GLES backends but GLES generators are unsuitable for the metal backend.
+  static constexpr std::string_view kGeneratorName = "{{get_generator_name()}}";
 {% if length(struct_definitions) > 0 %}
   // ===========================================================================
   // Struct Definitions ========================================================
   // ===========================================================================
 {% for def in struct_definitions %}
-
   struct {{def.name}} {
 {% for member in def.members %}
     {{member.type}} {{member.name}}; // (offset {{member.offset}}, size {{member.byte_length}})
@@ -51,10 +58,11 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   // ===========================================================================
 {% for buffer in buffers %}
 
-  static constexpr auto kResource{{camel_case(buffer.name)}} = ShaderUniformSlot<{{buffer.name}}> { // {{buffer.name}}
+  static constexpr auto kResource{{camel_case(buffer.name)}} = ShaderUniformSlot { // {{buffer.name}}
     "{{buffer.name}}",     // name
     {{buffer.ext_res_0}}u, // binding
   };
+  static ShaderMetadata kMetadata{{camel_case(buffer.name)}};
 {% endfor %}
 {% endif %}
 
@@ -94,6 +102,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
     {{sampled_image.ext_res_0}}u,  // texture
     {{sampled_image.ext_res_1}}u,  // sampler
   };
+  static ShaderMetadata kMetadata{{camel_case(sampled_image.name)}};
 {% endfor %}
 {% endif %}
   // ===========================================================================
@@ -130,7 +139,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 {% endfor %}) {
     return {{ proto.args.0.argument_name }}.BindResource({% for arg in proto.args %}
   {% if loop.is_first %}
-{{to_shader_stage(shader_stage)}}, kResource{{ proto.name }}, {% else %}
+{{to_shader_stage(shader_stage)}}, kResource{{ proto.name }}, kMetadata{{ proto.name }}, {% else %}
 std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
   {% endif %}
   {% endfor %});
@@ -162,6 +171,26 @@ static_assert(sizeof(Shader::{{def.name}}) == {{def.byte_length}});
 {% for member in def.members %}
 static_assert(offsetof(Shader::{{def.name}}, {{member.name}}) == {{member.offset}});
 {% endfor %}
+{% endfor %}
+
+{% for buffer in buffers %}
+ShaderMetadata Shader::kMetadata{{camel_case(buffer.name)}} = {
+  "{{buffer.name}}",    // name
+  std::vector<ShaderStructMemberMetadata> {
+    {% for member in buffer.type.members %}
+      ShaderStructMemberMetadata {
+        {{ member.base_type }}, // type
+        "{{ member.name }}",    // name
+        {{ member.offset }},    // offset
+        {{ member.size }},      // size
+      },
+    {% endfor %}
+  } // members
+};
+{% endfor %}
+
+{% for sampled_image in sampled_images %}
+ShaderMetadata Shader::kMetadata{{camel_case(sampled_image.name)}};
 {% endfor %}
 
 }  // namespace impeller

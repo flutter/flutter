@@ -131,8 +131,7 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
 RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer, RenderTarget target)
     : RenderPass(std::move(target)),
       buffer_(buffer),
-      desc_(ToMTLRenderPassDescriptor(GetRenderTarget())),
-      transients_buffer_(HostBuffer::Create()) {
+      desc_(ToMTLRenderPassDescriptor(GetRenderTarget())) {
   if (!buffer_ || !desc_ || !render_target_.IsValid()) {
     return;
   }
@@ -141,10 +140,6 @@ RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer, RenderTarget target)
 }
 
 RenderPassMTL::~RenderPassMTL() = default;
-
-HostBuffer& RenderPassMTL::GetTransientsBuffer() {
-  return *transients_buffer_;
-}
 
 bool RenderPassMTL::IsValid() const {
   return is_valid_;
@@ -158,7 +153,8 @@ void RenderPassMTL::SetLabel(std::string label) {
   transients_buffer_->SetLabel(SPrintF("%s Transients", label_.c_str()));
 }
 
-bool RenderPassMTL::EncodeCommands(Allocator& transients_allocator) const {
+bool RenderPassMTL::EncodeCommands(
+    const std::shared_ptr<Allocator>& transients_allocator) const {
   TRACE_EVENT0("impeller", "RenderPassMTL::EncodeCommands");
   if (!IsValid()) {
     return false;
@@ -368,24 +364,27 @@ static bool Bind(PassBindingsCache& pass,
                          SamplerMTL::Cast(sampler).GetMTLSamplerState());
 }
 
-bool RenderPassMTL::EncodeCommands(Allocator& allocator,
+bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
                                    id<MTLRenderCommandEncoder> encoder) const {
   PassBindingsCache pass_bindings(encoder);
   auto bind_stage_resources = [&allocator, &pass_bindings](
                                   const Bindings& bindings,
                                   ShaderStage stage) -> bool {
     for (const auto& buffer : bindings.buffers) {
-      if (!Bind(pass_bindings, allocator, stage, buffer.first, buffer.second)) {
+      if (!Bind(pass_bindings, *allocator, stage, buffer.first,
+                buffer.second.resource)) {
         return false;
       }
     }
     for (const auto& texture : bindings.textures) {
-      if (!Bind(pass_bindings, stage, texture.first, *texture.second)) {
+      if (!Bind(pass_bindings, stage, texture.first,
+                *texture.second.resource)) {
         return false;
       }
     }
     for (const auto& sampler : bindings.samplers) {
-      if (!Bind(pass_bindings, stage, sampler.first, *sampler.second)) {
+      if (!Bind(pass_bindings, stage, sampler.first,
+                *sampler.second.resource)) {
         return false;
       }
     }
@@ -438,8 +437,8 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
           .originY = v.rect.origin.y,
           .width = v.rect.size.width,
           .height = v.rect.size.height,
-          .znear = v.znear,
-          .zfar = v.zfar,
+          .znear = v.depth_range.z_near,
+          .zfar = v.depth_range.z_far,
       };
       [encoder setViewport:viewport];
     }
@@ -467,7 +466,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
     if (!index_buffer) {
       return false;
     }
-    auto device_buffer = index_buffer->GetDeviceBuffer(allocator);
+    auto device_buffer = index_buffer->GetDeviceBuffer(*allocator);
     if (!device_buffer) {
       return false;
     }
@@ -489,37 +488,6 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
                         baseVertex:command.base_vertex
                       baseInstance:0u];
   }
-  return true;
-}
-
-bool RenderPassMTL::AddCommand(Command command) {
-  if (!command) {
-    VALIDATION_LOG << "Attempted to add an invalid command to the render pass.";
-    return false;
-  }
-
-  if (command.scissor.has_value()) {
-    auto target_rect = IRect({}, render_target_.GetRenderTargetSize());
-    if (!target_rect.Contains(command.scissor.value())) {
-      VALIDATION_LOG << "Cannot apply a scissor that lies outside the bounds "
-                        "of the render target.";
-      return false;
-    }
-  }
-
-  if (command.index_count == 0u) {
-    // Essentially a no-op. Don't record the command but this is not necessary
-    // an error either.
-    return true;
-  }
-
-  if (command.instance_count == 0u) {
-    // Essentially a no-op. Don't record the command but this is not necessary
-    // an error either.
-    return true;
-  }
-
-  commands_.emplace_back(std::move(command));
   return true;
 }
 

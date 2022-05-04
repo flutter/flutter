@@ -20,20 +20,19 @@ class PlaygroundImplMTL final : public PlaygroundImpl {
  private:
   struct Data;
 
-  WindowHandle handle_ = nullptr;
+  static void DestroyWindowHandle(WindowHandle handle);
+  using UniqueHandle = std::unique_ptr<void, decltype(&DestroyWindowHandle)>;
+  UniqueHandle handle_;
+
   // To ensure that ObjC stuff doesn't leak into C++ TUs.
   std::unique_ptr<Data> data_;
+  std::shared_ptr<Context> context_;
 
   // |PlaygroundImpl|
-  std::shared_ptr<Context> CreateContext() const override;
+  std::shared_ptr<Context> GetContext() const override;
 
   // |PlaygroundImpl|
-  bool SetupWindow(WindowHandle handle,
-                   std::shared_ptr<Context> context) override;
-
-  // |PlaygroundImpl|
-  bool TeardownWindow(WindowHandle handle,
-                      std::shared_ptr<Context> context) override;
+  WindowHandle GetWindowHandle() override;
 
   // |PlaygroundImpl|
   std::unique_ptr<Surface> AcquireSurfaceFrame(

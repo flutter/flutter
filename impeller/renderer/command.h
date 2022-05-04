@@ -24,10 +24,26 @@
 
 namespace impeller {
 
+template <class T>
+struct Resource {
+  using ResourceType = T;
+  const ShaderMetadata* isa;
+  ResourceType resource;
+
+  Resource() : isa(nullptr) {}
+
+  Resource(const ShaderMetadata* p_isa, ResourceType p_resource)
+      : isa(p_isa), resource(p_resource) {}
+};
+
+using BufferResource = Resource<BufferView>;
+using TextureResource = Resource<std::shared_ptr<const Texture>>;
+using SamplerResource = Resource<std::shared_ptr<const Sampler>>;
+
 struct Bindings {
-  std::map<size_t, BufferView> buffers;
-  std::map<size_t, std::shared_ptr<const Texture>> textures;
-  std::map<size_t, std::shared_ptr<const Sampler>> samplers;
+  std::map<size_t, BufferResource> buffers;
+  std::map<size_t, TextureResource> textures;
+  std::map<size_t, SamplerResource> samplers;
 };
 
 //------------------------------------------------------------------------------
@@ -65,13 +81,53 @@ struct Command {
   /// setting this directly, it usually easier to specify the vertex and index
   /// buffer bindings directly via a single call to `BindVertices`.
   ///
+  /// @see         `BindVertices`
+  ///
   BufferView index_buffer;
+  //----------------------------------------------------------------------------
+  /// The number of indices to use from the index buffer. Set the vertex and
+  /// index buffers as well as the index count using a call to `BindVertices`.
+  ///
+  /// @see         `BindVertices`
+  ///
   size_t index_count = 0u;
+  //----------------------------------------------------------------------------
+  /// The type of indices in the index buffer. The indices must be tightly
+  /// packed in the index buffer.
+  ///
   IndexType index_type = IndexType::kUnknown;
+  //----------------------------------------------------------------------------
+  /// The debugging label to use for the command.
+  ///
   std::string label;
+  //----------------------------------------------------------------------------
+  /// The type of primitives in the vertex buffer. Set the vertex and index
+  /// buffers using a call to `BindVertices`.
+  ///
+  /// @see         `BindVertices`
+  ///
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
+  //----------------------------------------------------------------------------
+  /// The orientation of vertices of the front-facing polygons. This usually
+  /// matters when culling is enabled.
+  ///
+  /// @see         `cull_mode`
+  ///
   WindingOrder winding = WindingOrder::kClockwise;
+  //----------------------------------------------------------------------------
+  /// How to control culling of polygons. The orientation of front-facing
+  /// polygons is controlled via the `winding` parameter.
+  ///
+  /// @see         `winding`
+  ///
   CullMode cull_mode = CullMode::kNone;
+  //----------------------------------------------------------------------------
+  /// The reference value to use in stenciling operations. Stencil configuration
+  /// is part of pipeline setup and can be read from the pipelines descriptor.
+  ///
+  /// @see         `Pipeline`
+  /// @see         `PipelineDescriptor`
+  ///
   uint32_t stencil_reference = 0u;
   //----------------------------------------------------------------------------
   /// The offset used when indexing into the vertex buffer.
@@ -90,31 +146,46 @@ struct Command {
   /// If unset, no scissor is applied.
   ///
   std::optional<IRect> scissor;
+  //----------------------------------------------------------------------------
+  /// The number of instances of the given set of vertices to render. Not all
+  /// backends support rendering more than one instance at a time.
+  ///
+  /// @warning      Setting this to more than one will limit the availability of
+  ///               backends to use with this command.
+  ///
   size_t instance_count = 1u;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Specify the vertex and index buffer to use for this command.
+  ///
+  /// @param[in]  buffer  The vertex and index buffer definition.
+  ///
+  /// @return     returns if the binding was updated.
+  ///
   bool BindVertices(const VertexBuffer& buffer);
 
-  template <class T>
   bool BindResource(ShaderStage stage,
-                    const ShaderUniformSlot<T> slot,
-                    BufferView view) {
-    return BindResource(stage, slot.binding, std::move(view));
-  }
-
-  bool BindResource(ShaderStage stage, size_t binding, BufferView view);
+                    const ShaderUniformSlot& slot,
+                    const ShaderMetadata& metadata,
+                    BufferView view);
 
   bool BindResource(ShaderStage stage,
                     const SampledImageSlot& slot,
+                    const ShaderMetadata& metadata,
                     std::shared_ptr<const Texture> texture);
 
   bool BindResource(ShaderStage stage,
                     const SampledImageSlot& slot,
+                    const ShaderMetadata& metadata,
                     std::shared_ptr<const Sampler> sampler);
 
   bool BindResource(ShaderStage stage,
                     const SampledImageSlot& slot,
+                    const ShaderMetadata& metadata,
                     std::shared_ptr<const Texture> texture,
                     std::shared_ptr<const Sampler> sampler);
+
+  BufferView GetVertexBuffer() const;
 
   constexpr operator bool() const { return pipeline && pipeline->IsValid(); }
 };

@@ -14,39 +14,12 @@ namespace impeller {
 DeviceBufferMTL::DeviceBufferMTL(id<MTLBuffer> buffer,
                                  size_t size,
                                  StorageMode mode)
-    : buffer_(buffer), size_(size), mode_(mode) {}
+    : DeviceBuffer(size, mode), buffer_(buffer) {}
 
 DeviceBufferMTL::~DeviceBufferMTL() = default;
 
 id<MTLBuffer> DeviceBufferMTL::GetMTLBuffer() const {
   return buffer_;
-}
-
-std::shared_ptr<Texture> DeviceBufferMTL::MakeTexture(TextureDescriptor desc,
-                                                      size_t offset) const {
-  if (!desc.IsValid() || !buffer_) {
-    return nullptr;
-  }
-
-  // Avoid overruns.
-  if (offset + desc.GetByteSizeOfBaseMipLevel() > size_) {
-    VALIDATION_LOG << "Avoiding buffer overrun when creating texture.";
-    return nullptr;
-  }
-
-  if (@available(macOS 10.13, *)) {
-    auto texture =
-        [buffer_ newTextureWithDescriptor:ToMTLTextureDescriptor(desc)
-                                   offset:offset
-                              bytesPerRow:desc.GetBytesPerRow()];
-    if (!texture) {
-      return nullptr;
-    }
-
-    return std::make_shared<TextureMTL>(desc, texture);
-  } else {
-    return nullptr;
-  }
 }
 
 [[nodiscard]] bool DeviceBufferMTL::CopyHostBuffer(const uint8_t* source,
@@ -88,12 +61,6 @@ std::shared_ptr<Texture> DeviceBufferMTL::MakeTexture(TextureDescriptor desc,
   return true;
 }
 
-// |Buffer|
-std::shared_ptr<const DeviceBuffer> DeviceBufferMTL::GetDeviceBuffer(
-    Allocator& allocator) const {
-  return shared_from_this();
-}
-
 bool DeviceBufferMTL::SetLabel(const std::string& label) {
   if (label.empty()) {
     return false;
@@ -111,13 +78,6 @@ bool DeviceBufferMTL::SetLabel(const std::string& label, Range range) {
                       range:NSMakeRange(range.offset, range.length)];
   }
   return true;
-}
-
-BufferView DeviceBufferMTL::AsBufferView() const {
-  BufferView view;
-  view.buffer = shared_from_this();
-  view.range = {0u, size_};
-  return view;
 }
 
 }  // namespace impeller

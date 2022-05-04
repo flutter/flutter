@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/renderer/backend/gles/vertex_descriptor_gles.h"
+#include "impeller/renderer/backend/gles/gles_handle.h"
 
 namespace impeller {
 

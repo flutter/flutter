@@ -6,6 +6,19 @@
 
 namespace impeller {
 
-//
+ShaderFunctionGLES::ShaderFunctionGLES(
+    UniqueID library_id,
+    ShaderStage stage,
+    std::string name,
+    std::shared_ptr<const fml::Mapping> mapping)
+    : ShaderFunction(library_id, std::move(name), stage),
+      mapping_(std::move(mapping)) {}
+
+ShaderFunctionGLES::~ShaderFunctionGLES() = default;
+
+const std::shared_ptr<const fml::Mapping>&
+ShaderFunctionGLES::GetSourceMapping() const {
+  return mapping_;
+}
 
 }  // namespace impeller

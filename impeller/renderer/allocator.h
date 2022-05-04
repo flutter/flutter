@@ -63,12 +63,11 @@ class Allocator {
       StorageMode mode,
       const TextureDescriptor& desc) = 0;
 
-  virtual std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
-      const uint8_t* buffer,
-      size_t length) = 0;
+  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(const uint8_t* buffer,
+                                                     size_t length);
 
-  virtual std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
-      const fml::Mapping& mapping) = 0;
+  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
+      const fml::Mapping& mapping);
 
   static bool RequiresExplicitHostSynchronization(StorageMode mode);
 

@@ -25,29 +25,21 @@ class DeviceBuffer : public Buffer,
                                             Range source_range,
                                             size_t offset = 0u) = 0;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Create a texture whose contents are the same as that of this
-  ///             buffer. Changes to either the contents of the texture or the
-  ///             buffer will be shared. When using buffer backed textures,
-  ///             implementations may have to disable certain optimizations.
-  ///
-  /// @param[in]  desc    The description of the texture.
-  /// @param[in]  offset  The offset of the texture data within buffer.
-  ///
-  /// @return     The texture whose contents are backed by (a part of) this
-  ///             buffer.
-  ///
-  virtual std::shared_ptr<Texture> MakeTexture(TextureDescriptor desc,
-                                               size_t offset = 0u) const = 0;
-
   virtual bool SetLabel(const std::string& label) = 0;
 
   virtual bool SetLabel(const std::string& label, Range range) = 0;
 
-  virtual BufferView AsBufferView() const = 0;
+  BufferView AsBufferView() const;
+
+  // |Buffer|
+  std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
+      Allocator& allocator) const;
 
  protected:
-  DeviceBuffer();
+  const size_t size_;
+  const StorageMode mode_;
+
+  DeviceBuffer(size_t size, StorageMode mode);
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(DeviceBuffer);

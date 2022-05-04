@@ -93,13 +93,13 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   stencil0.load_action = LoadAction::kClear;
   stencil0.store_action = StoreAction::kDontCare;
 
-  RenderTarget desc;
-  desc.SetColorAttachment(color0, 0u);
-  desc.SetStencilAttachment(stencil0);
+  RenderTarget render_target_desc;
+  render_target_desc.SetColorAttachment(color0, 0u);
+  render_target_desc.SetStencilAttachment(stencil0);
 
   // The constructor is private. So make_unique may not be used.
   return std::unique_ptr<SurfaceMTL>(
-      new SurfaceMTL(std::move(desc), current_drawable));
+      new SurfaceMTL(std::move(render_target_desc), current_drawable));
 }
 
 SurfaceMTL::SurfaceMTL(RenderTarget target, id<MTLDrawable> drawable)
