@@ -155,11 +155,8 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
                print("No more results found in range");
                break;
            } else {
-
            oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1); // off by one potential
-           print("Old span text: ${oldSpanText}");
            newSpanText = newText.substring(currentSpanStart, currentSpanEnd + 1); // off by one potential, also might be out of range
-           print("New span text: ${newSpanText}");
 
            if (oldSpanText == newSpanText) {
                print("Found it");
@@ -169,11 +166,8 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
            else {
                spanLength = currentSpanEnd - currentSpanStart; // off by one potential
                RegExp regex = RegExp('\\b$oldSpanText\\b');
-            //    newStart = findBadSpan(newText.substring(searchStart), oldSpanText, spanLength); // off by one potential
-            print(regex);
-            print(searchStart);
-            int substring = newText.substring(searchStart).indexOf(regex);
-            newStart = substring + searchStart;
+                int substring = newText.substring(searchStart).indexOf(regex);
+                newStart = substring + searchStart;
 
             // STEP 2: Shift it or throw it out
                if (substring >= 0) {

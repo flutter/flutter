@@ -165,7 +165,6 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// By default makes text in composing range appear as underlined. Descendants
   /// can override this method to customize appearance of text.
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, SpellCheckConfiguration? spellCheckConfiguration}) {
-    // print('ASSERTION RESULTS ${!value.composing.isValid || !withComposing || value.isComposingRangeValid}');
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
@@ -2673,20 +2672,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ) ?? value;
 
         if (_spellCheckEnabled! && value.text.length > 0 && _value.text != value.text) {
-          // print("CURRENT WORD: ${renderEditable.getWordBoundary(TextPosition(offset: value.text.length-1)).textInside(value.text)}"); // this works in _handleselecionchanged
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
           Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value);
-          // print("REQUESTING SPELL CHECK RESULTS |${value.text}|");
+
           final String foo = value.text;
           spellCheckResultsFuture.then((results) {
-            // print("SPELL CHECK RESULTS GETTING UPDATED |${foo}|");
-            // results.forEach((SpellCheckerSuggestionSpan result) {
-            //   print(result.replacementSuggestions);
-            // });
             if (results.length > 1) {
             _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results[1];
             _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResultsText = results[0];
-            // print("${renderEditable.getWordBoundary(foo.length)}")
+
             renderEditable.text = buildTextSpan();
             }
       });
