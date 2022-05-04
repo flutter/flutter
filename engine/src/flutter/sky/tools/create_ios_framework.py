@@ -20,7 +20,7 @@ def main():
 
   parser.add_argument('--dst', type=str, required=True)
   parser.add_argument('--arm64-out-dir', type=str, required=True)
-  parser.add_argument('--armv7-out-dir', type=str, required=True)
+  parser.add_argument('--armv7-out-dir', type=str, required=False)
   # TODO(gw280): Remove --simulator-out-dir alias when all recipes are updated
   parser.add_argument('--simulator-x64-out-dir', '--simulator-out-dir', type=str, required=True)
   parser.add_argument('--simulator-arm64-out-dir', type=str, required=False)
