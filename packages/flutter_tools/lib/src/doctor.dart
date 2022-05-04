@@ -481,11 +481,11 @@ class FlutterValidator extends DoctorValidator {
       upstreamValidationError = VersionUpstreamValidator(version: version, platform: _platform).run();
 
       final String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
-      messages.add(
-        versionChannel == 'unknown' || frameworkVersion == '0.0.0-unknown'
-          ? ValidationMessage.hint(flutterVersionMessage)
-          : ValidationMessage(flutterVersionMessage)
-      );
+      if (versionChannel == 'unknown' || frameworkVersion == '0.0.0-unknown') {
+        messages.add(ValidationMessage.hint(flutterVersionMessage));
+      } else {
+        messages.add(ValidationMessage(flutterVersionMessage));
+      }
       if (repositoryUrl == null) {
         messages.add(ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown')));
       } else if (upstreamValidationError != null) {
