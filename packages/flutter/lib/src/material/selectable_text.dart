@@ -49,9 +49,9 @@ class _TextSpanEditingController extends TextEditingController {
 class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _SelectableTextSelectionGestureDetectorBuilder({
     required _SelectableTextState state,
-    required BuildContext context,
+    required super.context,
   }) : _state = state,
-       super(context: context, delegate: state);
+       super(delegate: state);
 
   final _SelectableTextState _state;
 

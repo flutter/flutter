@@ -39,9 +39,9 @@ typedef InputCounterWidgetBuilder = Widget? Function(
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({
     required _TextFieldState state,
-    required BuildContext context,
+    required super.context,
   }) : _state = state,
-       super(context: context, delegate: state);
+       super(delegate: state);
 
   final _TextFieldState _state;
 

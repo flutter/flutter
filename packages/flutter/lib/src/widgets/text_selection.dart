@@ -1289,6 +1289,8 @@ class TextSelectionGestureDetectorBuilder {
     required this.context,
   }) : assert(delegate != null);
 
+  // TODO(justinmc): Double check documentation.
+  /// The [BuildContext] where the [TextSelectionGestureDetector] will be built.
   final BuildContext context;
 
   /// The delegate for this [TextSelectionGestureDetectorBuilder].

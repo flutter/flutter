@@ -78,14 +78,21 @@ void main() {
       forcePressEnabled: forcePressEnabled,
       selectionEnabled: selectionEnabled,
     );
-    final TextSelectionGestureDetectorBuilder provider =
-    TextSelectionGestureDetectorBuilder(delegate: delegate);
 
     await tester.pumpWidget(
       MaterialApp(
-        home: provider.buildGestureDetector(
-          behavior: HitTestBehavior.translucent,
-          child: FakeEditableText(key: editableTextKey),
+        home: Builder(
+          builder: (BuildContext context) {
+            final TextSelectionGestureDetectorBuilder provider =
+                TextSelectionGestureDetectorBuilder(
+                  context: context,
+                  delegate: delegate,
+                );
+            return provider.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: FakeEditableText(key: editableTextKey),
+            );
+          },
         ),
       ),
     );

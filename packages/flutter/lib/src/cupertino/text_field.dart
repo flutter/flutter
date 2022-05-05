@@ -94,9 +94,9 @@ enum OverlayVisibilityMode {
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
     required _CupertinoTextFieldState state,
-    required BuildContext context,
+    required super.context,
   }) : _state = state,
-       super(context: context, delegate: state);
+       super(delegate: state);
 
   final _CupertinoTextFieldState _state;
 
