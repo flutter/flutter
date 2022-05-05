@@ -395,6 +395,7 @@ class IOSDevice extends Device {
             appDeltaDirectory: package.appDeltaDirectory,
             launchArguments: launchArguments,
             interfaceType: interfaceType,
+            uninstallFirst: debuggingOptions.uninstallFirst,
           );
           if (deviceLogReader is IOSDeviceLogReader) {
             deviceLogReader.debuggerStream = iosDeployDebugger;
