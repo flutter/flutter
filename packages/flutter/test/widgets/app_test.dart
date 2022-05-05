@@ -644,7 +644,7 @@ void main() {
     expect(MediaQuery.of(capturedContext), isNotNull);
   });
 
-  testWidgets('WidgetsApp provide meta based shortcut for iOS', (WidgetTester tester) async {
+  testWidgets('WidgetsApp provides meta based shortcuts for iOS and macOS', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final SelectAllSpy selectAllSpy = SelectAllSpy();
     final CopySpy copySpy = CopySpy();
@@ -707,7 +707,10 @@ void main() {
     expect(selectAllSpy.invoked, isTrue);
     expect(copySpy.invoked, isTrue);
     expect(pasteSpy.invoked, isTrue);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  },
+  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  skip: kIsWeb, // Web uses a different set of shortcuts.
+  );
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);

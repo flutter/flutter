@@ -5611,7 +5611,7 @@ void main() {
         );
         break;
 
-      // Mac and iOS expands by line.
+      // Mac and iOS expand by line.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
@@ -6857,7 +6857,7 @@ void main() {
         );
         break;
 
-      // Mac and iOS goes to the start/end of the document.
+      // Mac and iOS go to the start/end of the document.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
@@ -7147,7 +7147,7 @@ void main() {
         );
         break;
 
-      // Mac and iOS selects to the start of the document.
+      // Mac and iOS select to the start of the document.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
@@ -7204,7 +7204,7 @@ void main() {
         );
         break;
 
-      // Mac and iOS selects to the start of the document.
+      // Mac and iOS select to the start of the document.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
@@ -7339,7 +7339,7 @@ void main() {
         );
         break;
 
-      // Mac and iOS selects to the end of the document.
+      // Mac and iOS select to the end of the document.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
@@ -7396,7 +7396,7 @@ void main() {
         );
         break;
 
-      // Mac and iOS stays at the end of the document.
+      // Mac and iOS stay at the end of the document.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
@@ -10408,7 +10408,7 @@ void main() {
         expect(controller.selection.extentOffset, 15);
         break;
 
-      // Mac and iOS expands by line.
+      // Mac and iOS expand by line.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 15);
