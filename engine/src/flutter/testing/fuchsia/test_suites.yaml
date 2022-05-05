@@ -31,7 +31,7 @@
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cm
   package: ui_tests-0.far
   # TODO(fxb/87493): re-enable when this doesn't crash.
-- test_command: run-test-suite fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm -- --gtest_filter=-Embedder11yTest.A11yTreeIsConsistent
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm -- --gtest_filter=-EmbedderA11yTest.A11yTreeIsConsistent
   package: embedder_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cm
   package: dart_utils_tests-0.far
