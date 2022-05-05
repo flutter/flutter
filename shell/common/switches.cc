@@ -233,6 +233,11 @@ std::unique_ptr<fml::Mapping> GetSymbolMapping(std::string symbol_prefix,
 Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   Settings settings = {};
 
+  // Set executable name.
+  if (command_line.has_argv0()) {
+    settings.executable_name = command_line.argv0();
+  }
+
   // Enable Observatory
   settings.enable_observatory =
       !command_line.HasOption(FlagForSwitch(Switch::DisableObservatory));
