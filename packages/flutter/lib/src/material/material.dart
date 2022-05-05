@@ -748,6 +748,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
        assert(clipBehavior != null),
        assert(elevation != null && elevation >= 0.0),
        assert(color != null);
+       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   ///
