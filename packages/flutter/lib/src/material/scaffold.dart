@@ -1734,7 +1734,7 @@ class Scaffold extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
@@ -1910,7 +1910,7 @@ class Scaffold extends StatefulWidget {
 /// [BuildContext] using [Scaffold.of].
 class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, RestorationMixin {
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

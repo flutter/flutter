@@ -247,7 +247,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   final VoidCallback? onSuffixTap;
 
   /// {@macro flutter.material.textfield.restorationId}
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -326,7 +326,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   void _defaultOnSuffixTap() {
     final bool textChanged = _effectiveController.text.isNotEmpty;

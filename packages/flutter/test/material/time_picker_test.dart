@@ -25,7 +25,7 @@ class _TimePickerLauncher extends StatefulWidget {
 
   final ValueChanged<TimeOfDay?> onChanged;
   final TimePickerEntryMode entryMode;
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   _TimePickerLauncherState createState() => _TimePickerLauncherState();
@@ -33,7 +33,7 @@ class _TimePickerLauncher extends StatefulWidget {
 
 class _TimePickerLauncherState extends State<_TimePickerLauncher> with RestorationMixin {
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   late final RestorableRouteFuture<TimeOfDay?> _restorableTimePickerRouteFuture = RestorableRouteFuture<TimeOfDay?>(
     onComplete: _selectTime,
@@ -105,7 +105,7 @@ Future<Offset?> startPicker(
     WidgetTester tester,
     ValueChanged<TimeOfDay?> onChanged, {
       TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
-      String? restorationId,
+      RestorationId? restorationId,
     }) async {
   await tester.pumpWidget(MaterialApp(
     restorationScopeId: 'app',

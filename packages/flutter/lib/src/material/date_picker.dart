@@ -359,7 +359,7 @@ class DatePickerDialog extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -371,7 +371,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -1215,7 +1215,7 @@ class DateRangePickerDialog extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
@@ -1230,7 +1230,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
   final GlobalKey<_InputDateRangePickerState> _inputPickerKey = GlobalKey<_InputDateRangePickerState>();
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

@@ -1091,7 +1091,7 @@ class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
 
 class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableDateRangePickerDialogTestWidget> with RestorationMixin {
   @override
-  String? get restorationId => 'scaffold_state';
+  RestorationId? get restorationId => 'scaffold_state';
 
   final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021));
   final RestorableDateTimeN _endDate = RestorableDateTimeN(DateTime(2021, 1, 5));

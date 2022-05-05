@@ -327,7 +327,7 @@ class FormField<T> extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
@@ -423,7 +423,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

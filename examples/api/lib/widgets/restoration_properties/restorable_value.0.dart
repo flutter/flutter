@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key, this.restorationId}) : super(key: key);
 
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
@@ -40,7 +40,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   // The current value of the answer is stored in a [RestorableProperty].
   // During state restoration it is automatically restored to its old value.

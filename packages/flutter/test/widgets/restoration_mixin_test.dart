@@ -644,7 +644,7 @@ class _TestRestorableWidget extends StatefulWidget {
 
   const _TestRestorableWidget({super.key, this.restorationId});
 
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<_TestRestorableWidget> createState() => _TestRestorableWidgetState();
@@ -687,8 +687,8 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
 
   void setProperties(VoidCallback fn) => setState(fn);
 
-  String? _injectedId;
-  void injectId(String id) {
+  RestorationId? _injectedId;
+  void injectId(RestorationId id) {
     _injectedId = id;
     didUpdateRestorationId();
   }
@@ -708,7 +708,7 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
   }
 
   @override
-  String? get restorationId => _injectedId ?? widget.restorationId;
+  RestorationId? get restorationId => _injectedId ?? widget.restorationId;
 }
 
 Map<String, dynamic> _createRawDataSet() {

@@ -1137,7 +1137,7 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
 class TestRestorableWidget extends StatefulWidget {
   const TestRestorableWidget({super.key, required this.restorationId});
 
-  final String restorationId;
+  final RestorationId restorationId;
 
   @override
   State<StatefulWidget> createState() => _TestRestorableWidgetState();
@@ -1145,7 +1145,7 @@ class TestRestorableWidget extends StatefulWidget {
 
 class _TestRestorableWidgetState extends State<TestRestorableWidget> with RestorationMixin {
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   final RestorableInt counter = RestorableInt(0);
 

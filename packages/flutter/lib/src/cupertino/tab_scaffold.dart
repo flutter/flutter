@@ -308,7 +308,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<CupertinoTabScaffold> createState() => _CupertinoTabScaffoldState();
@@ -319,7 +319,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
   CupertinoTabController get _controller =>  widget.controller ?? _internalController!.value;
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

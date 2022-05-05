@@ -24,7 +24,7 @@ class RestorationExampleApp extends StatelessWidget {
 class RestorableCounter extends StatefulWidget {
   const RestorableCounter({Key? key, this.restorationId}) : super(key: key);
 
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<RestorableCounter> createState() => _RestorableCounterState();
@@ -43,7 +43,7 @@ class _RestorableCounterState extends State<RestorableCounter>
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

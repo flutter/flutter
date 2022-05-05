@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart' show RestorationId;
 
 import 'basic.dart';
 import 'debug.dart';
@@ -304,7 +305,7 @@ abstract class ScrollView extends StatelessWidget {
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///

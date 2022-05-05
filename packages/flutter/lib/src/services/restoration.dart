@@ -38,7 +38,7 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// [rootBucket] provided by this [RestorationManager]). The owner of a bucket
 /// may store arbitrary values in the bucket as long as they can be serialized
 /// with the [StandardMessageCodec]. The values are stored in the bucket under a
-/// given restoration ID as key. A restoration ID is a [String] that must be
+/// given restoration ID as key. A restoration ID is a [RestorationId] that must be
 /// unique within a given bucket. To access the stored value again during state
 /// restoration, the same restoration ID must be provided again. The owner of
 /// the bucket may also make the bucket available to other entities so that they
@@ -421,6 +421,9 @@ class RestorationManager extends ChangeNotifier {
   }
 }
 
+/// Type of restoration id.
+typedef RestorationId = String;
+
 /// A [RestorationBucket] holds pieces of the restoration data that a part of
 /// the application needs to restore its state.
 ///
@@ -433,7 +436,7 @@ class RestorationManager extends ChangeNotifier {
 /// restore its current state at a later point in time.
 ///
 /// A [RestorationBucket] stores restoration data as key-value pairs. The key is
-/// a [String] representing a restoration ID that identifies a piece of data
+/// a [RestorationId] representing a restoration ID that identifies a piece of data
 /// uniquely within a bucket. The value can be anything that is serializable via
 /// the [StandardMessageCodec]. Furthermore, a [RestorationBucket] may have
 /// child buckets, which are identified within their parent via a unique
@@ -500,7 +503,7 @@ class RestorationBucket {
   ///
   /// The `restorationId` must not be null.
   RestorationBucket.empty({
-    required String restorationId,
+    required RestorationId restorationId,
     required Object? debugOwner,
   }) : assert(restorationId != null),
        _restorationId = restorationId,
@@ -558,7 +561,7 @@ class RestorationBucket {
   ///
   /// The `restorationId` and `parent` argument must not be null.
   RestorationBucket.child({
-    required String restorationId,
+    required RestorationId restorationId,
     required RestorationBucket parent,
     required Object? debugOwner,
   }) : assert(restorationId != null),
@@ -608,11 +611,11 @@ class RestorationBucket {
   /// parent-less).
   ///
   /// This value is never null.
-  String get restorationId {
+  RestorationId get restorationId {
     assert(_debugAssertNotDisposed());
     return _restorationId;
   }
-  String _restorationId;
+  RestorationId _restorationId;
 
   // Maps a restoration ID to the raw map representation of a child bucket.
   Map<Object?, Object?> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <Object?, Object?>{})! as Map<Object?, Object?>;
@@ -633,7 +636,7 @@ class RestorationBucket {
   ///  * [remove], which removes a value from the bucket.
   ///  * [contains], which checks whether any value is stored under a given
   ///    restoration ID.
-  P? read<P>(String restorationId) {
+  P? read<P>(RestorationId restorationId) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     return _rawValues[restorationId] as P?;
@@ -655,7 +658,7 @@ class RestorationBucket {
   ///  * [remove], which removes a value from the bucket.
   ///  * [contains], which checks whether any value is stored under a given
   ///    restoration ID.
-  void write<P>(String restorationId, P value) {
+  void write<P>(RestorationId restorationId, P value) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     assert(debugIsSerializableForRestoration(value));
@@ -677,7 +680,7 @@ class RestorationBucket {
   ///  * [write], which stores a value in the bucket.
   ///  * [contains], which checks whether any value is stored under a given
   ///    restoration ID.
-  P? remove<P>(String restorationId) {
+  P? remove<P>(RestorationId restorationId) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     final bool needsUpdate = _rawValues.containsKey(restorationId);
@@ -699,7 +702,7 @@ class RestorationBucket {
   ///  * [read], which retrieves a stored value from the bucket.
   ///  * [write], which stores a value in the bucket.
   ///  * [remove], which removes a value from the bucket.
-  bool contains(String restorationId) {
+  bool contains(RestorationId restorationId) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     return _rawValues.containsKey(restorationId);
@@ -709,10 +712,10 @@ class RestorationBucket {
 
   // The restoration IDs and associated buckets of children that have been
   // claimed via [claimChild].
-  final Map<String, RestorationBucket> _claimedChildren = <String, RestorationBucket>{};
+  final Map<RestorationId, RestorationBucket> _claimedChildren = <RestorationId, RestorationBucket>{};
   // Newly created child buckets whose restoration ID is still in use, see
   // comment in [claimChild] for details.
-  final Map<String, List<RestorationBucket>> _childrenToAdd = <String, List<RestorationBucket>>{};
+  final Map<RestorationId, List<RestorationBucket>> _childrenToAdd = <RestorationId, List<RestorationBucket>>{};
 
   /// Claims ownership of the child with the provided `restorationId` from this
   /// bucket.
@@ -735,7 +738,7 @@ class RestorationBucket {
   ///
   /// When the returned bucket is no longer needed, it must be [dispose]d to
   /// delete the information stored in it from the app's restoration data.
-  RestorationBucket claimChild(String restorationId, {required Object? debugOwner}) {
+  RestorationBucket claimChild(RestorationId restorationId, {required Object? debugOwner}) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     // There are three cases to consider:
@@ -859,8 +862,8 @@ class RestorationBucket {
         ErrorSummary('Multiple owners claimed child RestorationBuckets with the same IDs.'),
         ErrorDescription('The following IDs were claimed multiple times from the parent $this:'),
       ];
-      for (final MapEntry<String, List<RestorationBucket>> child in _childrenToAdd.entries) {
-        final String id = child.key;
+      for (final MapEntry<RestorationId, List<RestorationBucket>> child in _childrenToAdd.entries) {
+        final RestorationId id = child.key;
         final List<RestorationBucket> buckets = child.value;
         assert(buckets.isNotEmpty);
         assert(_claimedChildren.containsKey(id));
@@ -942,7 +945,7 @@ class RestorationBucket {
   /// exception will be thrown at the end of the current frame unless the other
   /// owner has deleted its bucket by calling [dispose], [rename]ed it using
   /// another ID, or has moved it to a new parent via [adoptChild].
-  void rename(String newRestorationId) {
+  void rename(RestorationId newRestorationId) {
     assert(_debugAssertNotDisposed());
     assert(newRestorationId != null);
     if (newRestorationId == restorationId) {

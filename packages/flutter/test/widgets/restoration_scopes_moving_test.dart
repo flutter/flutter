@@ -157,13 +157,13 @@ class TestWidgetWithCounterChildState extends State<TestWidgetWithCounterChild> 
   }
 
   @override
-  String get restorationId => 'foo';
+  RestorationId get restorationId => 'foo';
 }
 
 class Counter extends StatefulWidget {
   const Counter({super.key, this.restorationId});
 
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<Counter> createState() => CounterState();
@@ -173,7 +173,7 @@ class CounterState extends State<Counter> with RestorationMixin {
   final RestorableInt count = RestorableInt(0);
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -204,7 +204,7 @@ class CounterState extends State<Counter> with RestorationMixin {
 class TestWidget extends StatefulWidget {
   const TestWidget({super.key, required this.restorationId});
 
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<TestWidget> createState() => TestWidgetState();
@@ -229,7 +229,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   Widget build(BuildContext context) {

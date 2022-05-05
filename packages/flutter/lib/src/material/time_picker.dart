@@ -1325,7 +1325,7 @@ class _TimePickerInput extends StatefulWidget {
   ///
   /// The state of this widget is persisted in a [RestorationBucket] claimed
   /// from the surrounding [RestorationScope] using the provided restoration ID.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   _TimePickerInputState createState() => _TimePickerInputState();
@@ -1337,7 +1337,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   final RestorableBool minuteHasError = RestorableBool(false);
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -1580,7 +1580,7 @@ class _HourTextField extends StatelessWidget {
   final ValueChanged<String?> onSavedSubmitted;
   final ValueChanged<String> onChanged;
   final String? hourLabelText;
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   Widget build(BuildContext context) {
@@ -1615,7 +1615,7 @@ class _MinuteTextField extends StatelessWidget {
   final FormFieldValidator<String> validator;
   final ValueChanged<String?> onSavedSubmitted;
   final String? minuteLabelText;
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   Widget build(BuildContext context) {
@@ -1653,7 +1653,7 @@ class _HourMinuteTextField extends StatefulWidget {
   final FormFieldValidator<String> validator;
   final ValueChanged<String?> onSavedSubmitted;
   final ValueChanged<String>? onChanged;
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   _HourMinuteTextFieldState createState() => _HourMinuteTextFieldState();
@@ -1684,7 +1684,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -1846,7 +1846,7 @@ class TimePickerDialog extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// Callback called when the selected entry mode is changed.
   final EntryModeChangeCallback? onEntryModeChanged;
@@ -1990,7 +1990,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

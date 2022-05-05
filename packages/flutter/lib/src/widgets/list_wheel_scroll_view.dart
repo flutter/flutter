@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart' show RestorationId;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -698,7 +699,7 @@ class ListWheelScrollView extends StatefulWidget {
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// {@macro flutter.widgets.shadow.scrollBehavior}
   ///

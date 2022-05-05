@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-export 'package:flutter/services.dart' show RestorationBucket;
+export 'package:flutter/services.dart' show RestorationBucket, RestorationId;
 
 /// Creates a new scope for restoration IDs used by descendant widgets to claim
 /// [RestorationBucket]s.
@@ -90,7 +90,7 @@ class RestorationScope extends StatefulWidget {
   ///
   /// If this is null, [RestorationScope.of] invoked by descendants will return
   /// null which effectively turns off state restoration for this subtree.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<RestorationScope> createState() => _RestorationScopeState();
@@ -98,7 +98,7 @@ class RestorationScope extends StatefulWidget {
 
 class _RestorationScopeState extends State<RestorationScope> with RestorationMixin {
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -235,7 +235,7 @@ class RootRestorationScope extends StatefulWidget {
   ///
   /// If this is null, no bucket is made available to descendants and state
   /// restoration for the subtree is essentially turned off.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<RootRestorationScope> createState() => _RootRestorationScopeState();
@@ -480,9 +480,9 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   }
 
   // ID under which the property has been registered with the RestorationMixin.
-  String? _restorationId;
+  RestorationId? _restorationId;
   RestorationMixin? _owner;
-  void _register(String restorationId, RestorationMixin owner) {
+  void _register(RestorationId restorationId, RestorationMixin owner) {
     assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     assert(owner != null);
@@ -633,7 +633,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// constructor of the [StatefulWidget] that this [State] object is associated
   /// with.
   @protected
-  String? get restorationId;
+  RestorationId? get restorationId;
 
   /// The [RestorationBucket] used for the restoration data of the
   /// [RestorableProperty]s registered to this mixin.
@@ -735,7 +735,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// re-registered within [restoreState] the next time that method is called
   /// unless it has been unregistered with [unregisterFromRestoration].
   @protected
-  void registerForRestoration(RestorableProperty<Object?> property, String restorationId) {
+  void registerForRestoration(RestorableProperty<Object?> property, RestorationId restorationId) {
     assert(property != null);
     assert(restorationId != null);
     assert(property._restorationId == null || (_debugDoingRestore && property._restorationId == restorationId),

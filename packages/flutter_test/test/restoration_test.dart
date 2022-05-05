@@ -74,7 +74,7 @@ void main() {
 class _RestorableWidget extends StatefulWidget {
   const _RestorableWidget({this.restorationId});
 
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   State<_RestorableWidget> createState() => _RestorableWidgetState();
@@ -106,5 +106,5 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 }

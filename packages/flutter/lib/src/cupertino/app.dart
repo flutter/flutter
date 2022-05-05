@@ -409,7 +409,7 @@ class CupertinoApp extends StatefulWidget {
   final Map<Type, Action<Intent>>? actions;
 
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
-  final String? restorationScopeId;
+  final RestorationId? restorationScopeId;
 
   /// {@macro flutter.material.materialApp.scrollBehavior}
   ///

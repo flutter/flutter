@@ -347,7 +347,7 @@ class Router<T> extends StatefulWidget {
   factory Router.withConfig({
     Key? key,
     required RouterConfig<T> config,
-    String? restorationScopeId,
+    RestorationId? restorationScopeId,
   }) {
     return Router<T>(
       key: key,
@@ -419,7 +419,7 @@ class Router<T> extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
-  final String? restorationScopeId;
+  final RestorationId? restorationScopeId;
 
   /// Retrieves the immediate [Router] ancestor from the given context.
   ///
@@ -564,7 +564,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   late bool _routeParsePending;
 
   @override
-  String? get restorationId => widget.restorationScopeId;
+  RestorationId? get restorationId => widget.restorationScopeId;
 
   @override
   void initState() {

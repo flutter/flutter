@@ -1371,7 +1371,7 @@ class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
 
 class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePickerDialogTestWidget> with RestorationMixin {
   @override
-  String? get restorationId => 'scaffold_state';
+  RestorationId? get restorationId => 'scaffold_state';
 
   final RestorableDateTime _selectedDate = RestorableDateTime(DateTime(2021, 7, 25));
   late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime?>(

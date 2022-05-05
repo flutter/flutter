@@ -176,7 +176,7 @@ abstract class Route<T> {
   }
 
   // ignore: use_setters_to_change_properties, (setters can't be private)
-  void _updateRestorationId(String? restorationId) {
+  void _updateRestorationId(RestorationId? restorationId) {
     _restorationScopeId.value = restorationId;
   }
 
@@ -587,7 +587,7 @@ abstract class Page<T> extends RouteSettings {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// Whether this page can be updated with the [other] page.
   ///
@@ -1457,7 +1457,7 @@ class Navigator extends StatefulWidget {
   ///  * [Navigator.restorablePush], which includes an example showcasing how
   ///    to push a restorable route unto the navigator.
   /// {@endtemplate}
-  final String? restorationScopeId;
+  final RestorationId? restorationScopeId;
 
   /// The name for the default route of the application.
   ///
@@ -2777,7 +2777,7 @@ class _RouteEntry extends RouteTransitionRecord {
 
   /// Restoration ID to be used for the encapsulating route when restoration is
   /// enabled for it or null if restoration cannot be enabled for it.
-  String? get restorationId {
+  RestorationId? get restorationId {
     // User-provided restoration ids of Pages are prefixed with 'p+'. Generated
     // ids for pageless routes are prefixed with 'r+' to avoid clashes.
     if (hasPage) {
@@ -3321,7 +3321,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
   }
   @override
-  String? get restorationId => widget.restorationScopeId;
+  RestorationId? get restorationId => widget.restorationScopeId;
 
   @override
   void didChangeDependencies() {
@@ -5402,7 +5402,7 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
     assert(!pageToRoutes.containsKey(page?.restorationId));
     if (routes != null && routes.isNotEmpty) {
       assert(page == null || page.restorationId != null);
-      final String? restorationId = page?.restorationId;
+      final RestorationId? restorationId = page?.restorationId;
       pageToRoutes[restorationId] = routes;
       pagesToRemove.remove(restorationId);
     }

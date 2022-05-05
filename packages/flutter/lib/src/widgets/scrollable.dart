@@ -246,7 +246,7 @@ class Scrollable extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   /// {@endtemplate}
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// {@macro flutter.widgets.shadow.scrollBehavior}
   ///
@@ -799,7 +799,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 }
 
 /// Describes the aspects of a Scrollable widget to inform inherited widgets

@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart' show RestorationId;
 
 import 'basic.dart';
 import 'focus_manager.dart';
@@ -232,7 +233,7 @@ class SingleChildScrollView extends StatelessWidget {
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;

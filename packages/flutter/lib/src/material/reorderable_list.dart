@@ -255,7 +255,7 @@ class ReorderableListView extends StatefulWidget {
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///

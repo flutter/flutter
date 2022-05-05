@@ -756,7 +756,7 @@ class TextField extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   /// {@endtemplate}
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// {@macro flutter.widgets.editableText.scribbleEnabled}
   final bool scribbleEnabled;
@@ -991,7 +991,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void dispose() {

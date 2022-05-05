@@ -1036,7 +1036,7 @@ Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
 class PagedTestWidget extends StatelessWidget {
   const PagedTestWidget({super.key, this.restorationId = 'app'});
 
-  final String restorationId;
+  final RestorationId restorationId;
 
   @override
   Widget build(BuildContext context) {
@@ -1126,7 +1126,7 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
   }
 
   @override
-  String get restorationId => 'router';
+  RestorationId get restorationId => 'router';
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -1159,7 +1159,7 @@ class TestPage extends Page<void> {
 class TestWidget extends StatelessWidget {
   const TestWidget({super.key, this.restorationId = 'app'});
 
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   @override
   Widget build(BuildContext context) {
@@ -1206,7 +1206,7 @@ class RouteWidgetState extends State<RouteWidget> with RestorationMixin {
   }
 
   @override
-  String get restorationId => 'stateful';
+  RestorationId get restorationId => 'stateful';
 
   @override
   void dispose() {
@@ -1268,7 +1268,7 @@ class RouteFutureWidgetState extends State<RouteFutureWidget> with RestorationMi
   }
 
   @override
-  String get restorationId => 'routefuturewidget';
+  RestorationId get restorationId => 'routefuturewidget';
 
   @override
   void dispose() {

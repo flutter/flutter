@@ -35,7 +35,7 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
   late RestorableRouteFuture<int> _counterRoute;
 
   @override
-  String get restorationId => 'home';
+  RestorationId get restorationId => 'home';
 
   @override
   void initState() {
@@ -116,7 +116,7 @@ class _MyCounterState extends State<MyCounter> with RestorationMixin {
   final RestorableInt _count = RestorableInt(0);
 
   @override
-  String get restorationId => 'counter';
+  RestorationId get restorationId => 'counter';
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

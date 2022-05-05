@@ -1142,7 +1142,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   /// {@endtemplate}
-  final String? restorationScopeId;
+  final RestorationId? restorationScopeId;
 
   /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
   /// If true, an inherited MediaQuery will be used. If one is not available,

@@ -768,7 +768,7 @@ class CupertinoTextField extends StatefulWidget {
   final Clip clipBehavior;
 
   /// {@macro flutter.material.textfield.restorationId}
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// {@macro flutter.widgets.editableText.scribbleEnabled}
   final bool scribbleEnabled;
@@ -902,7 +902,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  RestorationId? get restorationId => widget.restorationId;
 
   @override
   void dispose() {

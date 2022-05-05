@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart' show RestorationId;
 
 import 'basic.dart';
 import 'debug.dart';
@@ -808,7 +809,7 @@ class PageView extends StatefulWidget {
   final bool allowImplicitScrolling;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// The axis along which the page view scrolls.
   ///

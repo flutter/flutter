@@ -677,7 +677,7 @@ class MaterialApp extends StatefulWidget {
   final Map<Type, Action<Intent>>? actions;
 
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
-  final String? restorationScopeId;
+  final RestorationId? restorationScopeId;
 
   /// {@template flutter.material.materialApp.scrollBehavior}
   /// The default [ScrollBehavior] for the application.

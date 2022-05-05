@@ -82,7 +82,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   final RestorableTextEditingController controller = RestorableTextEditingController();
 
   @override
-  String get restorationId => 'widget';
+  RestorationId get restorationId => 'widget';
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

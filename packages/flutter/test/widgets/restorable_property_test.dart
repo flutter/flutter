@@ -554,5 +554,5 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   }
 
   @override
-  String get restorationId => 'widget';
+  RestorationId get restorationId => 'widget';
 }

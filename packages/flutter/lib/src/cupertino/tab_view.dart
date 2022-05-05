@@ -130,7 +130,7 @@ class CupertinoTabView extends StatefulWidget {
   /// this [CupertinoTabView].
   ///
   /// {@macro flutter.widgets.navigator.restorationScopeId}
-  final String? restorationScopeId;
+  final RestorationId? restorationScopeId;
 
   @override
   State<CupertinoTabView> createState() => _CupertinoTabViewState();

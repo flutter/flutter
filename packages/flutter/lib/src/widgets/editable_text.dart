@@ -1368,7 +1368,7 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
-  final String? restorationId;
+  final RestorationId? restorationId;
 
   /// {@template flutter.widgets.shadow.scrollBehavior}
   /// A [ScrollBehavior] that will be applied to this widget individually.
