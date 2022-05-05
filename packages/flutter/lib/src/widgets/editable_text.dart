@@ -2514,11 +2514,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
-
-      // if cursor is inactive, e.g. while selecting text, do not jump away
-      if (!_cursorActive) {
-        return;
-      }
       if (_currentCaretRect == null || !_scrollController.hasClients) {
         return;
       }
