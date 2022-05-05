@@ -8,7 +8,7 @@ _tl;dr: join [Discord](https://github.com/flutter/flutter/wiki/Chat), be [courte
 Welcome
 -------
 
-We invite you to join the Flutter team, which is made up of volunteers and sponsored folk alike!
+We invite you to join the Flutter team, which is made up of volunteers and sponsored folks alike!
 There are many ways to contribute, including writing code, filing issues on GitHub, helping people
 on our mailing lists, our chat channels, or on Stack Overflow, helping to triage, reproduce, or
 fix bugs that people have filed, adding to our documentation,
