@@ -652,3 +652,35 @@ action("embedding_jars") {
     }
   }
 }
+
+# Renames android artifacts and places them in the final
+# expected folder structure.
+action("abi_jars") {
+  script = "//flutter/build/android_artifacts.py"
+  deps = [
+    ":android_jar",
+    ":pom_libflutter",
+  ]
+
+  artifact_id =
+      string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
+  sources = [
+    "$root_out_dir/${artifact_id}.jar",
+    "$root_out_dir/${artifact_id}.pom",
+  ]
+  outputs = []
+  args = []
+  base_name = "$root_out_dir/zip_archives/flutter_download_io/" +
+              "${artifact_id}/1.0.0-$engine_version/" +
+              "${artifact_id}-1.0.0-${engine_version}"
+  foreach(source, sources) {
+    extension = get_path_info(source, "extension")
+    name = get_path_info(source, "name")
+    outputs += [ "${base_name}.${extension}" ]
+    args += [
+      "-i",
+      rebase_path(source),
+      rebase_path("${base_name}.${extension}"),
+    ]
+  }
+}
