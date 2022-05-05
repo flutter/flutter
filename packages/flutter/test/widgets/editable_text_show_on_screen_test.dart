@@ -553,7 +553,7 @@ void main() {
         focusNode.requestFocus();
         await tester.pumpAndSettle();
 
-        expect(isCaretOnScreen(tester), !readOnly);
+        expect(isCaretOnScreen(tester), isBrowser ? isFalse : !readOnly);
         expect(scrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
         expect(editableScrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
       });

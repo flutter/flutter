@@ -5915,7 +5915,7 @@ void main() {
 
       expect(focusNode1.hasFocus, isTrue);
       expect(focusNode2.hasFocus, isFalse);
-      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.baseOffset, kIsWeb ? 0 : 6);
       expect(controller.selection.extentOffset, 12);
 
       // Select everything.

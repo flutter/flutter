@@ -962,6 +962,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: TextField(
+            maxLines: isBrowser ? 2 : 1,
             autofocus: true,
             controller: controller,
           ),

@@ -1615,6 +1615,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final LayerLink _endHandleLayerLink = LayerLink();
 
   bool _didAutoFocus = false;
+  bool _focusedDirectly = false;
 
   AutofillGroupState? _currentAutofillScope;
   @override
@@ -2656,6 +2657,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                           || (!_value.composing.isCollapsed && value.composing.isCollapsed);
     final bool selectionChanged = _value.selection != value.selection;
 
+    _focusedDirectly = cause != null;
+
     if (textChanged) {
       try {
         value = widget.inputFormatters?.fold<TextEditingValue>(
@@ -2826,6 +2829,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
+      if (kIsWeb && widget._userSelectionEnabled && widget.maxLines == 1 && !_focusedDirectly) {
+        // Select all text in a single line input on web if it wasn't focused directly.
+        _handleSelectionChanged(TextSelection(baseOffset: 0, extentOffset: _value.text.length), null);
+      }
       if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
         _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
@@ -2839,6 +2846,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       WidgetsBinding.instance.removeObserver(this);
       setState(() { _currentPromptRectRange = null; });
     }
+    _focusedDirectly = false;
     updateKeepAlive();
   }
 

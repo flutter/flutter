@@ -635,6 +635,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
+            maxLines: kIsWeb ? 2 : 1,
             controller: controller,
             backgroundCursorColor: Colors.grey,
             focusNode: focusNode,
@@ -661,6 +662,47 @@ void main() {
     expect(controller.value, value);
     expect(focusNode.hasFocus, isFalse);
   });
+
+  testWidgets('selects all on focus change on web', (WidgetTester tester) async {
+    const String testText = 'test test';
+    const TextSelection allSelection = TextSelection(
+        baseOffset: 0,
+        extentOffset: testText.length
+    );
+    const TextEditingValue value = TextEditingValue(
+      text: testText,
+      selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 5, extentOffset: 7),
+    );
+    controller.value = value;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            keyboardType: TextInputType.multiline,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value, value);
+    expect(focusNode.hasFocus, isFalse);
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // On web this should select all of the text to match <input> behavior
+    expect(controller.value.selection, allSelection);
+    expect(focusNode.hasFocus, isTrue);
+  },
+    skip: !kIsWeb // [intended] should only select all on web
+  );
 
   testWidgets('EditableText does not derive selection color from DefaultSelectionStyle', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103341.
@@ -888,6 +930,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
+            maxLines: kIsWeb ? 2 : 1,
             backgroundCursorColor: Colors.grey,
             controller: controller,
             focusNode: focusNode,
@@ -3846,6 +3889,8 @@ void main() {
     ));
 
     expect((findRenderEditable(tester).text! as TextSpan).text, expectedValue);
+    const TextSelection lastSelection =TextSelection.collapsed(offset: 24);
+    const TextSelection allSelection = TextSelection(baseOffset: 0, extentOffset: 24);
 
     expect(
       semantics,
@@ -3873,7 +3918,7 @@ void main() {
                           ],
                           value: expectedValue,
                           textDirection: TextDirection.ltr,
-                          textSelection: const TextSelection.collapsed(offset: 24),
+                          textSelection: kIsWeb ? allSelection : lastSelection,
                         ),
                       ],
                     ),
@@ -4743,6 +4788,7 @@ void main() {
             child: Center(
               child: Material(
                 child: EditableText(
+                  maxLines: kIsWeb ? 2 : 1,
                   backgroundCursorColor: Colors.grey,
                   controller: controller,
                   focusNode: FocusNode(),
@@ -4979,6 +5025,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp( // So we can show overlays.
       home: EditableText(
+        maxLines: kIsWeb ? 2 : 1,
         autofocus: true,
         backgroundCursorColor: Colors.grey,
         controller: controller,
@@ -11190,6 +11237,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
+          maxLines: kIsWeb ? 2 : 1,
           autofocus: true,
           controller: TextEditingController(text: 'A'),
           focusNode: focusNode,

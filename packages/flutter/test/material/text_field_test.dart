@@ -1655,7 +1655,7 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, isBrowser ? isTrue : isFalse);
     await skipPastScrollingAnimation(tester);
 
-    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.isCollapsed, isBrowser ? isFalse : isTrue);
 
     await tester.tap(find.byType(TextField));
     await tester.pump();
@@ -6393,6 +6393,15 @@ void main() {
     semanticsOwner.performAction(inputFieldId, SemanticsAction.tap);
     await tester.pump();
 
+    const TextSelection endSelection = TextSelection(
+      baseOffset: textInTextField.length,
+      extentOffset: textInTextField.length,
+    );
+    const TextSelection allSelection = TextSelection(
+      baseOffset: 0,
+      extentOffset: textInTextField.length,
+    );
+
     expect(semantics, hasSemantics(
       TestSemantics.root(
         children: <TestSemantics>[
@@ -6409,13 +6418,12 @@ void main() {
               SemanticsAction.setSelection,
               SemanticsAction.setText,
               SemanticsAction.paste,
+              if (kIsWeb) SemanticsAction.cut,
+              if (kIsWeb) SemanticsAction.copy,
             ],
             value: textInTextField,
             textDirection: TextDirection.ltr,
-            textSelection: const TextSelection(
-              baseOffset: textInTextField.length,
-              extentOffset: textInTextField.length,
-            ),
+            textSelection: isBrowser ? allSelection : endSelection,
           ),
         ],
       ),
