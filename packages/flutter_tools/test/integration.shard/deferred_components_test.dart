@@ -72,6 +72,7 @@ void main() {
       'appbundle',
     ], workingDirectory: tempDir.path);
 
+    print(result.stderr.toString());
     expect(result.stdout.toString(), contains('app-release.aab'));
     expect(result.stdout.toString(), contains('Deferred components prebuild validation passed.'));
     expect(result.stdout.toString(), contains('Deferred components gen_snapshot validation passed.'));
