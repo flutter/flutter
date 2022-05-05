@@ -5204,19 +5204,19 @@ void main() {
     }
     if (shortcutModifier) {
       await tester.sendKeyDownEvent(
-        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
         platform: platform,
       );
     }
     if (wordModifier) {
       await tester.sendKeyDownEvent(
-        platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
         platform: platform,
       );
     }
     if (lineModifier) {
       await tester.sendKeyDownEvent(
-        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
         platform: platform,
       );
     }
@@ -5226,19 +5226,19 @@ void main() {
     }
     if (lineModifier) {
       await tester.sendKeyUpEvent(
-        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
         platform: platform,
       );
     }
     if (wordModifier) {
       await tester.sendKeyUpEvent(
-        platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
         platform: platform,
       );
     }
     if (shortcutModifier) {
       await tester.sendKeyUpEvent(
-        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
         platform: platform,
       );
     }
@@ -5547,7 +5547,6 @@ void main() {
 
     switch (defaultTargetPlatform) {
       // These platforms extend by line.
-      case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -5565,7 +5564,8 @@ void main() {
         );
         break;
 
-      // Mac expands by line.
+      // Mac and iOS expand by line.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -6738,7 +6738,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't handle shift + home/end at all.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selectionAfterHome,
@@ -6811,7 +6810,8 @@ void main() {
         );
         break;
 
-      // Mac goes to the start/end of the document.
+      // Mac and iOS go to the start/end of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selectionAfterHome,
@@ -7088,7 +7088,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't move the selection with shift + home/end at all.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selection,
@@ -7101,7 +7100,8 @@ void main() {
         );
         break;
 
-      // Mac selects to the start of the document.
+      // Mac and iOS select to the start of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -7145,7 +7145,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't move the selection with home/end at all still.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selection,
@@ -7158,7 +7157,8 @@ void main() {
         );
         break;
 
-      // Mac selects to the start of the document.
+      // Mac and iOS select to the start of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -7280,7 +7280,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't move the selection with home/end at all.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selection,
@@ -7293,7 +7292,8 @@ void main() {
         );
         break;
 
-      // Mac selects to the end of the document.
+      // Mac and iOS select to the end of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -7337,7 +7337,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't move the selection with home/end at all still.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selection,
@@ -7350,7 +7349,8 @@ void main() {
         );
         break;
 
-      // Mac stays at the end of the document.
+      // Mac and iOS stay at the end of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -10213,7 +10213,7 @@ void main() {
       wordModifier: true,
       targetPlatform: defaultTargetPlatform,
     );
-    if (defaultTargetPlatform == TargetPlatform.macOS) {
+    if (defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS) {
       // word wo|rd word
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 7);
@@ -10264,7 +10264,7 @@ void main() {
       wordModifier: true,
       targetPlatform: defaultTargetPlatform,
     );
-    if (defaultTargetPlatform == TargetPlatform.macOS) {
+    if (defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS) {
       // word wo|rd word
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 7);
@@ -10353,7 +10353,6 @@ void main() {
     expect(controller.selection.isCollapsed, false);
     switch (defaultTargetPlatform) {
       // These platforms extend by line.
-      case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -10362,7 +10361,8 @@ void main() {
         expect(controller.selection.extentOffset, 15);
         break;
 
-      // Mac expands by line.
+      // Mac and iOS expand by line.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 15);
         expect(controller.selection.extentOffset, 24);
