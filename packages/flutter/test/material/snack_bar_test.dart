@@ -2090,34 +2090,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750));
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('snack_bar.goldenTest.backdropFilter.png'));
   });
-
-  testWidgets('ScaffoldMessenger will alert for snackbars that cannot be presented', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/103004
-    await tester.pumpWidget(const MaterialApp(
-      home: Center(),
-    ));
-
-    final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
-      find.byType(ScaffoldMessenger),
-    );
-    expect(
-      () {
-        scaffoldMessengerState.showSnackBar(const SnackBar(
-          content: Text('I am a snack bar.'),
-        ));
-      },
-      throwsA(
-        isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
-          'description',
-          contains(
-            'ScaffoldMessenger.showSnackBar was called, but there are currently '
-            'no descendant Scaffolds to present to.'
-          )
-        ),
-      ),
-    );
-  });
 }
 
 /// Start test for "SnackBar dismiss test".
