@@ -700,10 +700,7 @@ void main() {
                 return Tooltip(
                   key: tooltipKey,
                   message: tooltipText,
-                  child: const SizedBox(
-                    width: 0.0,
-                    height: 0.0,
-                  ),
+                  child: const SizedBox.shrink(),
                 );
               },
             ),
@@ -733,10 +730,7 @@ void main() {
         home: Tooltip(
           key: tooltipKey,
           message: tooltipText,
-          child: const SizedBox(
-            width: 0.0,
-            height: 0.0,
-          ),
+          child: const SizedBox.shrink(),
         ),
       ),
     );
@@ -744,15 +738,14 @@ void main() {
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
-    expect(tooltipRenderParagraph.textSize.height, equals(10.0));
+    expect(tooltipRenderParagraph.textSize.height, equals(12.0));
 
-    final RenderBox tip = tester.renderObject(
+    final RenderBox tooltipContainer = tester.renderObject(
       _findTooltipContainer(tooltipText),
     );
-    expect(tip.size.height, equals(24.0));
-    expect(tip.size.width, equals(46.0));
-    expect(tip, paints..rrect(
-      rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
+    expect(tooltipContainer.size.height, equals(24.0));
+    expect(tooltipContainer, paints..rrect(
+      rrect: RRect.fromRectAndRadius(tooltipContainer.paintBounds, const Radius.circular(4.0)),
       color: const Color(0xe6616161),
     ));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
