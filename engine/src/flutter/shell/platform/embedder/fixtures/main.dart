@@ -42,6 +42,14 @@ void terminateExitCodeHandler() {
 
 
 @pragma('vm:entry-point')
+void executableNameNotNull() {
+  notifyStringValue(Platform.executable);
+}
+
+void notifyStringValue(String value) native 'NotifyStringValue';
+
+
+@pragma('vm:entry-point')
 void invokePlatformTaskRunner() {
   PlatformDispatcher.instance.sendPlatformMessage('OhHi', null, null);
 }

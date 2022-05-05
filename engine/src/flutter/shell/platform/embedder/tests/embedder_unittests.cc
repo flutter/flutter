@@ -151,6 +151,28 @@ TEST_F(EmbedderTest, CanTerminateCleanly) {
   ASSERT_TRUE(engine.is_valid());
 }
 
+TEST_F(EmbedderTest, ExecutableNameNotNull) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+
+  // Supply a callback to Dart for the test fixture to pass Platform.executable
+  // back to us.
+  fml::AutoResetWaitableEvent latch;
+  context.AddNativeCallback(
+      "NotifyStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        const auto dart_string = tonic::DartConverter<std::string>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        EXPECT_EQ("/path/to/binary", dart_string);
+        latch.Signal();
+      }));
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("executableNameNotNull");
+  builder.SetExecutableName("/path/to/binary");
+  auto engine = builder.LaunchEngine();
+  latch.Wait();
+}
+
 std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
 
 TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
