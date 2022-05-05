@@ -13,13 +13,13 @@
 library canvaskit_api;
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:js' as js;
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import '../profiler.dart';
 
 /// Entrypoint into the CanvasKit API.
@@ -132,7 +132,7 @@ extension CanvasKitExtension on CanvasKit {
   external TypefaceFontProviderNamespace get TypefaceFontProvider;
   external SkTypefaceFactory get Typeface;
   external int GetWebGLContext(
-      html.CanvasElement canvas, SkWebGLContextOptions options);
+      DomCanvasElement canvas, SkWebGLContextOptions options);
   external SkGrContext MakeGrContext(int glContext);
   external SkSurface? MakeOnScreenGLSurface(
     SkGrContext grContext,
@@ -140,7 +140,7 @@ extension CanvasKitExtension on CanvasKit {
     int height,
     ColorSpace colorSpace,
   );
-  external SkSurface MakeSWCanvasSurface(html.CanvasElement canvas);
+  external SkSurface MakeSWCanvasSurface(DomCanvasElement canvas);
 
   /// Creates an image from decoded pixels represented as a list of bytes.
   ///
@@ -2332,7 +2332,7 @@ class ProductionCollector implements Collector {
   /// emptied out to prevent memory leaks. This may happen, for example, when the
   /// same object is deleted more than once.
   void collectSkiaObjectsNow() {
-    html.window.performance.mark('SkObject collection-start');
+    domWindow.performance.mark('SkObject collection-start');
     final int length = _skiaObjectCollectionQueue.length;
     dynamic firstError;
     StackTrace? firstStackTrace;
@@ -2364,8 +2364,8 @@ class ProductionCollector implements Collector {
     }
     _skiaObjectCollectionQueue = <SkDeletable>[];
 
-    html.window.performance.mark('SkObject collection-end');
-    html.window.performance.measure('SkObject collection',
+    domWindow.performance.mark('SkObject collection-end');
+    domWindow.performance.measure('SkObject collection',
         'SkObject collection-start', 'SkObject collection-end');
 
     // It's safe to throw the error here, now that we've processed the queue.
@@ -2539,14 +2539,14 @@ extension SkPartialImageInfoExtension on SkPartialImageInfo {
 // TODO(hterkelsen): Rather than this monkey-patch hack, we should
 // build CanvasKit ourselves. See:
 // https://github.com/flutter/flutter/issues/52588
-void patchCanvasKitModule(html.ScriptElement canvasKitScript) {
+void patchCanvasKitModule(DomHTMLScriptElement canvasKitScript) {
   // First check if `exports` and `module` are already defined. If so, then
   // CommonJS is being used, and we shouldn't have any problems.
   final js.JsFunction objectConstructor = js.context['Object'] as js.JsFunction;
   if (js.context['exports'] == null) {
     final js.JsObject exportsAccessor = js.JsObject.jsify(<String, dynamic>{
       'get': allowInterop(() {
-        if (html.document.currentScript == canvasKitScript) {
+        if (domDocument.currentScript == canvasKitScript) {
           return js.JsObject(objectConstructor);
         } else {
           return js.context['_flutterWebCachedExports'];
@@ -2563,7 +2563,7 @@ void patchCanvasKitModule(html.ScriptElement canvasKitScript) {
   if (js.context['module'] == null) {
     final js.JsObject moduleAccessor = js.JsObject.jsify(<String, dynamic>{
       'get': allowInterop(() {
-        if (html.document.currentScript == canvasKitScript) {
+        if (domDocument.currentScript == canvasKitScript) {
           return js.JsObject(objectConstructor);
         } else {
           return js.context['_flutterWebCachedModule'];
@@ -2577,5 +2577,5 @@ void patchCanvasKitModule(html.ScriptElement canvasKitScript) {
     objectConstructor.callMethod(
         'defineProperty', <dynamic>[js.context, 'module', moduleAccessor]);
   }
-  html.document.head!.append(canvasKitScript);
+  domDocument.head!.appendChild(canvasKitScript);
 }
