@@ -1803,8 +1803,6 @@ abstract class RenderBox extends RenderObject {
   Map<BoxConstraints, Size>? _cachedDryLayoutSizes;
   bool _computingThisDryLayout = false;
 
-  bool _notifyParentIfDirty = false;
-
   /// Returns the [Size] that this [RenderBox] would like to be given the
   /// provided [BoxConstraints].
   ///
@@ -2350,7 +2348,7 @@ abstract class RenderBox extends RenderObject {
     }());
   }
 
-  void _clearCachedData() {
+  bool _clearCachedData() {
     if ((_cachedBaselines != null && _cachedBaselines!.isNotEmpty) ||
         (_cachedIntrinsicDimensions != null && _cachedIntrinsicDimensions!.isNotEmpty) ||
         (_cachedDryLayoutSizes != null && _cachedDryLayoutSizes!.isNotEmpty)) {
@@ -2362,16 +2360,15 @@ abstract class RenderBox extends RenderObject {
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
       _cachedDryLayoutSizes?.clear();
-      _notifyParentIfDirty = true;
+      return true;
     }
+    return false;
   }
 
   @override
   void markNeedsLayout() {
-    _clearCachedData();
-    if (_notifyParentIfDirty && parent is RenderObject) {
+    if (_clearCachedData() && parent is RenderObject) {
       markParentNeedsLayout();
-      _notifyParentIfDirty = false;
       return;
     }
     super.markNeedsLayout();
@@ -2383,7 +2380,6 @@ abstract class RenderBox extends RenderObject {
         _cachedBaselines != null && _cachedBaselines!.isNotEmpty) {
       // The cached baselines data may need update if the constraints change.
       _cachedBaselines?.clear();
-      _notifyParentIfDirty = true;
     }
     super.layout(constraints, parentUsesSize: parentUsesSize);
   }
