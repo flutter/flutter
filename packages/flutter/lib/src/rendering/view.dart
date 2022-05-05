@@ -38,14 +38,6 @@ class ViewConfiguration {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
 
-  /// Whether the root render object needs to replace the root transform layer.
-  ///
-  /// By default, the root layer will only be replaced when [devicePixelRatio]
-  /// changes.
-  bool shouldReplaceRootLayer(ViewConfiguration oldConfiguration) {
-    return oldConfiguration.devicePixelRatio != devicePixelRatio;
-  }
-
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
@@ -101,9 +93,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       return;
     final ViewConfiguration oldConfiguration = _configuration;
     _configuration = value;
-    _updateMatrices();
-    if (_configuration.shouldReplaceRootLayer(oldConfiguration)) {
-      replaceRootLayer(_createNewRootLayer());
+    if (oldConfiguration.toMatrix() != _configuration.toMatrix()) {
+      replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
     }
     assert(_rootTransform != null);
     markNeedsLayout();
@@ -144,18 +135,17 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(owner != null);
     assert(_rootTransform == null);
     scheduleInitialLayout();
-    _updateMatrices();
-    scheduleInitialPaint(_createNewRootLayer());
+    scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
     assert(_rootTransform != null);
   }
 
   Matrix4? _rootTransform;
-  void _updateMatrices() => _rootTransform = configuration.toMatrix();
 
-  TransformLayer _createNewRootLayer() {
-    assert(_rootTransform != null);
+  TransformLayer _updateMatricesAndCreateNewRootLayer() {
+    _rootTransform = configuration.toMatrix();
     final TransformLayer rootLayer = TransformLayer(transform: _rootTransform);
     rootLayer.attach(this);
+    assert(_rootTransform != null);
     return rootLayer;
   }
 
