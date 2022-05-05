@@ -8,7 +8,9 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../configuration.dart';
+import '../dom.dart';
 import '../platform_dispatcher.dart';
+import '../safe_browser_api.dart';
 import '../util.dart';
 import '../window.dart';
 import 'canvas.dart';
@@ -70,7 +72,7 @@ class Surface {
   /// We must cache this function because each time we access the tear-off it
   /// creates a new object, meaning we won't be able to remove this listener
   /// later.
-  void Function(html.Event)? _cachedContextLostListener;
+  void Function(DomEvent)? _cachedContextLostListener;
 
   /// A cached copy of the most recently created `webglcontextrestored`
   /// listener.
@@ -78,7 +80,7 @@ class Surface {
   /// We must cache this function because each time we access the tear-off it
   /// creates a new object, meaning we won't be able to remove this listener
   /// later.
-  void Function(html.Event)? _cachedContextRestoredListener;
+  void Function(DomEvent)? _cachedContextRestoredListener;
 
   SkGrContext? _grContext;
   int? _glContext;
@@ -93,10 +95,10 @@ class Surface {
   /// Conversely, the canvas that lives inside this element can be swapped, for
   /// example, when the screen size changes, or when the WebGL context is lost
   /// due to the browser tab becoming dormant.
-  final html.Element htmlElement = html.Element.tag('flt-canvas-container');
+  final DomElement htmlElement = createDomElement('flt-canvas-container');
 
   /// The underlying `<canvas>` element used for this surface.
-  html.CanvasElement? htmlCanvas;
+  DomCanvasElement? htmlCanvas;
   int _pixelWidth = -1;
   int _pixelHeight = -1;
 
@@ -131,7 +133,7 @@ class Surface {
 
   void addToScene() {
     if (!_addedToScene) {
-      skiaSceneHost!.children.insert(0, htmlElement);
+      skiaSceneHost!.children.insert(0, htmlElement as html.Element);
     }
     _addedToScene = true;
   }
@@ -207,9 +209,9 @@ class Surface {
   void _updateLogicalHtmlCanvasSize() {
     final double logicalWidth = _pixelWidth / window.devicePixelRatio;
     final double logicalHeight = _pixelHeight / window.devicePixelRatio;
-    htmlCanvas!.style
-      ..width = '${logicalWidth}px'
-      ..height = '${logicalHeight}px';
+    final DomCSSStyleDeclaration style = htmlCanvas!.style;
+    style.setProperty('width', '${logicalWidth}px');
+    style.setProperty('height', '${logicalHeight}px');
   }
 
   /// Translate the canvas so the surface covers the visible portion of the
@@ -224,10 +226,10 @@ class Surface {
     final int surfaceHeight = _currentSurfaceSize!.height.ceil();
     final double offset =
         (_pixelHeight - surfaceHeight) / window.devicePixelRatio;
-    htmlCanvas!.style.transform = 'translate(0, -${offset}px)';
+    htmlCanvas!.style.setProperty('transform', 'translate(0, -${offset}px)');
   }
 
-  void _contextRestoredListener(html.Event event) {
+  void _contextRestoredListener(DomEvent event) {
     assert(
         _contextLost,
         'Received "webglcontextrestored" event but never received '
@@ -239,7 +241,7 @@ class Surface {
     event.preventDefault();
   }
 
-  void _contextLostListener(html.Event event) {
+  void _contextLostListener(DomEvent event) {
     assert(event.target == htmlCanvas,
         'Received a context lost event for a disposed canvas');
     final SurfaceFactory factory = SurfaceFactory.instance;
@@ -277,7 +279,7 @@ class Surface {
     // we ensure that the rendred picture covers the entire browser window.
     _pixelWidth = physicalSize.width.ceil();
     _pixelHeight = physicalSize.height.ceil();
-    final html.CanvasElement htmlCanvas = html.CanvasElement(
+    final DomCanvasElement htmlCanvas = createDomCanvasElement(
       width: _pixelWidth,
       height: _pixelHeight,
     );
@@ -294,7 +296,7 @@ class Surface {
     // accessible.
     htmlCanvas.setAttribute('aria-hidden', 'true');
 
-    htmlCanvas.style.position = 'absolute';
+    htmlCanvas.style.setProperty('position', 'absolute');
     _updateLogicalHtmlCanvasSize();
 
     // When the browser tab using WebGL goes dormant the browser and/or OS may
@@ -303,8 +305,8 @@ class Surface {
     // notification. When we receive this notification we force a new context.
     //
     // See also: https://www.khronos.org/webgl/wiki/HandlingContextLost
-    _cachedContextRestoredListener = _contextRestoredListener;
-    _cachedContextLostListener = _contextLostListener;
+    _cachedContextRestoredListener = allowInterop(_contextRestoredListener);
+    _cachedContextLostListener = allowInterop(_contextLostListener);
     htmlCanvas.addEventListener(
       'webglcontextlost',
       _cachedContextLostListener,
@@ -377,7 +379,7 @@ class Surface {
   static bool _didWarnAboutWebGlInitializationFailure = false;
 
   CkSurface _makeSoftwareCanvasSurface(
-      html.CanvasElement htmlCanvas, String reason) {
+      DomCanvasElement htmlCanvas, String reason) {
     if (!_didWarnAboutWebGlInitializationFailure) {
       printWarning('WARNING: Falling back to CPU-only rendering. $reason.');
       _didWarnAboutWebGlInitializationFailure = true;
