@@ -10,7 +10,7 @@ enabled_branches:
   - flutter-\d+\.\d+-candidate\.\d+
 
 platform_properties:
-  linux_staging_build:
+  staging_build_linux:
     properties:
       caches: >-
         [
@@ -25,6 +25,7 @@ platform_properties:
         [
           {"dependency": "curl"}
         ]
+      bringup: true
       os: Ubuntu
       device_type: none
   linux:
@@ -2416,8 +2417,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_lifecycles_test
 
-  - name: Linux_staging_build analyze
-    bringup: true
+  - name: Staging_build_linux analyze
     recipe: flutter/flutter
     timeout: 60
     properties:
@@ -2426,8 +2426,7 @@ targets:
       validation: analyze
       validation_name: Analyze
 
-  - name: Linux_staging_build framework_tests_misc
-    bringup: true
+  - name: Staging_build_linux framework_tests_misc
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
