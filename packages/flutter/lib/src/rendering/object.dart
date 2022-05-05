@@ -263,6 +263,9 @@ class PaintingContext extends ClipContext {
     }
     assert(child._layerHandle.layer is OffsetLayer);
     final OffsetLayer childOffsetLayer = child._layerHandle.layer! as OffsetLayer;
+    for (final RenderObject client in child._offsetClients) {
+      client.updatePaintingOffset(offset - childOffsetLayer.offset);
+    }
     childOffsetLayer.offset = offset;
     appendLayer(childOffsetLayer);
   }
@@ -1314,6 +1317,36 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     _wasRepaintBoundary = isRepaintBoundary;
   }
 
+  final List<RenderObject> _offsetClients = <RenderObject>[];
+
+  @protected
+  bool registerAsOffsetClient() {
+    RenderObject? ancestor = parent as RenderObject?;
+    while (ancestor != null && !ancestor.isRepaintBoundary) {
+      ancestor = ancestor.parent as RenderObject?;
+    }
+    if (ancestor != null) {
+      ancestor._offsetClients.add(this);
+      return true;
+    }
+    return false;
+  }
+
+  @protected
+  bool unregisterAsOffsetClient() {
+    RenderObject? ancestor = parent as RenderObject?;
+    while (ancestor != null && !ancestor.isRepaintBoundary) {
+      ancestor = ancestor.parent as RenderObject?;
+    }
+    if (ancestor != null) {
+      return ancestor._offsetClients.remove(this);
+    }
+    return false;
+  }
+
+  @protected
+  void updatePaintingOffset(Offset offset) {}
+
   /// Cause the entire subtree rooted at the given [RenderObject] to be marked
   /// dirty for layout, paint, etc, so that the effects of a hot reload can be
   /// seen, or so that the effect of changing a global debug flag (such as
@@ -1371,6 +1404,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void dispose() {
     assert(!_debugDisposed);
     _layerHandle.layer = null;
+    _offsetClients.clear();
     assert(() {
       // TODO(dnfield): Enable this assert once clients have had a chance to
       // migrate.
