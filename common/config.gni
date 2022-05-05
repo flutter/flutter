@@ -68,23 +68,23 @@ if (is_ios || is_mac) {
 
 # A combo of host os name and cpu is used in several locations to
 # generate the names of the archived artifacts.
-_platform_name = host_os
-if (_platform_name == "mac") {
-  _platform_name = "darwin"
-} else if (_platform_name == "win") {
-  _platform_name = "windows"
+platform_name = host_os
+if (platform_name == "mac") {
+  platform_name = "darwin"
+} else if (platform_name == "win") {
+  platform_name = "windows"
 }
 
-full_platform_name = "$_platform_name-$host_cpu"
+full_platform_name = "$platform_name-$host_cpu"
 
-_platform_target_name = target_os
-if (_platform_target_name == "mac") {
-  _platform_target_name = "darwin"
-} else if (_platform_target_name == "win") {
-  _platform_target_name = "windows"
+target_platform_name = target_os
+if (target_platform_name == "mac") {
+  platform_target_name = "darwin"
+} else if (target_platform_name == "win") {
+  target_platform_name = "windows"
 }
 
-full_target_platform_name = "$_platform_target_name-$target_cpu"
+full_target_platform_name = "$target_platform_name-$target_cpu"
 
 # Prebuilt Dart SDK location
 
