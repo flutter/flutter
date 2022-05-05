@@ -6,42 +6,43 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const CupertinoTabBarApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class CupertinoTabBarApp extends StatelessWidget {
+  const CupertinoTabBarApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: CupertinoTabBarExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class CupertinoTabBarExample extends StatelessWidget {
+  const CupertinoTabBarExample({Key? key}) : super(key: key);
 
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.circle),
-            label: 'Tab 1',
+            icon: Icon(CupertinoIcons.star_fill),
+            label: 'Favourites',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.add),
-            label: 'Tab 2',
+            icon: Icon(CupertinoIcons.clock_solid),
+            label: 'Recents',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.person_alt_circle_fill),
+            label: 'Contacts',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.circle_grid_3x3_fill),
+            label: 'Keypad',
           ),
         ],
       ),
