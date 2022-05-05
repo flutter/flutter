@@ -55,6 +55,7 @@ const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 ///
 ///  * [CupertinoTabScaffold], which hosts the [CupertinoTabBar] at the bottom.
 ///  * [BottomNavigationBarItem], an item in a [CupertinoTabBar].
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/bars/tab-bars/>
 class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a tab bar in the iOS style.
   const CupertinoTabBar({
