@@ -1992,17 +1992,23 @@ class Locale {
     if (other is! Locale) {
       return false;
     }
-    final String? countryCode = _countryCode;
+    final String? thisCountryCode = countryCode;
     final String? otherCountryCode = other.countryCode;
     return other.languageCode == languageCode
         && other.scriptCode == scriptCode // scriptCode cannot be ''
-        && (other.countryCode == countryCode // Treat '' as equal to null.
-            || otherCountryCode != null && otherCountryCode.isEmpty && countryCode == null
-            || countryCode != null && countryCode.isEmpty && other.countryCode == null);
+        && (other.countryCode == thisCountryCode // Treat '' as equal to null.
+            || otherCountryCode != null && otherCountryCode.isEmpty && thisCountryCode == null
+            || thisCountryCode != null && thisCountryCode.isEmpty && other.countryCode == null);
   }
 
   @override
-  int get hashCode => hashValues(languageCode, scriptCode, countryCode == '' ? null : countryCode);
+  int get hashCode => _hashCode[this] ??= hashValues(
+        languageCode,
+        scriptCode,
+        countryCode == '' ? null : countryCode,
+      );
+  // Memoize hashCode since languageCode and countryCode require lookups.
+  static final Expando<int> _hashCode = Expando<int>();
 
   static Locale? _cachedLocale;
   static String? _cachedLocaleString;
