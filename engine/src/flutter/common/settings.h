@@ -157,6 +157,10 @@ struct Settings {
   // Dart code is executed.
   std::string advisory_script_entrypoint = "main";
 
+  // The executable path associated with this process. This is returned by
+  // Platform.executable from dart:io. If unknown, defaults to "Flutter".
+  std::string executable_name = "Flutter";
+
   // Observatory settings
 
   // Whether the Dart VM service should be enabled.

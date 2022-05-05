@@ -102,8 +102,8 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
             SkImage::MakeFromBitmap(bitmap));
       };
 
-  // The first argument is treated as the executable name. Don't make tests have
-  // to do this manually.
+  // The first argument is always the executable name. Don't make tests have to
+  // do this manually.
   AddCommandLineArgument("embedder_unittest");
 
   if (preference != InitializationPreference::kNoInitialize) {
@@ -262,6 +262,13 @@ void EmbedderConfigBuilder::SetLogTag(std::string tag) {
 void EmbedderConfigBuilder::SetLocalizationCallbackHooks() {
   project_args_.compute_platform_resolved_locale_callback =
       EmbedderTestContext::GetComputePlatformResolvedLocaleCallbackHook();
+}
+
+void EmbedderConfigBuilder::SetExecutableName(std::string executable_name) {
+  if (executable_name.size() == 0) {
+    return;
+  }
+  command_line_arguments_[0] = std::move(executable_name);
 }
 
 void EmbedderConfigBuilder::SetDartEntrypoint(std::string entrypoint) {
