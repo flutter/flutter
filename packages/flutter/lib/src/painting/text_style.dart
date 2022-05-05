@@ -530,7 +530,7 @@ class TextStyle with Diagnosticable {
   final Color? backgroundColor;
 
   /// The name of the font to use when painting the text (e.g., Roboto).
-  /// 
+  ///
   /// If the font is defined in a package, this will be prefixed with
   /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
   /// prefixing is done by the constructor when the `package` argument is
