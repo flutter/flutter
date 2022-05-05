@@ -39,6 +39,9 @@ import 'text_field.dart';
 /// ** See code in examples/api/lib/cupertino/search_field/cupertino_search_field.1.dart **
 /// {@end-tool}
 ///
+/// See also:
+///
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/bars/search-bars/>
 class CupertinoSearchTextField extends StatefulWidget {
   /// Creates a [CupertinoTextField] that mimics the look and behavior of
   /// UIKit's `UISearchTextField`.
