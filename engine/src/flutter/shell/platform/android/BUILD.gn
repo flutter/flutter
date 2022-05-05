@@ -607,3 +607,48 @@ group("android") {
     deps += [ ":gen_snapshot" ]
   }
 }
+
+# Renames embedding android artifacts and places them in the final
+# expected folder structure.
+action("embedding_jars") {
+  script = "//flutter/build/android_artifacts.py"
+
+  deps = [
+    ":flutter_shell_java",
+    ":pom_embedding",
+  ]
+  sources = [
+    "$root_out_dir/flutter_embedding_$flutter_runtime_mode.jar",
+    "$root_out_dir/flutter_embedding_$flutter_runtime_mode.pom",
+  ]
+  outputs = []
+  args = []
+  base_name = "$root_out_dir/zip_archives/flutter_download_io/" +
+              "flutter_embedding_$flutter_runtime_mode/1.0.0-$engine_version/" +
+              "flutter_embedding_$flutter_runtime_mode-1.0.0-${engine_version}"
+  foreach(source, sources) {
+    extension = get_path_info(source, "extension")
+    name = get_path_info(source, "name")
+    if (extension == "jar") {
+      outputs += [
+        "${base_name}.jar",
+        "${base_name}-sources.jar",
+      ]
+      args += [
+        "-i",
+        "${name}.jar",
+        rebase_path("${base_name}.jar"),
+        "-i",
+        "${name}-sources.jar",
+        rebase_path("${base_name}-sources.jar"),
+      ]
+    } else {
+      outputs += [ "${base_name}.${extension}" ]
+      args += [
+        "-i",
+        rebase_path(source),
+        rebase_path("${base_name}.${extension}"),
+      ]
+    }
+  }
+}
