@@ -94,13 +94,20 @@ TEST(DisplayListColorSource, FromSkiaNullShader) {
 }
 
 TEST(DisplayListColorSource, FromSkiaColorShader) {
+  // We cannot read back the matrix parameter from a Skia LinearGradient
+  // so we conservatively use an UnknownColorSource wrapper so as to not
+  // lose any data. Note that the Skia Color shader end is read back from
+  // the Skia asAGradient() method so while this type of color source
+  // does not really need the matrix, we represent all of the gradient
+  // sources using an unknown source.
+  // Note that this shader should never really happen in practice as it
+  // represents a degenerate gradient that collapsed to a single color.
   sk_sp<SkShader> shader = SkShaders::Color(SK_ColorBLUE);
   std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
-  DlColorColorSource dl_source(SK_ColorBLUE);
-  ASSERT_EQ(source->type(), DlColorSourceType::kColor);
-  ASSERT_EQ(*source->asColor(), dl_source);
-  ASSERT_EQ(source->asColor()->color(), SK_ColorBLUE);
+  ASSERT_EQ(source->type(), DlColorSourceType::kUnknown);
+  ASSERT_EQ(source->skia_object(), shader);
 
+  ASSERT_EQ(source->asColor(), nullptr);
   ASSERT_EQ(source->asImage(), nullptr);
   ASSERT_EQ(source->asLinearGradient(), nullptr);
   ASSERT_EQ(source->asRadialGradient(), nullptr);
@@ -131,129 +138,81 @@ TEST(DisplayListColorSource, FromSkiaImageShader) {
 }
 
 TEST(DisplayListColorSource, FromSkiaLinearGradient) {
-  // We can read back all of the parameters of a Linear gradient
-  // except for matrix.
+  // We cannot read back the matrix parameter from a Skia LinearGradient
+  // so we conservatively use an UnknownColorSource wrapper so as to not
+  // lose any data.
   const SkColor* sk_colors = reinterpret_cast<const SkColor*>(TestColors);
   sk_sp<SkShader> shader = SkGradientShader::MakeLinear(
       TestPoints, sk_colors, TestStops, kTestStopCount, SkTileMode::kClamp);
   std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
-  std::shared_ptr<DlColorSource> dl_source =
-      DlColorSource::MakeLinear(TestPoints[0], TestPoints[1], kTestStopCount,
-                                TestColors, TestStops, DlTileMode::kClamp);
-  ASSERT_EQ(source->type(), DlColorSourceType::kLinearGradient);
-  EXPECT_TRUE(*source->asLinearGradient() == *dl_source->asLinearGradient());
-  ASSERT_EQ(*source->asLinearGradient(), *dl_source->asLinearGradient());
-  ASSERT_EQ(source->asLinearGradient()->start_point(), TestPoints[0]);
-  ASSERT_EQ(source->asLinearGradient()->end_point(), TestPoints[1]);
-  ASSERT_EQ(source->asLinearGradient()->stop_count(), kTestStopCount);
-  for (int i = 0; i < kTestStopCount; i++) {
-    ASSERT_EQ(source->asLinearGradient()->colors()[i], TestColors[i]);
-    ASSERT_EQ(source->asLinearGradient()->stops()[i], TestStops[i]);
-  }
-  ASSERT_EQ(source->asLinearGradient()->tile_mode(), DlTileMode::kClamp);
-  ASSERT_EQ(source->asLinearGradient()->matrix(), SkMatrix::I());
+  ASSERT_EQ(source->type(), DlColorSourceType::kUnknown);
+  ASSERT_EQ(source->skia_object(), shader);
 
   ASSERT_EQ(source->asColor(), nullptr);
   ASSERT_EQ(source->asImage(), nullptr);
+  ASSERT_EQ(source->asLinearGradient(), nullptr);
   ASSERT_EQ(source->asRadialGradient(), nullptr);
   ASSERT_EQ(source->asConicalGradient(), nullptr);
   ASSERT_EQ(source->asSweepGradient(), nullptr);
 }
 
 TEST(DisplayListColorSource, FromSkiaRadialGradient) {
-  // We can read back all of the parameters of a Radial gradient
-  // except for matrix.
+  // We cannot read back the matrix parameter from a Skia RadialGradient
+  // so we conservatively use an UnknownColorSource wrapper so as to not
+  // lose any data.
   const SkColor* sk_colors = reinterpret_cast<const SkColor*>(TestColors);
   sk_sp<SkShader> shader =
       SkGradientShader::MakeRadial(TestPoints[0], 10.0, sk_colors, TestStops,
                                    kTestStopCount, SkTileMode::kClamp);
   std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
-  std::shared_ptr<DlColorSource> dl_source =
-      DlColorSource::MakeRadial(TestPoints[0], 10.0, kTestStopCount, TestColors,
-                                TestStops, DlTileMode::kClamp);
-  ASSERT_EQ(source->type(), DlColorSourceType::kRadialGradient);
-  EXPECT_TRUE(*source->asRadialGradient() == *dl_source->asRadialGradient());
-  ASSERT_EQ(*source->asRadialGradient(), *dl_source->asRadialGradient());
-  ASSERT_EQ(source->asRadialGradient()->center(), TestPoints[0]);
-  ASSERT_EQ(source->asRadialGradient()->radius(), 10.0);
-  ASSERT_EQ(source->asRadialGradient()->stop_count(), kTestStopCount);
-  for (int i = 0; i < kTestStopCount; i++) {
-    ASSERT_EQ(source->asRadialGradient()->colors()[i], TestColors[i]);
-    ASSERT_EQ(source->asRadialGradient()->stops()[i], TestStops[i]);
-  }
-  ASSERT_EQ(source->asRadialGradient()->tile_mode(), DlTileMode::kClamp);
-  ASSERT_EQ(source->asRadialGradient()->matrix(), SkMatrix::I());
+  ASSERT_EQ(source->type(), DlColorSourceType::kUnknown);
+  ASSERT_EQ(source->skia_object(), shader);
 
   ASSERT_EQ(source->asColor(), nullptr);
   ASSERT_EQ(source->asImage(), nullptr);
   ASSERT_EQ(source->asLinearGradient(), nullptr);
+  ASSERT_EQ(source->asRadialGradient(), nullptr);
   ASSERT_EQ(source->asConicalGradient(), nullptr);
   ASSERT_EQ(source->asSweepGradient(), nullptr);
 }
 
 TEST(DisplayListColorSource, FromSkiaConicalGradient) {
-  // We can read back all of the parameters of a Conical gradient
-  // except for matrix.
+  // We cannot read back the matrix parameter from a Skia ConicalGradient
+  // so we conservatively use an UnknownColorSource wrapper so as to not
+  // lose any data.
   const SkColor* sk_colors = reinterpret_cast<const SkColor*>(TestColors);
   sk_sp<SkShader> shader = SkGradientShader::MakeTwoPointConical(
       TestPoints[0], 10.0, TestPoints[1], 20.0, sk_colors, TestStops,
       kTestStopCount, SkTileMode::kClamp);
   std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
-  std::shared_ptr<DlColorSource> dl_source = DlColorSource::MakeConical(
-      TestPoints[0], 10.0, TestPoints[1], 20.0, kTestStopCount, TestColors,
-      TestStops, DlTileMode::kClamp);
-  ASSERT_EQ(source->type(), DlColorSourceType::kConicalGradient);
-  EXPECT_TRUE(*source->asConicalGradient() == *dl_source->asConicalGradient());
-  ASSERT_EQ(*source->asConicalGradient(), *dl_source->asConicalGradient());
-  ASSERT_EQ(source->asConicalGradient()->start_center(), TestPoints[0]);
-  ASSERT_EQ(source->asConicalGradient()->start_radius(), 10.0);
-  ASSERT_EQ(source->asConicalGradient()->end_center(), TestPoints[1]);
-  ASSERT_EQ(source->asConicalGradient()->end_radius(), 20.0);
-  ASSERT_EQ(source->asConicalGradient()->stop_count(), kTestStopCount);
-  for (int i = 0; i < kTestStopCount; i++) {
-    ASSERT_EQ(source->asConicalGradient()->colors()[i], TestColors[i]);
-    ASSERT_EQ(source->asConicalGradient()->stops()[i], TestStops[i]);
-  }
-  ASSERT_EQ(source->asConicalGradient()->tile_mode(), DlTileMode::kClamp);
-  ASSERT_EQ(source->asConicalGradient()->matrix(), SkMatrix::I());
-
-  ASSERT_EQ(source->asColor(), nullptr);
-  ASSERT_EQ(source->asImage(), nullptr);
-  ASSERT_EQ(source->asLinearGradient(), nullptr);
-  ASSERT_EQ(source->asRadialGradient(), nullptr);
-  ASSERT_EQ(source->asSweepGradient(), nullptr);
-}
-
-TEST(DisplayListColorSource, FromSkiaSweepGradient) {
-  // We can read back all of the parameters of a Sweep gradient
-  // except for matrix and the start/stop angles.
-  const SkColor* sk_colors = reinterpret_cast<const SkColor*>(TestColors);
-  sk_sp<SkShader> shader = SkGradientShader::MakeSweep(
-      TestPoints[0].fX, TestPoints[0].fY, sk_colors, TestStops, kTestStopCount);
-  std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
-  std::shared_ptr<DlColorSource> dl_source =
-      DlColorSource::MakeSweep(TestPoints[0], 0, 360, kTestStopCount,
-                               TestColors, TestStops, DlTileMode::kClamp);
-  ASSERT_EQ(source->type(), DlColorSourceType::kSweepGradient);
-  EXPECT_TRUE(*source->asSweepGradient() == *dl_source->asSweepGradient());
-  ASSERT_EQ(*source->asSweepGradient(), *dl_source->asSweepGradient());
-  ASSERT_EQ(source->asSweepGradient()->center(), TestPoints[0]);
-  ASSERT_EQ(source->asSweepGradient()->start(), 0);
-  ASSERT_EQ(source->asSweepGradient()->end(), 360);
-  ASSERT_EQ(source->asSweepGradient()->stop_count(), kTestStopCount);
-  for (int i = 0; i < kTestStopCount; i++) {
-    ASSERT_EQ(source->asSweepGradient()->colors()[i], TestColors[i]);
-    ASSERT_EQ(source->asSweepGradient()->stops()[i], TestStops[i]);
-  }
-  ASSERT_EQ(source->asSweepGradient()->tile_mode(), DlTileMode::kClamp);
-  ASSERT_EQ(source->asSweepGradient()->matrix(), SkMatrix::I());
+  ASSERT_EQ(source->type(), DlColorSourceType::kUnknown);
+  ASSERT_EQ(source->skia_object(), shader);
 
   ASSERT_EQ(source->asColor(), nullptr);
   ASSERT_EQ(source->asImage(), nullptr);
   ASSERT_EQ(source->asLinearGradient(), nullptr);
   ASSERT_EQ(source->asRadialGradient(), nullptr);
   ASSERT_EQ(source->asConicalGradient(), nullptr);
-  ASSERT_NE(source->asSweepGradient(), nullptr);
+  ASSERT_EQ(source->asSweepGradient(), nullptr);
+}
+
+TEST(DisplayListColorSource, FromSkiaSweepGradient) {
+  // We cannot read back the matrix parameter, nor the sweep parameters from a
+  // Skia SweepGradient so we conservatively use an UnknownColorSource wrapper
+  // so as to not lose any data.
+  const SkColor* sk_colors = reinterpret_cast<const SkColor*>(TestColors);
+  sk_sp<SkShader> shader = SkGradientShader::MakeSweep(
+      TestPoints[0].fX, TestPoints[0].fY, sk_colors, TestStops, kTestStopCount);
+  std::shared_ptr<DlColorSource> source = DlColorSource::From(shader);
+  ASSERT_EQ(source->type(), DlColorSourceType::kUnknown);
+  ASSERT_EQ(source->skia_object(), shader);
+
+  ASSERT_EQ(source->asColor(), nullptr);
+  ASSERT_EQ(source->asImage(), nullptr);
+  ASSERT_EQ(source->asLinearGradient(), nullptr);
+  ASSERT_EQ(source->asRadialGradient(), nullptr);
+  ASSERT_EQ(source->asConicalGradient(), nullptr);
+  ASSERT_EQ(source->asSweepGradient(), nullptr);
 }
 
 TEST(DisplayListColorSource, FromSkiaUnrecognizedShader) {
