@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -26,23 +24,23 @@ void testMain() {
       final Surface surface = SurfaceFactory.instance.getSurface();
       final CkSurface originalSurface =
           surface.acquireFrame(const ui.Size(9, 19)).skiaSurface;
-      final html.CanvasElement original = surface.htmlCanvas!;
+      final DomCanvasElement original = surface.htmlCanvas!;
 
       // Expect exact requested dimensions.
       expect(original.width, 9);
       expect(original.height, 19);
-      expect(original.style.width, '9px');
-      expect(original.style.height, '19px');
+      expect(original.style.getPropertyValue('width'), '9px');
+      expect(original.style.getPropertyValue('height'), '19px');
       expect(originalSurface.width(), 9);
       expect(originalSurface.height(), 19);
 
       // Shrinking reuses the existing canvas straight-up.
       final CkSurface shrunkSurface =
           surface.acquireFrame(const ui.Size(5, 15)).skiaSurface;
-      final html.CanvasElement shrunk = surface.htmlCanvas!;
+      final DomCanvasElement shrunk = surface.htmlCanvas!;
       expect(shrunk, same(original));
-      expect(shrunk.style.width, '9px');
-      expect(shrunk.style.height, '19px');
+      expect(shrunk.style.getPropertyValue('width'), '9px');
+      expect(shrunk.style.getPropertyValue('height'), '19px');
       expect(shrunkSurface, isNot(same(original)));
       expect(shrunkSurface.width(), 5);
       expect(shrunkSurface.height(), 15);
@@ -51,22 +49,22 @@ void testMain() {
       // by 40% to accommodate future increases.
       final CkSurface firstIncreaseSurface =
           surface.acquireFrame(const ui.Size(10, 20)).skiaSurface;
-      final html.CanvasElement firstIncrease = surface.htmlCanvas!;
+      final DomCanvasElement firstIncrease = surface.htmlCanvas!;
       expect(firstIncrease, isNot(same(original)));
       expect(firstIncreaseSurface, isNot(same(shrunkSurface)));
 
       // Expect overallocated dimensions
       expect(firstIncrease.width, 14);
       expect(firstIncrease.height, 28);
-      expect(firstIncrease.style.width, '14px');
-      expect(firstIncrease.style.height, '28px');
+      expect(firstIncrease.style.getPropertyValue('width'), '14px');
+      expect(firstIncrease.style.getPropertyValue('height'), '28px');
       expect(firstIncreaseSurface.width(), 10);
       expect(firstIncreaseSurface.height(), 20);
 
       // Subsequent increases within 40% reuse the old canvas.
       final CkSurface secondIncreaseSurface =
           surface.acquireFrame(const ui.Size(11, 22)).skiaSurface;
-      final html.CanvasElement secondIncrease = surface.htmlCanvas!;
+      final DomCanvasElement secondIncrease = surface.htmlCanvas!;
       expect(secondIncrease, same(firstIncrease));
       expect(secondIncreaseSurface, isNot(same(firstIncreaseSurface)));
       expect(secondIncreaseSurface.width(), 11);
@@ -74,22 +72,22 @@ void testMain() {
 
       // Increases beyond the 40% limit will cause a new allocation.
       final CkSurface hugeSurface = surface.acquireFrame(const ui.Size(20, 40)).skiaSurface;
-      final html.CanvasElement huge = surface.htmlCanvas!;
+      final DomCanvasElement huge = surface.htmlCanvas!;
       expect(huge, isNot(same(secondIncrease)));
       expect(hugeSurface, isNot(same(secondIncreaseSurface)));
 
       // Also over-allocated
       expect(huge.width, 28);
       expect(huge.height, 56);
-      expect(huge.style.width, '28px');
-      expect(huge.style.height, '56px');
+      expect(huge.style.getPropertyValue('width'), '28px');
+      expect(huge.style.getPropertyValue('height'), '56px');
       expect(hugeSurface.width(), 20);
       expect(hugeSurface.height(), 40);
 
       // Shrink again. Reuse the last allocated surface.
       final CkSurface shrunkSurface2 =
           surface.acquireFrame(const ui.Size(5, 15)).skiaSurface;
-      final html.CanvasElement shrunk2 = surface.htmlCanvas!;
+      final DomCanvasElement shrunk2 = surface.htmlCanvas!;
       expect(shrunk2, same(huge));
       expect(shrunkSurface2, isNot(same(hugeSurface)));
       expect(shrunkSurface2.width(), 5);
@@ -118,8 +116,8 @@ void testMain() {
         expect(afterAcquireFrame, same(before));
 
         // Emulate WebGL context loss.
-        final html.CanvasElement canvas =
-            surface.htmlElement.children.single as html.CanvasElement;
+        final DomCanvasElement canvas =
+            surface.htmlElement.children.single! as DomCanvasElement;
         final dynamic ctx = canvas.getContext('webgl2');
         expect(ctx, isNotNull);
         final dynamic loseContextExtension =
@@ -156,8 +154,8 @@ void testMain() {
 
       expect(original.width(), 10);
       expect(original.height(), 16);
-      expect(surface.htmlCanvas!.style.width, '10px');
-      expect(surface.htmlCanvas!.style.height, '16px');
+      expect(surface.htmlCanvas!.style.getPropertyValue('width'), '10px');
+      expect(surface.htmlCanvas!.style.getPropertyValue('height'), '16px');
 
       // Increase device-pixel ratio: this makes CSS pixels bigger, so we need
       // fewer of them to cover the browser window.
@@ -166,8 +164,8 @@ void testMain() {
           surface.acquireFrame(const ui.Size(10, 16)).skiaSurface;
       expect(highDpr.width(), 10);
       expect(highDpr.height(), 16);
-      expect(surface.htmlCanvas!.style.width, '5px');
-      expect(surface.htmlCanvas!.style.height, '8px');
+      expect(surface.htmlCanvas!.style.getPropertyValue('width'), '5px');
+      expect(surface.htmlCanvas!.style.getPropertyValue('height'), '8px');
 
       // Decrease device-pixel ratio: this makes CSS pixels smaller, so we need
       // more of them to cover the browser window.
@@ -176,8 +174,8 @@ void testMain() {
           surface.acquireFrame(const ui.Size(10, 16)).skiaSurface;
       expect(lowDpr.width(), 10);
       expect(lowDpr.height(), 16);
-      expect(surface.htmlCanvas!.style.width, '20px');
-      expect(surface.htmlCanvas!.style.height, '32px');
+      expect(surface.htmlCanvas!.style.getPropertyValue('width'), '20px');
+      expect(surface.htmlCanvas!.style.getPropertyValue('height'), '32px');
     });
   }, skip: isIosSafari);
 }

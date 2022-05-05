@@ -509,19 +509,20 @@ class HtmlViewEmbedder {
           final Surface? overlay = _overlays[viewId];
           if (overlay != null) {
             skiaSceneHost!
-                .insertBefore(overlay.htmlElement, elementToInsertBefore);
+                .insertBefore(overlay.htmlElement as html.Element, elementToInsertBefore);
           }
         } else {
           final html.Element platformViewRoot = _viewClipChains[viewId]!.root;
           skiaSceneHost!.append(platformViewRoot);
           final Surface? overlay = _overlays[viewId];
           if (overlay != null) {
-            skiaSceneHost!.append(overlay.htmlElement);
+            skiaSceneHost!.append(overlay.htmlElement as html.Element);
           }
         }
       }
       insertBeforeMap?.forEach((int viewId, int viewIdToInsertBefore) {
-        final html.Element overlay = _overlays[viewId]!.htmlElement;
+        final html.Element overlay = _overlays[viewId]!.htmlElement as
+            html.Element;
         if (viewIdToInsertBefore != -1) {
           final html.Element nextSibling =
               _viewClipChains[viewIdToInsertBefore]!.root;
@@ -532,7 +533,8 @@ class HtmlViewEmbedder {
       });
       if (_didPaintBackupSurface) {
         skiaSceneHost!
-            .append(SurfaceFactory.instance.backupSurface.htmlElement);
+            .append(SurfaceFactory.instance.backupSurface.htmlElement as
+                html.Element);
       }
     } else {
       SurfaceFactory.instance.removeSurfacesFromDom();
@@ -551,14 +553,15 @@ class HtmlViewEmbedder {
         final Surface? overlay = _overlays[viewId];
         skiaSceneHost!.append(platformViewRoot);
         if (overlay != null) {
-          skiaSceneHost!.append(overlay.htmlElement);
+          skiaSceneHost!.append(overlay.htmlElement as html.Element);
         }
         _activeCompositionOrder.add(viewId);
         unusedViews.remove(viewId);
       }
       if (_didPaintBackupSurface) {
         skiaSceneHost!
-            .append(SurfaceFactory.instance.backupSurface.htmlElement);
+            .append(SurfaceFactory.instance.backupSurface.htmlElement as
+                html.Element);
       }
     }
 
