@@ -13,7 +13,9 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'media_query.dart';
+import 'nested_scroll_view.dart';
 import 'notification_listener.dart';
+import 'page_storage.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
@@ -395,11 +397,17 @@ abstract class ScrollView extends StatelessWidget {
 
     final ScrollBehavior ancestorBehavior = ScrollConfiguration.of(context);
     ScrollController? scrollController;
-    if (ancestorBehavior.usePrimaryScrollController) {
+    // check if the scrollable is under a nested scroll scope
+    if (ancestorBehavior.underNestedScrollScope) {
       scrollController = controller ?? PrimaryScrollController.of(context);
+      if (key is PageStorageKey) {
+        final NestedScrollViewState nestedScrollViewState = NestedScrollView.of(context);
+        nestedScrollViewState.preserveInnerScrollPosition();
+      }
     } else {
       scrollController = primary ? PrimaryScrollController.of(context) : controller;
     }
+
     final Scrollable scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
