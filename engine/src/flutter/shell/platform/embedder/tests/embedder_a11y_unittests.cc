@@ -22,9 +22,9 @@
 namespace flutter {
 namespace testing {
 
-using Embedder11yTest = testing::EmbedderTest;
+using EmbedderA11yTest = testing::EmbedderTest;
 
-TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
+TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   fml::AutoResetWaitableEvent latch;
