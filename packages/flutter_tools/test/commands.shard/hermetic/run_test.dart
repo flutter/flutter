@@ -369,7 +369,7 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
-      testUsingContext('forwards --uninstall-only to ios-deploy --uninstall', () async {
+      testUsingContext('forwards --uninstall-only to DebuggingOptions', () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(
           sdkNameAndVersion: 'iOS 13',

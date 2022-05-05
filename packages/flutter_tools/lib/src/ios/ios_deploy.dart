@@ -16,7 +16,6 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../device.dart';
 import 'code_signing.dart';
 import 'iproxy.dart';
 
