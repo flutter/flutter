@@ -25,7 +25,6 @@ platform_properties:
         [
           {"dependency": "curl"}
         ]
-      bringup: true
       os: Ubuntu
       device_type: none
   linux:
@@ -2418,6 +2417,7 @@ targets:
       task_name: android_lifecycles_test
 
   - name: Staging_build_linux analyze
+    bringup: true
     recipe: flutter/flutter
     timeout: 60
     properties:
@@ -2427,6 +2427,7 @@ targets:
       validation_name: Analyze
 
   - name: Staging_build_linux framework_tests_misc
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
