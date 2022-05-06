@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_utils.dart';
 
 void main() {
   late int tapCount;
@@ -1098,6 +1099,89 @@ void main() {
       });
     });
   });
+
+  testWidgets('Mouse edge scrolling works in an outer scrollable', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102484
+    final TextEditingController controller = TextEditingController(
+      // 8 lines of text.
+      text: 'I love flutter!\nI love flutter!\nI love flutter!\nI love flutter!\nI love flutter!\nI love flutter!\nI love flutter!\nI love flutter!',
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+
+    final ScrollController scrollController = ScrollController();
+    const double kLineHeight = 14.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          // Only 4 lines visible of 8 given.
+          height: kLineHeight * 4,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Builder(
+              builder: (BuildContext context) {
+                final TextSelectionGestureDetectorBuilder provider =
+                    TextSelectionGestureDetectorBuilder(
+                      context: context,
+                      delegate: delegate,
+                    );
+                return provider.buildGestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  child: EditableText(
+                    key: editableTextKey,
+                    controller: controller,
+                    focusNode: FocusNode(),
+                    backgroundCursorColor: Colors.white,
+                    cursorColor: Colors.white,
+                    style: const TextStyle(),
+                    selectionControls: materialTextSelectionControls,
+                    // EditableText will expand to the full 8 line height and will
+                    // not scroll itself.
+                    maxLines: null,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+    expect(scrollController.position.pixels, 0.0);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, controller.text.length));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, controller.text.length);
+    expect(scrollController.position.pixels, kLineHeight* 8);
+  });
+  // TODO(justinmc): This test should work on all platforms, right?
+  //}, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.fuchsia }));
+
+  // TODO(justinmc): Test both scrollables too.
+  //testWidgets('Mouse edge scrolling works with both an outer scrollable and scrolling in the EditableText', (WidgetTester tester) async {
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
