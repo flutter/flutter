@@ -224,7 +224,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   /// [Drag] object returned by this callback.
   GestureMultiDragStartCallback? onStart;
 
-  Map<int, MultiDragPointerState>? _pointers = <int, MultiDragPointerState>{};
+  Map<PointerId, MultiDragPointerState>? _pointers = <PointerId, MultiDragPointerState>{};
 
   @override
   void addAllowedPointer(PointerDownEvent event) {

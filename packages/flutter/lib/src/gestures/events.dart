@@ -677,7 +677,7 @@ abstract class _TransformedPointerEvent extends _AbstractPointerEvent with Diagn
   Duration get timeStamp => original.timeStamp;
 
   @override
-  int get pointer => original.pointer;
+  PointerId get pointer => original.pointer;
 
   @override
   PointerDeviceKind get kind => original.kind;

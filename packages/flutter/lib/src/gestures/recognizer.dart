@@ -294,8 +294,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     super.supportedDevices,
   });
 
-  final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
-  final Set<int> _trackedPointers = HashSet<int>();
+  final Map<PointerId, GestureArenaEntry> _entries = <PointerId, GestureArenaEntry>{};
+  final Set<PointerId> _trackedPointers = HashSet<PointerId>();
 
   @override
   @protected
@@ -549,8 +549,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// called after the recognizer is no longer tracking a pointer if, e.g.
   /// [GestureArenaManager.hold] has been called, or if there are other
   /// recognizers keeping the arena open).
-  int? get primaryPointer => _primaryPointer;
-  int? _primaryPointer;
+  PointerId? get primaryPointer => _primaryPointer;
+  PointerId? _primaryPointer;
 
   /// The location at which the primary pointer contacted the screen.
   ///

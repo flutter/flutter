@@ -230,7 +230,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   double? _getPrimaryValueFromOffset(Offset value);
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
 
-  final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
+  final Map<PointerId, VelocityTracker> _velocityTrackers = <PointerId, VelocityTracker>{};
 
   @override
   bool isPointerAllowed(PointerEvent event) {
@@ -345,7 +345,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  final Set<int> _acceptedActivePointers = <int>{};
+  final Set<PointerId> _acceptedActivePointers = <PointerId>{};
 
   @override
   void acceptGesture(PointerId pointer) {

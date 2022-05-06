@@ -102,7 +102,7 @@ class _GestureArena {
 /// To debug problems with gestures, consider using
 /// [debugPrintGestureArenaDiagnostics].
 class GestureArenaManager {
-  final Map<int, _GestureArena> _arenas = <int, _GestureArena>{};
+  final Map<PointerId, _GestureArena> _arenas = <PointerId, _GestureArena>{};
 
   /// Adds a new member (e.g., gesture recognizer) to the arena.
   GestureArenaEntry add(PointerId pointer, GestureArenaMember member) {

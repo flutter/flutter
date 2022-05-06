@@ -195,7 +195,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   Timer? _doubleTapTimer;
   _TapTracker? _firstTap;
-  final Map<int, _TapTracker> _trackers = <int, _TapTracker>{};
+  final Map<PointerId, _TapTracker> _trackers = <PointerId, _TapTracker>{};
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
@@ -501,7 +501,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   /// particular location after [longTapDelay].
   GestureMultiTapDownCallback? onLongTapDown;
 
-  final Map<int, _TapGesture> _gestureMap = <int, _TapGesture>{};
+  final Map<PointerId, _TapGesture> _gestureMap = <PointerId, _TapGesture>{};
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
@@ -829,7 +829,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
 
   Timer? _serialTapTimer;
   final List<_TapTracker> _completedTaps = <_TapTracker>[];
-  final Map<int, GestureDisposition> _gestureResolutions = <int, GestureDisposition>{};
+  final Map<PointerId, GestureDisposition> _gestureResolutions = <PointerId, GestureDisposition>{};
   _TapTracker? _pendingTap;
 
   /// Indicates whether this recognizer is currently tracking a pointer that's

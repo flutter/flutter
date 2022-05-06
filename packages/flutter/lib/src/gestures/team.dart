@@ -126,7 +126,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 /// To assign a gesture recognizer to a team, set
 /// [OneSequenceGestureRecognizer.team] to an instance of [GestureArenaTeam].
 class GestureArenaTeam {
-  final Map<int, _CombiningGestureArenaMember> _combiners = <int, _CombiningGestureArenaMember>{};
+  final Map<PointerId, _CombiningGestureArenaMember> _combiners = <PointerId, _CombiningGestureArenaMember>{};
 
   /// A member that wins on behalf of the entire team.
   ///

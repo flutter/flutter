@@ -338,11 +338,11 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   late Offset _localFocalPoint;
   _LineBetweenPointers? _initialLine;
   _LineBetweenPointers? _currentLine;
-  final Map<int, Offset> _pointerLocations = <int, Offset>{};
+  final Map<PointerId, Offset> _pointerLocations = <PointerId, Offset>{};
   final List<PointerId> _pointerQueue = <PointerId>[]; // A queue to sort pointers in order of entrance
-  final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
+  final Map<PointerId, VelocityTracker> _velocityTrackers = <PointerId, VelocityTracker>{};
   late Offset _delta;
-  final Map<int, _PointerPanZoomData> _pointerPanZooms = <int, _PointerPanZoomData>{};
+  final Map<PointerId, _PointerPanZoomData> _pointerPanZooms = <PointerId, _PointerPanZoomData>{};
   double _initialPanZoomScaleFactor = 1;
   double _initialPanZoomRotationFactor = 0;
 

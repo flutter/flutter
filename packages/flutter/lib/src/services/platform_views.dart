@@ -245,7 +245,7 @@ class AndroidPointerProperties {
        assert(toolType != null);
 
   /// See Android's [MotionEvent.PointerProperties#id](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#id).
-  final int id;
+  final PointerId id;
 
   /// The type of tool used to make contact such as a finger or stylus, if known.
   /// See Android's [MotionEvent.PointerProperties#toolType](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#toolType).
@@ -509,11 +509,11 @@ enum _AndroidViewState {
 class _AndroidMotionEventConverter {
   _AndroidMotionEventConverter();
 
-  final Map<int, AndroidPointerCoords> pointerPositions =
-      <int, AndroidPointerCoords>{};
-  final Map<int, AndroidPointerProperties> pointerProperties =
-      <int, AndroidPointerProperties>{};
-  final Set<int> usedAndroidPointerIds = <int>{};
+  final Map<PointerId, AndroidPointerCoords> pointerPositions =
+      <PointerId, AndroidPointerCoords>{};
+  final Map<PointerId, AndroidPointerProperties> pointerProperties =
+      <PointerId, AndroidPointerProperties>{};
+  final Set<PointerId> usedAndroidPointerIds = <PointerId>{};
 
   PointTransformer get pointTransformer => _pointTransformer;
   late PointTransformer _pointTransformer;
@@ -528,7 +528,7 @@ class _AndroidMotionEventConverter {
     if (pointerProperties.isEmpty) {
       downTimeMillis = event.timeStamp.inMilliseconds;
     }
-    int androidPointerId = 0;
+    PointerId androidPointerId = 0;
     while (usedAndroidPointerIds.contains(androidPointerId)) {
       androidPointerId++;
     }
@@ -572,7 +572,7 @@ class _AndroidMotionEventConverter {
   }
 
   AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {
-    final List<int> pointers = pointerPositions.keys.toList();
+    final List<PointerId> pointers = pointerPositions.keys.toList();
     final int pointerIdx = pointers.indexOf(event.pointer);
     final int numPointers = pointers.length;
 
@@ -613,10 +613,10 @@ class _AndroidMotionEventConverter {
       action: action,
       pointerCount: pointerPositions.length,
       pointerProperties: pointers
-          .map<AndroidPointerProperties>((int i) => pointerProperties[i]!)
+          .map<AndroidPointerProperties>((PointerId i) => pointerProperties[i]!)
           .toList(),
       pointerCoords: pointers
-          .map<AndroidPointerCoords>((int i) => pointerPositions[i]!)
+          .map<AndroidPointerCoords>((PointerId i) => pointerPositions[i]!)
           .toList(),
       metaState: 0,
       buttonState: 0,

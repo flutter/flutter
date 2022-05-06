@@ -13,7 +13,7 @@ typedef PointerRoute = void Function(PointerEvent event);
 
 /// A routing table for [PointerEvent] events.
 class PointerRouter {
-  final Map<int, Map<PointerRoute, Matrix4?>> _routeMap = <int, Map<PointerRoute, Matrix4?>>{};
+  final Map<PointerId, Map<PointerRoute, Matrix4?>> _routeMap = <PointerId, Map<PointerRoute, Matrix4?>>{};
   final Map<PointerRoute, Matrix4?> _globalRoutes = <PointerRoute, Matrix4?>{};
 
   /// Adds a route to the routing table.

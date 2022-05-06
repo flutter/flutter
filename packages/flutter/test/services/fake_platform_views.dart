@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show PointerId;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -271,9 +272,9 @@ class FakeAndroidPlatformViewsController {
     final List<List<dynamic>> pointerProperties = (args[5] as List<dynamic>).cast<List<dynamic>>();
     final List<List<dynamic>> pointerCoords = (args[6] as List<dynamic>).cast<List<dynamic>>();
     final List<Offset> pointerOffsets = <Offset> [];
-    final List<int> pointerIds = <int> [];
+    final List<PointerId> pointerIds = <PointerId> [];
     for (int i = 0; i < pointerCoords.length; i++) {
-      pointerIds.add(pointerProperties[i][0] as int);
+      pointerIds.add(pointerProperties[i][0] as PointerId);
       final double x = pointerCoords[i][7] as double;
       final double y = pointerCoords[i][8] as double;
       pointerOffsets.add(Offset(x, y));
@@ -533,13 +534,13 @@ class FakeAndroidMotionEvent {
 
   final int action;
   final List<Offset> pointers;
-  final List<int> pointerIds;
+  final List<PointerId> pointerIds;
 
 
   @override
   bool operator ==(Object other) {
     return other is FakeAndroidMotionEvent
-        && listEquals<int>(other.pointerIds, pointerIds)
+        && listEquals<PointerId>(other.pointerIds, pointerIds)
         && other.action == action
         && listEquals<Offset>(other.pointers, pointers);
   }

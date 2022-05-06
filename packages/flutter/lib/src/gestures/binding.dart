@@ -317,7 +317,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   ///
   /// The state of hovering pointers is not tracked because that would require
   /// hit-testing on every frame.
-  final Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
+  final Map<PointerId, HitTestResult> _hitTests = <PointerId, HitTestResult>{};
 
   /// Dispatch an event to the targets found by a hit test on its position.
   ///
