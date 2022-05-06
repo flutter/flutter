@@ -11,7 +11,23 @@ abstract class ProjectValidator {
   /// Can return more than one result in case a file/command have a lot of info to share to the user
   Future<List<ProjectValidatorResult>> start(FlutterProject project);
   /// new ProjectValidators should be added here for the ValidateProjectCommand to run
-  static const List <ProjectValidator> allProjectValidators = <ProjectValidator>[
-    // TODO(jasguerrero): add validators
+  static List <ProjectValidator> allProjectValidators = <ProjectValidator>[
+    GeneralInfoValidator(),
   ];
+}
+
+class GeneralInfoValidator extends ProjectValidator{
+  @override
+  Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
+    return [];
+  }
+
+  @override
+  bool supportsProject(FlutterProject project) {
+    // this validator will run for any type of flutter project
+    return true;
+  }
+
+  @override
+  String get title => 'General Info';
 }
