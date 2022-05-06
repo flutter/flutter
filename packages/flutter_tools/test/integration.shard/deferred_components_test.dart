@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_print
-
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
@@ -41,8 +39,8 @@ void main() {
       '--target-platform=android-arm64',
     ], workingDirectory: tempDir.path);
 
-    print('stdout:\n${result.stdout.toString()}');
-    print('stderr:\n${result.stderr.toString()}');
+    printOnFailure('stdout:\n${result.stdout.toString()}');
+    printOnFailure('stderr:\n${result.stderr.toString()}');
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('app-release.aab'));
     expect(result.stdout.toString(), contains('Deferred components prebuild validation passed.'));
@@ -77,8 +75,8 @@ void main() {
       'appbundle',
     ], workingDirectory: tempDir.path);
 
-    print('stdout:\n${result.stdout.toString()}');
-    print('stderr:\n${result.stderr.toString()}');
+    printOnFailure('stdout:\n${result.stdout.toString()}');
+    printOnFailure('stderr:\n${result.stderr.toString()}');
     expect(result.stdout.toString(), contains('app-release.aab'));
     expect(result.stdout.toString(), contains('Deferred components prebuild validation passed.'));
     expect(result.stdout.toString(), contains('Deferred components gen_snapshot validation passed.'));
@@ -123,8 +121,8 @@ void main() {
       '--no-deferred-components',
     ], workingDirectory: tempDir.path);
 
-    print('stdout:\n${result.stdout.toString()}');
-    print('stderr:\n${result.stderr.toString()}');
+    printOnFailure('stdout:\n${result.stdout.toString()}');
+    printOnFailure('stderr:\n${result.stderr.toString()}');
     expect(result.stdout.toString().contains('app-release.aab'), true);
     expect(result.stdout.toString().contains('Deferred components prebuild validation passed.'), false);
     expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);
