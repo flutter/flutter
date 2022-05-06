@@ -436,6 +436,9 @@ def to_gn_args(args):
     elif os.getenv('FLUTTER_IMPELLER_ENABLE_PLAYGROUND', '0') == '1':
       gn_args['impeller_enable_playground'] = True
 
+    if args.prebuilt_impellerc is not None:
+      gn_args['impeller_use_prebuilt_impellerc'] = args.prebuilt_impellerc
+
     return gn_args
 
 def parse_args(args):
@@ -561,6 +564,9 @@ def parse_args(args):
   # Impeller flags.
   parser.add_argument('--enable-impeller-playground', default=False, action='store_true',
                       help='Whether impeller unit tests run in playground mode.')
+  parser.add_argument('--prebuilt-impellerc', default=None, type=str,
+                      help='Absolute path to a prebuilt impellerc. ' +
+                      'Do not use this outside of CI or with impellerc from a different engine version.')
 
   # Sanitizers.
   parser.add_argument('--asan', default=False, action='store_true')

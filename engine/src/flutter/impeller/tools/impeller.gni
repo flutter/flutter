@@ -18,6 +18,11 @@ declare_args() {
 
   # Whether the OpenGLES backend is enabled.
   impeller_enable_opengles = is_mac || is_linux
+
+  # Whether to use a prebuilt impellerc.
+  # If this is the empty string, impellerc will be built.
+  # If it is non-empty, it should be the absolute path to impellerc.
+  impeller_use_prebuilt_impellerc = ""
 }
 
 declare_args() {
@@ -195,6 +200,26 @@ template("embed_blob") {
   }
 }
 
+# Dispatches to the build or prebuilt impellerc depending on the value of
+# the impeller_use_prebuilt_impellerc argument. Forwards all variables to
+# compiled_action_foreach or action_foreach as appropriate.
+template("_impellerc") {
+  if (impeller_use_prebuilt_impellerc == "") {
+    compiled_action_foreach(target_name) {
+      forward_variables_from(invoker, "*")
+      tool = "//flutter/impeller/compiler:impellerc"
+    }
+  } else {
+    action_foreach(target_name) {
+      forward_variables_from(invoker, "*", [ "args" ])
+      script = "//build/gn_run_binary.py"
+      impellerc_path =
+          rebase_path(impeller_use_prebuilt_impellerc, root_build_dir)
+      args = [ impellerc_path ] + invoker.args
+    }
+  }
+}
+
 template("impellerc") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.sl_file_extension),
@@ -208,9 +233,7 @@ template("impellerc") {
 
   sl_file_extension = invoker.sl_file_extension
 
-  compiled_action_foreach(target_name) {
-    tool = "//flutter/impeller/compiler:impellerc"
-
+  _impellerc(target_name) {
     sources = invoker.shaders
     if (defined(invoker.intermediates_subdir)) {
       subdir = invoker.intermediates_subdir
