@@ -11,7 +11,12 @@ import '../base/terminal.dart';
 import 'migrate_result.dart';
 import 'migrate_utils.dart';
 
-/// Represents the mamifest file that tracks the contents of the current
+const String _kMergedFilesKey = 'merged_files';
+const String _kConflictFilesKey = 'conflict_files';
+const String _kAddedFilesKey = 'added_files';
+const String _kDeletedFilesKey = 'deleted_files';
+
+/// Represents the manifest file that tracks the contents of the current
 /// migration working directory.
 ///
 /// This manifest file is created with the MigrateResult of a computeMigration run.
@@ -29,14 +34,14 @@ class MigrateManifest {
       throwToolExit('Invalid .migrate_manifest file in the migrate working directory. File is not a Yaml map.', exitCode: 1);
     }
     final YamlMap map = yamlContents;
-    bool valid = map.containsKey('merged_files') && map.containsKey('conflict_files') && map.containsKey('added_files') && map.containsKey('deleted_files');
+    bool valid = map.containsKey(_kMergedFilesKey) && map.containsKey(_kConflictFilesKey) && map.containsKey(_kAddedFilesKey) && map.containsKey(_kDeletedFilesKey);
     if (!valid) {
       throwToolExit('Invalid .migrate_manifest file in the migrate working directory. File is missing an entry. Fix the manifest or abandon the migration and try again.', exitCode: 1);
     }
-    final Object? mergedFilesYaml = map['merged_files'];
-    final Object? conflictFilesYaml = map['conflict_files'];
-    final Object? addedFilesYaml = map['added_files'];
-    final Object? deletedFilesYaml = map['deleted_files'];
+    final Object? mergedFilesYaml = map[_kMergedFilesKey];
+    final Object? conflictFilesYaml = map[_kConflictFilesKey];
+    final Object? addedFilesYaml = map[_kAddedFilesKey];
+    final Object? deletedFilesYaml = map[_kDeletedFilesKey];
     valid = valid && (mergedFilesYaml is YamlList || mergedFilesYaml == null);
     valid = valid && (conflictFilesYaml is YamlList || conflictFilesYaml == null);
     valid = valid && (addedFilesYaml is YamlList || addedFilesYaml == null);
@@ -174,7 +179,7 @@ class MigrateManifest {
   }
 }
 
-/// Returns true if the file does not contain any git conflit markers.
+/// Returns true if the file does not contain any git conflict markers.
 bool _conflictsResolved(String contents) {
   if (contents.contains('>>>>>>>') && contents.contains('=======') && contents.contains('<<<<<<<')) {
     return false;
