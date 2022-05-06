@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
@@ -133,7 +131,7 @@ class Surface {
 
   void addToScene() {
     if (!_addedToScene) {
-      skiaSceneHost!.children.insert(0, htmlElement as html.Element);
+      skiaSceneHost!.prepend(htmlElement);
     }
     _addedToScene = true;
   }
@@ -210,8 +208,8 @@ class Surface {
     final double logicalWidth = _pixelWidth / window.devicePixelRatio;
     final double logicalHeight = _pixelHeight / window.devicePixelRatio;
     final DomCSSStyleDeclaration style = htmlCanvas!.style;
-    style.setProperty('width', '${logicalWidth}px');
-    style.setProperty('height', '${logicalHeight}px');
+    style.width = '${logicalWidth}px';
+    style.height = '${logicalHeight}px';
   }
 
   /// Translate the canvas so the surface covers the visible portion of the
@@ -226,7 +224,7 @@ class Surface {
     final int surfaceHeight = _currentSurfaceSize!.height.ceil();
     final double offset =
         (_pixelHeight - surfaceHeight) / window.devicePixelRatio;
-    htmlCanvas!.style.setProperty('transform', 'translate(0, -${offset}px)');
+    htmlCanvas!.style.transform = 'translate(0, -${offset}px)';
   }
 
   void _contextRestoredListener(DomEvent event) {
@@ -296,7 +294,7 @@ class Surface {
     // accessible.
     htmlCanvas.setAttribute('aria-hidden', 'true');
 
-    htmlCanvas.style.setProperty('position', 'absolute');
+    htmlCanvas.style.position = 'absolute';
     _updateLogicalHtmlCanvasSize();
 
     // When the browser tab using WebGL goes dormant the browser and/or OS may

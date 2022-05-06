@@ -10,6 +10,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart' show platformViewManager;
 import '../configuration.dart';
+import '../dom.dart';
 import '../html/path_to_svg_clip.dart';
 import '../platform_views/slots.dart';
 import '../util.dart';
@@ -212,10 +213,10 @@ class HtmlViewEmbedder {
   void _compositeWithParams(int viewId, EmbeddedViewParams params) {
     // If we haven't seen this viewId yet, cache it for clips/transforms.
     final ViewClipChain clipChain = _viewClipChains.putIfAbsent(viewId, () {
-      return ViewClipChain(view: createPlatformViewSlot(viewId));
+      return ViewClipChain(view: createPlatformViewSlot(viewId) as DomElement);
     });
 
-    final html.Element slot = clipChain.slot;
+    final DomElement slot = clipChain.slot;
 
     // See `apply()` in the PersistedPlatformView class for the HTML version
     // of this code.
@@ -228,8 +229,8 @@ class HtmlViewEmbedder {
     final int currentClippingCount = _countClips(params.mutators);
     final int previousClippingCount = clipChain.clipCount;
     if (currentClippingCount != previousClippingCount) {
-      final html.Element oldPlatformViewRoot = clipChain.root;
-      final html.Element newPlatformViewRoot = _reconstructClipViewsChain(
+      final DomElement oldPlatformViewRoot = clipChain.root;
+      final DomElement newPlatformViewRoot = _reconstructClipViewsChain(
         currentClippingCount,
         slot,
         oldPlatformViewRoot,
@@ -255,26 +256,26 @@ class HtmlViewEmbedder {
     return clipCount;
   }
 
-  html.Element _reconstructClipViewsChain(
+  DomElement _reconstructClipViewsChain(
     int numClips,
-    html.Element platformView,
-    html.Element headClipView,
+    DomElement platformView,
+    DomElement headClipView,
   ) {
     int indexInFlutterView = -1;
-    if (headClipView.parent != null) {
+    if (headClipView.parentElement != null) {
       indexInFlutterView = skiaSceneHost!.children.indexOf(headClipView);
       headClipView.remove();
     }
-    html.Element head = platformView;
+    DomElement head = platformView;
     int clipIndex = 0;
     // Re-use as much existing clip views as needed.
     while (head != headClipView && clipIndex < numClips) {
-      head = head.parent!;
+      head = head.parentElement!;
       clipIndex++;
     }
     // If there weren't enough existing clip views, add more.
     while (clipIndex < numClips) {
-      final html.Element clippingView = html.Element.tag('flt-clip');
+      final DomElement clippingView = createDomElement('flt-clip');
       clippingView.append(head);
       head = clippingView;
       clipIndex++;
@@ -309,9 +310,9 @@ class HtmlViewEmbedder {
   }
 
   void _applyMutators(
-      EmbeddedViewParams params, html.Element embeddedView, int viewId) {
+      EmbeddedViewParams params, DomElement embeddedView, int viewId) {
     final MutatorsStack mutators = params.mutators;
-    html.Element head = embeddedView;
+    DomElement head = embeddedView;
     Matrix4 headTransform = params.offset == ui.Offset.zero
       ? Matrix4.identity()
       : Matrix4.translationValues(params.offset.dx, params.offset.dy, 0);
@@ -329,7 +330,7 @@ class HtmlViewEmbedder {
         case MutatorType.clipRect:
         case MutatorType.clipRRect:
         case MutatorType.clipPath:
-          final html.Element clipView = head.parent!;
+          final DomElement clipView = head.parentElement!;
           clipView.style.clip = '';
           clipView.style.clipPath = '';
           headTransform = Matrix4.identity();
@@ -397,14 +398,15 @@ class HtmlViewEmbedder {
     final Matrix4 scaleMatrix =
         Matrix4.diagonal3Values(inverseScale, inverseScale, 1);
     headTransform = scaleMatrix.multiplied(headTransform);
-    head.style.transform = float64ListToCssTransform(headTransform.storage);
+    head.style.transform =
+        float64ListToCssTransform(headTransform.storage);
   }
 
   /// Sets the transform origin to the top-left corner of the element.
   ///
   /// By default, the transform origin is the center of the element, but
   /// Flutter assumes the transform origin is the top-left point.
-  void _resetAnchor(html.Element element) {
+  void _resetAnchor(DomElement element) {
     element.style.transformOrigin = '0 0 0';
     element.style.position = 'absolute';
   }
@@ -424,7 +426,7 @@ class HtmlViewEmbedder {
     }
     _svgPathDefs = kSvgResourceHeader.clone(false) as svg.SvgSvgElement;
     _svgPathDefs!.append(svg.DefsElement()..id = 'sk_path_defs');
-    skiaSceneHost!.append(_svgPathDefs!);
+    skiaSceneHost!.append(_svgPathDefs! as DomElement);
   }
 
   void submitFrame() {
@@ -489,7 +491,7 @@ class HtmlViewEmbedder {
       _activeCompositionOrder.addAll(_compositionOrder);
       unusedViews.removeAll(_compositionOrder);
 
-      html.Element? elementToInsertBefore;
+      DomElement? elementToInsertBefore;
       if (diffResult.addToBeginning) {
         elementToInsertBefore =
             _viewClipChains[diffResult.viewToInsertBefore!]!.root;
@@ -504,27 +506,26 @@ class HtmlViewEmbedder {
           }
         }
         if (diffResult.addToBeginning) {
-          final html.Element platformViewRoot = _viewClipChains[viewId]!.root;
+          final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
           skiaSceneHost!.insertBefore(platformViewRoot, elementToInsertBefore);
           final Surface? overlay = _overlays[viewId];
           if (overlay != null) {
             skiaSceneHost!
-                .insertBefore(overlay.htmlElement as html.Element, elementToInsertBefore);
+                .insertBefore(overlay.htmlElement, elementToInsertBefore);
           }
         } else {
-          final html.Element platformViewRoot = _viewClipChains[viewId]!.root;
+          final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
           skiaSceneHost!.append(platformViewRoot);
           final Surface? overlay = _overlays[viewId];
           if (overlay != null) {
-            skiaSceneHost!.append(overlay.htmlElement as html.Element);
+            skiaSceneHost!.append(overlay.htmlElement);
           }
         }
       }
       insertBeforeMap?.forEach((int viewId, int viewIdToInsertBefore) {
-        final html.Element overlay = _overlays[viewId]!.htmlElement as
-            html.Element;
+        final DomElement overlay = _overlays[viewId]!.htmlElement;
         if (viewIdToInsertBefore != -1) {
-          final html.Element nextSibling =
+          final DomElement nextSibling =
               _viewClipChains[viewIdToInsertBefore]!.root;
           skiaSceneHost!.insertBefore(overlay, nextSibling);
         } else {
@@ -533,8 +534,7 @@ class HtmlViewEmbedder {
       });
       if (_didPaintBackupSurface) {
         skiaSceneHost!
-            .append(SurfaceFactory.instance.backupSurface.htmlElement as
-                html.Element);
+            .append(SurfaceFactory.instance.backupSurface.htmlElement);
       }
     } else {
       SurfaceFactory.instance.removeSurfacesFromDom();
@@ -549,19 +549,18 @@ class HtmlViewEmbedder {
           }
         }
 
-        final html.Element platformViewRoot = _viewClipChains[viewId]!.root;
+        final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
         final Surface? overlay = _overlays[viewId];
         skiaSceneHost!.append(platformViewRoot);
         if (overlay != null) {
-          skiaSceneHost!.append(overlay.htmlElement as html.Element);
+          skiaSceneHost!.append(overlay.htmlElement);
         }
         _activeCompositionOrder.add(viewId);
         unusedViews.remove(viewId);
       }
       if (_didPaintBackupSurface) {
         skiaSceneHost!
-            .append(SurfaceFactory.instance.backupSurface.htmlElement as
-                html.Element);
+            .append(SurfaceFactory.instance.backupSurface.htmlElement);
       }
     }
 
@@ -770,19 +769,19 @@ class HtmlViewEmbedder {
 /// * The slot view in the stack (the actual contents of the platform view).
 /// * The number of clipping elements used last time the view was composited.
 class ViewClipChain {
-  html.Element _root;
-  html.Element _slot;
+  DomElement _root;
+  DomElement _slot;
   int _clipCount = -1;
 
-  ViewClipChain({required html.Element view})
+  ViewClipChain({required DomElement view})
       : _root = view,
         _slot = view;
 
-  html.Element get root => _root;
-  html.Element get slot => _slot;
+  DomElement get root => _root;
+  DomElement get slot => _slot;
   int get clipCount => _clipCount;
 
-  void updateClipChain({required html.Element root, required int clipCount}) {
+  void updateClipChain({required DomElement root, required int clipCount}) {
     _root = root;
     _clipCount = clipCount;
   }

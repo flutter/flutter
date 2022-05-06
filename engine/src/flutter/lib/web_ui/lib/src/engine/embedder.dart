@@ -11,6 +11,7 @@ import '../engine.dart' show buildMode, registerHotRestartListener;
 import 'browser_detection.dart';
 import 'canvaskit/initialization.dart';
 import 'configuration.dart';
+import 'dom.dart';
 import 'host_node.dart';
 import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
@@ -295,8 +296,8 @@ class FlutterViewEmbedder {
     /// added eagerly during initialization here and never touched, unless the
     /// system is reset due to hot restart or in a test.
     if (useCanvasKit) {
-      skiaSceneHost = html.Element.tag('flt-scene');
-      addSceneToSceneHost(skiaSceneHost);
+      skiaSceneHost = createDomElement('flt-scene');
+      addSceneToSceneHost(skiaSceneHost as html.Element?);
     }
 
     final html.Element semanticsHostElement =
