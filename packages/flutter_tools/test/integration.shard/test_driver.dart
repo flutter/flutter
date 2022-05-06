@@ -753,7 +753,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   void _throwErrorResponse(String message) {
-    throw Exception('$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim());
+    throw Exception('$message\n\n$_lastResponse\n\n$_errorBuffer'.trim());
   }
 
   final bool spawnDdsInstance;

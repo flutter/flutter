@@ -403,7 +403,7 @@ class _IndicatorPainter extends CustomPainter {
     if (!(rect.size >= insets.collapsedSize)) {
       throw FlutterError(
           'indicatorPadding insets should be less than Tab Size\n'
-          'Rect Size : ${rect.size}, Insets: ${insets.toString()}',
+          'Rect Size : ${rect.size}, Insets: $insets',
       );
     }
     return insets.deflateRect(rect);

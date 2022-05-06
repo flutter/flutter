@@ -758,7 +758,7 @@ void checkDirectoryNotExists(String directory) {
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
   for (final T value in values) {
     if (!collection.contains(value)) {
-      throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
+      throw TaskResult.failure('Expected to find `$value` in `$collection`.');
     }
   }
 }
