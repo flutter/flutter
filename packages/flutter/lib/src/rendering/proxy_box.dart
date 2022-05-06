@@ -843,7 +843,7 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get isRepaintBoundary => child != null && (_alpha > 0);
+  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
 
   @override
   OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
@@ -871,13 +871,13 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
-    final bool wasRepaintBoundary = isRepaintBoundary;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
-    if (wasRepaintBoundary != isRepaintBoundary)
+    if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
-    markNeedsCompositedLayerUpdate();
+    markNeedsPaint();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
@@ -898,10 +898,19 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_alpha == 0) {
-      return;
+    if (child != null) {
+      if (_alpha == 0) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
+        return;
+      }
+      assert(needsCompositing);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     }
-    super.paint(context, offset);
   }
 
   @override
