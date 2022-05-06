@@ -2431,37 +2431,6 @@ targets:
       validation: analyze
       validation_name: Analyze
 
-  - name: Staging_build_linux framework_tests_misc
-    bringup: true
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "goldctl"},
-          {"dependency": "clang"},
-          {"dependency": "cmake"},
-          {"dependency": "ninja"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "android_sdk", "version": "version:31v8"}
-        ]
-      shard: framework_tests
-      subshard: misc
-      tags: >
-        ["framework", "hostonly", "shard"]
-    runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
-      - .ci.yaml
-
   - name: Staging_build_linux build_tests_2_2
     bringup: true
     recipe: flutter/flutter_drone
