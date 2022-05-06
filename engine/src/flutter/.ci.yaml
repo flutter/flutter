@@ -53,7 +53,7 @@ platform_properties:
           {"dependency": "open_jdk", "version": "version:1.8.0u202-b08"}
         ]
       device_type: none
-      mac_model: "Macmini8,1"
+      cpu: x86
       os: Mac-12
       xcode: 13a233 # xcode 13.0
   windows:
