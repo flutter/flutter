@@ -1958,6 +1958,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       extentOffset: extentOffset,
       affinity: fromPosition.affinity,
     );
+
     _setSelection(newSelection, cause);
   }
 
