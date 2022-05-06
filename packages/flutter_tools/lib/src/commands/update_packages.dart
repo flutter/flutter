@@ -1648,8 +1648,17 @@ class PubspecDependency extends PubspecLine {
 
   /// This generates the entry for this dependency for the pubspec.yaml for the
   /// fake package that we'll use to get the version numbers figured out.
-  void describeForFakePubspec(StringBuffer dependencies, StringBuffer overrides, { bool useAnyVersion = true }) {
-    final String versionToUse = useAnyVersion || version.isEmpty ? 'any' : version;
+  void describeForFakePubspec(StringBuffer dependencies, StringBuffer overrides, { bool doUpgrade = true }) {
+    final String versionToUse;
+    if (version.isEmpty) {
+      versionToUse = 'any';
+    } else if (doUpgrade) {
+      // Must wrap in quotes for Yaml parsing
+      versionToUse = "'>= $version'";
+    } else {
+      versionToUse = version;
+    }
+    // final versionToUse = useAnyVersion || version.isEmpty ? 'any' : version;
     switch (kind) {
       case DependencyKind.unknown:
       case DependencyKind.overridden:
