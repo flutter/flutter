@@ -1265,7 +1265,7 @@ class LocalizationsGenerator {
     final List<String> sortedClassImports = supportedLocales
       .where((LocaleInfo locale) => isBaseClassLocale(locale, locale.languageCode))
       .map((LocaleInfo locale) {
-        final String library = '${fileName}_${locale.toString()}';
+        final String library = '${fileName}_$locale';
         if (useDeferredLoading) {
           return "import '$library.$fileExtension' deferred as $library;";
         } else {
