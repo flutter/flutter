@@ -143,9 +143,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addFlag('uninstall-first',
         hide: !verboseHelp,
-        help: 'Attempt to uninstall a previously installed app from the device '
-              'first before installing. This is normally not required and will '
-              'take longer. Currently only supported on iOS.',
+        help: 'Uninstall previous versions of the app on the device '
+              'before reinstalling. Currently only supported on iOS.',
     );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
