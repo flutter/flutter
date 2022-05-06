@@ -441,7 +441,6 @@ void main() {
       ),
     );
 
-
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
