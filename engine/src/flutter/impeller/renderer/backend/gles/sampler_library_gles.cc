@@ -22,7 +22,7 @@ std::shared_ptr<const Sampler> SamplerLibraryGLES::GetSampler(
     return found->second;
   }
   return samplers_[std::move(descriptor)] =
-             std::shared_ptr<SamplerGLES>(new SamplerGLES());
+             std::shared_ptr<SamplerGLES>(new SamplerGLES(descriptor));
 }
 
 }  // namespace impeller

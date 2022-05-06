@@ -77,7 +77,6 @@ executable("impeller_unittests") {
       "image:image_unittests",
       "playground",
       "renderer:renderer_unittests",
-      "renderer/backend:backend_unittests",
       "typographer:typographer_unittests",
     ]
   }

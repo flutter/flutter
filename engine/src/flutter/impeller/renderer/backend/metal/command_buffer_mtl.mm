@@ -195,7 +195,7 @@ bool CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
   return true;
 }
 
-std::shared_ptr<RenderPass> CommandBufferMTL::CreateRenderPass(
+std::shared_ptr<RenderPass> CommandBufferMTL::OnCreateRenderPass(
     RenderTarget target) const {
   if (!buffer_) {
     return nullptr;

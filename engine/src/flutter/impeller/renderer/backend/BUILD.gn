@@ -15,12 +15,3 @@ group("backend") {
     public_deps += [ "gles" ]
   }
 }
-
-group("backend_unittests") {
-  testonly = true
-
-  deps = []
-  if (impeller_enable_opengles) {
-    deps += [ "gles:gles_unittests" ]
-  }
-}

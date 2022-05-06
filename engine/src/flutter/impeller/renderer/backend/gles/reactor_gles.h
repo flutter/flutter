@@ -35,6 +35,8 @@ class ReactorGLES {
 
   void CollectHandle(GLESHandle handle);
 
+  void SetDebugLabel(const GLESHandle& handle, std::string label);
+
   using Operation = std::function<void(const ReactorGLES& reactor)>;
   [[nodiscard]] bool AddOperation(Operation operation);
 
@@ -45,7 +47,9 @@ class ReactorGLES {
   std::vector<Operation> pending_operations_;
   GLESHandleMap<std::optional<GLuint>> live_gl_handles_;
   GLESHandleMap<GLuint> gl_handles_to_collect_;
+  GLESHandleMap<std::string> pending_debug_labels_;
   bool in_reaction_ = false;
+  bool can_set_debug_labels_ = false;
 
   bool is_valid_ = false;
 

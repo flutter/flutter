@@ -62,21 +62,29 @@ struct GLProc {
   ///
   template <class... Args>
   auto operator()(Args&&... args) const {
-    FML_DCHECK(function) << "Function named "
-                         << (name != nullptr ? name : "<null>")
-                         << " unavailable.";
     AutoErrorCheck error(error_fn, name);
     return function(std::forward<Args>(args)...);
+  }
+
+  constexpr bool IsAvailable() const { return function != nullptr; }
+
+  void Reset() {
+    name = nullptr;
+    function = nullptr;
+    error_fn = nullptr;
   }
 };
 
 #define FOR_EACH_IMPELLER_PROC(PROC)         \
+  PROC(ActiveTexture);                       \
   PROC(AttachShader);                        \
   PROC(BindAttribLocation);                  \
   PROC(BindBuffer);                          \
+  PROC(BindTexture);                         \
   PROC(BlendEquationSeparate);               \
   PROC(BlendFuncSeparate);                   \
   PROC(BufferData);                          \
+  PROC(CheckFramebufferStatus);              \
   PROC(Clear);                               \
   PROC(ClearColor);                          \
   PROC(ClearDepthf);                         \
@@ -121,15 +129,28 @@ struct GLProc {
   PROC(StencilFuncSeparate);                 \
   PROC(StencilMaskSeparate);                 \
   PROC(StencilOpSeparate);                   \
+  PROC(TexImage2D);                          \
+  PROC(TexParameteri);                       \
   PROC(Uniform1fv);                          \
   PROC(Uniform1i);                           \
   PROC(Uniform2fv);                          \
   PROC(Uniform4fv);                          \
   PROC(UniformMatrix4fv);                    \
   PROC(UseProgram);                          \
-  PROC(CheckFramebufferStatus);              \
   PROC(VertexAttribPointer);                 \
   PROC(Viewport);
+
+#define FOR_EACH_IMPELLER_EXT_PROC(PROC) \
+  PROC(PushDebugGroupKHR);               \
+  PROC(PopDebugGroupKHR);                \
+  PROC(ObjectLabelKHR);
+
+enum class DebugResourceType {
+  kTexture,
+  kBuffer,
+  kProgram,
+  kShader,
+};
 
 class ProcTableGLES {
  public:
@@ -142,6 +163,7 @@ class ProcTableGLES {
   GLProc<decltype(gl##name)> name = {"gl" #name, nullptr};
 
   FOR_EACH_IMPELLER_PROC(IMPELLER_PROC);
+  FOR_EACH_IMPELLER_EXT_PROC(IMPELLER_PROC);
 
 #undef IMPELLER_PROC
 
@@ -154,6 +176,10 @@ class ProcTableGLES {
   std::string DescribeCurrentFramebuffer() const;
 
   bool IsCurrentFramebufferComplete() const;
+
+  void SetDebugLabel(DebugResourceType type,
+                     GLint name,
+                     const std::string& label) const;
 
  private:
   bool is_valid_ = false;

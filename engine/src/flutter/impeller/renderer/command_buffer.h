@@ -70,11 +70,14 @@ class CommandBuffer {
   ///
   /// @return     A valid render pass or null.
   ///
-  virtual std::shared_ptr<RenderPass> CreateRenderPass(
-      RenderTarget render_target) const = 0;
+  std::shared_ptr<RenderPass> CreateRenderPass(
+      RenderTarget render_target) const;
 
  protected:
   CommandBuffer();
+
+  virtual std::shared_ptr<RenderPass> OnCreateRenderPass(
+      RenderTarget render_target) const = 0;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);

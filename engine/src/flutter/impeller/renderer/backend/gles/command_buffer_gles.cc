@@ -41,7 +41,7 @@ bool CommandBufferGLES::SubmitCommands(CompletionCallback callback) {
 }
 
 // |CommandBuffer|
-std::shared_ptr<RenderPass> CommandBufferGLES::CreateRenderPass(
+std::shared_ptr<RenderPass> CommandBufferGLES::OnCreateRenderPass(
     RenderTarget target) const {
   if (!IsValid()) {
     return nullptr;

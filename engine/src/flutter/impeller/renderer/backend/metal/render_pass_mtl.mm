@@ -135,7 +135,6 @@ RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer, RenderTarget target)
   if (!buffer_ || !desc_ || !render_target_.IsValid()) {
     return;
   }
-  SetLabel("RenderPass");
   is_valid_ = true;
 }
 
@@ -145,12 +144,11 @@ bool RenderPassMTL::IsValid() const {
   return is_valid_;
 }
 
-void RenderPassMTL::SetLabel(std::string label) {
+void RenderPassMTL::OnSetLabel(std::string label) {
   if (label.empty()) {
     return;
   }
   label_ = std::move(label);
-  transients_buffer_->SetLabel(SPrintF("%s Transients", label_.c_str()));
 }
 
 bool RenderPassMTL::EncodeCommands(

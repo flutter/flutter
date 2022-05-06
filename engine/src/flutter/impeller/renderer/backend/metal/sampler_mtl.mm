@@ -6,7 +6,8 @@
 
 namespace impeller {
 
-SamplerMTL::SamplerMTL(id<MTLSamplerState> state) : state_(state) {}
+SamplerMTL::SamplerMTL(SamplerDescriptor desc, id<MTLSamplerState> state)
+    : Sampler(std::move(desc)), state_(state) {}
 
 SamplerMTL::~SamplerMTL() = default;
 

@@ -33,7 +33,7 @@ class RenderPass {
 
   virtual bool IsValid() const = 0;
 
-  virtual void SetLabel(std::string label) = 0;
+  void SetLabel(std::string label);
 
   HostBuffer& GetTransientsBuffer();
 
@@ -65,6 +65,8 @@ class RenderPass {
   std::vector<Command> commands_;
 
   RenderPass(RenderTarget target);
+
+  virtual void OnSetLabel(std::string label) = 0;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPass);

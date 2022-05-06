@@ -34,7 +34,7 @@ class CommandBufferGLES final : public CommandBuffer {
   bool SubmitCommands(CompletionCallback callback) override;
 
   // |CommandBuffer|
-  std::shared_ptr<RenderPass> CreateRenderPass(
+  std::shared_ptr<RenderPass> OnCreateRenderPass(
       RenderTarget target) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferGLES);

@@ -190,7 +190,10 @@ ShaderMetadata Shader::kMetadata{{camel_case(buffer.name)}} = {
 {% endfor %}
 
 {% for sampled_image in sampled_images %}
-ShaderMetadata Shader::kMetadata{{camel_case(sampled_image.name)}};
+ShaderMetadata Shader::kMetadata{{camel_case(sampled_image.name)}} = {
+    "{{sampled_image.name}}",    // name
+    std::vector<ShaderStructMemberMetadata> {}, // 0 members
+};
 {% endfor %}
 
 }  // namespace impeller

@@ -41,7 +41,9 @@ DecompressedImage CompressedImageSkia::Decode() const {
     return {};
   }
 
-  auto info = SkImageInfo::MakeN32Premul(generator->getInfo().dimensions());
+  const auto dims = generator->getInfo().dimensions();
+  auto info = SkImageInfo::Make(dims.width(), dims.height(),
+                                kRGBA_8888_SkColorType, kPremul_SkAlphaType);
 
   auto bitmap = std::make_shared<SkBitmap>();
   if (!bitmap->tryAllocPixels(info)) {

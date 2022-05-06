@@ -19,6 +19,7 @@ class RenderPassGLES final : public RenderPass {
   friend class CommandBufferGLES;
 
   ReactorGLES::Ref reactor_;
+  std::string label_;
   bool is_valid_ = false;
 
   RenderPassGLES(RenderTarget target, ReactorGLES::Ref reactor);
@@ -27,7 +28,7 @@ class RenderPassGLES final : public RenderPass {
   bool IsValid() const override;
 
   // |RenderPass|
-  void SetLabel(std::string label) override;
+  void OnSetLabel(std::string label) override;
 
   // |RenderPass|
   bool EncodeCommands(

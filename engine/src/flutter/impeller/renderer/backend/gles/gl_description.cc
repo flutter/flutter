@@ -77,4 +77,12 @@ std::string GLDescription::GetString() const {
   return stream.str();
 }
 
+bool GLDescription::HasExtension(const std::string& ext) const {
+  return extensions_.find(ext) != extensions_.end();
+}
+
+bool GLDescription::HasDebugExtension() const {
+  return HasExtension("GL_KHR_debug");
+}
+
 }  // namespace impeller

@@ -13,7 +13,11 @@ PipelineGLES::PipelineGLES(ReactorGLES::Ref reactor,
       reactor_(std::move(reactor)),
       handle_(reactor_ ? reactor_->CreateHandle(HandleType::kProgram)
                        : GLESHandle::DeadHandle()),
-      is_valid_(!handle_.IsDead()) {}
+      is_valid_(!handle_.IsDead()) {
+  if (is_valid_) {
+    reactor_->SetDebugLabel(handle_, GetDescriptor().GetLabel());
+  }
+}
 
 // |Pipeline|
 PipelineGLES::~PipelineGLES() {

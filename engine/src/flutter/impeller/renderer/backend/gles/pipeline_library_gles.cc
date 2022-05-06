@@ -83,6 +83,12 @@ static bool LinkProgram(
     return false;
   }
 
+  gl.SetDebugLabel(DebugResourceType::kShader, vert_shader,
+                   SPrintF("%s Vertex Shader", descriptor.GetLabel().c_str()));
+  gl.SetDebugLabel(
+      DebugResourceType::kShader, frag_shader,
+      SPrintF("%s Fragment Shader", descriptor.GetLabel().c_str()));
+
   fml::ScopedCleanupClosure delete_vert_shader(
       [&gl, vert_shader]() { gl.DeleteShader(vert_shader); });
   fml::ScopedCleanupClosure delete_frag_shader(

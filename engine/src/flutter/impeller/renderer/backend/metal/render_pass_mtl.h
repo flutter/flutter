@@ -31,7 +31,7 @@ class RenderPassMTL final : public RenderPass {
   bool IsValid() const override;
 
   // |RenderPass|
-  void SetLabel(std::string label) override;
+  void OnSetLabel(std::string label) override;
 
   // |RenderPass|
   bool EncodeCommands(

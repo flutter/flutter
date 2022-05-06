@@ -43,4 +43,7 @@ class Allocation {
 std::shared_ptr<fml::Mapping> CreateMappingWithCopy(const uint8_t* contents,
                                                     size_t length);
 
+std::shared_ptr<fml::Mapping> CreateMappingFromAllocation(
+    std::shared_ptr<Allocation> allocation);
+
 }  // namespace impeller

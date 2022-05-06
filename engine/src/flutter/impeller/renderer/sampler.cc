@@ -6,8 +6,12 @@
 
 namespace impeller {
 
-Sampler::Sampler() = default;
+Sampler::Sampler(SamplerDescriptor desc) : desc_(std::move(desc)) {}
 
 Sampler::~Sampler() = default;
+
+const SamplerDescriptor& Sampler::GetDescriptor() const {
+  return desc_;
+}
 
 }  // namespace impeller

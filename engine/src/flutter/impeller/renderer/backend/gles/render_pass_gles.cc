@@ -29,8 +29,8 @@ bool RenderPassGLES::IsValid() const {
 }
 
 // |RenderPass|
-void RenderPassGLES::SetLabel(std::string label) {
-  // Cannot support.
+void RenderPassGLES::OnSetLabel(std::string label) {
+  label_ = std::move(label);
 }
 
 void ConfigureBlending(const ProcTableGLES& gl,
