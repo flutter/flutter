@@ -40,7 +40,7 @@ static bool IsAbsolutePath(const char* path) {
   }
 
   auto wpath = Utf8ToWideString({path});
-  if (wpath.size() == 0) {
+  if (wpath.empty()) {
     return false;
   }
 
@@ -107,7 +107,7 @@ static DWORD GetFileAttributesForUtf8Path(const fml::UniqueFD& base_directory,
 std::string CreateTemporaryDirectory() {
   // Get the system temporary directory.
   auto temp_dir_container = GetTemporaryDirectoryPath();
-  if (temp_dir_container.size() == 0) {
+  if (temp_dir_container.empty()) {
     FML_DLOG(ERROR) << "Could not get system temporary directory.";
     return {};
   }
@@ -164,7 +164,7 @@ fml::UniqueFD OpenFile(const char* path,
 
   auto file_name = Utf8ToWideString({path});
 
-  if (file_name.size() == 0) {
+  if (file_name.empty()) {
     return {};
   }
 
@@ -207,7 +207,7 @@ fml::UniqueFD OpenDirectory(const char* path,
 
   auto file_name = Utf8ToWideString({path});
 
-  if (file_name.size() == 0) {
+  if (file_name.empty()) {
     return {};
   }
 

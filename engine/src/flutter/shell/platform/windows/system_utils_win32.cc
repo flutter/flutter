@@ -50,7 +50,7 @@ std::vector<std::wstring> GetPreferredLanguages() {
     }
     // Read the next null-terminated language.
     std::wstring language(buffer.c_str() + start);
-    if (language.size() == 0) {
+    if (language.empty()) {
       break;
     }
     languages.push_back(language);

@@ -78,7 +78,7 @@ void ConcurrentMessageLoop::WorkerMain() {
   while (true) {
     std::unique_lock lock(tasks_mutex_);
     tasks_condition_.wait(lock, [&]() {
-      return tasks_.size() > 0 || shutdown_ || HasThreadTasksLocked();
+      return !tasks_.empty() || shutdown_ || HasThreadTasksLocked();
     });
 
     // Shutdown cannot be read with the task mutex unlocked.
@@ -86,7 +86,7 @@ void ConcurrentMessageLoop::WorkerMain() {
     fml::closure task;
     std::vector<fml::closure> thread_tasks;
 
-    if (tasks_.size() != 0) {
+    if (!tasks_.empty()) {
       task = tasks_.front();
       tasks_.pop();
     }

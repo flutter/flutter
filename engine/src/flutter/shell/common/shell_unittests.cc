@@ -237,7 +237,7 @@ static void ValidateDestroyPlatformView(Shell* shell) {
 }
 
 static std::string CreateFlagsString(std::vector<const char*>& flags) {
-  if (flags.size() == 0) {
+  if (flags.empty()) {
     return "";
   }
   std::string flags_string = flags[0];
@@ -649,7 +649,7 @@ TEST_F(ShellTest, ReportTimingsIsCalled) {
   DestroyShell(std::move(shell));
 
   fml::TimePoint finish = fml::TimePoint::Now();
-  ASSERT_TRUE(timestamps.size() > 0);
+  ASSERT_TRUE(!timestamps.empty());
   ASSERT_TRUE(timestamps.size() % FrameTiming::kCount == 0);
   std::vector<FrameTiming> timings(timestamps.size() / FrameTiming::kCount);
 

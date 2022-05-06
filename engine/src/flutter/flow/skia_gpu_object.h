@@ -89,7 +89,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
       skia_object->unref();
     }
 
-    if (context && skia_objects.size() > 0) {
+    if (context && !skia_objects.empty()) {
       context->performDeferredCleanup(std::chrono::milliseconds(0));
     }
   }

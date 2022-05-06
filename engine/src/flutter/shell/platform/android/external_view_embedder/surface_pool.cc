@@ -80,7 +80,7 @@ void SurfacePool::RecycleLayers() {
 
 bool SurfacePool::HasLayers() {
   std::lock_guard lock(mutex_);
-  return layers_.size() > 0;
+  return !layers_.empty();
 }
 
 void SurfacePool::DestroyLayers(
@@ -91,7 +91,7 @@ void SurfacePool::DestroyLayers(
 
 void SurfacePool::DestroyLayersLocked(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade) {
-  if (layers_.size() == 0) {
+  if (layers_.empty()) {
     return;
   }
   jni_facade->FlutterViewDestroyOverlaySurfaces();

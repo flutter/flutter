@@ -37,7 +37,7 @@ fml::UniqueFD CreateDirectory(const fml::UniqueFD& base_directory,
     return {};
   }
 
-  if (components.size() == 0) {
+  if (components.empty()) {
     return {};
   }
 

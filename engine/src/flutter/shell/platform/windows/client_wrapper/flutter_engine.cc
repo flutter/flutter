@@ -28,7 +28,7 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
   c_engine_properties.dart_entrypoint_argc =
       static_cast<int>(entrypoint_argv.size());
   c_engine_properties.dart_entrypoint_argv =
-      entrypoint_argv.size() > 0 ? entrypoint_argv.data() : nullptr;
+      entrypoint_argv.empty() ? nullptr : entrypoint_argv.data();
 
   engine_ = FlutterDesktopEngineCreate(&c_engine_properties);
 

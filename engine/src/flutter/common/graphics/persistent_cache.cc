@@ -332,7 +332,7 @@ sk_sp<SkData> PersistentCache::load(const SkData& key) {
     return nullptr;
   }
   auto file_name = SkKeyToFilePath(key);
-  if (file_name.size() == 0) {
+  if (file_name.empty()) {
     return nullptr;
   }
   auto result =
@@ -405,7 +405,7 @@ void PersistentCache::store(const SkData& key, const SkData& data) {
 
   auto file_name = SkKeyToFilePath(key);
 
-  if (file_name.size() == 0) {
+  if (file_name.empty()) {
     return;
   }
 

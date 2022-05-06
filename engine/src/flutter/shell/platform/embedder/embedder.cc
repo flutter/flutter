@@ -1499,7 +1499,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   if (SAFE_ACCESS(args, custom_dart_entrypoint, nullptr) != nullptr) {
     auto dart_entrypoint = std::string{args->custom_dart_entrypoint};
-    if (dart_entrypoint.size() != 0) {
+    if (!dart_entrypoint.empty()) {
       run_configuration.SetEntrypoint(std::move(dart_entrypoint));
     }
   }
@@ -2257,7 +2257,7 @@ static bool DispatchJSONPlatformMessage(FLUTTER_API_SYMBOL(FlutterEngine)
                                             engine,
                                         rapidjson::Document document,
                                         const std::string& channel_name) {
-  if (channel_name.size() == 0) {
+  if (channel_name.empty()) {
     return false;
   }
 

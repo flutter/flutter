@@ -145,7 +145,7 @@ std::string SimplifyPath(std::string path) {
 }
 
 std::string AbsolutePath(const std::string& path) {
-  if (path.size() > 0) {
+  if (!path.empty()) {
     if (path[0] == '/') {
       // Path is already absolute.
       return path;

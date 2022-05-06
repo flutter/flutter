@@ -187,7 +187,7 @@ void Logger_PrintString(Dart_NativeArguments args) {
 
   if (dart::bin::ShouldCaptureStdout()) {
     std::stringstream stream;
-    if (tag.size() > 0) {
+    if (!tag.empty()) {
       stream << tag << ": ";
     }
     stream << message;
