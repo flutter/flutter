@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
@@ -11,6 +13,7 @@ import '../src/common.dart';
 import 'test_data/deferred_components_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
+
 
 void main() {
   late Directory tempDir;
