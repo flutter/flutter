@@ -97,19 +97,23 @@ void updateMissingResources(String localizationPath, String groupPrefix, {bool r
         final Set<String> localeResources = resourceKeys(localeBundle);
         // Whether or not the resources were modified and need to be updated.
         bool shouldWrite = false;
+
+        // Remove any localizations that are not defined in the canonical
+        // locale. This allows unused localizations to be removed if
+        // --remove-undefined is passed.
         if (removeUndefined) {
-          // Remove any localizations that are not defined in the canonical
-          // locale. This allows unused localizations to be removed if
-          // --remove-undefined is passed.
+          bool isIncluded(String key) {
+            return !isPluralVariation(key, localeBundle)
+                && !intentionallyOmitted(key, localeBundle);
+          }
 
           // Find any resources in this locale that don't appear in the
-          // canonical locale.
-          final Set<String> extraResources = localeResources.difference(
-              requiredKeys).where(
-                  (String key) =>
-              !isPluralVariation(key, localeBundle) &&
-                  !intentionallyOmitted(key, localeBundle)
-          ).toSet();
+          // canonical locale, and skipping any which should not be included
+          // (plurals and intentionally omitted).
+          final Set<String> extraResources = localeResources
+              .difference(requiredKeys)
+              .where(isIncluded)
+              .toSet();
 
           // Remove them.
           localeBundle.removeWhere((String key, dynamic value) {
