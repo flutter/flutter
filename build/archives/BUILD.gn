@@ -14,7 +14,7 @@ if (build_engine_artifacts) {
       "//flutter/lib/snapshot:generate_snapshot_bin",
       "//flutter/shell/testing:testing",
     ]
-    prefix = "$full_platform_name/"
+    prefix = "$full_target_platform_name/"
     if (flutter_runtime_mode != "debug") {
       prefix = "$full_platform_name-$flutter_runtime_mode/"
     }
