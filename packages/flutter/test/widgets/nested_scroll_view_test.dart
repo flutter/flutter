@@ -765,8 +765,7 @@ void main() {
                     handle:
                         NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                     sliver: SliverAppBar(
-                      title:
-                        const Text('Books'), 
+                      title: const Text('Books'), 
                       pinned: true,
                       expandedHeight: 150.0,
                       forceElevated: innerBoxIsScrolled,
