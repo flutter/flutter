@@ -790,12 +790,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void simulateTap([Intent? intent]) {
     _startNewSplash(context: context);
-    _handleTap();
+    handleTap();
   }
 
   void simulateLongPress() {
     _startNewSplash(context: context);
-    _handleLongPress();
+    handleLongPress();
   }
 
   void handleStatesControllerChange() {
@@ -813,7 +813,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void initState() {
     super.initState();
     initStatesController();
-    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
+    FocusManager.instance.addHighlightModeListener(handleFocusHighlightModeChange);
   }
 
   @override
@@ -824,6 +824,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       initStatesController();
     }
     if (enabled != isWidgetEnabled(oldWidget)) {
+      statesController.update(MaterialState.disabled, !enabled);
+      statesController.remove(MaterialState.pressed);
       // Don't call widget.onHover because many widgets, including the button
       // widgets, apply setState to an ancestor context from onHover.
       updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
@@ -833,7 +835,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void dispose() {
-    FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
+    FocusManager.instance.removeHighlightModeListener(handleFocusHighlightModeChange);
     statesController.removeListener(handleStatesControllerChange);
     super.dispose();
   }
@@ -885,7 +887,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         }
         break;
       case _HighlightType.focus:
-        // see _handleFocusUpdate()
+        // see handleFocusUpdate()
         break;
     }
 
@@ -972,7 +974,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     return splash;
   }
 
-  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
+  void handleFocusHighlightModeChange(FocusHighlightMode mode) {
     if (!mounted) {
       return;
     }
@@ -1005,7 +1007,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool _hasFocus = false;
-  void _handleFocusUpdate(bool hasFocus) {
+  void handleFocusUpdate(bool hasFocus) {
     _hasFocus = hasFocus;
     // Set here rather than updateHighlight because this widget's
     // (MaterialState) states include MaterialState.focused if
@@ -1024,7 +1026,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     widget.onTapDown?.call(details);
   }
 
-  void _handleTapUp(TapUpDetails details) {
+  void handleTapUp(TapUpDetails details) {
     widget.onTapUp?.call(details);
   }
 
@@ -1049,7 +1051,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     updateHighlight(_HighlightType.pressed, value: true);
   }
 
-  void _handleTap() {
+  void handleTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
     updateHighlight(_HighlightType.pressed, value: false);
@@ -1061,21 +1063,21 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
-  void _handleTapCancel() {
+  void handleTapCancel() {
     _currentSplash?.cancel();
     _currentSplash = null;
     widget.onTapCancel?.call();
     updateHighlight(_HighlightType.pressed, value: false);
   }
 
-  void _handleDoubleTap() {
+  void handleDoubleTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
     updateHighlight(_HighlightType.pressed, value: false);
     widget.onDoubleTap?.call();
   }
 
-  void _handleLongPress() {
+  void handleLongPress() {
     _currentSplash?.confirm();
     _currentSplash = null;
     if (widget.onLongPress != null) {
@@ -1111,21 +1113,21 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   bool get enabled => isWidgetEnabled(widget);
 
-  void _handleMouseEnter(PointerEnterEvent event) {
+  void handleMouseEnter(PointerEnterEvent event) {
     _hovering = true;
     if (enabled) {
-      _handleHoverChange();
+      handleHoverChange();
     }
   }
 
-  void _handleMouseExit(PointerExitEvent event) {
+  void handleMouseExit(PointerExitEvent event) {
     _hovering = false;
     // If the exit occurs after we've been disabled, we still
     // want to take down the highlights and run widget.onHover.
-    _handleHoverChange();
+    handleHoverChange();
   }
 
-  void _handleHoverChange() {
+  void handleHoverChange() {
     updateHighlight(_HighlightType.hover, value: _hovering);
   }
 
@@ -1161,22 +1163,22 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         child: Focus(
           focusNode: widget.focusNode,
           canRequestFocus: _canRequestFocus,
-          onFocusChange: _handleFocusUpdate,
+          onFocusChange: handleFocusUpdate,
           autofocus: widget.autofocus,
           child: MouseRegion(
             cursor: effectiveMouseCursor,
-            onEnter: _handleMouseEnter,
-            onExit: _handleMouseExit,
+            onEnter: handleMouseEnter,
+            onExit: handleMouseExit,
             child: Semantics(
               onTap: widget.excludeFromSemantics || widget.onTap == null ? null : simulateTap,
               onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : simulateLongPress,
               child: GestureDetector(
-                onTapDown: enabled ? _handleTapDown : null,
-                onTapUp: enabled ? _handleTapUp : null,
-                onTap: enabled ? _handleTap : null,
-                onTapCancel: enabled ? _handleTapCancel : null,
-                onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
-                onLongPress: widget.onLongPress != null ? _handleLongPress : null,
+                onTapDown: enabled ? handleTapDown : null,
+                onTapUp: enabled ? handleTapUp : null,
+                onTap: enabled ? handleTap : null,
+                onTapCancel: enabled ? handleTapCancel : null,
+                onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
+                onLongPress: widget.onLongPress != null ? handleLongPress : null,
                 behavior: HitTestBehavior.opaque,
                 excludeFromSemantics: true,
                 child: widget.child,
