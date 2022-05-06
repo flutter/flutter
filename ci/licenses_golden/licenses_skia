@@ -1,4 +1,4 @@
-Signature: 3c0838dafcbfcb962ccd64f68f37a2d4
+Signature: 4c392907c027c8cc24bd13058dca09e2
 
 UNUSED LICENSES:
 
@@ -689,6 +689,7 @@ FILE: ../../../third_party/skia/DIR_METADATA
 FILE: ../../../third_party/skia/OWNERS.android
 FILE: ../../../third_party/skia/WORKSPACE.bazel
 FILE: ../../../third_party/skia/bazel/BUILD.bazel
+FILE: ../../../third_party/skia/bazel/buildrc
 FILE: ../../../third_party/skia/bazel/cc_binary_with_flags.bzl
 FILE: ../../../third_party/skia/bazel/common_config_settings/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/common_config_settings/defs.bzl
@@ -1040,6 +1041,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/no
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/trybot.json
+FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_build/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_check_includes/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/check_generated_bazel_files/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/codesize/BUILD.bazel
@@ -6137,6 +6139,7 @@ FILE: ../../../third_party/skia/include/core/SkAlphaType.h
 FILE: ../../../third_party/skia/include/core/SkColorType.h
 FILE: ../../../third_party/skia/include/gpu/GpuTypes.h
 FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
+FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_build/bazel_build.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_check_includes/bazel_check_includes.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/check_generated_bazel_files/check_generated_bazel_files.go
 FILE: ../../../third_party/skia/src/core/SkBuiltInCodeSnippetID.h
