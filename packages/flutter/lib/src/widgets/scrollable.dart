@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -1224,4 +1225,61 @@ class _RestorableScrollOffset extends RestorableValue<double?> {
 
   @override
   bool get enabled => value != null;
+}
+
+/// A [RepaintBoundary] specialized for scrollable widgets.
+///
+/// If the scrollable hasn't scrolled before, the repaint boundary
+/// is disabled.
+class ScrollableRepaintBoundary extends StatefulWidget {
+  /// Create a new [ScrollableRepaintBoundary].
+  const ScrollableRepaintBoundary({super.key, required this.child});
+
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  @override
+  State<ScrollableRepaintBoundary> createState() {
+    return _ScrollableRepaintBoundaryState();
+  }
+}
+
+class _ScrollableRepaintBoundaryState extends State<ScrollableRepaintBoundary> {
+  final ValueNotifier<bool> boundary = ValueNotifier<bool>(false);
+  ScrollPosition? _lastPosition;
+
+  @override
+  void didChangeDependencies() {
+    _lastPosition = Scrollable.of(context)?.position;
+    if (_lastPosition != null) {
+      _lastPosition!.addListener(_didScroll);
+    }
+    super.didChangeDependencies();
+  }
+
+  void _didScroll() {
+    boundary.value = true;
+    _lastPosition!.removeListener(_didScroll);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _ConditionalRepaintBoundary(boundary, child: widget.child);
+  }
+}
+
+class _ConditionalRepaintBoundary extends SingleChildRenderObjectWidget {
+  const _ConditionalRepaintBoundary(this.boundary, { super.child });
+
+  final ValueListenable<bool> boundary;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderConditionalRepaintBoundary(boundary);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderConditionalRepaintBoundary renderObject) {
+    renderObject.boundary = boundary;
+  }
 }

@@ -3402,6 +3402,39 @@ class RenderRepaintBoundary extends RenderProxyBox {
   }
 }
 
+/// A [RenderRepaintBoundary] that can be toggled using a listenable.
+class RenderConditionalRepaintBoundary extends RenderRepaintBoundary {
+  /// Create a new [RenderConditionalRepaintBoundary].
+  RenderConditionalRepaintBoundary(this._boundary, { super.child })
+    : _isRepaintBoundary = _boundary.value;
+
+  @override
+  bool get isRepaintBoundary => _isRepaintBoundary;
+  bool _isRepaintBoundary;
+
+  /// This listenable controls whether this render object should be a
+  /// repaint boundary.
+  ValueListenable<bool> get boundary => _boundary;
+  ValueListenable<bool> _boundary;
+  set boundary(ValueListenable<bool> value) {
+    if (value == boundary) {
+      return;
+    }
+    _boundary.removeListener(_updateStatus);
+    _boundary = value;
+    _boundary.addListener(_updateStatus);
+    _updateStatus();
+  }
+
+  void _updateStatus() {
+    if (boundary.value == _isRepaintBoundary) {
+      return;
+    }
+    _isRepaintBoundary = boundary.value;
+    markNeedsCompositingBitsUpdate();
+  }
+}
+
 /// A render object that is invisible during hit testing.
 ///
 /// When [ignoring] is true, this render object (and its subtree) is invisible

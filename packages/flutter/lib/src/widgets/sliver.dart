@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'framework.dart';
+import 'scrollable.dart';
 
 export 'package:flutter/rendering.dart' show
   SliverGridDelegate,
@@ -477,7 +478,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     }
     final Key? key = child.key != null ? _SaltedValueKey(child.key!) : null;
     if (addRepaintBoundaries)
-      child = RepaintBoundary(child: child);
+      child = ScrollableRepaintBoundary(child: child);
     if (addSemanticIndexes) {
       final int? semanticIndex = semanticIndexCallback(child, index);
       if (semanticIndex != null)
@@ -741,7 +742,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
       "The sliver's children must not contain null values, but a null value was found at index $index",
     );
     if (addRepaintBoundaries)
-      child = RepaintBoundary(child: child);
+      child = ScrollableRepaintBoundary(child: child);
     if (addSemanticIndexes) {
       final int? semanticIndex = semanticIndexCallback(child, index);
       if (semanticIndex != null)
