@@ -24,6 +24,14 @@ HostBuffer& RenderPass::GetTransientsBuffer() {
   return *transients_buffer_;
 }
 
+void RenderPass::SetLabel(std::string label) {
+  if (label.empty()) {
+    return;
+  }
+  transients_buffer_->SetLabel(SPrintF("%s Transients", label.c_str()));
+  OnSetLabel(std::move(label));
+}
+
 bool RenderPass::AddCommand(Command command) {
   if (!command) {
     VALIDATION_LOG << "Attempted to add an invalid command to the render pass.";

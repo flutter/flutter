@@ -5,6 +5,7 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/sampler_descriptor.h"
 
 namespace impeller {
 
@@ -14,8 +15,12 @@ class Sampler {
 
   virtual bool IsValid() const = 0;
 
+  const SamplerDescriptor& GetDescriptor() const;
+
  protected:
-  Sampler();
+  SamplerDescriptor desc_;
+
+  Sampler(SamplerDescriptor desc);
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Sampler);

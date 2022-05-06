@@ -61,19 +61,3 @@ impeller_component("gles") {
     "//flutter/fml",
   ]
 }
-
-impeller_component("gles_unittests") {
-  testonly = true
-
-  sources = [
-    "gles_test.cc",
-    "gles_test.h",
-    "gles_unittests.cc",
-  ]
-
-  deps = [
-    ":gles",
-    "//flutter/testing",
-    "//third_party/swiftshader_flutter:swiftshader_gl",
-  ]
-}

@@ -4,6 +4,8 @@
 
 #include "impeller/compiler/compiler_backend.h"
 
+#include "impeller/base/comparable.h"
+
 namespace impeller {
 namespace compiler {
 
@@ -27,18 +29,19 @@ const spirv_cross::Compiler* CompilerBackend::operator->() const {
 uint32_t CompilerBackend::GetExtendedMSLResourceBinding(
     ExtendedResourceIndex index,
     spirv_cross::ID id) const {
+  if (auto compiler = GetMSLCompiler()) {
+    switch (index) {
+      case ExtendedResourceIndex::kPrimary:
+        return compiler->get_automatic_msl_resource_binding(id);
+      case ExtendedResourceIndex::kSecondary:
+        return compiler->get_automatic_msl_resource_binding_secondary(id);
+        break;
+    }
+  }
+  if (auto compiler = GetGLSLCompiler()) {
+    return compiler->get_decoration(id, spv::Decoration::DecorationLocation);
+  }
   const auto kOOBIndex = static_cast<uint32_t>(-1);
-  auto compiler = GetMSLCompiler();
-  if (!compiler) {
-    return kOOBIndex;
-  }
-  switch (index) {
-    case ExtendedResourceIndex::kPrimary:
-      return compiler->get_automatic_msl_resource_binding(id);
-    case ExtendedResourceIndex::kSecondary:
-      return compiler->get_automatic_msl_resource_binding_secondary(id);
-      break;
-  }
   return kOOBIndex;
 }
 

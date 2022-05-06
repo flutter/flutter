@@ -90,14 +90,17 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
 
 // |DeviceBuffer|
 bool DeviceBufferGLES::SetLabel(const std::string& label) {
-  // Cannot support.
+  if (!handle_.IsDead()) {
+    reactor_->SetDebugLabel(handle_, std::move(label));
+  }
   return true;
 }
 
 // |DeviceBuffer|
 bool DeviceBufferGLES::SetLabel(const std::string& label, Range range) {
-  // Cannot support.
-  return true;
+  // Cannot support debug label on the range. Set the label for the entire
+  // range.
+  return SetLabel(label);
 }
 
 std::shared_ptr<fml::Mapping> DeviceBufferGLES::GetBufferData() const {

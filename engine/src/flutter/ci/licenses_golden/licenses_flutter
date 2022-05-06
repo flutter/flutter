@@ -626,9 +626,6 @@ FILE: ../../../flutter/impeller/renderer/backend/gles/gl_description.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/gles_handle.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/gles_handle.h
-FILE: ../../../flutter/impeller/renderer/backend/gles/gles_test.cc
-FILE: ../../../flutter/impeller/renderer/backend/gles/gles_test.h
-FILE: ../../../flutter/impeller/renderer/backend/gles/gles_unittests.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/pipeline_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/pipeline_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/pipeline_library_gles.cc

@@ -29,7 +29,7 @@ class SamplerMTL final : public Sampler,
 
   id<MTLSamplerState> state_ = nullptr;
 
-  SamplerMTL(id<MTLSamplerState> state);
+  SamplerMTL(SamplerDescriptor desc, id<MTLSamplerState> state);
 
   // |Sampler|
   bool IsValid() const override;
