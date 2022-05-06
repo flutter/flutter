@@ -112,6 +112,7 @@ extension DomElementExtension on DomElement {
   external /* List<DomElement> */ List<Object?> get children;
   external DomCSSStyleDeclaration get style;
   external void append(DomNode node);
+  external void prepend(DomNode node);
   external void setAttribute(String name, Object value);
 }
 
@@ -120,6 +121,23 @@ extension DomElementExtension on DomElement {
 class DomCSSStyleDeclaration {}
 
 extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
+  set width(String value) => setProperty('width', value);
+  set height(String value) => setProperty('height', value);
+  set position(String value) => setProperty('position', value);
+  set clip(String value) => setProperty('clip', value);
+  set clipPath(String value) => setProperty('clip-path', value);
+  set transform(String value) => setProperty('transform', value);
+  set transformOrigin(String value) => setProperty('transform-origin', value);
+  set opacity(String value) => setProperty('opacity', value);
+  String get width => getPropertyValue('width');
+  String get height => getPropertyValue('height');
+  String get position => getPropertyValue('position');
+  String get clip => getPropertyValue('clip');
+  String get clipPath => getPropertyValue('clip-path');
+  String get transform => getPropertyValue('transform');
+  String get transformOrigin => getPropertyValue('transform-origin');
+  String get opacity => getPropertyValue('opacity');
+
   external String getPropertyValue(String property);
   external void setProperty(String propertyName, String value, [String
       priority]);

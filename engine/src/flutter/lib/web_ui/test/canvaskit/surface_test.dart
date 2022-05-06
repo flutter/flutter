@@ -29,8 +29,8 @@ void testMain() {
       // Expect exact requested dimensions.
       expect(original.width, 9);
       expect(original.height, 19);
-      expect(original.style.getPropertyValue('width'), '9px');
-      expect(original.style.getPropertyValue('height'), '19px');
+      expect(original.style.width, '9px');
+      expect(original.style.height, '19px');
       expect(originalSurface.width(), 9);
       expect(originalSurface.height(), 19);
 
@@ -39,8 +39,8 @@ void testMain() {
           surface.acquireFrame(const ui.Size(5, 15)).skiaSurface;
       final DomCanvasElement shrunk = surface.htmlCanvas!;
       expect(shrunk, same(original));
-      expect(shrunk.style.getPropertyValue('width'), '9px');
-      expect(shrunk.style.getPropertyValue('height'), '19px');
+      expect(shrunk.style.width, '9px');
+      expect(shrunk.style.height, '19px');
       expect(shrunkSurface, isNot(same(original)));
       expect(shrunkSurface.width(), 5);
       expect(shrunkSurface.height(), 15);
@@ -56,8 +56,8 @@ void testMain() {
       // Expect overallocated dimensions
       expect(firstIncrease.width, 14);
       expect(firstIncrease.height, 28);
-      expect(firstIncrease.style.getPropertyValue('width'), '14px');
-      expect(firstIncrease.style.getPropertyValue('height'), '28px');
+      expect(firstIncrease.style.width, '14px');
+      expect(firstIncrease.style.height, '28px');
       expect(firstIncreaseSurface.width(), 10);
       expect(firstIncreaseSurface.height(), 20);
 
@@ -79,8 +79,8 @@ void testMain() {
       // Also over-allocated
       expect(huge.width, 28);
       expect(huge.height, 56);
-      expect(huge.style.getPropertyValue('width'), '28px');
-      expect(huge.style.getPropertyValue('height'), '56px');
+      expect(huge.style.width, '28px');
+      expect(huge.style.height, '56px');
       expect(hugeSurface.width(), 20);
       expect(hugeSurface.height(), 40);
 
@@ -154,8 +154,8 @@ void testMain() {
 
       expect(original.width(), 10);
       expect(original.height(), 16);
-      expect(surface.htmlCanvas!.style.getPropertyValue('width'), '10px');
-      expect(surface.htmlCanvas!.style.getPropertyValue('height'), '16px');
+      expect(surface.htmlCanvas!.style.width, '10px');
+      expect(surface.htmlCanvas!.style.height, '16px');
 
       // Increase device-pixel ratio: this makes CSS pixels bigger, so we need
       // fewer of them to cover the browser window.
@@ -164,8 +164,8 @@ void testMain() {
           surface.acquireFrame(const ui.Size(10, 16)).skiaSurface;
       expect(highDpr.width(), 10);
       expect(highDpr.height(), 16);
-      expect(surface.htmlCanvas!.style.getPropertyValue('width'), '5px');
-      expect(surface.htmlCanvas!.style.getPropertyValue('height'), '8px');
+      expect(surface.htmlCanvas!.style.width, '5px');
+      expect(surface.htmlCanvas!.style.height, '8px');
 
       // Decrease device-pixel ratio: this makes CSS pixels smaller, so we need
       // more of them to cover the browser window.
@@ -174,8 +174,8 @@ void testMain() {
           surface.acquireFrame(const ui.Size(10, 16)).skiaSurface;
       expect(lowDpr.width(), 10);
       expect(lowDpr.height(), 16);
-      expect(surface.htmlCanvas!.style.getPropertyValue('width'), '20px');
-      expect(surface.htmlCanvas!.style.getPropertyValue('height'), '32px');
+      expect(surface.htmlCanvas!.style.width, '20px');
+      expect(surface.htmlCanvas!.style.height, '32px');
     });
   }, skip: isIosSafari);
 }
