@@ -4,7 +4,6 @@
 library canvaskit_initialization;
 
 import 'dart:async';
-import 'dart:html' as html;
 
 import '../../engine.dart' show kProfileMode;
 import '../browser_detection.dart';
@@ -119,4 +118,4 @@ void ensureSkiaFontCollectionInitialized() {
 }
 
 /// The scene host, where the root canvas and overlay canvases are added to.
-html.Element? skiaSceneHost;
+DomElement? skiaSceneHost;
