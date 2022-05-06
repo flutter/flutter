@@ -26,6 +26,13 @@ import 'thumb_painter.dart';
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [CupertinoSwitch]. When the thumb slides to
+/// the other side of the track, the switch is toggled between on/off.
+///
+/// ** See code in examples/api/lib/cupertino/switch/cupertino_switch.0.dart **
+/// {@end-tool}
+///
 /// {@tool snippet}
 ///
 /// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The

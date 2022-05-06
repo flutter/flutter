@@ -1518,7 +1518,7 @@ void main() {
   });
 
   testWidgets('DatePicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
-    Widget _buildDatePicker(Brightness brightness) {
+    Widget buildDatePicker(Brightness brightness) {
       return MaterialApp(
         theme: ThemeData(brightness: brightness),
         home: CupertinoDatePicker(
@@ -1530,14 +1530,14 @@ void main() {
     }
 
     // CupertinoDatePicker with light theme.
-    await tester.pumpWidget(_buildDatePicker(Brightness.light));
+    await tester.pumpWidget(buildDatePicker(Brightness.light));
     RenderParagraph paragraph = tester.renderObject(find.text('October').first);
     expect(paragraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoDatePicker with dark theme.
-    await tester.pumpWidget(_buildDatePicker(Brightness.dark));
+    await tester.pumpWidget(buildDatePicker(Brightness.dark));
     paragraph = tester.renderObject(find.text('October').first);
     expect(paragraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
@@ -1545,7 +1545,7 @@ void main() {
   });
 
   testWidgets('TimerPicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
-    Widget _buildTimerPicker(Brightness brightness) {
+    Widget buildTimerPicker(Brightness brightness) {
       return MaterialApp(
         theme: ThemeData(brightness: brightness),
         home: CupertinoTimerPicker(
@@ -1557,14 +1557,14 @@ void main() {
     }
 
     // CupertinoTimerPicker with light theme.
-    await tester.pumpWidget(_buildTimerPicker(Brightness.light));
+    await tester.pumpWidget(buildTimerPicker(Brightness.light));
     RenderParagraph paragraph = tester.renderObject(find.text('hours'));
     expect(paragraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoTimerPicker with light theme.
-    await tester.pumpWidget(_buildTimerPicker(Brightness.dark));
+    await tester.pumpWidget(buildTimerPicker(Brightness.dark));
     paragraph = tester.renderObject(find.text('hours'));
     expect(paragraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
