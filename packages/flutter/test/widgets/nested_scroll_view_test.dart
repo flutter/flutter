@@ -735,19 +735,125 @@ void main() {
     );
     await gesture5.moveBy(const Offset(400.0, 0.0));
     await tester.pump(); // bring the left page into view
-    await tester.pump(); // shadow would come back starting here, but there's no shadow to show
     expect(buildCount, expectedBuildCount);
-    expect(find.text('Item 18'), findsNothing);
-    expect(find.text('Item 2'), findsNWidgets(2));
+    await tester.pump(); // shadow comes back starting here because the scroll position is preserved by pageStorage key
+    expectedBuildCount += 1;
+    expect(buildCount, expectedBuildCount);
+    expect(buildCount, expectedBuildCount);
+    expect(find.text('Item 18'), findsOneWidget); // item 18 should be found because of preserved scroll position
+    expect(find.text('Item 2'), findsOneWidget);
     checkPhysicalLayer(elevation: 0);
     await tester.pump(const Duration(seconds: 1)); // shadow would be finished coming back
-    checkPhysicalLayer(elevation: 0);
+    checkPhysicalLayer(elevation: 4);
     await gesture5.up();
     await tester.pump(); // right tab view goes away
-    await tester.pumpAndSettle();
     expect(buildCount, expectedBuildCount);
-    checkPhysicalLayer(elevation: 0);
     debugDisableShadows = true;
+  });
+
+  testWidgets('NestedScrollView supports PageStorageKey', (WidgetTester tester) async {
+    final List<String> tabs = <String>['Tab 1', 'Tab 2'];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: tabs.length,
+          child: Scaffold(
+            body: NestedScrollView(
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverOverlapAbsorber(
+                    handle:
+                        NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    sliver: SliverAppBar(
+                      title:
+                          const Text('Books'), 
+                      pinned: true,
+                      expandedHeight: 150.0,
+                      forceElevated: innerBoxIsScrolled,
+                      bottom: TabBar(
+                        tabs: tabs.map((String name) => Tab(text: name)).toList(),
+                      ),
+                    ),
+                  ),
+                ];
+              },
+              body: TabBarView(
+                children: tabs.map((String name) {
+                  return SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return CustomScrollView(
+                          key: PageStorageKey<String>(name),
+                          slivers: <Widget>[
+                            SliverOverlapInjector(
+                              handle:
+                                  NestedScrollView.sliverOverlapAbsorberHandleFor(
+                                      context),
+                            ),
+                            SliverPadding(
+                              padding: const EdgeInsets.all(8.0),
+                              sliver: SliverFixedExtentList(
+                                itemExtent: 48.0,
+                                delegate: SliverChildBuilderDelegate(
+                                  (BuildContext context, int index) {
+                                    return ListTile(
+                                      title: Text('Item $index'),
+                                    );
+                                  },
+                                  childCount: 30,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    // Scroll to bottom of tab1
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -250.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 29'), findsOneWidget);
+    
+    // Bring tab2 into view
+    await tester.fling(find.text('Item 29'), const Offset(-400, 0.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 29'), findsNothing);
+
+    // Scroll to bottom of tab2
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -250.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 29'), findsOneWidget);
+
+    // Bring tab1 into view, the scroll position of tab1 should remain unchanged
+    await tester.fling(find.text('Item 29'), const Offset(400, 0.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 29'), findsOneWidget);
+    
+    // Scroll to top of tab1
+    await tester.fling(find.text('Item 29'), const Offset(0.0, 250.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 29'), findsNothing);
+
+    // Bring tab2 into view, the scroll position of tab2 should remain unchanged
+    await tester.fling(find.text('Item 2'), const Offset(-400, 0.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 29'), findsOneWidget);
   });
 
   testWidgets('NestedScrollView and bouncing', (WidgetTester tester) async {
@@ -2575,8 +2681,14 @@ void main() {
     // scroll to right
     await tester.fling(find.text('Item 1'), const Offset(-50.0, 0.0), 10000.0);
     await tester.pumpAndSettle();
-
     expect(globalKey.currentState!.outerController.position.pixels, globalKey.currentState!.outerController.position.maxScrollExtent);
+    expect(globalKey.currentState!.innerController.position.pixels, greaterThan(0));
+
+    // scroll to left
+    await tester.fling(find.byType(ListView), const Offset(50.0, 0.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(globalKey.currentState!.outerController.position.pixels, 0);
+    expect(globalKey.currentState!.innerController.position.pixels, 0);
   });
 }
 

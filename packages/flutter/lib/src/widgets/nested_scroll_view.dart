@@ -427,9 +427,10 @@ class NestedScrollViewState extends State<NestedScrollView> {
     super.dispose();
   }
 
-  /// allow the body of NesetedScrollView to restore its scroll position;
-  void preserveInnerScrollPosition() {
-    _coordinator!.preserveInnerScrollPosition = true;
+  /// This allows NesetedScrollView to restore its scroll position
+  /// using PageStorageKey.
+  void preserveScrollPosition() {
+    _coordinator!.preserveScrollPosition = true;
   }
 
   bool? _lastHasScrolledBody;
@@ -632,12 +633,12 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     return false;
   }
 
-  /// 
-  bool get preserveInnerScrollPosition => _preserveInnerScrollPosition;
-  bool _preserveInnerScrollPosition = false;
-  set preserveInnerScrollPosition(bool value) {
+  /// If set to true, the scroll position will be preserved
+  bool get preserveScrollPosition => _preserveScrollPosition;
+  bool _preserveScrollPosition = false;
+  set preserveScrollPosition(bool value) {
     assert(value != null);
-    _preserveInnerScrollPosition = value;
+    _preserveScrollPosition = value;
   }
 
   void updateShadow() { _onHasScrolledBodyChanged(); }
@@ -1207,7 +1208,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   void restoreScrollOffset() {
-    if (coordinator.canScrollBody || coordinator.preserveInnerScrollPosition)
+    if (coordinator.canScrollBody || coordinator.preserveScrollPosition)
       super.restoreScrollOffset();
   }
 

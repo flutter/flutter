@@ -402,7 +402,7 @@ abstract class ScrollView extends StatelessWidget {
       scrollController = controller ?? PrimaryScrollController.of(context);
       if (key is PageStorageKey) {
         final NestedScrollViewState nestedScrollViewState = NestedScrollView.of(context);
-        nestedScrollViewState.preserveInnerScrollPosition();
+        nestedScrollViewState.preserveScrollPosition();
       }
     } else {
       scrollController = primary ? PrimaryScrollController.of(context) : controller;
