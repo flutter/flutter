@@ -1105,16 +1105,14 @@ void main() {
   });
 
   testWidgets('TabBarView has clipBehavior Clip.hardEdge by default', (WidgetTester tester) async {
-    final List<String> tabs = <String>['First', 'Second'];
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
 
     Widget builder() {
       return boilerplate(
         child: DefaultTabController(
           length: tabs.length,
           child: TabBarView(
-            children: tabs.map<Widget>((String name) {
-              return Text(name);
-            }).toList(),
+            children: tabs,
           ),
         ),
       );
@@ -1126,7 +1124,7 @@ void main() {
   });
 
   testWidgets('TabBarView sets clipBehavior correctly', (WidgetTester tester) async {
-    final List<String> tabs = <String>['First', 'Second'];
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
 
     Widget builder() {
       return boilerplate(
@@ -1134,9 +1132,7 @@ void main() {
           length: tabs.length,
           child: TabBarView(
             clipBehavior: Clip.none,
-            children: tabs.map<Widget>((String name) {
-              return Text(name);
-            }).toList(),
+            children: tabs,
           ),
         ),
       );
