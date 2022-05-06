@@ -12,15 +12,6 @@ enabled_branches:
 platform_properties:
   staging_build_linux:
     properties:
-      caches: >-
-        [
-          {"name": "builder_linux_framework", "path": "builder"},
-          {"name": "android_sdk", "path": "android"},
-          {"name": "chrome_and_driver_96", "path": "chrome"},
-          {"name": "flutter_sdk", "path": "flutter sdk"},
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "pub_cache", "path": ".pub-cache"}
-        ]
       dependencies: >-
         [
           {"dependency": "curl"}
@@ -29,15 +20,6 @@ platform_properties:
       device_type: none
   linux:
     properties:
-      caches: >-
-        [
-          {"name": "builder_linux_framework", "path": "builder"},
-          {"name": "android_sdk", "path": "android"},
-          {"name": "chrome_and_driver_96", "path": "chrome"},
-          {"name": "flutter_sdk", "path": "flutter sdk"},
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "pub_cache", "path": ".pub-cache"}
-        ]
       dependencies: >-
         [
           {"dependency": "curl"}
@@ -46,16 +28,6 @@ platform_properties:
       device_type: none
   linux_android:
     properties:
-      caches: >-
-        [
-          {"name": "builder_linux_devicelab", "path": "builder"},
-          {"name": "android_sdk", "path": "android"},
-          {"name": "chrome_and_driver_96", "path": "chrome"},
-          {"name": "flutter_sdk", "path": "flutter sdk"},
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "pub_cache", "path": ".pub-cache"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -66,16 +38,6 @@ platform_properties:
       device_os: "N"
   linux_samsung_s10:
     properties:
-      caches: >-
-        [
-          {"name": "builder_linux_devicelab", "path": "builder"},
-          {"name": "android_sdk", "path": "android"},
-          {"name": "chrome_and_driver_96", "path": "chrome"},
-          {"name": "flutter_sdk", "path": "flutter sdk"},
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "pub_cache", "path": ".pub-cache"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -86,17 +48,6 @@ platform_properties:
       device_os: "R"
   mac:
     properties:
-      caches: >-
-        [
-          {"name": "builder_mac_framework", "path": "builder"},
-          {"name": "android_sdk", "path": "android"},
-          {"name": "chrome_and_driver_96", "path": "chrome"},
-          {"name": "flutter_sdk", "path": "flutter sdk"},
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "osx_sdk_13a233", "path": "osx_sdk"},
-          {"name": "pub_cache", "path": ".pub-cache"},
-          {"name": "xcode_binary", "path": "xcode_binary"}
-        ]
       dependencies: >-
         []
       os: Mac-12
@@ -105,16 +56,6 @@ platform_properties:
       xcode: 13a233
   mac_android:
     properties:
-      caches: >-
-          [
-            {"name": "builder_mac_devicelab", "path": "builder"},
-            {"name": "android_sdk", "path": "android"},
-            {"name": "chrome_and_driver_96", "path": "chrome"},
-            {"name": "flutter_sdk", "path": "flutter sdk"},
-            {"name": "gradle", "path": "gradle"},
-            {"name": "openjdk_11", "path": "java"},
-            {"name": "pub_cache", "path": ".pub-cache"}
-          ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -126,15 +67,6 @@ platform_properties:
       device_os: N
   mac_arm64_android:
     properties:
-      caches: >-
-          [
-            {"name":"builder_mac_devicelab", "path":"builder"},
-            {"name": "android_sdk", "path": "android"},
-            {"name": "flutter_sdk", "path": "flutter sdk"},
-            {"name": "gradle", "path": "gradle"},
-            {"name": "openjdk_11", "path": "java"},
-            {"name": "pub_cache", "path": ".pub-cache"}
-          ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -145,17 +77,6 @@ platform_properties:
       device_os: N
   mac_ios:
     properties:
-      caches: >-
-          [
-            {"name": "builder_mac_devicelab", "path": "builder"},
-            {"name": "chrome_and_driver_96", "path": "chrome"},
-            {"name": "flutter_sdk", "path": "flutter sdk"},
-            {"name": "gradle", "path": "gradle"},
-            {"name": "openjdk_11", "path": "java"},
-            {"name": "pub_cache", "path": ".pub-cache"},
-            {"name": "xcode_binary", "path": "xcode_binary"},
-            {"name": "osx_sdk_13a233", "path": "osx_sdk"}
-          ]
       dependencies: >-
         [
           {"dependency": "xcode"},
@@ -168,17 +89,6 @@ platform_properties:
       xcode: 13a233
   mac_arm64_ios:
     properties:
-      caches: >-
-          [
-            {"name": "builder_mac_devicelab", "path": "builder"},
-            {"name": "chrome_and_driver_96", "path": "chrome"},
-            {"name": "flutter_sdk", "path": "flutter sdk"},
-            {"name": "gradle", "path": "gradle"},
-            {"name": "openjdk", "path": "java11"},
-            {"name": "pub_cache", "path": ".pub-cache"},
-            {"name": "xcode_binary", "path": "xcode_binary"},
-            {"name": "osx_sdk_13a233", "path": "osx_sdk"}
-          ]
       dependencies: >-
         [
           {"dependency": "xcode"},
@@ -191,16 +101,6 @@ platform_properties:
       xcode: 13a233
   windows:
     properties:
-      caches: >-
-          [
-            {"name": "builder_win_framework", "path": "builder"},
-            {"name": "android_sdk", "path": "android"},
-            {"name": "chrome_and_driver_96", "path": "chrome"},
-            {"name": "flutter_sdk", "path": "flutter sdk"},
-            {"name": "openjdk_11", "path": "java"},
-            {"name": "pub_cache", "path": ".pub-cache"},
-            {"name": "vsbuild", "path": "vsbuild"}
-          ]
       dependencies: >-
           [
             {"dependency": "certs"}
@@ -209,16 +109,6 @@ platform_properties:
       device_type: none
   windows_android:
     properties:
-      caches: >-
-          [
-            {"name": "builder_win_devicelab", "path": "builder"},
-            {"name": "android_sdk", "path": "android"},
-            {"name": "chrome_and_driver_96", "path": "chrome"},
-            {"name": "flutter_sdk", "path": "flutter sdk"},
-            {"name": "gradle", "path": "gradle"},
-            {"name": "openjdk_11", "path": "java"},
-            {"name": "pub_cache", "path": ".pub-cache"}
-          ]
       dependencies: >-
           [
             {"dependency": "android_sdk", "version": "version:31v8"},
@@ -476,11 +366,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -499,11 +384,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -522,11 +402,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -545,11 +420,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -568,11 +438,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -591,11 +456,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -615,11 +475,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -638,11 +493,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -662,11 +512,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -686,11 +531,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -890,11 +730,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -908,11 +743,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -1548,11 +1378,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "gradle", "path": "gradle"}
-        ]
     scheduler: luci
 
   - name: Linux_android complex_layout_android__scroll_smoothness
@@ -1566,11 +1391,6 @@ targets:
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "gradle", "path": "gradle"}
         ]
     scheduler: luci
 
@@ -1586,11 +1406,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "gradle", "path": "gradle"}
-        ]
     scheduler: luci
 
   - name: Linux_android complex_layout_scroll_perf__memory
@@ -1604,11 +1419,6 @@ targets:
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "gradle", "path": "gradle"}
         ]
     scheduler: luci
 
@@ -1624,11 +1434,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "gradle", "path": "gradle"}
-        ]
     scheduler: luci
 
   - name: Linux_samsung_s10 complex_layout_scroll_perf__timeline_summary
@@ -1642,11 +1447,6 @@ targets:
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "gradle", "path": "gradle"}
         ]
     scheduler: luci
 
@@ -1662,11 +1462,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "gradle", "path": "gradle"}
-        ]
     scheduler: luci
 
   - name: Linux_android complex_layout__start_up
@@ -1680,11 +1475,6 @@ targets:
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"},
-          {"name": "gradle", "path": "gradle"}
         ]
     scheduler: luci
 
@@ -2282,11 +2072,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
     scheduler: luci
 
   - name: Linux_android web_size__compile_test
@@ -2466,11 +2251,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -2598,11 +2378,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "xcode"},
@@ -2704,11 +2479,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -2727,11 +2497,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -2751,11 +2516,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -2775,11 +2535,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -2820,11 +2575,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -2868,11 +2618,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -2892,10 +2637,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -3283,10 +3024,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"}
-        ]
     scheduler: luci
 
   - name: Mac_ios complex_layout_ios__start_up
@@ -3301,10 +3038,6 @@ targets:
         [
           {"dependency": "open_jdk", "version": "11"}
         ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"}
-        ]
     scheduler: luci
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
@@ -3318,10 +3051,6 @@ targets:
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -3971,10 +3700,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name":"gradle", "path":"gradle"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -3995,10 +3720,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name":"gradle", "path":"gradle"}
-        ]
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4018,11 +3739,6 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk", "version": "11"}
         ]
-      caches: >-
-        [
-          {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_custom_host_app_name_test
@@ -4037,11 +3753,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4062,11 +3773,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4087,11 +3793,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name": "gradle", "path": "gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4112,11 +3813,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk_11", "path": "java"}
-        ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4391,10 +4087,6 @@ targets:
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "11"}
-        ]
-      caches: >-
-        [
-          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
