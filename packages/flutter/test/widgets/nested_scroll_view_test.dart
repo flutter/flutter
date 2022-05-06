@@ -762,8 +762,7 @@ void main() {
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
                   SliverOverlapAbsorber(
-                    handle:
-                        NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                     sliver: SliverAppBar(
                       title: const Text('Books'), 
                       pinned: true,
