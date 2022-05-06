@@ -361,18 +361,18 @@ int main(int argc, char* argv[]) {
   }
 
   auto settings = flutter::SettingsFromCommandLine(command_line);
-  if (command_line.positional_args().size() > 0) {
+  if (!command_line.positional_args().empty()) {
     // The tester may not use the switch for the main dart file path. Specifying
     // it as a positional argument instead.
     settings.application_kernel_asset = command_line.positional_args()[0];
   }
 
-  if (settings.application_kernel_asset.size() == 0) {
+  if (settings.application_kernel_asset.empty()) {
     FML_LOG(ERROR) << "Dart kernel file not specified.";
     return EXIT_FAILURE;
   }
 
-  if (settings.icu_data_path.size() == 0) {
+  if (settings.icu_data_path.empty()) {
     settings.icu_data_path = "icudtl.dat";
   }
 
@@ -381,7 +381,7 @@ int main(int argc, char* argv[]) {
 
   settings.log_message_callback = [](const std::string& tag,
                                      const std::string& message) {
-    if (tag.size() > 0) {
+    if (!tag.empty()) {
       std::cout << tag << ": ";
     }
     std::cout << message << std::endl;

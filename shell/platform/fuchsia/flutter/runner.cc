@@ -168,7 +168,7 @@ Runner::Runner(fml::RefPtr<fml::TaskRunner> task_runner,
         dart_utils::VMServiceObject::LazyEntryVector out;
         dart_utils::VMServiceObject().GetContents(&out);
         std::string name = "";
-        if (out.size() > 0) {
+        if (!out.empty()) {
           name = out[0].name;
         }
         inspector.GetRoot().CreateString("vm_service_port", name, &inspector);

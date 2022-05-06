@@ -54,7 +54,7 @@ bool FlutterWindowController::CreateWindow(
   std::transform(
       arguments.begin(), arguments.end(), std::back_inserter(engine_switches),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
-  if (engine_switches.size() > 0) {
+  if (!engine_switches.empty()) {
     c_engine_properties.switches = &engine_switches[0];
     c_engine_properties.switches_count = engine_switches.size();
   }

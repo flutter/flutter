@@ -258,10 +258,10 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
   args.assets_path = assets_path_string.c_str();
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
-  args.command_line_argv = argv.size() > 0 ? argv.data() : nullptr;
+  args.command_line_argv = argv.empty() ? nullptr : argv.data();
   args.dart_entrypoint_argc = static_cast<int>(entrypoint_argv.size());
   args.dart_entrypoint_argv =
-      entrypoint_argv.size() > 0 ? entrypoint_argv.data() : nullptr;
+      entrypoint_argv.empty() ? nullptr : entrypoint_argv.data();
   args.platform_message_callback =
       [](const FlutterPlatformMessage* engine_message,
          void* user_data) -> void {

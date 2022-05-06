@@ -24,7 +24,7 @@ std::unique_ptr<FileMapping> FileMapping::CreateReadOnly(
 std::unique_ptr<FileMapping> FileMapping::CreateReadOnly(
     const fml::UniqueFD& base_fd,
     const std::string& sub_path) {
-  if (sub_path.size() != 0) {
+  if (!sub_path.empty()) {
     return CreateReadOnly(
         OpenFile(base_fd, sub_path.c_str(), false, FilePermission::kRead), "");
   }
@@ -48,7 +48,7 @@ std::unique_ptr<FileMapping> FileMapping::CreateReadExecute(
 std::unique_ptr<FileMapping> FileMapping::CreateReadExecute(
     const fml::UniqueFD& base_fd,
     const std::string& sub_path) {
-  if (sub_path.size() != 0) {
+  if (!sub_path.empty()) {
     return CreateReadExecute(
         OpenFile(base_fd, sub_path.c_str(), false, FilePermission::kRead), "");
   }

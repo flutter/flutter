@@ -337,13 +337,13 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
                           std::move(asset_manager));
 
   {
-    if ((entrypoint.size() > 0) && (libraryUrl.size() > 0)) {
+    if (!entrypoint.empty() && !libraryUrl.empty()) {
       config.SetEntrypointAndLibrary(std::move(entrypoint),
                                      std::move(libraryUrl));
-    } else if (entrypoint.size() > 0) {
+    } else if (!entrypoint.empty()) {
       config.SetEntrypoint(std::move(entrypoint));
     }
-    if (entrypoint_args.size() > 0) {
+    if (!entrypoint_args.empty()) {
       config.SetEntrypointArgs(std::move(entrypoint_args));
     }
   }
