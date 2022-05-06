@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io' as io;
-import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart' as package_arch;
@@ -195,6 +194,8 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64-release/gen_snapshot_x64',
       'artifacts/engine/darwin-x64/flutter_tester',
       'artifacts/engine/darwin-x64/gen_snapshot',
+      'artifacts/engine/darwin-x64/impellerc',
+      'artifacts/engine/darwin-x64/libtessellator.dylib',
       'artifacts/engine/darwin-x64/gen_snapshot_arm64',
       'artifacts/engine/darwin-x64/gen_snapshot_x64',
       'artifacts/engine/ios-profile/gen_snapshot_arm64',
@@ -486,59 +487,61 @@ class RemoteZip extends ZipArchive {
   /// must be codesigned.
   static List<RemoteZip> archives = <RemoteZip>[
     // Android artifacts
-    // for (final String arch in <String>['arm', 'arm64', 'x64'])
-    //   for (final String buildMode in <String>['release', 'profile'])
-    //     RemoteZip(
-    //       path: 'android-$arch-$buildMode/darwin-x64.zip',
-    //       files: const <BinaryFile>[
-    //         BinaryFile(path: 'gen_snapshot', entitlements: true),
-    //       ],
-    //     ),
-    // // macOS Dart SDK
-    // for (final String arch in <String>['arm64', 'x64'])
-    //   RemoteZip(
-    //     path: 'dart-sdk-darwin-$arch.zip',
-    //     files: const <BinaryFile>[
-    //       BinaryFile(path: 'dart-sdk/bin/dart', entitlements: true),
-    //       BinaryFile(path: 'dart-sdk/bin/dartaotruntime', entitlements: true),
-    //       BinaryFile(path: 'dart-sdk/bin/utils/gen_snapshot', entitlements: true),
-    //     ],
-    //   ),
-    // // macOS host debug artifacts
-    // const RemoteZip(
-    //   path: 'darwin-x64/artifacts.zip',
-    //   files: <BinaryFile>[
-    //     BinaryFile(path: 'flutter_tester', entitlements: true),
-    //     BinaryFile(path: 'gen_snapshot', entitlements: true),
-    //   ],
-    // ),
-    // // macOS host profile and release artifacts
-    // for (final String buildMode in <String>['profile', 'release'])
-    //   RemoteZip(
-    //     path: 'darwin-x64-$buildMode/artifacts.zip',
-    //     files: const <BinaryFile>[
-    //       BinaryFile(path: 'gen_snapshot', entitlements: true),
-    //     ],
-    //   ),
-    // const RemoteZip(
-    //   path: 'darwin-x64/font-subset.zip',
-    //   files: <BinaryFile>[BinaryFile(path: 'font-subset')],
-    // ),
+    for (final String arch in <String>['arm', 'arm64', 'x64'])
+      for (final String buildMode in <String>['release', 'profile'])
+        RemoteZip(
+          path: 'android-$arch-$buildMode/darwin-x64.zip',
+          files: const <BinaryFile>[
+            BinaryFile(path: 'gen_snapshot', entitlements: true),
+          ],
+        ),
+    // macOS Dart SDK
+    for (final String arch in <String>['arm64', 'x64'])
+      RemoteZip(
+        path: 'dart-sdk-darwin-$arch.zip',
+        files: const <BinaryFile>[
+          BinaryFile(path: 'dart-sdk/bin/dart', entitlements: true),
+          BinaryFile(path: 'dart-sdk/bin/dartaotruntime', entitlements: true),
+          BinaryFile(path: 'dart-sdk/bin/utils/gen_snapshot', entitlements: true),
+        ],
+      ),
+    // macOS host debug artifacts
+    const RemoteZip(
+      path: 'darwin-x64/artifacts.zip',
+      files: <BinaryFile>[
+        BinaryFile(path: 'flutter_tester', entitlements: true),
+        BinaryFile(path: 'gen_snapshot', entitlements: true),
+        BinaryFile(path: 'impellerc', entitlements: true),
+        BinaryFile(path: 'libtessellator.dylib', entitlements: true),
+      ],
+    ),
+    // macOS host profile and release artifacts
+    for (final String buildMode in <String>['profile', 'release'])
+      RemoteZip(
+        path: 'darwin-x64-$buildMode/artifacts.zip',
+        files: const <BinaryFile>[
+          BinaryFile(path: 'gen_snapshot', entitlements: true),
+        ],
+      ),
+    const RemoteZip(
+      path: 'darwin-x64/font-subset.zip',
+      files: <BinaryFile>[BinaryFile(path: 'font-subset')],
+    ),
 
-    // // macOS desktop Framework
-    // for (final String buildModeSuffix in <String>['', '-profile', '-release'])
-    //   RemoteZip(
-    //     path: 'darwin-x64$buildModeSuffix/FlutterMacOS.framework.zip',
-    //     files: const <ArchiveFile>[
-    //       EmbeddedZip(
-    //         path: 'FlutterMacOS.framework.zip',
-    //         files: <BinaryFile>[BinaryFile(path: 'Versions/A/FlutterMacOS')]
-    //       ),
-    //     ],
-    //   ),
+    // macOS desktop Framework
+    for (final String buildModeSuffix in <String>['', '-profile', '-release'])
+      RemoteZip(
+        path: 'darwin-x64$buildModeSuffix/FlutterMacOS.framework.zip',
+        files: const <ArchiveFile>[
+          EmbeddedZip(
+            path: 'FlutterMacOS.framework.zip',
+            files: <BinaryFile>[BinaryFile(path: 'Versions/A/FlutterMacOS')]
+          ),
+        ],
+      ),
 
     // ios artifacts
-    for (final String buildModeSuffix in <String>['']) //, '-profile', '-release'])
+    for (final String buildModeSuffix in <String>['', '-profile', '-release'])
       RemoteZip(
         path: 'ios$buildModeSuffix/artifacts.zip',
         files: const <ArchiveFile>[
@@ -671,9 +674,6 @@ class FileCodesignVisitor extends FileVisitor {
   /// The [parent] directory is scoped to the parent zip file.
   @override
   Future<void> visitEmbeddedZip(EmbeddedZip file, Directory parent) async {
-    print(' ');
-    print('entered into embedded file');
-    print(' ');
     final File localFile = await _validateFileExists(file, parent);
     final Directory newDir = tempDir.childDirectory('embedded_zip_$nextId');
     final package_arch.Archive? archive = await _unzip(localFile, newDir);
@@ -701,18 +701,12 @@ class FileCodesignVisitor extends FileVisitor {
   /// The [parent] directory is scoped to this particular [RemoteZip].
   @override
   Future<void> visitRemoteZip(RemoteZip file, Directory parent) async {
-    print(' ');
-    print('entered into remote zip');
-    print(' ');
     final FileSystem fs = tempDir.fileSystem;
 
     // namespace by index otherwise there will be collisions
     final String localFilePath = '${remoteDownloadIndex}_${fs.path.basename(file.path)}';
     // download the zip file
 
-    print(' ');
-    print('remote path is ${file.path}');
-    print('local path is ${remoteDownloadsDir.childFile(localFilePath).path}');
     final File originalFile = await download(
       file.path,
       remoteDownloadsDir.childFile(localFilePath).path,
@@ -985,8 +979,6 @@ class FileCodesignVisitor extends FileVisitor {
         file.name,
       );
       if (isBinary(fileOrDirPath, processManager)) {
-        print('parent path is ${parent.path}');
-        print('file name is ${file.name}');
         final String hexDigest = sha1.convert(await fs.file(fileOrDirPath).readAsBytes()).toString();
         actualFileHashes[hexDigest] = fileOrDirPath;
       }
@@ -998,10 +990,6 @@ class FileCodesignVisitor extends FileVisitor {
   @visibleForOverriding
   Future<File> download(String remotePath, String localPath) async {
     final String source = '$gsCloudBaseUrl/flutter/$engineHash/$remotePath';
-    print('');
-    print('source is $source');
-    print('localPath is $localPath');
-    print('');
     final io.ProcessResult result = await processManager.run(
       <String>['gsutil', 'cp', source, localPath],
     );
@@ -1039,9 +1027,6 @@ class FileCodesignVisitor extends FileVisitor {
       final Uint8List bytes = await inputZip.readAsBytes();
       final package_arch.Archive archive = package_arch.ZipDecoder().decodeBytes(bytes);
       package_arch.extractArchiveToDisk(archive, outDir.path);
-      print('');
-      print('this is unzipped to ${outDir.path}');
-      print('');
       return archive;
     //}
   }

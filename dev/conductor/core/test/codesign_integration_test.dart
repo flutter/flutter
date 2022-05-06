@@ -150,10 +150,15 @@ class TODOFileCodesignVisitor extends FileCodesignVisitor {
     appSpecificPassword: appSpecificPasswordEnv,
     codesignUserName: codesignUserNameEnv,
     codesignPrimaryBundleId: 'dev.flutter.sdk',
+    codesignAppstoreId: codesignAppstoreIdEnv,
+    codesignTeamId: codesignTeamIdEnv,
+    isNotaryTool: true,
   );
 
   static final String appSpecificPasswordEnv = io.Platform.environment['APP_SPECIFIC_PASSWORD']!;
   static final String codesignUserNameEnv = io.Platform.environment['CODESIGN_USERNAME']!;
+  static final String codesignAppstoreIdEnv = io.Platform.environment['CODESIGN_APPSTORE_ID']!;
+  static final String codesignTeamIdEnv = io.Platform.environment['CODESIGN_TEAM_ID']!;
 
   late final Directory todoUploadDir = tempDir.childDirectory('uploads')..createSync(); // TODO delete
   late final File todoUploadManifest = todoUploadDir.childFile('manifest.txt')..createSync();
@@ -184,7 +189,10 @@ class _FileValidationVisitor extends FileCodesignVisitor {
     appSpecificPassword: 'unused',
     codesignUserName: 'unused',
     codesignPrimaryBundleId: 'unused',
+    codesignAppstoreId: 'unused',
+    codesignTeamId: 'unused',
     stdio: TestStdio(),
+    isNotaryTool: true,
   );
 
   @override
