@@ -384,7 +384,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       fakePackage.writeAsStringSync(
         _generateFakePubspec(
           dependencies,
-          useAnyVersion: doUpgrade,
+          doUpgrade: doUpgrade,
         ),
       );
       // Create a synthetic flutter SDK so that transitive flutter SDK
@@ -1394,7 +1394,7 @@ String _generateFakePubspec(
 }) {
   final StringBuffer result = StringBuffer();
   final StringBuffer overrides = StringBuffer();
-  final bool verbose = useAnyVersion;
+  final bool verbose = doUpgrade;
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
   result.writeln("  sdk: '>=2.10.0 <3.0.0'");
@@ -1424,7 +1424,7 @@ String _generateFakePubspec(
   }
   for (final PubspecDependency dependency in dependencies) {
     if (!dependency.pointsToSdk) {
-      dependency.describeForFakePubspec(result, overrides, useAnyVersion: useAnyVersion);
+      dependency.describeForFakePubspec(result, overrides, doUpgrade: doUpgrade);
     }
   }
   result.write(overrides.toString());
