@@ -169,8 +169,8 @@ void main() {
       '--no-validate-deferred-components',
     ], workingDirectory: tempDir.path);
 
-    print('stdout:\n${result.stdout.toString()}');
-    print('stderr:\n${result.stderr.toString()}');
+    printOnFailure('stdout:\n${result.stdout.toString()}');
+    printOnFailure('stderr:\n${result.stderr.toString()}');
     expect(result.stdout.toString().contains('app-release.aab'), true);
     expect(result.stdout.toString().contains('Deferred components prebuild validation passed.'), false);
     expect(result.stdout.toString().contains('Deferred components gen_snapshot validation passed.'), false);
