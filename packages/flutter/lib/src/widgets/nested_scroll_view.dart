@@ -308,13 +308,7 @@ class NestedScrollView extends StatefulWidget {
     return target!.state._absorberHandle;
   }
 
-  /// Returns the [NestedScrollViewState] of the nearest ancestor
-  /// [NestedScrollView].
-  ///
-  /// Must to be called under a NestedScrollScope
-  /// See also:
-  ///
-  ///  * [ScrollConfiguration.underNestedScrollScope], which establish a NestedScrollScope
+  /// Returns the [NestedScrollViewState] of the nearest ancestor [NestedScrollView].
   static NestedScrollViewState of(BuildContext context) {
     final _InheritedNestedScrollView? target = context.dependOnInheritedWidgetOfExactType<_InheritedNestedScrollView>();
     assert(
@@ -427,8 +421,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
     super.dispose();
   }
 
-  /// This allows NesetedScrollView to restore its scroll position
-  /// using PageStorageKey.
+  /// This allows NesetedScrollView to restore its scroll position using PageStorageKey.
   void preserveScrollPosition() {
     _coordinator!.preserveScrollPosition = true;
   }
@@ -633,7 +626,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     return false;
   }
 
-  /// If set to true, the scroll position will be preserved
   bool get preserveScrollPosition => _preserveScrollPosition;
   bool _preserveScrollPosition = false;
   set preserveScrollPosition(bool value) {
