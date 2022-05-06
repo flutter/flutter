@@ -23,6 +23,10 @@ class GLDescription {
 
   std::string GetString() const;
 
+  bool HasExtension(const std::string& ext) const;
+
+  bool HasDebugExtension() const;
+
  private:
   std::string vendor_;
   std::string renderer_;

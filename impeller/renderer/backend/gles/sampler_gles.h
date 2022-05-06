@@ -5,20 +5,25 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "impeller/base/backend_cast.h"
 #include "impeller/renderer/sampler.h"
 
 namespace impeller {
 
 class SamplerLibraryGLES;
+class ProcTableGLES;
 
-class SamplerGLES final : public Sampler {
+class SamplerGLES final : public Sampler,
+                          public BackendCast<SamplerGLES, Sampler> {
  public:
   ~SamplerGLES();
+
+  bool ConfigureBoundTexture(const ProcTableGLES& gl) const;
 
  private:
   friend class SamplerLibraryGLES;
 
-  SamplerGLES();
+  SamplerGLES(SamplerDescriptor desc);
 
   // |Sampler|
   bool IsValid() const override;

@@ -5,18 +5,22 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/gles/gles_handle.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/texture.h"
 
 namespace impeller {
 
-class TextureGLES final : public Texture {
+class TextureGLES final : public Texture,
+                          public BackendCast<TextureGLES, Texture> {
  public:
   TextureGLES(ReactorGLES::Ref reactor, TextureDescriptor desc);
 
   // |Texture|
   ~TextureGLES() override;
+
+  bool Bind() const;
 
  private:
   friend class AllocatorMTL;

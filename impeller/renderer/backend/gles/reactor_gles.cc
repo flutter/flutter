@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 
+#include <algorithm>
+
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 
@@ -15,7 +17,7 @@ ReactorGLES::ReactorGLES(std::unique_ptr<ProcTableGLES> gl)
     VALIDATION_LOG << "Proc table was invalid.";
     return;
   }
-
+  can_set_debug_labels_ = proc_table_->GetDescription()->HasDebugExtension();
   is_valid_ = true;
 }
 
@@ -123,16 +125,32 @@ bool ReactorGLES::React() {
   return true;
 }
 
+static DebugResourceType ToDebugResourceType(HandleType type) {
+  switch (type) {
+    case HandleType::kUnknown:
+      FML_UNREACHABLE();
+    case HandleType::kTexture:
+      return DebugResourceType::kTexture;
+    case HandleType::kBuffer:
+      return DebugResourceType::kBuffer;
+    case HandleType::kProgram:
+      return DebugResourceType::kProgram;
+  }
+  FML_UNREACHABLE();
+}
+
 bool ReactorGLES::ReactOnce() {
   if (!IsValid()) {
     return false;
   }
 
+  const auto& gl = GetProcTable();
+
   //----------------------------------------------------------------------------
   /// Collect all the handles for whom there is a GL handle sibling.
   ///
   for (const auto& handle_to_collect : gl_handles_to_collect_) {
-    if (!CollectGLHandle(GetProcTable(),                // proc table
+    if (!CollectGLHandle(gl,                            // proc table
                          handle_to_collect.first.type,  // handle type
                          handle_to_collect.second       // GL handle name
                          )) {
@@ -150,13 +168,28 @@ bool ReactorGLES::ReactOnce() {
       // Already a realized GL handle.
       continue;
     }
-    auto gl_handle = CreateGLHandle(GetProcTable(), live_handle.first.type);
+    auto gl_handle = CreateGLHandle(gl, live_handle.first.type);
     if (!gl_handle.has_value()) {
       VALIDATION_LOG << "Could not create GL handle.";
       return false;
     }
     live_handle.second = gl_handle;
   }
+
+  if (can_set_debug_labels_) {
+    for (const auto& label : pending_debug_labels_) {
+      auto live_handle = live_gl_handles_.find(label.first);
+      if (live_handle == live_gl_handles_.end() ||
+          !live_handle->second.has_value()) {
+        continue;
+      }
+      gl.SetDebugLabel(ToDebugResourceType(label.first.type),  // type
+                       live_handle->second.value(),            // name
+                       label.second                            // label
+      );
+    }
+  }
+  pending_debug_labels_.clear();
 
   //----------------------------------------------------------------------------
   /// Flush all pending operations in order.
@@ -168,6 +201,19 @@ bool ReactorGLES::ReactOnce() {
   pending_operations_.clear();
 
   return true;
+}
+
+void ReactorGLES::SetDebugLabel(const GLESHandle& handle, std::string label) {
+  if (!can_set_debug_labels_) {
+    return;
+  }
+  if (label.empty()) {
+    return;
+  }
+  if (handle.IsDead()) {
+    return;
+  }
+  pending_debug_labels_[handle] = std::move(label);
 }
 
 }  // namespace impeller
