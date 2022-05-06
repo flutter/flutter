@@ -2290,7 +2290,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       if (parent._needsCompositingBitsUpdate)
         return;
 
-      if ((!_wasRepaintBoundary || !isRepaintBoundary) && !parent.isRepaintBoundary) {
+      if ((!_wasRepaintBoundary || !isRepaintBoundary) &&
+          (!parent.isRepaintBoundary || !parent._wasRepaintBoundary)) {
         parent.markNeedsCompositingBitsUpdate();
         return;
       }
