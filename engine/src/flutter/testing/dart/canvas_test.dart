@@ -357,4 +357,56 @@ void main() {
         await fuzzyGoldenImageCompare(image, 'dotted_path_effect_mixed_with_stroked_geometry.png');
     expect(areEqual, true);
   }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
+
+  test('Gradients with matrices in Paragraphs render correctly', () async {
+    final Image image = await toImage((Canvas canvas) {
+      final Paint p = Paint();
+      final Float64List transform = Float64List.fromList(<double>[
+        86.80000129342079,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        94.5,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        60.0,
+        224.310302734375,
+        0.0,
+        1.0
+      ]);
+      p.shader = Gradient.radial(
+          const Offset(2.5, 0.33),
+          0.8,
+          <Color>[
+            const Color(0xffff0000),
+            const Color(0xff00ff00),
+            const Color(0xff0000ff),
+            const Color(0xffff00ff)
+          ],
+          <double>[0.0, 0.3, 0.7, 0.9],
+          TileMode.mirror,
+          transform,
+          const Offset(2.55, 0.4));
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+      builder.pushStyle(TextStyle(
+        foreground: p,
+        fontSize: 200,
+      ));
+      builder.addText('Woodstock!');
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 1000));
+      canvas.drawParagraph(paragraph, const Offset(10, 150));
+    }, 600, 400);
+    expect(image.width, equals(600));
+    expect(image.height, equals(400));
+
+    final bool areEqual =
+    await fuzzyGoldenImageCompare(image, 'text_with_gradient_with_matrix.png');
+    expect(areEqual, true);
+  }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
 }
