@@ -60,7 +60,7 @@ std::deque<std::unique_ptr<AssetResolver>> AssetManager::TakeResolvers() {
 // |AssetResolver|
 std::unique_ptr<fml::Mapping> AssetManager::GetAsMapping(
     const std::string& asset_name) const {
-  if (asset_name.size() == 0) {
+  if (asset_name.empty()) {
     return nullptr;
   }
   TRACE_EVENT1("flutter", "AssetManager::GetAsMapping", "name",
@@ -80,7 +80,7 @@ std::vector<std::unique_ptr<fml::Mapping>> AssetManager::GetAsMappings(
     const std::string& asset_pattern,
     const std::optional<std::string>& subdir) const {
   std::vector<std::unique_ptr<fml::Mapping>> mappings;
-  if (asset_pattern.size() == 0) {
+  if (asset_pattern.empty()) {
     return mappings;
   }
   TRACE_EVENT1("flutter", "AssetManager::GetAsMappings", "pattern",
@@ -96,7 +96,7 @@ std::vector<std::unique_ptr<fml::Mapping>> AssetManager::GetAsMappings(
 
 // |AssetResolver|
 bool AssetManager::IsValid() const {
-  return resolvers_.size() > 0;
+  return !resolvers_.empty();
 }
 
 // |AssetResolver|

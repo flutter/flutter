@@ -282,7 +282,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   flutterArguments.assets_path = _project.assetsPath.UTF8String;
   flutterArguments.icu_data_path = _project.ICUDataPath.UTF8String;
   flutterArguments.command_line_argc = static_cast<int>(argv.size());
-  flutterArguments.command_line_argv = argv.size() > 0 ? argv.data() : nullptr;
+  flutterArguments.command_line_argv = argv.empty() ? nullptr : argv.data();
   flutterArguments.platform_message_callback = (FlutterPlatformMessageCallback)OnPlatformMessage;
   flutterArguments.update_semantics_node_callback = [](const FlutterSemanticsNode* node,
                                                        void* user_data) {

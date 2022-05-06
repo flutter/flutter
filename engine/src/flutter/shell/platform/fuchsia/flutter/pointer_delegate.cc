@@ -62,8 +62,7 @@ bool HasValidatedMouseSample(const fup_MouseEvent& event) {
   const auto& sample = event.pointer_sample();
   FML_DCHECK(sample.has_device_id()) << "API guarantee";
   FML_DCHECK(sample.has_position_in_viewport()) << "API guarantee";
-  FML_DCHECK(!sample.has_pressed_buttons() ||
-             sample.pressed_buttons().size() > 0)
+  FML_DCHECK(!sample.has_pressed_buttons() || !sample.pressed_buttons().empty())
       << "API guarantee";
 
   return true;

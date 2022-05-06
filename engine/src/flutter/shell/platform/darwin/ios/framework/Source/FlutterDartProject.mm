@@ -66,7 +66,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
     // TODO(cbracken): replace this with os_log-based approach.
     // https://github.com/flutter/flutter/issues/44030
     std::stringstream stream;
-    if (tag.size() > 0) {
+    if (!tag.empty()) {
       stream << tag << ": ";
     }
     stream << message;
@@ -78,7 +78,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   // defaults.
 
   // Flutter ships the ICU data file in the bundle of the engine. Look for it there.
-  if (settings.icu_data_path.size() == 0) {
+  if (settings.icu_data_path.empty()) {
     NSString* icuDataPath = [engineBundle pathForResource:@"icudtl" ofType:@"dat"];
     if (icuDataPath.length > 0) {
       settings.icu_data_path = icuDataPath.UTF8String;
@@ -94,7 +94,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
     }
 
     // No application bundle specified.  Try a known location from the main bundle's Info.plist.
-    if (settings.application_library_path.size() == 0) {
+    if (settings.application_library_path.empty()) {
       NSString* libraryName = [mainBundle objectForInfoDictionaryKey:@"FLTLibraryPath"];
       NSString* libraryPath = [mainBundle pathForResource:libraryName ofType:@""];
       if (libraryPath.length > 0) {
@@ -107,7 +107,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
 
     // In case the application bundle is still not specified, look for the App.framework in the
     // Frameworks directory.
-    if (settings.application_library_path.size() == 0) {
+    if (settings.application_library_path.empty()) {
       NSString* applicationFrameworkPath = [mainBundle pathForResource:@"Frameworks/App.framework"
                                                                 ofType:@""];
       if (applicationFrameworkPath.length > 0) {
@@ -121,7 +121,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   }
 
   // Checks to see if the flutter assets directory is already present.
-  if (settings.assets_path.size() == 0) {
+  if (settings.assets_path.empty()) {
     NSString* assetsName = [FlutterDartProject flutterAssetsName:bundle];
     NSString* assetsPath = [bundle pathForResource:assetsName ofType:@""];
 

@@ -22,7 +22,7 @@ namespace filesystem {
 namespace {
 
 size_t RootLength(const std::string& path) {
-  if (path.size() == 0)
+  if (path.empty())
     return 0;
   if (path[0] == '/')
     return 1;

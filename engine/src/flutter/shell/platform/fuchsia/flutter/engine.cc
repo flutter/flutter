@@ -898,7 +898,7 @@ void Engine::WarmupSkps(
       skp_mappings = asset_manager->GetAsMappings(".*\\.skp$", "shaders");
     }
 
-    if (skp_mappings.size() == 0) {
+    if (skp_mappings.empty()) {
       FML_LOG(WARNING)
           << "Engine::WarmupSkps got zero SKP mappings, returning early";
       completion_callback(0);

@@ -63,7 +63,7 @@ static std::shared_ptr<const fml::Mapping> SearchMapping(
   }
 
   // Attempt to open file at path specified.
-  if (file_path.size() > 0) {
+  if (!file_path.empty()) {
     if (auto file_mapping = GetFileMapping(file_path, is_executable)) {
       return file_mapping;
     }

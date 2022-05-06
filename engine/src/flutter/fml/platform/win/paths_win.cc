@@ -19,7 +19,7 @@ constexpr char kFileURLPrefix[] = "file:///";
 constexpr size_t kFileURLPrefixLength = sizeof(kFileURLPrefix) - 1;
 
 size_t RootLength(const std::string& path) {
-  if (path.size() == 0)
+  if (path.empty())
     return 0;
   if (path[0] == '/')
     return 1;

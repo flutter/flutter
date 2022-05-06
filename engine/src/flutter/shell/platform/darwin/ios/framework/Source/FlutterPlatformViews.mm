@@ -255,7 +255,7 @@ void FlutterPlatformViewsController::CancelFrame() {
 // Make this method check if there are pending view operations instead.
 // Also rename it to `HasPendingViewOperations`.
 bool FlutterPlatformViewsController::HasPlatformViewThisOrNextFrame() {
-  return composition_order_.size() > 0 || active_composition_order_.size() > 0;
+  return !composition_order_.empty() || !active_composition_order_.empty();
 }
 
 const int FlutterPlatformViewsController::kDefaultMergedLeaseDuration;

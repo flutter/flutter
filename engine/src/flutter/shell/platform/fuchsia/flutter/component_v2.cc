@@ -482,7 +482,7 @@ ComponentV2::ComponentV2(
 
   settings_.log_message_callback = [](const std::string& tag,
                                       const std::string& message) {
-    if (tag.size() > 0) {
+    if (!tag.empty()) {
       std::cout << tag << ": ";
     }
     std::cout << message << std::endl;
@@ -615,7 +615,7 @@ void ComponentV2::OnEngineTerminate(const Engine* shell_holder) {
 
   shell_holders_.erase(found);
 
-  if (shell_holders_.size() == 0) {
+  if (shell_holders_.empty()) {
     FML_VLOG(-1) << "Killing component because all shell holders have been "
                     "terminated.";
     Kill();

@@ -242,7 +242,7 @@ PostPrerollResult AndroidExternalViewEmbedder::PostPrerollAction(
 }
 
 bool AndroidExternalViewEmbedder::FrameHasPlatformLayers() {
-  return composition_order_.size() > 0;
+  return !composition_order_.empty();
 }
 
 // |ExternalViewEmbedder|

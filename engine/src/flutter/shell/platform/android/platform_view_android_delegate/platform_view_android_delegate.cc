@@ -209,12 +209,12 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
 
     // Calling NewDirectByteBuffer in API level 22 and below with a size of zero
     // will cause a JNI crash.
-    if (actions_buffer.size() > 0) {
+    if (!actions_buffer.empty()) {
       jni_facade_->FlutterViewUpdateCustomAccessibilityActions(actions_buffer,
                                                                action_strings);
     }
 
-    if (buffer.size() > 0) {
+    if (!buffer.empty()) {
       jni_facade_->FlutterViewUpdateSemantics(buffer, strings,
                                               string_attribute_args);
     }

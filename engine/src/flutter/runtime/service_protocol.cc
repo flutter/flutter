@@ -193,7 +193,7 @@ bool ServiceProtocol::HandleMessage(std::string_view method,
 
   fml::SharedLock lock(*handlers_mutex_);
 
-  if (handlers_.size() == 0) {
+  if (handlers_.empty()) {
     WriteServerErrorResponse(response,
                              "There are no running service protocol handlers.");
     return false;

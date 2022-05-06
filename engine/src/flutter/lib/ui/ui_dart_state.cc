@@ -197,14 +197,14 @@ void UIDartState::LogMessage(const std::string& tag,
                         (int)message.size(), message.c_str());
 #elif defined(FML_OS_IOS)
     std::stringstream stream;
-    if (tag.size() > 0) {
+    if (!tag.empty()) {
       stream << tag << ": ";
     }
     stream << message;
     std::string log = stream.str();
     syslog(1 /* LOG_ALERT */, "%.*s", (int)log.size(), log.c_str());
 #else
-    if (tag.size() > 0) {
+    if (!tag.empty()) {
       std::cout << tag << ": ";
     }
     std::cout << message << std::endl;

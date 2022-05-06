@@ -128,7 +128,7 @@ PlatformView::PlatformView(
       return;
     }
 
-    if (events.size() == 0) {
+    if (events.empty()) {
       return;  // No work, bounce out.
     }
 

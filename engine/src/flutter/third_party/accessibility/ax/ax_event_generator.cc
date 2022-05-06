@@ -873,7 +873,7 @@ void AXEventGenerator::PostprocessEvents() {
 
     // If this was the only event, remove the node entirely from the
     // tree events.
-    if (node_events.size() == 0)
+    if (node_events.empty())
       iter = tree_events_.erase(iter);
     else
       ++iter;

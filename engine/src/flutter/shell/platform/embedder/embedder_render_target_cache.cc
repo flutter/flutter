@@ -24,7 +24,7 @@ EmbedderRenderTargetCache::GetExistingTargetsInCache(
     }
     auto& compatible_targets =
         cached_render_targets_[external_view->CreateRenderTargetDescriptor()];
-    if (compatible_targets.size() == 0) {
+    if (compatible_targets.empty()) {
       unmatched_identifiers.insert(view.first);
     } else {
       std::unique_ptr<EmbedderRenderTarget> target =

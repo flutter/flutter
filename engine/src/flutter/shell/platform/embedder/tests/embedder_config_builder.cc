@@ -265,14 +265,14 @@ void EmbedderConfigBuilder::SetLocalizationCallbackHooks() {
 }
 
 void EmbedderConfigBuilder::SetExecutableName(std::string executable_name) {
-  if (executable_name.size() == 0) {
+  if (executable_name.empty()) {
     return;
   }
   command_line_arguments_[0] = std::move(executable_name);
 }
 
 void EmbedderConfigBuilder::SetDartEntrypoint(std::string entrypoint) {
-  if (entrypoint.size() == 0) {
+  if (entrypoint.empty()) {
     return;
   }
 
@@ -281,7 +281,7 @@ void EmbedderConfigBuilder::SetDartEntrypoint(std::string entrypoint) {
 }
 
 void EmbedderConfigBuilder::AddCommandLineArgument(std::string arg) {
-  if (arg.size() == 0) {
+  if (arg.empty()) {
     return;
   }
 
@@ -289,7 +289,7 @@ void EmbedderConfigBuilder::AddCommandLineArgument(std::string arg) {
 }
 
 void EmbedderConfigBuilder::AddDartEntrypointArgument(std::string arg) {
-  if (arg.size() == 0) {
+  if (arg.empty()) {
     return;
   }
 
@@ -394,7 +394,7 @@ UniqueEngine EmbedderConfigBuilder::SetupEngine(bool run) const {
     args.push_back(arg.c_str());
   }
 
-  if (args.size() > 0) {
+  if (!args.empty()) {
     project_args.command_line_argv = args.data();
     project_args.command_line_argc = args.size();
   } else {
@@ -411,7 +411,7 @@ UniqueEngine EmbedderConfigBuilder::SetupEngine(bool run) const {
     dart_args.push_back(arg.c_str());
   }
 
-  if (dart_args.size() > 0) {
+  if (!dart_args.empty()) {
     project_args.dart_entrypoint_argv = dart_args.data();
     project_args.dart_entrypoint_argc = dart_args.size();
   } else {

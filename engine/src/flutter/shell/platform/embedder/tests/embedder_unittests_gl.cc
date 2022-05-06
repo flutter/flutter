@@ -2995,7 +2995,7 @@ TEST_F(EmbedderTest, CompositorRenderTargetsAreInStableOrder) {
       [&](const FlutterLayer** layers, size_t layers_count) {
         ASSERT_EQ(layers_count, 20u);
 
-        if (first_frame_backing_store_user_data.size() == 0u) {
+        if (first_frame_backing_store_user_data.empty()) {
           for (size_t i = 0; i < layers_count; ++i) {
             if (layers[i]->type == kFlutterLayerContentTypeBackingStore) {
               first_frame_backing_store_user_data.push_back(

@@ -257,7 +257,7 @@ bool VulkanSwapchain::CreateSwapchainImages(GrDirectContext* skia_context,
                                             VkImageUsageFlags usage_flags) {
   std::vector<VkImage> images = GetImages();
 
-  if (images.size() == 0) {
+  if (images.empty()) {
     return false;
   }
 

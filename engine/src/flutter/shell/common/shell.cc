@@ -107,7 +107,7 @@ void PerformInitializationTasks(Settings& settings) {
     }
 
     if (settings.icu_initialization_required) {
-      if (settings.icu_data_path.size() != 0) {
+      if (!settings.icu_data_path.empty()) {
         fml::icu::InitializeICU(settings.icu_data_path);
       } else if (settings.icu_mapper) {
         fml::icu::InitializeICUFromMapping(settings.icu_mapper());
