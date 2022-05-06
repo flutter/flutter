@@ -112,7 +112,7 @@ class BuildAarCommand extends BuildSubCommand {
     final Iterable<AndroidArch> targetArchitectures =
         stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
 
-    final String? buildNumberArg = stringArg('build-number');
+    final String? buildNumberArg = stringArgDeprecated('build-number');
     final String buildNumber = argParser.options.containsKey('build-number')
       && buildNumberArg != null
       && buildNumberArg.isNotEmpty
@@ -142,7 +142,7 @@ class BuildAarCommand extends BuildSubCommand {
       project: _getProject(),
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
-      outputDirectoryPath: stringArg('output-dir'),
+      outputDirectoryPath: stringArgDeprecated('output-dir'),
       buildNumber: buildNumber,
     );
     return FlutterCommandResult.success();

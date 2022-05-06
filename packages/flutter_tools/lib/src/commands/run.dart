@@ -173,25 +173,25 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
 
-  String get route => stringArg('route');
+  String get route => stringArgDeprecated('route');
 
-  String get traceAllowlist => stringArg('trace-allowlist');
+  String get traceAllowlist => stringArgDeprecated('trace-allowlist');
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
     final BuildInfo buildInfo = await getBuildInfo();
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
-      ? int.parse(stringArg('web-browser-debug-port'))
+      ? int.parse(stringArgDeprecated('web-browser-debug-port'))
       : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
-        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
-        webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArg('web-server-debug-injected-client-protocol') == 'sse',
+        hostname: featureFlags.isWebEnabled ? stringArgDeprecated('web-hostname') : '',
+        port: featureFlags.isWebEnabled ? stringArgDeprecated('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-protocol') == 'sse',
+        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-backend-protocol') == 'sse',
+        webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-injected-client-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
@@ -205,13 +205,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
-        dartFlags: stringArg('dart-flags') ?? '',
+        dartFlags: stringArgDeprecated('dart-flags') ?? '',
         useTestFonts: argParser.options.containsKey('use-test-fonts') && boolArg('use-test-fonts'),
         enableSoftwareRendering: argParser.options.containsKey('enable-software-rendering') && boolArg('enable-software-rendering'),
         skiaDeterministicRendering: argParser.options.containsKey('skia-deterministic-rendering') && boolArg('skia-deterministic-rendering'),
         traceSkia: boolArg('trace-skia'),
         traceAllowlist: traceAllowlist,
-        traceSkiaAllowlist: stringArg('trace-skia-allowlist'),
+        traceSkiaAllowlist: stringArgDeprecated('trace-skia-allowlist'),
         traceSystrace: boolArg('trace-systrace'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
@@ -223,17 +223,17 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: boolArg('verbose-system-logs'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
-        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
-        webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArg('web-server-debug-injected-client-protocol') == 'sse',
+        hostname: featureFlags.isWebEnabled ? stringArgDeprecated('web-hostname') : '',
+        port: featureFlags.isWebEnabled ? stringArgDeprecated('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-protocol') == 'sse',
+        webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-backend-protocol') == 'sse',
+        webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArgDeprecated('web-server-debug-injected-client-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
-        webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
-        vmserviceOutFile: stringArg('vmservice-out-file'),
+        webLaunchUrl: featureFlags.isWebEnabled ? stringArgDeprecated('web-launch-url') : null,
+        vmserviceOutFile: stringArgDeprecated('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
           && !runningWithPrebuiltApplication,
@@ -363,7 +363,7 @@ class RunCommand extends RunCommandBase {
   List<Device> devices;
   bool webMode = false;
 
-  String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+  String get userIdentifier => stringArgDeprecated(FlutterOptions.kDeviceUser);
 
   @override
   bool get startPausedDefault => false;
@@ -515,8 +515,8 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
-        projectRootPath: stringArg('project-root'),
-        dillOutputPath: stringArg('output-dill'),
+        projectRootPath: stringArgDeprecated('project-root'),
+        dillOutputPath: stringArgDeprecated('output-dill'),
         stayResident: stayResident,
         ipv6: ipv6,
         multidexEnabled: boolArg('multidex'),
@@ -572,7 +572,7 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final BuildInfo buildInfo = await getBuildInfo();
     final bool hotMode = shouldUseHotMode(buildInfo);
-    final String applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
+    final String applicationBinaryPath = stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
 
     if (boolArg('machine')) {
       if (devices.length > 1) {
@@ -588,9 +588,9 @@ class RunCommand extends RunCommandBase {
               ? null
               : globals.fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
-          projectRootPath: stringArg('project-root'),
+          projectRootPath: stringArgDeprecated('project-root'),
           packagesFilePath: globalResults['packages'] as String,
-          dillOutputPath: stringArg('output-dill'),
+          dillOutputPath: stringArgDeprecated('output-dill'),
           ipv6: ipv6,
           multidexEnabled: boolArg('multidex'),
         );
@@ -683,7 +683,7 @@ class RunCommand extends RunCommandBase {
             signals: globals.signals,
             processInfo: globals.processInfo,
             reportReady: boolArg('report-ready'),
-            pidFile: stringArg('pid-file'),
+            pidFile: stringArgDeprecated('pid-file'),
           )
             ..registerSignalHandlers()
             ..setupTerminal();

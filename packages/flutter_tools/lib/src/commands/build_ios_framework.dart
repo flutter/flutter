@@ -159,7 +159,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String outputArgument = stringArg('output')
+    final String outputArgument = stringArgDeprecated('output')
         ?? globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
