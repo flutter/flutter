@@ -203,7 +203,7 @@ bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, 
       mergedFiles.add(localPath);
     }
   }
-  
+
   mergedFiles.addAll(manifest.mergedFiles);
   if (manifest.addedFiles.isNotEmpty) {
     printout.write('Added files:\n');
