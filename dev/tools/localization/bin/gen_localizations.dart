@@ -549,8 +549,8 @@ void main(List<String> rawArgs) {
   );
 
   try {
-    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes, allowUndefined: options.removeUndefined);
-    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes, allowUndefined: options.removeUndefined);
+    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes, removeUndefined: options.removeUndefined);
+    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes, removeUndefined: options.removeUndefined);
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }

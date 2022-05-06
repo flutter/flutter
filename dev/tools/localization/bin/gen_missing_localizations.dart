@@ -95,14 +95,23 @@ void updateMissingResources(String localizationPath, String groupPrefix, {bool r
         final File arbFile = File(entityPath);
         final Map<String, dynamic> localeBundle = loadBundle(arbFile);
         final Set<String> localeResources = resourceKeys(localeBundle);
+        // Whether or not the resources were modified and need to be updated.
         bool shouldWrite = false;
         if (removeUndefined) {
+          // Remove any localizations that are not defined in the canonical
+          // locale. This allows unused localizations to be removed if
+          // --remove-undefined is passed.
+
+          // Find any resources in this locale that don't appear in the
+          // canonical locale.
           final Set<String> extraResources = localeResources.difference(
               requiredKeys).where(
                   (String key) =>
               !isPluralVariation(key, localeBundle) &&
                   !intentionallyOmitted(key, localeBundle)
           ).toSet();
+
+          // Remove them.
           localeBundle.removeWhere((String key, dynamic value) {
             final bool found = extraResources.contains(key);
             if (found) {
@@ -111,9 +120,12 @@ void updateMissingResources(String localizationPath, String groupPrefix, {bool r
             return found;
           });
           if (shouldWrite) {
-            print('Updating $entityPath removing extra entries for $extraResources');
+            print('Updating $entityPath by removing extra entries for $extraResources');
           }
         }
+
+        // Add in any resources that are in the canonical locale and not present
+        // in this locale.
         final Set<String> missingResources = requiredKeys.difference(localeResources).where(
           (String key) => !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle)
         ).toSet();

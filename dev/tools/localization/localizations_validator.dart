@@ -88,15 +88,24 @@ void validateEnglishLocalizations(File file) {
     throw ValidationError(errorMessages.toString());
 }
 
+/// This removes undefined localizations (localizations that aren't present in
+/// the canonical locale anymore) by:
+///
+/// 1. Looking up the canonical (English, in this case) localizations.
+/// 2. For each locale, getting the resources.
+/// 3. Determining the set of keys that aren't plural variations (we're only
+///    interested in the base terms being translated and not their variants)
+/// 4. Determining the set of invalid keys; that is those that are (non-plural)
+///    keys in the resources for this locale, but which _aren't_ keys in the
+///    canonical list.
+/// 5. Removes the invalid mappings from this resource's locale.
 void removeUndefinedLocalizations(
   Map<LocaleInfo, Map<String, String>> localeToResources,
 ) {
   final Map<String, String> canonicalLocalizations = localeToResources[LocaleInfo.fromString('en')]!;
   final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
 
-  for (final LocaleInfo locale in localeToResources.keys) {
-    final Map<String, String> resources = localeToResources[locale]!;
-    // final Map<LocaleInfo, Map<String, String>> updatedLocaleToResources = <LocaleInfo, Map<String, String>>{};
+  localeToResources.forEach((LocaleInfo locale, Map<String, String> resources) {
     bool isPluralVariation(String key) {
       final Match? pluralMatch = kPluralRegexp.firstMatch(key);
       if (pluralMatch == null)
@@ -111,7 +120,7 @@ void removeUndefinedLocalizations(
 
     final Set<String> invalidKeys = keys.difference(canonicalKeys);
     resources.removeWhere((String key, String value) => invalidKeys.contains(key));
-  }
+  });
 }
 
 /// Enforces the following invariants in our localizations:
@@ -126,7 +135,7 @@ void removeUndefinedLocalizations(
 void validateLocalizations(
   Map<LocaleInfo, Map<String, String>> localeToResources,
   Map<LocaleInfo, Map<String, dynamic>> localeToAttributes, {
-  bool allowUndefined = false,
+  bool removeUndefined = false,
 }) {
   final Map<String, String> canonicalLocalizations = localeToResources[LocaleInfo.fromString('en')]!;
   final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
@@ -155,8 +164,10 @@ void validateLocalizations(
     // Make sure keys are valid (i.e. they also exist in the canonical
     // localizations)
     final Set<String> invalidKeys = keys.difference(canonicalKeys);
-    if (invalidKeys.isNotEmpty && !allowUndefined)
+    if (invalidKeys.isNotEmpty && !removeUndefined) {
       errorMessages.writeln('Locale "$locale" contains invalid resource keys: ${invalidKeys.join(', ')}');
+    }
+
     // For language-level locales only, check that they have a complete list of
     // keys, or opted out of using certain ones.
     if (locale.length == 1) {
