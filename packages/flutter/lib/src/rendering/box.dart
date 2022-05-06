@@ -2348,8 +2348,7 @@ abstract class RenderBox extends RenderObject {
     }());
   }
 
-  @override
-  void markNeedsLayout() {
+  bool _clearCachedData() {
     if ((_cachedBaselines != null && _cachedBaselines!.isNotEmpty) ||
         (_cachedIntrinsicDimensions != null && _cachedIntrinsicDimensions!.isNotEmpty) ||
         (_cachedDryLayoutSizes != null && _cachedDryLayoutSizes!.isNotEmpty)) {
@@ -2361,12 +2360,28 @@ abstract class RenderBox extends RenderObject {
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
       _cachedDryLayoutSizes?.clear();
-      if (parent is RenderObject) {
-        markParentNeedsLayout();
-        return;
-      }
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  void markNeedsLayout() {
+    if (_clearCachedData() && parent is RenderObject) {
+      markParentNeedsLayout();
+      return;
     }
     super.markNeedsLayout();
+  }
+
+  @override
+  void layout(Constraints constraints, {bool parentUsesSize = false}) {
+    if (hasSize && constraints != this.constraints &&
+        _cachedBaselines != null && _cachedBaselines!.isNotEmpty) {
+      // The cached baselines data may need update if the constraints change.
+      _cachedBaselines?.clear();
+    }
+    super.layout(constraints, parentUsesSize: parentUsesSize);
   }
 
   /// {@macro flutter.rendering.RenderObject.performResize}
