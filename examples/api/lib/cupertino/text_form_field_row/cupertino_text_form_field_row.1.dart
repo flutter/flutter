@@ -21,7 +21,7 @@ class FormSectionApp extends StatelessWidget {
 }
 
 class FromSectionExample extends StatelessWidget {
-  const FromSectionExample({super.key});
+  const FromSectionExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
