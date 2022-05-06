@@ -43,6 +43,10 @@ const List<Map<String, Object>> kMaterialFonts = <Map<String, Object>>[
   },
 ];
 
+const List<String> kMaterialShaders = <String>[
+  'shaders/ink_sparkle.frag',
+];
+
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
@@ -404,11 +408,15 @@ class ManifestAssetBundle implements AssetBundle {
     }
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign)
-        ..._getMaterialAssets(),
+        ..._getMaterialFonts(),
+      // Include the shaders unconditionally. They are small, and whether
+      // they're used is determined only by the app source code and not by
+      // the Flutter manifest.
+      ..._getMaterialShaders(),
     ];
     for (final _Asset asset in materialAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
-      assert(assetFile.existsSync());
+      assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
       entries[asset.entryUri.path] ??= DevFSFileContent(assetFile);
     }
 
@@ -490,7 +498,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
   }
 
-  List<_Asset> _getMaterialAssets() {
+  List<_Asset> _getMaterialFonts() {
     final List<_Asset> result = <_Asset>[];
     for (final Map<String, Object> family in kMaterialFonts) {
       final Object? fonts = family['fonts'];
@@ -504,12 +512,41 @@ class ManifestAssetBundle implements AssetBundle {
         }
         final Uri entryUri = _fileSystem.path.toUri(asset);
         result.add(_Asset(
-          baseDir: _fileSystem.path.join(Cache.flutterRoot!, 'bin', 'cache', 'artifacts', 'material_fonts'),
+          baseDir: _fileSystem.path.join(
+            Cache.flutterRoot!,
+            'bin', 'cache', 'artifacts', 'material_fonts',
+          ),
           relativeUri: Uri(path: entryUri.pathSegments.last),
           entryUri: entryUri,
           package: null,
         ));
       }
+    }
+
+    return result;
+  }
+
+  List<_Asset> _getMaterialShaders() {
+    final String shaderPath = _fileSystem.path.join(
+      Cache.flutterRoot!,
+      'packages', 'flutter', 'lib', 'src', 'material', 'shaders',
+    );
+    // This file will exist in a real invocation unless the git checkout is
+    // corrupted somehow, but unit tests generally don't create this file
+    // in their mock file systems. Leaving it out in those cases is harmless.
+    if (!_fileSystem.directory(shaderPath).existsSync()) {
+      return <_Asset>[];
+    }
+
+    final List<_Asset> result = <_Asset>[];
+    for (final String shader in kMaterialShaders) {
+      final Uri entryUri = _fileSystem.path.toUri(shader);
+      result.add(_Asset(
+        baseDir: shaderPath,
+        relativeUri: Uri(path: entryUri.pathSegments.last),
+        entryUri: entryUri,
+        package: null,
+      ));
     }
 
     return result;

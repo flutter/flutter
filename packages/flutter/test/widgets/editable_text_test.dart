@@ -5183,53 +5183,6 @@ void main() {
     // toolbar. Until we change that, this test should remain skipped.
   }, skip: kIsWeb); // [intended]
 
-
-  testWidgets('text selection handle visibility for long text', (WidgetTester tester) async {
-    // long text which is scrollable based on given box size
-    const String testText =
-        'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.';
-    final TextEditingController controller =
-        TextEditingController(text: testText);
-    final ScrollController scrollController = ScrollController();
-
-    await tester.pumpWidget(MaterialApp(
-      home: Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 100,
-          height: 100,
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: EditableText(
-              controller: controller,
-              showSelectionHandles: true,
-              focusNode: FocusNode(),
-              style: Typography.material2018().black.subtitle1!,
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              selectionControls: materialTextSelectionControls,
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-            ),
-          ),
-        ),
-      ),
-    ));
-
-    // scroll to a text that is outside of the inital visible rect
-    scrollController.jumpTo(151);
-    await tester.pump();
-
-    // long press on a word to trigger a select
-    await tester.longPressAt(const Offset(20, 15));
-    // wait for adjustments of scroll area
-    await tester.pump();
-    await tester.pumpAndSettle();
-
-    // assert not jumped to top
-    expect(scrollController.offset, equals(151));
-  });
-
   const String testText = 'Now is the time for\n' // 20
       'all good people\n'                         // 20 + 16 => 36
       'to come to the aid\n'                      // 36 + 19 => 55
@@ -5251,19 +5204,19 @@ void main() {
     }
     if (shortcutModifier) {
       await tester.sendKeyDownEvent(
-        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
         platform: platform,
       );
     }
     if (wordModifier) {
       await tester.sendKeyDownEvent(
-        platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
         platform: platform,
       );
     }
     if (lineModifier) {
       await tester.sendKeyDownEvent(
-        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
         platform: platform,
       );
     }
@@ -5273,19 +5226,19 @@ void main() {
     }
     if (lineModifier) {
       await tester.sendKeyUpEvent(
-        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
         platform: platform,
       );
     }
     if (wordModifier) {
       await tester.sendKeyUpEvent(
-        platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
         platform: platform,
       );
     }
     if (shortcutModifier) {
       await tester.sendKeyUpEvent(
-        platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
         platform: platform,
       );
     }
@@ -5594,7 +5547,6 @@ void main() {
 
     switch (defaultTargetPlatform) {
       // These platforms extend by line.
-      case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -5612,7 +5564,8 @@ void main() {
         );
         break;
 
-      // Mac expands by line.
+      // Mac and iOS expand by line.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -6785,7 +6738,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't handle shift + home/end at all.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selectionAfterHome,
@@ -6858,7 +6810,8 @@ void main() {
         );
         break;
 
-      // Mac goes to the start/end of the document.
+      // Mac and iOS go to the start/end of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selectionAfterHome,
@@ -7135,7 +7088,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't move the selection with shift + home/end at all.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selection,
@@ -7148,7 +7100,8 @@ void main() {
         );
         break;
 
-      // Mac selects to the start of the document.
+      // Mac and iOS select to the start of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -7192,7 +7145,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't move the selection with home/end at all still.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selection,
@@ -7205,7 +7157,8 @@ void main() {
         );
         break;
 
-      // Mac selects to the start of the document.
+      // Mac and iOS select to the start of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -7327,7 +7280,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't move the selection with home/end at all.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selection,
@@ -7340,7 +7292,8 @@ void main() {
         );
         break;
 
-      // Mac selects to the end of the document.
+      // Mac and iOS select to the end of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -7384,7 +7337,6 @@ void main() {
     switch (defaultTargetPlatform) {
       // These platforms don't move the selection with home/end at all still.
       case TargetPlatform.android:
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(
           selection,
@@ -7397,7 +7349,8 @@ void main() {
         );
         break;
 
-      // Mac stays at the end of the document.
+      // Mac and iOS stay at the end of the document.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(
           selection,
@@ -10260,7 +10213,7 @@ void main() {
       wordModifier: true,
       targetPlatform: defaultTargetPlatform,
     );
-    if (defaultTargetPlatform == TargetPlatform.macOS) {
+    if (defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS) {
       // word wo|rd word
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 7);
@@ -10311,7 +10264,7 @@ void main() {
       wordModifier: true,
       targetPlatform: defaultTargetPlatform,
     );
-    if (defaultTargetPlatform == TargetPlatform.macOS) {
+    if (defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS) {
       // word wo|rd word
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 7);
@@ -10400,7 +10353,6 @@ void main() {
     expect(controller.selection.isCollapsed, false);
     switch (defaultTargetPlatform) {
       // These platforms extend by line.
-      case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -10409,7 +10361,8 @@ void main() {
         expect(controller.selection.extentOffset, 15);
         break;
 
-      // Mac expands by line.
+      // Mac and iOS expand by line.
+      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 15);
         expect(controller.selection.extentOffset, 24);

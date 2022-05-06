@@ -6,30 +6,28 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const TimerPickerApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'CupertinoTimerPicker Sample';
+class TimerPickerApp extends StatelessWidget {
+  const TimerPickerApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: CupertinoTimerPickerSample(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: TimerPickerExample(),
     );
   }
 }
 
-class CupertinoTimerPickerSample extends StatefulWidget {
-  const CupertinoTimerPickerSample({Key? key}) : super(key: key);
+class TimerPickerExample extends StatefulWidget {
+  const TimerPickerExample({Key? key}) : super(key: key);
 
   @override
-  State<CupertinoTimerPickerSample> createState() => _CupertinoTimerPickerSampleState();
+  State<TimerPickerExample> createState() => _TimerPickerExampleState();
 }
 
-class _CupertinoTimerPickerSampleState extends State<CupertinoTimerPickerSample> {
+class _TimerPickerExampleState extends State<TimerPickerExample> {
   Duration duration = const Duration(hours: 1, minutes: 23);
 
   // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoTimerPicker.

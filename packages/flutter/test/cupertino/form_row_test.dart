@@ -170,7 +170,7 @@ void main() {
     const Widget prefix = Text('Prefix');
     const Widget helper = Text('Helper');
 
-    Widget _buildFormRow(Brightness brightness) {
+    Widget buildFormRow(Brightness brightness) {
       return MaterialApp(
         theme: ThemeData(brightness: brightness),
         home: const Center(
@@ -184,7 +184,7 @@ void main() {
     }
 
     // CupertinoFormRow with light theme.
-    await tester.pumpWidget(_buildFormRow(Brightness.light));
+    await tester.pumpWidget(buildFormRow(Brightness.light));
     RenderParagraph helperParagraph = tester.renderObject(find.text('Helper'));
     expect(helperParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
@@ -195,7 +195,7 @@ void main() {
     expect(prefixParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoFormRow with light theme.
-    await tester.pumpWidget(_buildFormRow(Brightness.dark));
+    await tester.pumpWidget(buildFormRow(Brightness.dark));
     helperParagraph = tester.renderObject(find.text('Helper'));
     expect(helperParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
