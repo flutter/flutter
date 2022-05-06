@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 
 import 'message_codec.dart';
 
+const int _writeBufferStartCapacity = 64;
+
 /// [MessageCodec] with unencoded binary messages represented using [ByteData].
 ///
 /// On Android, messages will be represented using `java.nio.ByteBuffer`.
@@ -310,7 +312,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   ByteData? encodeMessage(Object? message) {
     if (message == null)
       return null;
-    final WriteBuffer buffer = WriteBuffer(startCapacity: 64);
+    final WriteBuffer buffer = WriteBuffer(startCapacity: _writeBufferStartCapacity);
     writeValue(buffer, message);
     return buffer.done();
   }
@@ -575,7 +577,7 @@ class StandardMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeMethodCall(MethodCall methodCall) {
-    final WriteBuffer buffer = WriteBuffer();
+    final WriteBuffer buffer = WriteBuffer(startCapacity: _writeBufferStartCapacity);
     messageCodec.writeValue(buffer, methodCall.method);
     messageCodec.writeValue(buffer, methodCall.arguments);
     return buffer.done();
@@ -594,7 +596,7 @@ class StandardMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeSuccessEnvelope(Object? result) {
-    final WriteBuffer buffer = WriteBuffer();
+    final WriteBuffer buffer = WriteBuffer(startCapacity: _writeBufferStartCapacity);
     buffer.putUint8(0);
     messageCodec.writeValue(buffer, result);
     return buffer.done();
@@ -602,7 +604,7 @@ class StandardMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeErrorEnvelope({ required String code, String? message, Object? details}) {
-    final WriteBuffer buffer = WriteBuffer();
+    final WriteBuffer buffer = WriteBuffer(startCapacity: _writeBufferStartCapacity);
     buffer.putUint8(1);
     messageCodec.writeValue(buffer, code);
     messageCodec.writeValue(buffer, message);

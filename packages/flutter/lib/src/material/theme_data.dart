@@ -994,7 +994,7 @@ class ThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///   * [StretchingOverscrollIndicator], a material design edge effect
+  ///   * [StretchingOverscrollIndicator], a Material Design edge effect
   ///     that transforms the contents of a scrollable when overscrolled.
   ///   * [GlowingOverscrollIndicator], an edge effect that paints a glow
   ///     over the contents of a scrollable when overscrolled.
@@ -1203,6 +1203,7 @@ class ThemeData with Diagnosticable {
   /// Components that have been migrated to Material 3 are:
   ///
   ///   * [AlertDialog]
+  ///   * [AppBar]
   ///   * [Card]
   ///   * [Dialog]
   ///   * [ElevatedButton]
@@ -1867,7 +1868,7 @@ class ThemeData with Diagnosticable {
   /// [Brightness.dark].
   ///
   /// This compares the luminosity of the given color to a threshold value that
-  /// matches the material design specification.
+  /// matches the Material Design specification.
   static Brightness estimateBrightnessForColor(Color color) {
     final double relativeLuminance = color.computeLuminance();
 
@@ -1907,7 +1908,7 @@ class ThemeData with Diagnosticable {
   static Map<Object, ThemeExtension<dynamic>> _themeExtensionIterableToMap(Iterable<ThemeExtension<dynamic>> extensionsIterable) {
     return Map<Object, ThemeExtension<dynamic>>.unmodifiable(<Object, ThemeExtension<dynamic>>{
       // Strangely, the cast is necessary for tests to run.
-      for (final ThemeExtension<dynamic> extension in extensionsIterable) extension.type: extension as ThemeExtension<ThemeExtension<dynamic>>
+      for (final ThemeExtension<dynamic> extension in extensionsIterable) extension.type: extension as ThemeExtension<ThemeExtension<dynamic>>,
     });
   }
 
@@ -2624,7 +2625,7 @@ class VisualDensity with Diagnosticable {
   /// The base adjustment in logical pixels of the visual density of UI components.
   ///
   /// The input density values are multiplied by a constant to arrive at a base
-  /// size adjustment that fits material design guidelines.
+  /// size adjustment that fits Material Design guidelines.
   ///
   /// Individual components may adjust this value based upon their own
   /// individual interpretation of density.

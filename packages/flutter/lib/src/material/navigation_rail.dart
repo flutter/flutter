@@ -63,7 +63,7 @@ import 'theme.dart';
 ///     out horizontally.
 ///  * https://material.io/components/navigation-rail/
 class NavigationRail extends StatefulWidget {
-  /// Creates a material design navigation rail.
+  /// Creates a Material Design navigation rail.
   ///
   /// The value of [destinations] must be a list of one or more
   /// [NavigationRailDestination] values.

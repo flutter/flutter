@@ -2318,7 +2318,7 @@ void main() {
 
   // Show the selection menu at the given index into the text by tapping to
   // place the cursor and then tapping on the handle.
-  Future<void> _showSelectionMenuAt(WidgetTester tester, TextEditingController controller, int index) async {
+  Future<void> showSelectionMenuAt(WidgetTester tester, TextEditingController controller, int index) async {
     await tester.tapAt(tester.getCenter(find.byType(EditableText)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
@@ -2365,7 +2365,7 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position is below the text.
       Offset toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
@@ -2386,7 +2386,7 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position
       toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
@@ -2432,7 +2432,7 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position is above the text.
       expect(find.text('Select all'), findsOneWidget);
@@ -2493,7 +2493,7 @@ void main() {
 
       // Show the selection menu on the first line and verify the selection
       // toolbar position is below the first line.
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('c'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('c'));
       expect(find.text('Select all'), findsOneWidget);
       final Offset firstLineToolbarTopLeft = tester.getTopLeft(find.text('Select all'));
       final Offset firstLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('a'));
@@ -2502,7 +2502,7 @@ void main() {
       // Show the selection menu on the second to last line and verify the
       // selection toolbar position is above that line and above the first
       // line's toolbar.
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('o'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('o'));
       expect(find.text('Select all'), findsOneWidget);
       final Offset penultimateLineToolbarTopLeft = tester.getTopLeft(find.text('Select all'));
       final Offset penultimateLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
@@ -2512,7 +2512,7 @@ void main() {
       // Show the selection menu on the last line and verify the selection
       // toolbar position is above that line and below the position of the
       // second to last line's toolbar.
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('r'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('r'));
       expect(find.text('Select all'), findsOneWidget);
       final Offset lastLineToolbarTopLeft = tester.getTopLeft(find.text('Select all'));
       final Offset lastLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
@@ -9827,7 +9827,7 @@ void main() {
     });
 
     group('intrinsics', () {
-      Widget _buildTest({ required bool isDense }) {
+      Widget buildTest({ required bool isDense }) {
         return MaterialApp(
           home: Scaffold(
             body: CustomScrollView(
@@ -9857,14 +9857,14 @@ void main() {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        await tester.pumpWidget(_buildTest(isDense: false));
+        await tester.pumpWidget(buildTest(isDense: false));
       });
 
       testWidgets('When isDense, intrinsic height can go below kMinInteractiveDimension height', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        await tester.pumpWidget(_buildTest(isDense: true));
+        await tester.pumpWidget(buildTest(isDense: true));
       });
     });
   });
@@ -10058,7 +10058,7 @@ void main() {
         ),
       ));
 
-      await _showSelectionMenuAt(tester, controller, controller.text.indexOf('test'));
+      await showSelectionMenuAt(tester, controller, controller.text.indexOf('test'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     },

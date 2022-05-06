@@ -713,7 +713,7 @@ VMServiceConnector getFakeVmServiceFactory({
             'views': <Object>[
               <String, Object>{
                 'id': '1',
-                'isolate': fakeUnpausedIsolate.toJson()
+                'isolate': fakeUnpausedIsolate.toJson(),
               },
             ],
           },
@@ -740,7 +740,7 @@ VMServiceConnector getFakeVmServiceFactory({
             'views': <Object>[
               <String, Object>{
                 'id': '1',
-                'isolate': fakeUnpausedIsolate.toJson()
+                'isolate': fakeUnpausedIsolate.toJson(),
               },
             ],
           },

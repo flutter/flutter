@@ -4321,17 +4321,17 @@ void main() {
     await pumpDecorator(focused: false, empty: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
 
     await pumpDecorator(focused: true);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
 
     await pumpDecorator(focused: true, empty: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
 
     await pumpDecorator(focused: false, enabled: false);
     await tester.pumpAndSettle();
@@ -4341,7 +4341,7 @@ void main() {
     await pumpDecorator(focused: false, empty: false, enabled: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
 
     // Focused and disabled happens with NavigationMode.directional.
     await pumpDecorator(focused: true, enabled: false);
@@ -4352,7 +4352,7 @@ void main() {
     await pumpDecorator(focused: true, empty: false, enabled: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
-    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16) * 0.75));
   });
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {

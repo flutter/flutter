@@ -12,7 +12,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
-/// A material design checkbox.
+/// A Material Design checkbox.
 ///
 /// The checkbox itself does not maintain any state. Instead, when the state of
 /// the checkbox changes, the widget calls the [onChanged] callback. Most
@@ -46,7 +46,7 @@ import 'toggleable.dart';
 ///  * <https://material.io/design/components/selection-controls.html#checkboxes>
 ///  * <https://material.io/design/components/lists.html#types>
 class Checkbox extends StatefulWidget {
-  /// Creates a material design checkbox.
+  /// Creates a Material Design checkbox.
   ///
   /// The checkbox itself does not maintain any state. Instead, when the state of
   /// the checkbox changes, the widget calls the [onChanged] callback. Most

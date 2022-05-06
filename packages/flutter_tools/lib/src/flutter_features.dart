@@ -48,9 +48,6 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
-  bool get isWindowsUwpEnabled => isEnabled(windowsUwpEmbedding);
-
-  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);

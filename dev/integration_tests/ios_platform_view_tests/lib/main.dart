@@ -91,7 +91,7 @@ class PlatformViewPage extends StatelessWidget {
             key: button,
             child: const Text('button'),
             onPressed: (){},
-          )
+          ),
         ],
       ),
     );

@@ -136,15 +136,15 @@ void main() {
   });
 
   test('Returns null if an error is caught resolving an image', () {
-    Future<ui.Codec> _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    Future<ui.Codec> basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
     }
     final ErrorImageProvider errorImage = ErrorImageProvider();
-    expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, _basicDecoder)), throwsA(isA<Error>()));
+    expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, basicDecoder)), throwsA(isA<Error>()));
     bool caughtError = false;
     final ImageStreamCompleter? result = imageCache.putIfAbsent(
       errorImage,
-      () => errorImage.load(errorImage, _basicDecoder),
+      () => errorImage.load(errorImage, basicDecoder),
       onError: (dynamic error, StackTrace? stackTrace) {
        caughtError = true;
       },

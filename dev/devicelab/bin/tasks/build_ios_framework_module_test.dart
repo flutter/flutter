@@ -30,7 +30,7 @@ Future<void> main() async {
             'io.flutter.devicelab',
             '--template',
             'module',
-            'hello_module'
+            'hello_module',
           ],
         );
 
@@ -410,7 +410,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
         'ios-framework',
         '--cocoapods',
         '--force', // Allow podspec creation on master.
-        '--output=$cocoapodsOutputDirectoryName'
+        '--output=$cocoapodsOutputDirectoryName',
       ],
     );
   });

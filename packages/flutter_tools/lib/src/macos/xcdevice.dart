@@ -186,11 +186,11 @@ class XCDevice {
           final String identifier = match.group(2)!;
           if (verb.startsWith('attach')) {
             _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
-              XCDeviceEvent.attach: identifier
+              XCDeviceEvent.attach: identifier,
             });
           } else if (verb.startsWith('detach')) {
             _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
-              XCDeviceEvent.detach: identifier
+              XCDeviceEvent.detach: identifier,
             });
           }
         }

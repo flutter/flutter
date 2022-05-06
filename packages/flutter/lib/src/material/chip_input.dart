@@ -8,7 +8,7 @@ import 'chip.dart';
 import 'debug.dart';
 import 'theme_data.dart';
 
-/// A material design input chip.
+/// A Material Design input chip.
 ///
 /// Input chips represent a complex piece of information, such as an entity
 /// (person, place, or thing) or conversational text, in a compact form.

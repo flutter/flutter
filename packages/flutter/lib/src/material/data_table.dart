@@ -304,7 +304,7 @@ class DataCell {
       onTapCancel != null;
 }
 
-/// A material design data table.
+/// A Material Design data table.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ktTajqbhIcY}
 ///

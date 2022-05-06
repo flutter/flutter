@@ -53,7 +53,7 @@ class FakeVmServiceHost {
           'error': <String, Object?>{
             'code': fakeRequest.errorCode,
             'message': 'error',
-          }
+          },
         }));
       }
       _applyStreamListen();

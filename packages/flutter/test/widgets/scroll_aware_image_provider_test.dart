@@ -21,11 +21,11 @@ void main() {
     imageCache.clear();
   });
 
-  T _findPhysics<T extends ScrollPhysics>(WidgetTester tester) {
+  T findPhysics<T extends ScrollPhysics>(WidgetTester tester) {
     return Scrollable.of(find.byType(TestWidget).evaluate().first)!.position.physics as T;
   }
 
-  ScrollMetrics _findMetrics(WidgetTester tester) {
+  ScrollMetrics findMetrics(WidgetTester tester) {
     return Scrollable.of(find.byType(TestWidget).evaluate().first)!.position;
   }
 
@@ -89,7 +89,7 @@ void main() {
     testImageProvider.complete();
 
     expect(imageCache.currentSize, 1);
-    expect(_findPhysics<RecordingPhysics>(tester).velocities, <double>[0]);
+    expect(findPhysics<RecordingPhysics>(tester).velocities, <double>[0]);
   });
 
   testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (WidgetTester tester) async {
@@ -124,7 +124,7 @@ void main() {
       curve: Curves.fastLinearToSlowEaseIn,
     );
     await tester.pump();
-    final RecordingPhysics physics = _findPhysics<RecordingPhysics>(tester);
+    final RecordingPhysics physics = findPhysics<RecordingPhysics>(tester);
 
     expect(physics.velocities.length, 0);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -132,7 +132,7 @@ void main() {
     expect(
       const ScrollPhysics().recommendDeferredLoading(
         physics.velocities.first,
-        _findMetrics(tester),
+        findMetrics(tester),
         find.byType(TestWidget).evaluate().first,
       ),
       false,
@@ -181,7 +181,7 @@ void main() {
       curve: Curves.fastLinearToSlowEaseIn,
     );
     await tester.pump();
-    final RecordingPhysics physics = _findPhysics<RecordingPhysics>(tester);
+    final RecordingPhysics physics = findPhysics<RecordingPhysics>(tester);
 
     expect(physics.velocities.length, 0);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -189,7 +189,7 @@ void main() {
     expect(
       const ScrollPhysics().recommendDeferredLoading(
         physics.velocities.first,
-        _findMetrics(tester),
+        findMetrics(tester),
         find.byType(TestWidget).evaluate().first,
       ),
       true,
@@ -248,7 +248,7 @@ void main() {
       curve: Curves.fastLinearToSlowEaseIn,
     );
     await tester.pump();
-    final RecordingPhysics physics = _findPhysics<RecordingPhysics>(tester);
+    final RecordingPhysics physics = findPhysics<RecordingPhysics>(tester);
 
     expect(physics.velocities.length, 0);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -256,7 +256,7 @@ void main() {
     expect(
       const ScrollPhysics().recommendDeferredLoading(
         physics.velocities.first,
-        _findMetrics(tester),
+        findMetrics(tester),
         find.byType(TestWidget).evaluate().first,
       ),
       true,
@@ -307,7 +307,7 @@ void main() {
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
 
-    final ControllablePhysics physics = _findPhysics<ControllablePhysics>(tester);
+    final ControllablePhysics physics = findPhysics<ControllablePhysics>(tester);
     physics.recommendDeferredLoadingValue = true;
 
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -358,7 +358,7 @@ void main() {
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
 
-    final ControllablePhysics physics = _findPhysics<ControllablePhysics>(tester);
+    final ControllablePhysics physics = findPhysics<ControllablePhysics>(tester);
     physics.recommendDeferredLoadingValue = true;
 
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);

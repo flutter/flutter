@@ -108,7 +108,6 @@ class BuildBundleCommand extends BuildSubCommand {
         }
         break;
       case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_uwp_x64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }

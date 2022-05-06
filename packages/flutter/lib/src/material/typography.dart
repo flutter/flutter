@@ -91,7 +91,7 @@ class Typography with Diagnosticable {
     TextTheme? tall,
   }) = Typography.material2018;
 
-  /// Creates a typography instance using material design's 2014 defaults.
+  /// Creates a typography instance using Material Design's 2014 defaults.
   ///
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
@@ -119,7 +119,7 @@ class Typography with Diagnosticable {
     );
   }
 
-  /// Creates a typography instance using material design's 2018 defaults.
+  /// Creates a typography instance using Material Design's 2018 defaults.
   ///
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
@@ -222,7 +222,7 @@ class Typography with Diagnosticable {
       assert(dense != null),
       assert(tall != null);
 
-  /// A material design text theme with dark glyphs.
+  /// A Material Design text theme with dark glyphs.
   ///
   /// This [TextTheme] should provide color but not geometry (font size,
   /// weight, etc). A text theme's geometry depends on the locale. To look
@@ -233,7 +233,7 @@ class Typography with Diagnosticable {
   /// geometry.
   final TextTheme black;
 
-  /// A material design text theme with light glyphs.
+  /// A Material Design text theme with light glyphs.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   /// A text theme's geometry depends on the locale. To look up a localized
@@ -354,7 +354,7 @@ class Typography with Diagnosticable {
     properties.add(DiagnosticsProperty<TextTheme>('tall', tall, defaultValue: defaultTypography.tall));
   }
 
-  /// A material design text theme with dark glyphs based on Roboto.
+  /// A Material Design text theme with dark glyphs based on Roboto.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme blackMountainView = TextTheme(
@@ -375,7 +375,7 @@ class Typography with Diagnosticable {
     labelSmall: TextStyle(debugLabel: 'blackMountainView labelSmall', fontFamily: 'Roboto', color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on Roboto.
+  /// A Material Design text theme with light glyphs based on Roboto.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme whiteMountainView = TextTheme(
@@ -396,7 +396,7 @@ class Typography with Diagnosticable {
     labelSmall: TextStyle(debugLabel: 'whiteMountainView labelSmall', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with dark glyphs based on Segoe UI.
+  /// A Material Design text theme with dark glyphs based on Segoe UI.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme blackRedmond = TextTheme(
@@ -417,7 +417,7 @@ class Typography with Diagnosticable {
     labelSmall: TextStyle(debugLabel: 'blackRedmond labelSmall', fontFamily: 'Segoe UI', color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on Segoe UI.
+  /// A Material Design text theme with light glyphs based on Segoe UI.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme whiteRedmond = TextTheme(
@@ -439,7 +439,7 @@ class Typography with Diagnosticable {
   );
 
   static const List<String> _helsinkiFontFallbacks = <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'];
-  /// A material design text theme with dark glyphs based on Roboto, with
+  /// A Material Design text theme with dark glyphs based on Roboto, with
   /// fallback fonts that are likely (but not guaranteed) to be installed on
   /// Linux.
   ///
@@ -462,7 +462,7 @@ class Typography with Diagnosticable {
     labelSmall: TextStyle(debugLabel: 'blackHelsinki labelSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on Roboto, with fallbacks of DejaVu Sans, Liberation Sans and Arial.
+  /// A Material Design text theme with light glyphs based on Roboto, with fallbacks of DejaVu Sans, Liberation Sans and Arial.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme whiteHelsinki = TextTheme(
@@ -483,7 +483,7 @@ class Typography with Diagnosticable {
     labelSmall: TextStyle(debugLabel: 'whiteHelsinki labelSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with dark glyphs based on San Francisco.
+  /// A Material Design text theme with dark glyphs based on San Francisco.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   ///
@@ -506,7 +506,7 @@ class Typography with Diagnosticable {
     labelSmall: TextStyle(debugLabel: 'blackCupertino labelSmall', fontFamily: '.SF UI Text', color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on San Francisco.
+  /// A Material Design text theme with light glyphs based on San Francisco.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   ///
@@ -529,7 +529,7 @@ class Typography with Diagnosticable {
     labelSmall: TextStyle(debugLabel: 'whiteCupertino labelSmall', fontFamily: '.SF UI Text', color: Colors.white, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with dark glyphs based on San Francisco.
+  /// A Material Design text theme with dark glyphs based on San Francisco.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   ///
@@ -552,7 +552,7 @@ class Typography with Diagnosticable {
     labelSmall: TextStyle(debugLabel: 'blackRedwoodCity labelSmall', fontFamily: '.AppleSystemUIFont', color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on San Francisco.
+  /// A Material Design text theme with light glyphs based on San Francisco.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   ///

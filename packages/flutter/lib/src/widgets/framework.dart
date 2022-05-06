@@ -4197,6 +4197,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return true;
   }
 
+  /// Returns `true` if [dependOnInheritedElement] was previously called with [ancestor].
+  @protected
+  bool doesDependOnInheritedElement(InheritedElement ancestor) =>
+      _dependencies != null && _dependencies!.contains(ancestor);
+
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
     assert(ancestor != null);

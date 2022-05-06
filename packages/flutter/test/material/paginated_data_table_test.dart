@@ -776,7 +776,7 @@ void main() {
     const double height = 400;
 
     // By default, the margin of a Card is 4 in all directions, so
-    // the size of the DataTable (inside the Card) is horizontically
+    // the size of the DataTable (inside the Card) is horizontally
     // reduced by 4 * 2; the left and right margins.
     const double cardMargin = 8;
 

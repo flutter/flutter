@@ -131,15 +131,15 @@ void main() {
                       'enabled': true,
                       'shortcutTrigger': 100,
                       'shortcutModifiers': 1,
-                    }
-                  ]
+                    },
+                  ],
                 },
                 <String, Object?>{
                   'id': 17,
                   'label': 'Sub Menu 12',
                   'enabled': true,
-                }
-              ]
+                },
+              ],
             },
             <String, Object?>{
               'id': 20,
@@ -153,8 +153,8 @@ void main() {
                 },
               ],
             },
-            <String, Object?>{'id': 21, 'label': 'Menu 3', 'enabled': false, 'children': <Map<String, Object?>>[]}
-          ]
+            <String, Object?>{'id': 21, 'label': 'Menu 3', 'enabled': false, 'children': <Map<String, Object?>>[]},
+          ],
         }),
       );
     });

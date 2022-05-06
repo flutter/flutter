@@ -123,8 +123,8 @@ void main() {
         'platform': 'ios',
         'data': <String, Object>{
           'A': 'B',
-        }
-      }
+        },
+      },
     ));
 
     await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);

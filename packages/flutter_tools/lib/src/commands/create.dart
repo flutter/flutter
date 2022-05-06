@@ -289,7 +289,6 @@ class CreateCommand extends CreateBase {
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
       macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
-      windowsUwp: featureFlags.isWindowsUwpEnabled && platforms.contains('winuwp'),
       // Enable null safety everywhere.
       dartSdkVersionBounds: "'>=$dartSdk <3.0.0'",
       implementationTests: boolArg('implementation-tests'),
@@ -666,7 +665,7 @@ Your $application code is in $relativeAppMain.
   List<String> _getSupportedPlatformsFromTemplateContext(Map<String, dynamic> templateContext) {
     return <String>[
       for (String platform in kAllCreatePlatforms)
-        if (templateContext[platform] == true) platform
+        if (templateContext[platform] == true) platform,
     ];
   }
 

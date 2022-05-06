@@ -128,7 +128,8 @@ void main() {
 
     expect(
       createTestCommandRunner(command).run(const <String>[
-        'symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']),
+        'symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result',
+      ]),
       throwsToolExit(message: 'test'),
     );
   }, overrides: <Type, Generator>{

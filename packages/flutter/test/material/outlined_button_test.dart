@@ -852,10 +852,6 @@ void main() {
         ),
       );
     }
-
-    // 116 = 16 + 'button'.length * 14 + 16, horizontal padding = 16
-    const Rect clipRect = Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
-    final Path clipPath = Path()..addRect(clipRect);
     final Finder outlinedButton = find.byType(OutlinedButton);
 
     BorderSide getBorderSide() {
@@ -873,12 +869,6 @@ void main() {
     // Expect that the button is disabled and painted with the disabled border color.
     expect(tester.widget<OutlinedButton>(outlinedButton).enabled, false);
     expect(getBorderSide(), disabledBorderSide);
-    _checkPhysicalLayer(
-      tester.element(outlinedButton),
-      fillColor,
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
 
     // Pump a new button with a no-op onPressed callback to make it enabled.
     await tester.pumpWidget(
@@ -896,23 +886,11 @@ void main() {
     // Wait for the border's color to change to pressed
     await tester.pump(const Duration(milliseconds: 200));
     expect(getBorderSide(), pressedBorderSide);
-    _checkPhysicalLayer(
-      tester.element(outlinedButton),
-      fillColor,
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
 
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
     await tester.pumpAndSettle();
     expect(getBorderSide(), enabledBorderSide);
-    _checkPhysicalLayer(
-      tester.element(outlinedButton),
-      fillColor,
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
   });
 
   testWidgets('OutlinedButton has no clip by default', (WidgetTester tester) async {
@@ -1746,29 +1724,6 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
-}
-
-PhysicalModelLayer _findPhysicalLayer(Element element) {
-  expect(element, isNotNull);
-  RenderObject? object = element.renderObject;
-  while (object != null && object is! RenderRepaintBoundary && object is! RenderView) {
-    object = object.parent as RenderObject?;
-  }
-  expect(object!.debugLayer, isNotNull);
-  expect(object.debugLayer!.firstChild, isA<PhysicalModelLayer>());
-  final PhysicalModelLayer layer = object.debugLayer!.firstChild! as PhysicalModelLayer;
-  final Layer child = layer.firstChild!;
-  return child is PhysicalModelLayer ? child : layer;
-}
-
-void _checkPhysicalLayer(Element element, Color expectedColor, { Path? clipPath, Rect? clipRect }) {
-  final PhysicalModelLayer expectedLayer = _findPhysicalLayer(element);
-  expect(expectedLayer.elevation, 0.0);
-  expect(expectedLayer.color, expectedColor);
-  if (clipPath != null) {
-    expect(clipRect, isNotNull);
-    expect(expectedLayer.clipPath, coversSameAreaAs(clipPath, areaToCompare: clipRect!.inflate(10.0)));
-  }
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {

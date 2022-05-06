@@ -66,7 +66,7 @@ void main() {
           '--no-link-platform',
           '--packages',
           '.packages',
-          'file:///path/to/main.dart'
+          'file:///path/to/main.dart',
         ], completer: completer),
       ]),
       stdoutHandler: stdoutHandler,
@@ -111,7 +111,7 @@ void main() {
           '--no-link-platform',
           '--packages',
           '.packages',
-          'file:///path/to/main.dart'
+          'file:///path/to/main.dart',
         ], completer: completer),
       ]),
       stdoutHandler: stdoutHandler,
@@ -156,7 +156,7 @@ void main() {
           '--no-link-platform',
           '--packages',
           '.packages',
-          'file:///path/to/main.dart'
+          'file:///path/to/main.dart',
         ], completer: completer, exitCode: 127),
       ]),
       stdoutHandler: stdoutHandler,
@@ -202,7 +202,7 @@ void main() {
           '--tfa',
           '--packages',
           '.packages',
-          'file:///path/to/main.dart'
+          'file:///path/to/main.dart',
         ], completer: completer),
       ]),
       stdoutHandler: stdoutHandler,
@@ -249,7 +249,7 @@ void main() {
           '--tfa',
           '--packages',
           '.packages',
-          'file:///path/to/main.dart'
+          'file:///path/to/main.dart',
         ], completer: completer),
       ]),
       stdoutHandler: stdoutHandler,
