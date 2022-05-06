@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' as io;
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart' as package_arch;
@@ -34,8 +35,10 @@ const String kRevision = 'revision';
 const String kUpstream = 'upstream';
 const String kCodesignCertName = 'codesign-cert-name';
 const String kCodesignPrimaryBundleId = 'codesign-primary-bundle-id';
-const String kCodesignUserName = 'codesign-user-name';
+const String kCodesignUserName = 'codesign-username';
 const String kAppSpecificPassword = 'app-specific-password';
+const String kCodesignAppStoreId = 'codesign-appstore-id';
+const String kCodesignTeamId = 'codesign-team-id';
 
 /// Command to codesign and verify the signatures of cached binaries.
 class CodesignCommand extends Command<void> {
@@ -85,6 +88,14 @@ class CodesignCommand extends Command<void> {
     argParser.addOption(
       kAppSpecificPassword,
       help: 'Unique password specifically for codesigning the given application.',
+    );
+    argParser.addOption(
+      kCodesignAppStoreId,
+      help: 'Apple-id for connecting to app store. Used by notary service for xcode version 13+.',
+    );
+    argParser.addOption(
+      kCodesignTeamId,
+      help: 'Team-id is used by notary service for xcode version 13+.',
     );
   }
 
@@ -146,6 +157,8 @@ class CodesignCommand extends Command<void> {
     final String codesignPrimaryBundleId = getValueFromEnvOrArgs(kCodesignPrimaryBundleId, argResults!, platform.environment)!;
     final String codesignUserName = getValueFromEnvOrArgs(kCodesignUserName, argResults!, platform.environment)!;
     final String appSpecificPassword = getValueFromEnvOrArgs(kAppSpecificPassword, argResults!, platform.environment)!;
+    final String codesignAppstoreId = getValueFromEnvOrArgs(kCodesignAppStoreId, argResults!, platform.environment)!;
+    final String codesignTeamId = getValueFromEnvOrArgs(kCodesignTeamId, argResults!, platform.environment)!;
 
     return CodesignContext(
       framework: framework,
@@ -157,6 +170,8 @@ class CodesignCommand extends Command<void> {
       codesignPrimaryBundleId: codesignPrimaryBundleId,
       codesignUserName: codesignUserName,
       appSpecificPassword: appSpecificPassword,
+      codesignAppstoreId: codesignAppstoreId,
+      codesignTeamId: codesignTeamId,
     ).run();
   }
 
@@ -183,11 +198,8 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64/gen_snapshot_arm64',
       'artifacts/engine/darwin-x64/gen_snapshot_x64',
       'artifacts/engine/ios-profile/gen_snapshot_arm64',
-      'artifacts/engine/ios-profile/gen_snapshot_armv7',
       'artifacts/engine/ios-release/gen_snapshot_arm64',
-      'artifacts/engine/ios-release/gen_snapshot_armv7',
       'artifacts/engine/ios/gen_snapshot_arm64',
-      'artifacts/engine/ios/gen_snapshot_armv7',
       'artifacts/libimobiledevice/idevicescreenshot',
       'artifacts/libimobiledevice/idevicesyslog',
       'artifacts/libimobiledevice/libimobiledevice-1.0.6.dylib',
@@ -472,64 +484,63 @@ class RemoteZip extends ZipArchive {
   /// must be codesigned.
   static List<RemoteZip> archives = <RemoteZip>[
     // Android artifacts
-    for (final String arch in <String>['arm', 'arm64', 'x64'])
-      for (final String buildMode in <String>['release', 'profile'])
-        RemoteZip(
-          path: 'android-$arch-$buildMode/darwin-x64.zip',
-          files: const <BinaryFile>[
-            BinaryFile(path: 'gen_snapshot', entitlements: true),
-          ],
-        ),
-    // macOS Dart SDK
-    for (final String arch in <String>['arm64', 'x64'])
-      RemoteZip(
-        path: 'dart-sdk-darwin-$arch.zip',
-        files: const <BinaryFile>[
-          BinaryFile(path: 'dart-sdk/bin/dart', entitlements: true),
-          BinaryFile(path: 'dart-sdk/bin/dartaotruntime', entitlements: true),
-          BinaryFile(path: 'dart-sdk/bin/utils/gen_snapshot', entitlements: true),
-        ],
-      ),
-    // macOS host debug artifacts
-    const RemoteZip(
-      path: 'darwin-x64/artifacts.zip',
-      files: <BinaryFile>[
-        BinaryFile(path: 'flutter_tester', entitlements: true),
-        BinaryFile(path: 'gen_snapshot', entitlements: true),
-      ],
-    ),
-    // macOS host profile and release artifacts
-    for (final String buildMode in <String>['profile', 'release'])
-      RemoteZip(
-        path: 'darwin-x64-$buildMode/artifacts.zip',
-        files: const <BinaryFile>[
-          BinaryFile(path: 'gen_snapshot', entitlements: true),
-        ],
-      ),
-    const RemoteZip(
-      path: 'darwin-x64/font-subset.zip',
-      files: <BinaryFile>[BinaryFile(path: 'font-subset')],
-    ),
+    // for (final String arch in <String>['arm', 'arm64', 'x64'])
+    //   for (final String buildMode in <String>['release', 'profile'])
+    //     RemoteZip(
+    //       path: 'android-$arch-$buildMode/darwin-x64.zip',
+    //       files: const <BinaryFile>[
+    //         BinaryFile(path: 'gen_snapshot', entitlements: true),
+    //       ],
+    //     ),
+    // // macOS Dart SDK
+    // for (final String arch in <String>['arm64', 'x64'])
+    //   RemoteZip(
+    //     path: 'dart-sdk-darwin-$arch.zip',
+    //     files: const <BinaryFile>[
+    //       BinaryFile(path: 'dart-sdk/bin/dart', entitlements: true),
+    //       BinaryFile(path: 'dart-sdk/bin/dartaotruntime', entitlements: true),
+    //       BinaryFile(path: 'dart-sdk/bin/utils/gen_snapshot', entitlements: true),
+    //     ],
+    //   ),
+    // // macOS host debug artifacts
+    // const RemoteZip(
+    //   path: 'darwin-x64/artifacts.zip',
+    //   files: <BinaryFile>[
+    //     BinaryFile(path: 'flutter_tester', entitlements: true),
+    //     BinaryFile(path: 'gen_snapshot', entitlements: true),
+    //   ],
+    // ),
+    // // macOS host profile and release artifacts
+    // for (final String buildMode in <String>['profile', 'release'])
+    //   RemoteZip(
+    //     path: 'darwin-x64-$buildMode/artifacts.zip',
+    //     files: const <BinaryFile>[
+    //       BinaryFile(path: 'gen_snapshot', entitlements: true),
+    //     ],
+    //   ),
+    // const RemoteZip(
+    //   path: 'darwin-x64/font-subset.zip',
+    //   files: <BinaryFile>[BinaryFile(path: 'font-subset')],
+    // ),
 
-    // macOS desktop Framework
-    for (final String buildModeSuffix in <String>['', '-profile', '-release'])
-      RemoteZip(
-        path: 'darwin-x64$buildModeSuffix/FlutterMacOS.framework.zip',
-        files: const <ArchiveFile>[
-          EmbeddedZip(
-            path: 'FlutterMacOS.framework.zip',
-            files: <BinaryFile>[BinaryFile(path: 'Versions/A/FlutterMacOS')]
-          ),
-        ],
-      ),
+    // // macOS desktop Framework
+    // for (final String buildModeSuffix in <String>['', '-profile', '-release'])
+    //   RemoteZip(
+    //     path: 'darwin-x64$buildModeSuffix/FlutterMacOS.framework.zip',
+    //     files: const <ArchiveFile>[
+    //       EmbeddedZip(
+    //         path: 'FlutterMacOS.framework.zip',
+    //         files: <BinaryFile>[BinaryFile(path: 'Versions/A/FlutterMacOS')]
+    //       ),
+    //     ],
+    //   ),
 
     // ios artifacts
-    for (final String buildModeSuffix in <String>['', '-profile', '-release'])
+    for (final String buildModeSuffix in <String>['']) //, '-profile', '-release'])
       RemoteZip(
         path: 'ios$buildModeSuffix/artifacts.zip',
         files: const <ArchiveFile>[
           BinaryFile(path: 'gen_snapshot_arm64', entitlements: true),
-          BinaryFile(path: 'gen_snapshot_armv7', entitlements: true),
           BinaryFile(path: 'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter'),
           BinaryFile(path: 'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter'),
         ],
@@ -562,7 +573,10 @@ class FileCodesignVisitor extends FileVisitor {
     required this.codesignPrimaryBundleId,
     required this.codesignUserName,
     required this.appSpecificPassword,
+    required this.codesignAppstoreId,
+    required this.codesignTeamId,
     required this.stdio,
+    required this.isNotaryTool,
   });
 
   /// Temp [Directory] to download/extract files to.
@@ -576,7 +590,10 @@ class FileCodesignVisitor extends FileVisitor {
   final String codesignPrimaryBundleId;
   final String codesignUserName;
   final String appSpecificPassword;
+  final String codesignAppstoreId;
+  final String codesignTeamId;
   final Stdio stdio;
+  final bool isNotaryTool;
 
   final IOClient httpClient = IOClient();
 
@@ -652,6 +669,9 @@ class FileCodesignVisitor extends FileVisitor {
   /// The [parent] directory is scoped to the parent zip file.
   @override
   Future<void> visitEmbeddedZip(EmbeddedZip file, Directory parent) async {
+    print(' ');
+    print('entered into embedded file');
+    print(' ');
     final File localFile = await _validateFileExists(file, parent);
     final Directory newDir = tempDir.childDirectory('embedded_zip_$nextId');
     final package_arch.Archive? archive = await _unzip(localFile, newDir);
@@ -679,11 +699,18 @@ class FileCodesignVisitor extends FileVisitor {
   /// The [parent] directory is scoped to this particular [RemoteZip].
   @override
   Future<void> visitRemoteZip(RemoteZip file, Directory parent) async {
+    print(' ');
+    print('entered into remote zip');
+    print(' ');
     final FileSystem fs = tempDir.fileSystem;
 
     // namespace by index otherwise there will be collisions
     final String localFilePath = '${remoteDownloadIndex}_${fs.path.basename(file.path)}';
     // download the zip file
+
+    print(' ');
+    print('remote path is ${file.path}');
+    print('local path is ${remoteDownloadsDir.childFile(localFilePath).path}');
     final File originalFile = await download(
       file.path,
       remoteDownloadsDir.childFile(localFilePath).path,
@@ -807,7 +834,8 @@ class FileCodesignVisitor extends FileVisitor {
     await completer.future;
   }
 
-  static final RegExp _statusCheckPattern = RegExp(r'[ ]*Status: ([a-z ]+)');
+  static final RegExp _altoolStatusCheckPattern = RegExp(r'[ ]*Status: ([a-z ]+)');
+  static final RegExp _notarytoolStatusCheckPattern = RegExp(r'[ ]*status: ([a-zA-z ]+)');
 
   /// Make a request to the notary service to see if the notary job is finished.
   ///
@@ -816,22 +844,44 @@ class FileCodesignVisitor extends FileVisitor {
   /// function will throw a [ConductorException].
   @visibleForTesting
   bool checkNotaryJobFinished(String uuid) {
-    final List<String> args = <String>[
-      'xcrun',
-      'altool',
-      '--notarization-info',
-      uuid,
-      '-u',
-      codesignUserName,
-      '--password',
-      appSpecificPassword,
-    ];
+    List<String> args;
+    if(isNotaryTool){
+      args = <String>[
+        'xcrun',
+        'notarytool',
+        'info',
+        uuid,
+        '--password',
+        appSpecificPassword,
+        '--apple-id',
+        codesignAppstoreId,
+        '--team-id',
+        codesignTeamId,
+      ];
+    }else{
+      args = <String>[
+        'xcrun',
+        'altool',
+        '--notarization-info',
+        uuid,
+        '-u',
+        codesignUserName,
+        '--password',
+        appSpecificPassword,
+      ];
+    }
+
     stdio.printStatus('checking notary status with ${args.join(' ')}');
     final io.ProcessResult result = processManager.runSync(args);
     // Note that this tool outputs to STDOUT on Xcode 11, STDERR on earlier
     final String combinedOutput = (result.stdout as String) + (result.stderr as String);
 
-    final RegExpMatch? match = _statusCheckPattern.firstMatch(combinedOutput);
+    RegExpMatch? match;
+    if(isNotaryTool){
+      match = _notarytoolStatusCheckPattern.firstMatch(combinedOutput);
+    }else{
+      match = _altoolStatusCheckPattern.firstMatch(combinedOutput);
+    }
 
     if (match == null) {
       throw ConductorException(
@@ -840,34 +890,62 @@ class FileCodesignVisitor extends FileVisitor {
     }
 
     final String status = match.group(1)!;
-    if (status == 'success') {
-      return true;
+    if(isNotaryTool){
+      if (status == 'Accepted') {
+        return true;
+      }
+      if (status == 'In Progress') {
+        stdio.printStatus('job $uuid still pending');
+        return false;
+      }
+      throw ConductorException('Notarization failed with: $status\n$combinedOutput');
+    }else{
+      if (status == 'success') {
+        return true;
+      }
+      if (status == 'in progress') {
+        stdio.printStatus('job $uuid still pending');
+        return false;
+      }
+      throw ConductorException('Notarization failed with: $status\n$combinedOutput');
     }
-    if (status == 'in progress') {
-      stdio.printStatus('job $uuid still pending');
-      return false;
-    }
-
-    throw ConductorException('Notarization failed with: $status\n$combinedOutput');
   }
 
-  static final RegExp _notaryRequestPattern = RegExp(r'RequestUUID = ([a-z0-9-]+)');
+  static final RegExp _altoolRequestPattern = RegExp(r'RequestUUID = ([a-z0-9-]+)');
+  static final RegExp _notarytoolRequestPattern = RegExp(r'id: ([a-z0-9-]+)');
 
   String _uploadZipToNotary(File localFile, [int retryCount = 3]) {
     while (retryCount > 0) {
-      final List<String> args = <String>[
-        'xcrun',
-        'altool',
-        '--notarize-app',
-        '--primary-bundle-id',
-        codesignPrimaryBundleId,
-        '--username',
-        codesignUserName,
-        '--password',
-        appSpecificPassword,
-        '--file',
-        localFile.absolute.path,
-      ];
+      List<String> args;
+      if(isNotaryTool){
+        args = <String>[
+          'xcrun',
+          'notarytool',
+          'submit',
+          localFile.absolute.path,
+          '--apple-id',
+          codesignAppstoreId,
+          '--password',
+          appSpecificPassword,
+          '--team-id',
+          codesignTeamId,
+        ];
+      }
+      else{
+        args = <String>[
+          'xcrun',
+          'altool',
+          '--notarize-app',
+          '--primary-bundle-id',
+          codesignPrimaryBundleId,
+          '--username',
+          codesignUserName,
+          '--password',
+          appSpecificPassword,
+          '--file',
+          localFile.absolute.path,
+        ];
+      }
 
       stdio.printStatus('uploading ${args.join(' ')}');
       // altool utilizes file locks, so run this synchronously
@@ -875,13 +953,17 @@ class FileCodesignVisitor extends FileVisitor {
 
       // Note that this tool outputs to STDOUT on Xcode 11, STDERR on earlier
       final String combinedOutput = (result.stdout as String) + (result.stderr as String);
-      final RegExpMatch? match = _notaryRequestPattern.firstMatch(combinedOutput);
+      final RegExpMatch? match;
+      if(isNotaryTool){
+        match =  _notarytoolRequestPattern.firstMatch(combinedOutput);
+      }else{
+        match =  _altoolRequestPattern.firstMatch(combinedOutput);
+      }
       if (match == null) {
-        throw ConductorException('Exception uploading ${localFile.path}\n${combinedOutput.trim()}');
         print('Failed to upload to the notary service with args: ${args.join(' ')}\n\n${combinedOutput.trim()}\n');
         retryCount -= 1;
         print('Trying again $retryCount more time${retryCount > 1 ? 's' : ''}...');
-        // TODO delay?
+        io.sleep(const Duration(seconds: 1));
         continue;
       }
 
@@ -901,6 +983,8 @@ class FileCodesignVisitor extends FileVisitor {
         file.name,
       );
       if (isBinary(fileOrDirPath, processManager)) {
+        print('parent path is ${parent.path}');
+        print('file name is ${file.name}');
         final String hexDigest = sha1.convert(await fs.file(fileOrDirPath).readAsBytes()).toString();
         actualFileHashes[hexDigest] = fileOrDirPath;
       }
@@ -912,6 +996,10 @@ class FileCodesignVisitor extends FileVisitor {
   @visibleForOverriding
   Future<File> download(String remotePath, String localPath) async {
     final String source = '$gsCloudBaseUrl/flutter/$engineHash/$remotePath';
+    print('');
+    print('source is $source');
+    print('localPath is $localPath');
+    print('');
     final io.ProcessResult result = await processManager.run(
       <String>['gsutil', 'cp', source, localPath],
     );
@@ -933,24 +1021,27 @@ class FileCodesignVisitor extends FileVisitor {
   }
 
   Future<package_arch.Archive?> _unzip(File inputZip, Directory outDir) async {
-    // unzip is faster
-    if (processManager.canRun('unzip')) {
-      await processManager.run(
-        <String>[
-          'unzip',
-          inputZip.absolute.path,
-          '-d',
-          outDir.absolute.path,
-        ],
-      );
-      return null;
-    } else {
-      stdio.printError('unzip binary not found on path, falling back to package:archive implementation');
+    // unzip is faster, commenting it out to pass hash check
+    // if (processManager.canRun('unzip')) {
+    //   await processManager.run(
+    //     <String>[
+    //       'unzip',
+    //       inputZip.absolute.path,
+    //       '-d',
+    //       outDir.absolute.path,
+    //     ],
+    //   );
+    //   return null;
+    // } else {
+    //  stdio.printError('unzip binary not found on path, falling back to package:archive implementation');
       final Uint8List bytes = await inputZip.readAsBytes();
       final package_arch.Archive archive = package_arch.ZipDecoder().decodeBytes(bytes);
       package_arch.extractArchiveToDisk(archive, outDir.path);
+      print('');
+      print('this is unzipped to ${outDir.path}');
+      print('');
       return archive;
-    }
+    //}
   }
 
   Future<package_arch.Archive?> _zip(Directory inDir, File outputZip) async {
@@ -1063,6 +1154,8 @@ class CodesignContext extends _Context {
     required this.codesignPrimaryBundleId,
     required this.codesignUserName,
     required this.appSpecificPassword,
+    required this.codesignAppstoreId,
+    required this.codesignTeamId,
   });
 
   final Directory localFlutterRoot;
@@ -1070,7 +1163,27 @@ class CodesignContext extends _Context {
   final String codesignPrimaryBundleId;
   final String codesignUserName;
   final String appSpecificPassword;
+  final String codesignAppstoreId;
+  final String codesignTeamId;
 
+  bool checkXcodeVersion(){
+    bool isNotaryTool = true;
+    print('checking Xcode version...');
+    final io.ProcessResult result = processManager.runSync(
+      <String>[
+        'xcodebuild',
+        '-version',
+      ],
+    );
+    final List<String> outArray = (result.stdout as String).split('\n');
+    final int xcodeVersion = int.parse(outArray[0].split(' ')[1].split('.')[0]);
+    if(xcodeVersion <= 12){
+      isNotaryTool = false;
+    }
+        
+    print('based on your xcode major version of $xcodeVersion, the decision to use notarytool is $isNotaryTool');
+    return isNotaryTool;
+  }
 
   Future<void> run() async {
     if (initialRevision != null) {
@@ -1091,6 +1204,7 @@ class CodesignContext extends _Context {
         .readAsString())
         .trim();
 
+    final bool isNotaryTool = checkXcodeVersion();
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('conductor_codesign');
     final FileCodesignVisitor codesignVisitor = FileCodesignVisitor(
       tempDir: tempDir,
@@ -1101,6 +1215,9 @@ class CodesignContext extends _Context {
       codesignUserName: codesignUserName,
       appSpecificPassword: appSpecificPassword,
       stdio: stdio,
+      codesignAppstoreId: codesignAppstoreId,
+      codesignTeamId: codesignTeamId,
+      isNotaryTool: isNotaryTool,
     );
 
     await codesignVisitor.validateAll(RemoteZip.archives);
