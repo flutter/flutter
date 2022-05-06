@@ -766,7 +766,7 @@ void main() {
                         NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                     sliver: SliverAppBar(
                       title:
-                          const Text('Books'), 
+                        const Text('Books'), 
                       pinned: true,
                       expandedHeight: 150.0,
                       forceElevated: innerBoxIsScrolled,
@@ -824,7 +824,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Item 2'), findsNothing);
     expect(find.text('Item 29'), findsOneWidget);
-    
+
     // Bring tab2 into view
     await tester.fling(find.text('Item 29'), const Offset(-400, 0.0), 10000.0);
     await tester.pumpAndSettle();
@@ -842,7 +842,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Item 2'), findsNothing);
     expect(find.text('Item 29'), findsOneWidget);
-    
+
     // Scroll to top of tab1
     await tester.fling(find.text('Item 29'), const Offset(0.0, 250.0), 10000.0);
     await tester.pumpAndSettle();
