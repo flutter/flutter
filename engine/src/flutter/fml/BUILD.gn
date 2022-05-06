@@ -96,7 +96,7 @@ source_set("fml") {
     "wakeable.h",
   ]
 
-  if (is_mac || is_ios || is_linux) {
+  if (is_mac || is_linux || (is_ios && is_debug)) {
     sources += [ "backtrace.cc" ]
   } else {
     sources += [ "backtrace_stub.cc" ]
@@ -109,12 +109,16 @@ source_set("fml") {
   ]
 
   deps = [
-    "//third_party/abseil-cpp/absl/debugging:symbolize",
     "//third_party/dart/runtime:dart_api",
 
     # These need to be in sync with the Fuchsia buildroot.
     "//third_party/icu",
   ]
+
+  if (is_mac || is_linux || (is_ios && is_debug)) {
+    # This abseil dependency is only used by backtrace.cc.
+    deps += [ "//third_party/abseil-cpp/absl/debugging:symbolize" ]
+  }
 
   configs += [ "//third_party/icu:icu_config" ]
 
