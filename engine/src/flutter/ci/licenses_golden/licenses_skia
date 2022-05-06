@@ -1,4 +1,4 @@
-Signature: 4010fa3decd081ab8c5342138801ad1e
+Signature: 1b37f5892914bfb90ee12c9496adbd5b
 
 UNUSED LICENSES:
 
@@ -1284,7 +1284,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/gradients/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/mock/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/mtl/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/BUILD.bazel
-FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/v1/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/BUILD.bazel
@@ -2808,8 +2808,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrMeshDrawTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrMeshDrawTarget.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrOpsTypes.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrPersistentCacheUtils.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrSubRunAllocator.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrSubRunAllocator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrSurfaceInfo.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrWritePixelsRenderTask.h
@@ -2973,6 +2971,8 @@ FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadGlobalVariab
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadLocalVariables.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateUnreachableCode.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLProgramWriter.h
+FILE: ../../../third_party/skia/src/text/gpu/SubRunAllocator.cpp
+FILE: ../../../third_party/skia/src/text/gpu/SubRunAllocator.h
 FILE: ../../../third_party/skia/src/utils/SkVMVisualizer.cpp
 FILE: ../../../third_party/skia/src/utils/SkVMVisualizer.h
 ----------------------------------------------------------------------------------------------------
@@ -3271,8 +3271,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TriangulatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TriangulatingPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrDistanceFieldAdjustTable.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrDistanceFieldAdjustTable.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrStrikeCache.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrStrikeCache.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlob.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlob.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlobRedrawCoordinator.cpp
@@ -3339,6 +3337,8 @@ FILE: ../../../third_party/skia/src/shaders/SkImageShader.h
 FILE: ../../../third_party/skia/src/svg/SkSVGCanvas.cpp
 FILE: ../../../third_party/skia/src/svg/SkSVGDevice.cpp
 FILE: ../../../third_party/skia/src/svg/SkSVGDevice.h
+FILE: ../../../third_party/skia/src/text/gpu/StrikeCache.cpp
+FILE: ../../../third_party/skia/src/text/gpu/StrikeCache.h
 FILE: ../../../third_party/skia/src/utils/SkPaintFilterCanvas.cpp
 FILE: ../../../third_party/skia/src/xps/SkXPSDocument.cpp
 ----------------------------------------------------------------------------------------------------
@@ -5737,8 +5737,8 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/PathInnerTriangulateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/PathInnerTriangulateOp.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TessellationPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TessellationPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrPathTessellationShader.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrPathTessellationShader.h
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrPathTessellationShader.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrPathTessellationShader.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.cpp
@@ -6084,9 +6084,9 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrVx.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/AtlasInstancedHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeTessellateOp.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrStrokeTessellationShader.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrStrokeTessellationShader.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrTessellationShader.h
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrStrokeTessellationShader.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrStrokeTessellationShader.h
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrTessellationShader.h
 FILE: ../../../third_party/skia/src/opts/SkVM_opts.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLModifiersPool.h
@@ -6156,12 +6156,10 @@ FILE: ../../../third_party/skia/src/gpu/AtlasTypes.cpp
 FILE: ../../../third_party/skia/src/gpu/AtlasTypes.h
 FILE: ../../../third_party/skia/src/gpu/RefCntedCallback.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrImageInfo.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/ops/PathTessellator.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/ops/PathTessellator.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeTessellator.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeTessellator.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrGlyphVector.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrGlyphVector.h
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/PathTessellator.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/PathTessellator.h
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/StrokeTessellator.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/StrokeTessellator.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack_graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawGeometry.h
@@ -6204,6 +6202,8 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLFinalizationChecks.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
+FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.cpp
+FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.h
 FILE: ../../../third_party/skia/src/utils/SkTestCanvas.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
@@ -6466,7 +6466,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/PathStencilCoverOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/PathStencilCoverOp.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/PathTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/PathTessellateOp.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/shaders/GrTessellationShader.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrTessellationShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/AffineMatrix.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/Tessellation.cpp
