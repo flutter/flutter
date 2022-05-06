@@ -176,6 +176,33 @@ void main() {
     expect(paragraph2.selections.isEmpty, isTrue);
     expect(paragraph1.selections.isEmpty, isTrue);
   });
+
+  testWidgets('widget span can copy correctly', (WidgetTester tester) async {
+    final FocusNode node = FocusNode();
+    const String line1 = 'How are you?';
+    const String line2 = 'Good, and you?';
+    const String line3 = 'Fine, thank you.';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: node,
+          selectionControls: materialTextSelectionControls,
+          child: const Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                TextSpan(text: line1),
+                WidgetSpan(child: Text(line2)),
+                TextSpan(text: line3),
+              ],
+            )
+          ),
+        ),
+      ),
+    );
+    final SelectableRegionState state = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+    state.selectAll();
+    expect(state.getSelectedContent()!.plainText, '$line1$line2$line3');
+  });
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
