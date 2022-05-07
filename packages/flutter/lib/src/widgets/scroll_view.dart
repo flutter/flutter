@@ -393,8 +393,14 @@ abstract class ScrollView extends StatelessWidget {
     final List<Widget> slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
 
-    final ScrollController? scrollController =
-        primary ? PrimaryScrollController.of(context) : controller;
+    final ScrollBehavior ancestorBehavior = ScrollConfiguration.of(context);
+    ScrollController? scrollController;
+    // check if the scrollable is under a nested scroll scope
+    if (ancestorBehavior.underNestedScrollScope) {
+      scrollController = controller ?? PrimaryScrollController.of(context);
+    } else {
+      scrollController = primary ? PrimaryScrollController.of(context) : controller;
+    }
     final Scrollable scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,

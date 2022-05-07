@@ -2552,6 +2552,38 @@ void main() {
     expect(scrollStarted, 2);
     expect(scrollEnded, 2);
   });
+
+  testWidgets('NestedScrollView.body will be connected if horizontal', (WidgetTester tester) async {
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: NestedScrollView(
+            key: globalKey,
+            scrollDirection: Axis.horizontal,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[const SliverAppBar(title: Text('Demo'))];
+            },
+            body: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            )),
+      ),
+    ));
+
+    expect(globalKey.currentState?.innerController, isNotNull);
+
+    // scroll to right
+    await tester.fling(find.text('Item 1'), const Offset(-50.0, 0.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(globalKey.currentState!.outerController.position.pixels, globalKey.currentState!.outerController.position.maxScrollExtent);
+    expect(globalKey.currentState!.innerController.position.pixels, greaterThan(0));
+
+    // scroll to left
+    await tester.fling(find.byType(ListView), const Offset(50.0, 0.0), 10000.0);
+    await tester.pumpAndSettle();
+    expect(globalKey.currentState!.outerController.position.pixels, 0);
+    expect(globalKey.currentState!.innerController.position.pixels, 0);
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {
