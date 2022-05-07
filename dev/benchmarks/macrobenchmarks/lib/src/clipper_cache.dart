@@ -15,7 +15,7 @@ class ClipperCachePage extends StatefulWidget {
 
 class _ClipperCachePageState extends State<ClipperCachePage>
     with TickerProviderStateMixin {
-  final double _animateOffset = 80;
+  final double _animateOffset = 100;
   final ScrollController _controller = ScrollController();
   final bool _isComplex = true;
   late double _topMargin;
@@ -24,7 +24,7 @@ class _ClipperCachePageState extends State<ClipperCachePage>
   void initState() {
     super.initState();
     const double itemHeight = 140;
-    _topMargin = (window.physicalSize.height / window.devicePixelRatio - itemHeight * 4) / 2;
+    _topMargin = (window.physicalSize.height / window.devicePixelRatio - itemHeight * 3) / 2;
     if (_topMargin < 0) {
       _topMargin = 0;
     }
@@ -59,12 +59,6 @@ class _ClipperCachePageState extends State<ClipperCachePage>
           ClipRRect(
             clipBehavior: Clip.antiAliasWithSaveLayer,
             child: _makeChild(2, _isComplex)
-          ),
-          PhysicalModel(
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            color: Colors.blueAccent,
-            borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-            child: _makeChild(2, _isComplex),
           ),
           const SizedBox(height: 1000),
         ],
