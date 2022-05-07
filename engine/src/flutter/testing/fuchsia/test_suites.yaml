@@ -2,8 +2,6 @@
 # test command for femu_test.py.
 
 # Legacy Component Framework v1 components.
-- test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cmx
-  package: flutter_runner_tests-0.far
 - test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter-embedder-test2#meta/flutter-embedder-test2.cmx
   packages:
     - flutter-embedder-test2-0.far
@@ -14,10 +12,18 @@
 # v2 components.
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/dart_runner_tests#meta/dart_runner_tests.cm
   package: dart_runner_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cm
+  package: flutter_runner_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cm
   package: flutter_runner_tzdata_tests-0.far
-- test_command: run-test-suite fuchsia-pkg://fuchsia.com/fml_tests#meta/fml_tests.cm -- --gtest_filter=-MessageLoop.TimeSensitiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_missing_tests#meta/flutter_runner_tzdata_missing_tests.cm
+  package: flutter_runner_tzdata_missing_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/fml_tests#meta/fml_tests.cm -- --gtest_filter=-MessageLoop.TimeSensitiveTest_*
   package: fml_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/display_list_tests#meta/display_list_tests.cm
+  package: display_list_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/display_list_render_tests#meta/display_list_render_tests.cm
+  package: display_list_render_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/flow_tests#meta/flow_tests.cm
   package: flow_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cm
@@ -30,7 +36,7 @@
   package: txt_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cm
   package: ui_tests-0.far
-  # TODO(fxb/87493): re-enable when this doesn't crash.
+  # TODO(fxb/87493): re-enable A11yTreeIsConsistent when it doesn't crash.
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm -- --gtest_filter=-EmbedderA11yTest.A11yTreeIsConsistent
   package: embedder_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cm

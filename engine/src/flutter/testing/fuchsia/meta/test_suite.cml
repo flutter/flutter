@@ -1,6 +1,7 @@
 {
     facets: {
-        "fuchsia.test": { type: "system" },
+        // shell_unittests and embedder_unittests require vulkan to function.
+        "fuchsia.test": { type: "vulkan" },
     },
     program: {
         // TODO(fxbug.dev/80338): Switch to gtest_runner after the filters in
@@ -34,42 +35,8 @@
             ],
         },
         {
-            storage: "cache",
-            path: "/cache",
-        },
-        {
             storage: "tmp",
             path: "/tmp",
-        },
-
-        // The following lines are equivalent to the "vulkan" sandbox feature in
-        // cfv1.
-        // TODO(fxbug.dev/79792): Remove after vulkan cml shard is available in
-        // the fuchsia sdk.
-        {
-            directory: "dev-gpu",
-            rights: [ "rw*" ],
-            path: "/dev/class/gpu",
-        },
-        {
-            directory: "dev-goldfish-address-space",
-            rights: [ "rw*" ],
-            path: "/dev/class/goldfish-address-space",
-        },
-        {
-            directory: "dev-goldfish-control",
-            rights: [ "rw*" ],
-            path: "/dev/class/goldfish-control",
-        },
-        {
-            directory: "dev-goldfish-pipe",
-            rights: [ "rw*" ],
-            path: "/dev/class/goldfish-pipe",
-        },
-        {
-            directory: "dev-goldfish-sync",
-            rights: [ "rw*" ],
-            path: "/dev/class/goldfish-sync",
         },
     ],
 }
