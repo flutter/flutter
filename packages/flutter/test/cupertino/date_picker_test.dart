@@ -1517,6 +1517,37 @@ void main() {
     handle.dispose();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/98567
+  testWidgets('picker semantics action test', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    debugResetSemanticsIdCounter();
+    final DateTime initialDate = DateTime(2018, 6, 8);
+    late DateTime? date;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              onDateTimeChanged: (DateTime newDate) => date = newDate,
+              initialDateTime: initialDate,
+              maximumDate: initialDate.add(const Duration(days: 2)),
+              minimumDate: initialDate.subtract(const Duration(days: 2)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(4, SemanticsAction.decrease);
+    await tester.pumpAndSettle();
+
+    expect(date, DateTime(2018, 6, 7));
+
+    handle.dispose();
+  });
+
   testWidgets('DatePicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
     Widget buildDatePicker(Brightness brightness) {
       return MaterialApp(
