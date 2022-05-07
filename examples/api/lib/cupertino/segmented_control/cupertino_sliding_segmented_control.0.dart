@@ -14,10 +14,10 @@ Map<Sky, Color> skyColors = <Sky, Color> {
   Sky.cerulean: const Color(0xff007ba7),
 };
 
-void main() => runApp(const SegmentControlApp());
+void main() => runApp(const SegmentedControlApp());
 
-class SegmentControlApp extends StatelessWidget {
-  const SegmentControlApp({Key? key}) : super(key: key);
+class SegmentedControlApp extends StatelessWidget {
+  const SegmentedControlApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
