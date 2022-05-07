@@ -472,7 +472,6 @@ if (enable_unittests) {
       "keyboard_unittest.cc",
       "platform_view_unittest.cc",
       "pointer_delegate_unittests.cc",
-      "runner_unittest.cc",
       "tests/engine_unittests.cc",
       "tests/fake_flatland_unittests.cc",
       "tests/fake_session_unittests.cc",
@@ -539,8 +538,47 @@ if (enable_unittests) {
            ] + flutter_deps
   }
 
+  executable("flutter_runner_tzdata_missing_unittests") {
+    testonly = true
+
+    output_name = "flutter_runner_tzdata_missing_tests"
+
+    sources = [ "runner_tzdata_missing_unittest.cc" ]
+
+    # This is needed for //third_party/googletest for linking zircon symbols.
+    libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+
+    # The use of these dependencies is temporary and will be moved behind the
+    # embedder API.
+    flutter_deps = [
+      "//flutter/lib/ui",
+      "//flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
+      "//third_party/dart/runtime:libdart_jit",
+      "//third_party/dart/runtime/platform:libdart_platform_jit",
+    ]
+
+    deps = [
+             ":flutter_runner_fixtures",
+             ":flutter_runner_sources",
+             "//flutter/testing",
+           ] + flutter_deps
+  }
+
   fuchsia_test_archive("flutter_runner_tests") {
     deps = [ ":flutter_runner_unittests" ]
+
+    binary = "$target_name"
+
+    resources = [
+      {
+        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        dest = "icudtl.dat"
+      },
+    ]
+  }
+
+  fuchsia_test_archive("flutter_runner_tzdata_tests") {
+    deps = [ ":flutter_runner_tzdata_unittests" ]
 
     binary = "$target_name"
 
@@ -565,12 +603,10 @@ if (enable_unittests) {
         dest = "tzdata/zoneinfo64.res"
       },
     ]
-
-    cmx_file = rebase_path("meta/$target_name.cmx")
   }
 
-  fuchsia_test_archive("flutter_runner_tzdata_tests") {
-    deps = [ ":flutter_runner_tzdata_unittests" ]
+  fuchsia_test_archive("flutter_runner_tzdata_missing_tests") {
+    deps = [ ":flutter_runner_tzdata_missing_unittests" ]
 
     binary = "$target_name"
 
@@ -586,6 +622,18 @@ if (enable_unittests) {
     deps = [ "//flutter/fml:fml_unittests" ]
 
     binary = "fml_unittests"
+  }
+
+  fuchsia_test_archive("display_list_tests") {
+    deps = [ "//flutter/display_list:display_list_unittests" ]
+
+    binary = "display_list_unittests"
+  }
+
+  fuchsia_test_archive("display_list_render_tests") {
+    deps = [ "//flutter/display_list:display_list_rendertests" ]
+
+    binary = "display_list_rendertests"
   }
 
   fuchsia_test_archive("flow_tests") {
@@ -817,9 +865,12 @@ if (enable_unittests) {
 
     deps = [
       ":dart_utils_tests",
+      ":display_list_render_tests",
+      ":display_list_tests",
       ":embedder_tests",
       ":flow_tests",
       ":flutter_runner_tests",
+      ":flutter_runner_tzdata_missing_tests",
       ":flutter_runner_tzdata_tests",
       ":fml_tests",
       ":runtime_tests",

@@ -107,7 +107,7 @@ group("flutter") {
   }
 
   # Compile all benchmark targets if enabled.
-  if (enable_unittests && !is_win) {
+  if (enable_unittests && !is_win && !is_fuchsia) {
     public_deps += [
       "//flutter/display_list:display_list_benchmarks",
       "//flutter/fml:fml_benchmarks",

@@ -36,7 +36,7 @@ flutter_component("channel_test_flutter_component") {
   main_package = "channel_test"
   component_name = "channel_test"
   main_dart = "channel_test.dart"
-  manifest = rebase_path("meta/channel_test.cmx")
+  manifest = rebase_path("meta/channel_test.cml")
   deps = [ ":dart_library" ]
 }
 
