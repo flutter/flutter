@@ -308,13 +308,26 @@ class NestedScrollView extends StatefulWidget {
     return target!.state._absorberHandle;
   }
 
+  /// Returns the [NestedScrollViewState] of the nearest ancestor [NestedScrollView].
+  static NestedScrollViewState of(BuildContext context) {
+    final _InheritedNestedScrollView? target = context.dependOnInheritedWidgetOfExactType<_InheritedNestedScrollView>();
+    assert(
+      target != null,
+      'NestedScrollView.of must be called with a context that contains a NestedScrollView.',
+    );
+    return target!.state;
+  }
+
   List<Widget> _buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {
     return <Widget>[
       ...headerSliverBuilder(context, bodyIsScrolled),
       SliverFillRemaining(
         child: PrimaryScrollController(
           controller: innerController,
-          child: body,
+          child: ScrollConfiguration(
+            behavior: scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false, underNestedScrollScope: true),
+            child: body
+          ),
         ),
       ),
     ];
@@ -406,6 +419,11 @@ class NestedScrollViewState extends State<NestedScrollView> {
     _coordinator!.dispose();
     _coordinator = null;
     super.dispose();
+  }
+
+  /// This allows NesetedScrollView to restore its scroll position using PageStorageKey.
+  void preserveScrollPosition() {
+    _coordinator!.preserveScrollPosition = true;
   }
 
   bool? _lastHasScrolledBody;
@@ -606,6 +624,13 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
     }
     return false;
+  }
+
+  bool get preserveScrollPosition => _preserveScrollPosition;
+  bool _preserveScrollPosition = false;
+  set preserveScrollPosition(bool value) {
+    assert(value != null);
+    _preserveScrollPosition = value;
   }
 
   void updateShadow() { _onHasScrolledBodyChanged(); }
@@ -1175,7 +1200,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   void restoreScrollOffset() {
-    if (coordinator.canScrollBody)
+    if (coordinator.canScrollBody || coordinator.preserveScrollPosition)
       super.restoreScrollOffset();
   }
 

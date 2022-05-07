@@ -99,6 +99,7 @@ class ScrollBehavior {
   ScrollBehavior copyWith({
     bool? scrollbars,
     bool? overscroll,
+    bool? underNestedScrollScope,
     Set<PointerDeviceKind>? dragDevices,
     ScrollPhysics? physics,
     TargetPlatform? platform,
@@ -112,6 +113,7 @@ class ScrollBehavior {
       delegate: this,
       scrollbars: scrollbars ?? true,
       overscroll: overscroll ?? true,
+      underNestedScrollScope: underNestedScrollScope ?? false,
       physics: physics,
       platform: platform,
       dragDevices: dragDevices,
@@ -131,6 +133,15 @@ class ScrollBehavior {
   /// Enabling this for [PointerDeviceKind.mouse] will make it difficult or
   /// impossible to select text in scrollable containers and is not recommended.
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
+
+  /// If set to true, the [ScrollView] in the subtree will use [PrimaryScrollController]
+  /// if the [ScrollController] is null.
+  ///
+  /// See also:
+  ///
+  ///  * [NestedScrollView], which depends on PrimaryScrollController to scroll
+  ///    its body.
+  bool get underNestedScrollScope => false;
 
   /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///
@@ -273,9 +284,11 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.overscroll = true,
     this.physics,
     this.platform,
+    bool? underNestedScrollScope,
     Set<PointerDeviceKind>? dragDevices,
     AndroidOverscrollIndicator? androidOverscrollIndicator,
-  }) : _androidOverscrollIndicator = androidOverscrollIndicator,
+  }) : _underNestedScrollScope = underNestedScrollScope,
+       _androidOverscrollIndicator = androidOverscrollIndicator,
        _dragDevices = dragDevices;
 
   final ScrollBehavior delegate;
@@ -283,6 +296,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final bool overscroll;
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
+  final bool? _underNestedScrollScope;
   final Set<PointerDeviceKind>? _dragDevices;
   @override
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
@@ -292,6 +306,9 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
+
+  @override
+  bool get underNestedScrollScope => _underNestedScrollScope ?? delegate.underNestedScrollScope;
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
@@ -316,6 +333,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   ScrollBehavior copyWith({
     bool? scrollbars,
     bool? overscroll,
+    bool? underNestedScrollScope,
     ScrollPhysics? physics,
     TargetPlatform? platform,
     Set<PointerDeviceKind>? dragDevices,
@@ -324,6 +342,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
       overscroll: overscroll ?? this.overscroll,
+      underNestedScrollScope: underNestedScrollScope ?? this.underNestedScrollScope,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
       dragDevices: dragDevices ?? this.dragDevices,
