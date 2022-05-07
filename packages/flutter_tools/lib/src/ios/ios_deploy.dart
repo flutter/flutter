@@ -127,6 +127,7 @@ class IOSDeploy {
     required List<String> launchArguments,
     required IOSDeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
+    required bool uninstallFirst,
   }) {
     appDeltaDirectory?.createSync(recursive: true);
     // Interactive debug session to support sending the lldb detach command.
@@ -144,6 +145,8 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
+      if (uninstallFirst)
+        '--uninstall',
       '--debug',
       if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
@@ -168,6 +171,7 @@ class IOSDeploy {
     required String bundlePath,
     required List<String> launchArguments,
     required IOSDeviceConnectionInterface interfaceType,
+    required bool uninstallFirst,
     Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
@@ -183,6 +187,8 @@ class IOSDeploy {
       ],
       if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
+      if (uninstallFirst)
+        '--uninstall',
       '--justlaunch',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
