@@ -89,7 +89,7 @@ class Runner final
   // Called from SetupICU, for testing only.  Returns false on error.
   static bool SetupTZDataInternal();
 #if defined(FRIEND_TEST)
-  FRIEND_TEST(RunnerTest, TZData);
+  FRIEND_TEST(RunnerTZDataTest, LoadsWithTZDataPresent);
   FRIEND_TEST(RunnerTZDataTest, LoadsWithoutTZDataPresent);
 #endif  // defined(FRIEND_TEST)
 

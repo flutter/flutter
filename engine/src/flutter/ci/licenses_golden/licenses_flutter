@@ -1932,13 +1932,11 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/dart_jit_product_
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/dart_jit_product_runner.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/dart_jit_runner.cml
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/dart_jit_runner.cmx
-FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/dart_zircon_test.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/jit_product_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/jit_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/service_isolate.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/service_isolate.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/vmservice/empty.dart
-FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/vmservice/meta/vmservice.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge_unittest.cc
@@ -2006,7 +2004,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_product_r
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_product_runner.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_runner.cml
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_runner.cmx
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_runner_tests.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/jit_product_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/jit_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view.cc
@@ -2018,8 +2015,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate_unittests
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/program_metadata.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_tzdata_missing_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_tzdata_unittest.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/software_surface.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/software_surface.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/software_surface_producer.cc
