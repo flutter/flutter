@@ -25,6 +25,7 @@ import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
+import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'ticker_provider.dart';
@@ -785,11 +786,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       controller: _effectiveScrollController,
     );
 
-    return _configuration.buildScrollbar(
+    result =  _configuration.buildScrollbar(
       context,
       _configuration.buildOverscrollIndicator(context, result, details),
       details,
     );
+
+    return ScrollableRepaintBoundaryManager(child: result);
   }
 
   @override
@@ -1227,6 +1230,68 @@ class _RestorableScrollOffset extends RestorableValue<double?> {
   bool get enabled => value != null;
 }
 
+
+/// A [ScrollableRepaintBoundaryManager] tracks the scrollable state and notifies
+/// descendant [ScrollableRepaintBoundary].
+class ScrollableRepaintBoundaryManager extends StatefulWidget {
+  /// Create a new [ScrollableRepaintBoundaryManager].
+  const ScrollableRepaintBoundaryManager({required this.child, super.key});
+
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  @override
+  State<ScrollableRepaintBoundaryManager> createState() {
+    return _ScrollableRepaintBoundaryManager();
+  }
+}
+
+class _ScrollableRepaintBoundaryManager extends State<ScrollableRepaintBoundaryManager> {
+  final ValueNotifier<bool> boundary = ValueNotifier<bool>(false);
+
+  bool _onScrollUpdateNotification(ScrollNotification notification) {
+    if (notification.depth != 0) {
+      return false;
+    }
+    if (notification is ScrollStartNotification) {
+      boundary.value = true;
+    } else if (notification is ScrollUpdateNotification) {
+      boundary.value = true;
+    } else if (notification is ScrollEndNotification) {
+      boundary.value = false;
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: _onScrollUpdateNotification,
+      child: _ScrollableRepaintBoundaryNotifier(
+        state: boundary,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// An inherited widget that listens to the scroll state and notifies the
+/// child [ScrollableRepaintBoundary] to enable/disable the repaint
+/// boundary.
+class _ScrollableRepaintBoundaryNotifier extends InheritedWidget {
+  const _ScrollableRepaintBoundaryNotifier({
+    required super.child,
+    required this.state,
+  });
+
+  final ValueNotifier<bool> state;
+
+  @override
+  bool updateShouldNotify(covariant _ScrollableRepaintBoundaryNotifier oldWidget) {
+    return oldWidget.state != state;
+  }
+}
+
 /// A [RepaintBoundary] specialized for scrollable widgets.
 ///
 /// If the scrollable hasn't scrolled before, the repaint boundary
@@ -1245,21 +1310,14 @@ class ScrollableRepaintBoundary extends StatefulWidget {
 }
 
 class _ScrollableRepaintBoundaryState extends State<ScrollableRepaintBoundary> {
-  final ValueNotifier<bool> boundary = ValueNotifier<bool>(false);
-  ScrollPosition? _lastPosition;
+  late ValueNotifier<bool> boundary;
+  late _ScrollableRepaintBoundaryNotifier _notifier;
 
   @override
   void didChangeDependencies() {
-    _lastPosition = Scrollable.of(context)?.position;
-    if (_lastPosition != null) {
-      _lastPosition!.addListener(_didScroll);
-    }
     super.didChangeDependencies();
-  }
-
-  void _didScroll() {
-    boundary.value = true;
-    _lastPosition!.removeListener(_didScroll);
+    _notifier = context.dependOnInheritedWidgetOfExactType<_ScrollableRepaintBoundaryNotifier>()!;
+    boundary = _notifier.state;
   }
 
   @override

@@ -3406,7 +3406,9 @@ class RenderRepaintBoundary extends RenderProxyBox {
 class RenderConditionalRepaintBoundary extends RenderRepaintBoundary {
   /// Create a new [RenderConditionalRepaintBoundary].
   RenderConditionalRepaintBoundary(this._boundary, { super.child })
-    : _isRepaintBoundary = _boundary.value;
+    : _isRepaintBoundary = _boundary.value {
+      _boundary.addListener(_updateStatus);
+    }
 
   @override
   bool get isRepaintBoundary => _isRepaintBoundary;
@@ -3432,6 +3434,26 @@ class RenderConditionalRepaintBoundary extends RenderRepaintBoundary {
     }
     _isRepaintBoundary = boundary.value;
     markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
+
+  @override
+  void detach() {
+    _boundary.removeListener(_updateStatus);
+    super.detach();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    _boundary.addListener(_updateStatus);
+    _updateStatus();
+    super.attach(owner);
+  }
+
+  @override
+  void dispose() {
+    _boundary.removeListener(_updateStatus);
+    super.dispose();
   }
 }
 
