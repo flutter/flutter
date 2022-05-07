@@ -39,7 +39,8 @@ class _ReorderableExampleState extends State<ReorderableExample> {
     final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
 
     return ReorderableListView(
-      buildDefaultDragHandles: false,
+      buildDefaultDragHandlesOnDesktop: false,
+      delayedDragStartDuration: null,
       children: <Widget>[
         for (int index = 0; index < _items.length; index++)
           Container(

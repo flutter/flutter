@@ -1296,7 +1296,7 @@ class ReorderableDragStartListener extends StatelessWidget {
 class ReorderableDelayedDragStartListener extends ReorderableDragStartListener {
   /// Creates a listener for a drag following a long press event over the
   /// given child widget.
-  /// 
+  ///
   /// The [delay] specifies the [Duration] it takes for the press gesture to be
   /// considered a long press. The [delay] defaults to [kLongPressTimeout].
   ///

@@ -32,7 +32,7 @@ import 'theme.dart';
 /// to move the item. On [TargetPlatformVariant.mobile], no drag handle will be
 /// added, but when the user long presses anywhere on the item it will start
 /// moving the item. Displaying drag handles can be controlled with
-/// [ReorderableListView.buildDefaultDragHandles].
+/// [ReorderableListView.buildDefaultDragHandlesOnDesktop].
 ///
 /// All list items must have a key.
 ///
@@ -69,7 +69,8 @@ class ReorderableListView extends StatefulWidget {
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
-    this.buildDefaultDragHandles = true,
+    this.buildDefaultDragHandlesOnDesktop = true,
+    this.buildDefaultDragHandlesOnMobile = false,
     this.padding,
     this.header,
     this.footer,
@@ -97,7 +98,8 @@ class ReorderableListView extends StatefulWidget {
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
        ),
-       assert(buildDefaultDragHandles != null),
+       assert(buildDefaultDragHandlesOnDesktop != null),
+       assert(buildDefaultDragHandlesOnMobile != null),
        itemBuilder = ((BuildContext context, int index) => children[index]),
        itemCount = children.length;
 
@@ -139,7 +141,8 @@ class ReorderableListView extends StatefulWidget {
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
-    this.buildDefaultDragHandles = true,
+    this.buildDefaultDragHandlesOnDesktop = true,
+    this.buildDefaultDragHandlesOnMobile = false,
     this.padding,
     this.header,
     this.footer,
@@ -163,7 +166,8 @@ class ReorderableListView extends StatefulWidget {
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
        ),
-       assert(buildDefaultDragHandles != null);
+       assert(buildDefaultDragHandlesOnDesktop != null),
+       assert(buildDefaultDragHandlesOnMobile != null);
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
@@ -184,13 +188,10 @@ class ReorderableListView extends StatefulWidget {
   final ReorderItemProxyDecorator? proxyDecorator;
 
   /// If true: on desktop platforms, a drag handle is stacked over the
-  /// center of each item's trailing edge; on mobile platforms, a long
-  /// press anywhere on the item starts a drag.
+  /// center of each item's trailing edge.
   ///
   /// The default desktop drag handle is just an [Icons.drag_handle]
-  /// wrapped by a [ReorderableDragStartListener]. On mobile
-  /// platforms, the entire item is wrapped with a
-  /// [ReorderableDelayedDragStartListener].
+  /// wrapped by a [ReorderableDragStartListener].
   ///
   /// To change the appearance or the layout of the drag handles, make
   /// this parameter false and wrap each list item, or a widget within
@@ -198,15 +199,42 @@ class ReorderableListView extends StatefulWidget {
   /// [ReorderableDelayedDragStartListener], or a custom subclass
   /// of [ReorderableDragStartListener].
   ///
-  /// The following sample specifies `buildDefaultDragHandles: false`, and
-  /// uses a [Card] at the leading edge of each item for the item's drag handle.
+  /// The following sample specifies `buildDefaultDragHandlesOnDesktop: false`,
+  /// and uses a [Card] at the leading edge of each item for the item's drag
+  /// handle.
   ///
   /// {@tool dartpad}
   ///
   ///
   /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart **
   ///{@end-tool}
-  final bool buildDefaultDragHandles;
+  final bool buildDefaultDragHandlesOnDesktop;
+
+  /// If true: on mobile platforms, a drag handle is stacked over the
+  /// center of each item's trailing edge. If false: on mobile platforms, the
+  /// whole item is draggable after long press for [delayedDragStartDuration] if
+  /// [delayedDragStartDuration] is not `null`.
+  ///
+  /// The default mobile drag handle is just an [Icons.drag_handle]
+  /// wrapped by a [ReorderableDragStartListener]. If false, the entire item is
+  /// wrapped with a [ReorderableDelayedDragStartListener].
+  ///
+  /// To change the appearance or the layout of the drag handles, make
+  /// this parameter false and wrap each list item, or a widget within
+  /// each list item, with [ReorderableDragStartListener] or
+  /// [ReorderableDelayedDragStartListener], or a custom subclass
+  /// of [ReorderableDragStartListener].
+  ///
+  /// The following sample specifies `buildDefaultDragHandlesOnDesktop: false`,
+  /// and uses a [Card] at the leading edge of each item for the item's drag
+  /// handle.
+  ///
+  /// {@tool dartpad}
+  ///
+  ///
+  /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart **
+  ///{@end-tool}
+  final bool buildDefaultDragHandlesOnMobile;
 
   /// {@macro flutter.widgets.reorderable_list.padding}
   final EdgeInsets? padding;
@@ -252,8 +280,12 @@ class ReorderableListView extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// The delay after which the user is able to drag the element.
-  /// By default, this is [kLongPressTimeout].
-  final Duration delayedDragStartDuration;
+  /// By default, this is [kLongPressTimeout]. If set to `null`, and having
+  /// [buildDefaultDragHandlesOnMobile] as `false`, the list items are not going
+  /// to be reorderable by default.
+  ///
+  /// This only applies to mobile platforms.
+  final Duration? delayedDragStartDuration;
 
   /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
   ///
@@ -336,6 +368,51 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     );
   }
 
+  Widget _buildDefaultDragHandles(BuildContext context, int index, Key itemGlobalKey, Widget item) {
+    switch (widget.scrollDirection) {
+      case Axis.horizontal:
+        return Stack(
+          key: itemGlobalKey,
+          children: <Widget>[
+            item,
+            Positioned.directional(
+              textDirection: Directionality.of(context),
+              start: 0,
+              end: 0,
+              bottom: 8,
+              child: Align(
+                alignment: AlignmentDirectional.bottomCenter,
+                child: ReorderableDragStartListener(
+                  index: index,
+                  child: const Icon(Icons.drag_handle),
+                ),
+              ),
+            ),
+          ],
+        );
+      case Axis.vertical:
+        return Stack(
+          key: itemGlobalKey,
+          children: <Widget>[
+            item,
+            Positioned.directional(
+              textDirection: Directionality.of(context),
+              top: 0,
+              bottom: 0,
+              end: 8,
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: ReorderableDragStartListener(
+                  index: index,
+                  child: const Icon(Icons.drag_handle),
+                ),
+              ),
+            ),
+          ],
+        );
+    }
+  }
+
   Widget _itemBuilder(BuildContext context, int index) {
     final Widget item = widget.itemBuilder(context, index);
     assert(() {
@@ -352,71 +429,35 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     final Widget itemWithSemantics = _wrapWithSemantics(item, index);
     final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
 
-    if (widget.buildDefaultDragHandles) {
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-        case TargetPlatform.macOS:
-          switch (widget.scrollDirection) {
-            case Axis.horizontal:
-              return Stack(
-                key: itemGlobalKey,
-                children: <Widget>[
-                  itemWithSemantics,
-                  Positioned.directional(
-                    textDirection: Directionality.of(context),
-                    start: 0,
-                    end: 0,
-                    bottom: 8,
-                    child: Align(
-                      alignment: AlignmentDirectional.bottomCenter,
-                      child: ReorderableDragStartListener(
-                        index: index,
-                        child: const Icon(Icons.drag_handle),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            case Axis.vertical:
-              return Stack(
-                key: itemGlobalKey,
-                children: <Widget>[
-                  itemWithSemantics,
-                  Positioned.directional(
-                    textDirection: Directionality.of(context),
-                    top: 0,
-                    bottom: 0,
-                    end: 8,
-                    child: Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: ReorderableDragStartListener(
-                        index: index,
-                        child: const Icon(Icons.drag_handle),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-          }
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.macOS:
+        if (!widget.buildDefaultDragHandlesOnDesktop)
+          break;
+        return _buildDefaultDragHandles(context, index, itemGlobalKey, itemWithSemantics);
 
-        case TargetPlatform.iOS:
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          return widget.delayedDragStartDuration == Duration.zero
-              ? ReorderableDragStartListener(
-                  key: itemGlobalKey,
-                  index: index,
-                  child: itemWithSemantics,
-                )
-              : ReorderableDelayedDragStartListener(
-                  key: itemGlobalKey,
-                  index: index,
-                  delay: widget.delayedDragStartDuration,
-                  child: itemWithSemantics,
-                );
-      }
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        if (widget.buildDefaultDragHandlesOnMobile)
+          return _buildDefaultDragHandles(context, index, itemGlobalKey, item);
+        if (widget.delayedDragStartDuration == null)
+          break;
+        return widget.delayedDragStartDuration == Duration.zero
+            ? ReorderableDragStartListener(
+                key: itemGlobalKey,
+                index: index,
+                child: itemWithSemantics,
+              )
+            : ReorderableDelayedDragStartListener(
+                key: itemGlobalKey,
+                index: index,
+                delay: widget.delayedDragStartDuration!,
+                child: itemWithSemantics,
+              );
     }
+    
 
     return KeyedSubtree(
       key: itemGlobalKey,
