@@ -448,7 +448,7 @@ void main() {
       );
 
       final Finder checkbox = find.byType(Checkbox);
-      /// verify initial values
+      // verify initial values
       expect(tester.widget<Checkbox>(checkbox).value, false);
       expect(enabled, true);
 

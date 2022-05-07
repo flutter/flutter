@@ -296,8 +296,11 @@ class CheckboxListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
-  /// if enabled = false, the [CheckboxListTile] will be disabled and will not react to user input.
-  /// if enabled is not provided it will depend on [onChanged] property.
+  /// Whether this list tile is interactive.
+  ///
+  /// If false, this list tile is styled with the disabled color from the
+  /// current [Theme] and the [onTap] callback is
+  /// inoperative.  
   final bool? enabled;
 
   void _handleValueChange() {
