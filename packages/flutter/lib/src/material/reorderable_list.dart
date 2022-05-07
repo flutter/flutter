@@ -457,7 +457,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
                 child: itemWithSemantics,
               );
     }
-    
 
     return KeyedSubtree(
       key: itemGlobalKey,
