@@ -17,6 +17,21 @@ import 'theme.dart';
 
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
+///
+/// ## Color palettes
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_basic_colors.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_active_colors.png)
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_system_colors_1.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_system_colors_2.png)
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_background_colors.png)
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_label_colors.png)
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_separator_link_colors.png)
+///
 class CupertinoColors {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
