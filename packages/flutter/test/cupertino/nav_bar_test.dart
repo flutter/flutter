@@ -1359,6 +1359,64 @@ void main() {
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
   });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar magnifies upon over-scroll and shrinks back once over-scroll ends',
+    (WidgetTester tester) async {
+      const Text titleText = Text('Large Title');
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  largeTitle: titleText,
+                  stretch: true,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder titleTextFinder = find.byWidget(titleText).first;
+
+      // Gets the height of the large title
+      final Offset initialLargeTitleTextSize =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getTopLeft(titleTextFinder);
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+      await tester.pump();
+
+      final Offset magnifiedTitleTextSize =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getTopLeft(titleTextFinder);
+
+      expect(
+        magnifiedTitleTextSize.dy.abs(),
+        greaterThan(initialLargeTitleTextSize.dy.abs()),
+      );
+
+      // Ensure title text retracts to original size after releasing gesture
+      await tester.pumpAndSettle();
+
+      final Offset finalTitleTextSize = tester.getBottomLeft(titleTextFinder) -
+          tester.getTopLeft(titleTextFinder);
+
+      expect(
+        finalTitleTextSize.dy.abs(),
+        initialLargeTitleTextSize.dy.abs(),
+      );
+    },
+  );
 }
 
 class _ExpectStyles extends StatelessWidget {
