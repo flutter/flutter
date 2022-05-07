@@ -1,4 +1,4 @@
-Signature: 8601129697e32b1714d5b240766e35e6
+Signature: de3ecac5b095eb5e0efee31d7199ab8e
 
 UNUSED LICENSES:
 
@@ -3621,6 +3621,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/pairing.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.buildinfo.test/buildinfotest.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/overview.fidl
