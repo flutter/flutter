@@ -40,6 +40,11 @@
 @property(nonatomic) BOOL semanticsEnabled;
 
 /**
+ * The executable name for the current process.
+ */
+@property(nonatomic, readonly, nonnull) NSString* executableName;
+
+/**
  * Informs the engine that the associated view controller's view size has changed.
  */
 - (void)updateWindowMetrics;
