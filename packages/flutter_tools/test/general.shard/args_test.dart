@@ -45,9 +45,9 @@ void main() {
         }
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
-    command.argParser.addOption('key');
+    command.argParser.addFlag('key');
     runner.addCommand(command);
-    await runner.run(<String>['dummy', '--key=true']);
+    await runner.run(<String>['dummy', '--key']);
 
     expect(command.boolArg('key'), true);
     expect(command.boolArg('empty'), null);
