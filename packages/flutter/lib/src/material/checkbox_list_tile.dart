@@ -296,7 +296,7 @@ class CheckboxListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
-  /// Whether this list tile is interactive.
+  /// Whether the CheckboxListTile is interactive.
   ///
   /// If false, this list tile is styled with the disabled color from the
   /// current [Theme] and the [onTap] callback is
