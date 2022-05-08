@@ -374,6 +374,11 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     double pulledExtent,
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
+{
+  double? marginTop,
+  double? radius,
+  Color? color,
+}
   ) {
     final double percentageComplete = (pulledExtent / refreshTriggerPullDistance).clamp(0.0, 1.0);
 
@@ -389,17 +394,18 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
         clipBehavior: Clip.none,
         children: <Widget>[
           Positioned(
-            top: _kActivityIndicatorMargin,
+          top: marginTop ?? _kActivityIndicatorMargin,
             left: 0.0,
             right: 0.0,
-            child: _buildIndicatorForRefreshState(refreshState, _kActivityIndicatorRadius, percentageComplete),
+            child: _buildIndicatorForRefreshState(refreshState, radius ?? _kActivityIndicatorRadius, percentageComplete,color,),
           ),
         ],
       ),
     );
   }
 
-  static Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState, double radius, double percentageComplete) {
+  static Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState, double radius, double percentageComplete,  Color? color,
+) {
     switch (refreshState) {
       case RefreshIndicatorMode.drag:
         // While we're dragging, we draw individual ticks of the spinner while simultaneously
@@ -408,15 +414,15 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
         const Curve opacityCurve = Interval(0.0, 0.35, curve: Curves.easeInOut);
         return Opacity(
           opacity: opacityCurve.transform(percentageComplete),
-          child: CupertinoActivityIndicator.partiallyRevealed(radius: radius, progress: percentageComplete),
+          child: CupertinoActivityIndicator.partiallyRevealed(radius: radius, progress: percentageComplete,color: color,),
         );
       case RefreshIndicatorMode.armed:
       case RefreshIndicatorMode.refresh:
         // Once we're armed or performing the refresh, we just show the normal spinner.
-        return CupertinoActivityIndicator(radius: radius);
+        return CupertinoActivityIndicator(radius: radius,color: color);
       case RefreshIndicatorMode.done:
         // When the user lets go, the standard transition is to shrink the spinner.
-        return CupertinoActivityIndicator(radius: radius * percentageComplete);
+        return CupertinoActivityIndicator(radius: radius * percentageComplete,color:color);
       case RefreshIndicatorMode.inactive:
         // Anything else doesn't show anything.
         return Container();
