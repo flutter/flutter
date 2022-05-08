@@ -264,11 +264,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   // TODO(stuartmorgan): Move internal channel registration from FlutterViewController to here.
 
-  // FlutterProjectArgs is expecting a full argv, so when processing it for
-  // flags the first item is treated as the executable and ignored. Add a dummy
-  // value so that all provided arguments are used.
+  // The first argument of argv is required to be the executable name.
+  std::vector<const char*> argv = {[self.executableName UTF8String]};
   std::vector<std::string> switches = _project.switches;
-  std::vector<const char*> argv = {"placeholder"};
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),
                  [](const std::string& arg) -> const char* { return arg.c_str(); });
 
@@ -515,6 +513,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (std::weak_ptr<flutter::AccessibilityBridge>)accessibilityBridge {
   return _bridge;
+}
+
+- (nonnull NSString*)executableName {
+  return [[[NSProcessInfo processInfo] arguments] firstObject] ?: @"Flutter";
 }
 
 - (void)updateWindowMetrics {
