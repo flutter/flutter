@@ -2,11 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui';
 
 void signalNativeTest() native 'SignalNativeTest';
 
 void main() {
+}
+
+/// Notifies the test of a string value.
+///
+/// This is used to notify the native side of the test of a string value from
+/// the Dart fixture under test.
+void notifyStringValue(String s) native 'NotifyStringValue';
+
+@pragma('vm:entry-point')
+void executableNameNotNull() {
+  notifyStringValue(Platform.executable);
 }
 
 @pragma('vm:entry-point')
