@@ -373,14 +373,13 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     RefreshIndicatorMode refreshState,
     double pulledExtent,
     double refreshTriggerPullDistance,
-    double refreshIndicatorExtent,
-{
-  double? marginTop,
-  double? radius,
-  Color? color,
-}
-  ) {
-    final double percentageComplete = (pulledExtent / refreshTriggerPullDistance).clamp(0.0, 1.0);
+    double refreshIndicatorExtent, {
+    double? marginTop,
+    double? radius,
+    Color? color,
+  }) {
+    final double percentageComplete =
+        (pulledExtent / refreshTriggerPullDistance).clamp(0.0, 1.0);
 
     // Place the indicator at the top of the sliver that opens up. Note that we're using
     // a Stack/Positioned widget because the CupertinoActivityIndicator does some internal
@@ -394,18 +393,27 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
         clipBehavior: Clip.none,
         children: <Widget>[
           Positioned(
-          top: marginTop ?? _kActivityIndicatorMargin,
+            top: marginTop ?? _kActivityIndicatorMargin,
             left: 0.0,
             right: 0.0,
-            child: _buildIndicatorForRefreshState(refreshState, radius ?? _kActivityIndicatorRadius, percentageComplete,color,),
+            child: _buildIndicatorForRefreshState(
+              refreshState,
+              radius ?? _kActivityIndicatorRadius,
+              percentageComplete,
+              color,
+            ),
           ),
         ],
       ),
     );
   }
 
-  static Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState, double radius, double percentageComplete,  Color? color,
-) {
+  static Widget _buildIndicatorForRefreshState(
+    RefreshIndicatorMode refreshState,
+    double radius,
+    double percentageComplete,
+    Color? color,
+  ) {
     switch (refreshState) {
       case RefreshIndicatorMode.drag:
         // While we're dragging, we draw individual ticks of the spinner while simultaneously
@@ -414,15 +422,20 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
         const Curve opacityCurve = Interval(0.0, 0.35, curve: Curves.easeInOut);
         return Opacity(
           opacity: opacityCurve.transform(percentageComplete),
-          child: CupertinoActivityIndicator.partiallyRevealed(radius: radius, progress: percentageComplete,color: color,),
+          child: CupertinoActivityIndicator.partiallyRevealed(
+            radius: radius,
+            progress: percentageComplete,
+            color: color,
+          ),
         );
       case RefreshIndicatorMode.armed:
       case RefreshIndicatorMode.refresh:
         // Once we're armed or performing the refresh, we just show the normal spinner.
-        return CupertinoActivityIndicator(radius: radius,color: color);
+        return CupertinoActivityIndicator(radius: radius, color: color);
       case RefreshIndicatorMode.done:
         // When the user lets go, the standard transition is to shrink the spinner.
-        return CupertinoActivityIndicator(radius: radius * percentageComplete,color:color);
+        return CupertinoActivityIndicator(
+            radius: radius * percentageComplete, color: color);
       case RefreshIndicatorMode.inactive:
         // Anything else doesn't show anything.
         return Container();
