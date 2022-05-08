@@ -1073,7 +1073,7 @@ class EditableText extends StatefulWidget {
   /// The bytes represent the content being committed through the keyboard. This can
   /// be an image, video, or any other file type
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool sample}
   ///
   /// This example shows how to access the data for committed content in your
   /// `TextField`.
@@ -1421,7 +1421,7 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to ['image/png', 'image/bmp', 'image/jpg', 'image/tiff', 'image/gif', 'image/jpeg', 'image/webp']
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   ///
   /// This example shows how to limit your keyboard commits to specific file types
   /// using the `TextField` widget.
