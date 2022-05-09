@@ -371,7 +371,7 @@ class CocoaPods {
       ).send();
       _logger.printError(
         'Error: To set up CocoaPods for ARM macOS, run:\n'
-        '  arch -x86_64 sudo gem install ffi\n',
+        '  sudo gem uninstall ffi && sudo gem install ffi -- --enable-libffi-alloc\n',
         emphasis: true,
       );
     }

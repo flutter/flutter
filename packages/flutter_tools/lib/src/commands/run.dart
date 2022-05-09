@@ -140,6 +140,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'this option multiple times each with one argument to pass '
               'multiple arguments to the Dart entrypoint. Currently this is '
               'only supported on desktop platforms.',
+      )
+      ..addFlag('uninstall-first',
+        hide: !verboseHelp,
+        help: 'Uninstall previous versions of the app on the device '
+              'before reinstalling. Currently only supported on iOS.',
     );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -166,6 +171,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get runningWithPrebuiltApplication => argResults[FlutterOptions.kUseApplicationBinary] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   bool get enableImpeller => boolArg('enable-impeller');
+  bool get uninstallFirst => boolArg('uninstall-first');
 
   @override
   bool get reportNullSafety => true;
@@ -196,6 +202,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
         enableImpeller: enableImpeller,
+        uninstallFirst: uninstallFirst,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -240,6 +247,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
+        uninstallFirst: uninstallFirst,
       );
     }
   }

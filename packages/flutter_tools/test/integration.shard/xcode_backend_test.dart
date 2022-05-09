@@ -26,23 +26,6 @@ const Map<String, String> unknownFlutterBuildMode = <String, String>{
   'CONFIGURATION': 'Debug',
 };
 
-// Can't use a debug engine build with a release build.
-const Map<String, String> localEngineDebugBuildModeRelease = <String, String>{
-  'SOURCE_ROOT': '../examples/hello_world',
-  'FLUTTER_ROOT': '../..',
-  'LOCAL_ENGINE': '/engine/src/out/ios_debug_unopt',
-  'CONFIGURATION': 'Release',
-};
-
-// Can't use a debug build with a profile engine.
-const Map<String, String> localEngineProfileBuildModeRelease = <String, String>{
-  'SOURCE_ROOT': '../examples/hello_world',
-  'FLUTTER_ROOT': '../..',
-  'LOCAL_ENGINE': '/engine/src/out/ios_profile',
-  'CONFIGURATION': 'Debug',
-  'FLUTTER_BUILD_MODE': 'Debug',
-};
-
 void main() {
   Future<void> expectXcodeBackendFails(Map<String, String> environment) async {
     final ProcessResult result = await Process.run(
@@ -70,8 +53,6 @@ void main() {
   test('Xcode backend fails for on unsupported configuration combinations', () async {
     await expectXcodeBackendFails(unknownConfiguration);
     await expectXcodeBackendFails(unknownFlutterBuildMode);
-    await expectXcodeBackendFails(localEngineDebugBuildModeRelease);
-    await expectXcodeBackendFails(localEngineProfileBuildModeRelease);
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
   test('Xcode backend warns archiving a non-release build.', () async {
