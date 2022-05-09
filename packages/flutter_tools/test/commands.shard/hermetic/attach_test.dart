@@ -631,7 +631,11 @@ class StreamLogger extends Logger {
   }
 
   @override
-  Status startSpinner({ VoidCallback onFinish }) {
+  Status startSpinner({
+    VoidCallback onFinish,
+    Duration timeout,
+    SlowWarningCallback slowWarningCallback,
+  }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
       onFinish: onFinish,
@@ -709,7 +713,7 @@ VMServiceConnector getFakeVmServiceFactory({
             'views': <Object>[
               <String, Object>{
                 'id': '1',
-                'isolate': fakeUnpausedIsolate.toJson()
+                'isolate': fakeUnpausedIsolate.toJson(),
               },
             ],
           },
@@ -736,7 +740,7 @@ VMServiceConnector getFakeVmServiceFactory({
             'views': <Object>[
               <String, Object>{
                 'id': '1',
-                'isolate': fakeUnpausedIsolate.toJson()
+                'isolate': fakeUnpausedIsolate.toJson(),
               },
             ],
           },
@@ -798,6 +802,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int hostPort,
     bool ipv6,
     bool disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {}
 
   @override

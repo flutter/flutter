@@ -277,7 +277,7 @@ void main() {
           stdout: revision3,
         ),
         const FakeCommand(
-          command: <String>['git', 'merge-base', candidateBranch, 'master'],
+          command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],
           stdout: branchPointRevision,
         ),
         // check if commit is tagged, zero exit code means it is tagged
@@ -465,7 +465,7 @@ void main() {
           stdout: revision3,
         ),
         const FakeCommand(
-          command: <String>['git', 'merge-base', candidateBranch, 'master'],
+          command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],
           stdout: branchPointRevision,
         ),
       ];
@@ -639,7 +639,7 @@ void main() {
           stdout: revision3,
         ),
         const FakeCommand(
-          command: <String>['git', 'merge-base', candidateBranch, 'master'],
+          command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],
           stdout: branchPointRevision,
         ),
         // check if commit is tagged, 0 exit code means it is tagged
@@ -826,7 +826,7 @@ void main() {
           stdout: revision3,
         ),
         const FakeCommand(
-          command: <String>['git', 'merge-base', candidateBranch, 'master'],
+          command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],
           stdout: branchPointRevision,
         ),
         // check if commit is tagged, 0 exit code thus it is tagged
@@ -1014,7 +1014,7 @@ void main() {
           stdout: branchPointRevision,
         ),
         const FakeCommand(
-          command: <String>['git', 'merge-base', candidateBranch, 'master'],
+          command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],
           stdout: branchPointRevision,
         ),
         // check if commit is tagged

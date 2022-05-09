@@ -297,6 +297,27 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, false);
   });
 
+  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
+    const Color selectionColor = Colors.orange;
+    const Color cursorColor = Colors.red;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: DefaultSelectionStyle(
+            selectionColor: selectionColor,
+            cursorColor: cursorColor,
+            child: SelectableText('text'),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.selectionColor, selectionColor);
+    expect(state.widget.cursorColor, cursorColor);
+  });
+
   testWidgets('Selectable Text has adaptive size', (WidgetTester tester) async {
     await tester.pumpWidget(
         boilerplate(
@@ -2176,7 +2197,7 @@ void main() {
           actions: <SemanticsAction>[SemanticsAction.longPress],
           label: 'German greeting for good day',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
   });
@@ -2319,6 +2340,99 @@ void main() {
         ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/100395.
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 200);
+    const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
+    const String offScreenText = 'off screen';
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          controller: controller,
+          child: SelectableText.rich(
+            TextSpan(
+              children: <TextSpan>[
+                const TextSpan(text: onScreenText),
+                TextSpan(
+                  text: offScreenText,
+                  recognizer: TapGestureRecognizer()..onTap = () { },
+                ),
+              ],
+              style: textStyle,
+            ),
+            textDirection: TextDirection.ltr,
+          ),
+        )
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                      actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          actions: <SemanticsAction>[SemanticsAction.longPress],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  label: 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isHidden,
+                                    SemanticsFlag.isLink,
+                                  ],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                  label: 'off screen',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
+
+    // Test show on screen.
+    expect(controller.offset, 0.0);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(8, SemanticsAction.showOnScreen);
+    await tester.pumpAndSettle();
+    expect(controller.offset != 0.0, isTrue);
 
     semantics.dispose();
   });
@@ -4520,8 +4634,8 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(newSelection!.baseOffset, 4);
-    expect(newSelection!.extentOffset, 7);
+    expect(newSelection!.isCollapsed, isTrue);
+    expect(newSelection!.baseOffset, 5);
     newSelection = null;
 
     await tester.tap(find.text('Select all'));

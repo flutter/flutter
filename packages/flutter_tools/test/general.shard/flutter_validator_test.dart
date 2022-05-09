@@ -54,7 +54,7 @@ void main() {
         const FakeCommand(
           command: <String>['Artifact.genSnapshot'],
           exitCode: 1,
-        )
+        ),
       ])
     );
     fileSystem.file(artifacts.getArtifactPath(Artifact.genSnapshot)).createSync(recursive: true);

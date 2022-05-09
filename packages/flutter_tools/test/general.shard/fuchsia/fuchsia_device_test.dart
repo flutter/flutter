@@ -657,7 +657,7 @@ void main() {
             jsonResponse: <String, Object>{
               'views': <Object>[
                 for (FlutterView view in views)
-                  view.toJson()
+                  view.toJson(),
               ],
             },
           ),
@@ -944,6 +944,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int hostPort,
     bool ipv6,
     bool disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {}
 
   @override

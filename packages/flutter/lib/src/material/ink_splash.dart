@@ -114,7 +114,7 @@ class InkSplash extends InteractiveInkFeature {
   /// When the splash is removed, `onRemoved` will be called.
   InkSplash({
     required MaterialInkController controller,
-    required RenderBox referenceBox,
+    required super.referenceBox,
     required TextDirection textDirection,
     Offset? position,
     required Color color,
@@ -123,7 +123,7 @@ class InkSplash extends InteractiveInkFeature {
     BorderRadius? borderRadius,
     ShapeBorder? customBorder,
     double? radius,
-    VoidCallback? onRemoved,
+    super.onRemoved,
   }) : assert(textDirection != null),
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
@@ -132,7 +132,7 @@ class InkSplash extends InteractiveInkFeature {
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
        _textDirection = textDirection,
-       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
+       super(controller: controller, color: color) {
     assert(_borderRadius != null);
     _radiusController = AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)

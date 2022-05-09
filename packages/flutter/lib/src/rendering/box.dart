@@ -16,7 +16,7 @@ import 'object.dart';
 
 // This class should only be used in debug builds.
 class _DebugSize extends Size {
-  _DebugSize(Size source, this._owner, this._canBeUsedByParent) : super.copy(source);
+  _DebugSize(super.source, this._owner, this._canBeUsedByParent) : super.copy();
   final RenderBox _owner;
   final bool _canBeUsedByParent;
 }
@@ -61,20 +61,20 @@ class _DebugSize extends Size {
 /// ## Terminology
 ///
 /// When the minimum constraints and the maximum constraint in an axis are the
-/// same, that axis is _tightly_ constrained. See: [new
-/// BoxConstraints.tightFor], [new BoxConstraints.tightForFinite], [tighten],
+/// same, that axis is _tightly_ constrained. See: [
+/// BoxConstraints.tightFor], [BoxConstraints.tightForFinite], [tighten],
 /// [hasTightWidth], [hasTightHeight], [isTight].
 ///
 /// An axis with a minimum constraint of 0.0 is _loose_ (regardless of the
 /// maximum constraint; if it is also 0.0, then the axis is simultaneously tight
-/// and loose!). See: [new BoxConstraints.loose], [loosen].
+/// and loose!). See: [BoxConstraints.loose], [loosen].
 ///
 /// An axis whose maximum constraint is not infinite is _bounded_. See:
 /// [hasBoundedWidth], [hasBoundedHeight].
 ///
 /// An axis whose maximum constraint is infinite is _unbounded_. An axis is
 /// _expanding_ if it is tightly infinite (its minimum and maximum constraints
-/// are both infinite). See: [new BoxConstraints.expand].
+/// are both infinite). See: [BoxConstraints.expand].
 ///
 /// An axis whose _minimum_ constraint is infinite is just said to be _infinite_
 /// (since by definition the maximum constraint must also be infinite in that
@@ -107,7 +107,7 @@ class BoxConstraints extends Constraints {
   ///
   /// See also:
   ///
-  ///  * [new BoxConstraints.tightForFinite], which is similar but instead of
+  ///  * [BoxConstraints.tightForFinite], which is similar but instead of
   ///    being tight if the value is non-null, is tight if the value is not
   ///    infinite.
   const BoxConstraints.tightFor({
@@ -123,7 +123,7 @@ class BoxConstraints extends Constraints {
   ///
   /// See also:
   ///
-  ///  * [new BoxConstraints.tightFor], which is similar but instead of being
+  ///  * [BoxConstraints.tightFor], which is similar but instead of being
   ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
     double width = double.infinity,
@@ -670,7 +670,7 @@ class BoxHitTestResult extends HitTestResult {
   ///    generic [HitTestResult].
   ///  * [SliverHitTestResult.wrap], which turns a [BoxHitTestResult] into a
   ///    [SliverHitTestResult] for hit testing on [RenderSliver] children.
-  BoxHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+  BoxHitTestResult.wrap(super.result) : super.wrap();
 
   /// Transforms `position` to the local coordinate system of a child for
   /// hit-testing the child.
@@ -890,9 +890,8 @@ class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
-  BoxHitTestEntry(RenderBox target, this.localPosition)
-    : assert(localPosition != null),
-      super(target);
+  BoxHitTestEntry(super.target, this.localPosition)
+    : assert(localPosition != null);
 
   /// The position of the hit test in the local coordinates of [target].
   final Offset localPosition;
@@ -1369,15 +1368,15 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
         } else {
-          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+          debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments['intrinsics dimension'] = describeEnum(dimension);
-        debugTimelineArguments['intrinsics argument'] = '$argument';
+        debugTimelineArguments!['intrinsics dimension'] = describeEnum(dimension);
+        debugTimelineArguments!['intrinsics argument'] = '$argument';
         return true;
       }());
       if (!kReleaseMode) {
@@ -1833,14 +1832,14 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
         } else {
-          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+          debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments['getDryLayout constraints'] = '$constraints';
+        debugTimelineArguments!['getDryLayout constraints'] = '$constraints';
         return true;
       }());
       if (!kReleaseMode) {
@@ -1976,7 +1975,7 @@ abstract class RenderBox extends RenderObject {
   /// of those functions, call [markNeedsLayout] instead to schedule a layout of
   /// the box.
   Size get size {
-    assert(hasSize, 'RenderBox was not laid out: ${toString()}');
+    assert(hasSize, 'RenderBox was not laid out: $this');
     assert(() {
       final Size? size = _size;
       if (size is _DebugSize) {
@@ -2349,8 +2348,7 @@ abstract class RenderBox extends RenderObject {
     }());
   }
 
-  @override
-  void markNeedsLayout() {
+  bool _clearCachedData() {
     if ((_cachedBaselines != null && _cachedBaselines!.isNotEmpty) ||
         (_cachedIntrinsicDimensions != null && _cachedIntrinsicDimensions!.isNotEmpty) ||
         (_cachedDryLayoutSizes != null && _cachedDryLayoutSizes!.isNotEmpty)) {
@@ -2362,12 +2360,28 @@ abstract class RenderBox extends RenderObject {
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
       _cachedDryLayoutSizes?.clear();
-      if (parent is RenderObject) {
-        markParentNeedsLayout();
-        return;
-      }
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  void markNeedsLayout() {
+    if (_clearCachedData() && parent is RenderObject) {
+      markParentNeedsLayout();
+      return;
     }
     super.markNeedsLayout();
+  }
+
+  @override
+  void layout(Constraints constraints, {bool parentUsesSize = false}) {
+    if (hasSize && constraints != this.constraints &&
+        _cachedBaselines != null && _cachedBaselines!.isNotEmpty) {
+      // The cached baselines data may need update if the constraints change.
+      _cachedBaselines?.clear();
+    }
+    super.layout(constraints, parentUsesSize: parentUsesSize);
   }
 
   /// {@macro flutter.rendering.RenderObject.performResize}

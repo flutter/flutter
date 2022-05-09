@@ -89,10 +89,10 @@ class ElevatedButtonTheme extends InheritedTheme {
   ///
   /// The [data] parameter must not be null.
   const ElevatedButtonTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The configuration of this theme.
   final ElevatedButtonThemeData data;

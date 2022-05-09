@@ -526,8 +526,8 @@ void main() {
                 position: location,
                 buttons: kSecondaryMouseButton,
                 pointer: 1,
-              )
-            ])
+              ),
+            ]),
         ],
         PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
           PointerUpEvent(
@@ -535,8 +535,8 @@ void main() {
             position: location,
             buttons: kSecondaryMouseButton,
             pointer: 1,
-          )
-        ])
+          ),
+        ]),
       ];
       final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
       expect(timeDiffs.length, records.length);
@@ -783,7 +783,7 @@ class FakeMatcher extends AsyncMatcher {
 }
 
 class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest({Key? key}) : super(key: key);
+  const _SingleTickerTest();
 
   @override
   _SingleTickerTestState createState() => _SingleTickerTestState();

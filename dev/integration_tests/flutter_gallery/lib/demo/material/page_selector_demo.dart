@@ -74,7 +74,7 @@ class _PageSelector extends StatelessWidget {
 }
 
 class PageSelectorDemo extends StatelessWidget {
-  const PageSelectorDemo({Key? key}) : super(key: key);
+  const PageSelectorDemo({super.key});
 
   static const String routeName = '/material/page-selector';
   static final List<Icon> icons = <Icon>[

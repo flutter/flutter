@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({ Key? key, this.child }) : super(key: key);
+  const StateMarker({ super.key, this.child });
 
   final Widget? child;
 

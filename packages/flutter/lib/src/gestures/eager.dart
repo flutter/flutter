@@ -21,9 +21,9 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(kind: kind, supportedDevices: supportedDevices);
+    super.kind,
+    super.supportedDevices,
+  });
 
   @override
   void addAllowedPointer(PointerDownEvent event) {

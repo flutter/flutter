@@ -12,7 +12,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
-  Future<void> _checkNonLinearAnimation(WidgetTester tester) async {
+  Future<void> checkNonLinearAnimation(WidgetTester tester) async {
     final Offset firstPosition = tester.getCenter(find.text('BottomSheet'));
     await tester.pump(const Duration(milliseconds: 30));
     final Offset secondPosition = tester.getCenter(find.text('BottomSheet'));
@@ -360,13 +360,13 @@ void main() {
     );
     await tester.pump();
 
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle();
 
     // Tap above the bottom sheet to dismiss it.
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump();
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(find.text('BottomSheet'), findsNothing);
   });
@@ -1149,6 +1149,50 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/99627
+  testWidgets('The old route entry should be removed when a new sheet popup', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+    PersistentBottomSheetController<void>? sheetController;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    final ModalRoute<dynamic> route = ModalRoute.of(scaffoldKey.currentContext!)!;
+    expect(route.canPop, false);
+
+    scaffoldKey.currentState!.showBottomSheet<void>((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(height: 200.0);
+        },
+      );
+    });
+
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(route.canPop, true);
+
+    // Trigger the second sheet will remove the first sheet from tree.
+    sheetController = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(height: 200.0);
+        },
+      );
+    });
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(route.canPop, true);
+
+    sheetController.close();
+
+    expect(route.canPop, false);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/87708
   testWidgets('The framework does not dispose of the transitionAnimationController provided by user.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
@@ -1613,7 +1657,7 @@ void main() {
 }
 
 class _TestPage extends StatelessWidget {
-  const _TestPage({Key? key, this.useRootNavigator}) : super(key: key);
+  const _TestPage({this.useRootNavigator});
 
   final bool? useRootNavigator;
 

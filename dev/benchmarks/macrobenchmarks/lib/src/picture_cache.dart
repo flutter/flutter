@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class PictureCachePage extends StatelessWidget {
-  const PictureCachePage({Key? key}) : super(key: key);
+  const PictureCachePage({super.key});
 
   static const List<String> kTabNames = <String>['1', '2', '3', '4', '5'];
 
@@ -45,8 +45,7 @@ class PictureCachePage extends StatelessWidget {
 }
 
 class ListItem extends StatelessWidget {
-  const ListItem({Key? key, required this.index})
-      : super(key: key);
+  const ListItem({super.key, required this.index});
 
   final int index;
 
@@ -63,7 +62,7 @@ class ListItem extends StatelessWidget {
       _buildUserInfo(),
       const SizedBox(
         height: 10,
-      )
+      ),
     ];
     if (index % 3 != 0) {
       contents.add(_buildImageContent());
@@ -141,7 +140,7 @@ class ListItem extends StatelessWidget {
         ),
         const SizedBox(
           width: 15,
-        )
+        ),
       ],
     );
   }

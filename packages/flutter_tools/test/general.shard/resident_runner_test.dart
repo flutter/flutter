@@ -587,7 +587,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -647,15 +647,15 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
           'success': false,
           'notices': <Object>[
             <String, Object>{
-              'message': 'Failed to hot reload'
-            }
+              'message': 'Failed to hot reload',
+            },
           ],
           'details': <String, Object>{},
         },
@@ -711,7 +711,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -883,7 +883,7 @@ void main() {
           timestamp: 0,
           kind: vm_service.EventKind.kIsolateRunnable,
         )
-      )
+      ),
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -962,8 +962,8 @@ void main() {
         event: vm_service.Event(
           timestamp: 0,
           kind: vm_service.EventKind.kIsolateRunnable,
-        )
-      )
+        ),
+      ),
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -1084,7 +1084,7 @@ void main() {
           timestamp: 0,
           kind: vm_service.EventKind.kIsolateRunnable,
         ),
-      )
+      ),
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -1330,6 +1330,7 @@ flutter:
           commandHelp.a,
           commandHelp.M,
           commandHelp.g,
+          commandHelp.j,
           commandHelp.hWithDetails,
           commandHelp.c,
           commandHelp.q,
@@ -1403,7 +1404,7 @@ flutter:
           commandHelp.hWithDetails,
           commandHelp.c,
           commandHelp.q,
-          ''
+          '',
         ].join('\n')
     ));
   }));
@@ -1436,7 +1437,7 @@ flutter:
           commandHelp.hWithoutDetails,
           commandHelp.c,
           commandHelp.q,
-          ''
+          '',
         ].join('\n')
     ));
   }));
@@ -1450,7 +1451,7 @@ flutter:
           'viewId': fakeFlutterView.id,
         },
         jsonResponse: <String, Object>{
-          'SkSLs': <String, Object>{}
+          'SkSLs': <String, Object>{},
         }
       ),
     ]);
@@ -1471,9 +1472,9 @@ flutter:
         jsonResponse: <String, Object>{
           'SkSLs': <String, Object>{
             'A': 'B',
-          }
-        }
-      )
+          },
+        },
+      ),
     ]);
     await residentRunner.writeSkSL();
 
@@ -1483,7 +1484,7 @@ flutter:
       'platform': 'android',
       'name': 'FakeDevice',
       'engineRevision': 'abcdefg',
-      'data': <String, Object>{'A': 'B'}
+      'data': <String, Object>{'A': 'B'},
     });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -1491,7 +1492,7 @@ flutter:
       fileSystem: globals.fs,
       platform: globals.platform,
     ),
-    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg')
+    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg'),
   }));
 
   testUsingContext('ResidentRunner ignores DevtoolsLauncher when attaching with enableDevTools: false - cold mode', () => testbed.run(() async {
@@ -1570,7 +1571,13 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        const BuildInfo(
+          BuildMode.debug,
+          null,
+          treeShakeIcons: false,
+        )
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1639,6 +1646,29 @@ flutter:
 
     expect(await globals.fs.file(globals.fs.path.join(
       'build', 'cache.dill')).readAsString(), 'ABC');
+  }));
+
+  testUsingContext('HotRunner copies compiled app.dill to cache during startup with track-widget-creation', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ], wsAddress: testUri);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+
+    await residentRunner.run(enableDevTools: true);
+
+    expect(await globals.fs.file(globals.fs.path.join(
+      'build', 'cache.dill.track.dill')).readAsString(), 'ABC');
   }));
 
   testUsingContext('HotRunner does not copy app.dill if a dillOutputPath is given', () => testbed.run(() async {
@@ -1838,7 +1868,7 @@ flutter:
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true)
+    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
   });
 
    testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag', () async {
@@ -1882,6 +1912,30 @@ flutter:
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill, '/foo/bar.dill');
+    expect(residentCompiler.assumeInitializeFromDillUpToDate, false);
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+   testUsingContext('FlutterDevice passes assumeInitializeFromDillUpToDate parameter if specified', () async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final FakeDevice device = FakeDevice();
+
+    final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
+      device,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        extraFrontEndOptions: <String>[],
+        assumeInitializeFromDillUpToDate: true,
+      ),
+      target: null, platform: null,
+    )).generator as DefaultResidentCompiler;
+
+    expect(residentCompiler.assumeInitializeFromDillUpToDate, true);
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1892,11 +1946,12 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri, List<String> cachedUserTags}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
+      expect(cachedUserTags, isEmpty);
       throw FakeDartDevelopmentServiceException(message:
         'Existing VM service clients prevent DDS from taking control.',
       );
@@ -1939,11 +1994,12 @@ flutter:
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
     final Completer<void>done = Completer<void>();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) async {
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri, List<String> cachedUserTags}) async {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
       expect(ipv6, isTrue);
       expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
+      expect(cachedUserTags, isEmpty);
       done.complete();
       return null;
     };
@@ -1970,11 +2026,12 @@ flutter:
     // See https://github.com/flutter/flutter/issues/72385 for context.
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri, List<String> cachedUserTags}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
+      expect(cachedUserTags, isEmpty);
       throw FakeDartDevelopmentServiceException(message: 'No URI');
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
@@ -2202,6 +2259,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     int ddsPort,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
+    bool cacheStartupProfile = false,
     @required bool allowExistingDdsInstance,
     bool ipv6 = false,
   }) async { }
@@ -2244,6 +2302,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     bool enableDds = true,
+    bool cacheStartupProfile = false,
     bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     CompileExpression compileExpression,

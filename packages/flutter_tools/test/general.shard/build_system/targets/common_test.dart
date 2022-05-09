@@ -93,6 +93,7 @@ void main() {
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
+        '--track-widget-creation',
         '--aot',
         '--tfa',
         '--packages',
@@ -109,7 +110,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('KernelSnapshot does not use track widget creation on profile builds', () async {
+  testWithoutContext('KernelSnapshot does use track widget creation on profile builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -129,6 +130,7 @@ void main() {
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
+        '--track-widget-creation',
         '--aot',
         '--tfa',
         '--packages',
@@ -166,6 +168,7 @@ void main() {
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
+        '--track-widget-creation',
         '--aot',
         '--tfa',
         '--packages',
@@ -204,6 +207,7 @@ void main() {
         '--target=flutter',
         '--no-print-incremental-dependencies',
         ...buildModeOptions(BuildMode.profile, <String>[]),
+        '--track-widget-creation',
         '--aot',
         '--tfa',
         '--packages',
@@ -365,7 +369,7 @@ void main() {
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         '$build/app.dill',
-      ])
+      ]),
     ]);
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
 
@@ -393,7 +397,7 @@ void main() {
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         '$build/app.dill',
-      ])
+      ]),
     ]);
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
 
@@ -447,123 +451,7 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('AotAssemblyProfile generates multiple arches and lipos together', () async {
-    final String build = iosEnvironment.buildDir.path;
-    processManager.addCommands(<FakeCommand>[
-      FakeCommand(command: <String>[
-        // This path is not known by the cache due to the iOS gen_snapshot split.
-        'Artifact.genSnapshot.TargetPlatform.ios.profile_armv7',
-        '--deterministic',
-        kAssemblyAot,
-        '--assembly=$build/armv7/snapshot_assembly.S',
-        '--strip',
-        '--no-sim-use-hardfp',
-        '--no-use-integer-division',
-        '$build/app.dill',
-      ]),
-      FakeCommand(command: <String>[
-        // This path is not known by the cache due to the iOS gen_snapshot split.
-        'Artifact.genSnapshot.TargetPlatform.ios.profile_arm64',
-        '--deterministic',
-        kAssemblyAot,
-        '--assembly=$build/arm64/snapshot_assembly.S',
-        '--strip',
-        '$build/app.dill',
-      ]),
-      FakeCommand(command: <String>[
-        'xcrun',
-        'cc',
-        '-arch',
-        'armv7',
-        '-miphoneos-version-min=9.0',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
-        '-c',
-        '$build/armv7/snapshot_assembly.S',
-        '-o',
-        '$build/armv7/snapshot_assembly.o',
-      ]),
-      FakeCommand(command: <String>[
-        'xcrun',
-        'cc',
-        '-arch',
-        'arm64',
-        '-miphoneos-version-min=9.0',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
-        '-c',
-        '$build/arm64/snapshot_assembly.S',
-        '-o',
-        '$build/arm64/snapshot_assembly.o',
-      ]),
-      FakeCommand(command: <String>[
-        'xcrun',
-        'clang',
-        '-arch',
-        'armv7',
-        '-miphoneos-version-min=9.0',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
-        '-dynamiclib',
-        '-Xlinker',
-        '-rpath',
-        '-Xlinker',
-        '@executable_path/Frameworks',
-        '-Xlinker',
-        '-rpath',
-        '-Xlinker',
-        '@loader_path/Frameworks',
-        '-install_name',
-        '@rpath/App.framework/App',
-        '-o',
-        '$build/armv7/App.framework/App',
-        '$build/armv7/snapshot_assembly.o',
-      ]),
-      FakeCommand(command: <String>[
-        'xcrun',
-        'clang',
-        '-arch',
-        'arm64',
-        '-miphoneos-version-min=9.0',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
-        '-dynamiclib',
-        '-Xlinker',
-        '-rpath',
-        '-Xlinker',
-        '@executable_path/Frameworks',
-        '-Xlinker',
-        '-rpath',
-        '-Xlinker',
-        '@loader_path/Frameworks',
-        '-install_name',
-        '@rpath/App.framework/App',
-        '-o',
-        '$build/arm64/App.framework/App',
-        '$build/arm64/snapshot_assembly.o',
-      ]),
-      FakeCommand(command: <String>[
-        'lipo',
-        '$build/armv7/App.framework/App',
-        '$build/arm64/App.framework/App',
-        '-create',
-        '-output',
-        '$build/App.framework/App',
-      ]),
-    ]);
-    iosEnvironment.defines[kIosArchs] ='armv7 arm64';
-    iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-
-    await const AotAssemblyProfile().build(iosEnvironment);
-
-    expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{
-    Platform: () => macPlatform,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('AotAssemblyProfile with bitcode sends correct argument to snapshotter (one arch)', () async {
+  testUsingContext('AotAssemblyProfile with bitcode sends correct argument to snapshotter', () async {
     iosEnvironment.defines[kIosArchs] = 'arm64';
     iosEnvironment.defines[kBitcodeFlag] = 'true';
     iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
@@ -583,7 +471,7 @@ void main() {
         'cc',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=11.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
@@ -598,7 +486,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=11.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-dynamiclib',
@@ -659,7 +547,7 @@ void main() {
         'cc',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=11.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
@@ -674,7 +562,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=11.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
         '-dynamiclib',

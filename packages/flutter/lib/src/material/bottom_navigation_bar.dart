@@ -161,7 +161,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// [BottomNavigationBarType.fixed] and `false` when [type] is
   /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
-    Key? key,
+    super.key,
     required this.items,
     this.onTap,
     this.currentIndex = 0,
@@ -198,8 +198,7 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       selectedItemColor = selectedItemColor ?? fixedColor,
-       super(key: key);
+       selectedItemColor = selectedItemColor ?? fixedColor;
 
   /// Defines the appearance of the button items that are arrayed within the
   /// bottom navigation bar.
@@ -572,11 +571,10 @@ class _BottomNavigationTile extends StatelessWidget {
 // icon-label column.
 class _Tile extends StatelessWidget {
  const  _Tile({
-    Key? key,
     required this.layout,
     required this.icon,
     required this.label
-  }) : super(key: key);
+  });
 
   final BottomNavigationBarLandscapeLayout layout;
   final Widget icon;
@@ -604,7 +602,6 @@ class _Tile extends StatelessWidget {
 
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
-    Key? key,
     required this.colorTween,
     required this.animation,
     required this.iconSize,
@@ -613,8 +610,7 @@ class _TileIcon extends StatelessWidget {
     required this.selectedIconTheme,
     required this.unselectedIconTheme,
   }) : assert(selected != null),
-       assert(item != null),
-       super(key: key);
+       assert(item != null);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -650,7 +646,6 @@ class _TileIcon extends StatelessWidget {
 
 class _Label extends StatelessWidget {
   const _Label({
-    Key? key,
     required this.colorTween,
     required this.animation,
     required this.item,
@@ -664,8 +659,7 @@ class _Label extends StatelessWidget {
        assert(selectedLabelStyle != null),
        assert(unselectedLabelStyle != null),
        assert(showSelectedLabels != null),
-       assert(showUnselectedLabels != null),
-       super(key: key);
+       assert(showUnselectedLabels != null);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -1054,12 +1048,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 // BottomNavigationBarLandscapeLayout.centered
 class _Bar extends StatelessWidget {
   const _Bar({
-    Key? key,
     required this.child,
     required this.layout,
     required this.elevation,
     required this.color,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final BottomNavigationBarLandscapeLayout layout;

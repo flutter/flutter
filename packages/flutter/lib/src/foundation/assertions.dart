@@ -261,12 +261,12 @@ class ErrorDescription extends _ErrorDiagnostic {
   /// kernel transformer is used. The kernel transformer is required so that
   /// debugging tools can provide interactive displays of objects described by
   /// the error.
-  ErrorDescription(String message) : super(message, level: DiagnosticLevel.info);
+  ErrorDescription(super.message) : super(level: DiagnosticLevel.info);
 
   /// Calls to the default constructor may be rewritten to use this constructor
   /// in debug mode using a kernel transformer.
   // ignore: unused_element
-  ErrorDescription._fromParts(List<Object> messageParts) : super._fromParts(messageParts, level: DiagnosticLevel.info);
+  ErrorDescription._fromParts(super.messageParts) : super._fromParts(level: DiagnosticLevel.info);
 }
 
 /// A short (one line) description of the problem that was detected.
@@ -300,12 +300,12 @@ class ErrorSummary extends _ErrorDiagnostic {
   /// kernel transformer is used. The kernel transformer is required so that
   /// debugging tools can provide interactive displays of objects described by
   /// the error.
-  ErrorSummary(String message) : super(message, level: DiagnosticLevel.summary);
+  ErrorSummary(super.message) : super(level: DiagnosticLevel.summary);
 
   /// Calls to the default constructor may be rewritten to use this constructor
   /// in debug mode using a kernel transformer.
   // ignore: unused_element
-  ErrorSummary._fromParts(List<Object> messageParts) : super._fromParts(messageParts, level: DiagnosticLevel.summary);
+  ErrorSummary._fromParts(super.messageParts) : super._fromParts(level: DiagnosticLevel.summary);
 }
 
 /// An [ErrorHint] provides specific, non-obvious advice that may be applicable.
@@ -336,12 +336,12 @@ class ErrorHint extends _ErrorDiagnostic {
   /// kernel transformer is used. The kernel transformer is required so that
   /// debugging tools can provide interactive displays of objects described by
   /// the error.
-  ErrorHint(String message) : super(message, level:DiagnosticLevel.hint);
+  ErrorHint(super.message) : super(level:DiagnosticLevel.hint);
 
   /// Calls to the default constructor may be rewritten to use this constructor
   /// in debug mode using a kernel transformer.
   // ignore: unused_element
-  ErrorHint._fromParts(List<Object> messageParts) : super._fromParts(messageParts, level:DiagnosticLevel.hint);
+  ErrorHint._fromParts(super.messageParts) : super._fromParts(level:DiagnosticLevel.hint);
 }
 
 /// An [ErrorSpacer] creates an empty [DiagnosticsNode], that can be used to
@@ -619,7 +619,7 @@ class FlutterErrorDetails with Diagnosticable {
     } else if (exception is Error || exception is Exception) {
       longMessage = exception.toString();
     } else {
-      longMessage = '  ${exception.toString()}';
+      longMessage = '  $exception';
     }
     longMessage = longMessage.trimRight();
     if (longMessage.isEmpty)
@@ -774,10 +774,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// All sentences in the error should be correctly punctuated (i.e.,
   /// do end the error message with a period).
   ///
-  /// This constructor defers to the [new FlutterError.fromParts] constructor.
+  /// This constructor defers to the [FlutterError.fromParts] constructor.
   /// The first line is wrapped in an implied [ErrorSummary], and subsequent
   /// lines are wrapped in implied [ErrorDescription]s. Consider using the
-  /// [new FlutterError.fromParts] constructor to provide more detail, e.g.
+  /// [FlutterError.fromParts] constructor to provide more detail, e.g.
   /// using [ErrorHint]s or other [DiagnosticsNode]s.
   factory FlutterError(String message) {
     final List<String> lines = message.split('\n');
@@ -1228,13 +1228,12 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
     String name,
     StackTrace? stack, {
     IterableFilter<String>? stackFilter,
-    bool showSeparator = true,
+    super.showSeparator,
   }) : super(
     name: name,
     value: stack,
     properties: _applyStackFilter(stack, stackFilter),
     style: DiagnosticsTreeStyle.flat,
-    showSeparator: showSeparator,
     allowTruncate: true,
   );
 
@@ -1242,12 +1241,11 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
   DiagnosticsStackTrace.singleFrame(
     String name, {
     required String frame,
-    bool showSeparator = true,
+    super.showSeparator,
   }) : super(
     name: name,
     properties: <DiagnosticsNode>[_createStackFrame(frame)],
     style: DiagnosticsTreeStyle.whitespace,
-    showSeparator: showSeparator,
   );
 
   static List<DiagnosticsNode> _applyStackFilter(
@@ -1271,14 +1269,10 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
 
 class _FlutterErrorDetailsNode extends DiagnosticableNode<FlutterErrorDetails> {
   _FlutterErrorDetailsNode({
-    String? name,
-    required FlutterErrorDetails value,
-    required DiagnosticsTreeStyle? style,
-  }) : super(
-    name: name,
-    value: value,
-    style: style,
-  );
+    super.name,
+    required super.value,
+    required super.style,
+  });
 
   @override
   DiagnosticPropertiesBuilder? get builder {

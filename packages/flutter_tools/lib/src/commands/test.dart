@@ -239,7 +239,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         // Use [DeviceBasedDevelopmentArtifacts].
         ? await super.requiredArtifacts
         : <DevelopmentArtifact>{};
-    if (stringArg('platform') == 'chrome') {
+    if (stringArgDeprecated('platform') == 'chrome') {
       results.add(DevelopmentArtifact.web);
     }
     return results;
@@ -277,7 +277,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           if (globals.fs.isDirectorySync(path))
             ..._findTests(globals.fs.directory(path))
           else
-            globals.fs.path.normalize(globals.fs.path.absolute(path))
+            globals.fs.path.normalize(globals.fs.path.absolute(path)),
       ];
     }
 
@@ -305,8 +305,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
-    final String tags = stringArg('tags');
-    final String excludeTags = stringArg('exclude-tags');
+    final String tags = stringArgDeprecated('tags');
+    final String excludeTags = stringArgDeprecated('exclude-tags');
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     if (buildInfo.packageConfig['test_api'] == null) {
@@ -332,7 +332,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    int jobs = int.tryParse(stringArg('concurrency'));
+    int jobs = int.tryParse(stringArgDeprecated('concurrency'));
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
@@ -350,13 +350,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       jobs = 1;
     }
 
-    final int shardIndex = int.tryParse(stringArg('shard-index') ?? '');
+    final int shardIndex = int.tryParse(stringArgDeprecated('shard-index') ?? '');
     if (shardIndex != null && (shardIndex < 0 || !shardIndex.isFinite)) {
       throwToolExit(
           'Could not parse --shard-index=$shardIndex argument. It must be an integer greater than -1.');
     }
 
-    final int totalShards = int.tryParse(stringArg('total-shards') ?? '');
+    final int totalShards = int.tryParse(stringArgDeprecated('total-shards') ?? '');
     if (totalShards != null && (totalShards <= 0 || !totalShards.isFinite)) {
       throwToolExit(
           'Could not parse --total-shards=$totalShards argument. It must be an integer greater than zero.');
@@ -378,8 +378,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
-        packagesPath: globals.fs.file(buildInfo.packagesPath)
-          .parent.parent.childFile('.packages').path
+        packagesPath: buildInfo.packagesPath
       );
     }
 
@@ -447,20 +446,20 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
-      web: stringArg('platform') == 'chrome',
-      randomSeed: stringArg('test-randomize-ordering-seed'),
-      reporter: stringArg('reporter'),
-      timeout: stringArg('timeout'),
+      web: stringArgDeprecated('platform') == 'chrome',
+      randomSeed: stringArgDeprecated('test-randomize-ordering-seed'),
+      reporter: stringArgDeprecated('reporter'),
+      timeout: stringArgDeprecated('timeout'),
       runSkipped: boolArg('run-skipped'),
       shardIndex: shardIndex,
       totalShards: totalShards,
       integrationTestDevice: integrationTestDevice,
-      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
+      integrationTestUserIdentifier: stringArgDeprecated(FlutterOptions.kDeviceUser),
     );
 
     if (collector != null) {
       final bool collectionResult = collector.collectCoverageData(
-        stringArg('coverage-path'),
+        stringArgDeprecated('coverage-path'),
         mergeCoverageData: boolArg('merge-coverage'),
       );
       if (!collectionResult) {

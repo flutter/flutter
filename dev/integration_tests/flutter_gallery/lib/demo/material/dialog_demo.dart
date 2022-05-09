@@ -21,7 +21,7 @@ const String _alertWithTitleText =
   'data to Google, even when no apps are running.';
 
 class DialogDemoItem extends StatelessWidget {
-  const DialogDemoItem({ Key? key, this.icon, this.color, this.text, this.onPressed }) : super(key: key);
+  const DialogDemoItem({ super.key, this.icon, this.color, this.text, this.onPressed });
 
   final IconData? icon;
   final Color? color;
@@ -46,7 +46,7 @@ class DialogDemoItem extends StatelessWidget {
 }
 
 class DialogDemo extends StatefulWidget {
-  const DialogDemo({Key? key}) : super(key: key);
+  const DialogDemo({super.key});
 
   static const String routeName = '/material/dialog';
 

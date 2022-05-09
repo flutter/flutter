@@ -17,6 +17,7 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind, kSecondaryMouseButton, kDoubleTapTimeout;
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -403,6 +404,32 @@ void main() {
         tester.getSize(find.byType(CupertinoTextField)),
         const Size(200, 29), // 29 is the height of the default font (17) + decoration (12).
       );
+    },
+  );
+
+  testWidgets(
+    'uses DefaultSelectionStyle for selection and cursor colors if provided',
+    (WidgetTester tester) async {
+      const Color selectionColor = Colors.black;
+      const Color cursorColor = Colors.white;
+
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: DefaultSelectionStyle(
+              selectionColor: selectionColor,
+              cursorColor: cursorColor,
+              child: CupertinoTextField(
+                autofocus: true,
+              )
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.widget.selectionColor, selectionColor);
+      expect(state.widget.cursorColor, cursorColor);
     },
   );
 
@@ -5496,4 +5523,87 @@ void main() {
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux,  TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }));
+
+  // Regression test for https://github.com/flutter/flutter/issues/101587.
+  testWidgets('Right clicking menu behavior', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(find.byType(CupertinoButton), findsNothing);
+    expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+    final Offset midBlah2 = textOffsetToPosition(tester, 8);
+
+    // Right click the second word.
+    final TestGesture gesture = await tester.startGesture(
+      midBlah2,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(controller.selection, const TextSelection(baseOffset: 6, extentOffset: 11));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection, const TextSelection.collapsed(offset: 8));
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsOneWidget);
+        break;
+    }
+
+    // Right click the first word.
+    await gesture.down(midBlah1);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection, const TextSelection.collapsed(offset: 8));
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsNothing);
+        break;
+    }
+  },
+    variant: TargetPlatformVariant.all(),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
 }

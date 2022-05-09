@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -120,7 +121,7 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// The value of [tristate] must not be null.
   const CheckboxListTile({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -149,8 +150,7 @@ class CheckboxListTile extends StatelessWidget {
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
        assert(controlAffinity != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// Whether this checkbox is checked.
   final bool? value;

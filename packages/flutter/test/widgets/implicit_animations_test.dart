@@ -85,6 +85,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedPadding onEnd callback test', (WidgetTester tester) async {
@@ -106,6 +108,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedAlign onEnd callback test', (WidgetTester tester) async {
@@ -127,6 +131,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedPositioned onEnd callback test', (WidgetTester tester) async {
@@ -148,6 +154,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedPositionedDirectional onEnd callback test', (WidgetTester tester) async {
@@ -169,6 +177,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
    testWidgets('AnimatedSlide onEnd callback test', (WidgetTester tester) async {
@@ -189,6 +199,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedSlide transition test', (WidgetTester tester) async {
@@ -247,6 +259,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedScale transition test', (WidgetTester tester) async {
@@ -305,6 +319,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedRotation transition test', (WidgetTester tester) async {
@@ -363,6 +379,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedOpacity transition test', (WidgetTester tester) async {
@@ -421,6 +439,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('SliverAnimatedOpacity transition test', (WidgetTester tester) async {
@@ -480,6 +500,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedPhysicalModel onEnd callback test', (WidgetTester tester) async {
@@ -501,6 +523,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('TweenAnimationBuilder onEnd callback test', (WidgetTester tester) async {
@@ -522,6 +546,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('AnimatedTheme onEnd callback test', (WidgetTester tester) async {
@@ -543,6 +569,8 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
   testWidgets('Ensure CurvedAnimations are disposed on widget change',
@@ -599,6 +627,21 @@ void main() {
   });
 }
 
+Future<void> tapTest2and3(WidgetTester tester, Finder widgetFinder,
+    MockOnEndFunction mockOnEndFunction) async {
+  await tester.tap(widgetFinder);
+
+  await tester.pump();
+  await tester.pump(animationDuration + additionalDelay);
+  expect(mockOnEndFunction.called, 2);
+
+  await tester.tap(widgetFinder);
+
+  await tester.pump();
+  await tester.pump(animationDuration + additionalDelay);
+  expect(mockOnEndFunction.called, 3);
+}
+
 Widget wrap({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -614,11 +657,11 @@ abstract class RebuildCountingState<T extends StatefulWidget> extends State<T> {
 
 class TestAnimatedWidget extends StatefulWidget {
   const TestAnimatedWidget({
-    Key? key,
+    super.key,
     this.callback,
     required this.switchKey,
     required this.state,
-  }) : super(key: key);
+  });
   final VoidCallback? callback;
   final Key switchKey;
   final State<StatefulWidget> state;
@@ -664,6 +707,7 @@ class _TestAnimatedContainerWidgetState extends _TestAnimatedWidgetState {
       duration: duration,
       onEnd: widget.callback,
       width: toggle ? 10 : 20,
+      foregroundDecoration: toggle ? const BoxDecoration() : null,
       child: child,
     );
   }
@@ -835,7 +879,7 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 1, end: 2),
+      tween: toggle ? Tween<double>(begin: 1, end: 2) : Tween<double>(begin: 2, end: 1),
       duration: duration,
       onEnd: widget.callback,
       child: child,

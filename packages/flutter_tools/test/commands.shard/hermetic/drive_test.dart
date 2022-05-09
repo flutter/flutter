@@ -207,6 +207,26 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     Pub: () => FakePub(),
   });
+
+  testUsingContext('--enable-impeller flag propagates to debugging options', () async {
+    final DriveCommand command = DriveCommand(fileSystem: fileSystem, logger: logger, platform: platform);
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'drive',
+      '--enable-impeller',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.enableImpeller, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.

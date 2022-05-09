@@ -43,7 +43,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
           blurRadius: 10.0,
           spreadRadius: 3.0,
           offset: Offset(0, 6.0),
-        )
+        ),
       ],
     ),
     end: BoxDecoration(

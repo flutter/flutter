@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -125,7 +124,7 @@ void main() {
 
   group('Common text editing shortcuts: ',
     () {
-      final TargetPlatformVariant allExceptMacOS = TargetPlatformVariant(TargetPlatform.values.toSet()..remove(TargetPlatform.macOS));
+      final TargetPlatformVariant allExceptApple = TargetPlatformVariant(TargetPlatform.values.toSet()..removeAll(<TargetPlatform>[TargetPlatform.macOS, TargetPlatform.iOS]));
 
       group('backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
@@ -492,8 +491,8 @@ void main() {
       group('word modifier + backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
         SingleActivator wordModifierBackspace() {
-          final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-          return SingleActivator(trigger, control: !isMacOS, alt: isMacOS);
+          final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+          return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
         testWidgets('WordModifier-backspace', (WidgetTester tester) async {
@@ -632,8 +631,8 @@ void main() {
       group('word modifier + delete', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
         SingleActivator wordModifierDelete() {
-          final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-          return SingleActivator(trigger, control: !isMacOS, alt: isMacOS);
+          final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+          return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
         testWidgets('WordModifier-delete', (WidgetTester tester) async {
@@ -765,8 +764,8 @@ void main() {
       group('line modifier + backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
         SingleActivator lineModifierBackspace() {
-          final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-          return SingleActivator(trigger, meta: isMacOS, alt: !isMacOS);
+          final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+          return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
         testWidgets('alt-backspace', (WidgetTester tester) async {
@@ -946,8 +945,8 @@ void main() {
       group('line modifier + delete', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
         SingleActivator lineModifierDelete() {
-          final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-          return SingleActivator(trigger, meta: isMacOS, alt: !isMacOS);
+          final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+          return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
         testWidgets('alt-delete', (WidgetTester tester) async {
@@ -1168,7 +1167,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 4,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
 
           testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1182,7 +1181,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 20,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
         });
 
         group('right', () {
@@ -1231,7 +1230,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 10,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
 
          testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1246,7 +1245,7 @@ void main() {
               offset: 35, // Before the newline character.
               affinity: TextAffinity.upstream,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
         });
 
         group('With initial non-collapsed selection', () {
@@ -1353,7 +1352,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 28, // After "good".
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
 
          testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1407,7 +1406,7 @@ void main() {
               offset: 35, // After "people".
               affinity: TextAffinity.upstream,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
         });
 
         group('vertical movement', () {

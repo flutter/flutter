@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior, TextLeadingDistribution;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, FontVariation, TextHeightBehavior, TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
 
@@ -377,7 +377,7 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// #### Supported font formats
 ///
-/// Font formats currently supported by Flutter :
+/// Font formats currently supported by Flutter:
 ///
 ///  * `.ttc`
 ///  * `.ttf`
@@ -482,6 +482,7 @@ class TextStyle with Diagnosticable {
     this.background,
     this.shadows,
     this.fontFeatures,
+    this.fontVariations,
     this.decoration,
     this.decorationColor,
     this.decorationStyle,
@@ -528,8 +529,9 @@ class TextStyle with Diagnosticable {
   /// specified in one place, it will dominate [color] in another.
   final Color? backgroundColor;
 
-  /// The name of the font to use when painting the text (e.g., Roboto). If the
-  /// font is defined in a package, this will be prefixed with
+  /// The name of the font to use when painting the text (e.g., Roboto).
+  ///
+  /// If the font is defined in a package, this will be prefixed with
   /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
   /// prefixing is done by the constructor when the `package` argument is
   /// provided.
@@ -769,6 +771,23 @@ class TextStyle with Diagnosticable {
   /// these variants will be used for rendering.
   final List<ui.FontFeature>? fontFeatures;
 
+  /// A list of [FontVariation]s that affect how a variable font is rendered.
+  ///
+  /// Some fonts are variable fonts that can generate multiple font faces based
+  /// on the values of customizable attributes.  For example, a variable font
+  /// may have a weight axis that can be set to a value between 1 and 1000.
+  /// [FontVariation]s can be used to select the values of these design axes.
+  ///
+  /// For example, to control the weight axis of the Roboto Slab variable font
+  /// (https://fonts.google.com/specimen/Roboto+Slab):
+  /// ```dart
+  /// TextStyle(
+  ///   fontFamily: 'RobotoSlab',
+  ///   fontVariations: <FontVariation>[FontVariation('wght', 900.0)]
+  /// )
+  /// ```
+  final List<ui.FontVariation>? fontVariations;
+
   /// How visual text overflow should be handled.
   final TextOverflow? overflow;
 
@@ -809,6 +828,7 @@ class TextStyle with Diagnosticable {
     Paint? background,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
     TextDecoration? decoration,
     Color? decorationColor,
     TextDecorationStyle? decorationStyle,
@@ -845,6 +865,7 @@ class TextStyle with Diagnosticable {
       background: background ?? this.background,
       shadows: shadows ?? this.shadows,
       fontFeatures: fontFeatures ?? this.fontFeatures,
+      fontVariations: fontVariations ?? this.fontVariations,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
@@ -911,6 +932,7 @@ class TextStyle with Diagnosticable {
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
     String? package,
     TextOverflow? overflow,
   }) {
@@ -957,6 +979,7 @@ class TextStyle with Diagnosticable {
       background: background,
       shadows: shadows ?? this.shadows,
       fontFeatures: fontFeatures ?? this.fontFeatures,
+      fontVariations: fontVariations ?? this.fontVariations,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
@@ -1017,6 +1040,7 @@ class TextStyle with Diagnosticable {
       background: other.background,
       shadows: other.shadows,
       fontFeatures: other.fontFeatures,
+      fontVariations: other.fontVariations,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle,
@@ -1073,6 +1097,7 @@ class TextStyle with Diagnosticable {
         background: t < 0.5 ? null : b.background,
         shadows: t < 0.5 ? null : b.shadows,
         fontFeatures: t < 0.5 ? null : b.fontFeatures,
+        fontVariations: t < 0.5 ? null : b.fontVariations,
         decoration: t < 0.5 ? null : b.decoration,
         decorationColor: Color.lerp(null, b.decorationColor, t),
         decorationStyle: t < 0.5 ? null : b.decorationStyle,
@@ -1103,6 +1128,7 @@ class TextStyle with Diagnosticable {
         background: t < 0.5 ? a.background : null,
         shadows: t < 0.5 ? a.shadows : null,
         fontFeatures: t < 0.5 ? a.fontFeatures : null,
+        fontVariations: t < 0.5 ? a.fontVariations : null,
         decoration: t < 0.5 ? a.decoration : null,
         decorationColor: Color.lerp(a.decorationColor, null, t),
         decorationStyle: t < 0.5 ? a.decorationStyle : null,
@@ -1140,6 +1166,7 @@ class TextStyle with Diagnosticable {
         : null,
       shadows: t < 0.5 ? a.shadows : b.shadows,
       fontFeatures: t < 0.5 ? a.fontFeatures : b.fontFeatures,
+      fontVariations: t < 0.5 ? a.fontVariations : b.fontVariations,
       decoration: t < 0.5 ? a.decoration : b.decoration,
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
       decorationStyle: t < 0.5 ? a.decorationStyle : b.decorationStyle,
@@ -1178,6 +1205,7 @@ class TextStyle with Diagnosticable {
       ),
       shadows: shadows,
       fontFeatures: fontFeatures,
+      fontVariations: fontVariations,
     );
   }
 
@@ -1260,6 +1288,7 @@ class TextStyle with Diagnosticable {
         background != other.background ||
         !listEquals(shadows, other.shadows) ||
         !listEquals(fontFeatures, other.fontFeatures) ||
+        !listEquals(fontVariations, other.fontVariations) ||
         !listEquals(fontFamilyFallback, other.fontFamilyFallback) ||
         overflow != other.overflow)
       return RenderComparison.layout;
@@ -1296,6 +1325,7 @@ class TextStyle with Diagnosticable {
         && other.background == background
         && listEquals(other.shadows, shadows)
         && listEquals(other.fontFeatures, fontFeatures)
+        && listEquals(other.fontVariations, fontVariations)
         && other.decoration == decoration
         && other.decorationColor == decorationColor
         && other.decorationStyle == decorationStyle
@@ -1324,10 +1354,11 @@ class TextStyle with Diagnosticable {
     background,
     shadows == null ? null : Object.hashAll(shadows!),
     fontFeatures == null ? null : Object.hashAll(fontFeatures!),
+    fontVariations == null ? null : Object.hashAll(fontVariations!),
     decoration,
     decorationColor,
-    decorationStyle,
     Object.hash(
+      decorationStyle,
       decorationThickness,
       fontFamily,
       fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback!),

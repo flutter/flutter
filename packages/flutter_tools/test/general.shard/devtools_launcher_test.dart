@@ -86,7 +86,7 @@ void main() {
           'devtools',
           '--no-launch-browser',
           '--vm-uri=localhost:8181/abcdefg',
-          '--profile-memory=foo'
+          '--profile-memory=foo',
         ],
         stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
       ),
@@ -118,7 +118,7 @@ void main() {
             '--vm-uri=http://127.0.0.1:1234/abcdefg',
           ],
           exception: ProcessException('pub', <String>[]),
-        )
+        ),
       ]),
     );
 

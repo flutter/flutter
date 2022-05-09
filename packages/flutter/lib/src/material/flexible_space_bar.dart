@@ -35,7 +35,7 @@ enum StretchMode {
   fadeTitle,
 }
 
-/// The part of a material design [AppBar] that expands, collapses, and
+/// The part of a Material Design [AppBar] that expands, collapses, and
 /// stretches.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=mSc7qFzxHDw}
@@ -75,7 +75,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Most commonly used in the [AppBar.flexibleSpace] field.
   const FlexibleSpaceBar({
-    Key? key,
+    super.key,
     this.title,
     this.background,
     this.centerTitle,
@@ -84,8 +84,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
     this.expandedTitleScale = 1.5,
   }) : assert(collapseMode != null),
-       assert(expandedTitleScale >= 1),
-       super(key: key);
+       assert(expandedTitleScale >= 1);
 
   /// The primary contents of the flexible space bar when expanded.
   ///
@@ -376,12 +375,12 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// The required [toolbarOpacity], [minExtent], [maxExtent], [currentExtent],
   /// and [child] parameters must not be null.
   const FlexibleSpaceBarSettings({
-    Key? key,
+    super.key,
     required this.toolbarOpacity,
     required this.minExtent,
     required this.maxExtent,
     required this.currentExtent,
-    required Widget child,
+    required super.child,
     this.isScrolledUnder,
   }) : assert(toolbarOpacity != null),
        assert(minExtent != null && minExtent >= 0),
@@ -390,8 +389,7 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
        assert(toolbarOpacity >= 0.0),
        assert(minExtent <= maxExtent),
        assert(minExtent <= currentExtent),
-       assert(currentExtent <= maxExtent),
-       super(key: key, child: child);
+       assert(currentExtent <= maxExtent);
 
   /// Affects how transparent the text within the toolbar appears.
   final double toolbarOpacity;

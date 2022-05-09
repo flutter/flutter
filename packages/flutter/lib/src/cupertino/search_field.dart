@@ -21,62 +21,27 @@ import 'text_field.dart';
 /// [controller]. For example, to set the initial value of the text field, use
 /// a [controller] that already contains some text such as:
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This examples shows how to provide initial text to a [CupertinoSearchTextField]
+/// using the [controller] property.
 ///
-/// ```dart
-/// class MyPrefilledSearch extends StatefulWidget {
-///   const MyPrefilledSearch({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyPrefilledSearch> createState() => _MyPrefilledSearchState();
-/// }
-///
-/// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
-///   late TextEditingController _textController;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _textController = TextEditingController(text: 'initial text');
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoSearchTextField(controller: _textController);
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/search_field/cupertino_search_field.0.dart **
 /// {@end-tool}
 ///
 /// It is recommended to pass a [ValueChanged<String>] to both [onChanged] and
 /// [onSubmitted] parameters in order to be notified once the value of the
 /// field changes or is submitted by the keyboard:
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This examples shows how to be notified of field changes or submitted text from
+/// a [CupertinoSearchTextField].
 ///
-/// ```dart
-/// class MyPrefilledSearch extends StatefulWidget {
-///   const MyPrefilledSearch({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyPrefilledSearch> createState() => _MyPrefilledSearchState();
-/// }
-///
-/// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoSearchTextField(
-///       onChanged: (String value) {
-///         print('The text has changed to: $value');
-///       },
-///       onSubmitted: (String value) {
-///         print('Submitted text: $value');
-///       },
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/search_field/cupertino_search_field.1.dart **
 /// {@end-tool}
+///
+/// See also:
+///
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/bars/search-bars/>
 class CupertinoSearchTextField extends StatefulWidget {
   /// Creates a [CupertinoTextField] that mimics the look and behavior of
   /// UIKit's `UISearchTextField`.
@@ -130,7 +95,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// To customize the X-Mark (suffix) action, pass a [VoidCallback] to
   /// [onSuffixTap]. This defaults to clearing the text.
   const CupertinoSearchTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.onChanged,
     this.onSubmitted,
@@ -173,8 +138,7 @@ class CupertinoSearchTextField extends StatefulWidget {
           'Cannot provide both a border radius and a decoration\n'
           'To provide both, use "decoration: BoxDecoration(borderRadius: '
           'borderRadius)"',
-        ),
-        super(key: key);
+        );
 
   /// Controls the text being edited.
   ///

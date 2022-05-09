@@ -26,14 +26,13 @@ import 'sliver.dart';
 class SliverFillViewport extends StatelessWidget {
   /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
-    Key? key,
+    super.key,
     required this.delegate,
     this.viewportFraction = 1.0,
     this.padEnds = true,
   }) : assert(viewportFraction != null),
        assert(viewportFraction > 0.0),
-       assert(padEnds != null),
-       super(key: key);
+       assert(padEnds != null);
 
   /// The fraction of the viewport that each child should fill in the main axis.
   ///
@@ -72,12 +71,10 @@ class SliverFillViewport extends StatelessWidget {
 
 class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
   const _SliverFillViewportRenderObjectWidget({
-    Key? key,
-    required SliverChildDelegate delegate,
+    required super.delegate,
     this.viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
-      assert(viewportFraction > 0.0),
-      super(key: key, delegate: delegate);
+      assert(viewportFraction > 0.0);
 
   final double viewportFraction;
 
@@ -261,13 +258,12 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 class SliverFillRemaining extends StatelessWidget {
   /// Creates a sliver that fills the remaining space in the viewport.
   const SliverFillRemaining({
-    Key? key,
+    super.key,
     this.child,
     this.hasScrollBody = true,
     this.fillOverscroll = false,
   }) : assert(hasScrollBody != null),
-       assert(fillOverscroll != null),
-       super(key: key);
+       assert(fillOverscroll != null);
 
   /// Box child widget that fills the remaining space in the viewport.
   ///
@@ -326,9 +322,8 @@ class SliverFillRemaining extends StatelessWidget {
 
 class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingWithScrollable({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   @override
   RenderSliverFillRemainingWithScrollable createRenderObject(BuildContext context) => RenderSliverFillRemainingWithScrollable();
@@ -336,9 +331,8 @@ class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
 
 class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingWithoutScrollable({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   @override
   RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining();
@@ -346,9 +340,8 @@ class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidge
 
 class _SliverFillRemainingAndOverscroll extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingAndOverscroll({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   @override
   RenderSliverFillRemainingAndOverscroll createRenderObject(BuildContext context) => RenderSliverFillRemainingAndOverscroll();

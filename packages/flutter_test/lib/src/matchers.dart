@@ -37,6 +37,7 @@ import 'widget_tester.dart' show WidgetTester;
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
 
 /// Asserts that the [Finder] locates at least one widget in the widget tree.
@@ -52,6 +53,7 @@ const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
 
 /// Asserts that the [Finder] locates at exactly one widget in the widget tree.
@@ -67,6 +69,7 @@ const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 
 /// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
@@ -82,7 +85,24 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
+
+/// Asserts that the [Finder] locates at least a number of widgets in the widget tree.
+///
+/// ## Sample code
+///
+/// ```dart
+/// expect(find.text('Save'), findsAtLeastNWidgets(2));
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsWidgets], when you want the finder to find one or more widgets.
+///  * [findsOneWidget], when you want the finder to find exactly one widget.
+///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+Matcher findsAtLeastNWidgets(int n) => _FindsWidgetMatcher(n, null);
 
 /// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
@@ -477,7 +497,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// expect(tester.getSemantics(find.text('hello')), matchesSemanticsNode(label: 'hello'));
+/// expect(tester.getSemantics(find.text('hello')), matchesSemantics(label: 'hello'));
 /// handle.dispose();
 /// ```
 ///
@@ -494,6 +514,7 @@ Matcher matchesSemantics({
   String? increasedValue,
   AttributedString? attributedIncreasedValue,
   String? decreasedValue,
+  String? tooltip,
   AttributedString? attributedDecreasedValue,
   TextDirection? textDirection,
   Rect? rect,
@@ -583,7 +604,7 @@ Matcher matchesSemantics({
     if (hasToggledState) SemanticsFlag.hasToggledState,
     if (isToggled) SemanticsFlag.isToggled,
     if (hasImplicitScrolling) SemanticsFlag.hasImplicitScrolling,
-    if (isSlider) SemanticsFlag.isSlider
+    if (isSlider) SemanticsFlag.isSlider,
   ];
 
   final List<SemanticsAction> actions = <SemanticsAction>[
@@ -625,6 +646,7 @@ Matcher matchesSemantics({
     value: value,
     attributedValue: attributedValue,
     increasedValue: increasedValue,
+    tooltip: tooltip,
     attributedIncreasedValue: attributedIncreasedValue,
     decreasedValue: decreasedValue,
     attributedDecreasedValue: attributedDecreasedValue,
@@ -663,6 +685,7 @@ Matcher matchesSemantics({
 ///   * [androidTapTargetGuideline], for Android minimum tappable area guidelines.
 ///   * [iOSTapTargetGuideline], for iOS minimum tappable area guidelines.
 ///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
+///   * [labeledTapTargetGuideline], for enforcing labels on tappable areas.
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
   return _MatchesAccessibilityGuideline(guideline);
 }
@@ -1782,6 +1805,7 @@ class _MatchesSemanticsData extends Matcher {
     this.attributedIncreasedValue,
     this.decreasedValue,
     this.attributedDecreasedValue,
+    this.tooltip,
     this.flags,
     this.actions,
     this.textDirection,
@@ -1807,6 +1831,7 @@ class _MatchesSemanticsData extends Matcher {
   final AttributedString? attributedIncreasedValue;
   final String? decreasedValue;
   final AttributedString? attributedDecreasedValue;
+  final String? tooltip;
   final SemanticsHintOverrides? hintOverrides;
   final List<SemanticsAction>? actions;
   final List<CustomSemanticsAction>? customActions;
@@ -1844,6 +1869,8 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with decreasedValue: $decreasedValue ');
     if (attributedDecreasedValue != null)
       description.add(' with attributedDecreasedValue: $attributedDecreasedValue');
+    if (tooltip != null)
+      description.add(' with tooltip: $tooltip');
     if (actions != null)
       description.add(' with actions: ').addDescriptionOf(actions);
     if (flags != null)
@@ -1941,6 +1968,8 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(
           matchState, 'attributedDecreasedValue was: ${data.attributedDecreasedValue}');
     }
+    if (tooltip != null && tooltip != data.tooltip)
+      return failWithDescription(matchState, 'tooltip was: ${data.tooltip}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
     if (rect != null && rect != data.rect)

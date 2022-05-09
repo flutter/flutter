@@ -222,7 +222,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        nonEphemeralOne
+        nonEphemeralOne,
       ]);
     });
 
@@ -242,7 +242,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        nonEphemeralTwo
+        nonEphemeralTwo,
       ]);
     });
 
@@ -263,7 +263,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        ephemeralOne
+        ephemeralOne,
       ]);
     });
 
@@ -283,7 +283,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        ephemeralTwo
+        ephemeralTwo,
       ]);
     });
 
@@ -307,7 +307,7 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        nonEphemeralOne
+        nonEphemeralOne,
       ]);
     });
 
@@ -450,7 +450,7 @@ void main() {
       final DeviceManager deviceManager = TestDeviceManager(
         <Device>[],
         deviceDiscoveryOverrides: <DeviceDiscovery>[
-          deviceDiscovery
+          deviceDiscovery,
         ],
         logger: BufferLogger.test(),
         terminal: Terminal.test(),
@@ -476,7 +476,7 @@ void main() {
       final DeviceManager deviceManager = TestDeviceManager(
         <Device>[],
         deviceDiscoveryOverrides: <DeviceDiscovery>[
-          deviceDiscovery
+          deviceDiscovery,
         ],
         logger: BufferLogger.test(),
         terminal: Terminal.test(),
@@ -521,6 +521,7 @@ void main() {
         dartEntrypointArgs: <String>['a', 'b'],
         dartFlags: 'c',
         deviceVmServicePort: 1234,
+        enableImpeller: true,
       );
       final String jsonString = json.encode(original.toJson());
       final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
@@ -531,6 +532,7 @@ void main() {
       expect(deserialized.dartEntrypointArgs, original.dartEntrypointArgs);
       expect(deserialized.dartFlags, original.dartFlags);
       expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
+      expect(deserialized.enableImpeller, original.enableImpeller);
     });
   });
 }
@@ -539,12 +541,12 @@ class TestDeviceManager extends DeviceManager {
   TestDeviceManager(
     List<Device> allDevices, {
     List<DeviceDiscovery>? deviceDiscoveryOverrides,
-    required Logger logger,
-    required Terminal terminal,
+    required super.logger,
+    required super.terminal,
     String? wellKnownId,
   }) : _fakeDeviceDiscoverer = FakePollingDeviceDiscovery(),
        _deviceDiscoverers = <DeviceDiscovery>[],
-       super(logger: logger, terminal: terminal, userMessages: UserMessages()) {
+       super(userMessages: UserMessages()) {
     if (wellKnownId != null) {
       _fakeDeviceDiscoverer.wellKnownIds.add(wellKnownId);
     }

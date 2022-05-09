@@ -92,7 +92,7 @@ class DriveCommand extends RunCommandBase {
       )
       ..addFlag('build',
         defaultsTo: true,
-        help: '(deprecated) Build the app before running. To use an existing app, pass the "--use-application-binary" '
+        help: '(deprecated) Build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
               'flag with an existing APK.',
       )
       ..addOption('screenshot',
@@ -179,9 +179,9 @@ class DriveCommand extends RunCommandBase {
   @override
   final List<String> aliases = <String>['driver'];
 
-  String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+  String get userIdentifier => stringArgDeprecated(FlutterOptions.kDeviceUser);
 
-  String get screenshot => stringArg('screenshot');
+  String get screenshot => stringArgDeprecated('screenshot');
 
   @override
   bool get startPausedDefault => true;
@@ -209,7 +209,8 @@ class DriveCommand extends RunCommandBase {
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
     }
-    final Device device = await findTargetDevice(includeUnsupportedDevices: stringArg('use-application-binary') == null);
+    final String applicationBinaryPath = stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
+    final Device device = await findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
     if (device == null) {
       throwToolExit(null);
     }
@@ -233,13 +234,13 @@ class DriveCommand extends RunCommandBase {
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
-    final File applicationBinary = stringArg('use-application-binary') == null
+    final File applicationBinary = applicationBinaryPath == null
       ? null
-      : _fileSystem.file(stringArg('use-application-binary'));
+      : _fileSystem.file(applicationBinaryPath);
 
     bool screenshotTaken = false;
     try {
-      if (stringArg('use-existing-app') == null) {
+      if (stringArgDeprecated('use-existing-app') == null) {
         await driverService.start(
           buildInfo,
           device,
@@ -259,9 +260,9 @@ class DriveCommand extends RunCommandBase {
           }
         );
       } else {
-        final Uri uri = Uri.tryParse(stringArg('use-existing-app'));
+        final Uri uri = Uri.tryParse(stringArgDeprecated('use-existing-app'));
         if (uri == null) {
-          throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
+          throwToolExit('Invalid VM Service URI: ${stringArgDeprecated('use-existing-app')}');
         }
         await driverService.reuseApplication(
           uri,
@@ -276,15 +277,15 @@ class DriveCommand extends RunCommandBase {
         stringsArg('test-arguments'),
         <String, String>{},
         packageConfig,
-        chromeBinary: stringArg('chrome-binary'),
+        chromeBinary: stringArgDeprecated('chrome-binary'),
         headless: boolArg('headless'),
-        browserDimension: stringArg('browser-dimension').split(','),
-        browserName: stringArg('browser-name'),
-        driverPort: stringArg('driver-port') != null
-          ? int.tryParse(stringArg('driver-port'))
+        browserDimension: stringArgDeprecated('browser-dimension').split(','),
+        browserName: stringArgDeprecated('browser-name'),
+        driverPort: stringArgDeprecated('driver-port') != null
+          ? int.tryParse(stringArgDeprecated('driver-port'))
           : null,
         androidEmulator: boolArg('android-emulator'),
-        profileMemory: stringArg('profile-memory'),
+        profileMemory: stringArgDeprecated('profile-memory'),
       );
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
@@ -295,8 +296,8 @@ class DriveCommand extends RunCommandBase {
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         _logger.printStatus('Leaving the application running.');
       } else {
-        final File skslFile = stringArg('write-sksl-on-exit') != null
-          ? _fileSystem.file(stringArg('write-sksl-on-exit'))
+        final File skslFile = stringArgDeprecated('write-sksl-on-exit') != null
+          ? _fileSystem.file(stringArgDeprecated('write-sksl-on-exit'))
           : null;
         await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
       }
@@ -317,7 +318,7 @@ class DriveCommand extends RunCommandBase {
 
   String _getTestFile() {
     if (argResults['driver'] != null) {
-      return stringArg('driver');
+      return stringArgDeprecated('driver');
     }
 
     // If the --driver argument wasn't provided, then derive the value from

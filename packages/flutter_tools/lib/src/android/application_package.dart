@@ -23,13 +23,12 @@ import 'gradle.dart';
 /// An application package created from an already built Android APK.
 class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackage {
   AndroidApk({
-    required String id,
+    required super.id,
     required this.applicationPackage,
     required this.versionCode,
     required this.launchActivity,
   }) : assert(applicationPackage != null),
-       assert(launchActivity != null),
-       super(id: id);
+       assert(launchActivity != null);
 
   /// Creates a new AndroidApk from an existing APK.
   ///
@@ -149,7 +148,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       }
       logger.printError('AndroidManifest.xml is not a valid XML document.');
       logger.printError('Please check $manifestLocation for errors.');
-      throwToolExit('XML Parser error message: ${exception.toString()}');
+      throwToolExit('XML Parser error message: $exception');
     }
 
     final Iterable<XmlElement> manifests = document.findElements('manifest');

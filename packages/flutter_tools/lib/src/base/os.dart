@@ -166,16 +166,11 @@ abstract class OperatingSystemUtils {
 
 class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  }) : super._private();
 
   @override
   void makeExecutable(File file) {
@@ -295,16 +290,11 @@ class _PosixUtils extends OperatingSystemUtils {
 
 class _LinuxUtils extends _PosixUtils {
   _LinuxUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  });
 
   String? _name;
 
@@ -367,16 +357,11 @@ class _LinuxUtils extends _PosixUtils {
 
 class _MacOSUtils extends _PosixUtils {
   _MacOSUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  });
 
   String? _name;
 
@@ -387,10 +372,16 @@ class _MacOSUtils extends _PosixUtils {
         _processUtils.runSync(<String>['sw_vers', '-productName']),
         _processUtils.runSync(<String>['sw_vers', '-productVersion']),
         _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+        _processUtils.runSync(<String>['uname', '-m']),
       ];
       if (results.every((RunResult result) => result.exitCode == 0)) {
+        String osName = getNameForHostPlatform(hostPlatform);
+        // If the script is running in Rosetta, "uname -m" will return x86_64.
+        if (hostPlatform == HostPlatform.darwin_arm && results[3].stdout.contains('x86_64')) {
+          osName = '$osName (Rosetta)';
+        }
         _name =
-            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForHostPlatform(hostPlatform)}';
+            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} $osName';
       }
       _name ??= super.name;
     }
@@ -475,16 +466,11 @@ class _MacOSUtils extends _PosixUtils {
 
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  }) : super._private();
 
   @override
   HostPlatform hostPlatform = HostPlatform.windows_x64;

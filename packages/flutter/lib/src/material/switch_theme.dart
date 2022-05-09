@@ -188,10 +188,10 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
 class SwitchTheme extends InheritedWidget {
   /// Constructs a switch theme that configures all descendant [Switch] widgets.
   const SwitchTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// The properties used for all descendant [Switch] widgets.
   final SwitchThemeData data;

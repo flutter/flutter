@@ -28,8 +28,7 @@ const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 /// Generates the key mapping for macOS, based on the information in the key
 /// data structure given to it.
 class MacOSCodeGenerator extends PlatformCodeGenerator {
-  MacOSCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-    : super(keyData, logicalData);
+  MacOSCodeGenerator(super.keyData, super.logicalData);
 
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
@@ -97,6 +96,27 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
     return specialKeyConstants.toString().trimRight();
   }
 
+  String get _layoutGoals {
+    final OutputLines<int> lines = OutputLines<int>('macOS layout goals');
+    final Iterable<LogicalKeyEntry> asciiEntries = logicalData.entries.where(
+        (LogicalKeyEntry entry) => entry.value <= 128);
+    for (final LogicalKeyEntry logicalEntry in asciiEntries) {
+      final int value = logicalEntry.value;
+      final PhysicalKeyEntry? physicalEntry = keyData.tryEntryByName(logicalEntry.name);
+      if (physicalEntry == null) {
+        continue;
+      }
+      final bool mandatory = (value >= '0'.codeUnitAt(0) && value <= '9'.codeUnitAt(0))
+                          || (value >= 'a'.codeUnitAt(0) && value <= 'z'.codeUnitAt(0));
+      lines.add(value,
+          '    LayoutGoal{${toHex(physicalEntry.macOSScanCode, digits: 2)}, '
+          '${toHex(value, digits: 2)}, '
+          '${mandatory ? 'true}, ' : 'false},'}'
+          '  // ${logicalEntry.name}');
+    }
+    return lines.sortedJoin().trimRight();
+  }
+
   @override
   String get templatePath => path.join(dataRoot, 'macos_key_code_map_cc.tmpl');
 
@@ -116,6 +136,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
+      'LAYOUT_GOALS': _layoutGoals,
     };
   }
 }

@@ -39,8 +39,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverList({
-    required RenderSliverBoxChildManager childManager,
-  }) : super(childManager: childManager);
+    required super.childManager,
+  });
 
   @override
   void performLayout() {

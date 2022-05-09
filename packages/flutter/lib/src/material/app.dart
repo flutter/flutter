@@ -50,10 +50,10 @@ enum ThemeMode {
   dark,
 }
 
-/// An application that uses material design.
+/// An application that uses Material Design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly
-/// required for material design applications. It builds upon a [WidgetsApp] by
+/// required for Material Design applications. It builds upon a [WidgetsApp] by
 /// adding material-design specific functionality, such as [AnimatedTheme] and
 /// [GridPaper].
 ///
@@ -81,6 +81,14 @@ enum ThemeMode {
 ///
 /// This widget also configures the observer of the top-level [Navigator] (if
 /// any) to perform [Hero] animations.
+///
+/// {@template flutter.material.MaterialApp.defaultSelectionStyle}
+/// The [MaterialApp] automatically creates a [DefaultSelectionStyle]. It uses
+/// the colors in the [ThemeData.textSelectionTheme] if they are not null;
+/// otherwise, the [MaterialApp] sets [DefaultSelectionStyle.selectionColor] to
+/// [ColorScheme.primary] with 0.4 opacity and
+/// [DefaultSelectionStyle.cursorColor] to [ColorScheme.primary].
+/// {@endtemplate}
 ///
 /// If [home], [routes], [onGenerateRoute], and [onUnknownRoute] are all null,
 /// and [builder] is not null, then no [Navigator] is created.
@@ -193,7 +201,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const MaterialApp({
-    Key? key,
+    super.key,
     this.navigatorKey,
     this.scaffoldMessengerKey,
     this.home,
@@ -241,15 +249,18 @@ class MaterialApp extends StatefulWidget {
        routeInformationParser = null,
        routerDelegate = null,
        backButtonDispatcher = null,
-       super(key: key);
+       routerConfig = null;
 
   /// Creates a [MaterialApp] that uses the [Router] instead of a [Navigator].
+  ///
+  /// {@macro flutter.widgets.WidgetsApp.router}
   const MaterialApp.router({
-    Key? key,
+    super.key,
     this.scaffoldMessengerKey,
     this.routeInformationProvider,
-    required RouteInformationParser<Object> this.routeInformationParser,
-    required RouterDelegate<Object> this.routerDelegate,
+    this.routeInformationParser,
+    this.routerDelegate,
+    this.routerConfig,
     this.backButtonDispatcher,
     this.builder,
     this.title = '',
@@ -276,8 +287,7 @@ class MaterialApp extends StatefulWidget {
     this.restorationScopeId,
     this.scrollBehavior,
     this.useInheritedMediaQuery = false,
-  }) : assert(routeInformationParser != null),
-       assert(routerDelegate != null),
+  }) : assert(routerDelegate != null || routerConfig != null),
        assert(title != null),
        assert(debugShowMaterialGrid != null),
        assert(showPerformanceOverlay != null),
@@ -292,8 +302,7 @@ class MaterialApp extends StatefulWidget {
        onGenerateInitialRoutes = null,
        onUnknownRoute = null,
        routes = null,
-       initialRoute = null,
-       super(key: key);
+       initialRoute = null;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -346,6 +355,9 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
   final BackButtonDispatcher? backButtonDispatcher;
+
+  /// {@macro flutter.widgets.widgetsApp.routerConfig}
+  final RouterConfig<Object>? routerConfig;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   ///
@@ -587,7 +599,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.
@@ -730,7 +742,10 @@ class MaterialApp extends StatefulWidget {
 /// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
 /// overscroll indicator that is used on [TargetPlatform.android]. When null,
 /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
-/// overscroll indicator is the [GlowingOverscrollIndicator].
+/// overscroll indicator is the [GlowingOverscrollIndicator]. These properties
+/// are deprecated. In order to use the [StretchingOverscrollIndicator], use
+/// the [ThemeData.useMaterial3] flag, or override
+/// [ScrollBehavior.buildOverscrollIndicator].
 ///
 /// See also:
 ///
@@ -745,9 +760,12 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
   /// overscroll indicator is the [GlowingOverscrollIndicator].
   const MaterialScrollBehavior({
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
-  }) : _androidOverscrollIndicator = androidOverscrollIndicator,
-       super(androidOverscrollIndicator: androidOverscrollIndicator);
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
+    super.androidOverscrollIndicator,
+  }) : _androidOverscrollIndicator = androidOverscrollIndicator;
 
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
@@ -782,9 +800,14 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
-    final AndroidOverscrollIndicator indicator = _androidOverscrollIndicator
+    late final AndroidOverscrollIndicator indicator;
+    if (Theme.of(context).useMaterial3) {
+      indicator = AndroidOverscrollIndicator.stretch;
+    } else {
+      indicator = _androidOverscrollIndicator
         ?? Theme.of(context).androidOverscrollIndicator
         ?? androidOverscrollIndicator;
+    }
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -815,7 +838,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
 class _MaterialAppState extends State<MaterialApp> {
   late HeroController _heroController;
 
-  bool get _usesRouter => widget.routerDelegate != null;
+  bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
 
   @override
   void initState() {
@@ -862,29 +885,35 @@ class _MaterialAppState extends State<MaterialApp> {
       theme = widget.highContrastTheme;
     }
     theme ??= widget.theme ?? ThemeData.light();
+    final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+    final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
 
     return ScaffoldMessenger(
       key: widget.scaffoldMessengerKey,
-      child: AnimatedTheme(
-        data: theme,
-        child: widget.builder != null
-          ? Builder(
-              builder: (BuildContext context) {
-                // Why are we surrounding a builder with a builder?
-                //
-                // The widget.builder may contain code that invokes
-                // Theme.of(), which should return the theme we selected
-                // above in AnimatedTheme. However, if we invoke
-                // widget.builder() directly as the child of AnimatedTheme
-                // then there is no Context separating them, and the
-                // widget.builder() will not find the theme. Therefore, we
-                // surround widget.builder with yet another builder so that
-                // a context separates them and Theme.of() correctly
-                // resolves to the theme we passed to AnimatedTheme.
-                return widget.builder!(context, child);
-              },
-            )
-          : child ?? const SizedBox.shrink(),
+      child: DefaultSelectionStyle(
+        selectionColor: effectiveSelectionColor,
+        cursorColor: effectiveCursorColor,
+        child: AnimatedTheme(
+          data: theme,
+          child: widget.builder != null
+            ? Builder(
+                builder: (BuildContext context) {
+                  // Why are we surrounding a builder with a builder?
+                  //
+                  // The widget.builder may contain code that invokes
+                  // Theme.of(), which should return the theme we selected
+                  // above in AnimatedTheme. However, if we invoke
+                  // widget.builder() directly as the child of AnimatedTheme
+                  // then there is no Context separating them, and the
+                  // widget.builder() will not find the theme. Therefore, we
+                  // surround widget.builder with yet another builder so that
+                  // a context separates them and Theme.of() correctly
+                  // resolves to the theme we passed to AnimatedTheme.
+                  return widget.builder!(context, child);
+                },
+              )
+            : child ?? const SizedBox.shrink(),
+        ),
       ),
     );
   }
@@ -902,8 +931,9 @@ class _MaterialAppState extends State<MaterialApp> {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
         routeInformationProvider: widget.routeInformationProvider,
-        routeInformationParser: widget.routeInformationParser!,
-        routerDelegate: widget.routerDelegate!,
+        routeInformationParser: widget.routeInformationParser,
+        routerDelegate: widget.routerDelegate,
+        routerConfig: widget.routerConfig,
         backButtonDispatcher: widget.backButtonDispatcher,
         builder: _materialBuilder,
         title: widget.title,

@@ -7,11 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 class TestTransition extends AnimatedWidget {
   const TestTransition({
-    Key? key,
+    super.key,
     required this.childFirstHalf,
     required this.childSecondHalf,
     required Animation<double> animation,
-  }) : super(key: key, listenable: animation);
+  }) : super(listenable: animation);
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;

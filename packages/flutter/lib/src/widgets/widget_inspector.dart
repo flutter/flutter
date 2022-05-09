@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection' show HashMap;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
@@ -742,6 +743,8 @@ mixin WidgetInspectorService {
   int _nextId = 0;
 
   List<String>? _pubRootDirectories;
+  /// Memoization for [_isLocalCreationLocation].
+  final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
 
   bool _trackRebuildDirtyWidgets = false;
   bool _trackRepaintWidgets = false;
@@ -1345,6 +1348,7 @@ mixin WidgetInspectorService {
     _pubRootDirectories = pubRootDirectories
       .map<String>((String directory) => Uri.parse(directory).path)
       .toList();
+    _isLocalCreationCache.clear();
   }
 
   /// Set the [WidgetInspector] selection to the object matching the specified
@@ -1419,7 +1423,7 @@ mixin WidgetInspectorService {
 
     final Uri uri = Uri.parse(activeDevToolsServerAddress!).replace(
       queryParameters: <String, dynamic>{
-        'uri': connectedVmServiceUri!,
+        'uri': connectedVmServiceUri,
         'inspectorRef': inspectorRef,
       },
     );
@@ -1518,14 +1522,11 @@ mixin WidgetInspectorService {
     if (creationLocation == null) {
       return false;
     }
-    return _isLocalCreationLocation(creationLocation);
+    return _isLocalCreationLocation(creationLocation.file);
   }
 
-  bool _isLocalCreationLocation(_Location? location) {
-    if (location == null) {
-      return false;
-    }
-    final String file = Uri.parse(location.file).path;
+  bool _isLocalCreationLocationImpl(String locationUri) {
+    final String file = Uri.parse(locationUri).path;
 
     // By default check whether the creation location was within package:flutter.
     if (_pubRootDirectories == null) {
@@ -1539,6 +1540,17 @@ mixin WidgetInspectorService {
       }
     }
     return false;
+  }
+
+  /// Memoized version of [_isLocalCreationLocationImpl].
+  bool _isLocalCreationLocation(String locationUri) {
+    final bool? cachedValue = _isLocalCreationCache[locationUri];
+    if (cachedValue != null) {
+      return cachedValue;
+    }
+    final bool result = _isLocalCreationLocationImpl(locationUri);
+    _isLocalCreationCache[locationUri] = result;
+    return result;
   }
 
   /// Wrapper around `json.encode` that uses a ring of cached values to prevent
@@ -2066,7 +2078,7 @@ class _ElementLocationStatsTracker {
       entry = _LocationCount(
         location: location,
         id: id,
-        local: WidgetInspectorService.instance._isLocalCreationLocation(location),
+        local: WidgetInspectorService.instance._isLocalCreationLocation(location.file),
       );
       if (entry.local) {
         newLocations.add(entry);
@@ -2193,11 +2205,10 @@ class WidgetInspector extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const WidgetInspector({
-    Key? key,
+    super.key,
     required this.child,
     required this.selectButtonBuilder,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// The widget that is being inspected.
   final Widget child;
@@ -2317,11 +2328,11 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
     _hitTestHelper(regularHits, edgeHits, position, root, root.getTransformTo(null));
     // Order matches by the size of the hit area.
-    double _area(RenderObject object) {
+    double area(RenderObject object) {
       final Size size = object.semanticBounds.size;
       return size.width * size.height;
     }
-    regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
+    regularHits.sort((RenderObject a, RenderObject b) => area(a).compareTo(area(b)));
     final Set<RenderObject> hits = <RenderObject>{
       ...edgeHits,
       ...regularHits,
@@ -2501,9 +2512,8 @@ class InspectorSelection {
 
 class _InspectorOverlay extends LeafRenderObjectWidget {
   const _InspectorOverlay({
-    Key? key,
     required this.selection,
-  }) : super(key: key);
+  });
 
   final InspectorSelection selection;
 
@@ -3072,12 +3082,22 @@ bool debugIsLocalCreationLocation(Object object) {
   bool isLocal = false;
   assert(() {
     final _Location? location = _getCreationLocation(object);
-    if (location == null)
-      isLocal =  false;
-    isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location);
+    if (location != null) {
+      isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location.file);
+    }
     return true;
   }());
   return isLocal;
+}
+
+/// Returns true if a [Widget] is user created.
+///
+/// This is a faster variant of `debugIsLocalCreationLocation` that is available
+/// in debug and profile builds but only works for [Widget].
+bool debugIsWidgetLocalCreation(Widget widget) {
+  final _Location? location = _getObjectCreationLocation(widget);
+  return location != null &&
+      WidgetInspectorService.instance._isLocalCreationLocation(location.file);
 }
 
 /// Returns the creation location of an object in String format if one is available.
@@ -3092,14 +3112,18 @@ String? _describeCreationLocation(Object object) {
   return location?.toString();
 }
 
+_Location? _getObjectCreationLocation(Object object) {
+  return object is _HasCreationLocation ? object._location : null;
+}
+
 /// Returns the creation location of an object if one is available.
 ///
 /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 _Location? _getCreationLocation(Object? object) {
-  final Object? candidate =  object is Element && !object.debugIsDefunct ? object.widget : object;
-  return candidate is _HasCreationLocation ? candidate._location : null;
+  final Object? candidate = object is Element && !object.debugIsDefunct ? object.widget : object;
+  return candidate == null ? null : _getObjectCreationLocation(candidate);
 }
 
 // _Location objects are always const so we don't need to worry about the GC
@@ -3226,7 +3250,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     if (creationLocation != null) {
       result['locationId'] = _toLocationId(creationLocation);
       result['creationLocation'] = creationLocation.toJsonMap();
-      if (service._isLocalCreationLocation(creationLocation)) {
+      if (service._isLocalCreationLocation(creationLocation.file)) {
         _nodesCreatedByLocalProject.add(node);
         result['createdByLocalProject'] = true;
       }

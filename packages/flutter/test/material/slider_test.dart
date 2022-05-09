@@ -784,6 +784,7 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..rrect(color: const Color(0xfffafafa))
         ..rrect(color: customColor1) // active track
         ..rrect(color: customColor2) // inactive track
         ..circle(color: customColor1.withOpacity(0.12)) // overlay
@@ -1816,6 +1817,66 @@ void main() {
     semantics.dispose();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/101868
+  testWidgets('Slider.label info should not write to semantic node', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Slider(
+            value: 40.0,
+            max: 200.0,
+            divisions: 10,
+            semanticFormatterCallback: (double value) => value.round().toString(),
+            onChanged: (double v) { },
+            label: 'Bingo',
+          ),
+        ),
+      ),
+    ));
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
+                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          value: '40',
+                          increasedValue: '60',
+                          decreasedValue: '20',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
+  });
+
   testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -2093,6 +2154,102 @@ void main() {
     expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('In directional nav, Slider can be navigated out of by using up and down arrows', (WidgetTester tester) async {
+    const Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
+      SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
+      SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
+      SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+      SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+    };
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    double topSliderValue = 0.5;
+    double bottomSliderValue = 0.5;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Shortcuts(
+          shortcuts: shortcuts,
+          child: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return MediaQuery(
+                  data: const MediaQueryData(navigationMode: NavigationMode.directional),
+                  child: Column(
+                    children: <Widget>[
+                      Slider(
+                        value: topSliderValue,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            topSliderValue = newValue;
+                          });
+                        },
+                        autofocus: true,
+                      ),
+                      Slider(
+                        value: bottomSliderValue,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            bottomSliderValue = newValue;
+                          });
+                        },
+                      ),
+                    ]
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The top slider is auto-focused and can be adjusted with left and right arrow keys.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.55, reason: 'focused top Slider increased after first arrowRight');
+    expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by first arrowRight');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5, reason: 'focused top Slider decreased after first arrowLeft');
+    expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by first arrowLeft');
+
+    // Pressing the down-arrow key moves focus down to the bottom slider
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5, reason: 'arrowDown unfocuses top Slider, does not alter its value');
+    expect(bottomSliderValue, 0.5, reason: 'arrowDown focuses bottom Slider, does not alter its value');
+
+    // The bottom slider is now focused and can be adjusted with left and right arrow keys.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5, reason: 'unfocused top Slider unaffected by second arrowRight');
+    expect(bottomSliderValue, 0.55, reason: 'focused bottom Slider increased by second arrowRight');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5, reason: 'unfocused top Slider unaffected by second arrowLeft');
+    expect(bottomSliderValue, 0.5, reason: 'focused bottom Slider decreased by second arrowLeft');
+
+    // Pressing the up-arrow key moves focus back up to the top slider
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5, reason: 'arrowUp focuses top Slider, does not alter its value');
+    expect(bottomSliderValue, 0.5, reason: 'arrowUp unfocuses bottom Slider, does not alter its value');
+
+    // The top slider is now focused again and can be adjusted with left and right arrow keys.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.55, reason: 'focused top Slider increased after third arrowRight');
+    expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by third arrowRight');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5, reason: 'focused top Slider decreased after third arrowRight');
+    expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by third arrowRight');
+  });
+
   testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
@@ -2355,7 +2512,7 @@ void main() {
         ..paragraph(),
     );
 
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 3));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 2));
 
     await tester.tap(find.text('Next'));
@@ -2372,7 +2529,7 @@ void main() {
     );
 
     // Represents the ElevatedButton with inner Text, inner page.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
 
     // Don't stop holding the value indicator.

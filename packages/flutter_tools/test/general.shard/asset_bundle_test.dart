@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -387,6 +388,63 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+
+  group('Shaders: ', () {
+    MemoryFileSystem fileSystem;
+    Artifacts artifacts;
+    String impellerc;
+    Directory output;
+    String shaderPath;
+    String outputPath;
+
+    setUp(() {
+      artifacts = Artifacts.test();
+      fileSystem = MemoryFileSystem.test();
+      impellerc = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+
+      fileSystem.file(impellerc).createSync(recursive: true);
+
+      output = fileSystem.directory('asset_output')..createSync(recursive: true);
+      shaderPath = fileSystem.path.join('assets', 'shader.frag');
+      outputPath = fileSystem.path.join(output.path, 'assets', 'shader.frag');
+      fileSystem.file(shaderPath).createSync(recursive: true);
+    });
+
+    testUsingContext('Including a shader triggers the shader compiler', () async {
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - assets/shader.frag
+  ''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+      expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);
+
+      await writeBundle(output, bundle.entries, loggerOverride: testLogger);
+
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--flutter-spirv',
+            '--spirv=$outputPath',
+            '--input=/$shaderPath',
+          ],
+          onRun: () {
+            fileSystem.file(outputPath).createSync(recursive: true);
+          },
+        ),
+      ]),
+    });
+  });
+
   testUsingContext('Does not insert dummy file into additionalDependencies '
     'when wildcards are used by dependencies', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
@@ -521,7 +579,7 @@ flutter:
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext('does not include material design assets if uses-material-design: true is '
+  testUsingContext('does not include Material Design assets if uses-material-design: true is '
     'specified only by a dependency', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/

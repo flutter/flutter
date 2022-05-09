@@ -9,6 +9,7 @@ import 'colors.dart';
 import 'debug.dart';
 import 'drawer_theme.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
@@ -46,7 +47,7 @@ const double _kEdgeDragWidth = 20.0;
 const double _kMinFlingVelocity = 365.0;
 const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 
-/// A material design panel that slides in horizontally from the edge of a
+/// A Material Design panel that slides in horizontally from the edge of a
 /// [Scaffold] to show navigation links in an application.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=WRj86iHihgY}
@@ -133,20 +134,20 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///  * [ScaffoldState.openDrawer], which displays its [Drawer], if any.
 ///  * <https://material.io/design/components/navigation-drawer.html>
 class Drawer extends StatelessWidget {
-  /// Creates a material design drawer.
+  /// Creates a Material Design drawer.
   ///
   /// Typically used in the [Scaffold.drawer] property.
   ///
   /// The [elevation] must be non-negative.
   const Drawer({
-    Key? key,
+    super.key,
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.width,
     this.child,
     this.semanticLabel,
-  }) : assert(elevation == null || elevation >= 0.0),
-       super(key: key);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// Sets the color of the [Material] that holds all of the [Drawer]'s
   /// contents.
@@ -170,6 +171,12 @@ class Drawer extends StatelessWidget {
   /// If this is null, then [DrawerThemeData.shape] is used. If that
   /// is also null, then it falls back to [Material]'s default.
   final ShapeBorder? shape;
+
+  /// The width of the drawer.
+  ///
+  /// If this is null, then [DrawerThemeData.width] is used. If that is also
+  /// null, then it falls back to the Material spec's default (304.0).
+  final double? width;
 
   /// The widget below this widget in the tree.
   ///
@@ -211,7 +218,7 @@ class Drawer extends StatelessWidget {
       explicitChildNodes: true,
       label: label,
       child: ConstrainedBox(
-        constraints: const BoxConstraints.expand(width: _kWidth),
+        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
         child: Material(
           color: backgroundColor ?? drawerTheme.backgroundColor,
           elevation: elevation ?? drawerTheme.elevation ?? 16.0,
@@ -394,7 +401,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (_historyEntry == null) {
       final ModalRoute<dynamic>? route = ModalRoute.of(context);
       if (route != null) {
-        _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
+        _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved, impliesAppBarDismissal: false);
         route.addLocalHistoryEntry(_historyEntry!);
         FocusScope.of(context).setFirstFocus(_focusScopeNode);
       }

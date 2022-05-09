@@ -18,7 +18,7 @@ class CardModel {
 }
 
 class CardCollection extends StatefulWidget {
-  const CardCollection({Key? key}) : super(key: key);
+  const CardCollection({super.key});
 
   @override
   CardCollectionState createState() => CardCollectionState();

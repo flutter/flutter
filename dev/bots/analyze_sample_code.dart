@@ -507,8 +507,9 @@ class SampleChecker {
       process.stdout.transform(utf8.decoder).forEach(stdout.write);
     }
     process.stderr.transform(utf8.decoder).forEach(stderr.write);
-    final int exitCode = await process.exitCode.timeout(const Duration(seconds: 30), onTimeout: () {
-      stderr.writeln('Snippet script timed out.');
+    const Duration timeoutDuration = Duration(minutes: 5);
+    final int exitCode = await process.exitCode.timeout(timeoutDuration, onTimeout: () {
+      stderr.writeln('Snippet script timed out after $timeoutDuration.');
       return -1;
     });
     if (exitCode != 0) {
@@ -745,9 +746,10 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  vector_math: any
 
 dev_dependencies:
-  flutter_lints: ^1.0.3
+  flutter_lints: ^2.0.0
 ''');
     }
 

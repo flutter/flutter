@@ -30,11 +30,10 @@ class WillPopScope extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const WillPopScope({
-    Key? key,
+    super.key,
     required this.child,
     required this.onWillPop,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// The widget below this widget in the tree.
   ///

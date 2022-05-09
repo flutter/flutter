@@ -61,7 +61,7 @@ import 'icon_theme_data.dart';
 /// See also:
 ///
 ///  * [IconButton], for interactive icons.
-///  * [Icons], for the list of available icons for use with this class.
+///  * [Icons], the library of Material Icons available for use with this class.
 ///  * [IconTheme], which provides ambient configuration for icons.
 ///  * [ImageIcon], for showing icons from [AssetImage]s or other [ImageProvider]s.
 class Icon extends StatelessWidget {
@@ -70,13 +70,13 @@ class Icon extends StatelessWidget {
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const Icon(
     this.icon, {
-    Key? key,
+    super.key,
     this.size,
     this.color,
     this.semanticLabel,
     this.textDirection,
     this.shadows,
-  }) : super(key: key);
+  });
 
   /// The icon to display. The available icons are described in [Icons].
   ///

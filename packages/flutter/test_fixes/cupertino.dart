@@ -226,4 +226,7 @@ void main() {
   bool nowShowing = scrollbar.isAlwaysShown;
   RawScrollbar rawScrollbar = RawScrollbar(isAlwaysShown: true);
   nowShowing = rawScrollbar.isAlwaysShown;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  TextSelectionOverlay.fadeDuration;
 }

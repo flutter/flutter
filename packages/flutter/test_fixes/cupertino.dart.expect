@@ -226,4 +226,7 @@ void main() {
   bool nowShowing = scrollbar.thumbVisibility;
   RawScrollbar rawScrollbar = RawScrollbar(thumbVisibility: true);
   nowShowing = rawScrollbar.thumbVisibility;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  SelectionOverlay.fadeDuration;
 }

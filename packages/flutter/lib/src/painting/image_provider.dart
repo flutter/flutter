@@ -435,38 +435,21 @@ abstract class ImageProvider<T extends Object> {
       didError = true;
     }
 
-    // If an error is added to a synchronous completer before a listener has been
-    // added, it can throw an error both into the zone and up the stack. Thus, it
-    // looks like the error has been caught, but it is in fact also bubbling to the
-    // zone. Since we cannot prevent all usage of Completer.sync here, or rather
-    // that changing them would be too breaking, we instead hook into the same
-    // zone mechanism to intercept the uncaught error and deliver it to the
-    // image stream's error handler. Note that these errors may be duplicated,
-    // hence the need for the `didError` flag.
-    final Zone dangerZone = Zone.current.fork(
-      specification: ZoneSpecification(
-        handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
-          handleError(error, stackTrace);
-        },
-      ),
-    );
-    dangerZone.runGuarded(() {
-      Future<T> key;
+    Future<T> key;
+    try {
+      key = obtainKey(configuration);
+    } catch (error, stackTrace) {
+      handleError(error, stackTrace);
+      return;
+    }
+    key.then<void>((T key) {
+      obtainedKey = key;
       try {
-        key = obtainKey(configuration);
+        successCallback(key, handleError);
       } catch (error, stackTrace) {
         handleError(error, stackTrace);
-        return;
       }
-      key.then<void>((T key) {
-        obtainedKey = key;
-        try {
-          successCallback(key, handleError);
-        } catch (error, stackTrace) {
-          handleError(error, stackTrace);
-        }
-      }).catchError(handleError);
-    });
+    }).catchError(handleError);
   }
 
   /// Called by [resolve] with the key returned by [obtainKey].

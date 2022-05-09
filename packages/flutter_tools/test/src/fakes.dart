@@ -22,7 +22,7 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   FakeDyldEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
   @override
   Map<String, String> get environment => <String, String>{
-    'DYLD_LIBRARY_PATH': '/path/to/libraries'
+    'DYLD_LIBRARY_PATH': '/path/to/libraries',
   };
 
   @override
@@ -32,7 +32,7 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   String get name => 'fake';
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async {
+  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils, {bool offline = false}) async {
   }
 }
 
@@ -425,7 +425,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
-    this.isWindowsUwpEnabled = false,
   });
 
   @override
@@ -456,9 +455,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool areCustomDevicesEnabled;
 
   @override
-  final bool isWindowsUwpEnabled;
-
-  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -479,15 +475,13 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case flutterCustomDevicesFeature:
         return areCustomDevicesEnabled;
-      case windowsUwpEmbedding:
-        return isWindowsUwpEnabled;
     }
     return false;
   }
 }
 
 class FakeStatusLogger extends DelegatingLogger {
-  FakeStatusLogger(Logger delegate) : super(delegate);
+  FakeStatusLogger(super.delegate);
 
   late Status status;
 

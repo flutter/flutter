@@ -120,7 +120,7 @@ static final String tokenBar = 'bar';
 }
 
 class TestTemplate extends TokenTemplate {
-  TestTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
+  TestTemplate(super.fileName, super.tokens);
 
   @override
   String generate() => '''

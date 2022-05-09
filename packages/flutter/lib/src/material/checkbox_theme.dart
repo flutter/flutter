@@ -238,10 +238,10 @@ class CheckboxTheme extends InheritedWidget {
   /// Constructs a checkbox theme that configures all descendant [Checkbox]
   /// widgets.
   const CheckboxTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// The properties used for all descendant [Checkbox] widgets.
   final CheckboxThemeData data;

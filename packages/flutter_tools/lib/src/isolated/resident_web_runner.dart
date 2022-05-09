@@ -302,6 +302,7 @@ class ResidentWebRunner extends ResidentRunner {
             true,
             debuggingOptions.nativeNullAssertions,
             null,
+            null,
           );
         }
         await device.device.startApp(
@@ -375,6 +376,7 @@ class ResidentWebRunner extends ResidentRunner {
           true,
           debuggingOptions.nativeNullAssertions,
           kBaseHref,
+          null,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -473,13 +475,19 @@ class ResidentWebRunner extends ResidentRunner {
         'typedef _UnaryFunction = dynamic Function(List<String> args);',
         'typedef _NullaryFunction = dynamic Function();',
         'Future<void> main() async {',
-        if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistrar);',
-        '  await ui.webOnlyInitializePlatform();',
-        '  if (entrypoint.main is _UnaryFunction) {',
-        '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
-        '  }',
-        '  return (entrypoint.main as _NullaryFunction)();',
+        '  await ui.webOnlyWarmupEngine(',
+        '    runApp: () {',
+        '      if (entrypoint.main is _UnaryFunction) {',
+        '        return (entrypoint.main as _UnaryFunction)(<String>[]);',
+        '      }',
+        '      return (entrypoint.main as _NullaryFunction)();',
+        '    },',
+        if (hasWebPlugins) ...<String>[
+        '    registerPlugins: () {',
+        '      registerPlugins(webPluginRegistrar);',
+        '    },',
+        ],
+        '  );',
         '}',
         '',
       ].join('\n');

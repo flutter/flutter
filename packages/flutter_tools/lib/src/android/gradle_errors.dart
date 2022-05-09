@@ -71,12 +71,13 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
   r8FailureHandler,
-  minSdkVersion,
-  transformInputIssue,
-  lockFileDepMissing,
+  minSdkVersionHandler,
+  transformInputIssueHandler,
+  lockFileDepMissingHandler,
   multidexErrorHandler,
   incompatibleKotlinVersionHandler,
   minCompileSdkVersionHandler,
+  jvm11RequiredHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -380,7 +381,7 @@ final RegExp _minSdkVersionPattern = RegExp(r'uses-sdk:minSdkVersion ([0-9]+) ca
 
 /// Handler when a plugin requires a higher Android API level.
 @visibleForTesting
-final GradleHandledError minSdkVersion = GradleHandledError(
+final GradleHandledError minSdkVersionHandler = GradleHandledError(
   test: (String line) {
     return _minSdkVersionPattern.hasMatch(line);
   },
@@ -422,7 +423,7 @@ final GradleHandledError minSdkVersion = GradleHandledError(
 /// Handler when https://issuetracker.google.com/issues/141126614 or
 /// https://github.com/flutter/flutter/issues/58247 is triggered.
 @visibleForTesting
-final GradleHandledError transformInputIssue = GradleHandledError(
+final GradleHandledError transformInputIssueHandler = GradleHandledError(
   test: (String line) {
     return line.contains('https://issuetracker.google.com/issues/158753935');
   },
@@ -456,7 +457,7 @@ final GradleHandledError transformInputIssue = GradleHandledError(
 
 /// Handler when a dependency is missing in the lockfile.
 @visibleForTesting
-final GradleHandledError lockFileDepMissing = GradleHandledError(
+final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
   test: (String line) {
     return line.contains('which is not part of the dependency lock state');
   },
@@ -537,4 +538,26 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'min-compile-sdk-version',
+);
+
+@visibleForTesting
+final GradleHandledError jvm11RequiredHandler = GradleHandledError(
+  test: (String line) {
+    return line.contains('Android Gradle plugin requires Java 11 to run');
+  },
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} You need Java 11 or higher to build your app with this version of Gradle.\n\n'
+      'To get Java 11, update to the latest version of Android Studio on https://developer.android.com/studio/install.\n\n'
+      'To check the Java version used by Flutter, run `flutter doctor -v`.',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'java11-required',
 );

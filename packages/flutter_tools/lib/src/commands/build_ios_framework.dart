@@ -159,7 +159,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String outputArgument = stringArg('output')
+    final String outputArgument = stringArgDeprecated('output')
         ?? globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
@@ -284,7 +284,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra_release/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
-  s.platform              = :ios, '9.0'
+  s.platform              = :ios, '11.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
@@ -490,7 +490,7 @@ end
             podProduct as Directory,
             simulatorBuildConfiguration
                 .childDirectory(builtProduct.basename)
-                .childDirectory(podFrameworkName)
+                .childDirectory(podFrameworkName),
           ];
 
           await _produceXCFramework(frameworks, binaryName, modeDirectory);
@@ -520,10 +520,10 @@ end
                 entity.basename.endsWith('dSYM'))
             .map((FileSystemEntity entity) =>
                 <String>['-debug-symbols', entity.path])
-            .expand<String>((List<String> parameter) => parameter)
+            .expand<String>((List<String> parameter) => parameter),
       ],
       '-output',
-      outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path
+      outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path,
     ];
 
     final RunResult xcframeworkResult = await globals.processUtils.run(

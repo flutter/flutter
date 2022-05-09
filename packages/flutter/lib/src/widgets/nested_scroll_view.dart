@@ -178,7 +178,7 @@ class NestedScrollView extends StatefulWidget {
   /// The [reverse], [headerSliverBuilder], and [body] arguments must not be
   /// null.
   const NestedScrollView({
-    Key? key,
+    super.key,
     this.controller,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -195,8 +195,7 @@ class NestedScrollView extends StatefulWidget {
        assert(headerSliverBuilder != null),
        assert(body != null),
        assert(floatHeaderSlivers != null),
-       assert(clipBehavior != null),
-       super(key: key);
+       assert(clipBehavior != null);
 
   /// An object that can be used to control the position to which the outer
   /// scroll view is scrolled.
@@ -461,27 +460,17 @@ class NestedScrollViewState extends State<NestedScrollView> {
 
 class _NestedScrollViewCustomScrollView extends CustomScrollView {
   const _NestedScrollViewCustomScrollView({
-    required Axis scrollDirection,
-    required bool reverse,
-    required ScrollPhysics physics,
-    required ScrollBehavior scrollBehavior,
-    required ScrollController controller,
-    required List<Widget> slivers,
+    required super.scrollDirection,
+    required super.reverse,
+    required ScrollPhysics super.physics,
+    required ScrollBehavior super.scrollBehavior,
+    required ScrollController super.controller,
+    required super.slivers,
     required this.handle,
-    required Clip clipBehavior,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-    String? restorationId,
-  }) : super(
-         scrollDirection: scrollDirection,
-         reverse: reverse,
-         physics: physics,
-         scrollBehavior: scrollBehavior,
-         controller: controller,
-         slivers: slivers,
-         dragStartBehavior: dragStartBehavior,
-         restorationId: restorationId,
-         clipBehavior: clipBehavior,
-       );
+    required super.clipBehavior,
+    super.dragStartBehavior,
+    super.restorationId,
+  });
 
   final SliverOverlapAbsorberHandle handle;
 
@@ -505,12 +494,10 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
 
 class _InheritedNestedScrollView extends InheritedWidget {
   const _InheritedNestedScrollView({
-    Key? key,
     required this.state,
-    required Widget child,
+    required super.child,
   }) : assert(state != null),
-       assert(child != null),
-       super(key: key, child: child);
+       assert(child != null);
 
   final NestedScrollViewState state;
 
@@ -520,21 +507,15 @@ class _InheritedNestedScrollView extends InheritedWidget {
 
 class _NestedScrollMetrics extends FixedScrollMetrics {
   _NestedScrollMetrics({
-    required double? minScrollExtent,
-    required double? maxScrollExtent,
-    required double? pixels,
-    required double? viewportDimension,
-    required AxisDirection axisDirection,
+    required super.minScrollExtent,
+    required super.maxScrollExtent,
+    required super.pixels,
+    required super.viewportDimension,
+    required super.axisDirection,
     required this.minRange,
     required this.maxRange,
     required this.correctionOffset,
-  }) : super(
-    minScrollExtent: minScrollExtent,
-    maxScrollExtent: maxScrollExtent,
-    pixels: pixels,
-    viewportDimension: viewportDimension,
-    axisDirection: axisDirection,
-  );
+  });
 
   @override
   _NestedScrollMetrics copyWith({
@@ -1090,9 +1071,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 class _NestedScrollController extends ScrollController {
   _NestedScrollController(
     this.coordinator, {
-    double initialScrollOffset = 0.0,
-    String? debugLabel,
-  }) : super(initialScrollOffset: initialScrollOffset, debugLabel: debugLabel);
+    super.initialScrollOffset,
+    super.debugLabel,
+  });
 
   final _NestedScrollCoordinator coordinator;
 
@@ -1156,18 +1137,13 @@ class _NestedScrollController extends ScrollController {
 // this class, they can defer, or be influenced by, the coordinator.
 class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDelegate {
   _NestedScrollPosition({
-    required ScrollPhysics physics,
-    required ScrollContext context,
+    required super.physics,
+    required super.context,
     double initialPixels = 0.0,
-    ScrollPosition? oldPosition,
-    String? debugLabel,
+    super.oldPosition,
+    super.debugLabel,
     required this.coordinator,
-  }) : super(
-    physics: physics,
-    context: context,
-    oldPosition: oldPosition,
-    debugLabel: debugLabel,
-  ) {
+  }) {
     if (!hasPixels && initialPixels != null)
       correctPixels(initialPixels);
     if (activity == null)
@@ -1638,11 +1614,11 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
   ///
   /// The [handle] must not be null.
   const SliverOverlapAbsorber({
-    Key? key,
+    super.key,
     required this.handle,
     Widget? sliver,
   }) : assert(handle != null),
-      super(key: key, child: sliver);
+      super(child: sliver);
 
   /// The object in which the absorbed overlap is recorded.
   ///
@@ -1797,11 +1773,11 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
   ///
   /// The [handle] must not be null.
   const SliverOverlapInjector({
-    Key? key,
+    super.key,
     required this.handle,
     Widget? sliver,
   }) : assert(handle != null),
-       super(key: key, child: sliver);
+       super(child: sliver);
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   ///
@@ -1954,26 +1930,16 @@ class NestedScrollViewViewport extends Viewport {
   ///
   /// The [handle] must not be null.
   NestedScrollViewViewport({
-    Key? key,
-    AxisDirection axisDirection = AxisDirection.down,
-    AxisDirection? crossAxisDirection,
-    double anchor = 0.0,
-    required ViewportOffset offset,
-    Key? center,
-    List<Widget> slivers = const <Widget>[],
+    super.key,
+    super.axisDirection,
+    super.crossAxisDirection,
+    super.anchor,
+    required super.offset,
+    super.center,
+    super.slivers,
     required this.handle,
-    Clip clipBehavior = Clip.hardEdge,
-  }) : assert(handle != null),
-       super(
-         key: key,
-         axisDirection: axisDirection,
-         crossAxisDirection: crossAxisDirection,
-         anchor: anchor,
-         offset: offset,
-         center: center,
-         slivers: slivers,
-         clipBehavior: clipBehavior,
-       );
+    super.clipBehavior,
+  }) : assert(handle != null);
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   final SliverOverlapAbsorberHandle handle;
@@ -2024,25 +1990,16 @@ class RenderNestedScrollViewViewport extends RenderViewport {
   ///
   /// The [handle] must not be null.
   RenderNestedScrollViewViewport({
-    AxisDirection axisDirection = AxisDirection.down,
-    required AxisDirection crossAxisDirection,
-    required ViewportOffset offset,
-    double anchor = 0.0,
-    List<RenderSliver>? children,
-    RenderSliver? center,
+    super.axisDirection,
+    required super.crossAxisDirection,
+    required super.offset,
+    super.anchor,
+    super.children,
+    super.center,
     required SliverOverlapAbsorberHandle handle,
-    Clip clipBehavior = Clip.hardEdge,
+    super.clipBehavior,
   }) : assert(handle != null),
-       _handle = handle,
-       super(
-         axisDirection: axisDirection,
-         crossAxisDirection: crossAxisDirection,
-         offset: offset,
-         anchor: anchor,
-         children: children,
-         center: center,
-         clipBehavior: clipBehavior,
-       );
+       _handle = handle;
 
   /// The object to notify when [markNeedsLayout] is called.
   SliverOverlapAbsorberHandle get handle => _handle;

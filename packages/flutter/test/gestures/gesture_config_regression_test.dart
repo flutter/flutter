@@ -5,7 +5,6 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestResult {
@@ -14,7 +13,7 @@ class TestResult {
 }
 
 class NestedScrollableCase extends StatefulWidget {
-  const NestedScrollableCase({Key? key, required this.testResult}) : super(key: key);
+  const NestedScrollableCase({super.key, required this.testResult});
 
   final TestResult testResult;
 
@@ -58,7 +57,7 @@ class _NestedScrollableCaseState extends State<NestedScrollableCase> {
 }
 
 class NestedDragableCase extends StatefulWidget {
-  const NestedDragableCase({Key? key, required this.testResult}) : super(key: key);
+  const NestedDragableCase({super.key, required this.testResult});
 
   final TestResult testResult;
 

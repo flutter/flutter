@@ -16,6 +16,7 @@ import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'platform_menu_bar.dart';
 import 'router.dart';
 import 'widget_inspector.dart';
 
@@ -32,45 +33,12 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// handlers must be implemented (and the analyzer will list those that have
 /// been omitted).
 ///
-/// {@tool snippet}
-///
-/// This [StatefulWidget] implements the parts of the [State] and
+/// {@tool dartpad}
+/// This sample shows how to implement parts of the [State] and
 /// [WidgetsBindingObserver] protocols necessary to react to application
 /// lifecycle messages. See [didChangeAppLifecycleState].
 ///
-/// ```dart
-/// class AppLifecycleReactor extends StatefulWidget {
-///   const AppLifecycleReactor({ Key? key }) : super(key: key);
-///
-///   @override
-///   State<AppLifecycleReactor> createState() => _AppLifecycleReactorState();
-/// }
-///
-/// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
-///   @override
-///   void initState() {
-///     super.initState();
-///     WidgetsBinding.instance.addObserver(this);
-///   }
-///
-///   @override
-///   void dispose() {
-///     WidgetsBinding.instance.removeObserver(this);
-///     super.dispose();
-///   }
-///
-///   late AppLifecycleState _notification;
-///
-///   @override
-///   void didChangeAppLifecycleState(AppLifecycleState state) {
-///     setState(() { _notification = state; });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Text('Last notification: $_notification');
-///   }
-/// }
+/// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
 /// ```
 /// {@end-tool}
 ///
@@ -294,6 +262,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
     }());
+    platformMenuDelegate = DefaultPlatformMenuDelegate();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -466,6 +435,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
             debugProfileBuildsEnabled = value;
         },
       );
+      registerBoolServiceExtension(
+        name: 'profileUserWidgetBuilds',
+        getter: () async => debugProfileBuildsEnabledUserWidgets,
+        setter: (bool value) async {
+          if (debugProfileBuildsEnabledUserWidgets != value)
+            debugProfileBuildsEnabledUserWidgets = value;
+        },
+      );
     }
 
     assert(() {
@@ -522,6 +499,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// See [FocusManager] for more details.
   FocusManager get focusManager => _buildOwner!.focusManager;
+
+  /// A delegate that communicates with a platform plugin for serializing and
+  /// managing platform-rendered menu bars created by [PlatformMenuBar].
+  ///
+  /// This is set by default to a [DefaultPlatformMenuDelegate] instance in
+  /// [initInstances].
+  late PlatformMenuDelegate platformMenuDelegate;
 
   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];
 
@@ -1136,7 +1120,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   /// The [RenderObject] created by this element is not automatically set as a
   /// child of the hosting [RenderObject]. To actually attach this element to
   /// the render tree, call [RenderObjectToWidgetAdapter.attachToRenderTree].
-  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
+  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> super.widget);
 
   Element? _child;
 

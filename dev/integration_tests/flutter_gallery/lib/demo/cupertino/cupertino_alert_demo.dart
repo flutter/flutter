@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoAlertDemo extends StatefulWidget {
-  const CupertinoAlertDemo({Key? key}) : super(key: key);
+  const CupertinoAlertDemo({super.key});
 
   static const String routeName = '/cupertino/alert';
 
@@ -198,7 +198,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
 }
 
 class CupertinoDessertDialog extends StatelessWidget {
-  const CupertinoDessertDialog({Key? key, this.title, this.content}) : super(key: key);
+  const CupertinoDessertDialog({super.key, this.title, this.content});
 
   final Widget? title;
   final Widget? content;

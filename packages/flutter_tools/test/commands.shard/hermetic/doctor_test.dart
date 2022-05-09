@@ -17,7 +17,6 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio_validator.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -359,6 +358,16 @@ void main() {
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
     });
 
+    testUsingContext('validate tool exit when exceeding timeout', () async {
+      FakeAsync().run<void>((FakeAsync time) {
+        final Doctor doctor = FakeAsyncStuckDoctor(logger);
+        doctor.diagnose(verbose: false);
+        time.elapse(Doctor.doctorDuration + const Duration(seconds: 1));
+        time.flushMicrotasks();
+      });
+
+      expect(logger.statusText, contains('Stuck validator that never completes exceeded maximum allowed duration of '));
+    });
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
       final Completer<void> completer = Completer<void>();
@@ -816,6 +825,18 @@ class NotAvailableValidator extends DoctorValidator {
   }
 }
 
+class StuckValidator extends DoctorValidator {
+  StuckValidator() : super('Stuck validator that never completes');
+
+  @override
+  Future<ValidationResult> validate() {
+    final Completer<ValidationResult> completer = Completer<ValidationResult>();
+
+    // This future will never complete
+    return completer.future;
+  }
+}
+
 class PartialValidatorWithErrors extends DoctorValidator {
   PartialValidatorWithErrors() : super('Partial Validator with Errors');
 
@@ -959,6 +980,25 @@ class FakeCrashingDoctor extends Doctor {
       _validators.add(PassingValidator('Passing Validator'));
       _validators.add(PassingValidator('Another Passing Validator'));
       _validators.add(CrashingValidator());
+      _validators.add(PassingValidator('Validators are fun'));
+      _validators.add(PassingValidator('Four score and seven validators ago'));
+    }
+    return _validators;
+  }
+}
+
+/// A doctor with a validator that will never finish.
+class FakeAsyncStuckDoctor extends Doctor {
+  FakeAsyncStuckDoctor(Logger logger) : super(logger: logger);
+
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(StuckValidator());
       _validators.add(PassingValidator('Validators are fun'));
       _validators.add(PassingValidator('Four score and seven validators ago'));
     }

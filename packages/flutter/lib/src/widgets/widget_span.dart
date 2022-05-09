@@ -71,9 +71,9 @@ class WidgetSpan extends PlaceholderSpan {
   /// decoration, foreground, background, and spacing options will be used.
   const WidgetSpan({
     required this.child,
-    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
-    TextBaseline? baseline,
-    TextStyle? style,
+    super.alignment,
+    super.baseline,
+    super.style,
   }) : assert(child != null),
        assert(
          baseline != null || !(
@@ -81,12 +81,7 @@ class WidgetSpan extends PlaceholderSpan {
           identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
           identical(alignment, ui.PlaceholderAlignment.baseline)
         ),
-      ),
-       super(
-         alignment: alignment,
-         baseline: baseline,
-         style: style,
-       );
+      );
 
   /// The widget to embed inline within text.
   final Widget child;

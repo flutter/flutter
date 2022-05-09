@@ -52,7 +52,7 @@ class _NotImplementedDialog extends StatelessWidget {
 }
 
 class StockHome extends StatefulWidget {
-  const StockHome(this.stocks, this.configuration, this.updater, {Key? key}) : super(key: key);
+  const StockHome(this.stocks, this.configuration, this.updater, {super.key});
 
   final StockData stocks;
   final StockConfiguration configuration;

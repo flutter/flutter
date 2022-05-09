@@ -271,11 +271,10 @@ class TabController extends ChangeNotifier {
 
 class _TabControllerScope extends InheritedWidget {
   const _TabControllerScope({
-    Key? key,
     required this.controller,
     required this.enabled,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final TabController controller;
   final bool enabled;
@@ -340,15 +339,14 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// The [initialIndex] argument must not be null.
   const DefaultTabController({
-    Key? key,
+    super.key,
     required this.length,
     this.initialIndex = 0,
     required this.child,
     this.animationDuration,
   }) : assert(initialIndex != null),
        assert(length >= 0),
-       assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
-       super(key: key);
+       assert(length == 0 || (initialIndex >= 0 && initialIndex < length));
 
   /// The total number of tabs.
   ///

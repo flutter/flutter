@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-/// A header used in a material design [GridTile].
+/// A header used in a Material Design [GridTile].
 ///
 /// Typically used to add a one or two line header or footer on a [GridTile].
 ///
@@ -23,13 +23,13 @@ class GridTileBar extends StatelessWidget {
   ///
   /// Typically used to with [GridTile].
   const GridTileBar({
-    Key? key,
+    super.key,
     this.backgroundColor,
     this.leading,
     this.title,
     this.subtitle,
     this.trailing,
-  }) : super(key: key);
+  });
 
   /// The color to paint behind the child widgets.
   ///

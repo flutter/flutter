@@ -228,7 +228,7 @@ void main() {
 }
 
 class BoringTickerTest extends StatefulWidget {
-  const BoringTickerTest({ Key? key }) : super(key: key);
+  const BoringTickerTest({ super.key });
   @override
   State<BoringTickerTest> createState() => _BoringTickerTestState();
 }
@@ -239,7 +239,7 @@ class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerPr
 }
 
 class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest({Key? key}) : super(key: key);
+  const _SingleTickerTest({super.key});
 
   @override
   _SingleTickerTestState createState() => _SingleTickerTestState();
@@ -272,7 +272,7 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 }
 
 class _MultipleTickerTest extends StatefulWidget {
-  const _MultipleTickerTest({Key? key}) : super(key: key);
+  const _MultipleTickerTest({super.key});
 
   @override
   _MultipleTickerTestState createState() => _MultipleTickerTestState();

@@ -482,7 +482,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   ///
   /// Only check if `--check` is explicitly specified. (Don't check by default)
   Future<FlutterCommandResult> runNonInteractively() async {
-    final String jsonStr = stringArg(_kJson);
+    final String jsonStr = stringArgDeprecated(_kJson);
     final bool shouldCheck = boolArg(_kCheck) ?? false;
 
     dynamic json;
@@ -529,7 +529,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
     final String exampleOrDefault = <String>[
       if (example != null) 'example: $example',
-      if (defaultsTo != null) 'empty for $defaultsTo'
+      if (defaultsTo != null) 'empty for $defaultsTo',
     ].join(', ');
 
     if (exampleOrDefault.isNotEmpty) {
@@ -710,7 +710,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         '-o', 'BatchMode=yes',
         if (ipv6) '-6',
         r'${localPath}',
-        '$sshTarget:/tmp/\${appName}'
+        '$sshTarget:/tmp/\${appName}',
       ],
 
       uninstallCommand: <String>[
@@ -718,7 +718,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         '-o', 'BatchMode=yes',
         if (ipv6) '-6',
         sshTarget,
-        r'rm -rf "/tmp/${appName}"'
+        r'rm -rf "/tmp/${appName}"',
       ],
 
       runDebugCommand: <String>[
@@ -726,7 +726,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         '-o', 'BatchMode=yes',
         if (ipv6) '-6',
         sshTarget,
-        remoteRunDebugCommand
+        remoteRunDebugCommand,
       ],
 
       forwardPortCommand: usePortForwarding
@@ -737,7 +737,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           if (ipv6) '-6',
           '-L', '$formattedLoopbackIp:\${hostPort}:$formattedLoopbackIp:\${devicePort}',
           sshTarget,
-          "echo 'Port forwarding success'; read"
+          "echo 'Port forwarding success'; read",
         ]
         : null,
       forwardPortSuccessRegex: usePortForwarding
@@ -750,7 +750,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           '-o', 'BatchMode=yes',
           if (ipv6) '-6',
           sshTarget,
-          screenshotCommand
+          screenshotCommand,
         ]
         : null
     );
@@ -762,7 +762,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           if (ipv6) '-6',
           '-n', '1',
           '-w', '500',
-          targetStr
+          targetStr,
         ],
         explicitPingSuccessRegex: true,
         pingSuccessRegex: RegExp(r'[<=]\d+ms')
@@ -774,7 +774,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           if (ipv6) '-6',
           '-c', '1',
           '-w', '1',
-          targetStr
+          targetStr,
         ],
         explicitPingSuccessRegex: true,
         pingSuccessRegex: null
@@ -803,7 +803,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    if (stringArg(_kJson) != null) {
+    if (stringArgDeprecated(_kJson) != null) {
       return runNonInteractively();
     }
     if (boolArg(_kSsh) == true) {

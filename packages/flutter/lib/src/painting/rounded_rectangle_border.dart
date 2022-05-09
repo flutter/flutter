@@ -29,11 +29,10 @@ class RoundedRectangleBorder extends OutlinedBorder {
   ///
   /// The arguments must not be null.
   const RoundedRectangleBorder({
-    BorderSide side = BorderSide.none,
+    super.side,
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
-       assert(borderRadius != null),
-       super(side: side);
+       assert(borderRadius != null);
 
   /// The radii for each corner.
   final BorderRadiusGeometry borderRadius;
@@ -150,13 +149,12 @@ class RoundedRectangleBorder extends OutlinedBorder {
 
 class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   const _RoundedRectangleToCircleBorder({
-    BorderSide side = BorderSide.none,
+    super.side,
     this.borderRadius = BorderRadius.zero,
     required this.circleness,
   }) : assert(side != null),
        assert(borderRadius != null),
-       assert(circleness != null),
-       super(side: side);
+       assert(circleness != null);
 
   final BorderRadiusGeometry borderRadius;
 

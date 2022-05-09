@@ -37,7 +37,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   const DefaultTextStyle({
-    Key? key,
+    super.key,
     required this.style,
     this.textAlign,
     this.softWrap = true,
@@ -45,14 +45,13 @@ class DefaultTextStyle extends InheritedTheme {
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
-    required Widget child,
+    required super.child,
   }) : assert(style != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
        assert(child != null),
-       assert(textWidthBasis != null),
-       super(key: key, child: child);
+       assert(textWidthBasis != null);
 
   /// A const-constructable default text style that provides fallback values.
   ///
@@ -60,7 +59,7 @@ class DefaultTextStyle extends InheritedTheme {
   ///
   /// This constructor creates a [DefaultTextStyle] with an invalid [child], which
   /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextStyle.fallback({ Key? key })
+  const DefaultTextStyle.fallback({ super.key })
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
@@ -68,7 +67,7 @@ class DefaultTextStyle extends InheritedTheme {
       overflow = TextOverflow.clip,
       textWidthBasis = TextWidthBasis.parent,
       textHeightBehavior = null,
-      super(key: key, child: const _NullWidget());
+      super(child: const _NullWidget());
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -83,7 +82,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// ancestor". To replace a non-null [maxLines] from an ancestor with the null
   /// value (to remove the restriction on number of lines), manually obtain the
   /// ambient [DefaultTextStyle] using [DefaultTextStyle.of], then create a new
-  /// [DefaultTextStyle] using the [new DefaultTextStyle] constructor directly.
+  /// [DefaultTextStyle] using the [DefaultTextStyle.new] constructor directly.
   /// See the source below for an example of how to do this (since that's
   /// essentially what this constructor does).
   static Widget merge({
@@ -234,12 +233,11 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   ///
   /// The [textHeightBehavior] and [child] arguments are required and must not be null.
   const DefaultTextHeightBehavior({
-    Key? key,
+    super.key,
     required this.textHeightBehavior,
-    required Widget child,
+    required super.child,
   }) :  assert(textHeightBehavior != null),
-        assert(child != null),
-        super(key: key, child: child);
+        assert(child != null);
 
   /// {@macro dart.ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
@@ -336,7 +334,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// To make [Text] react to touch events, wrap it in a [GestureDetector] widget
 /// with a [GestureDetector.onTap] handler.
 ///
-/// In a material design application, consider using a [TextButton] instead, or
+/// In a Material Design application, consider using a [TextButton] instead, or
 /// if that isn't appropriate, at least using an [InkWell] instead of
 /// [GestureDetector].
 ///
@@ -361,7 +359,7 @@ class Text extends StatelessWidget {
   /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   const Text(
     String this.data, {
-    Key? key,
+    super.key,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -378,8 +376,7 @@ class Text extends StatelessWidget {
          data != null,
          'A non-null String must be provided to a Text widget.',
        ),
-       textSpan = null,
-       super(key: key);
+       textSpan = null;
 
   /// Creates a text widget with a [InlineSpan].
   ///
@@ -393,7 +390,7 @@ class Text extends StatelessWidget {
   /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(
     InlineSpan this.textSpan, {
-    Key? key,
+    super.key,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -410,8 +407,7 @@ class Text extends StatelessWidget {
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
        ),
-       data = null,
-       super(key: key);
+       data = null;
 
   /// The text to display.
   ///

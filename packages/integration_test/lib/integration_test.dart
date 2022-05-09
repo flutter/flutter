@@ -60,7 +60,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
                 return MapEntry<String, dynamic>(name, result.details);
               }
               return MapEntry<String, Object>(name, result);
-            })
+            }),
           },
         );
       } on MissingPluginException {

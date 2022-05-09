@@ -8,8 +8,8 @@ import 'basic_types.dart';
 
 /// Base class for [BorderRadius] that allows for text-direction aware resolution.
 ///
-/// A property or argument of this type accepts classes created either with [new
-/// BorderRadius.only] and its variants, or [new BorderRadiusDirectional.only]
+/// A property or argument of this type accepts classes created either with [
+/// BorderRadius.only] and its variants, or [BorderRadiusDirectional.only]
 /// and its variants.
 ///
 /// To convert a [BorderRadiusGeometry] object of indeterminate type into a

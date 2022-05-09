@@ -140,7 +140,7 @@ class CustomListItemTwo extends StatelessWidget {
                   readDuration: readDuration,
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

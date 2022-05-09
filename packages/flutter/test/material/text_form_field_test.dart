@@ -98,7 +98,153 @@ void main() {
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
   },
-    variant: TargetPlatformVariant.desktop(),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
+    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+  );
+
+  testWidgets('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(find.byType(CupertinoButton), findsNothing);
+    expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+
+    // Right clicking shows the menu.
+    TestGesture gesture = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 2));
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Select all'), findsOneWidget);
+
+    // Double tap to select the first word, then right click to show the menu.
+    final Offset startBlah1 = textOffsetToPosition(tester, 0);
+    gesture = await tester.startGesture(
+      startBlah1,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.down(startBlah1);
+    await tester.pump();
+    await gesture.up();
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Select all'), findsNothing);
+    gesture = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+    expect(find.text('Cut'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsOneWidget);
+
+    // Copy the first word.
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+    expect(controller.text, 'blah1 blah2');
+    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 5));
+    expect(find.byType(CupertinoButton), findsNothing);
+
+    // Paste it at the end.
+    gesture = await tester.startGesture(
+      textOffsetToPosition(tester, controller.text.length),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+    await gesture.up();
+    await gesture.removePointer();
+    expect(controller.selection, const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream));
+    gesture = await tester.startGesture(
+      textOffsetToPosition(tester, controller.text.length),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream));
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsOneWidget);
+    await tester.tap(find.text('Paste'));
+    await tester.pumpAndSettle();
+    expect(controller.text, 'blah1 blah2blah1');
+    expect(controller.selection, const TextSelection.collapsed(offset: 16));
+
+    // Cut the first word.
+    gesture = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.down(startBlah1);
+    await tester.pump();
+    await gesture.up();
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Select all'), findsNothing);
+    gesture = await tester.startGesture(
+      textOffsetToPosition(tester, controller.text.length),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+    expect(find.text('Cut'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsOneWidget);
+    await tester.tap(find.text('Cut'));
+    await tester.pumpAndSettle();
+    expect(controller.text, ' blah2blah1');
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
+    expect(find.byType(CupertinoButton), findsNothing);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
@@ -171,6 +317,16 @@ void main() {
 
     final Offset midBlah1 = textOffsetToPosition(tester, 2);
 
+    // Make a selection.
+    await tester.tapAt(midBlah1);
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+    expect(controller.selection, const TextSelection(baseOffset: 2, extentOffset: 0));
+
     // Right clicking shows the menu.
     final TestGesture gesture = await tester.startGesture(
       midBlah1,
@@ -181,7 +337,6 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Paste'), findsOneWidget);
@@ -490,7 +645,7 @@ void main() {
         child: Center(
             child: TextFormField(
               buildCounter: (BuildContext context, { int? currentLength, int? maxLength, bool? isFocused }) {
-                return Text('${currentLength.toString()} of ${maxLength.toString()}');
+                return Text('$currentLength of $maxLength');
               },
               maxLength: 10,
             ),
@@ -817,4 +972,155 @@ void main() {
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.scrollController, scrollController);
   });
+
+  testWidgets('TextFormField changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextFormField(
+              mouseCursor: SystemMouseCursors.grab,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Center, which is within the area
+    final Offset center = tester.getCenter(find.byType(TextFormField));
+    // Top left, which is also within the area
+    final Offset edge = tester.getTopLeft(find.byType(TextFormField)) + const Offset(1, 1);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: center);
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextFormField(),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    await gesture.moveTo(edge);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    await gesture.moveTo(center);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextFormField(
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(edge);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(center);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/101587.
+  testWidgets('Right clicking menu behavior', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(find.byType(CupertinoButton), findsNothing);
+    expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+    final Offset midBlah2 = textOffsetToPosition(tester, 8);
+
+    // Right click the second word.
+    final TestGesture gesture = await tester.startGesture(
+      midBlah2,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(controller.selection, const TextSelection(baseOffset: 6, extentOffset: 11));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection, const TextSelection.collapsed(offset: 8));
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select all'), findsOneWidget);
+        break;
+    }
+
+    // Right click the first word.
+    await gesture.down(midBlah1);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        break;
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection, const TextSelection.collapsed(offset: 8));
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select all'), findsNothing);
+        break;
+    }
+  },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+  );
 }

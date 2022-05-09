@@ -30,7 +30,7 @@ Widget boilerplate({ Widget? child, TextDirection textDirection = TextDirection.
 }
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({ Key? key, this.child }) : super(key: key);
+  const StateMarker({ super.key, this.child });
 
   final Widget? child;
 
@@ -50,7 +50,7 @@ class StateMarkerState extends State<StateMarker> {
 }
 
 class AlwaysKeepAliveWidget extends StatefulWidget {
-  const AlwaysKeepAliveWidget({ Key? key}) : super(key: key);
+  const AlwaysKeepAliveWidget({ super.key});
   static String text = 'AlwaysKeepAlive';
   @override
   AlwaysKeepAliveState createState() => AlwaysKeepAliveState();
@@ -130,11 +130,11 @@ typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabCon
 
 class TabControllerFrame extends StatefulWidget {
   const TabControllerFrame({
-    Key? key,
+    super.key,
     required this.length,
     this.initialIndex = 0,
     required this.builder,
-  }) : super(key: key);
+  });
 
   final int length;
   final int initialIndex;
@@ -210,7 +210,7 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
 }
 
 class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const TestScrollPhysics({ super.parent });
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -1102,6 +1102,45 @@ void main() {
     // The TabView was initialized with default viewportFraction
     // So it's expected the PageView inside would obtain the value 1
     expect(pageController.viewportFraction, 1);
+  });
+
+  testWidgets('TabBarView has clipBehavior Clip.hardEdge by default', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
+
+    Widget builder() {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBarView(
+            children: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final TabBarView tabBarView = tester.widget(find.byType(TabBarView));
+    expect(tabBarView.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('TabBarView sets clipBehavior correctly', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
+
+    Widget builder() {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBarView(
+            clipBehavior: Clip.none,
+            children: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final PageView pageView = tester.widget(find.byType(PageView));
+    expect(pageView.clipBehavior, Clip.none);
   });
 
   testWidgets('TabBar tap skips indicator animation when disabled in controller', (WidgetTester tester) async {
@@ -3582,13 +3621,13 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/94504.
     final List<String> tabTitles = <String>[];
 
-    void _onTabAdd(StateSetter setState) {
+    void onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
       });
     }
 
-    void _onTabRemove(StateSetter setState) {
+    void onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
       });
@@ -3606,12 +3645,12 @@ void main() {
                     TextButton(
                       key: const Key('Add tab'),
                       child: const Text('Add tab'),
-                      onPressed: () => _onTabAdd(setState),
+                      onPressed: () => onTabAdd(setState),
                     ),
                     TextButton(
                       key: const Key('Remove tab'),
                       child: const Text('Remove tab'),
-                      onPressed: () => _onTabRemove(setState),
+                      onPressed: () => onTabRemove(setState),
                     ),
                   ],
                   bottom: PreferredSize(
@@ -3657,14 +3696,14 @@ void main() {
     final List<String> tabTitles = <String>[];
     TabController tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
 
-    void _onTabAdd(StateSetter setState) {
+    void onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
         tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
-    void _onTabRemove(StateSetter setState) {
+    void onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
         tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
@@ -3681,12 +3720,12 @@ void main() {
                   TextButton(
                     key: const Key('Add tab'),
                     child: const Text('Add tab'),
-                    onPressed: () => _onTabAdd(setState),
+                    onPressed: () => onTabAdd(setState),
                   ),
                   TextButton(
                     key: const Key('Remove tab'),
                     child: const Text('Remove tab'),
-                    onPressed: () => _onTabRemove(setState),
+                    onPressed: () => onTabRemove(setState),
                   ),
                 ],
                 bottom: PreferredSize(
@@ -4576,7 +4615,7 @@ void main() {
 }
 
 class KeepAliveInk extends StatefulWidget {
-  const KeepAliveInk(this.title, {Key? key}) : super(key: key);
+  const KeepAliveInk(this.title, {super.key});
   final String title;
   @override
   State<StatefulWidget> createState() {
@@ -4598,7 +4637,7 @@ class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClie
 }
 
 class TabBarDemo extends StatelessWidget {
-  const TabBarDemo({Key? key}) : super(key: key);
+  const TabBarDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -4632,7 +4671,7 @@ class TabBarDemo extends StatelessWidget {
 class MockScrollMetrics extends Fake implements ScrollMetrics { }
 
 class TabBody extends StatefulWidget {
-  const TabBody({ Key? key, required this.index, required this.log }) : super(key: key);
+  const TabBody({ super.key, required this.index, required this.log });
 
   final int index;
   final List<String> log;

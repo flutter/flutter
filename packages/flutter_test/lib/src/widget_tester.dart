@@ -498,9 +498,9 @@ Future<void> expectLater(
 /// For convenience, instances of this class (such as the one provided by
 /// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
-  WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
+  WidgetTester._(super.binding) {
     if (binding is LiveTestWidgetsFlutterBinding)
-      binding.deviceEventDispatcher = this;
+      (binding as LiveTestWidgetsFlutterBinding).deviceEventDispatcher = this;
   }
 
   /// The description string of the test currently being run.
@@ -977,7 +977,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
               'should be disposed by calling dispose() on the AnimationController itself. '
               'Otherwise, the ticker will leak.'
             ),
-            ticker.describeForError('The offending ticker was')
+            ticker.describeForError('The offending ticker was'),
           ]);
         }
       }
@@ -1002,7 +1002,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           'If your test uses SemanticsTester, it is '
           'sufficient to call dispose() on SemanticsTester. Otherwise, the '
           'existing handle will leak into another test and alter its behavior.'
-        )
+        ),
       ]);
     }
     _lastRecordedSemanticsHandles = null;
@@ -1106,7 +1106,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 
 class _TestTicker extends Ticker {
-  _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
+  _TestTicker(super.onTick, this._onDispose);
 
   final _TickerDisposeCallback _onDispose;
 
