@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 
-import 'base/common.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'resident_runner.dart';

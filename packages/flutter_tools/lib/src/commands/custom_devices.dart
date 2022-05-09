@@ -482,7 +482,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   ///
   /// Only check if `--check` is explicitly specified. (Don't check by default)
   Future<FlutterCommandResult> runNonInteractively() async {
-    final String jsonStr = stringArg(_kJson);
+    final String jsonStr = stringArgDeprecated(_kJson);
     final bool shouldCheck = boolArg(_kCheck) ?? false;
 
     dynamic json;
@@ -803,7 +803,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    if (stringArg(_kJson) != null) {
+    if (stringArgDeprecated(_kJson) != null) {
       return runNonInteractively();
     }
     if (boolArg(_kSsh) == true) {

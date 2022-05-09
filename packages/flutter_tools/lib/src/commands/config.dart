@@ -132,11 +132,11 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults?.wasParsed('android-sdk') ?? false) {
-      _updateConfig('android-sdk', stringArg('android-sdk')!);
+      _updateConfig('android-sdk', stringArgDeprecated('android-sdk')!);
     }
 
     if (argResults?.wasParsed('android-studio-dir') ?? false) {
-      _updateConfig('android-studio-dir', stringArg('android-studio-dir')!);
+      _updateConfig('android-studio-dir', stringArgDeprecated('android-studio-dir')!);
     }
 
     if (argResults?.wasParsed('clear-ios-signing-cert') ?? false) {
@@ -144,7 +144,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults?.wasParsed('build-dir') ?? false) {
-      final String buildDir = stringArg('build-dir')!;
+      final String buildDir = stringArgDeprecated('build-dir')!;
       if (globals.fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
       }
