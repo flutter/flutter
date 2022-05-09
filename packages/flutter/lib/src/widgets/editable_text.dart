@@ -2558,17 +2558,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           renderEditable.text = buildTextSpan();
         }
       });
-
-      Future<List<dynamic>> spellCheckResultsFuture2 = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value);
-
-      spellCheckResultsFuture2.then((results) {
-        if (results.length > 1) {
-          _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results[1];
-          _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResultsText = results[0];
-
-          renderEditable.text = buildTextSpan();
-        }
-      });
     }
 
     previousCause = cause;

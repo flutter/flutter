@@ -153,7 +153,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
                break;
            } 
            else {
-              oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1);
+              oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1); //this is off sometimes...
               newSpanText = newText.substring(currentSpanStart, currentSpanEnd + 1);
 
                 if (oldSpanText == newSpanText) {

@@ -26,12 +26,19 @@ class MaterialSpellCheckService implements SpellCheckService {
     assert(value.text != null);
 
     List<dynamic> spellCheckResults = <dynamic>[];
+    final List<dynamic> rawResults;
 
     //TODO: handle exception
-    final List<dynamic> rawResults = await spellCheckChannel.invokeMethod(
+    try {
+    rawResults = await spellCheckChannel.invokeMethod(
         'SpellCheck.initiateSpellCheck',
         <String>[ locale.toLanguageTag(), value.text],
       );
+    print("RAW RESULTS BESTIE: ${rawResults}");
+    } catch(e) {
+      print("ERROR BESTIE: ${e}");
+      return spellCheckResults;
+    }
 
     List<String> results = rawResults.cast<String>();
 
