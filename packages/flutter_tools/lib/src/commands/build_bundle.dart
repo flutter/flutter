@@ -80,7 +80,7 @@ class BuildBundleCommand extends BuildSubCommand {
       return const CustomDimensions();
     }
     return CustomDimensions(
-      commandBuildBundleTargetPlatform: stringArg('target-platform'),
+      commandBuildBundleTargetPlatform: stringArgDeprecated('target-platform'),
       commandBuildBundleIsModule: flutterProject.isModule,
     );
   }
@@ -95,7 +95,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = stringArg('target-platform')!;
+    final String targetPlatform = stringArgDeprecated('target-platform')!;
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
@@ -138,8 +138,8 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
-      depfilePath: stringArg('depfile'),
-      assetDirPath: stringArg('asset-dir'),
+      depfilePath: stringArgDeprecated('depfile'),
+      assetDirPath: stringArgDeprecated('asset-dir'),
     );
     return FlutterCommandResult.success();
   }
