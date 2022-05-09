@@ -31,12 +31,12 @@ class MigrateManifest {
   MigrateManifest.fromFile(File manifestFile) : migrateResult = MigrateResult.empty(), migrateRootDir = manifestFile.parent {
     final Object? yamlContents = loadYaml(manifestFile.readAsStringSync());
     if (yamlContents is! YamlMap) {
-      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. File is not a Yaml map.', exitCode: 1);
+      throw Exception('Invalid .migrate_manifest file in the migrate working directory. File is not a Yaml map.');
     }
     final YamlMap map = yamlContents;
     bool valid = map.containsKey(_kMergedFilesKey) && map.containsKey(_kConflictFilesKey) && map.containsKey(_kAddedFilesKey) && map.containsKey(_kDeletedFilesKey);
     if (!valid) {
-      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. File is missing an entry. Fix the manifest or abandon the migration and try again.', exitCode: 1);
+      throw Exception('Invalid .migrate_manifest file in the migrate working directory. File is missing an entry.');
     }
     final Object? mergedFilesYaml = map[_kMergedFilesKey];
     final Object? conflictFilesYaml = map[_kConflictFilesKey];
@@ -47,7 +47,7 @@ class MigrateManifest {
     valid = valid && (addedFilesYaml is YamlList || addedFilesYaml == null);
     valid = valid && (deletedFilesYaml is YamlList || deletedFilesYaml == null);
     if (!valid) {
-      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list. Fix the manifest or abandon the migration and try again.', exitCode: 1);
+      throw Exception('Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list.');
     }
     if (mergedFilesYaml != null) {
       for (final Object? localPath in mergedFilesYaml as YamlList) {

@@ -44,7 +44,7 @@ void main() {
        MigrateManifest.fromFile(manifestFile);
       } on Exception catch (e) {
         exceptionFound = true;
-        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is missing an entry. Fix the manifest or abandon the migration and try again.');
+        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is missing an entry.');
       }
       expect(exceptionFound, true);
     });
@@ -60,7 +60,7 @@ void main() {
         MigrateManifest.fromFile(manifestFile);
       } on Exception catch (e) {
         exceptionFound = true;
-        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is missing an entry. Fix the manifest or abandon the migration and try again.');
+        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is missing an entry.');
       }
       expect(exceptionFound, true);
     });
@@ -78,7 +78,7 @@ void main() {
         MigrateManifest.fromFile(manifestFile);
       } on Exception catch (e) {
         exceptionFound = true;
-        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list. Fix the manifest or abandon the migration and try again.');
+        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list.');
       }
       expect(exceptionFound, true);
     });
