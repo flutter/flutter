@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'framework.dart';
-import 'scrollable.dart';
+import 'scrollable_repaint_boundary.dart';
 
 export 'package:flutter/rendering.dart' show
   SliverGridDelegate,
