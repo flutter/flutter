@@ -799,9 +799,15 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   _DraggableScrollableSheetScrollPosition({
     required super.physics,
     required super.context,
-    super.oldPosition,
+    ScrollPosition? oldPosition,
     required this.getExtent,
-  });
+  }) : assert(oldPosition is _DraggableScrollableSheetScrollPosition?),
+       super(oldPosition: oldPosition) {
+    if (oldPosition is _DraggableScrollableSheetScrollPosition
+        && oldPosition._dragCancelCallback != null) {
+      _dragCancelCallback = oldPosition._dragCancelCallback;
+    }
+  }
 
   VoidCallback? _dragCancelCallback;
   final _DraggableSheetExtent Function() getExtent;
