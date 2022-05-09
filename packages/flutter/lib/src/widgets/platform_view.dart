@@ -559,9 +559,11 @@ class _AndroidViewState extends State<AndroidView> {
 }
 
 class _UiKitViewState extends State<UiKitView> {
+  int? _id;
   UiKitViewController? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
+  FocusNode? _focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
@@ -571,10 +573,14 @@ class _UiKitViewState extends State<UiKitView> {
     if (_controller == null) {
       return const SizedBox.expand();
     }
-    return _UiKitPlatformView(
-      controller: _controller!,
-      hitTestBehavior: widget.hitTestBehavior,
-      gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+    return Focus(
+      focusNode: _focusNode,
+      onFocusChange: _onFocusChange,
+      child: _UiKitPlatformView(
+        controller: _controller!,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+      ),
     );
   }
 
@@ -584,6 +590,7 @@ class _UiKitViewState extends State<UiKitView> {
     }
     _initialized = true;
     _createNewUiKitView();
+    _focusNode = FocusNode(debugLabel: "UiKitView(id: $_id)");
   }
 
   @override
@@ -639,13 +646,37 @@ class _UiKitViewState extends State<UiKitView> {
       layoutDirection: _layoutDirection!,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        _focusNode!.requestFocus();
+      }
     );
     if (!mounted) {
       controller.dispose();
       return;
     }
     widget.onPlatformViewCreated?.call(id);
-    setState(() { _controller = controller; });
+    setState(() {
+      _controller = controller;
+      _id = id;
+    });
+  }
+
+  void _onFocusChange(bool isFocused) {
+    if (!isFocused) {
+      // Unlike Android, we do not need to send "clearFocus" channel message
+      // to the engine, because focusing on another view will automatically
+      // cancel the focus on the previously focused platform view.
+    } else {
+      SystemChannels.textInput.invokeMethod<void>(
+        'TextInput.setPlatformViewClient',
+        <String, dynamic>{'platformViewId': _id},
+      ).catchError((dynamic e) {
+        // TODO(huan): remove this once "TextInput.setPlatformViewClient" is implemented on engine.
+        if (e is MissingPluginException) {
+          return;
+        }
+      });
+    }
   }
 }
 

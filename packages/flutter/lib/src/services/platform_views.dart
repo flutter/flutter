@@ -199,6 +199,8 @@ class PlatformViewsService {
   /// factory for this view type must have been registered on the platform side.
   /// Platform view factories are typically registered by plugin code.
   ///
+  /// `onFocus` is a callback that will be invoked when the UIKit view asks to
+  /// get the input focus.
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
   static Future<UiKitViewController> initUiKitView({
@@ -207,6 +209,7 @@ class PlatformViewsService {
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
+    VoidCallback? onFocus,
   }) async {
     assert(id != null);
     assert(viewType != null);
@@ -227,7 +230,9 @@ class PlatformViewsService {
       );
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
-    return UiKitViewController._(id, layoutDirection);
+    final UiKitViewController controller = UiKitViewController._(id, layoutDirection);
+    _instance._focusCallbacks[id] = onFocus ?? () {};
+    return controller;
   }
 }
 
