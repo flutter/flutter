@@ -61,6 +61,34 @@ void main() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
+  testWidgets('Semantics tooltip', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          tooltip: 'test1',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      Semantics(
+        tooltip: 'test1',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      expectedSemantics,
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
+    semantics.dispose();
+  });
+
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();

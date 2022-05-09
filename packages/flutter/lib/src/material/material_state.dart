@@ -561,7 +561,7 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
   /// Creates a [MaterialStateUnderlineInputBorder] from a [MaterialPropertyResolver<InputBorder>]
   /// callback function.
   ///
-  /// If used as a regular ionput bortder, the border resolved in the default state (the
+  /// If used as a regular input border, the border resolved in the default state (the
   /// empty set of states) will be used.
   ///
   /// The given callback parameter must return a non-null text style in the default

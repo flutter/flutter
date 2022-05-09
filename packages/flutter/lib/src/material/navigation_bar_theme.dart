@@ -41,6 +41,7 @@ class NavigationBarThemeData with Diagnosticable {
   const NavigationBarThemeData({
     this.height,
     this.backgroundColor,
+    this.surfaceTintColor,
     this.elevation,
     this.indicatorColor,
     this.indicatorShape,
@@ -54,6 +55,9 @@ class NavigationBarThemeData with Diagnosticable {
 
   /// Overrides the default value of [NavigationBar.backgroundColor].
   final Color? backgroundColor;
+
+  /// Overrides the default value of [NavigationBar.surfaceTintColor].
+  final Color? surfaceTintColor;
 
   /// Overrides the default value of [NavigationBar.elevation].
   final double? elevation;
@@ -85,6 +89,7 @@ class NavigationBarThemeData with Diagnosticable {
   NavigationBarThemeData copyWith({
     double? height,
     Color? backgroundColor,
+    Color? surfaceTintColor,
     double? elevation,
     Color? indicatorColor,
     ShapeBorder? indicatorShape,
@@ -95,6 +100,7 @@ class NavigationBarThemeData with Diagnosticable {
     return NavigationBarThemeData(
       height: height ?? this.height,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       elevation: elevation ?? this.elevation,
       indicatorColor: indicatorColor ?? this.indicatorColor,
       indicatorShape: indicatorShape ?? this.indicatorShape,
@@ -116,6 +122,7 @@ class NavigationBarThemeData with Diagnosticable {
     return NavigationBarThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       indicatorShape: ShapeBorder.lerp(a?.indicatorShape, b?.indicatorShape, t),
@@ -129,6 +136,7 @@ class NavigationBarThemeData with Diagnosticable {
   int get hashCode => Object.hash(
     height,
     backgroundColor,
+    surfaceTintColor,
     elevation,
     indicatorColor,
     indicatorShape,
@@ -146,6 +154,7 @@ class NavigationBarThemeData with Diagnosticable {
     return other is NavigationBarThemeData
         && other.height == height
         && other.backgroundColor == backgroundColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.elevation == elevation
         && other.indicatorColor == indicatorColor
         && other.indicatorShape == indicatorShape
@@ -159,6 +168,7 @@ class NavigationBarThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('indicatorShape', indicatorShape, defaultValue: null));

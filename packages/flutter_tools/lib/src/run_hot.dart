@@ -11,7 +11,6 @@ import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -614,7 +613,7 @@ class HotRunner extends ResidentRunner {
               device.vmService.service.setIsolatePauseMode(isolate.id,
                 exceptionPauseMode: vm_service.ExceptionPauseMode.kNone),
               for (final vm_service.Breakpoint breakpoint in isolate.breakpoints)
-                device.vmService.service.removeBreakpoint(isolate.id, breakpoint.id)
+                device.vmService.service.removeBreakpoint(isolate.id, breakpoint.id),
             ];
             await Future.wait(breakpointAndExceptionRemoval);
             await device.vmService.service.resume(view.uiIsolate.id);
@@ -1186,7 +1185,7 @@ Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
         isolateRef.id,
         pause: pause,
         rootLibUri: deviceEntryUri,
-      )
+      ),
   ];
 }
 

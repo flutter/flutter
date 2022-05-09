@@ -35,7 +35,7 @@ enum StretchMode {
   fadeTitle,
 }
 
-/// The part of a material design [AppBar] that expands, collapses, and
+/// The part of a Material Design [AppBar] that expands, collapses, and
 /// stretches.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=mSc7qFzxHDw}

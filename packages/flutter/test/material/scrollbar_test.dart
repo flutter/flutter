@@ -1713,7 +1713,7 @@ void main() {
   });
 
   testWidgets('Scrollbar.isAlwaysShown triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
-    Widget _getTabContent({ ScrollController? scrollController }) {
+    Widget getTabContent({ ScrollController? scrollController }) {
       return Scrollbar(
         isAlwaysShown: true,
         controller: scrollController,
@@ -1725,7 +1725,7 @@ void main() {
       );
     }
 
-    Widget _buildApp({
+    Widget buildApp({
       required String id,
       ScrollController? scrollController,
     }) {
@@ -1736,8 +1736,8 @@ void main() {
           child: Scaffold(
             body: TabBarView(
               children: <Widget>[
-                _getTabContent(scrollController: scrollController),
-                _getTabContent(scrollController: scrollController),
+                getTabContent(scrollController: scrollController),
+                getTabContent(scrollController: scrollController),
               ],
             ),
           ),
@@ -1746,7 +1746,7 @@ void main() {
     }
 
     // Asserts when using the PrimaryScrollController.
-    await tester.pumpWidget(_buildApp(id: 'PrimaryScrollController'));
+    await tester.pumpWidget(buildApp(id: 'PrimaryScrollController'));
 
     // Swipe to the second tab, resulting in two attached ScrollPositions during
     // the transition.
@@ -1762,7 +1762,7 @@ void main() {
     // Asserts when using the ScrollController provided by the user.
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
-      _buildApp(
+      buildApp(
         id: 'Provided ScrollController',
         scrollController: scrollController,
       ),
@@ -1782,7 +1782,7 @@ void main() {
   testWidgets('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
 
-    Widget _buildScrollWithOrientation(ScrollbarOrientation orientation) {
+    Widget buildScrollWithOrientation(ScrollbarOrientation orientation) {
       return _buildBoilerplate(
         child: Theme(
           data: ThemeData(
@@ -1804,7 +1804,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_buildScrollWithOrientation(ScrollbarOrientation.left));
+    await tester.pumpWidget(buildScrollWithOrientation(ScrollbarOrientation.left));
     await tester.pumpAndSettle();
 
     expect(

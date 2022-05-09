@@ -1103,7 +1103,7 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
       'flutterExit': device.supportsFlutterExit,
       'hardwareRendering': await device.supportsHardwareRendering,
       'startPaused': device.supportsStartPaused,
-    }
+    },
   };
 }
 
