@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import '../assets.dart';
+import '../dom.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'font_fallbacks.dart';
@@ -210,7 +210,7 @@ class SkiaFontCollection {
     return actualFamily;
   }
 
-  Future<ByteBuffer> _getArrayBuffer(html.Body fetchResult) {
+  Future<ByteBuffer> _getArrayBuffer(DomResponse fetchResult) {
     return fetchResult
         .arrayBuffer()
         .then<ByteBuffer>((dynamic x) => x as ByteBuffer);

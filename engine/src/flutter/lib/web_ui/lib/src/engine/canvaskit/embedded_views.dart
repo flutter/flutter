@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
-import 'dart:svg' as svg;
 
 import 'package:ui/ui.dart' as ui;
 
@@ -13,6 +11,7 @@ import '../configuration.dart';
 import '../dom.dart';
 import '../html/path_to_svg_clip.dart';
 import '../platform_views/slots.dart';
+import '../svg.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import '../window.dart';
@@ -293,16 +292,16 @@ class HtmlViewEmbedder {
   /// be recomposited.
   void _cleanUpClipDefs(int viewId) {
     if (_svgClipDefs.containsKey(viewId)) {
-      final html.Element clipDefs =
+      final DomElement clipDefs =
           _svgPathDefs!.querySelector('#sk_path_defs')!;
-      final List<html.Element> nodesToRemove = <html.Element>[];
+      final List<DomElement> nodesToRemove = <DomElement>[];
       final Set<String> oldDefs = _svgClipDefs[viewId]!;
-      for (final html.Element child in clipDefs.children) {
+      for (final DomElement child in clipDefs.children.cast<DomElement>()) {
         if (oldDefs.contains(child.id)) {
           nodesToRemove.add(child);
         }
       }
-      for (final html.Element node in nodesToRemove) {
+      for (final DomElement node in nodesToRemove) {
         node.remove();
       }
       _svgClipDefs[viewId]!.clear();
@@ -343,14 +342,14 @@ class HtmlViewEmbedder {
             final CkPath path = CkPath();
             path.addRRect(mutator.rrect!);
             _ensureSvgPathDefs();
-            final html.Element pathDefs =
+            final DomElement pathDefs =
                 _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
             final String clipId = 'svgClip$_clipPathCount';
-            final svg.ClipPathElement newClipPath = svg.ClipPathElement();
+            final SVGClipPathElement newClipPath = createSVGClipPathElement();
             newClipPath.id = clipId;
             newClipPath.append(
-                svg.PathElement()
+                createSVGPathElement()
                   ..setAttribute('d', path.toSvgString()!));
 
             pathDefs.append(newClipPath);
@@ -362,14 +361,14 @@ class HtmlViewEmbedder {
           } else if (mutator.path != null) {
             final CkPath path = mutator.path! as CkPath;
             _ensureSvgPathDefs();
-            final html.Element pathDefs =
+            final DomElement pathDefs =
                 _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
             final String clipId = 'svgClip$_clipPathCount';
-            final svg.ClipPathElement newClipPath = svg.ClipPathElement();
+            final SVGClipPathElement newClipPath = createSVGClipPathElement();
             newClipPath.id = clipId;
             newClipPath.append(
-                svg.PathElement()
+                createSVGPathElement()
                   ..setAttribute('d', path.toSvgString()!));
             pathDefs.append(newClipPath);
             // Store the id of the node instead of [newClipPath] directly. For
@@ -413,7 +412,7 @@ class HtmlViewEmbedder {
 
   int _clipPathCount = 0;
 
-  html.Element? _svgPathDefs;
+  DomElement? _svgPathDefs;
 
   /// The nodes containing the SVG clip definitions needed to clip this view.
   Map<int, Set<String>> _svgClipDefs = <int, Set<String>>{};
@@ -424,9 +423,9 @@ class HtmlViewEmbedder {
     if (_svgPathDefs != null) {
       return;
     }
-    _svgPathDefs = kSvgResourceHeader.clone(false) as svg.SvgSvgElement;
-    _svgPathDefs!.append(svg.DefsElement()..id = 'sk_path_defs');
-    skiaSceneHost!.append(_svgPathDefs! as DomElement);
+    _svgPathDefs = kSvgResourceHeader.clone(false) as SVGElement;
+    _svgPathDefs!.append(createSVGDefsElement()..id = 'sk_path_defs');
+    skiaSceneHost!.append(_svgPathDefs!);
   }
 
   void submitFrame() {
@@ -733,11 +732,12 @@ class HtmlViewEmbedder {
 
   /// Deletes SVG clip paths, useful for tests.
   void debugCleanupSvgClipPaths() {
-    _svgPathDefs?.children.single.children.forEach(removeElement);
+    _svgPathDefs?.children.cast<DomElement>().single
+        .children.cast<DomElement>().forEach(removeElement);
     _svgClipDefs.clear();
   }
 
-  static void removeElement(html.Element element) {
+  static void removeElement(DomElement element) {
     element.remove();
   }
 

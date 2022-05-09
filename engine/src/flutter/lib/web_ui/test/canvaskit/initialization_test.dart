@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -20,9 +18,9 @@ void testMain() {
 
     test('populates flt-renderer and flt-build-mode', () {
       FlutterViewEmbedder();
-      expect(html.document.body!.attributes['flt-renderer'],
+      expect(domDocument.body!.getAttribute('flt-renderer'),
           'canvaskit (requested explicitly)');
-      expect(html.document.body!.attributes['flt-build-mode'], 'debug');
+      expect(domDocument.body!.getAttribute('flt-build-mode'), 'debug');
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
