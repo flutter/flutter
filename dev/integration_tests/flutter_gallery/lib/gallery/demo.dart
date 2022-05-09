@@ -4,7 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'demos.dart';
 import 'example_code_parser.dart';
@@ -70,8 +70,8 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     if (url == null)
       return;
 
-    if (await canLaunch(url)) {
-      await launch(url);
+    if (await canLaunchUrlString(url)) {
+      await launchUrlString(url);
     } else {
       showDialog<void>(
         context: context,
@@ -230,7 +230,7 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.library_books),
       tooltip: 'API documentation',
-      onPressed: () => launch(documentationUrl!, forceWebView: true),
+      onPressed: () => launchUrlString(documentationUrl!),
     );
   }
 }
@@ -253,7 +253,7 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
         label: 'API documentation',
         child: const Icon(CupertinoIcons.book),
       ),
-      onPressed: () => launch(documentationUrl!, forceWebView: true),
+      onPressed: () => launchUrlString(documentationUrl!),
     );
   }
 }

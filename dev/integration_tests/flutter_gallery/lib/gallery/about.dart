@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class _LinkTextSpan extends TextSpan {
 
@@ -25,7 +25,7 @@ class _LinkTextSpan extends TextSpan {
   _LinkTextSpan({ super.style, String? url, String? text }) : super(
     text: text ?? url,
     recognizer: TapGestureRecognizer()..onTap = () {
-      launch(url!, forceSafariVC: false);
+      launchUrlString(url!);
     }
   );
 }
