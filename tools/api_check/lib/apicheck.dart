@@ -7,9 +7,13 @@ import 'dart:io';
 
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/analysis_context.dart';
+import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/session.dart';
+import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 /// Returns all indexed fields in [className].
 ///
@@ -155,4 +159,22 @@ List<String> _getBlockStartingWith({
   }
   final int blockEnd = pos;
   return LineSplitter.split(source, blockStart, blockEnd).toList();
+}
+
+/// Apply a visitor to all compilation units in the dart:ui library.
+void visitUIUnits(String flutterRoot, AstVisitor<void> visitor) {
+  String uiRoot = '$flutterRoot/lib/ui';
+  final FeatureSet analyzerFeatures = FeatureSet.fromEnableFlags2(
+    sdkLanguageVersion: Version.parse('2.12.0'),
+    flags: <String>['non-nullable'],
+  );
+  final ParseStringResult uiResult = parseFile(path: '$uiRoot/ui.dart', featureSet: analyzerFeatures);
+  for (PartDirective part in uiResult.unit.directives.whereType<PartDirective>()) {
+    final String partPath = part.uri.stringValue!;
+    final ParseStringResult partResult = parseFile(path: '$uiRoot/$partPath', featureSet: analyzerFeatures);
+
+    for (CompilationUnitMember unitMember in partResult.unit.declarations) {
+      unitMember.accept(visitor);
+    }
+  }
 }

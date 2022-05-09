@@ -24,17 +24,17 @@ class DartPluginRegistrant {
 }
 
 // Corelib 'print' implementation.
-void _print(Object? arg) {
-  _Logger._printString(arg.toString());
+void _print(String arg) {
+  _Logger._printString(arg);
 }
 
-void _printDebug(Object? arg) {
-  _Logger._printDebugString(arg.toString());
+void _printDebug(String arg) {
+  _Logger._printDebugString(arg);
 }
 
 class _Logger {
-  static void _printString(String? s) native 'Logger_PrintString';
-  static void _printDebugString(String? s) native 'Logger_PrintDebugString';
+  static void _printString(String s) native 'Logger_PrintString';
+  static void _printDebugString(String s) native 'Logger_PrintDebugString';
 }
 
 // If we actually run on big endian machines, we'll need to do something smarter
