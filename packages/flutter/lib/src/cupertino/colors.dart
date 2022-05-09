@@ -20,17 +20,22 @@ import 'theme.dart';
 ///
 /// ## Color palettes
 ///
+/// ### Basic Colors
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_basic_colors.png)
+///
+/// ### Active Colors
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_active_colors.png)
 ///
+/// ### System Colors
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_system_colors_1.png)
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_system_colors_2.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_system_colors_3.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_background_colors.png)
-///
+/// ### Label Colors
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_label_colors.png)
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_separator_link_colors.png)
+/// ### Background Colors
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_background_colors.png)
 ///
 class CupertinoColors {
   // This class is not meant to be instantiated or extended; this constructor
