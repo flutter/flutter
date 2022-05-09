@@ -4,8 +4,22 @@
 
 import 'dart:io';
 
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:apicheck/apicheck.dart';
 import 'package:litetest/litetest.dart';
+
+main(List<String> arguments) {
+  if (arguments.length < 1) {
+    print('usage: dart bin/apicheck.dart path/to/engine/src/flutter');
+    exit(1);
+  }
+
+  final String flutterRoot = arguments[0];
+
+  checkApiConsistency(flutterRoot);
+  checkNativeApi(flutterRoot);
+}
 
 /// Verify that duplicate Flutter API is consistent between implementations.
 ///
@@ -21,13 +35,7 @@ import 'package:litetest/litetest.dart';
 /// CANNOT be removed without breaking backward compatibility, which we have
 /// never done. See the note at the top of `shell/platform/embedder/embedder.h`
 /// for further details.
-main(List<String> arguments) {
-  if (arguments.length < 1) {
-    print('usage: dart bin/apicheck.dart path/to/engine/src/flutter');
-    exit(1);
-  }
-  final String flutterRoot = arguments[0];
-
+checkApiConsistency(String flutterRoot) {
   test('AccessibilityFeatures enums match', () {
     // Dart values: _kFooBarIndex = 1 << N
     List<String> uiFields = getDartClassFields(
@@ -137,4 +145,63 @@ String allCapsToCamelCase(String identifier) {
     }
   }
   return buffer.toString();
+}
+
+/// Verify that the native functions in the dart:ui package do not use nullable
+/// parameters that map to simple types such as numbers and strings.
+///
+/// The Tonic argument converters used by the native function implementations
+/// expect that values of these types will not be null.
+class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
+  final Set<String> simpleTypes = <String>{'int', 'double', 'bool', 'String'};
+
+  List<String> errors = <String>[];
+
+  @override
+  void visitNativeFunctionBody(NativeFunctionBody node) {
+    MethodDeclaration? method = node.thisOrAncestorOfType<MethodDeclaration>();
+    if (method != null) {
+      if (method.parameters != null) {
+        check(method.toString(), method.parameters!);
+      }
+      return;
+    }
+
+    FunctionDeclaration? func = node.thisOrAncestorOfType<FunctionDeclaration>();
+    if (func != null) {
+      FunctionExpression funcExpr = func.functionExpression;
+      if (funcExpr.parameters != null) {
+        check(func.toString(), funcExpr.parameters!);
+      }
+      return;
+    }
+
+    throw Exception('unreachable');
+  }
+
+  void check(String description, FormalParameterList parameters) {
+    for (FormalParameter parameter in parameters.parameters) {
+      TypeAnnotation? type;
+      if (parameter is SimpleFormalParameter) {
+        type = parameter.type;
+      } else if (parameter is DefaultFormalParameter) {
+        type = (parameter.parameter as SimpleFormalParameter).type;
+      }
+      if (type! is NamedType) {
+        String name = (type as NamedType).name.name;
+        if (type.question != null && simpleTypes.contains(name)) {
+          errors.add(description);
+          return;
+        }
+      }
+    }
+  }
+}
+
+void checkNativeApi(String flutterRoot) {
+  test('Native API does not pass nullable parameters of simple types', () {
+    NativeFunctionVisitor visitor = NativeFunctionVisitor();
+    visitUIUnits(flutterRoot, visitor);
+    expect(visitor.errors, isEmpty);
+  });
 }

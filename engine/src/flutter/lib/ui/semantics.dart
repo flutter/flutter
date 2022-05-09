@@ -913,7 +913,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
       decreasedValueAttributes,
       hint,
       hintAttributes,
-      tooltip,
+      tooltip ?? '',
       textDirection != null ? textDirection.index + 1 : 0,
       transform,
       childrenInTraversalOrder,
@@ -951,7 +951,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
     List<StringAttribute> decreasedValueAttributes,
     String hint,
     List<StringAttribute> hintAttributes,
-    String? tooltip,
+    String tooltip,
     int textDirection,
     Float64List transform,
     Int32List childrenInTraversalOrder,
@@ -977,12 +977,12 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
   void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) {
     assert(id != null);
     assert(overrideId != null);
-    _updateCustomAction(id, label, hint, overrideId);
+    _updateCustomAction(id, label ?? '', hint ?? '', overrideId);
   }
   void _updateCustomAction(
       int id,
-      String? label,
-      String? hint,
+      String label,
+      String hint,
       int overrideId) native 'SemanticsUpdateBuilder_updateCustomAction';
 
   /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded

@@ -2883,11 +2883,11 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
       _constructor(
         style._encoded,
         encodedStrutStyle,
-        style._fontFamily,
+        style._fontFamily ?? '',
         strutFontFamilies,
-        style._fontSize,
-        style._height,
-        style._ellipsis,
+        style._fontSize ?? 0,
+        style._height ?? 0,
+        style._ellipsis ?? '',
         _encodeLocale(style._locale)
       );
   }
@@ -2895,11 +2895,11 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
   void _constructor(
     Int32List encoded,
     ByteData? strutData,
-    String? fontFamily,
+    String fontFamily,
     List<Object?>? strutFontFamily,
-    double? fontSize,
-    double? height,
-    String? ellipsis,
+    double fontSize,
+    double height,
+    String ellipsis,
     String locale
   ) native 'ParagraphBuilder_constructor';
 
@@ -2955,11 +2955,11 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
     _pushStyle(
       encoded,
       fullFontFamilies,
-      style._fontSize,
-      style._letterSpacing,
-      style._wordSpacing,
-      style._height,
-      style._decorationThickness,
+      style._fontSize ?? 0,
+      style._letterSpacing ?? 0,
+      style._wordSpacing ?? 0,
+      style._height ?? 0,
+      style._decorationThickness ?? 0,
       _encodeLocale(style._locale),
       style._background?._objects,
       style._background?._data,
@@ -2974,11 +2974,11 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
   void _pushStyle(
     Int32List encoded,
     List<Object?> fontFamilies,
-    double? fontSize,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? height,
-    double? decorationThickness,
+    double fontSize,
+    double letterSpacing,
+    double wordSpacing,
+    double height,
+    double decorationThickness,
     String locale,
     List<Object?>? backgroundObjects,
     ByteData? backgroundData,
@@ -3068,11 +3068,11 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
     // Default the baselineOffset to height if null. This will place the placeholder
     // fully above the baseline, similar to [PlaceholderAlignment.aboveBaseline].
     baselineOffset = baselineOffset ?? height;
-    _addPlaceholder(width * scale, height * scale, alignment.index, baselineOffset * scale, baseline?.index);
+    _addPlaceholder(width * scale, height * scale, alignment.index, baselineOffset * scale, (baseline ?? TextBaseline.alphabetic).index);
     _placeholderCount++;
     _placeholderScales.add(scale);
   }
-  String? _addPlaceholder(double width, double height, int alignment, double baselineOffset, int? baseline) native 'ParagraphBuilder_addPlaceholder';
+  String? _addPlaceholder(double width, double height, int alignment, double baselineOffset, int baseline) native 'ParagraphBuilder_addPlaceholder';
 
   /// Applies the given paragraph style and returns a [Paragraph] containing the
   /// added text and associated styling.
@@ -3095,7 +3095,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
 Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
   return _futurize(
     (_Callback<void> callback) {
-      _loadFontFromList(list, callback, fontFamily);
+      _loadFontFromList(list, callback, fontFamily ?? '');
     }
   ).then((_) => _sendFontChangeMessage());
 }
@@ -3119,4 +3119,4 @@ FutureOr<void> _sendFontChangeMessage() async {
   }
 }
 
-void _loadFontFromList(Uint8List list, _Callback<void> callback, String? fontFamily) native 'loadFontFromList';
+void _loadFontFromList(Uint8List list, _Callback<void> callback, String fontFamily) native 'loadFontFromList';
