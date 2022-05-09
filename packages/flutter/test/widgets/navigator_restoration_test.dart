@@ -476,7 +476,7 @@ void main() {
 
     // Push is in progress.
     final ModalRoute<Object> route1 = ModalRoute.of(tester.element(find.text('Route: Foo')))!;
-    final String route1id = route1.restorationScopeId.value!;
+    final RestorationId route1id = route1.restorationScopeId.value!;
     expect(route1id, isNotNull);
     expect(route1.settings.name, 'Foo');
     expect(route1.animation!.isCompleted, isFalse);

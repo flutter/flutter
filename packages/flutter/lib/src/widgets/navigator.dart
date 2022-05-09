@@ -5048,7 +5048,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   @optionalTypeArgs
-  Route<T>? _getRouteById<T>(String id) {
+  Route<T>? _getRouteById<T>(RestorationId id) {
     assert(id != null);
     return _history.cast<_RouteEntry?>().firstWhere(
       (_RouteEntry? entry) => entry!.restorationId == id,
@@ -5536,7 +5536,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///
 /// ** See code in examples/api/lib/widgets/navigator/restorable_route_future.0.dart **
 /// {@end-tool}
-class RestorableRouteFuture<T> extends RestorableProperty<String?> {
+class RestorableRouteFuture<T> extends RestorableProperty<RestorationId?> {
   /// Creates a [RestorableRouteFuture].
   ///
   /// The [onPresent] and [navigatorFinder] arguments must not be null.
@@ -5578,7 +5578,7 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   void present([Object? arguments]) {
     assert(!isPresent);
     assert(isRegistered);
-    final String routeId = onPresent(_navigator, arguments);
+    final RestorationId routeId = onPresent(_navigator, arguments);
     assert(routeId != null);
     _hookOntoRouteFuture(routeId);
     notifyListeners();
@@ -5596,10 +5596,10 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   Route<T>? _route;
 
   @override
-  String? createDefaultValue() => null;
+  RestorationId? createDefaultValue() => null;
 
   @override
-  void initWithValue(String? value) {
+  void initWithValue(RestorationId? value) {
     if (value != null) {
       _hookOntoRouteFuture(value);
     }
@@ -5613,9 +5613,9 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   }
 
   @override
-  String fromPrimitives(Object? data) {
+  RestorationId fromPrimitives(Object? data) {
     assert(data != null);
-    return data! as String;
+    return data! as RestorationId;
   }
 
   bool _disposed = false;
@@ -5636,7 +5636,7 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
     return navigator;
   }
 
-  void _hookOntoRouteFuture(String id) {
+  void _hookOntoRouteFuture(RestorationId id) {
     assert(id != null);
     _route = _navigator._getRouteById<T>(id);
     assert(_route != null);
