@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -461,7 +462,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
 
     if (boolArg('paths')) {
-      showDependencyPaths(from: stringArg('from')!, to: stringArg('to')!, tree: tree);
+      showDependencyPaths(from: stringArgDeprecated('from')!, to: stringArgDeprecated('to')!, tree: tree);
       return true;
     }
 
@@ -495,7 +496,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
     try {
       // int.tryParse will not accept null, but will convert empty string to null
-      final int? maxJobs = int.tryParse(stringArg('jobs') ?? '');
+      final int? maxJobs = int.tryParse(stringArgDeprecated('jobs') ?? '');
       final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {

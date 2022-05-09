@@ -15,47 +15,10 @@ import 'theme.dart';
 /// its [CupertinoTabBar].
 ///
 /// {@tool snippet}
+/// This samples shows how [CupertinoTabController] can be used to switch tabs in
+/// [CupertinoTabScaffold].
 ///
-/// [CupertinoTabController] can be used to switch tabs:
-///
-/// ```dart
-/// class MyCupertinoTabScaffoldPage extends StatefulWidget {
-///   const MyCupertinoTabScaffoldPage({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyCupertinoTabScaffoldPage> createState() => _CupertinoTabScaffoldPageState();
-/// }
-///
-/// class _CupertinoTabScaffoldPageState extends State<MyCupertinoTabScaffoldPage> {
-///   final CupertinoTabController _controller = CupertinoTabController();
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoTabScaffold(
-///       tabBar: CupertinoTabBar(
-///         items: const <BottomNavigationBarItem> [
-///           // ...
-///         ],
-///       ),
-///       controller: _controller,
-///       tabBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: CupertinoButton(
-///             child: const Text('Go to first tab'),
-///             onPressed: () => _controller.index = 0,
-///           )
-///         );
-///       }
-///     );
-///   }
-///
-///   @override
-///   void dispose() {
-///     _controller.dispose();
-///     super.dispose();
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/tab_scaffold/cupertino_tab_controller.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -138,54 +101,10 @@ class CupertinoTabController extends ChangeNotifier {
 /// (via [State.setState], for instance) from its descendant rather than from
 /// its ancestor.
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad}
 /// A sample code implementing a typical iOS information architecture with tabs.
 ///
-/// ```dart
-/// CupertinoTabScaffold(
-///   tabBar: CupertinoTabBar(
-///     items: const <BottomNavigationBarItem> [
-///       // ...
-///     ],
-///   ),
-///   tabBuilder: (BuildContext context, int index) {
-///     return CupertinoTabView(
-///       builder: (BuildContext context) {
-///         return CupertinoPageScaffold(
-///           navigationBar: CupertinoNavigationBar(
-///             middle: Text('Page 1 of tab $index'),
-///           ),
-///           child: Center(
-///             child: CupertinoButton(
-///               child: const Text('Next page'),
-///               onPressed: () {
-///                 Navigator.of(context).push(
-///                   CupertinoPageRoute<void>(
-///                     builder: (BuildContext context) {
-///                       return CupertinoPageScaffold(
-///                         navigationBar: CupertinoNavigationBar(
-///                           middle: Text('Page 2 of tab $index'),
-///                         ),
-///                         child: Center(
-///                           child: CupertinoButton(
-///                             child: const Text('Back'),
-///                             onPressed: () { Navigator.of(context).pop(); },
-///                           ),
-///                         ),
-///                       );
-///                     },
-///                   ),
-///                 );
-///               },
-///             ),
-///           ),
-///         );
-///       },
-///     );
-///   },
-/// )
-/// ```
+/// ** See code in examples/api/lib/cupertino/tab_scaffold/cupertino_tab_scaffold.0.dart **
 /// {@end-tool}
 ///
 /// To push a route above all tabs instead of inside the currently selected one

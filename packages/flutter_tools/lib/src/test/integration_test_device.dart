@@ -8,7 +8,6 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart' as globals;

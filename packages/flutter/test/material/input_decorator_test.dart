@@ -1294,7 +1294,7 @@ void main() {
     Finder counterFinder = find.byType(Text);
     expect(counterFinder, findsOneWidget);
     final Text counterWidget = tester.widget(counterFinder);
-    expect(counterWidget.data, '0/${maxLength.toString()}');
+    expect(counterWidget.data, '0/$maxLength');
 
     // When counter, counterText, and buildCounter are set, shows the counter
     // widget.
@@ -1309,7 +1309,7 @@ void main() {
       required bool isFocused,
     }) {
       return Text(
-        '${currentLength.toString()} of ${maxLength.toString()}',
+        '$currentLength of $maxLength',
         key: buildCounterKey,
       );
     }

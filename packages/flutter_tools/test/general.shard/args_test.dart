@@ -11,7 +11,21 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/testbed.dart';
+
+class CommandDummy extends FlutterCommand{
+  @override
+  String get description => 'description';
+
+  @override
+  String get name => 'test';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
 
 void main() {
   test('Help for command line arguments is consistently styled and complete', () => Testbed().run(() {
@@ -22,6 +36,20 @@ void main() {
     ).forEach(runner.addCommand);
     verifyCommandRunner(runner);
   }));
+
+  testUsingContext('String? safe argResults', () async {
+    final CommandDummy command = CommandDummy();
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    command.argParser.addOption('key');
+    runner.addCommand(command);
+    await runner.run(<String>['test', '--key=value']);
+
+    expect(command.stringArg('key'), 'value');
+    expect(command.stringArg('empty'), null);
+
+    expect(command.stringArgDeprecated('key'), 'value');
+    expect(() => command.stringArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+  });
 }
 
 void verifyCommandRunner(CommandRunner<Object> runner) {
