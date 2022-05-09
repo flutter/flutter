@@ -179,22 +179,18 @@ class MigrateUtils {
   }
 
   /// Returns true if the workingDirectory git repo has any uncommited changes.
-  Future<bool> hasUncommittedChanges(String workingDirectory) async {
-    final List<String> cmdArgs = <String>['git', 'diff', '--quiet', 'HEAD', '--', '.'];
-    // windows uses double quotes.
-    if (_platform.isWindows) {
-      String path = _fileSystem.path.join(workingDirectory, kDefaultMigrateWorkingDirectoryName);
-      // Trim off any drive labels such as 'C:'
-      if (path.contains(':')) {
-        path = path.substring(path.indexOf(':') + 1);
-      }
-      cmdArgs.add('":(exclude)$path"');
-    } else {
-      cmdArgs.add("':(exclude)${_fileSystem.path.join(workingDirectory, kDefaultMigrateWorkingDirectoryName)}'");
-    }
+  Future<bool> hasUncommittedChanges(String workingDirectory, {String? migrateWorkingDir}) async {
+    final List<String> cmdArgs = <String>[
+      'git',
+      'ls-files',
+      '--deleted',
+      '--modified',
+      '--others',
+      '--exclude=${migrateWorkingDir ?? kDefaultMigrateWorkingDirectoryName}'
+    ];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: cmdArgs.join(' '));
-    if (result.exitCode == 0) {
+    if (result.stdout.isEmpty) {
       return false;
     }
     return true;
