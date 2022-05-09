@@ -44,7 +44,7 @@ class IconTheme extends InheritedTheme {
     );
   }
 
-  /// The color, opacity, and size to use for icons in this subtree.
+  /// The size, font variations, color, opacity, and shadows to use for icons in this subtree.
   final IconThemeData data;
 
   /// The data from the closest instance of this class that encloses the given

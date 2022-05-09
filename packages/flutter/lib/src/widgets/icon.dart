@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -13,7 +15,7 @@ import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 
 /// A graphical icon widget drawn with a glyph from a font described in
-/// an [IconData] such as material's predefined [IconData]s in [Icons].
+/// an [IconData] such as material's predefined [IconData]s in [Icons] and [Symbols].
 ///
 /// Icons are not interactive. For an interactive icon, consider material's
 /// [IconButton].
@@ -61,7 +63,8 @@ import 'icon_theme_data.dart';
 /// See also:
 ///
 ///  * [IconButton], for interactive icons.
-///  * [Icons], the library of Material Icons available for use with this class.
+///  * [Icons], for the list of available Material Icons for use with this class.
+///  * [Symbols], for the list of available Material Symbols for use with this class.
 ///  * [IconTheme], which provides ambient configuration for icons.
 ///  * [ImageIcon], for showing icons from [AssetImage]s or other [ImageProvider]s.
 class Icon extends StatelessWidget {
@@ -72,10 +75,14 @@ class Icon extends StatelessWidget {
     this.icon, {
     super.key,
     this.size,
+    this.fill,
+    this.weight,
+    this.grade,
+    this.opticalSize,
     this.color,
+    this.shadows,
     this.semanticLabel,
     this.textDirection,
-    this.shadows,
   });
 
   /// The icon to display. The available icons are described in [Icons].
@@ -88,9 +95,7 @@ class Icon extends StatelessWidget {
   ///
   /// Icons occupy a square with width and height equal to size.
   ///
-  /// Defaults to the current [IconTheme] size, if any. If there is no
-  /// [IconTheme], or it does not specify an explicit size, then it defaults to
-  /// 24.0.
+  /// Defaults to the nearest [IconTheme]'s [IconThemeData.size].
   ///
   /// If this [Icon] is being placed inside an [IconButton], then use
   /// [IconButton.iconSize] instead, so that the [IconButton] can make the splash
@@ -98,23 +103,96 @@ class Icon extends StatelessWidget {
   /// pass down the size to the [Icon].
   final double? size;
 
+  /// [FontVariation] which specifies an icon's fill.
+  ///
+  /// TODO(guidezpl): remove Ranges from 0 for unfilled to 1 for completely filled.
+  ///
+  /// Can be used to convey a state transition for animation or interaction.
+  ///
+  /// Requires the underlying icon font to support the `FILL` [FontVariation]
+  /// axis, otherwise has no effect.
+  ///
+  /// Defaults to nearest [IconTheme]'s [IconThemeData.fill].
+  ///
+  /// See also:
+  ///  * [weight], a [FontVariation] for controlling stroke weight.
+  ///  * [grade], a [FontVariation] for controlling stroke grade.
+  ///  * [opticalSize], a [FontVariation] for controlling optical size.
+  final double? fill;
+
+  /// [FontVariation] which specifies an icon's stroke weight.
+  ///
+  /// TODO(guidezpl): remove Ranges from 100 (thin) to 700 (bold).
+  ///
+  /// Requires the underlying icon font to support the `wght` [FontVariation]
+  /// axis, otherwise has no effect.
+  ///
+  /// Defaults to nearest [IconTheme]'s [IconThemeData.weight].
+  /// 
+  /// See also:
+  ///  * [fill], a [FontVariation] for controlling fill.
+  ///  * [grade], a [FontVariation] for controlling stroke grade.
+  ///  * [opticalSize], a [FontVariation] for controlling optical size.
+  ///  * https://fonts.google.com/knowledge/glossary/weight_axis
+  final double? weight;
+
+  /// [FontVariation] which specifies an icon's stroke weight in a more granular way.
+  ///
+  /// TODO(guidezpl): remove => Ranges from -25 to 200.
+  ///
+  /// Grade and [weight] both affect a symbol's stroke weight (thickness), but
+  /// grade has a smaller impact on the size of the symbol.
+  ///
+  /// Grade is also available in some text fonts. One can match grade levels
+  /// between text and symbols for a harmonious visual effect. For example, if
+  /// the text font has a -25 grade value, the symbols can match it with a
+  /// suitable value, say -25.
+  ///
+  /// Grade for different needs:
+  /// - Low emphasis (e.g. -25 grade): To reduce glare for a light symbol on a
+  /// dark background, use a low grade.
+  /// - High emphasis (e.g. 200 grade): To highlight a symbol, increase the
+  /// positive grade.
+  ///
+  /// Requires the underlying icon font to support the `GRAD` [FontVariation]
+  /// axis, otherwise has no effect.
+  ///
+  /// Defaults to nearest [IconTheme]'s [IconThemeData.grade].
+  /// 
+  /// See also:
+  ///  * [fill], a [FontVariation] for controlling fill.
+  ///  * [weight], a [FontVariation] for controlling stroke weight.
+  ///  * [opticalSize], a [FontVariation] for controlling optical size.
+  ///  * https://fonts.google.com/knowledge/glossary/grade_axis
+  final double? grade;
+
+  /// [FontVariation] which specifies an icon's optical size.
+  ///
+  /// TODO(guidezpl): remove Ranges from 20dp to 48dp.
+  ///
+  /// For an icon to look the same at different sizes, the stroke weight
+  /// (thickness) must change as the icon size scales. Optical size offers a way
+  /// to automatically adjust the stroke weight as icon size changes.
+  ///
+  /// Requires the underlying icon font to support the `opsz` [FontVariation]
+  /// axis, otherwise has no effect.
+  ///
+  /// Defaults to nearest [IconTheme]'s [IconThemeData.opticalSize].
+  /// 
+  /// See also:
+  ///  * [fill], a [FontVariation] for controlling fill.
+  ///  * [weight], a [FontVariation] for controlling stroke weight.
+  ///  * [grade], a [FontVariation] for controlling stroke grade.
+  ///  * https://fonts.google.com/knowledge/glossary/optical_size_axis
+  final double? opticalSize;
+
   /// The color to use when drawing the icon.
   ///
-  /// Defaults to the current [IconTheme] color, if any.
+  /// Defaults to the nearest [IconTheme]'s [IconThemeData.color].
   ///
   /// The color (whether specified explicitly here or obtained from the
-  /// [IconTheme]) will be further adjusted by the opacity of the current
-  /// [IconTheme], if any.
-  ///
-  /// In material apps, if there is a [Theme] without any [IconTheme]s
-  /// specified, icon colors default to white if the theme is dark
-  /// and black if the theme is light.
-  ///
-  /// If no [IconTheme] and no [Theme] is specified, icons will default to
-  /// black.
-  ///
-  /// See [Theme] to set the current theme and [ThemeData.brightness]
-  /// for setting the current theme's brightness.
+  /// [IconTheme]) will be further adjusted by the nearest [IconTheme]'s
+  /// [IconThemeData.opacity].
   ///
   /// {@tool snippet}
   /// Typically, a Material Design color will be used, as follows:
@@ -127,6 +205,17 @@ class Icon extends StatelessWidget {
   /// ```
   /// {@end-tool}
   final Color? color;
+
+  /// A list of [Shadow]s that will be painted underneath the icon.
+  ///
+  /// Multiple shadows are supported to replicate lighting from multiple light
+  /// sources.
+  ///
+  /// Shadows must be in the same order for [Icon] to be considered as
+  /// equivalent as order produces differing transparency.
+  /// 
+  /// Defaults to the nearest [IconTheme]'s [IconThemeData.shadows].
+  final List<Shadow>? shadows;
 
   /// Semantic label for the icon.
   ///
@@ -151,15 +240,6 @@ class Icon extends StatelessWidget {
   /// field is false, but for consistency a text direction value must always be
   /// specified, either directly using this property or using [Directionality].
   final TextDirection? textDirection;
-
-  /// A list of [Shadow]s that will be painted underneath the icon.
-  ///
-  /// Multiple shadows are supported to replicate lighting from multiple light
-  /// sources.
-  ///
-  /// Shadows must be in the same order for [Icon] to be considered as
-  /// equivalent as order produces differing transparency.
-  final List<Shadow>? shadows;
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +271,12 @@ class Icon extends StatelessWidget {
       text: TextSpan(
         text: String.fromCharCode(icon!.codePoint),
         style: TextStyle(
+          fontVariations: [
+            if (fill != null) FontVariation('FILL', fill!),
+            if (weight != null) FontVariation('wght', weight!),
+            if (grade != null) FontVariation('GRAD', grade!),
+            if (opticalSize != null) FontVariation('opsz', opticalSize!),
+          ],
           inherit: false,
           color: iconColor,
           fontSize: iconSize,
@@ -235,7 +321,13 @@ class Icon extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(IconDataProperty('icon', icon, ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));
+    properties.add(DoubleProperty('fill', fill, defaultValue: null));
+    properties.add(DoubleProperty('weight', weight, defaultValue: null));
+    properties.add(DoubleProperty('grade', grade, defaultValue: null));
+    properties.add(DoubleProperty('opticalSize', opticalSize, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
+    properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
