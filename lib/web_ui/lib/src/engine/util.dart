@@ -12,6 +12,7 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
+import 'dom.dart';
 import 'safe_browser_api.dart';
 import 'vector_math.dart';
 
@@ -558,9 +559,9 @@ bool unsafeIsNull(dynamic object) {
 }
 
 /// A typed variant of [html.Window.fetch].
-Future<html.Body> httpFetch(String url) async {
-  final dynamic result = await html.window.fetch(url);
-  return result as html.Body;
+Future<DomResponse> httpFetch(String url) async {
+  final Object? result = await html.window.fetch(url);
+  return result! as DomResponse;
 }
 
 /// Extensions to [Map] that make it easier to treat it as a JSON object. The

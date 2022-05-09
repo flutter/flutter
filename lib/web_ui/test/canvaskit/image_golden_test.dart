@@ -450,7 +450,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
     });
 
     test('Decode test images', () async {
-      final html.Body listingResponse = await httpFetch('/test_images/');
+      final DomResponse listingResponse = await httpFetch('/test_images/');
       final List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
 
       // Sanity-check the test file list. If suddenly test files are moved or
@@ -464,7 +464,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       expect(testFiles, contains(matches(RegExp(r'.*\.bmp'))));
 
       for (final String testFile in testFiles) {
-        final html.Body imageResponse = await httpFetch('/test_images/$testFile');
+        final DomResponse imageResponse = await httpFetch('/test_images/$testFile');
         final Uint8List imageData = (await imageResponse.arrayBuffer() as ByteBuffer).asUint8List();
         final ui.Codec codec = await skiaInstantiateImageCodec(imageData);
         expect(codec.frameCount, greaterThan(0));
@@ -480,7 +480,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
     // Reproduces https://skbug.com/12721
     test('decoded image can be read back from picture', () async {
-      final html.Body imageResponse = await httpFetch('/test_images/mandrill_128.png');
+      final DomResponse imageResponse = await httpFetch('/test_images/mandrill_128.png');
       final Uint8List imageData = (await imageResponse.arrayBuffer() as ByteBuffer).asUint8List();
       final ui.Codec codec = await skiaInstantiateImageCodec(imageData);
       final ui.FrameInfo frame = await codec.getNextFrame();
