@@ -37,7 +37,7 @@ class MigrateApplyCommand extends FlutterCommand {
     argParser.addOption(
       'working-directory',
       help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
-            'This path can be absolute or relative to the flutter project root.',
+            'This path can be absolute or relative to the flutter project root. This defaults to `migrate_working_dir`',
       valueHelp: 'path',
     );
     argParser.addOption(
