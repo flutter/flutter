@@ -86,7 +86,7 @@ void main() {
       flutterBin,
       'upgrade',
       '--verbose',
-      '--working-directory=${testDirectory.path}'
+      '--working-directory=${testDirectory.path}',
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
@@ -107,7 +107,7 @@ void main() {
        flutterBin,
       'downgrade',
       '--no-prompt',
-      '--working-directory=${testDirectory.path}'
+      '--working-directory=${testDirectory.path}',
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 

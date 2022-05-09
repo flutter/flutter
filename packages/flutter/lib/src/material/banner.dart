@@ -18,7 +18,7 @@ const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
 /// The [ScaffoldMessengerState.showMaterialBanner] function returns a
 /// [ScaffoldFeatureController]. The value of the controller's closed property
 /// is a Future that resolves to a MaterialBannerClosedReason. Applications that need
-/// to know how a material banner was closed can use this value.
+/// to know how a [MaterialBanner] was closed can use this value.
 ///
 /// Example:
 ///
@@ -183,7 +183,7 @@ class MaterialBanner extends StatefulWidget {
 
   // API for ScaffoldMessengerState.showMaterialBanner():
 
-  /// Creates an animation controller useful for driving a material banner's entrance and exit animation.
+  /// Creates an animation controller useful for driving a [MaterialBanner]'s entrance and exit animation.
   static AnimationController createAnimationController({ required TickerProvider vsync }) {
     return AnimationController(
       duration: _materialBannerTransitionDuration,

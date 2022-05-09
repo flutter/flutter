@@ -415,7 +415,7 @@ void main() {
               subForSigTerm: signalUnderTest,
               exitSignals: <ProcessSignal>[signalUnderTest],
             ),
-        Usage: () => usage
+        Usage: () => usage,
       });
     });
 

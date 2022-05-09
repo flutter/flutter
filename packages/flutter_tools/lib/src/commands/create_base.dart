@@ -20,7 +20,6 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
-import '../features.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -45,7 +44,6 @@ const List<String> kAllCreatePlatforms = <String>[
   'linux',
   'macos',
   'web',
-  'winuwp',
 ];
 
 const String _kDefaultPlatformArgumentHelp =
@@ -165,13 +163,9 @@ abstract class CreateBase extends FlutterCommand {
       aliases: <String>[ 'platform' ],
       defaultsTo: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled)
-          'winuwp',
       ],
       allowed: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled)
-          'winuwp',
       ],
     );
   }
@@ -355,7 +349,6 @@ abstract class CreateBase extends FlutterCommand {
     bool linux = false,
     bool macos = false,
     bool windows = false,
-    bool windowsUwp = false,
     bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
@@ -418,7 +411,6 @@ abstract class CreateBase extends FlutterCommand {
       'linux': linux,
       'macos': macos,
       'windows': windows,
-      'winuwp': windowsUwp,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
       'implementationTests': implementationTests,
@@ -522,7 +514,6 @@ abstract class CreateBase extends FlutterCommand {
     final bool macOSPlatform = templateContext['macos'] as bool ?? false;
     final bool windowsPlatform = templateContext['windows'] as bool ?? false;
     final bool webPlatform = templateContext['web'] as bool ?? false;
-    final bool winUwpPlatform = templateContext['winuwp'] as bool ?? false;
 
     if (boolArg('pub')) {
       final Environment environment = Environment(
@@ -562,7 +553,6 @@ abstract class CreateBase extends FlutterCommand {
         macOSPlatform: macOSPlatform,
         windowsPlatform: windowsPlatform,
         webPlatform: webPlatform,
-        winUwpPlatform: winUwpPlatform,
       );
     }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
@@ -584,9 +574,6 @@ abstract class CreateBase extends FlutterCommand {
     }
     if (windowsPlatform) {
       platformsForMigrateConfig.add(SupportedPlatform.windows);
-    }
-    if (winUwpPlatform) {
-      platformsForMigrateConfig.add(SupportedPlatform.windowsuwp);
     }
     if (templateContext['fuchsia'] == true) {
       platformsForMigrateConfig.add(SupportedPlatform.fuchsia);

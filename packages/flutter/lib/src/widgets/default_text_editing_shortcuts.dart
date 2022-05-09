@@ -157,7 +157,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   );
 
   // These are shortcuts are shared between most platforms except macOS for it
-  // uses different modifier keys as the line/word modifer.
+  // uses different modifier keys as the line/word modifier.
   static final Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
     for (final bool pressShift in const <bool>[true, false])
@@ -230,25 +230,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   static final Map<ShortcutActivator, Intent> _androidShortcuts = _commonShortcuts;
 
   static final Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
-
-  // The following key combinations have no effect on text editing on this
-  // platform:
-  //   * End
-  //   * Home
-  //   * Meta + X
-  //   * Meta + C
-  //   * Meta + V
-  //   * Meta + A
-  //   * Meta + shift? + Z
-  //   * Meta + shift? + arrow down
-  //   * Meta + shift? + arrow left
-  //   * Meta + shift? + arrow right
-  //   * Meta + shift? + arrow up
-  //   * Shift + end
-  //   * Shift + home
-  //   * Meta + shift? + delete
-  //   * Meta + shift? + backspace
-  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _commonShortcuts;
 
   static final Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
@@ -341,6 +322,10 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Control + shift? + home
     //   * Control + shift? + Z
   };
+
+  // There is no complete documentation of iOS shortcuts. Use mac shortcuts for
+  // now.
+  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _macShortcuts;
 
   // The following key combinations have no effect on text editing on this
   // platform:

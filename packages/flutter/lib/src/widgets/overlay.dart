@@ -45,9 +45,12 @@ import 'ticker_provider.dart';
 /// if widgets in an overlay entry with [maintainState] set to true repeatedly
 /// call [State.setState], the user's battery will be drained unnecessarily.
 ///
-/// [OverlayEntry] is a [ChangeNotifier] that notifies when the widget built by
+/// [OverlayEntry] is a [Listenable] that notifies when the widget built by
 /// [builder] is mounted or unmounted, whose exact state can be queried by
-/// [mounted].
+/// [mounted]. After the owner of the [OverlayEntry] calls [remove] and then
+/// [dispose], the widget may not be immediately removed from the widget tree.
+/// As a result listeners of the [OverlayEntry] can get notified for one last
+/// time after the [dispose] call, when the widget is eventually unmounted.
 ///
 /// See also:
 ///
@@ -55,7 +58,7 @@ import 'ticker_provider.dart';
 ///  * [OverlayState]
 ///  * [WidgetsApp]
 ///  * [MaterialApp]
-class OverlayEntry extends ChangeNotifier {
+class OverlayEntry implements Listenable {
   /// Creates an overlay entry.
   ///
   /// To insert the entry into an [Overlay], first find the overlay using
@@ -86,6 +89,7 @@ class OverlayEntry extends ChangeNotifier {
   bool get opaque => _opaque;
   bool _opaque;
   set opaque(bool value) {
+    assert(!_disposedByOwner);
     if (_opaque == value)
       return;
     _opaque = value;
@@ -109,6 +113,7 @@ class OverlayEntry extends ChangeNotifier {
   bool get maintainState => _maintainState;
   bool _maintainState;
   set maintainState(bool value) {
+    assert(!_disposedByOwner);
     assert(_maintainState != null);
     if (_maintainState == value)
       return;
@@ -120,14 +125,21 @@ class OverlayEntry extends ChangeNotifier {
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
   ///
   /// The [OverlayEntry] notifies its listeners when this value changes.
-  bool get mounted => _mounted;
-  bool _mounted = false;
-  void _updateMounted(bool value) {
-    if (value == _mounted) {
-      return;
-    }
-    _mounted = value;
-    notifyListeners();
+  bool get mounted => _overlayStateMounted.value;
+
+  /// Whether the `_OverlayState`s built using this [OverlayEntry] is currently
+  /// mounted.
+  final ValueNotifier<bool> _overlayStateMounted = ValueNotifier<bool>(false);
+
+  @override
+  void addListener(VoidCallback listener) {
+    assert(!_disposedByOwner);
+    _overlayStateMounted.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _overlayStateMounted.removeListener(listener);
   }
 
   OverlayState? _overlay;
@@ -145,6 +157,7 @@ class OverlayEntry extends ChangeNotifier {
   /// until	the next frame (i.e. many milliseconds later).
   void remove() {
     assert(_overlay != null);
+    assert(!_disposedByOwner);
     final OverlayState overlay = _overlay!;
     _overlay = null;
     if (!overlay.mounted)
@@ -164,7 +177,38 @@ class OverlayEntry extends ChangeNotifier {
   ///
   /// You need to call this function if the output of [builder] has changed.
   void markNeedsBuild() {
+    assert(!_disposedByOwner);
     _key.currentState?._markNeedsBuild();
+  }
+
+  void _didUnmount() {
+    assert(!mounted);
+    if (_disposedByOwner) {
+      _overlayStateMounted.dispose();
+    }
+  }
+
+  bool _disposedByOwner = false;
+
+  /// Discards any resources used by this [OverlayEntry].
+  ///
+  /// This method must be called after [remove] if the [OverlayEntry] is
+  /// inserted into an [Overlay].
+  ///
+  /// After this is called, the object is not in a usable state and should be
+  /// discarded (calls to [addListener] will throw after the object is disposed).
+  /// However, the listeners registered may not be immediately released until
+  /// the widget built using this [OverlayEntry] is unmounted from the widget
+  /// tree.
+  ///
+  /// This method should only be called by the object's owner.
+  void dispose() {
+    assert(!_disposedByOwner);
+    assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
+    _disposedByOwner = true;
+    if (!mounted) {
+      _overlayStateMounted.dispose();
+    }
   }
 
   @override
@@ -192,12 +236,13 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   @override
   void initState() {
     super.initState();
-    widget.entry._updateMounted(true);
+    widget.entry._overlayStateMounted.value = true;
   }
 
   @override
   void dispose() {
-    widget.entry._updateMounted(false);
+    widget.entry._overlayStateMounted.value = false;
+    widget.entry._didUnmount();
     super.dispose();
   }
 

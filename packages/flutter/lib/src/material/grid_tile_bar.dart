@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-/// A header used in a material design [GridTile].
+/// A header used in a Material Design [GridTile].
 ///
 /// Typically used to add a one or two line header or footer on a [GridTile].
 ///

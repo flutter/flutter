@@ -1470,7 +1470,7 @@ void main() {
                   setState = stateSetter;
                   return Actions(
                     actions: <Type, Action<Intent>> {
-                      if (action2LookupContext != null) LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: action2LookupContext!)
+                      if (action2LookupContext != null) LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: action2LookupContext!),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
@@ -1579,7 +1579,7 @@ void main() {
                                 context: context2,
                               ),
                               context: context3,
-                            )
+                            ),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {

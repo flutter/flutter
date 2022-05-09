@@ -83,7 +83,7 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }

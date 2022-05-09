@@ -1086,7 +1086,7 @@ void main() {
     const Size kSmallScreenSizePortrait = Size(320, 521);
     const Size kSmallScreenSizeLandscape = Size(521, 320);
 
-    Future<void> _showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
+    Future<void> showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
       tester.binding.window.physicalSizeTestValue = size;
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
@@ -1098,42 +1098,42 @@ void main() {
     }
 
     testWidgets('common screen size - portrait', (WidgetTester tester) async {
-      await _showPicker(tester, kCommonScreenSizePortrait);
+      await showPicker(tester, kCommonScreenSizePortrait);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('common screen size - landscape', (WidgetTester tester) async {
-      await _showPicker(tester, kCommonScreenSizeLandscape);
+      await showPicker(tester, kCommonScreenSizeLandscape);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('common screen size - portrait - textScale 1.3', (WidgetTester tester) async {
-      await _showPicker(tester, kCommonScreenSizePortrait, 1.3);
+      await showPicker(tester, kCommonScreenSizePortrait, 1.3);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('common screen size - landscape - textScale 1.3', (WidgetTester tester) async {
-      await _showPicker(tester, kCommonScreenSizeLandscape, 1.3);
+      await showPicker(tester, kCommonScreenSizeLandscape, 1.3);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('small screen size - portrait', (WidgetTester tester) async {
-      await _showPicker(tester, kSmallScreenSizePortrait);
+      await showPicker(tester, kSmallScreenSizePortrait);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('small screen size - landscape', (WidgetTester tester) async {
-      await _showPicker(tester, kSmallScreenSizeLandscape);
+      await showPicker(tester, kSmallScreenSizeLandscape);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('small screen size - portrait -textScale 1.3', (WidgetTester tester) async {
-      await _showPicker(tester, kSmallScreenSizePortrait, 1.3);
+      await showPicker(tester, kSmallScreenSizePortrait, 1.3);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('small screen size - landscape - textScale 1.3', (WidgetTester tester) async {
-      await _showPicker(tester, kSmallScreenSizeLandscape, 1.3);
+      await showPicker(tester, kSmallScreenSizeLandscape, 1.3);
       expect(tester.takeException(), isNull);
     });
   });

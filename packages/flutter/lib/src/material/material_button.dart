@@ -40,7 +40,7 @@ import 'theme_data.dart';
 ///
 ///  * [IconButton], to create buttons that contain icons rather than text.
 class MaterialButton extends StatelessWidget {
-  /// Creates a material button.
+  /// Creates a Material Design button.
   ///
   /// To create a custom Material button consider using [TextButton],
   /// [ElevatedButton], or [OutlinedButton].

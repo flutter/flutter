@@ -402,12 +402,14 @@ void main() {
         MaterialApp(
           home: CustomScrollView(
             physics: canDrag ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
-            slivers: <Widget>[SliverToBoxAdapter(
-              child: SizedBox(
-                height: 2000,
-                child: GestureDetector(onTap: () {}),
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 2000,
+                  child: GestureDetector(onTap: () {}),
+                ),
               ),
-            )],
+            ],
           ),
         ),
       );

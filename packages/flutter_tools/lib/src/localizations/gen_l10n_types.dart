@@ -358,7 +358,7 @@ class Message {
 
     if (attributes == null) {
 
-      void _throwEmptyAttributes(final RegExp regExp, final String type) {
+      void throwEmptyAttributes(final RegExp regExp, final String type) {
         final RegExpMatch? match = regExp.firstMatch(_value(bundle, resourceId));
         final bool isMatch = match != null && match.groupCount == 1;
         if (isMatch) {
@@ -369,8 +369,8 @@ class Message {
         }
       }
 
-      _throwEmptyAttributes(_pluralRE, 'plural');
-      _throwEmptyAttributes(_selectRE, 'select');
+      throwEmptyAttributes(_pluralRE, 'plural');
+      throwEmptyAttributes(_selectRE, 'select');
     }
 
     return attributes as Map<String, Object?>?;
@@ -442,7 +442,7 @@ class AppResourceBundle {
     } on FormatException catch (e) {
       throw L10nException(
         'The arb file ${file.path} has the following formatting issue: \n'
-        '${e.toString()}',
+        '$e',
       );
     }
 

@@ -173,6 +173,10 @@ class RenderSliverOpacity extends RenderProxySliver {
         super.paint,
         oldLayer: layer as OpacityLayer?,
       );
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     }
   }
 

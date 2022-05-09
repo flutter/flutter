@@ -149,6 +149,6 @@ abstract class TokenTemplate {
 
   /// Generate a [TextTheme] text style name for the given component token.
   String textStyle(String componentToken) {
-    return '$textThemePrefix${tokens["$componentToken.text-style"]!.toString()}';
+    return '$textThemePrefix${tokens["$componentToken.text-style"]}';
   }
 }

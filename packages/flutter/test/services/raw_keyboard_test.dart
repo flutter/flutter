@@ -2143,7 +2143,7 @@ void main() {
 
     test('Code points with more than three Unicode scalar values are not allowed', () {
       // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
-      void _createFailingKey() {
+      void createFailingKey() {
         RawKeyEvent.fromMessage(const <String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
@@ -2155,7 +2155,7 @@ void main() {
         });
       }
 
-      expect(() => _createFailingKey(), throwsAssertionError);
+      expect(() => createFailingKey(), throwsAssertionError);
     });
 
     test('Control keyboard keys are correctly translated', () {
@@ -2375,7 +2375,7 @@ void main() {
 
     test('Code points with more than three Unicode scalar values are not allowed', () {
       // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
-      void _createFailingKey() {
+      void createFailingKey() {
         RawKeyEvent.fromMessage(const <String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
@@ -2387,7 +2387,7 @@ void main() {
         });
       }
 
-      expect(() => _createFailingKey(), throwsAssertionError);
+      expect(() => createFailingKey(), throwsAssertionError);
     });
 
     test('Control keyboard keys are correctly translated', () {

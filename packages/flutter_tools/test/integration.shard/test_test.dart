@@ -37,7 +37,7 @@ void main() {
       <String>[
         flutterBin,
         'pub',
-        'get'
+        'get',
       ],
       workingDirectory: flutterTestDirectory
     );
@@ -45,7 +45,7 @@ void main() {
       <String>[
         flutterBin,
         'pub',
-        'get'
+        'get',
       ],
       workingDirectory: missingDependencyDirectory
     );

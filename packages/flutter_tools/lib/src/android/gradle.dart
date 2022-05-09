@@ -269,7 +269,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     ];
     if (_logger.isVerbose) {
       command.add('--full-stacktrace');
-      command.add('--debug');
+      command.add('--info');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');
@@ -589,11 +589,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
       '-Pflutter-root=$flutterRoot',
       '-Poutput-dir=${outputDirectory.path}',
       '-Pis-plugin=${manifest.isPlugin}',
-      '-PbuildNumber=$buildNumber'
+      '-PbuildNumber=$buildNumber',
     ];
     if (_logger.isVerbose) {
       command.add('--full-stacktrace');
-      command.add('--debug');
+      command.add('--info');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');
@@ -851,15 +851,15 @@ Iterable<String> listApkPaths(
         <String>[
           'app',
           getNameForAndroidArch(androidArch),
-          ...apkPartialName
-        ].join('-')
+          ...apkPartialName,
+        ].join('-'),
     ];
   }
   return <String>[
     <String>[
       'app',
       ...apkPartialName,
-    ].join('-')
+    ].join('-'),
   ];
 }
 

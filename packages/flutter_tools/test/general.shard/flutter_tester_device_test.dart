@@ -132,7 +132,7 @@ void main() {
         '--non-interactive',
         '--use-test-fonts',
         '--packages=.dart_tool/package_config.json',
-        'example.dill'
+        'example.dill',
       ], environment: <String, String>{
         'FLUTTER_TEST': expectedFlutterTestValue,
         'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
@@ -206,11 +206,11 @@ void main() {
             '--packages=.dart_tool/package_config.json',
             '--foo',
             '--bar',
-            'example.dill'
+            'example.dill',
           ],
           stdout: 'success',
           stderr: 'failure',
-        )
+        ),
       ]);
       device = createDevice(dartEntrypointArgs: <String>['--foo', '--bar']);
     });
@@ -245,11 +245,11 @@ void main() {
             '--non-interactive',
             '--use-test-fonts',
             '--packages=.dart_tool/package_config.json',
-            'example.dill'
+            'example.dill',
           ],
           stdout: 'The Dart VM service is listening on http://localhost:1234',
           stderr: 'failure',
-        )
+        ),
       ]);
       device = createDevice(enableObservatory: true);
     });

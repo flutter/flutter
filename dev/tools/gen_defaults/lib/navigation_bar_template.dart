@@ -25,11 +25,9 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
-  // With Material 3, the NavigationBar uses an overlay blend for the
-  // default color regardless of light/dark mode. This should be handled
-  // in the Material widget based off of elevation, but for now we will do
-  // it here in the defaults.
-  @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(${componentColor("md.comp.navigation-bar.container")}, _colors.primary, ${elevation("md.comp.navigation-bar.container")});
+  @override Color? get backgroundColor => ${componentColor("md.comp.navigation-bar.container")};
+
+  @override Color? get surfaceTintColor => ${color("md.comp.navigation-bar.container.surface-tint-layer.color")};
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {

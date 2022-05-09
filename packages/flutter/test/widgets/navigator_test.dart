@@ -2759,7 +2759,7 @@ void main() {
       );
     });
 
-    Widget _buildFrame(String action) {
+    Widget buildFrame(String action) {
       const TestPage myPage = TestPage(key: ValueKey<String>('1'), name:'initial');
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/' : (BuildContext context) => OnTapPage(
@@ -2779,7 +2779,7 @@ void main() {
       return MaterialApp(routes: routes);
     }
 
-    void _checkException(WidgetTester tester) {
+    void checkException(WidgetTester tester) {
       final dynamic exception = tester.takeException();
       expect(exception, isFlutterError);
       final FlutterError error = exception as FlutterError;
@@ -2795,24 +2795,24 @@ void main() {
     }
 
     testWidgets('throw if add page-based route using the imperative api - push', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame('push'));
+      await tester.pumpWidget(buildFrame('push'));
       await tester.tap(find.text('push'));
       await tester.pumpAndSettle();
-      _checkException(tester);
+      checkException(tester);
     });
 
     testWidgets('throw if add page-based route using the imperative api - pushReplacement', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame('pushReplacement'));
+      await tester.pumpWidget(buildFrame('pushReplacement'));
       await tester.tap(find.text('pushReplacement'));
       await tester.pumpAndSettle();
-      _checkException(tester);
+      checkException(tester);
     });
 
     testWidgets('throw if add page-based route using the imperative api - pushAndRemoveUntil', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame('pushAndRemoveUntil'));
+      await tester.pumpWidget(buildFrame('pushAndRemoveUntil'));
       await tester.tap(find.text('pushAndRemoveUntil'));
       await tester.pumpAndSettle();
-      _checkException(tester);
+      checkException(tester);
     });
 
     testWidgets('throw if page list is empty', (WidgetTester tester) async {

@@ -44,7 +44,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  void _checkBuildDir() {
+  void checkBuildDir() {
     // The android/app/build directory should not exists
     final Directory appBuildDir = fileSystem.directory(fileSystem.path.join(
       exampleAppDir.path,
@@ -65,7 +65,7 @@ void main() {
         'apk',
         '--target-platform=android-arm',
       ], workingDirectory: exampleAppDir.path);
-      _checkBuildDir();
+      checkBuildDir();
     },
   );
 
@@ -79,7 +79,7 @@ void main() {
         'appbundle',
         '--target-platform=android-arm',
       ], workingDirectory: exampleAppDir.path);
-      _checkBuildDir();
+      checkBuildDir();
     },
   );
 }

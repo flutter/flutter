@@ -46,10 +46,11 @@ class MyStatelessWidget extends StatelessWidget {
                     children: <Widget>[
                       const Text('BottomSheet'),
                       ElevatedButton(
-                          child: const Text('Close BottomSheet'),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          })
+                        child: const Text('Close BottomSheet'),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
                     ],
                   ),
                 ),

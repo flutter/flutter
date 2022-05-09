@@ -71,9 +71,9 @@ void main() {
             'fastStart': false,
             'flutterExit': false,
             'hardwareRendering': false,
-            'startPaused': true
-          }
-        }
+            'startPaused': true,
+          },
+        },
       )),
     );
   }, overrides: <Type, Generator>{

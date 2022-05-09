@@ -151,7 +151,7 @@ abstract class Repository {
         upstreamRemote.name,
         '--',
         upstreamRemote.url,
-        checkoutDirectory.path
+        checkoutDirectory.path,
       ],
       'Cloning $name repo',
       workingDirectory: parentDirectory.path,
@@ -302,7 +302,7 @@ abstract class Repository {
         'merge-base',
         '--is-ancestor',
         possibleDescendant,
-        possibleAncestor
+        possibleAncestor,
       ],
       'verify $possibleAncestor is a direct ancestor of $possibleDescendant.',
       allowNonZeroExitCode: true,

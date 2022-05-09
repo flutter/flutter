@@ -1104,6 +1104,45 @@ void main() {
     expect(pageController.viewportFraction, 1);
   });
 
+  testWidgets('TabBarView has clipBehavior Clip.hardEdge by default', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
+
+    Widget builder() {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBarView(
+            children: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final TabBarView tabBarView = tester.widget(find.byType(TabBarView));
+    expect(tabBarView.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('TabBarView sets clipBehavior correctly', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
+
+    Widget builder() {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBarView(
+            clipBehavior: Clip.none,
+            children: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final PageView pageView = tester.widget(find.byType(PageView));
+    expect(pageView.clipBehavior, Clip.none);
+  });
+
   testWidgets('TabBar tap skips indicator animation when disabled in controller', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B'];
 
@@ -3582,13 +3621,13 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/94504.
     final List<String> tabTitles = <String>[];
 
-    void _onTabAdd(StateSetter setState) {
+    void onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
       });
     }
 
-    void _onTabRemove(StateSetter setState) {
+    void onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
       });
@@ -3606,12 +3645,12 @@ void main() {
                     TextButton(
                       key: const Key('Add tab'),
                       child: const Text('Add tab'),
-                      onPressed: () => _onTabAdd(setState),
+                      onPressed: () => onTabAdd(setState),
                     ),
                     TextButton(
                       key: const Key('Remove tab'),
                       child: const Text('Remove tab'),
-                      onPressed: () => _onTabRemove(setState),
+                      onPressed: () => onTabRemove(setState),
                     ),
                   ],
                   bottom: PreferredSize(
@@ -3657,14 +3696,14 @@ void main() {
     final List<String> tabTitles = <String>[];
     TabController tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
 
-    void _onTabAdd(StateSetter setState) {
+    void onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
         tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
-    void _onTabRemove(StateSetter setState) {
+    void onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
         tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
@@ -3681,12 +3720,12 @@ void main() {
                   TextButton(
                     key: const Key('Add tab'),
                     child: const Text('Add tab'),
-                    onPressed: () => _onTabAdd(setState),
+                    onPressed: () => onTabAdd(setState),
                   ),
                   TextButton(
                     key: const Key('Remove tab'),
                     child: const Text('Remove tab'),
-                    onPressed: () => _onTabRemove(setState),
+                    onPressed: () => onTabRemove(setState),
                   ),
                 ],
                 bottom: PreferredSize(
