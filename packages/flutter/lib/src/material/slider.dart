@@ -475,13 +475,22 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   Timer? interactionTimer;
 
   final GlobalKey _renderObjectKey = GlobalKey();
+
   // Keyboard mapping for a focused slider.
-  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _traditionalNavShortcutMap = <ShortcutActivator, Intent>{
       SingleActivator(LogicalKeyboardKey.arrowUp): _AdjustSliderIntent.up(),
       SingleActivator(LogicalKeyboardKey.arrowDown): _AdjustSliderIntent.down(),
       SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
       SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
     };
+
+  // Keyboard mapping for a focused slider when using directional navigation.
+  // The vertical inputs are not handled to allow navigating out of the slider.
+  static const Map<ShortcutActivator, Intent> _directionalNavShortcutMap = <ShortcutActivator, Intent>{
+      SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
+      SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
+    };
+
   // Action mapping for a focused slider.
   late Map<Type, Action<Intent>> _actionMap;
 
@@ -735,13 +744,23 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         break;
     }
 
+    final Map<ShortcutActivator, Intent> shortcutMap;
+    switch (MediaQuery.of(context).navigationMode) {
+      case NavigationMode.directional:
+        shortcutMap = _directionalNavShortcutMap;
+        break;
+      case NavigationMode.traditional:
+        shortcutMap = _traditionalNavShortcutMap;
+        break;
+    }
+
     return Semantics(
       container: true,
       slider: true,
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: FocusableActionDetector(
         actions: _actionMap,
-        shortcuts: _shortcutMap,
+        shortcuts: shortcutMap,
         focusNode: focusNode,
         autofocus: widget.autofocus,
         enabled: _enabled,

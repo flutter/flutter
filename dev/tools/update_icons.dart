@@ -419,7 +419,7 @@ void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
           home: Scaffold(
             body: Wrap(
               children: const [
-                ${newIconUsages.toString()}
+                $newIconUsages
               ],
             ),
           ),

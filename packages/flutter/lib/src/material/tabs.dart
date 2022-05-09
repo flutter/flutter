@@ -403,7 +403,7 @@ class _IndicatorPainter extends CustomPainter {
     if (!(rect.size >= insets.collapsedSize)) {
       throw FlutterError(
           'indicatorPadding insets should be less than Tab Size\n'
-          'Rect Size : ${rect.size}, Insets: ${insets.toString()}',
+          'Rect Size : ${rect.size}, Insets: $insets',
       );
     }
     return insets.deflateRect(rect);
@@ -1310,6 +1310,7 @@ class TabBarView extends StatefulWidget {
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
     this.viewportFraction = 1.0,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(children != null),
        assert(dragStartBehavior != null);
 
@@ -1341,6 +1342,11 @@ class TabBarView extends StatefulWidget {
 
   /// {@macro flutter.widgets.pageview.viewportFraction}
   final double viewportFraction;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   @override
   State<TabBarView> createState() => _TabBarViewState();
@@ -1531,6 +1537,7 @@ class _TabBarViewState extends State<TabBarView> {
       onNotification: _handleScrollNotification,
       child: PageView(
         dragStartBehavior: widget.dragStartBehavior,
+        clipBehavior: widget.clipBehavior,
         controller: _pageController,
         physics: widget.physics == null
           ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())

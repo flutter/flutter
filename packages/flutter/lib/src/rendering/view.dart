@@ -82,6 +82,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The constraints used for the root layout.
   ViewConfiguration get configuration => _configuration;
   ViewConfiguration _configuration;
+
   /// The configuration is initially set by the `configuration` argument
   /// passed to the constructor.
   ///
@@ -90,8 +91,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(value != null);
     if (configuration == value)
       return;
+    final ViewConfiguration oldConfiguration = _configuration;
     _configuration = value;
-    replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
+    if (oldConfiguration.toMatrix() != _configuration.toMatrix()) {
+      replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
+    }
     assert(_rootTransform != null);
     markNeedsLayout();
   }
