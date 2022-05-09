@@ -9,7 +9,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../widgets/animated_repaint_notifier.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'ink_highlight.dart';
@@ -837,11 +836,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void updateHighlight(_HighlightType type, { required bool value, bool callOnHover = true }) {
-    if (value) {
-      const AnimationStart().dispatch(context);
-    } else {
-      const AnimationEnd().dispatch(context);
-    }
     final InkHighlight? highlight = _highlights[type];
     void handleInkRemoval() {
       assert(_highlights[type] != null);

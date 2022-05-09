@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import 'animated_repaint_notifier.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
@@ -98,8 +97,10 @@ class _ScrollableRepaintBoundaryNotifier extends InheritedWidget {
 /// during scrolling are also removed.
 ///
 /// This widget attempts to address these cases, by making the repaint boundary used
-/// to wrap scrollable children conditional on whether the scrollable is currently
-/// scrolling.
+/// to wrap scrollable children conditional on whether the scrollable has ever
+/// scrolled before. This is a comprompose solution, and could be adjusted to take
+/// into account whether or not the child has repainted or whether the scrollable
+/// is likely to scroll again.
 class ScrollableRepaintBoundary extends StatefulWidget {
   /// Create a new [ScrollableRepaintBoundary].
   const ScrollableRepaintBoundary({super.key, required this.child});
@@ -114,45 +115,19 @@ class ScrollableRepaintBoundary extends StatefulWidget {
 }
 
 class _ScrollableRepaintBoundaryState extends State<ScrollableRepaintBoundary> {
-  final ValueNotifier<bool> combinedBoundary = ValueNotifier<bool>(false);
   ValueNotifier<bool>? scrolling;
   late _ScrollableRepaintBoundaryNotifier _notifier;
-  bool _animating = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _notifier = context.dependOnInheritedWidgetOfExactType<_ScrollableRepaintBoundaryNotifier>()!;
-    scrolling?.removeListener(_onNotifierChange);
     scrolling = _notifier.state;
-    scrolling!.addListener(_onNotifierChange);
-    _onNotifierChange();
-  }
-
-  void _onNotifierChange() {
-    combinedBoundary.value = scrolling!.value || _animating;
-  }
-
-  bool _onNotification(AnimatedRepaintNotification notification) {
-    if (notification is AnimationStart) {
-      _animating = true;
-      _onNotifierChange();
-      return true;
-    }
-    if (notification is AnimationEnd) {
-      _animating = false;
-      _onNotifierChange();
-      return true;
-    }
-    return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<AnimatedRepaintNotification>(
-      onNotification: _onNotification,
-      child: _ConditionalRepaintBoundary(combinedBoundary, child: widget.child),
-    );
+    return _ConditionalRepaintBoundary(scrolling!, child: widget.child);
   }
 }
 
