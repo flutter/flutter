@@ -46,6 +46,8 @@ void main() {
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addFlag('key');
+    command.argParser.addFlag('key-false');
+
     runner.addCommand(command);
     await runner.run(<String>['dummy', '--key']);
 
@@ -54,6 +56,9 @@ void main() {
 
     expect(command.boolArgDeprecated('key'), true);
     expect(() => command.boolArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+
+    expect(command.boolArg('key-false'), false);
+    expect(command.boolArgDeprecated('key-false'), false);
   });
 
   testUsingContext('String? safe argResults', () async {
