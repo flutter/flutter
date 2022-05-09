@@ -35,6 +35,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // removed when a new major version of shelf is published.
   'shelf': '1.1.4',
   'video_player': '2.2.11',
+  // https://github.com/flutter/flutter/issues/103357 color regressions
+  'material_color_utilities': '0.1.4',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
