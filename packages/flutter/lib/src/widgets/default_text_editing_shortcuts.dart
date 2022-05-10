@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
+import 'framework.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 
@@ -145,16 +146,20 @@ import 'text_editing_intents.dart';
 /// See also:
 ///
 ///   * [WidgetsApp], which creates a DefaultTextEditingShortcuts.
-class DefaultTextEditingShortcuts extends Shortcuts {
+class DefaultTextEditingShortcuts extends StatelessWidget {
   /// Creates a [Shortcuts] widget that provides the default text editing
   /// shortcuts on the current platform.
-  DefaultTextEditingShortcuts({
+  const DefaultTextEditingShortcuts({
     super.key,
-    required super.child,
-  }) : super(
-    debugLabel: '<Default Text Editing Shortcuts>',
-    shortcuts: _shortcuts,
-  );
+    required this.child,
+  });
+  //     : super(
+  //   debugLabel: '<Default Text Editing Shortcuts>',
+  //   shortcuts: _shortcuts,
+  // )
+
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
 
   // These are shortcuts are shared between most platforms except macOS for it
   // uses different modifier keys as the line/word modifier.
@@ -353,7 +358,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
 
   // Web handles its text selection natively and doesn't use any of these
   // shortcuts in Flutter.
-  static final Map<ShortcutActivator, Intent> _webShortcuts = <ShortcutActivator, Intent>{
+  static final Map<ShortcutActivator, Intent> _webDisablingTextShortcuts = <ShortcutActivator, Intent>{
     for (final bool pressShift in const <bool>[true, false])
       ...<SingleActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
@@ -412,10 +417,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
-    if (kIsWeb) {
-      return _webShortcuts;
-    }
-
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return _androidShortcuts;
@@ -430,5 +431,32 @@ class DefaultTextEditingShortcuts extends Shortcuts {
       case TargetPlatform.windows:
         return _windowsShortcuts;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget result = child;
+    if (kIsWeb) {
+      // This shortcuts makes sure the following:
+      //
+      // 1. Shortcuts fired in TextField is swallowed.
+      // 2. Shortcuts fired above TextField will still trigger corresponding
+      //    intents.
+      //
+      // In (2), the disabling shortcuts will still fire. The
+      // [DoNothingAndStopPropagationTextIntent] will not be handled because the
+      // context is above the TextField. The key event will then trigger the
+      // default Text Editing Shortcuts
+      result = Shortcuts(
+        debugLabel: '<Web disabling text shortcuts>',
+        shortcuts: _webDisablingTextShortcuts,
+        child: result
+      );
+    }
+    return Shortcuts(
+      debugLabel: '<Default Text Editing Shortcuts>',
+      shortcuts: _shortcuts,
+      child: result
+    );
   }
 }
