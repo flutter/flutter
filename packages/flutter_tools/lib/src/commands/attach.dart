@@ -234,7 +234,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<void> _attachToDevice(Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
 
-    final Daemon daemon = boolArg('machine')
+    final Daemon daemon = boolArgDeprecated('machine')
       ? Daemon(
           DaemonConnection(
             daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
@@ -336,7 +336,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
                 connectionInfoCompleter: connectionInfoCompleter,
                 appStartedCompleter: appStartedCompleter,
                 allowExistingDdsInstance: true,
-                enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+                enableDevTools: boolArgDeprecated(FlutterCommand.kEnableDevTools),
               );
             },
             device,
@@ -369,7 +369,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             terminal: globals.terminal,
             signals: globals.signals,
             processInfo: globals.processInfo,
-            reportReady: boolArg('report-ready'),
+            reportReady: boolArgDeprecated('report-ready'),
             pidFile: stringArgDeprecated('pid-file'),
           )
             ..registerSignalHandlers()
@@ -378,7 +378,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         result = await runner.attach(
           appStartedCompleter: onAppStart,
           allowExistingDdsInstance: true,
-          enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+          enableDevTools: boolArgDeprecated(FlutterCommand.kEnableDevTools),
         );
         if (result != 0) {
           throwToolExit(null, exitCode: result);

@@ -145,15 +145,15 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner!.getRepoPackages();
 
-    final bool forceUpgrade = boolArg('force-upgrade');
-    final bool isPrintPaths = boolArg('paths');
-    final bool isPrintTransitiveClosure = boolArg('transitive-closure');
-    final bool isVerifyOnly = boolArg('verify-only');
-    final bool isConsumerOnly = boolArg('consumer-only');
-    final bool offline = boolArg('offline');
+    final bool forceUpgrade = boolArgDeprecated('force-upgrade');
+    final bool isPrintPaths = boolArgDeprecated('paths');
+    final bool isPrintTransitiveClosure = boolArgDeprecated('transitive-closure');
+    final bool isVerifyOnly = boolArgDeprecated('verify-only');
+    final bool isConsumerOnly = boolArgDeprecated('consumer-only');
+    final bool offline = boolArgDeprecated('offline');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
 
-    if (boolArg('crash')) {
+    if (boolArgDeprecated('crash')) {
       throw StateError('test crash please ignore.');
     }
 
@@ -403,7 +403,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         context: PubContext.updatePackages,
         directory: tempDir.path,
         upgrade: doUpgrade,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         flutterRootOverride: temporaryFlutterSdk?.path,
       );
       // Cleanup the temporary SDK
@@ -454,14 +454,14 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
     }
 
-    if (boolArg('transitive-closure')) {
+    if (boolArgDeprecated('transitive-closure')) {
       tree._dependencyTree.forEach((String from, Set<String> to) {
         globals.printStatus('$from -> $to');
       });
       return true;
     }
 
-    if (boolArg('paths')) {
+    if (boolArgDeprecated('paths')) {
       showDependencyPaths(from: stringArgDeprecated('from')!, to: stringArgDeprecated('to')!, tree: tree);
       return true;
     }

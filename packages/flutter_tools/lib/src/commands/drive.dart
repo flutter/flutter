@@ -156,7 +156,7 @@ class DriveCommand extends RunCommandBase {
   // specified not to.
   @override
   bool get shouldRunPub {
-    if (argResults.wasParsed('pub') && !boolArg('pub')) {
+    if (argResults.wasParsed('pub') && !boolArgDeprecated('pub')) {
       return false;
     }
     return true;
@@ -255,7 +255,7 @@ class DriveCommand extends RunCommandBase {
               'trace-startup': traceStartup,
             if (web)
               '--no-launch-chrome': true,
-            if (boolArg('multidex'))
+            if (boolArgDeprecated('multidex'))
               'multidex': true,
           }
         );
@@ -278,13 +278,13 @@ class DriveCommand extends RunCommandBase {
         <String, String>{},
         packageConfig,
         chromeBinary: stringArgDeprecated('chrome-binary'),
-        headless: boolArg('headless'),
+        headless: boolArgDeprecated('headless'),
         browserDimension: stringArgDeprecated('browser-dimension').split(','),
         browserName: stringArgDeprecated('browser-name'),
         driverPort: stringArgDeprecated('driver-port') != null
           ? int.tryParse(stringArgDeprecated('driver-port'))
           : null,
-        androidEmulator: boolArg('android-emulator'),
+        androidEmulator: boolArgDeprecated('android-emulator'),
         profileMemory: stringArgDeprecated('profile-memory'),
       );
       if (testResult != 0 && screenshot != null) {
@@ -293,7 +293,7 @@ class DriveCommand extends RunCommandBase {
         screenshotTaken = true;
       }
 
-      if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
+      if (boolArgDeprecated('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         _logger.printStatus('Leaving the application running.');
       } else {
         final File skslFile = stringArgDeprecated('write-sksl-on-exit') != null
