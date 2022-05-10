@@ -1969,7 +1969,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late final _RestorableTimePickerEntryMode _entryMode = _RestorableTimePickerEntryMode(widget.initialEntryMode);
-  final _RestorableTimePickerMode _mode = _RestorableTimePickerMode(widget.focusOnMinutes ? _TimePickerMode.minute : _TimePickerMode.hour);
+  late final _RestorableTimePickerMode _mode = _RestorableTimePickerMode(widget.focusOnMinutes ? _TimePickerMode.minute : _TimePickerMode.hour);
   final _RestorableTimePickerModeN _lastModeAnnounced = _RestorableTimePickerModeN(null);
   final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
   final RestorableBoolN _autofocusHour = RestorableBoolN(null);
