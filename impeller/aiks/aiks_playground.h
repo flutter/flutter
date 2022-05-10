@@ -14,7 +14,7 @@ namespace impeller {
 class AiksPlayground : public Playground {
  public:
   using AiksPlaygroundCallback =
-      std::function<bool(AiksContext& renderer, RenderPass& pass)>;
+      std::function<bool(AiksContext& renderer, RenderTarget& render_target)>;
 
   AiksPlayground();
 

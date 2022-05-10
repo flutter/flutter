@@ -21,7 +21,7 @@ bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
   if (!content_context.IsValid()) {
     return false;
   }
-  Renderer::RenderCallback callback = [&](RenderPass& pass) -> bool {
+  SinglePassCallback callback = [&](RenderPass& pass) -> bool {
     return entity.Render(content_context, pass);
   };
   return Playground::OpenPlaygroundHere(callback);
@@ -36,10 +36,10 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
   if (!content_context.IsValid()) {
     return false;
   }
-  Renderer::RenderCallback render_callback = [&](RenderPass& pass) -> bool {
+  SinglePassCallback pass_callback = [&](RenderPass& pass) -> bool {
     return callback(content_context, pass);
   };
-  return Playground::OpenPlaygroundHere(render_callback);
+  return Playground::OpenPlaygroundHere(pass_callback);
 }
 
 }  // namespace impeller
