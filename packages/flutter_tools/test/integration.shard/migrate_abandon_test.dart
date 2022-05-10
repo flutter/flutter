@@ -44,14 +44,14 @@ void main() {
 
   testUsingContext('abandon deletes working directory', () async {
     final MigrateCommand command = MigrateCommand(
-      verbose: true,
+      // verbose: true,
       logger: logger,
       fileSystem: fileSystem,
       terminal: terminal,
       platform: platform,
       processManager: processManager,
     );
-    Directory workingDir = appDir.childDirectory('migrate_working_dir');
+    final Directory workingDir = appDir.childDirectory('migrate_working_dir');
     appDir.childFile('lib/main.dart').createSync(recursive: true);
     final File pubspecOriginal = appDir.childFile('pubspec.yaml');
     pubspecOriginal.createSync();
