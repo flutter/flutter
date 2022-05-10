@@ -37,7 +37,7 @@ class MigrateApplyCommand extends FlutterCommand {
     argParser.addOption(
       'working-directory',
       help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
-            'This path can be absolute or relative to the flutter project root.',
+            'This path can be absolute or relative to the flutter project root. This defaults to `migrate_working_dir`',
       valueHelp: 'path',
     );
     argParser.addOption(
@@ -90,14 +90,14 @@ class MigrateApplyCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    final bool force = boolArg('force');
+    final bool force = boolArg('force') ?? false;
 
     terminal.usesTerminalUi = true;
 
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
     if (customWorkingDirectoryPath != null) {
-      if (customWorkingDirectoryPath.startsWith(fileSystem.path.separator) || customWorkingDirectoryPath.startsWith('/')) {
+      if (customWorkingDirectoryPath.startsWith(fileSystem.path.separator) || customWorkingDirectoryPath.startsWith(RegExp(r'[A-Z]:\\'))) {
         // Is an absolute path
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
       } else {
@@ -175,7 +175,8 @@ class MigrateApplyCommand extends FlutterCommand {
     );
 
     // Clean up the working directory
-    if (!boolArg('keep-working-directory')) {
+    final bool keepWorkingDirectory = boolArg('keep-working-directory') ?? false;
+    if (!keepWorkingDirectory) {
       workingDirectory.deleteSync(recursive: true);
     }
 

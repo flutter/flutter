@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -51,7 +50,7 @@ void main() {
       platform: platform,
       processManager: processManager,
     );
-    Directory workingDir = appDir.childDirectory('migrate_working_dir');
+    final Directory workingDir = appDir.childDirectory('migrate_working_dir');
     appDir.childFile('lib/main.dart').createSync(recursive: true);
     final File pubspecOriginal = appDir.childFile('pubspec.yaml');
     pubspecOriginal.createSync();
