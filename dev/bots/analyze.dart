@@ -742,6 +742,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
+      '--remove-undefined',
     ],
     workingDirectory: workingDirectory,
   );
@@ -750,6 +751,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
+      '--remove-undefined',
     ],
     workingDirectory: workingDirectory,
   );
