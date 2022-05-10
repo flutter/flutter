@@ -1834,7 +1834,7 @@ class TimePickerDialog extends StatefulWidget {
 
   /// Optionally provide your own minute label text.
   final String? minuteLabelText;
-  
+
   /// If set minutes selection is active when the dialog is shown.
   final bool focusOnMinutes;
 
@@ -2359,7 +2359,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 /// dial or text input).
 ///
 /// The `focusOnMinutes` parameter can be set to focus on minutes selection
-/// instead of hours when the dialog is first shown. 
+/// instead of hours when the dialog is first shown.
 ///
 /// Optional strings for the [helpText], [cancelText], [errorInvalidText],
 /// [hourLabelText], [minuteLabelText] and [confirmText] can be provided to
