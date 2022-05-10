@@ -1804,6 +1804,7 @@ class TimePickerDialog extends StatefulWidget {
     this.restorationId,
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.onEntryModeChanged,
+    this.focusOnMinutes = false,
   }) : assert(initialTime != null);
 
   /// The time initially selected when the dialog is shown.
@@ -1833,6 +1834,9 @@ class TimePickerDialog extends StatefulWidget {
 
   /// Optionally provide your own minute label text.
   final String? minuteLabelText;
+  
+  /// If set minutes selection is active when the dialog is shown.
+  final bool focusOnMinutes;
 
   /// Restoration ID to save and restore the state of the [TimePickerDialog].
   ///
@@ -1965,7 +1969,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late final _RestorableTimePickerEntryMode _entryMode = _RestorableTimePickerEntryMode(widget.initialEntryMode);
-  final _RestorableTimePickerMode _mode = _RestorableTimePickerMode(_TimePickerMode.hour);
+  final _RestorableTimePickerMode _mode = _RestorableTimePickerMode(widget.focusOnMinutes ? _TimePickerMode.minute : _TimePickerMode.hour);
   final _RestorableTimePickerModeN _lastModeAnnounced = _RestorableTimePickerModeN(null);
   final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
   final RestorableBoolN _autofocusHour = RestorableBoolN(null);
@@ -2354,6 +2358,9 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 /// determine the initial time entry selection of the picker (either a clock
 /// dial or text input).
 ///
+/// The `focusOnMinutes` parameter can be set to focus on minutes selection
+/// instead of hours when the dialog is first shown. 
+///
 /// Optional strings for the [helpText], [cancelText], [errorInvalidText],
 /// [hourLabelText], [minuteLabelText] and [confirmText] can be provided to
 /// override the default values.
@@ -2421,6 +2428,7 @@ Future<TimeOfDay?> showTimePicker({
   RouteSettings? routeSettings,
   EntryModeChangeCallback? onEntryModeChanged,
   Offset? anchorPoint,
+  bool focusOnMinutes = false,
 }) async {
   assert(context != null);
   assert(initialTime != null);
@@ -2438,6 +2446,7 @@ Future<TimeOfDay?> showTimePicker({
     hourLabelText: hourLabelText,
     minuteLabelText: minuteLabelText,
     onEntryModeChanged: onEntryModeChanged,
+    focusOnMinutes: focusOnMinutes,
   );
   return showDialog<TimeOfDay>(
     context: context,
