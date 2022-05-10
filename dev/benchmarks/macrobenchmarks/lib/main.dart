@@ -27,6 +27,7 @@ import 'src/opacity_peephole.dart';
 import 'src/picture_cache.dart';
 import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
+import 'src/raster_cache_use_memory.dart';
 import 'src/shader_mask_cache.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
@@ -66,6 +67,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
         kHeavyGridViewRouteName: (BuildContext context) => const HeavyGridViewPage(),
+        kRasterCacheUseMemory: (BuildContext context) => const RasterCacheUseMemory(),
         kShaderMaskCacheRouteName: (BuildContext context) => const ShaderMaskCachePage(),
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
@@ -189,6 +191,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Color Filter Cache'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterCacheRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kRasterCacheUseMemory),
+            child: const Text('RasterCache Use Memory'),
+            onPressed: () {
+              Navigator.pushNamed(context, kRasterCacheUseMemory);
             },
           ),
           ElevatedButton(
