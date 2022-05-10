@@ -22,9 +22,6 @@ class TextureFilterInput final : public FilterInput {
   // |FilterInput|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
-  // |FilterInput|
-  Matrix GetLocalTransform(const Entity& entity) const override;
-
  private:
   TextureFilterInput(std::shared_ptr<Texture> texture);
 

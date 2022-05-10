@@ -3,13 +3,18 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/entity_pass.h"
+
 #include <variant>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/inputs/filter_input.h"
+#include "impeller/entity/contents/texture_contents.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/texture.h"
@@ -28,6 +33,10 @@ void EntityPass::SetDelegate(std::unique_ptr<EntityPassDelegate> delegate) {
 }
 
 void EntityPass::AddEntity(Entity entity) {
+  if (entity.GetBlendMode() > Entity::BlendMode::kLastPipelineBlendMode) {
+    contains_advanced_blends_ = true;
+  }
+
   elements_.emplace_back(std::move(entity));
 }
 
@@ -111,39 +120,97 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   FML_DCHECK(pass->superpass_ == nullptr);
   pass->superpass_ = this;
   auto subpass_pointer = pass.get();
+  if (pass->blend_mode_ > Entity::BlendMode::kLastPipelineBlendMode) {
+    contains_advanced_blends_ = true;
+  }
   elements_.emplace_back(std::move(pass));
   return subpass_pointer;
 }
 
 bool EntityPass::Render(ContentContext& renderer,
-                        RenderPass& parent_pass,
-                        Point position) const {
+                        RenderTarget render_target) const {
+  if (contains_advanced_blends_) {
+    auto offscreen_target = RenderTarget::CreateOffscreen(
+        *renderer.GetContext(), render_target.GetRenderTargetSize());
+    if (!RenderInternal(renderer, offscreen_target, Point(), 0)) {
+      return false;
+    }
+
+    auto command_buffer = renderer.GetContext()->CreateRenderCommandBuffer();
+    auto render_pass = command_buffer->CreateRenderPass(offscreen_target);
+
+    {
+      auto contents = std::make_shared<TextureContents>();
+      contents->SetTexture(offscreen_target.GetRenderTargetTexture());
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetBlendMode(Entity::BlendMode::kSource);
+
+      entity.Render(renderer, *render_pass);
+    }
+
+    if (!render_pass->EncodeCommands(
+            renderer.GetContext()->GetTransientsAllocator())) {
+      return false;
+    }
+    if (!command_buffer->SubmitCommands()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  return RenderInternal(renderer, render_target, Point(), 0);
+}
+
+bool EntityPass::RenderInternal(ContentContext& renderer,
+                                RenderTarget render_target,
+                                Point position,
+                                uint32_t depth) const {
   TRACE_EVENT0("impeller", "EntityPass::Render");
 
+  auto context = renderer.GetContext();
+
+  std::shared_ptr<CommandBuffer> command_buffer;
+  std::shared_ptr<RenderPass> pass;
+  uint32_t pass_count = 0;
+
+  auto end_pass = [&command_buffer, &pass, &context]() {
+    if (!pass->EncodeCommands(context->GetTransientsAllocator())) {
+      return false;
+    }
+
+    if (!command_buffer->SubmitCommands()) {
+      return false;
+    }
+
+    return true;
+  };
+
   for (const auto& element : elements_) {
+    Entity element_entity;
+
     // =========================================================================
-    // Entity rendering ========================================================
+    // Setup entity element for rendering ======================================
     // =========================================================================
     if (const auto& entity = std::get_if<Entity>(&element)) {
-      Entity e = *entity;
+      element_entity = *entity;
       if (!position.IsZero()) {
         // If the pass image is going to be rendered with a non-zero position,
         // apply the negative translation to entity copies before rendering them
         // so that they'll end up rendering to the correct on-screen position.
-        e.SetTransformation(Matrix::MakeTranslation(Vector3(-position)) *
-                            e.GetTransformation());
+        element_entity.SetTransformation(
+            Matrix::MakeTranslation(Vector3(-position)) *
+            element_entity.GetTransformation());
       }
-      if (!e.Render(renderer, parent_pass)) {
-        return false;
-      }
-      continue;
     }
 
     // =========================================================================
-    // Subpass rendering =======================================================
+    // Setup subpass element for rendering =====================================
     // =========================================================================
-    if (const auto& subpass_ptr =
-            std::get_if<std::unique_ptr<EntityPass>>(&element)) {
+    else if (const auto& subpass_ptr =
+                 std::get_if<std::unique_ptr<EntityPass>>(&element)) {
       auto subpass = subpass_ptr->get();
 
       if (subpass->delegate_->CanElide()) {
@@ -151,8 +218,9 @@ bool EntityPass::Render(ContentContext& renderer,
       }
 
       if (subpass->delegate_->CanCollapseIntoParentPass()) {
-        // Directly render into the parent pass and move on.
-        if (!subpass->Render(renderer, parent_pass, position)) {
+        // Directly render into the parent target and move on.
+        if (!subpass->RenderInternal(renderer, render_target, position,
+                                     depth)) {
           return false;
         }
         continue;
@@ -168,8 +236,6 @@ bool EntityPass::Render(ContentContext& renderer,
         // create their intermediates must trip errors.
         continue;
       }
-
-      auto context = renderer.GetContext();
 
       auto subpass_target = RenderTarget::CreateOffscreen(
           *context, ISize::Ceil(subpass_coverage->size));
@@ -195,56 +261,105 @@ bool EntityPass::Render(ContentContext& renderer,
         return false;
       }
 
-      auto sub_command_buffer = context->CreateRenderCommandBuffer();
-
-      if (!sub_command_buffer) {
+      if (!subpass->RenderInternal(renderer, subpass_target,
+                                   subpass_coverage->origin, ++depth)) {
         return false;
       }
 
-      sub_command_buffer->SetLabel("Offscreen Command Buffer");
-
-      auto sub_renderpass =
-          sub_command_buffer->CreateRenderPass(subpass_target);
-
-      if (!sub_renderpass) {
-        return false;
-      }
-
-      sub_renderpass->SetLabel("OffscreenPass");
-
-      if (!subpass->Render(renderer, *sub_renderpass,
-                           subpass_coverage->origin)) {
-        return false;
-      }
-
-      if (!sub_renderpass->EncodeCommands(context->GetTransientsAllocator())) {
-        return false;
-      }
-
-      if (!sub_command_buffer->SubmitCommands()) {
-        return false;
-      }
-
-      Entity entity;
-      entity.SetContents(std::move(offscreen_texture_contents));
-      entity.SetStencilDepth(stencil_depth_);
-      entity.SetBlendMode(subpass->blend_mode_);
+      element_entity.SetContents(std::move(offscreen_texture_contents));
+      element_entity.SetStencilDepth(stencil_depth_);
+      element_entity.SetBlendMode(subpass->blend_mode_);
       // Once we have filters being applied for SaveLayer, some special sauce
       // may be needed here (or in PaintPassDelegate) to ensure the filter
       // parameters are transformed by the `xformation_` matrix, while
       // continuing to apply only the subpass offset to the offscreen texture.
-      entity.SetTransformation(Matrix::MakeTranslation(
+      element_entity.SetTransformation(Matrix::MakeTranslation(
           Vector3(subpass_coverage->origin - position)));
-      if (!entity.Render(renderer, parent_pass)) {
+    } else {
+      FML_UNREACHABLE();
+    }
+
+    // =========================================================================
+    // Render the element ======================================================
+    // =========================================================================
+
+    if (pass && element_entity.GetBlendMode() >
+                    Entity::BlendMode::kLastPipelineBlendMode) {
+      // End the active pass and flush the buffer before rendering "advanced"
+      // blends. Advanced blends work by binding the current render target
+      // texture as an input ("destination"), blending with a second texture
+      // input ("source"), writing the result to an intermediate texture, and
+      // finally copying the data from the intermediate texture back to the
+      // render target texture. And so all of the commands that have written to
+      // the render target texture so far need to execute before it's bound for
+      // blending (otherwise the blend pass will end up executing before all the
+      // previous commands in the active pass).
+      if (!end_pass()) {
+        return false;
+      }
+      // Resetting these handles triggers a new pass to get created below
+      pass = nullptr;
+      command_buffer = nullptr;
+
+      // Amend an advanced blend to the contents.
+      if (render_target.GetColorAttachments().empty()) {
+        return false;
+      }
+      auto color0 = render_target.GetColorAttachments().find(0)->second;
+
+      auto input = FilterInput::Make({
+          element_entity.GetContents(),
+          color0.resolve_texture ? color0.resolve_texture : color0.texture,
+      });
+      element_entity.SetContents(FilterContents::MakeBlend(blend_mode_, input));
+      element_entity.SetBlendMode(Entity::BlendMode::kSource);
+    }
+
+    // Create a new render pass to render the element if one isn't active.
+    if (!pass) {
+      command_buffer = context->CreateRenderCommandBuffer();
+      if (!command_buffer) {
         return false;
       }
 
-      continue;
+      command_buffer->SetLabel(
+          "EntityPass Command Buffer: Depth=" + std::to_string(depth) +
+          " Count=" + std::to_string(pass_count));
+
+      // Never clear the texture for subsequent passes.
+      if (pass_count > 0) {
+        if (!render_target.GetColorAttachments().empty()) {
+          auto color0 = render_target.GetColorAttachments().find(0)->second;
+          color0.load_action = LoadAction::kLoad;
+          render_target.SetColorAttachment(color0, 0);
+        }
+
+        if (auto stencil = render_target.GetStencilAttachment();
+            stencil.has_value()) {
+          stencil->load_action = LoadAction::kLoad;
+          render_target.SetStencilAttachment(stencil.value());
+        }
+      }
+
+      pass = command_buffer->CreateRenderPass(render_target);
+      if (!pass) {
+        return false;
+      }
+
+      pass->SetLabel("EntityPass Render Pass: Depth=" + std::to_string(depth) +
+                     " Count=" + std::to_string(pass_count));
+
+      ++pass_count;
     }
 
-    FML_UNREACHABLE();
+    if (!element_entity.Render(renderer, *pass)) {
+      return false;
+    }
   }
 
+  if (pass) {
+    return end_pass();
+  }
   return true;
 }
 
