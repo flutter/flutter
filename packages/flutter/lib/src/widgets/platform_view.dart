@@ -559,7 +559,6 @@ class _AndroidViewState extends State<AndroidView> {
 }
 
 class _UiKitViewState extends State<UiKitView> {
-  int? _id;
   UiKitViewController? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
@@ -590,7 +589,6 @@ class _UiKitViewState extends State<UiKitView> {
     }
     _initialized = true;
     _createNewUiKitView();
-    _focusNode = FocusNode(debugLabel: "UiKitView(id: $_id)");
   }
 
   @override
@@ -657,7 +655,7 @@ class _UiKitViewState extends State<UiKitView> {
     widget.onPlatformViewCreated?.call(id);
     setState(() {
       _controller = controller;
-      _id = id;
+      _focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
     });
   }
 
@@ -669,7 +667,7 @@ class _UiKitViewState extends State<UiKitView> {
     } else {
       SystemChannels.textInput.invokeMethod<void>(
         'TextInput.setPlatformViewClient',
-        <String, dynamic>{'platformViewId': _id},
+        <String, dynamic>{'platformViewId': _controller!.id},
       ).catchError((dynamic e) {
         // TODO(huan): remove this once "TextInput.setPlatformViewClient" is implemented on engine.
         if (e is MissingPluginException) {

@@ -2096,7 +2096,7 @@ void main() {
         find.descendant(
           of: find.byType(UiKitView),
           matching: find.byWidgetPredicate(
-              (Widget widget) => widget.runtimeType.toString() == "_UiKitPlatformView",
+              (Widget widget) => widget.runtimeType.toString() == '_UiKitPlatformView',
           ),
         ),
       );

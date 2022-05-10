@@ -231,7 +231,9 @@ class PlatformViewsService {
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     final UiKitViewController controller = UiKitViewController._(id, layoutDirection);
-    _instance._focusCallbacks[id] = onFocus ?? () {};
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
     return controller;
   }
 }
