@@ -83,7 +83,7 @@ flutter:
       ]
     );
     expect(logger.statusText, contains('Project is not a git repo. Please initialize a git repo and try again.'));
-    
+
     await processManager.run(<String>['git', 'init'], workingDirectory: appDir.path);
 
     logger.clear();
