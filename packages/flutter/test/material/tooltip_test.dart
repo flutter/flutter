@@ -801,15 +801,16 @@ void main() {
     tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(
-      _findTooltipContainer(tooltipText),
-    );
+    final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
     expect(tip, paints..rrect(
       rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
       color: const Color(0xe6616161),
     ));
+
+    final Container tooltipContainer = tester.firstWidget<Container>(_findTooltipContainer(tooltipText));
+    expect(tooltipContainer.padding, const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0));
   });
 
   testWidgets('Tooltip default size, shape, and color test for Desktop', (WidgetTester tester) async {
@@ -830,14 +831,15 @@ void main() {
     final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
     expect(tooltipRenderParagraph.textSize.height, equals(12.0));
 
-    final RenderBox tooltipContainer = tester.renderObject(
-      _findTooltipContainer(tooltipText),
-    );
-    expect(tooltipContainer.size.height, equals(24.0));
-    expect(tooltipContainer, paints..rrect(
-      rrect: RRect.fromRectAndRadius(tooltipContainer.paintBounds, const Radius.circular(4.0)),
+    final RenderBox tooltipRenderBox = tester.renderObject(_findTooltipContainer(tooltipText));
+    expect(tooltipRenderBox.size.height, equals(24.0));
+    expect(tooltipRenderBox, paints..rrect(
+      rrect: RRect.fromRectAndRadius(tooltipRenderBox.paintBounds, const Radius.circular(4.0)),
       color: const Color(0xe6616161),
     ));
+
+    final Container tooltipContainer = tester.firstWidget<Container>(_findTooltipContainer(tooltipText));
+    expect(tooltipContainer.padding, const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
 
   testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
@@ -1437,7 +1439,7 @@ void main() {
     tip = tester.renderObject(
       _findTooltipContainer(tooltipText),
     );
-    expect(tip.size.height, equals(56.0));
+    expect(tip.size.height, equals(64.0));
   });
 
   testWidgets('Tooltip text displays with richMessage', (WidgetTester tester) async {

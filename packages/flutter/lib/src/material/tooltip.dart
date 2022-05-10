@@ -134,7 +134,8 @@ class Tooltip extends StatefulWidget {
 
   /// The amount of space by which to inset the tooltip's [child].
   ///
-  /// Defaults to 16.0 logical pixels in each direction.
+  /// On mobile, defaults to 16.0 logical pixels horizontally and 4.0 vertically.
+  /// On desktop, defaults to 8.0 logical pixels horizontally and 4.0 vertically.
   final EdgeInsetsGeometry? padding;
 
   /// The empty space that surrounds the tooltip.
@@ -403,11 +404,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return const EdgeInsets.symmetric(horizontal: 8.0);
+        return const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
-        return const EdgeInsets.symmetric(horizontal: 16.0);
+        return const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
     }
   }
 
