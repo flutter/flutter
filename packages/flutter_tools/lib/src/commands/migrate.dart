@@ -2,20 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
 
+import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_utils.dart';
 import '../runner/flutter_command.dart';
-
+import 'migrate_status.dart';
 
 /// Base command for the migration tool.
 class MigrateCommand extends FlutterCommand {
   MigrateCommand({
+    bool verbose = false,
     required this.logger,
-    // TODO(garyq): Add each parameters in as subcommands land.
+    // TODO(garyq): Add each of these back in as they land.
+    required FileSystem fileSystem,
+    required Terminal terminal,
+    required Platform platform,
+    required ProcessManager processManager,
   }) {
-    // TODO(garyq): Add subcommands.
+    // TODO(garyq): Add each of these back in as they land.
+    addSubcommand(MigrateStatusCommand(verbose: verbose, logger: logger, fileSystem: fileSystem, platform: platform, processManager: processManager));
   }
 
   final Logger logger;
