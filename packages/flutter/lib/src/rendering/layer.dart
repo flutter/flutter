@@ -136,10 +136,10 @@ class AnnotationResult<T> {
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
-  final List<VoidCallback> _callbacks = <VoidCallback>[];
+  final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
 
   void _fireCompositionCallbacks(bool includeChildren) {
-    for (final VoidCallback callback in List<VoidCallback>.of(_callbacks)) {
+    for (final VoidCallback callback in List<VoidCallback>.of(_callbacks.values)) {
       callback();
     }
   }
@@ -941,6 +941,8 @@ typedef CompositionCallback = void Function(ContainerLayer);
 /// into the composited rendering in order. There are subclasses of
 /// [ContainerLayer] which apply more elaborate effects in the process.
 class ContainerLayer extends Layer {
+  static int _nextCallbackId = 0;
+
   @override
   void _fireCompositionCallbacks(bool includeChildren) {
     super._fireCompositionCallbacks(includeChildren);
@@ -972,8 +974,12 @@ class ContainerLayer extends Layer {
   /// compositing. For example, a composition callback may be used to observe
   /// the total transform and clip of the current container layer to determine
   /// whether a render object drawn into it is visible or not.
-  void addCompositionCallback(CompositionCallback callback) {
-    _callbacks.add(() {
+  ///
+  /// Calling the returned callback will remove [callback] from the composition
+  /// callbacks.
+  VoidCallback addCompositionCallback(CompositionCallback callback) {
+    _nextCallbackId += 1;
+    _callbacks[_nextCallbackId] = () {
       assert(() {
         _debugMutationsLocked = true;
         return true;
@@ -983,7 +989,10 @@ class ContainerLayer extends Layer {
         _debugMutationsLocked = false;
         return true;
       }());
-    });
+    };
+    return () {
+      _callbacks.remove(_nextCallbackId);
+    };
   }
 
   /// The first composited layer in this layer's child list.
@@ -1084,6 +1093,8 @@ class ContainerLayer extends Layer {
       child.detach();
       child = child.nextSibling;
     }
+    // Children fired them already in child.detach().
+    _fireCompositionCallbacks(false);
   }
 
   /// Adds the given layer to the end of this layer's child list.

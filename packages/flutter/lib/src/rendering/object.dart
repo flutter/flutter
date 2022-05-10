@@ -338,10 +338,12 @@ class PaintingContext extends ClipContext {
   /// the total transform and clip of the current container layer to determine
   /// whether a render object drawn into it is visible or not.
   ///
+  /// Calling the returned callback will remove [callback] from the composition
+  /// callbacks.
   /// See also:
   ///   *  [Layer.addCompositionCallback].
-  void addCompositionCallback(CompositionCallback callback) {
-    _containerLayer.addCompositionCallback(callback);
+  VoidCallback addCompositionCallback(CompositionCallback callback) {
+    return _containerLayer.addCompositionCallback(callback);
   }
 
   /// Stop recording to a canvas if recording has started.
