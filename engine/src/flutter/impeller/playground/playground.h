@@ -50,8 +50,14 @@ class Playground : public ::testing::TestWithParam<PlaygroundBackend> {
 
   bool OpenPlaygroundHere(SinglePassCallback pass_callback);
 
+  std::optional<DecompressedImage> LoadFixtureImageRGBA(
+      const char* fixture_name) const;
+
   std::shared_ptr<Texture> CreateTextureForFixture(
       const char* fixture_name) const;
+
+  std::shared_ptr<Texture> CreateTextureCubeForFixture(
+      std::array<const char*, 6> fixture_names) const;
 
  private:
 #if IMPELLER_ENABLE_PLAYGROUND

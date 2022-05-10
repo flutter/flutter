@@ -6,6 +6,8 @@
 #include "flutter/testing/testing.h"
 #include "impeller/fixtures/box_fade.frag.h"
 #include "impeller/fixtures/box_fade.vert.h"
+#include "impeller/fixtures/impeller.frag.h"
+#include "impeller/fixtures/impeller.vert.h"
 #include "impeller/fixtures/instanced_draw.frag.h"
 #include "impeller/fixtures/instanced_draw.vert.h"
 #include "impeller/fixtures/test_texture.frag.h"
@@ -16,6 +18,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/renderer.h"
@@ -334,6 +337,74 @@ TEST_P(RendererTest, CanRenderInstanced) {
   }));
 }
 #endif  // IMPELLER_ENABLE_METAL
+
+#if IMPELLER_ENABLE_METAL
+TEST_P(RendererTest, TheImpeller) {
+  if (GetBackend() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP_(
+        "The shader fails to link in the GLES backend for some reason.");
+  }
+  using VS = ImpellerVertexShader;
+  using FS = ImpellerFragmentShader;
+
+  auto context = GetContext();
+  auto pipeline_descriptor =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_descriptor.has_value());
+  pipeline_descriptor->SetSampleCount(SampleCount::kCount4);
+  auto pipeline = context->GetPipelineLibrary()
+                      ->GetRenderPipeline(pipeline_descriptor)
+                      .get();
+  ASSERT_TRUE(pipeline && pipeline->IsValid());
+
+  auto blue_noise = CreateTextureForFixture("blue_noise.png");
+  SamplerDescriptor noise_sampler_desc;
+  noise_sampler_desc.width_address_mode = SamplerAddressMode::kRepeat;
+  noise_sampler_desc.height_address_mode = SamplerAddressMode::kRepeat;
+  auto noise_sampler =
+      context->GetSamplerLibrary()->GetSampler(noise_sampler_desc);
+
+  auto cube_map = CreateTextureCubeForFixture(
+      {"table_mountain_px.png", "table_mountain_nx.png",
+       "table_mountain_py.png", "table_mountain_ny.png",
+       "table_mountain_pz.png", "table_mountain_nz.png"});
+  auto cube_map_sampler = context->GetSamplerLibrary()->GetSampler({});
+
+  SinglePassCallback callback = [&](RenderPass& pass) {
+    auto size = pass.GetRenderTargetSize();
+
+    Command cmd;
+    cmd.pipeline = pipeline;
+    cmd.label = "Impeller SDF scene";
+    VertexBufferBuilder<VS::PerVertexData> builder;
+    builder.AddVertices({{Point()},
+                         {Point(0, size.height)},
+                         {Point(size.width, 0)},
+                         {Point(size.width, 0)},
+                         {Point(0, size.height)},
+                         {Point(size.width, size.height)}});
+    cmd.BindVertices(builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
+    cmd.cull_mode = CullMode::kNone;
+
+    VS::FrameInfo vs_uniform;
+    vs_uniform.mvp = Matrix::MakeOrthographic(size);
+    VS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(vs_uniform));
+
+    FS::FrameInfo fs_uniform;
+    fs_uniform.texture_size = Point(size);
+    fs_uniform.time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+    FS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
+    FS::BindBlueNoise(cmd, blue_noise, noise_sampler);
+    FS::BindCubeMap(cmd, cube_map, cube_map_sampler);
+
+    pass.AddCommand(cmd);
+    return true;
+  };
+  OpenPlaygroundHere(callback);
+}
+#endif
 
 }  // namespace testing
 }  // namespace impeller

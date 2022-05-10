@@ -126,11 +126,13 @@ constexpr bool CanDiscardAttachmentWhenDone(StoreAction action) {
 enum class TextureType {
   kTexture2D,
   kTexture2DMultisample,
+  kTextureCube,
 };
 
 constexpr bool IsMultisampleCapable(TextureType type) {
   switch (type) {
     case TextureType::kTexture2D:
+    case TextureType::kTextureCube:
       return false;
     case TextureType::kTexture2DMultisample:
       return true;
