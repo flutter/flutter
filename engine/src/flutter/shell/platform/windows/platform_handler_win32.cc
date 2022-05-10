@@ -241,12 +241,12 @@ void PlatformHandlerWin32::GetHasStrings(
   bool hasStrings;
   int open_result = clipboard_->Open(std::get<HWND>(*view_->GetRenderTarget()));
   if (open_result != kErrorSuccess) {
-    rapidjson::Document error_code;
-    error_code.SetInt(open_result);
     // Swallow errors of type ERROR_ACCESS_DENIED. These happen when the app is
     // not in the foreground and GetHasStrings is irrelevant.
     // See https://github.com/flutter/flutter/issues/95817.
-    if (error_code != kAccessDeniedErrorCode) {
+    if (open_result != kAccessDeniedErrorCode) {
+      rapidjson::Document error_code;
+      error_code.SetInt(open_result);
       result->Error(kClipboardError, "Unable to open clipboard", error_code);
       return;
     }
