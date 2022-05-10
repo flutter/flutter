@@ -19,11 +19,20 @@ import 'package:js/js_util.dart' as js_util;
 class DomWindow {}
 
 extension DomWindowExtension on DomWindow {
+  external DomConsole get console;
   external DomDocument get document;
   external DomNavigator get navigator;
   external DomPerformance get performance;
   Future<Object?> fetch(String url) =>
-    js_util.promiseToFuture(js_util.callMethod(this, 'fetch', <String>[url]));
+      js_util.promiseToFuture(js_util.callMethod(this, 'fetch', <String>[url]));
+}
+
+@JS()
+@staticInterop
+class DomConsole {}
+
+extension DomConsoleExtension on DomConsole {
+  external void warn(Object? arg);
 }
 
 @JS('window')
@@ -86,6 +95,15 @@ extension DomEventExtension on DomEvent {
   external DomEventTarget? get target;
   external void preventDefault();
   external void stopPropagation();
+}
+
+@JS()
+@staticInterop
+class DomProgressEvent extends DomEvent {}
+
+extension DomProgressEventExtension on DomProgressEvent {
+  external int? get loaded;
+  external int? get total;
 }
 
 @JS()
@@ -225,6 +243,7 @@ extension DomCanvasElementExtension on DomCanvasElement {
   external set width(int? value);
   external int? get height;
   external set height(int? value);
+  external String toDataURL([String? type]);
 
   Object? getContext(String contextType, [Map<dynamic, dynamic>? attributes]) {
     return js_util.callMethod(this, 'getContext', <Object?>[
@@ -232,25 +251,79 @@ extension DomCanvasElementExtension on DomCanvasElement {
       if (attributes != null) js_util.jsify(attributes)
     ]);
   }
+
+  DomCanvasRenderingContext2D get getContext2D =>
+      getContext('2d')! as DomCanvasRenderingContext2D;
+}
+
+@JS()
+@staticInterop
+abstract class DomCanvasImageSource {}
+
+@JS()
+@staticInterop
+class DomCanvasRenderingContext2D {}
+
+extension DomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
+  external void drawImage(DomCanvasImageSource source, num destX, num destY);
+}
+
+@JS()
+@staticInterop
+class DomXMLHttpRequestEventTarget extends DomEventTarget {}
+
+@JS('XMLHttpRequest')
+@staticInterop
+class DomXMLHttpRequest extends DomXMLHttpRequestEventTarget {}
+
+DomXMLHttpRequest createDomXMLHttpRequest() =>
+    domCallConstructorString('XMLHttpRequest', <Object?>[])!
+        as DomXMLHttpRequest;
+
+extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
+  external dynamic get response;
+  external String get responseType;
+  external int? get status;
+  external set responseType(String value);
+  external void open(String method, String url, [bool? async]);
+  external void send();
 }
 
 @JS()
 @staticInterop
 class DomResponse {}
 
+@JS()
+@staticInterop
+class DomException {
+  static const String notSupported = 'NotSupportedError';
+}
+
+extension DomExceptionExtension on DomException {
+  external String get name;
+}
+
 extension DomResponseExtension on DomResponse {
-  Future<dynamic> arrayBuffer() =>
-    js_util.promiseToFuture(js_util.callMethod(this, 'arrayBuffer', <Object>[]));
+  Future<dynamic> arrayBuffer() => js_util
+      .promiseToFuture(js_util.callMethod(this, 'arrayBuffer', <Object>[]));
 
   Future<dynamic> json() =>
-    js_util.promiseToFuture(js_util.callMethod(this, 'json', <Object>[]));
+      js_util.promiseToFuture(js_util.callMethod(this, 'json', <Object>[]));
 
   Future<String> text() =>
-    js_util.promiseToFuture(js_util.callMethod(this, 'text', <Object>[]));
+      js_util.promiseToFuture(js_util.callMethod(this, 'text', <Object>[]));
 }
 
 Object? domGetConstructor(String constructorName) =>
     js_util.getProperty(domWindow, constructorName);
+
+Object? domCallConstructorString(String constructorName, List<Object?> args) {
+  final Object? constructor = domGetConstructor(constructorName);
+  if (constructor == null) {
+    return null;
+  }
+  return js_util.callConstructor(constructor, args);
+}
 
 bool domInstanceOfString(Object? element, String objectType) =>
     js_util.instanceof(element, domGetConstructor(objectType)!);

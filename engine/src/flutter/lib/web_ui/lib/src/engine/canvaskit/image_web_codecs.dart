@@ -10,7 +10,6 @@
 
 import 'dart:async';
 import 'dart:convert' show base64;
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -18,6 +17,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../alarm_clock.dart';
+import '../dom.dart';
 import '../safe_browser_api.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
@@ -202,8 +202,8 @@ class CkBrowserImageDecoder implements ui.Codec {
 
       return webDecoder;
     } catch (error) {
-      if (error is html.DomException) {
-        if (error.name == html.DomException.NOT_SUPPORTED) {
+      if (domInstanceOfString(error, 'DOMException')) {
+        if ((error as DomException).name == DomException.notSupported) {
           throw ImageCodecException(
             'Image file format ($contentType) is not supported by this browser\'s ImageDecoder API.\n'
             'Image source: $debugSource',
@@ -455,11 +455,10 @@ Future<ByteBuffer> readVideoFramePixelsUnmodified(VideoFrame videoFrame) async {
 Future<Uint8List> encodeVideoFrameAsPng(VideoFrame videoFrame) async {
   final int width = videoFrame.displayWidth;
   final int height = videoFrame.displayHeight;
-  final html.CanvasElement canvas = html.CanvasElement()
-    ..width = width
-    ..height = height;
-  final html.CanvasRenderingContext2D ctx = canvas.context2D;
-  ctx.drawImage(videoFrame, 0, 0);
-  final String pngBase64 = canvas.toDataUrl().substring('data:image/png;base64,'.length);
+  final DomCanvasElement canvas = createDomCanvasElement(width: width, height:
+      height);
+  final DomCanvasRenderingContext2D ctx = canvas.getContext2D;
+  ctx.drawImage(videoFrame as DomCanvasImageSource, 0, 0);
+  final String pngBase64 = canvas.toDataURL().substring('data:image/png;base64,'.length);
   return base64.decode(pngBase64);
 }
