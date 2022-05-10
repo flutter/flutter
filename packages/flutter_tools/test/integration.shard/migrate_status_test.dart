@@ -4,11 +4,10 @@
 
 // @dart = 2.8
 
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
+// import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/migrate.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -21,7 +20,8 @@ void main() {
   FileSystem fileSystem;
   BufferLogger logger;
   Platform platform;
-  Terminal terminal;
+  // TODO(garyq): Add terminal back in when other subcommands land.
+  // Terminal terminal;
   ProcessManager processManager;
   Directory appDir;
 
@@ -30,7 +30,7 @@ void main() {
     appDir = fileSystem.systemTempDirectory.createTempSync('apptestdir');
     logger = BufferLogger.test();
     platform = FakePlatform();
-    terminal = Terminal.test();
+    // terminal = Terminal.test();
     processManager = globals.processManager;
   });
 
@@ -47,11 +47,11 @@ void main() {
       verbose: true,
       logger: logger,
       fileSystem: fileSystem,
-      terminal: terminal,
+      // terminal: terminal,
       platform: platform,
       processManager: processManager,
     );
-    Directory workingDir = appDir.childDirectory('migrate_working_dir');
+    final Directory workingDir = appDir.childDirectory('migrate_working_dir');
     appDir.childFile('lib/main.dart').createSync(recursive: true);
     final File pubspecOriginal = appDir.childFile('pubspec.yaml');
     pubspecOriginal.createSync();
