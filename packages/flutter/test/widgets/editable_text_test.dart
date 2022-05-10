@@ -660,36 +660,6 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
-  testWidgets('use DefaultSelectionStyle for selection color', (WidgetTester tester) async {
-    const TextEditingValue value = TextEditingValue(
-      text: 'test test',
-      selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 5, extentOffset: 7),
-    );
-    const Color selectionColor = Colors.orange;
-    controller.value = value;
-    await tester.pumpWidget(
-      DefaultSelectionStyle(
-        selectionColor: selectionColor,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: EditableText(
-              controller: controller,
-              backgroundCursorColor: Colors.grey,
-              focusNode: focusNode,
-              keyboardType: TextInputType.multiline,
-              style: textStyle,
-              cursorColor: cursorColor,
-            ),
-          ),
-        )
-      ),
-    );
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    expect(state.renderEditable.selectionColor, selectionColor);
-  });
-
   testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
