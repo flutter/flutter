@@ -82,7 +82,7 @@ unlinked_spec.ds
 **/android/key.properties
 *.jks
 
-# iOS/XCode related
+# iOS/Xcode related
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3
 **/ios/**/*.moved-aside
@@ -102,7 +102,6 @@ unlinked_spec.ds
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.framework
 **/ios/Flutter/Flutter.xcframework
-**/ios/Flutter/Flutter.podspec
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
