@@ -66,6 +66,12 @@ static std::optional<GLuint> CreateGLHandle(const ProcTableGLES& gl,
       return handle;
     case HandleType::kProgram:
       return gl.CreateProgram();
+    case HandleType::kRenderBuffer:
+      gl.GenRenderbuffers(1u, &handle);
+      return handle;
+    case HandleType::kFrameBuffer:
+      gl.GenFramebuffers(1u, &handle);
+      return handle;
   }
   return std::nullopt;
 }
@@ -84,6 +90,12 @@ static bool CollectGLHandle(const ProcTableGLES& gl,
       return true;
     case HandleType::kProgram:
       gl.DeleteProgram(handle);
+      return true;
+    case HandleType::kRenderBuffer:
+      gl.DeleteRenderbuffers(1u, &handle);
+      return true;
+    case HandleType::kFrameBuffer:
+      gl.DeleteFramebuffers(1u, &handle);
       return true;
   }
   return false;
@@ -135,6 +147,10 @@ static DebugResourceType ToDebugResourceType(HandleType type) {
       return DebugResourceType::kBuffer;
     case HandleType::kProgram:
       return DebugResourceType::kProgram;
+    case HandleType::kRenderBuffer:
+      return DebugResourceType::kRenderBuffer;
+    case HandleType::kFrameBuffer:
+      return DebugResourceType::kFrameBuffer;
   }
   FML_UNREACHABLE();
 }
@@ -212,6 +228,17 @@ void ReactorGLES::SetDebugLabel(const GLESHandle& handle, std::string label) {
   }
   if (handle.IsDead()) {
     return;
+  }
+  if (in_reaction_) {
+    if (auto found = live_gl_handles_.find(handle);
+        found != live_gl_handles_.end() && found->second.has_value()) {
+      GetProcTable().SetDebugLabel(
+          ToDebugResourceType(found->first.type),  // type
+          found->second.value(),                   // name
+          label                                    // label
+      );
+      return;
+    }
   }
   pending_debug_labels_[handle] = std::move(label);
 }

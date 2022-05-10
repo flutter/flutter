@@ -21,6 +21,8 @@ enum class HandleType {
   kTexture,
   kBuffer,
   kProgram,
+  kRenderBuffer,
+  kFrameBuffer,
 };
 
 class ReactorGLES;
