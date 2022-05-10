@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "impeller/base/comparable.h"
 #include "impeller/base/validation.h"
 
 namespace impeller {
@@ -40,6 +41,10 @@ ProcTableGLES::Resolver WrappedResolver(ProcTableGLES::Resolver resolver) {
     // out and try to resolve the same proc addresses again.
     auto function = std::string{function_name};
     if (function.find("KHR", function.size() - 3) != std::string::npos) {
+      auto truncated = function.substr(0u, function.size() - 3);
+      return resolver(truncated.c_str());
+    }
+    if (function.find("EXT", function.size() - 3) != std::string::npos) {
       auto truncated = function.substr(0u, function.size() - 3);
       return resolver(truncated.c_str());
     }
@@ -95,6 +100,12 @@ ProcTableGLES::ProcTableGLES(Resolver resolver) {
     PushDebugGroupKHR.Reset();
     PopDebugGroupKHR.Reset();
     ObjectLabelKHR.Reset();
+  } else {
+    GetIntegerv(GL_MAX_LABEL_LENGTH_KHR, &debug_label_max_length_);
+  }
+
+  if (!description_->HasExtension("GL_EXT_discard_framebuffer")) {
+    DiscardFramebufferEXT.Reset();
   }
 
   is_valid_ = true;
@@ -223,14 +234,17 @@ bool ProcTableGLES::IsCurrentFramebufferComplete() const {
 static std::optional<GLenum> ToDebugIdentifier(DebugResourceType type) {
   switch (type) {
     case DebugResourceType::kTexture:
-      // No entry in GL_KHR_debug headers.
-      return std::nullopt;
+      return GL_TEXTURE;
     case DebugResourceType::kBuffer:
       return GL_BUFFER_KHR;
     case DebugResourceType::kProgram:
       return GL_PROGRAM_KHR;
     case DebugResourceType::kShader:
       return GL_SHADER_KHR;
+    case DebugResourceType::kRenderBuffer:
+      return GL_RENDERBUFFER;
+    case DebugResourceType::kFrameBuffer:
+      return GL_FRAMEBUFFER;
   }
   FML_UNREACHABLE();
 }
@@ -238,12 +252,12 @@ static std::optional<GLenum> ToDebugIdentifier(DebugResourceType type) {
 void ProcTableGLES::SetDebugLabel(DebugResourceType type,
                                   GLint name,
                                   const std::string& label) const {
-  if (!ObjectLabelKHR.IsAvailable()) {
+  if (debug_label_max_length_ <= 0) {
     return;
   }
   const auto identifier = ToDebugIdentifier(type);
   const auto label_length =
-      std::min<GLsizei>(GL_MAX_LABEL_LENGTH_KHR - 1, label.size());
+      std::min<GLsizei>(debug_label_max_length_ - 1, label.size());
   if (!identifier.has_value()) {
     return;
   }
@@ -252,6 +266,27 @@ void ProcTableGLES::SetDebugLabel(DebugResourceType type,
                  label_length,        // length
                  label.data()         // label
   );
+}
+
+void ProcTableGLES::PushDebugGroup(const std::string& label) const {
+  if (debug_label_max_length_ <= 0) {
+    return;
+  }
+  UniqueID id;
+  const auto label_length =
+      std::min<GLsizei>(debug_label_max_length_ - 1, label.size());
+  PushDebugGroupKHR(GL_DEBUG_SOURCE_APPLICATION_KHR,  // source
+                    static_cast<GLuint>(id.id),       // id
+                    label_length,                     // length
+                    label.data()                      // message
+  );
+}
+
+void ProcTableGLES::PopDebugGroup() const {
+  if (debug_label_max_length_ <= 0) {
+    return;
+  }
+  PopDebugGroupKHR();
 }
 
 }  // namespace impeller
