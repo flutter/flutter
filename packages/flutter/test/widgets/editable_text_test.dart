@@ -660,7 +660,7 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
-  testWidgets('selection color can be null with DefaultSelectionStyle as parent', (WidgetTester tester) async {
+  testWidgets('EditableText does not derive selection color from DefaultSelectionStyle', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103341.
     const TextEditingValue value = TextEditingValue(
       text: 'test test',
@@ -682,7 +682,6 @@ void main() {
               keyboardType: TextInputType.multiline,
               style: textStyle,
               cursorColor: cursorColor,
-              selectionColor: null,
             ),
           ),
         )

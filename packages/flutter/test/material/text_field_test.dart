@@ -4199,6 +4199,7 @@ void main() {
   });
 
   testWidgets('Text field drops selection color when losing focus', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103341.
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
     final TextEditingController controller1 = TextEditingController();
@@ -4223,7 +4224,7 @@ void main() {
       ),
     );
 
-    final TextSelection selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    const TextSelection selection = TextSelection(baseOffset: 0, extentOffset: 4);
     final EditableTextState state1 = tester.state<EditableTextState>(find.byType(EditableText).first);
     final EditableTextState state2 = tester.state<EditableTextState>(find.byType(EditableText).last);
 
