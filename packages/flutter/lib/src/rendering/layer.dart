@@ -561,10 +561,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     // _needsAddToScene being false.
     if (!_needsAddToScene && _engineLayer != null) {
       builder.addRetained(_engineLayer!);
-      _fireCompositionCallbacks(true);
       return;
     }
-    _fireCompositionCallbacks(false);
     addToScene(builder);
     // Clearing the flag _after_ calling `addToScene`, not _before_. This is
     // because `addToScene` calls children's `addToScene` methods, which may
@@ -1015,6 +1013,7 @@ class ContainerLayer extends Layer {
   ui.Scene buildScene(ui.SceneBuilder builder) {
     updateSubtreeNeedsAddToScene();
     addToScene(builder);
+    _fireCompositionCallbacks(true);
     // Clearing the flag _after_ calling `addToScene`, not _before_. This is
     // because `addToScene` calls children's `addToScene` methods, which may
     // mark this layer as dirty.
