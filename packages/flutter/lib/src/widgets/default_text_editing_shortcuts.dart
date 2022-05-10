@@ -437,16 +437,16 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget result = child;
     if (kIsWeb) {
-      // This shortcuts makes sure the following:
+      // On web platform, this shortcuts makes sure the following:
       //
-      // 1. Shortcuts fired in TextField is swallowed.
+      // 1. Shortcuts fired in TextField are swallowed.
       // 2. Shortcuts fired above TextField will still trigger corresponding
       //    intents.
       //
-      // In (2), the disabling shortcuts will still fire. The
+      // In (2), the disabling shortcuts will still fire; however, the
       // [DoNothingAndStopPropagationTextIntent] will not be handled because the
       // context is above the TextField. The key event will then trigger the
-      // default Text Editing Shortcuts
+      // default Text Editing Shortcuts.
       result = Shortcuts(
         debugLabel: '<Web disabling text shortcuts>',
         shortcuts: _webDisablingTextShortcuts,
