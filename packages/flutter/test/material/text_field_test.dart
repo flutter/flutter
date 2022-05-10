@@ -4198,6 +4198,60 @@ void main() {
     feedback.dispose();
   });
 
+  testWidgets('Text field drops selection color when losing focus', (WidgetTester tester) async {
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    final TextEditingController controller1 = TextEditingController();
+    const Color selectionColor = Colors.orange;
+    const Color cursorColor = Colors.red;
+
+    await tester.pumpWidget(
+      overlay(
+        child: DefaultSelectionStyle(
+          selectionColor: selectionColor,
+          cursorColor: cursorColor,
+          child: Column(
+            children: <Widget>[
+              TextField(
+                key: key1,
+                controller: controller1,
+              ),
+              TextField(key: key2),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TextSelection selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    final EditableTextState state1 = tester.state<EditableTextState>(find.byType(EditableText).first);
+    final EditableTextState state2 = tester.state<EditableTextState>(find.byType(EditableText).last);
+
+    await tester.tap(find.byKey(key1));
+    await tester.enterText(find.byKey(key1), 'abcd');
+    await tester.pump();
+
+    await tester.tap(find.byKey(key2));
+    await tester.enterText(find.byKey(key2), 'dcba');
+    await tester.pump();
+
+    // Focus and selection is active on first TextField, so the second TextFields
+    // selectionColor should be dropped.
+    await tester.tap(find.byKey(key1));
+    controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+    expect(controller1.selection, selection);
+    expect(state1.widget.selectionColor, selectionColor);
+    expect(state2.widget.selectionColor, null);
+
+    // Focus and selection is active on second TextField, so the first TextFields
+    // selectionColor should be dropped.
+    await tester.tap(find.byKey(key2));
+    await tester.pump();
+    expect(state1.widget.selectionColor, null);
+    expect(state2.widget.selectionColor, selectionColor);
+  });
+
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 

@@ -660,6 +660,38 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
+  testWidgets('selection color can be null with DefaultSelectionStyle as parent', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103341.
+    const TextEditingValue value = TextEditingValue(
+      text: 'test test',
+      selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 5, extentOffset: 7),
+    );
+    const Color selectionColor = Colors.orange;
+    controller.value = value;
+    await tester.pumpWidget(
+      DefaultSelectionStyle(
+        selectionColor: selectionColor,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.multiline,
+              style: textStyle,
+              cursorColor: cursorColor,
+              selectionColor: null,
+            ),
+          ),
+        )
+      ),
+    );
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.renderEditable.selectionColor, null);
+  });
+
   testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
