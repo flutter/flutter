@@ -9,13 +9,32 @@
 struct _FlViewAccessible {
   GtkContainerAccessible parent_instance;
 
+  FlEngine* engine;
+
   // Semantics nodes keyed by ID
   GHashTable* semantics_nodes_by_id;
 };
 
+enum { PROP_0, PROP_ENGINE, PROP_LAST };
+
 G_DEFINE_TYPE(FlViewAccessible,
               fl_view_accessible,
               GTK_TYPE_CONTAINER_ACCESSIBLE)
+
+static void init_engine(FlViewAccessible* self, FlEngine* engine) {
+  g_assert(self->engine == nullptr);
+  self->engine = engine;
+  g_object_add_weak_pointer(G_OBJECT(self),
+                            reinterpret_cast<gpointer*>(&self->engine));
+}
+
+static FlEngine* get_engine(FlViewAccessible* self) {
+  if (self->engine == nullptr) {
+    FlView* view = FL_VIEW(gtk_accessible_get_widget(GTK_ACCESSIBLE(self)));
+    init_engine(self, fl_view_get_engine(view));
+  }
+  return self->engine;
+}
 
 // Gets the ATK node for the given id.
 // If the node doesn't exist it will be created.
@@ -26,8 +45,8 @@ static FlAccessibleNode* get_node(FlViewAccessible* self, int32_t id) {
     return node;
   }
 
-  FlView* view = FL_VIEW(gtk_accessible_get_widget(GTK_ACCESSIBLE(self)));
-  node = fl_accessible_node_new(fl_view_get_engine(view), id);
+  FlEngine* engine = get_engine(self);
+  node = fl_accessible_node_new(engine, id);
   if (id == 0) {
     fl_accessible_node_set_parent(node, ATK_OBJECT(self), 0);
   }
@@ -59,10 +78,48 @@ static AtkRole fl_view_accessible_get_role(AtkObject* accessible) {
   return ATK_ROLE_PANEL;
 }
 
+// Implements GObject::set_property
+static void fl_view_accessible_set_property(GObject* object,
+                                            guint prop_id,
+                                            const GValue* value,
+                                            GParamSpec* pspec) {
+  FlViewAccessible* self = FL_VIEW_ACCESSIBLE(object);
+  switch (prop_id) {
+    case PROP_ENGINE:
+      init_engine(self, FL_ENGINE(g_value_get_object(value)));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      break;
+  }
+}
+
+static void fl_view_accessible_dispose(GObject* object) {
+  FlViewAccessible* self = FL_VIEW_ACCESSIBLE(object);
+
+  if (self->engine != nullptr) {
+    g_object_remove_weak_pointer(object,
+                                 reinterpret_cast<gpointer*>(&self->engine));
+    self->engine = nullptr;
+  }
+
+  G_OBJECT_CLASS(fl_view_accessible_parent_class)->dispose(object);
+}
+
 static void fl_view_accessible_class_init(FlViewAccessibleClass* klass) {
   ATK_OBJECT_CLASS(klass)->get_n_children = fl_view_accessible_get_n_children;
   ATK_OBJECT_CLASS(klass)->ref_child = fl_view_accessible_ref_child;
   ATK_OBJECT_CLASS(klass)->get_role = fl_view_accessible_get_role;
+
+  G_OBJECT_CLASS(klass)->dispose = fl_view_accessible_dispose;
+  G_OBJECT_CLASS(klass)->set_property = fl_view_accessible_set_property;
+
+  g_object_class_install_property(
+      G_OBJECT_CLASS(klass), PROP_ENGINE,
+      g_param_spec_object(
+          "engine", "engine", "Flutter engine", fl_engine_get_type(),
+          static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |
+                                   G_PARAM_STATIC_STRINGS)));
 }
 
 static void fl_view_accessible_init(FlViewAccessible* self) {
