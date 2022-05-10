@@ -308,17 +308,8 @@ action("_generate_symlinks") {
   ]
 }
 
-copy("copy_framework_podspec") {
-  visibility = [ ":*" ]
-  sources = [ "framework/FlutterMacOS.podspec" ]
-  outputs = [ "$root_out_dir/FlutterMacOS.podspec" ]
-}
-
 group("flutter_framework") {
-  deps = [
-    ":_generate_symlinks",
-    ":copy_framework_podspec",
-  ]
+  deps = [ ":_generate_symlinks" ]
 }
 
 if (build_glfw_shell) {
@@ -342,10 +333,7 @@ zip_bundle("zip_macos_flutter_framework") {
 }
 
 zip_bundle("macos_flutter_framework_archive") {
-  deps = [
-    ":copy_framework_podspec",
-    ":zip_macos_flutter_framework",
-  ]
+  deps = [ ":zip_macos_flutter_framework" ]
   prefix = "$full_platform_name-$flutter_runtime_mode/"
   if (flutter_runtime_mode == "debug") {
     prefix = "$full_platform_name/"
@@ -355,10 +343,6 @@ zip_bundle("macos_flutter_framework_archive") {
     {
       source = "$root_out_dir/zip_archives/tmp/FlutterMacOS.framework.zip"
       destination = "FlutterMacOS.framework.zip"
-    },
-    {
-      source = "$root_out_dir/FlutterMacOS.podspec"
-      destination = "FlutterMacOS.podspec"
     },
   ]
 }

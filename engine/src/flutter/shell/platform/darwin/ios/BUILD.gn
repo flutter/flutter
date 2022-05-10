@@ -376,12 +376,6 @@ copy("copy_framework_icu") {
   outputs = [ "$_flutter_framework_dir/{{source_file_part}}" ]
 }
 
-copy("copy_framework_podspec") {
-  visibility = [ ":*" ]
-  sources = [ "framework/Flutter.podspec" ]
-  outputs = [ "$root_out_dir/Flutter.podspec" ]
-}
-
 copy("copy_license") {
   visibility = [ ":*" ]
   sources = [ "//LICENSE" ]
@@ -413,7 +407,6 @@ group("universal_flutter_framework") {
     ":copy_framework_icu",
     ":copy_framework_info_plist",
     ":copy_framework_module_map",
-    ":copy_framework_podspec",
     ":copy_license",
   ]
 

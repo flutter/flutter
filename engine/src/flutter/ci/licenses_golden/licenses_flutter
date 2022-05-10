@@ -1556,7 +1556,6 @@ FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.mm
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Flutter.podspec
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h
@@ -1696,7 +1695,6 @@ FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/rendering_api_selection.h
 FILE: ../../../flutter/shell/platform/darwin/ios/rendering_api_selection.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/FlutterMacOS.podspec
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterDartProject.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
