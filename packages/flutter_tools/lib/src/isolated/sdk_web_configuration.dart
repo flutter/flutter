@@ -10,11 +10,13 @@ import 'package:dwds/dwds.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
-import '../globals.dart' as globals;
 
 /// Provides paths to SDK files for dart SDK used in flutter.
 class SdkWebConfigurationProvider extends SdkConfigurationProvider {
-  SdkWebConfigurationProvider();
+
+  SdkWebConfigurationProvider(this._artifacts);
+
+  final Artifacts _artifacts;
   SdkConfiguration _configuration;
 
   /// Create and validate configuration matching the default SDK layout.
@@ -22,10 +24,10 @@ class SdkWebConfigurationProvider extends SdkConfigurationProvider {
   @override
   Future<SdkConfiguration> get configuration async {
     if (_configuration == null) {
-      final String sdkDir = globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
-      final String unsoundSdkSummaryPath = globals.artifacts.getHostArtifact(HostArtifact.webPlatformKernelDill).path;
-      final String soundSdkSummaryPath = globals.artifacts.getHostArtifact(HostArtifact.webPlatformSoundKernelDill).path;
-      final String librariesPath = globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path;
+      final String sdkDir = _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
+      final String unsoundSdkSummaryPath = _artifacts.getHostArtifact(HostArtifact.webPlatformKernelDill).path;
+      final String soundSdkSummaryPath = _artifacts.getHostArtifact(HostArtifact.webPlatformSoundKernelDill).path;
+      final String librariesPath = _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path;
 
       _configuration = SdkConfiguration(
         sdkDirectory: sdkDir,

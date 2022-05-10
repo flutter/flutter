@@ -301,7 +301,7 @@ class WebAssetServer implements AssetReader {
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
-      sdkConfigurationProvider: SdkWebConfigurationProvider(),
+      sdkConfigurationProvider: SdkWebConfigurationProvider(globals.artifacts),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
