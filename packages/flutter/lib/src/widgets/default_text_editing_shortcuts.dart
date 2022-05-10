@@ -10,8 +10,7 @@ import 'framework.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 
-/// A [Shortcuts] widget with the shortcuts used for the default text editing
-/// behavior.
+/// A widget with the shortcuts used for the default text editing behavior.
 ///
 /// This default behavior can be overridden by placing a [Shortcuts] widget
 /// lower in the widget tree than this. See the [Action] class for an example
@@ -147,16 +146,12 @@ import 'text_editing_intents.dart';
 ///
 ///   * [WidgetsApp], which creates a DefaultTextEditingShortcuts.
 class DefaultTextEditingShortcuts extends StatelessWidget {
-  /// Creates a [Shortcuts] widget that provides the default text editing
+  /// Creates a [DefaultTextEditingShortcuts] widget that provides the default text editing
   /// shortcuts on the current platform.
   const DefaultTextEditingShortcuts({
     super.key,
     required this.child,
   });
-  //     : super(
-  //   debugLabel: '<Default Text Editing Shortcuts>',
-  //   shortcuts: _shortcuts,
-  // )
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
