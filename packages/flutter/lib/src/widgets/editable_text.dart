@@ -2546,7 +2546,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     print("------------------------------------------------------------------------------------------------------------------------------------------------------>Selection changed cause: ${cause}");
-    if (_spellCheckEnabled! && _value.text.length > 0 && (previousCause != null && cause != null && previousCause == SelectionChangedCause.keyboard && cause == SelectionChangedCause.tap)) {
+    if (_spellCheckEnabled! && _value.text.length > 0) { // && (previousCause != null && cause != null && previousCause == SelectionChangedCause.keyboard && cause == SelectionChangedCause.tap)) {
       Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
       Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value);
 
