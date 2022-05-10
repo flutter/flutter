@@ -48,6 +48,7 @@ void main() {
   });
 
   testWidgets('Theme overrides selection style', (WidgetTester tester) async {
+    final Key key = UniqueKey();
     const Color defaultSelectionColor = Color(0x11111111);
     const Color defaultCursorColor = Color(0x22222222);
     const Color themeSelectionColor = Color(0x33333333);
@@ -66,7 +67,9 @@ void main() {
                   cursorColor: themeCursorColor,
                 ),
               ),
-              child: const TextField(),
+              child: TextField(
+                key: key,
+              ),
             )
           ),
         ),
@@ -83,6 +86,12 @@ void main() {
       child.visitChildren(recursiveFinder);
     }
     root.visitChildren(recursiveFinder);
+
+    // Focus text field so it has a selection color. The selection color is null
+    // on an unfocused text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
     expect(renderEditable.selectionColor, themeSelectionColor);
     expect(tester.widget<EditableText>(find.byType(EditableText)).cursorColor, themeCursorColor);
   });
