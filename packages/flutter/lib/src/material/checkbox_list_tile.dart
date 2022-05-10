@@ -322,7 +322,7 @@ class CheckboxListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
       value: value,
-      onChanged: (enabled != null && !enabled!) ? null : onChanged,
+      onChanged: enabled ?? true ? onChanged : null ,
       activeColor: activeColor,
       checkColor: checkColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
