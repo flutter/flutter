@@ -192,6 +192,13 @@ void main() {
       '     FocusTraversalGroup\n'
       '     _ActionsMarker\n'
       '     Actions\n'
+      '${kIsWeb
+          ? '     _ShortcutsMarker\n'
+            '     Semantics\n'
+            '     _FocusMarker\n'
+            '     Focus\n'
+            '     Shortcuts\n'
+           : ''}'
       '     _ShortcutsMarker\n'
       '     Semantics\n'
       '     _FocusMarker\n'
