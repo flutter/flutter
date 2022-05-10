@@ -138,7 +138,24 @@ class AnnotationResult<T> {
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
 
-  void _fireCompositionCallbacks(bool includeChildren) {
+  /// Whether the subtree rooted at this layer has any composition callback
+  /// observers.
+  ///
+  /// See also:
+  ///
+  ///   * [ContainerLayer.addCompositionCallback].
+  bool get subtreeHasCompositionCallbacks => _childrenWithCompositionCallbacks > 0;
+
+  int _childrenWithCompositionCallbacks = 0;
+  void _incrementSubtreeCompositionObserverCount(int delta) {
+    _childrenWithCompositionCallbacks += delta;
+    assert(_childrenWithCompositionCallbacks >= 0);
+    if (parent != null) {
+      parent!._incrementSubtreeCompositionObserverCount(delta);
+    }
+  }
+
+  void _fireCompositionCallbacks({required bool includeChildren}) {
     for (final VoidCallback callback in List<VoidCallback>.of(_callbacks.values)) {
       callback();
     }
@@ -409,6 +426,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
     }
+
+    _incrementSubtreeCompositionObserverCount(-(child as Layer)._childrenWithCompositionCallbacks);
     super.dropChild(child);
   }
 
@@ -418,6 +437,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
     }
+    _incrementSubtreeCompositionObserverCount((child as Layer)._childrenWithCompositionCallbacks);
     super.adoptChild(child);
   }
 
@@ -942,17 +962,16 @@ class ContainerLayer extends Layer {
   static int _nextCallbackId = 0;
 
   @override
-  void _fireCompositionCallbacks(bool includeChildren) {
-    super._fireCompositionCallbacks(includeChildren);
+  void _fireCompositionCallbacks({required bool includeChildren}) {
+    super._fireCompositionCallbacks(includeChildren: includeChildren);
     if (!includeChildren) {
       return;
     }
     Layer? child = firstChild;
     while (child != null) {
-      child._fireCompositionCallbacks(includeChildren);
+      child._fireCompositionCallbacks(includeChildren: includeChildren);
       child = child.nextSibling;
     }
-
   }
 
   /// Adds a callback for when the layer tree that this layer is part of gets
@@ -976,6 +995,7 @@ class ContainerLayer extends Layer {
   /// Calling the returned callback will remove [callback] from the composition
   /// callbacks.
   VoidCallback addCompositionCallback(CompositionCallback callback) {
+    _incrementSubtreeCompositionObserverCount(1);
     _nextCallbackId += 1;
     _callbacks[_nextCallbackId] = () {
       assert(() {
@@ -990,6 +1010,9 @@ class ContainerLayer extends Layer {
     };
     return () {
       _callbacks.remove(_nextCallbackId);
+      if (_callbacks.isEmpty) {
+        _incrementSubtreeCompositionObserverCount(-1);
+      }
     };
   }
 
@@ -1013,7 +1036,9 @@ class ContainerLayer extends Layer {
   ui.Scene buildScene(ui.SceneBuilder builder) {
     updateSubtreeNeedsAddToScene();
     addToScene(builder);
-    _fireCompositionCallbacks(true);
+    if (subtreeHasCompositionCallbacks) {
+      _fireCompositionCallbacks(includeChildren: true);
+    }
     // Clearing the flag _after_ calling `addToScene`, not _before_. This is
     // because `addToScene` calls children's `addToScene` methods, which may
     // mark this layer as dirty.
@@ -1092,8 +1117,10 @@ class ContainerLayer extends Layer {
       child.detach();
       child = child.nextSibling;
     }
+    // Detach indicates that we may never be composited again. Clients
+    // interested in observing composition will need to get updated to show
     // Children fired them already in child.detach().
-    _fireCompositionCallbacks(false);
+    _fireCompositionCallbacks(includeChildren: false);
   }
 
   /// Adds the given layer to the end of this layer's child list.
