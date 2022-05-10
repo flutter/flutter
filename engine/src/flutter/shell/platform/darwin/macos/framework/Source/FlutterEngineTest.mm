@@ -43,6 +43,7 @@ TEST_F(FlutterEngineTest, HasNonNullExecutableName) {
   // Launch the test entrypoint.
   FlutterEngine* engine = GetFlutterEngine();
   std::string executable_name = [[engine executableName] UTF8String];
+  ASSERT_FALSE(executable_name.empty());
   EXPECT_TRUE([engine runWithEntrypoint:@"executableNameNotNull"]);
 
   // Block until notified by the Dart test of the value of Platform.executable.
