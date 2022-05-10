@@ -452,7 +452,7 @@ void main() {
       expect(tester.widget<Checkbox>(checkbox).value, false);
       expect(enabled, true);
 
-      // Tap the checkbox to disabled CheckboxListTile
+      // Tap the checkbox to disable CheckboxListTile
       await tester.tap(checkbox);
       await tester.pumpAndSettle();
       expect(tester.widget<Checkbox>(checkbox).value, true);
