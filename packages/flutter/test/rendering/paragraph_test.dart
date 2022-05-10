@@ -355,6 +355,111 @@ void main() {
     expect(paragraph.size.height, 30.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
+  test('minLines on empty text', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: '',
+        style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+    void layoutAt(int? minLines) {
+      paragraph.minLines = minLines;
+      pumpFrame();
+    }
+
+    layoutAt(null);
+    expect(paragraph.size.height, 20.0);
+
+    layoutAt(0);
+    expect(paragraph.size.height, 20.0);
+
+    layoutAt(1);
+    expect(paragraph.size.height, 20.0);
+
+    layoutAt(2);
+    expect(paragraph.size.height, 40.0);
+
+    layoutAt(3);
+    expect(paragraph.size.height, 60.0);
+  }, skip: isBrowser);
+
+  test('minLines', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
+            // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
+            // 0          1          2       3       4      5     6         7         8    9       10      11     12
+        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+    void layoutAt(int? minLines) {
+      paragraph.minLines = minLines;
+      pumpFrame();
+    }
+
+    layoutAt(null);
+    expect(paragraph.size.height, 130.0);
+
+    layoutAt(0);
+    expect(paragraph.size.height, 130.0);
+
+    layoutAt(1);
+    expect(paragraph.size.height, 130.0);
+
+    layoutAt(14);
+    expect(paragraph.size.height, 140.0);
+
+    layoutAt(15);
+    expect(paragraph.size.height, 150.0);
+
+    layoutAt(20);
+    expect(paragraph.size.height, 200.0);
+  }, skip: isBrowser);
+
+  test('minLines and maxLines', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
+            // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
+            // 0          1          2       3       4      5     6         7         8    9       10      11     12
+        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+    void layoutAt(int? minLines, int? maxLines) {
+      paragraph.minLines = minLines;
+      paragraph.maxLines = maxLines;
+      pumpFrame();
+    }
+
+    layoutAt(null, null);
+    expect(paragraph.size.height, 130.0);
+
+    layoutAt(1, 1);
+    expect(paragraph.size.height, 10.0);
+
+    layoutAt(1, 2);
+    expect(paragraph.size.height, 20.0);
+
+    layoutAt(3, 2);
+    expect(paragraph.size.height, 30.0);
+
+    layoutAt(15, 5);
+    expect(paragraph.size.height, 150.0);
+
+    layoutAt(15, 15);
+    expect(paragraph.size.height, 150.0);
+
+    layoutAt(20, 25);
+    expect(paragraph.size.height, 200.0);
+  }, skip: isBrowser);
+
+
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(

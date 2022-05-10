@@ -72,12 +72,16 @@ class RenderParagraph extends RenderBox
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
+  /// 
+  /// The [minLines] property may be null (and indeed defaults to null), but if
+  /// it is not null, it must be greater than or equal to zero.
   RenderParagraph(InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
     required TextDirection textDirection,
     bool softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
     double textScaleFactor = 1.0,
+    int? minLines,
     int? maxLines,
     Locale? locale,
     StrutStyle? strutStyle,
@@ -91,6 +95,7 @@ class RenderParagraph extends RenderBox
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
+       assert(minLines == null || minLines >= 0),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
        _softWrap = softWrap,
@@ -100,6 +105,7 @@ class RenderParagraph extends RenderBox
          textAlign: textAlign,
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
+         minLines: minLines,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
@@ -231,6 +237,20 @@ class RenderParagraph extends RenderBox
       return;
     _textPainter.textScaleFactor = value;
     _overflowShader = null;
+    markNeedsLayout();
+  }
+
+  /// An optional minimum number of lines for the text to span. If the text 
+  /// falls short of the given number of lines, lines will be added below until 
+  /// there are the given number of lines.
+  int? get minLines => _textPainter.minLines;
+  /// The value may be null. If it is not null, then it must be greater than or 
+  /// equal to zero.
+  set minLines(int? value) {
+    assert(value == null || value >= 0);
+    if (_textPainter.minLines == value)
+      return;
+    _textPainter.minLines = value;
     markNeedsLayout();
   }
 
@@ -1085,6 +1105,7 @@ class RenderParagraph extends RenderBox
         defaultValue: null,
       ),
     );
+    properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }

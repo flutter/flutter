@@ -163,6 +163,7 @@ class TextPainter {
     TextAlign textAlign = TextAlign.start,
     TextDirection? textDirection,
     double textScaleFactor = 1.0,
+    int? minLines,
     int? maxLines,
     String? ellipsis,
     Locale? locale,
@@ -172,12 +173,14 @@ class TextPainter {
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
+       assert(minLines == null || minLines >= 0),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
        _textScaleFactor = textScaleFactor,
+       _minLines = minLines,
        _maxLines = maxLines,
        _ellipsis = ellipsis,
        _locale = locale,
@@ -336,6 +339,25 @@ class TextPainter {
     if (_locale == value)
       return;
     _locale = value;
+    markNeedsLayout();
+  }
+
+
+  /// An optional minimum number of lines for the text to span.
+  ///
+  /// If the text falls short of the given number of lines, lines will be added
+  /// below until there are the given number of lines.
+  ///
+  /// After this is set, you must call [layout] before the next call to [paint].
+  int? get minLines => _minLines;
+  int? _minLines;
+  /// The value may be null. If it is not null, then it must be greater than or 
+  /// equal to zero.
+  set minLines(int? value) {
+    assert(value == null || value >= 0);
+    if (_minLines == value)
+      return;
+    _minLines = value;
     markNeedsLayout();
   }
 
@@ -544,7 +566,7 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   double get height {
     assert(!_debugNeedsLayout);
-    return _applyFloatingPointHack(_paragraph!.height);
+    return _applyFloatingPointHack(_paragraph!.height + _additionalMinLinesHeight);
   }
 
   /// The amount of space required to paint this text.
@@ -588,6 +610,7 @@ class TextPainter {
 
   double? _lastMinWidth;
   double? _lastMaxWidth;
+  double _additionalMinLinesHeight = 0;
 
   // Creates a ui.Paragraph using the current configurations in this class and
   // assign it to _paragraph.
@@ -625,8 +648,43 @@ class TextPainter {
       if (newWidth != _applyFloatingPointHack(_paragraph!.width)) {
         _paragraph!.layout(ui.ParagraphConstraints(width: newWidth));
       }
-    }
+    }   
+    
+    _layoutMinLines();
   }
+
+  void _layoutMinLines() {
+    if (minLines == null || minLines! == 0) {
+      // If `minLines` is null or equal to zero, no additional height needs to
+      // be added.
+      _additionalMinLinesHeight = 0;
+      return;
+    }
+
+    final List<ui.LineMetrics> lines = computeLineMetrics();
+
+
+    if (lines.isEmpty) {
+      // No lines are present, but the paragraph still takes up one line of space.
+      // That's why we need to subtract this line from the calculation for the 
+      // minLines height.
+      _additionalMinLinesHeight = preferredLineHeight * (minLines! - 1);
+      return;
+    } 
+
+    if (lines.isNotEmpty) {
+      final int fillerLineCount = minLines! - lines.length;
+
+      if (fillerLineCount > 0) {
+        // Only add filler lines when there the count is positive.
+        _additionalMinLinesHeight = preferredLineHeight * fillerLineCount;
+        return;
+      }
+    }
+
+    _additionalMinLinesHeight = 0;
+  }
+
 
   /// Computes the visual position of the glyphs for painting the text.
   ///

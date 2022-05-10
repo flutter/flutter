@@ -42,6 +42,7 @@ class DefaultTextStyle extends InheritedTheme {
     this.textAlign,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    this.minLines,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
@@ -49,6 +50,7 @@ class DefaultTextStyle extends InheritedTheme {
   }) : assert(style != null),
        assert(softWrap != null),
        assert(overflow != null),
+       assert(minLines == null || minLines >= 0),
        assert(maxLines == null || maxLines > 0),
        assert(child != null),
        assert(textWidthBasis != null);
@@ -63,6 +65,7 @@ class DefaultTextStyle extends InheritedTheme {
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
+      minLines = null,
       maxLines = null,
       overflow = TextOverflow.clip,
       textWidthBasis = TextWidthBasis.parent,
@@ -91,6 +94,7 @@ class DefaultTextStyle extends InheritedTheme {
     TextAlign? textAlign,
     bool? softWrap,
     TextOverflow? overflow,
+    int? minLines,
     int? maxLines,
     TextWidthBasis? textWidthBasis,
     required Widget child,
@@ -105,6 +109,7 @@ class DefaultTextStyle extends InheritedTheme {
           textAlign: textAlign ?? parent.textAlign,
           softWrap: softWrap ?? parent.softWrap,
           overflow: overflow ?? parent.overflow,
+          minLines: minLines ?? parent.minLines,
           maxLines: maxLines ?? parent.maxLines,
           textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
           child: child,
@@ -132,6 +137,12 @@ class DefaultTextStyle extends InheritedTheme {
   /// If [softWrap] is true or null, the glyph causing overflow, and those that follow,
   /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   final TextOverflow overflow;
+
+  /// An optional minimum number of lines for the text to span.
+  ///
+  /// If the text falls short of the given number of lines, lines will be added
+  /// below until there are the given number of lines.
+  final int? minLines;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
@@ -172,6 +183,7 @@ class DefaultTextStyle extends InheritedTheme {
         textAlign != oldWidget.textAlign ||
         softWrap != oldWidget.softWrap ||
         overflow != oldWidget.overflow ||
+        minLines != oldWidget.minLines ||
         maxLines != oldWidget.maxLines ||
         textWidthBasis != oldWidget.textWidthBasis ||
         textHeightBehavior != oldWidget.textHeightBehavior;
@@ -184,6 +196,7 @@ class DefaultTextStyle extends InheritedTheme {
       textAlign: textAlign,
       softWrap: softWrap,
       overflow: overflow,
+      minLines: minLines,
       maxLines: maxLines,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
@@ -368,6 +381,7 @@ class Text extends StatelessWidget {
     this.softWrap,
     this.overflow,
     this.textScaleFactor,
+    this.minLines,
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
@@ -399,6 +413,7 @@ class Text extends StatelessWidget {
     this.softWrap,
     this.overflow,
     this.textScaleFactor,
+    this.minLines,
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
@@ -477,6 +492,8 @@ class Text extends StatelessWidget {
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   final double? textScaleFactor;
 
+  final int? minLines;
+
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow].
@@ -527,6 +544,7 @@ class Text extends StatelessWidget {
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+      minLines: minLines ?? defaultTextStyle.minLines,
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
@@ -563,6 +581,7 @@ class Text extends StatelessWidget {
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null));
     properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));

@@ -5480,6 +5480,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.textScaleFactor = 1.0,
+    this.minLines,
     this.maxLines,
     this.locale,
     this.strutStyle,
@@ -5490,6 +5491,7 @@ class RichText extends MultiChildRenderObjectWidget {
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
+       assert(minLines == null || minLines >= 0),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
        super(children: _extractChildren(text));
@@ -5547,6 +5549,12 @@ class RichText extends MultiChildRenderObjectWidget {
   /// the specified font size.
   final double textScaleFactor;
 
+  /// An optional minimum number of lines for the text to span.
+  ///
+  /// If the text falls short of the given number of lines, lines will be added
+  /// below until there are the given number of lines.
+  final int? minLines;
+
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow].
@@ -5582,6 +5590,7 @@ class RichText extends MultiChildRenderObjectWidget {
       softWrap: softWrap,
       overflow: overflow,
       textScaleFactor: textScaleFactor,
+      minLines: minLines,
       maxLines: maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
@@ -5600,6 +5609,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..softWrap = softWrap
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
+      ..minLines = minLines
       ..maxLines = maxLines
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
@@ -5615,6 +5625,7 @@ class RichText extends MultiChildRenderObjectWidget {
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));

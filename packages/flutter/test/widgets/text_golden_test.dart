@@ -1362,4 +1362,164 @@ void main() {
       matchesGoldenFile('text_golden.TextHeightBehavior.1.png'),
     );
   });
+
+  testWidgets('Text minLines', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.green,
+            child: Center(
+              child: Container(
+                width: 100.0,
+                color: Colors.blue,
+                child: const Text(
+                  'Ppppp pppp',
+                  style: TextStyle(color: Colors.black),
+                  minLines: 5,
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(Container).first,
+      matchesGoldenFile('text_golden.MinLines.1.png'),
+    );
+  });
+
+  testWidgets('Text minLines and maxLines', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.green,
+            child: Center(
+              child: Container(
+                width: 100.0,
+                color: Colors.blue,
+                child: const Text(
+                  'Ppppp pppp Ppppp pppp Ppppp pppp',
+                  style: TextStyle(color: Colors.black),
+                  minLines: 5,
+                  maxLines: 2,
+                  textDirection: TextDirection.ltr,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(Container).first,
+      matchesGoldenFile('text_golden.MinLines.2.png'),
+    );
+  });
+
+  testWidgets('Text minLines empty text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.green,
+            child: Center(
+              child: Container(
+                width: 100.0,
+                color: Colors.blue,
+                child: const Text(
+                  '',
+                  style: TextStyle(color: Colors.black),
+                  minLines: 5,
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    await expectLater(
+      find.byType(Container).first,
+      matchesGoldenFile('text_golden.MinLines.3.png'),
+    );
+  });
+
+  testWidgets('Text minLines line height', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.green,
+            child: Center(
+              child: Container(
+                width: 100.0,
+                color: Colors.blue,
+                child: const Text(
+                  'Ppppp',
+                  style: TextStyle(color: Colors.black, height: 2),
+                  minLines: 5,
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    await expectLater(
+      find.byType(Container).first,
+      matchesGoldenFile('text_golden.MinLines.4.png'),
+    );
+  });
+
+  testWidgets('Text minLines rich text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.green,
+            child: Center(
+              child: Container(
+                width: 100.0,
+                color: Colors.blue,
+                child: RichText(
+                  textDirection: TextDirection.ltr,
+                  minLines: 5,
+                  text: const TextSpan(children: [
+                    TextSpan(text: 'Pppp ', style: TextStyle(color: Colors.red, fontSize: 24)),
+                    TextSpan(text: 'Pppp ', style: TextStyle(color: Colors.black, fontSize: 16)),
+                    TextSpan(text: 'Ppppp ', style: TextStyle(color: Colors.yellow, fontSize: 8))
+                  ]),
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    await expectLater(
+      find.byType(Container).first,
+      matchesGoldenFile('text_golden.MinLines.5.png'),
+    );
+  });
 }
