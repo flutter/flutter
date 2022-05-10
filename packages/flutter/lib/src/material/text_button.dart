@@ -57,6 +57,13 @@ import 'theme_data.dart';
 /// ** See code in examples/api/lib/material/text_button/text_button.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates using the [statesController] parameter to create a button
+/// that adds support for [MaterialState.selected].
+///
+/// ** See code in examples/api/lib/material/text_button/text_button.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [OutlinedButton], a [TextButton] with a border outline.
