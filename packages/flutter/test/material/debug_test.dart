@@ -196,6 +196,7 @@ void main() {
       '     Semantics\n'
       '     _FocusMarker\n'
       '     Focus\n'
+      '     Shortcuts\n'
       '     DefaultTextEditingShortcuts\n'
       '     _ShortcutsMarker\n'
       '     Semantics\n'
