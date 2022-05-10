@@ -74,6 +74,9 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
     );
+    if (visualStudio.displayVersion == '17.1.0') {
+      _fixBrokenCmakeGeneration(buildDirectory);
+    }
     await _runBuild(cmakePath, buildDirectory, buildModeName);
   } finally {
     status.cancel();
@@ -334,4 +337,56 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, environment);
+}
+
+// Works around the Visual Studio 17.1.0 CMake bug described in
+// https://github.com/flutter/flutter/issues/97086
+//
+// Rather than attempt to remove all the duplicate entries within the
+// <CustomBuild> element, which would require a more complicated parser, this
+// just fixes the incorrect duplicates to have the correct `$<CONFIG>` value,
+// making the duplication harmless.
+//
+// TODO(stuartmorgan): Remove this workaround either once 17.1.0 is
+// sufficiently old that we no longer need to support it, or when
+// dropping VS 2022 support.
+void _fixBrokenCmakeGeneration(Directory buildDirectory) {
+  final File assembleProject = buildDirectory
+    .childDirectory('flutter')
+    .childFile('flutter_assemble.vcxproj');
+  if (assembleProject.existsSync()) {
+    // E.g.: <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    final RegExp commandRegex = RegExp(
+      r'<Command Condition=.*\(Configuration\)\|\$\(Platform\).==.(Debug|Profile|Release)\|');
+    // E.g.: [...]/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+    final RegExp assembleCallRegex = RegExp(
+      r'^.*/tool_backend\.bat windows[^ ]* (Debug|Profile|Release)');
+    String? lastCommandConditionConfig;
+    final StringBuffer newProjectContents = StringBuffer();
+    // vcxproj files contain a BOM, which readAsLinesSync drops; re-add it.
+    newProjectContents.writeCharCode(unicodeBomCharacterRune);
+    for (final String line in assembleProject.readAsLinesSync()) {
+      final RegExpMatch? commandMatch = commandRegex.firstMatch(line);
+      if (commandMatch != null) {
+        lastCommandConditionConfig = commandMatch.group(1);
+      } else if (lastCommandConditionConfig != null) {
+        final RegExpMatch? assembleCallMatch = assembleCallRegex.firstMatch(line);
+        if (assembleCallMatch != null) {
+          final String callConfig = assembleCallMatch.group(1)!;
+          if (callConfig != lastCommandConditionConfig) {
+            // The config is the end of the line; make sure to replace that one,
+            // in case config-matching strings appear anywhere else in the line
+            // (e.g., the project path).
+            final int badConfigIndex = line.lastIndexOf(assembleCallMatch.group(1)!);
+            final String correctedLine = line.replaceFirst(
+              callConfig, lastCommandConditionConfig, badConfigIndex);
+            newProjectContents.writeln('$correctedLine\r');
+            continue;
+          }
+        }
+      }
+      newProjectContents.writeln('$line\r');
+    }
+    assembleProject.writeAsStringSync(newProjectContents.toString());
+  }
 }
