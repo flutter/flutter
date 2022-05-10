@@ -852,10 +852,7 @@ class _LargeTitleNavigationBarSliverDelegate
                                   // It has a maximum magnification of about 15%.
                                   scale: math.min(
                                     1.15,
-                                    1 +
-                                        (constraints.maxHeight - maxExtent) /
-                                            maxExtent *
-                                            0.12,
+                                    1 + (constraints.maxHeight - maxExtent) / maxExtent *  0.12,
                                   ),
                                   alignment: AlignmentDirectional.bottomStart,
                                   child: components.largeTitle,
