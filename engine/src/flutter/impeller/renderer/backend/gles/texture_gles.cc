@@ -154,7 +154,9 @@ struct TexImage2DData {
 };
 
 // |Texture|
-bool TextureGLES::SetContents(const uint8_t* contents, size_t length) {
+bool TextureGLES::OnSetContents(const uint8_t* contents,
+                                size_t length,
+                                size_t slice) {
   if (length == 0u) {
     return true;
   }
@@ -181,8 +183,23 @@ bool TextureGLES::SetContents(const uint8_t* contents, size_t length) {
   }
 
   if (length < tex_descriptor.GetByteSizeOfBaseMipLevel()) {
-    VALIDATION_LOG << "Insufficient data provided for texture.";
-    return false;
+  }
+
+  GLenum texture_type;
+  GLenum texture_target;
+  switch (tex_descriptor.type) {
+    case TextureType::kTexture2D:
+      texture_type = GL_TEXTURE_2D;
+      texture_target = GL_TEXTURE_2D;
+      break;
+    case TextureType::kTexture2DMultisample:
+      VALIDATION_LOG << "Multisample texture uploading is not supported for "
+                        "the OpenGLES backend.";
+      return false;
+    case TextureType::kTextureCube:
+      texture_type = GL_TEXTURE_CUBE_MAP;
+      texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice;
+      break;
   }
 
   auto data =
@@ -192,9 +209,11 @@ bool TextureGLES::SetContents(const uint8_t* contents, size_t length) {
     return false;
   }
 
-  ReactorGLES::Operation texture_upload = [handle = handle_,           //
-                                           data,                       //
-                                           size = tex_descriptor.size  //
+  ReactorGLES::Operation texture_upload = [handle = handle_,            //
+                                           data,                        //
+                                           size = tex_descriptor.size,  //
+                                           texture_type,                //
+                                           texture_target               //
   ](const auto& reactor) {
     auto gl_handle = reactor.GetGLHandle(handle);
     if (!gl_handle.has_value()) {
@@ -203,12 +222,13 @@ bool TextureGLES::SetContents(const uint8_t* contents, size_t length) {
       return;
     }
     const auto& gl = reactor.GetProcTable();
-    gl.BindTexture(GL_TEXTURE_2D, gl_handle.value());
+    gl.BindTexture(texture_type, gl_handle.value());
     const GLvoid* tex_data = nullptr;
     if (data->data) {
       tex_data = data->data->GetMapping();
     }
-    gl.TexImage2D(GL_TEXTURE_2D,          // target
+
+    gl.TexImage2D(texture_target,         // target
                   0u,                     // LOD level
                   data->internal_format,  // internal format
                   size.width,             // width
