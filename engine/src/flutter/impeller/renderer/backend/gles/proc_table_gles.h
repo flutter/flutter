@@ -80,6 +80,8 @@ struct GLProc {
   PROC(AttachShader);                        \
   PROC(BindAttribLocation);                  \
   PROC(BindBuffer);                          \
+  PROC(BindFramebuffer);                     \
+  PROC(BindRenderbuffer);                    \
   PROC(BindTexture);                         \
   PROC(BlendEquationSeparate);               \
   PROC(BlendFuncSeparate);                   \
@@ -95,7 +97,9 @@ struct GLProc {
   PROC(CreateShader);                        \
   PROC(CullFace);                            \
   PROC(DeleteBuffers);                       \
+  PROC(DeleteFramebuffers);                  \
   PROC(DeleteProgram);                       \
+  PROC(DeleteRenderbuffers);                 \
   PROC(DeleteShader);                        \
   PROC(DeleteTextures);                      \
   PROC(DepthFunc);                           \
@@ -107,8 +111,12 @@ struct GLProc {
   PROC(DrawElements);                        \
   PROC(Enable);                              \
   PROC(EnableVertexAttribArray);             \
+  PROC(FramebufferRenderbuffer);             \
+  PROC(FramebufferTexture2D);                \
   PROC(FrontFace);                           \
   PROC(GenBuffers);                          \
+  PROC(GenFramebuffers);                     \
+  PROC(GenRenderbuffers);                    \
   PROC(GenTextures);                         \
   PROC(GetActiveUniform);                    \
   PROC(GetBooleanv);                         \
@@ -123,6 +131,7 @@ struct GLProc {
   PROC(IsFramebuffer);                       \
   PROC(IsProgram);                           \
   PROC(LinkProgram);                         \
+  PROC(RenderbufferStorage);                 \
   PROC(Scissor);                             \
   PROC(ShaderBinary);                        \
   PROC(ShaderSource);                        \
@@ -141,6 +150,7 @@ struct GLProc {
   PROC(Viewport);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC) \
+  PROC(DiscardFramebufferEXT);           \
   PROC(PushDebugGroupKHR);               \
   PROC(PopDebugGroupKHR);                \
   PROC(ObjectLabelKHR);
@@ -150,6 +160,8 @@ enum class DebugResourceType {
   kBuffer,
   kProgram,
   kShader,
+  kRenderBuffer,
+  kFrameBuffer,
 };
 
 class ProcTableGLES {
@@ -181,9 +193,14 @@ class ProcTableGLES {
                      GLint name,
                      const std::string& label) const;
 
+  void PushDebugGroup(const std::string& string) const;
+
+  void PopDebugGroup() const;
+
  private:
   bool is_valid_ = false;
   std::unique_ptr<GLDescription> description_;
+  GLint debug_label_max_length_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ProcTableGLES);
 };

@@ -12,6 +12,7 @@
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
+#include "impeller/renderer/backend/gles/texture_gles.h"
 
 namespace impeller {
 
@@ -119,8 +120,9 @@ struct RenderPassData {
   uint32_t clear_stencil = 0u;
   Scalar clear_depth = 1.0;
 
-  bool has_depth_attachment = false;
-  bool has_stencil_attachment = false;
+  std::shared_ptr<Texture> color_attachment;
+  std::shared_ptr<Texture> depth_attachment;
+  std::shared_ptr<Texture> stencil_attachment;
 
   bool clear_color_attachment = true;
   bool clear_depth_attachment = true;
@@ -129,6 +131,8 @@ struct RenderPassData {
   bool discard_color_attachment = true;
   bool discard_depth_attachment = true;
   bool discard_stencil_attachment = true;
+
+  std::string label;
 };
 
 [[nodiscard]] bool EncodeCommandsInReactor(
@@ -138,17 +142,70 @@ struct RenderPassData {
     const std::vector<Command>& commands) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
+  if (commands.empty()) {
+    return true;
+  }
+
   const auto& gl = reactor.GetProcTable();
+
+  fml::ScopedCleanupClosure pop_pass_debug_marker(
+      [&gl]() { gl.PopDebugGroup(); });
+  if (!pass_data.label.empty()) {
+    gl.PushDebugGroup(pass_data.label);
+  } else {
+    pop_pass_debug_marker.Release();
+  }
+
+  GLuint fbo = GL_NONE;
+  fml::ScopedCleanupClosure delete_fbo([&gl, &fbo]() {
+    if (fbo != GL_NONE) {
+      gl.BindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+      gl.DeleteFramebuffers(1u, &fbo);
+    }
+  });
+
+  const auto is_default_fbo =
+      TextureGLES::Cast(*pass_data.color_attachment).IsWrapped();
+
+  if (!is_default_fbo) {
+    // Create and bind an offscreen FBO.
+    gl.GenFramebuffers(1u, &fbo);
+    gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    if (auto color = TextureGLES::Cast(pass_data.color_attachment.get())) {
+      if (!color->SetAsFramebufferAttachment(
+              fbo, TextureGLES::AttachmentPoint::kColor0)) {
+        return false;
+      }
+    }
+    if (auto depth = TextureGLES::Cast(pass_data.depth_attachment.get())) {
+      if (!depth->SetAsFramebufferAttachment(
+              fbo, TextureGLES::AttachmentPoint::kDepth)) {
+        return false;
+      }
+    }
+    if (auto stencil = TextureGLES::Cast(pass_data.stencil_attachment.get())) {
+      if (!stencil->SetAsFramebufferAttachment(
+              fbo, TextureGLES::AttachmentPoint::kStencil)) {
+        return false;
+      }
+    }
+
+    if (gl.CheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+      VALIDATION_LOG << "Could not create a complete frambuffer.";
+      return false;
+    }
+  }
 
   gl.ClearColor(pass_data.clear_color.red,    // red
                 pass_data.clear_color.green,  // green
                 pass_data.clear_color.blue,   // blue
                 pass_data.clear_color.alpha   // alpha
   );
-  if (pass_data.has_depth_attachment) {
+  if (pass_data.depth_attachment) {
     gl.ClearDepthf(pass_data.clear_depth);
   }
-  if (pass_data.has_stencil_attachment) {
+  if (pass_data.stencil_attachment) {
     gl.ClearStencil(pass_data.clear_stencil);
   }
 
@@ -173,6 +230,14 @@ struct RenderPassData {
     if (!command.pipeline) {
       VALIDATION_LOG << "Command has no pipeline specified.";
       return false;
+    }
+
+    fml::ScopedCleanupClosure pop_cmd_debug_marker(
+        [&gl]() { gl.PopDebugGroup(); });
+    if (!command.label.empty()) {
+      gl.PushDebugGroup(command.label);
+    } else {
+      pop_cmd_debug_marker.Release();
     }
 
     const auto& pipeline = PipelineGLES::Cast(*command.pipeline);
@@ -217,7 +282,7 @@ struct RenderPassData {
                 viewport.rect.size.width,  // width
                 viewport.rect.size.height  // height
     );
-    if (pass_data.has_depth_attachment) {
+    if (pass_data.depth_attachment) {
       gl.DepthRangef(viewport.depth_range.z_near, viewport.depth_range.z_far);
     }
 
@@ -351,8 +416,25 @@ struct RenderPassData {
     }
   }
 
-  // TODO(csg): Respect the discard flags using glDiscardFramebuffer. Vital for
-  //            mobile GPUs.
+  if (gl.DiscardFramebufferEXT.IsAvailable()) {
+    std::vector<GLenum> attachments;
+    if (pass_data.discard_color_attachment) {
+      attachments.push_back(is_default_fbo ? GL_COLOR_EXT
+                                           : GL_COLOR_ATTACHMENT0);
+    }
+    if (pass_data.discard_depth_attachment) {
+      attachments.push_back(is_default_fbo ? GL_DEPTH_EXT
+                                           : GL_DEPTH_ATTACHMENT);
+    }
+    if (pass_data.discard_stencil_attachment) {
+      attachments.push_back(is_default_fbo ? GL_STENCIL_EXT
+                                           : GL_STENCIL_ATTACHMENT);
+    }
+    gl.DiscardFramebufferEXT(GL_FRAMEBUFFER,      // target
+                             attachments.size(),  // attachments to discard
+                             attachments.data()   // size
+    );
+  }
 
   return true;
 }
@@ -375,11 +457,13 @@ bool RenderPassGLES::EncodeCommands(
   const auto& stencil0 = render_target.GetStencilAttachment();
 
   auto pass_data = std::make_shared<RenderPassData>();
+  pass_data->label = label_;
   pass_data->viewport.rect = Rect::MakeSize(Size(GetRenderTargetSize()));
 
   //----------------------------------------------------------------------------
   /// Setup color data.
   ///
+  pass_data->color_attachment = color0.texture;
   pass_data->clear_color = color0.clear_color;
   pass_data->clear_color_attachment = CanClearAttachment(color0.load_action);
   pass_data->discard_color_attachment =
@@ -389,7 +473,7 @@ bool RenderPassGLES::EncodeCommands(
   /// Setup depth data.
   ///
   if (depth0.has_value()) {
-    pass_data->has_depth_attachment = true;
+    pass_data->depth_attachment = depth0->texture;
     pass_data->clear_depth = depth0->clear_depth;
     pass_data->clear_depth_attachment = CanClearAttachment(depth0->load_action);
     pass_data->discard_depth_attachment =
@@ -400,7 +484,7 @@ bool RenderPassGLES::EncodeCommands(
   /// Setup depth data.
   ///
   if (stencil0.has_value()) {
-    pass_data->has_stencil_attachment = true;
+    pass_data->stencil_attachment = stencil0->texture;
     pass_data->clear_stencil = stencil0->clear_stencil;
     pass_data->clear_stencil_attachment =
         CanClearAttachment(stencil0->load_action);

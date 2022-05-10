@@ -25,31 +25,33 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(std::shared_ptr<Context> context,
   const auto& gl_context = ContextGLES::Cast(*context);
 
   TextureDescriptor color0_tex;
-  color0_tex.type = TextureType::kTexture2D;  // lies
+  color0_tex.type = TextureType::kTexture2D;
   color0_tex.format = color_format;
   color0_tex.size = fbo_size;
   color0_tex.usage = static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-  color0_tex.sample_count = SampleCount::kCount4;
+  color0_tex.sample_count = SampleCount::kCount1;
 
   ColorAttachment color0;
-  color0.texture = std::make_shared<TextureGLES>(gl_context.GetReactor(),
-                                                 std::move(color0_tex));
+  color0.texture = std::make_shared<TextureGLES>(
+      gl_context.GetReactor(), std::move(color0_tex),
+      TextureGLES::IsWrapped::kWrapped);
   color0.clear_color = Color::DarkSlateGray();
   color0.load_action = LoadAction::kClear;
   color0.store_action = StoreAction::kStore;
 
   TextureDescriptor stencil0_tex;
-  stencil0_tex.type = TextureType::kTexture2D;  // lies
+  stencil0_tex.type = TextureType::kTexture2D;
   stencil0_tex.format = color_format;
   stencil0_tex.size = fbo_size;
   stencil0_tex.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-  stencil0_tex.sample_count = SampleCount::kCount4;
+  stencil0_tex.sample_count = SampleCount::kCount1;
 
   StencilAttachment stencil0;
   stencil0.clear_stencil = 0;
-  stencil0.texture = std::make_shared<TextureGLES>(gl_context.GetReactor(),
-                                                   std::move(stencil0_tex));
+  stencil0.texture = std::make_shared<TextureGLES>(
+      gl_context.GetReactor(), std::move(stencil0_tex),
+      TextureGLES::IsWrapped::kWrapped);
   stencil0.load_action = LoadAction::kClear;
   stencil0.store_action = StoreAction::kDontCare;
 

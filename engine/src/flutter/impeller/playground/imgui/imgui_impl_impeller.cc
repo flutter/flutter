@@ -78,6 +78,7 @@ bool ImGui_ImplImpeller_Init(std::shared_ptr<impeller::Context> context) {
         impeller::StorageMode::kHostVisible, texture_descriptor);
     IM_ASSERT(bd->font_texture != nullptr &&
               "Could not allocate ImGui font texture.");
+    bd->font_texture->SetLabel("ImGui Font Texture");
 
     [[maybe_unused]] bool uploaded = bd->font_texture->SetContents(
         pixels, texture_descriptor.GetByteSizeOfBaseMipLevel());

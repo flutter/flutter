@@ -21,7 +21,7 @@ DeviceBufferGLES::DeviceBufferGLES(ReactorGLES::Ref reactor,
 
 // |DeviceBuffer|
 DeviceBufferGLES::~DeviceBufferGLES() {
-  if (!reactor_) {
+  if (!handle_.IsDead()) {
     reactor_->CollectHandle(handle_);
   }
 }
