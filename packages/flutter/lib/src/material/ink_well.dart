@@ -825,7 +825,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
     if (enabled != isWidgetEnabled(oldWidget)) {
       statesController.update(MaterialState.disabled, !enabled);
-      statesController.remove(MaterialState.pressed);
+      if (!enabled) {
+        statesController.remove(MaterialState.pressed);
+      }
       // Don't call widget.onHover because many widgets, including the button
       // widgets, apply setState to an ancestor context from onHover.
       updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
