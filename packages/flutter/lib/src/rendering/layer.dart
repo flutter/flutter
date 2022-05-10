@@ -137,21 +137,27 @@ class AnnotationResult<T> {
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
+  static int _nextCallbackId = 0;
 
   /// Whether the subtree rooted at this layer has any composition callback
   /// observers.
   ///
+  /// This only evaluates to true if the subtree rooted at this node has
+  /// observers. For example, it may evaluate to true on a parent node but false
+  /// on a child if the parent has observers but the child does not.
+  ///
   /// See also:
   ///
-  ///   * [ContainerLayer.addCompositionCallback].
+  ///   * [Layer.addCompositionCallback].
   bool get subtreeHasCompositionCallbacks => _childrenWithCompositionCallbacks > 0;
 
   int _childrenWithCompositionCallbacks = 0;
-  void _incrementSubtreeCompositionObserverCount(int delta) {
+  void _updateSubtreeCompositionObserverCount(int delta) {
+    assert(delta != 0);
     _childrenWithCompositionCallbacks += delta;
     assert(_childrenWithCompositionCallbacks >= 0);
     if (parent != null) {
-      parent!._incrementSubtreeCompositionObserverCount(delta);
+      parent!._updateSubtreeCompositionObserverCount(delta);
     }
   }
 
@@ -162,6 +168,53 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   bool _debugMutationsLocked = false;
+
+  /// Adds a callback for when the layer tree that this layer is part of gets
+  /// composited, or when it is detached and will not be rendered again.
+  ///
+  /// This callback will fire even if an ancestor layer is added with retained
+  /// rendering, meaning that it will fire even if this layer gets added to the
+  /// scene via some call to [ui.SceneBuilder.addRetained] on one of its ancestor
+  /// layers.
+  ///
+  /// The callback receives a reference to this layer. The recipient must not
+  /// mutate the layer during the scope of the callback, but may traverse the
+  /// tree to find information about the current transform or clip. The layer
+  /// may not be [attached] anymore in this state, but even if it is detached it
+  /// may still have an also detached parent it can visit.
+  ///
+  /// If new callbacks are added or removed within the [callback], the new
+  /// callbacks will fire (or stop firing) on the _next_ compositing event.
+  ///
+  /// Composition callbacks are useful in place of pushing a layer that would
+  /// otherwise try to observe the layer tree without actually affecting
+  /// compositing. For example, a composition callback may be used to observe
+  /// the total transform and clip of the current container layer to determine
+  /// whether a render object drawn into it is visible or not.
+  ///
+  /// Calling the returned callback will remove [callback] from the composition
+  /// callbacks.
+  VoidCallback addCompositionCallback(CompositionCallback callback) {
+    _updateSubtreeCompositionObserverCount(1);
+    final int callbackId = _nextCallbackId += 1;
+    _callbacks[callbackId] = () {
+      assert(() {
+        _debugMutationsLocked = true;
+        return true;
+      }());
+      callback(this is ContainerLayer ? this as ContainerLayer : parent!);
+      assert(() {
+        _debugMutationsLocked = false;
+        return true;
+      }());
+    };
+    return () {
+      _callbacks.remove(callbackId);
+      if (_callbacks.isEmpty) {
+        _updateSubtreeCompositionObserverCount(-1);
+      }
+    };
+  }
 
   /// If asserts are enabled, returns whether [dispose] has
   /// been called since the last time any retained resources were created.
@@ -421,23 +474,26 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   Layer? _previousSibling;
 
   @override
-  void dropChild(AbstractNode child) {
+  void dropChild(Layer child) {
     assert(!_debugMutationsLocked);
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
     }
-
-    _incrementSubtreeCompositionObserverCount(-(child as Layer)._childrenWithCompositionCallbacks);
+    if (child._childrenWithCompositionCallbacks != 0) {
+      _updateSubtreeCompositionObserverCount(child._childrenWithCompositionCallbacks);
+    }
     super.dropChild(child);
   }
 
   @override
-  void adoptChild(AbstractNode child) {
+  void adoptChild(Layer child) {
     assert(!_debugMutationsLocked);
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
     }
-    _incrementSubtreeCompositionObserverCount((child as Layer)._childrenWithCompositionCallbacks);
+    if (child._childrenWithCompositionCallbacks != 0) {
+      _updateSubtreeCompositionObserverCount(child._childrenWithCompositionCallbacks);
+    }
     super.adoptChild(child);
   }
 
@@ -959,8 +1015,6 @@ typedef CompositionCallback = void Function(ContainerLayer);
 /// into the composited rendering in order. There are subclasses of
 /// [ContainerLayer] which apply more elaborate effects in the process.
 class ContainerLayer extends Layer {
-  static int _nextCallbackId = 0;
-
   @override
   void _fireCompositionCallbacks({required bool includeChildren}) {
     super._fireCompositionCallbacks(includeChildren: includeChildren);
@@ -972,48 +1026,6 @@ class ContainerLayer extends Layer {
       child._fireCompositionCallbacks(includeChildren: includeChildren);
       child = child.nextSibling;
     }
-  }
-
-  /// Adds a callback for when the layer tree that this layer is part of gets
-  /// composited.
-  ///
-  /// This callback will fire even if an ancestor layer is added with retained
-  /// rendering, meaning that it will fire even if this layer gets added to the
-  /// scene via some call to [ui.SceneBuilder.addRetained] on one of its ancestor
-  /// layers.
-  ///
-  /// The callback receives a reference to this layer. The recipient must not
-  /// mutate the layer during the scope of the callback, but may traverse the
-  /// tree to find information about the current transform or clip.
-  ///
-  /// Composition callbacks are useful in place of pushing a layer that would
-  /// otherwise try to observe the layer tree without actually affecting
-  /// compositing. For example, a composition callback may be used to observe
-  /// the total transform and clip of the current container layer to determine
-  /// whether a render object drawn into it is visible or not.
-  ///
-  /// Calling the returned callback will remove [callback] from the composition
-  /// callbacks.
-  VoidCallback addCompositionCallback(CompositionCallback callback) {
-    _incrementSubtreeCompositionObserverCount(1);
-    _nextCallbackId += 1;
-    _callbacks[_nextCallbackId] = () {
-      assert(() {
-        _debugMutationsLocked = true;
-        return true;
-      }());
-      callback(this);
-      assert(() {
-        _debugMutationsLocked = false;
-        return true;
-      }());
-    };
-    return () {
-      _callbacks.remove(_nextCallbackId);
-      if (_callbacks.isEmpty) {
-        _incrementSubtreeCompositionObserverCount(-1);
-      }
-    };
   }
 
   /// The first composited layer in this layer's child list.
@@ -1118,7 +1130,10 @@ class ContainerLayer extends Layer {
       child = child.nextSibling;
     }
     // Detach indicates that we may never be composited again. Clients
-    // interested in observing composition will need to get updated to show
+    // interested in observing composition need to get an update here because
+    // they might otherwise never get another one even though the layer is no
+    // longer visible.
+    //
     // Children fired them already in child.detach().
     _fireCompositionCallbacks(includeChildren: false);
   }

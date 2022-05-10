@@ -716,6 +716,194 @@ void main() {
     layer.addToScene(builder);
     expect(layer.engineLayer, null);
   });
+
+  test('Layers describe clip bounds', () {
+    ContainerLayer layer = ContainerLayer();
+    expect(layer.describeClipBounds(), null);
+
+    const Rect bounds = Rect.fromLTRB(10, 10, 20, 20);
+    final RRect rbounds = RRect.fromRectXY(bounds, 2, 2);
+    layer = ClipRectLayer(clipRect: bounds);
+    expect(layer.describeClipBounds(), bounds);
+
+    layer = ClipRRectLayer(clipRRect: rbounds);
+    expect(layer.describeClipBounds(), rbounds.outerRect);
+
+    layer = ClipPathLayer(clipPath: Path()..addRect(bounds));
+    expect(layer.describeClipBounds(), bounds);
+  });
+
+  test('Subtree has composition callbacks', () {
+    final ContainerLayer root = ContainerLayer();
+    expect(root.subtreeHasCompositionCallbacks, false);
+
+    final List<VoidCallback> cancellationCallbacks = <VoidCallback>[];
+
+    cancellationCallbacks.add(root.addCompositionCallback((_) {}));
+    expect(root.subtreeHasCompositionCallbacks, true);
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, false);
+    cancellationCallbacks.add(b1.addCompositionCallback((_) {}));
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, true);
+
+    cancellationCallbacks.removeAt(0)();
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, true);
+
+    cancellationCallbacks.removeAt(0)();
+
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, false);
+  });
+
+  test('No callback if removed', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    // Add and immediately remove the callback.
+    b1.addCompositionCallback((ContainerLayer layer) {
+      fail('Should not have called back');
+    })();
+
+    root.buildScene(SceneBuilder()).dispose();
+  });
+
+  test('Observe layer tree composition - not retained', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((ContainerLayer layer) {
+      expect(layer, b1);
+      compositedB1 = true;
+    });
+
+    expect(compositedB1, false);
+
+    root.buildScene(SceneBuilder()).dispose();
+
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - retained', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    // Force the layer to appear clean and have an engine layer for retained
+    // rendering.
+    final SceneBuilder builder = SceneBuilder();
+    b1.engineLayer = builder.pushOffset(0, 0);
+    expect(b1.engineLayer, isNotNull);
+    b1.debugMarkClean();
+    expect(b1.debugSubtreeNeedsAddToScene, false);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((ContainerLayer layer) {
+      expect(layer, b1);
+      compositedB1 = true;
+    });
+
+    expect(compositedB1, false);
+
+    root.buildScene(builder).dispose();
+
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - asserts on mutation', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((ContainerLayer layer) {
+      expect(layer, b1);
+      expect(() => layer.remove(), throwsAssertionError);
+      expect(() => layer.dispose(), throwsAssertionError);
+      expect(() => layer.markNeedsAddToScene(), throwsAssertionError);
+      expect(() => layer.debugMarkClean(), throwsAssertionError);
+      expect(() => layer.updateSubtreeNeedsAddToScene(), throwsAssertionError);
+      expect(() => layer.dropChild(ContainerLayer()), throwsAssertionError);
+      expect(() => layer.adoptChild(ContainerLayer()), throwsAssertionError);
+      expect(() => layer.append(ContainerLayer()), throwsAssertionError);
+      expect(() => layer.engineLayer = null, throwsAssertionError);
+      compositedB1 = true;
+    });
+
+    expect(compositedB1, false);
+
+    root.buildScene(SceneBuilder()).dispose();
+
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - detach triggers callback', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((ContainerLayer layer) {
+      expect(layer, b1);
+      compositedB1 = true;
+    });
+
+    root.attach(Object());
+    expect(compositedB1, false);
+    root.detach();
+    expect(compositedB1, true);
+  });
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {

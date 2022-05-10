@@ -329,8 +329,9 @@ class PaintingContext extends ClipContext {
   /// context.
   ///
   /// Composition callbacks are called whenever the layer tree containing the
-  /// current layer of this painting context  gets composited. This happens
-  /// regardless of whether the layer is added via retained rendering or not.
+  /// current layer of this painting context gets composited, or when it gets
+  /// detached and will not be rendered again. This happens regardless of
+  /// whether the layer is added via retained rendering or not.
   ///
   /// Composition callbacks are useful in place of pushing a layer that would
   /// otherwise try to observe the layer tree without actually affecting
@@ -342,7 +343,7 @@ class PaintingContext extends ClipContext {
   /// callbacks.
   ///
   /// See also:
-  ///   *  [ContainerLayer.addCompositionCallback].
+  ///   *  [Layer.addCompositionCallback].
   VoidCallback addCompositionCallback(CompositionCallback callback) {
     return _containerLayer.addCompositionCallback(callback);
   }
