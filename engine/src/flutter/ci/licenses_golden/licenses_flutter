@@ -2188,6 +2188,7 @@ FILE: ../../../flutter/shell/platform/linux/fl_value_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view_accessible.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view_accessible.h
+FILE: ../../../flutter/shell/platform/linux/fl_view_accessible_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view_private.h
 FILE: ../../../flutter/shell/platform/linux/key_mapping.cc
 FILE: ../../../flutter/shell/platform/linux/key_mapping.h
