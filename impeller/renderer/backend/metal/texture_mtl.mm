@@ -30,7 +30,9 @@ void TextureMTL::SetLabel(const std::string_view& label) {
   [texture_ setLabel:@(label.data())];
 }
 
-bool TextureMTL::SetContents(const uint8_t* contents, size_t length) {
+bool TextureMTL::OnSetContents(const uint8_t* contents,
+                               size_t length,
+                               size_t slice) {
   if (!IsValid() || !contents) {
     return false;
   }
@@ -48,10 +50,12 @@ bool TextureMTL::SetContents(const uint8_t* contents, size_t length) {
   // that there seems to be no error handling guidance.
   const auto region =
       MTLRegionMake2D(0u, 0u, desc.size.width, desc.size.height);
-  [texture_ replaceRegion:region                 //
-              mipmapLevel:0u                     //
-                withBytes:contents               //
-              bytesPerRow:desc.GetBytesPerRow()  //
+  [texture_ replaceRegion:region                            //
+              mipmapLevel:0u                                //
+                    slice:slice                             //
+                withBytes:contents                          //
+              bytesPerRow:desc.GetBytesPerRow()             //
+            bytesPerImage:desc.GetByteSizeOfBaseMipLevel()  //
   ];
 
   return true;
