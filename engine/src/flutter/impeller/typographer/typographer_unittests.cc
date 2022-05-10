@@ -40,7 +40,7 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
   ASSERT_TRUE(blob);
   auto atlas = context->CreateGlyphAtlas(TextFrameFromTextBlob(blob));
   ASSERT_NE(atlas, nullptr);
-  OpenPlaygroundHere([](auto&) { return true; });
+  OpenPlaygroundHere([](RenderTarget&) { return true; });
 }
 
 }  // namespace testing

@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
 #include <sstream>
+
+#include "impeller/renderer/command_buffer.h"
 
 #define GLFW_INCLUDE_NONE
 #import "third_party/glfw/include/GLFW/glfw3.h"
@@ -211,13 +214,41 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
 
     ImGui_ImplGlfw_NewFrame();
 
-    Renderer::RenderCallback wrapped_callback = [render_callback](auto& pass) {
-      pass.SetLabel("Playground Main Render Pass");
-
+    Renderer::RenderCallback wrapped_callback =
+        [render_callback,
+         &renderer = renderer_](RenderTarget& render_target) -> bool {
       ImGui::NewFrame();
-      bool result = render_callback(pass);
+      bool result = render_callback(render_target);
       ImGui::Render();
-      ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), pass);
+
+      // Render ImGui overlay.
+      {
+        auto buffer = renderer->GetContext()->CreateRenderCommandBuffer();
+        if (!buffer) {
+          return false;
+        }
+        buffer->SetLabel("ImGui Command Buffer");
+
+        if (render_target.GetColorAttachments().empty()) {
+          return false;
+        }
+        auto color0 = render_target.GetColorAttachments().find(0)->second;
+        color0.load_action = LoadAction::kLoad;
+        render_target.SetColorAttachment(color0, 0);
+        auto pass = buffer->CreateRenderPass(render_target);
+        if (!pass) {
+          return false;
+        }
+        pass->SetLabel("ImGui Render Pass");
+
+        ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass);
+
+        pass->EncodeCommands(renderer->GetContext()->GetTransientsAllocator());
+        if (!buffer->SubmitCommands()) {
+          return false;
+        }
+      }
+
       return result;
     };
 
@@ -231,6 +262,33 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   ::glfwHideWindow(window);
 
   return true;
+}
+
+bool Playground::OpenPlaygroundHere(SinglePassCallback pass_callback) {
+  return OpenPlaygroundHere(
+      [context = GetContext(), &pass_callback](RenderTarget& render_target) {
+        auto buffer = context->CreateRenderCommandBuffer();
+        if (!buffer) {
+          return false;
+        }
+        buffer->SetLabel("Playground Command Buffer");
+
+        auto pass = buffer->CreateRenderPass(render_target);
+        if (!pass) {
+          return false;
+        }
+        pass->SetLabel("Playground Render Pass");
+
+        if (!pass_callback(*pass)) {
+          return false;
+        }
+
+        pass->EncodeCommands(context->GetTransientsAllocator());
+        if (!buffer->SubmitCommands()) {
+          return false;
+        }
+        return true;
+      });
 }
 
 std::shared_ptr<Texture> Playground::CreateTextureForFixture(

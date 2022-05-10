@@ -36,14 +36,14 @@ bool DisplayListPlayground::OpenPlaygroundHere(
     return false;
   }
   return Playground::OpenPlaygroundHere(
-      [&context, &callback](RenderPass& pass) -> bool {
+      [&context, &callback](RenderTarget& render_target) -> bool {
         auto list = callback();
 
         DisplayListDispatcher dispatcher;
         list->Dispatch(dispatcher);
         auto picture = dispatcher.EndRecordingAsPicture();
 
-        return context.Render(picture, pass);
+        return context.Render(picture, render_target);
       });
 }
 

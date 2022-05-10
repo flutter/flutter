@@ -77,11 +77,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISiz
         display_list->Dispatch(impeller_dispatcher);
         auto picture = impeller_dispatcher.EndRecordingAsPicture();
 
-        return renderer->Render(std::move(surface),
-                                fml::MakeCopyable([aiks_context, picture = std::move(picture)](
-                                                      impeller::RenderPass& pass) -> bool {
-                                  return aiks_context->Render(picture, pass);
-                                }));
+        return renderer->Render(
+            std::move(surface),
+            fml::MakeCopyable([aiks_context, picture = std::move(picture)](
+                                  impeller::RenderTarget& render_target) -> bool {
+              return aiks_context->Render(picture, render_target);
+            }));
       });
 
   return std::make_unique<SurfaceFrame>(nullptr,                          // surface

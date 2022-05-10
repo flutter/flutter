@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include <array>
+#include <cmath>
+#include <tuple>
 
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_playground.h"
@@ -467,6 +469,121 @@ TEST_P(AiksTest, PaintBlendModeIsRespected) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanDrawWithAdvancedBlend) {
+  // Compare with https://fiddle.skia.org/c/@BlendModes
+
+  std::vector<const char*> blend_mode_names;
+  std::vector<Entity::BlendMode> blend_mode_values;
+  {
+    const std::vector<std::tuple<const char*, Entity::BlendMode>> blends = {
+        // Pipeline blends (Porter-Duff/alpha blends)
+        {"Clear", Entity::BlendMode::kClear},
+        {"Source", Entity::BlendMode::kSource},
+        {"Destination", Entity::BlendMode::kDestination},
+        {"SourceOver", Entity::BlendMode::kSourceOver},
+        {"DestinationOver", Entity::BlendMode::kDestinationOver},
+        {"SourceIn", Entity::BlendMode::kSourceIn},
+        {"DestinationIn", Entity::BlendMode::kDestinationIn},
+        {"SourceOut", Entity::BlendMode::kSourceOut},
+        {"DestinationOut", Entity::BlendMode::kDestinationOut},
+        {"SourceATop", Entity::BlendMode::kSourceATop},
+        {"DestinationATop", Entity::BlendMode::kDestinationATop},
+        {"Xor", Entity::BlendMode::kXor},
+        {"Plus", Entity::BlendMode::kPlus},
+        {"Modulate", Entity::BlendMode::kModulate},
+        // Advanced blends (non Porter-Duff/color blends)
+        {"Screen", Entity::BlendMode::kScreen},
+    };
+    assert(blends.size() ==
+           static_cast<size_t>(Entity::BlendMode::kLastAdvancedBlendMode) + 1);
+    for (const auto& [name, mode] : blends) {
+      blend_mode_names.push_back(name);
+      blend_mode_values.push_back(mode);
+    }
+  }
+
+  auto draw_color_wheel = [](Canvas& canvas) {
+    /// color_wheel_sampler: r=0 -> fuchsia, r=2pi/3 -> yellow, r=4pi/3 ->
+    /// cyan domain: r >= 0 (because modulo used is non euclidean)
+    auto color_wheel_sampler = [](Radians r) {
+      Scalar x = r.radians / k2Pi + 1;
+
+      // https://www.desmos.com/calculator/6nhjelyoaj
+      auto color_cycle = [](Scalar x) {
+        Scalar cycle = std::fmod(x, 6.0f);
+        return std::max(0.0f, std::min(1.0f, 2 - std::abs(2 - cycle)));
+      };
+      return Color(color_cycle(6 * x + 1),  //
+                   color_cycle(6 * x - 1),  //
+                   color_cycle(6 * x - 3),  //
+                   1);
+    };
+
+    Paint paint;
+
+    // Draw a fancy color wheel for the backdrop.
+    // https://www.desmos.com/calculator/xw7kafthwd
+    const int max_dist = 900;
+    for (int i = 0; i <= 900; i++) {
+      Radians r(kPhi / k2Pi * i);
+      Scalar distance = r.radians / std::powf(4.12, 0.0026 * r.radians);
+      Scalar normalized_distance = static_cast<Scalar>(i) / max_dist;
+
+      paint.color =
+          color_wheel_sampler(r).WithAlpha(1.0f - normalized_distance);
+      Point position(distance * std::sin(r.radians),
+                     -distance * std::cos(r.radians));
+
+      canvas.DrawCircle(position, 9 + normalized_distance * 3, paint);
+    }
+  };
+
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({350, 200});
+      ImGui::SetNextWindowPos({325, 550});
+    }
+
+    ImGui::Begin("Controls");
+    static int current_blend_index = 3;
+    ImGui::ListBox("Blending mode", &current_blend_index,
+                   blend_mode_names.data(), blend_mode_names.size());
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+    // Default blend is kSourceOver.
+    paint.color = Color::White();
+    canvas.DrawPaint(paint);
+
+    canvas.Translate(Vector2(500, 400));
+    canvas.Scale(Vector2(3, 3));
+
+    draw_color_wheel(canvas);
+
+    // Draw 3 circles to a subpass and blend it in.
+    canvas.SaveLayer({.blend_mode = blend_mode_values[current_blend_index]});
+    {
+      paint.blend_mode = Entity::BlendMode::kPlus;
+      const Scalar x = std::sin(k2Pi / 3);
+      const Scalar y = -std::cos(k2Pi / 3);
+      paint.color = Color::Red();
+      canvas.DrawCircle(Point(-x, y) * 45, 65, paint);
+      paint.color = Color::Green();
+      canvas.DrawCircle(Point(0, -1) * 45, 65, paint);
+      paint.color = Color::Blue();
+      canvas.DrawCircle(Point(x, y) * 45, 65, paint);
+    }
+    canvas.Restore();
+
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, TransformMultipliesCorrectly) {
   Canvas canvas;
   ASSERT_MATRIX_NEAR(canvas.GetCurrentTransformation(), Matrix());
@@ -509,7 +626,7 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
 TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
   bool first_frame = true;
-  auto callback = [&](AiksContext& renderer, RenderPass& pass) {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     if (first_frame) {
       first_frame = false;
       ImGui::SetNextWindowSize({480, 100});
@@ -573,14 +690,14 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
       canvas.Translate({-240, 60});
     }
 
-    return renderer.Render(canvas.EndRecordingAsPicture(), pass);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
-  auto callback = [](AiksContext& renderer, RenderPass& pass) {
+  auto callback = [](AiksContext& renderer, RenderTarget& render_target) {
     Canvas canvas;
     Paint alpha;
     alpha.color = Color::Red().WithAlpha(0.5);
@@ -605,7 +722,7 @@ TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
 
     canvas.Restore();
 
-    return renderer.Render(canvas.EndRecordingAsPicture(), pass);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));

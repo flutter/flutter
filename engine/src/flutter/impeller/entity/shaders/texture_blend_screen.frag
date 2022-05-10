@@ -18,8 +18,17 @@ vec4 SampleWithBorder(sampler2D tex, vec2 uv) {
   return vec4(0);
 }
 
+vec4 Unpremultiply(vec4 color) {
+  if (color.a == 0) {
+    return vec4(0);
+  }
+  return vec4(color.rgb / color.a, color.a);
+}
+
 void main() {
-  vec4 dst = SampleWithBorder(texture_sampler_dst, v_dst_texture_coords);
+  vec4 dst = texture(texture_sampler_dst, v_dst_texture_coords);
+  vec4 d = Unpremultiply(dst);
   vec4 src = SampleWithBorder(texture_sampler_src, v_src_texture_coords);
-  frag_color = src + dst - src * dst;
+  vec4 s = Unpremultiply(src);
+  frag_color = 1 - ((1 - s) * (1 - d));
 }

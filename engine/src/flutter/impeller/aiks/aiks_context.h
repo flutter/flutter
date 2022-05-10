@@ -9,6 +9,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/context.h"
+#include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
@@ -23,7 +24,7 @@ class AiksContext {
 
   bool IsValid() const;
 
-  bool Render(const Picture& picture, RenderPass& parent_pass);
+  bool Render(const Picture& picture, RenderTarget& render_target);
 
  private:
   std::shared_ptr<Context> context_;

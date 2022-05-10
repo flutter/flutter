@@ -27,9 +27,4 @@ std::optional<Rect> TextureFilterInput::GetCoverage(
       .TransformBounds(GetTransform(entity));
 }
 
-Matrix TextureFilterInput::GetLocalTransform(const Entity& entity) const {
-  // Compute the local transform such that the texture is centered.
-  return Matrix::MakeTranslation(-Point(texture_->GetSize()) / 2);
-}
-
 }  // namespace impeller

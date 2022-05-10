@@ -43,27 +43,9 @@ bool Renderer::Render(std::unique_ptr<Surface> surface,
     return false;
   }
 
-  auto command_buffer = context_->CreateRenderCommandBuffer();
+  RenderTarget render_target = surface->GetTargetRenderPassDescriptor();
 
-  if (!command_buffer) {
-    return false;
-  }
-
-  command_buffer->SetLabel("Onscreen Command Buffer");
-
-  auto render_pass = command_buffer->CreateRenderPass(
-      surface->GetTargetRenderPassDescriptor());
-  if (!render_pass) {
-    return false;
-  }
-
-  render_pass->SetLabel("Onscreen Render Pass");
-
-  if (render_callback && !render_callback(*render_pass)) {
-    return false;
-  }
-
-  if (!render_pass->EncodeCommands(GetContext()->GetTransientsAllocator())) {
+  if (render_callback && !render_callback(render_target)) {
     return false;
   }
 
@@ -71,16 +53,7 @@ bool Renderer::Render(std::unique_ptr<Surface> surface,
     return false;
   }
 
-  if (!command_buffer->SubmitCommands(
-          [sema = frames_in_flight_sema_](CommandBuffer::Status result) {
-            sema->Signal();
-            if (result != CommandBuffer::Status::kCompleted) {
-              VALIDATION_LOG << "Could not commit command buffer.";
-            }
-          })) {
-    return false;
-  }
-
+  frames_in_flight_sema_->Signal();
   return surface->Present();
 }
 

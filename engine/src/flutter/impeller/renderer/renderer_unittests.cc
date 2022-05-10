@@ -65,7 +65,7 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   ASSERT_TRUE(bridge && boston);
   auto sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
-  Renderer::RenderCallback callback = [&](RenderPass& pass) {
+  SinglePassCallback callback = [&](RenderPass& pass) {
     Command cmd;
     cmd.label = "Box";
     cmd.pipeline = box_pipeline;
@@ -131,7 +131,7 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
   auto sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
-  Renderer::RenderCallback callback = [&](RenderPass& pass) {
+  SinglePassCallback callback = [&](RenderPass& pass) {
     Command cmd;
     cmd.label = "Box";
     cmd.pipeline = box_pipeline;

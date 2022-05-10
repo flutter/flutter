@@ -817,14 +817,16 @@ TEST_P(EntityTest, GaussianBlurFilter) {
         blur_styles[selected_blur_style]);
 
     auto mask_blur = FilterContents::MakeBorderMaskBlur(
-        FilterInput::Make(boston), FilterContents::Sigma{blur_amount[0]},
+        FilterInput::Make(bridge), FilterContents::Sigma{blur_amount[0]},
         FilterContents::Sigma{blur_amount[1]},
         blur_styles[selected_blur_style]);
 
+    auto input_size = bridge->GetSize();
     auto ctm = Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
                Matrix::MakeRotationZ(Radians(rotation)) *
                Matrix::MakeScale(Vector2(scale[0], scale[1])) *
-               Matrix::MakeSkew(skew[0], skew[1]);
+               Matrix::MakeSkew(skew[0], skew[1]) *
+               Matrix::MakeTranslation(-Point(input_size) / 2);
 
     auto target_contents = selected_blur_type == 0 ? blur : mask_blur;
 
@@ -838,10 +840,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     // unfiltered input.
     Entity cover_entity;
     cover_entity.SetContents(SolidColorContents::Make(
-        PathBuilder{}
-            .AddRect(
-                Rect(-Point(bridge->GetSize()) / 2, Size(bridge->GetSize())))
-            .TakePath(),
+        PathBuilder{}.AddRect(Rect::MakeSize(Size(input_size))).TakePath(),
         cover_color));
     cover_entity.SetTransformation(ctm);
 
