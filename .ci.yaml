@@ -79,7 +79,6 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "apple_signing"}
         ]
@@ -91,7 +90,6 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "apple_signing"}
         ]
@@ -2255,7 +2253,6 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
       tags: >
@@ -2293,7 +2290,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
@@ -2313,7 +2309,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
@@ -2333,7 +2328,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
@@ -2353,7 +2347,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
@@ -2380,7 +2373,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
       tags: >
@@ -2426,7 +2418,6 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl"},
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "android_sdk", "version": "version:31v8"}
@@ -2558,7 +2549,6 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
       tags: >
@@ -2579,7 +2569,6 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
       tags: >
@@ -2600,7 +2589,6 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
       tags: >
@@ -2641,7 +2629,6 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
       tags: >
@@ -2661,7 +2648,6 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
       shard: tool_host_cross_arch_tests
@@ -2684,7 +2670,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
@@ -2710,7 +2695,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
@@ -2736,7 +2720,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
@@ -2762,7 +2745,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
@@ -2823,10 +2805,6 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode"}
-        ]
       tags: >
         ["framework", "hostonly", "shard"]
       validation: verify_binaries_codesigned
@@ -3500,7 +3478,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
       tags: >
@@ -3519,7 +3496,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
       tags: >
