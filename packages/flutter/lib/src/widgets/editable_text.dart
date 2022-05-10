@@ -3253,7 +3253,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(debugCheckHasMediaQuery(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
-    final Color? effectiveSelectionColor = widget.selectionColor ?? DefaultSelectionStyle.of(context).selectionColor;
+    final Color? effectiveSelectionColor = widget.selectionColor;
 
     final TextSelectionControls? controls = widget.selectionControls;
     return MouseRegion(
