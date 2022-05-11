@@ -242,32 +242,32 @@ class MigrateUtils {
     bool exit = true,
     bool silent = false
   }) {
-    if (!allowedExitCodes.contains(result.exitCode) && !allowedExitCodes.contains(-1)) {
-      if (!silent) {
-        _logger.printError('Command encountered an error with exit code ${result.exitCode}.');
-        if (commandDescription != null) {
-          _logger.printError('Command:');
-          _logger.printError(commandDescription, indent: 2);
-        }
-        _logger.printError('Stdout:');
-        _logger.printError(result.stdout, indent: 2);
-        _logger.printError('Stderr:');
-        _logger.printError(result.stderr, indent: 2);
-      }
-      if (exit) {
-        throwToolExit('Command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
-      }
-      return false;
+    if (allowedExitCodes.contains(result.exitCode) || allowedExitCodes.contains(-1)) {
+      return true;
     }
-    return true;
+    if (!silent) {
+      _logger.printError('Command encountered an error with exit code ${result.exitCode}.');
+      if (commandDescription != null) {
+        _logger.printError('Command:');
+        _logger.printError(commandDescription, indent: 2);
+      }
+      _logger.printError('Stdout:');
+      _logger.printError(result.stdout, indent: 2);
+      _logger.printError('Stderr:');
+      _logger.printError(result.stderr, indent: 2);
+    }
+    if (exit) {
+      throwToolExit('Command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
+    }
+    return false;
   }
 
   /// Returns true if the file does not contain any git conflit markers.
   bool conflictsResolved(String contents) {
-    if (contents.contains('>>>>>>>') && contents.contains('=======') && contents.contains('<<<<<<<')) {
-      return false;
-    }
-    return true;
+    final bool hasMarker = contents.contains('>>>>>>>') ||
+                           contents.contains('=======') ||
+                           contents.contains('<<<<<<<');
+    return !hasMarker;
   }
 }
 
