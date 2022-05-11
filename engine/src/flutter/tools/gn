@@ -11,6 +11,7 @@ import argparse
 import subprocess
 import sys
 import os
+import platform
 
 SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -89,8 +90,6 @@ def is_host_build(args):
     # If target_os == None, then this is a host build.
     # However, for linux arm64 builds, we cross compile from x64 hosts, so the
     # target_os='linux' and linux-cpu='arm64'
-    # TODO(fujino): make host platform explicit
-    #   https://github.com/flutter/flutter/issues/79403
     return args.target_os is None or (args.target_os == 'linux' and args.linux_cpu == 'arm64')
 
 # Determines whether a prebuilt Dart SDK can be used instead of building one.
@@ -121,6 +120,47 @@ def can_use_prebuilt_dart(args):
   return prebuilts_dir != None and os.path.isdir(prebuilts_dir)
 
 
+# Returns the host machine operating system.
+def get_host_os():
+  if sys.platform.startswith(('cygwin', 'win')):
+    return 'win'
+  if sys.platform == 'darwin':
+    return 'mac'
+  return 'linux'
+
+
+# Runs true if the currently executing python interpreter is running under
+# Rosetta. I.e., python3 is an x64 executable and we're on an arm64 Mac.
+def is_rosetta():
+  if platform.system() == 'Darwin':
+    p = subprocess.Popen(['sysctl', '-in', 'sysctl.proc_translated'],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    output, _ = p.communicate()
+    return output.decode('utf-8').strip() == '1'
+  return False
+
+
+# Returns the host machine CPU architecture.
+def get_host_cpu(args):
+  # If gn itself is running under Rosetta on an arm64 Mac, platform.machine()
+  # will return x86_64; instead return the underlying host architecture.
+  if is_rosetta():
+    return 'arm64'
+  m = platform.machine()
+  if m in ['aarch64', 'arm64']:
+    return 'arm64'
+  if m in ['x86_64', 'AMD64', 'x64']:
+    return 'x64'
+  if m in ['i686', 'i386', 'x86']:
+    return 'x86'
+  raise Exception('Unknown CPU architecture: %s' % m)
+
+
+# Returns the target CPU architecture.
+#
+# For macOS host builds where --mac-cpu is specified, returns that value.
+# For all other host builds, assumes 'x64'.
 def get_target_cpu(args):
   if args.target_os == 'android':
     return args.android_cpu
@@ -139,7 +179,10 @@ def get_target_cpu(args):
     return 'wasm'
   if args.target_os == 'win':
     return args.windows_cpu
-  # Building host artifacts. Default to x64.
+
+  # Host build. Default to x64 unless overridden.
+  if get_host_os() == 'mac' and args.mac_cpu:
+    return args.mac_cpu
   return 'x64'
 
 
@@ -212,19 +255,39 @@ def to_gn_args(args):
       # The GN arg is not available in the windows toolchain.
       gn_args['enable_lto'] = enable_lto
 
-    if args.target_os:
+    # Set OS, CPU arch for host or target build.
+    if is_host_build(args):
+      gn_args['host_os'] = get_host_os()
+      gn_args['host_cpu'] = get_host_cpu(args)
+      gn_args['target_os'] = gn_args['host_os']
+      gn_args['target_cpu'] = get_target_cpu(args)
+      gn_args['dart_target_arch'] = gn_args['target_cpu']
+    else:
       gn_args['target_os'] = args.target_os
-    gn_args['target_cpu'] = get_target_cpu(args)
-    gn_args['dart_target_arch'] = gn_args['target_cpu']
+      gn_args['target_cpu'] = get_target_cpu(args)
+      gn_args['dart_target_arch'] = gn_args['target_cpu']
 
-    # No cross-compilation on Windows (for now).
-    # See: https://github.com/flutter/engine/pull/3883
+    # No cross-compilation on Windows (for now). Use host toolchain that
+    # matches the bit-width of the target architecture.
     if sys.platform.startswith(('cygwin', 'win')) and args.target_os != 'win':
+      gn_args['host_cpu'] = cpu_for_target_arch(gn_args['target_cpu'])
       gn_args['target_cpu'] = cpu_for_target_arch(gn_args['target_cpu'])
 
-    if args.target_os == 'ios':
+    # macOS host builds (whether x64 or arm64) must currently be built under
+    # Rosetta on Apple Silicon Macs.
+    # TODO(cbracken): https://github.com/flutter/flutter/issues/103386
+    if is_host_build(args) and gn_args['host_os'] == 'mac':
+      gn_args['host_cpu'] = 'x64'
+
+    # macOS target builds (whether x64 or arm64) must currently be built under
+    # Rosetta on Apple Silicon Macs.
+    # TODO(cbracken): https://github.com/flutter/flutter/issues/103386
+    if 'target_os' in gn_args and gn_args['target_os'] == 'mac':
+      gn_args['host_cpu'] = 'x64'
+
+    if gn_args['target_os'] == 'ios':
       gn_args['use_ios_simulator'] = args.simulator
-    elif args.target_os == 'mac':
+    elif gn_args['target_os'] == 'mac':
       gn_args['use_ios_simulator'] = False
 
     if args.dart_debug:
@@ -274,10 +337,6 @@ def to_gn_args(args):
     if args.target_os is None:
       if sys.platform.startswith(('cygwin', 'win')):
         gn_args['dart_use_fallback_root_certificates'] = True
-
-    # Make sure host_cpu matches the bit width of target_cpu on x86.
-    if gn_args['target_cpu'] == 'x86':
-      gn_args['host_cpu'] = 'x86'
 
     if args.target_sysroot:
       gn_args['target_sysroot'] = args.target_sysroot
