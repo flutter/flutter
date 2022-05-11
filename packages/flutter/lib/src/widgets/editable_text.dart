@@ -448,8 +448,8 @@ class ToolbarOptions {
 ///
 /// On iOS, the on-screen keyboard may announce the most recent input
 /// incorrectly when a [TextInputFormatter] inserts a thousands separator to
-/// a currency value text field. The following example demonstrates how to 
-/// suppress the default accessibility announcements by always announcing 
+/// a currency value text field. The following example demonstrates how to
+/// suppress the default accessibility announcements by always announcing
 /// the content of the text field as a US currency value:
 /// ```dart
 /// onChanged: (String newText) {
