@@ -148,7 +148,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       }
       logger.printError('AndroidManifest.xml is not a valid XML document.');
       logger.printError('Please check $manifestLocation for errors.');
-      throwToolExit('XML Parser error message: ${exception.toString()}');
+      throwToolExit('XML Parser error message: $exception');
     }
 
     final Iterable<XmlElement> manifests = document.findElements('manifest');

@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';

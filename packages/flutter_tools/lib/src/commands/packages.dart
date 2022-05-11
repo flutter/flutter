@@ -143,7 +143,7 @@ class PackagesGetCommand extends FlutterCommand {
         directory: directory,
         upgrade: upgrade,
         shouldSkipThirdPartyGenerator: false,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
       pubGetTimer.stop();
