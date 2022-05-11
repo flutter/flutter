@@ -446,13 +446,11 @@ class ToolbarOptions {
 /// changes, use [SemanticsService.announce] to make the desired
 /// accessibility announcement.
 ///
-/// {@tool snippet}
 /// On iOS, the on-screen keyboard may announce the most recent input
-/// incorrectly when we insert a thousands separator to a currency value text
-/// field. The following example demonstrates how to suppress the default
-/// accessibility announcements by always announcing the content of the text
-/// field as a US currency value.
-///
+/// incorrectly when a [TextInputFormatter] inserts a thousands separator to
+/// a currency value text field. The following example demonstrates how to 
+/// suppress the default accessibility announcements by always announcing 
+/// the content of the text field as a US currency value:
 /// ```dart
 /// onChanged: (String newText) {
 ///   if (newText.isNotEmpty) {
@@ -460,8 +458,6 @@ class ToolbarOptions {
 ///   }
 /// }
 /// ```
-/// {@end-tool}
-///
 ///
 /// {@endtemplate}
 ///
