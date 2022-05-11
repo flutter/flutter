@@ -5,6 +5,7 @@
 import("//flutter/testing/dart/compile_test.gni")
 
 tests = [
+  "assets_test.dart",
   "canvas_test.dart",
   "channel_buffers_test.dart",
   "codec_test.dart",
