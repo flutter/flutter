@@ -1104,6 +1104,45 @@ void main() {
     expect(pageController.viewportFraction, 1);
   });
 
+  testWidgets('TabBarView has clipBehavior Clip.hardEdge by default', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
+
+    Widget builder() {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBarView(
+            children: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final TabBarView tabBarView = tester.widget(find.byType(TabBarView));
+    expect(tabBarView.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('TabBarView sets clipBehavior correctly', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
+
+    Widget builder() {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBarView(
+            clipBehavior: Clip.none,
+            children: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final PageView pageView = tester.widget(find.byType(PageView));
+    expect(pageView.clipBehavior, Clip.none);
+  });
+
   testWidgets('TabBar tap skips indicator animation when disabled in controller', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B'];
 

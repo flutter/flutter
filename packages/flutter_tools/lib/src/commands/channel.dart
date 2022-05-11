@@ -39,7 +39,7 @@ class ChannelCommand extends FlutterCommand {
     switch (rest.length) {
       case 0:
         await _listChannels(
-          showAll: boolArg('all'),
+          showAll: boolArgDeprecated('all'),
           verbose: globalResults?['verbose'] == true,
         );
         return FlutterCommandResult.success();

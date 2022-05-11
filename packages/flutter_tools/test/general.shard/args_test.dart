@@ -11,7 +11,22 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/testbed.dart';
+import 'runner/utils.dart';
+
+class CommandDummy extends FlutterCommand{
+  @override
+  String get description => 'description';
+
+  @override
+  String get name => 'test';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
 
 void main() {
   test('Help for command line arguments is consistently styled and complete', () => Testbed().run(() {
@@ -22,6 +37,43 @@ void main() {
     ).forEach(runner.addCommand);
     verifyCommandRunner(runner);
   }));
+
+  testUsingContext('bool? safe argResults', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+    );
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    command.argParser.addFlag('key');
+    command.argParser.addFlag('key-false');
+
+    runner.addCommand(command);
+    await runner.run(<String>['dummy', '--key']);
+
+    expect(command.boolArg('key'), true);
+    expect(command.boolArg('empty'), null);
+
+    expect(command.boolArgDeprecated('key'), true);
+    expect(() => command.boolArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+
+    expect(command.boolArg('key-false'), false);
+    expect(command.boolArgDeprecated('key-false'), false);
+  });
+
+  testUsingContext('String? safe argResults', () async {
+    final CommandDummy command = CommandDummy();
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    command.argParser.addOption('key');
+    runner.addCommand(command);
+    await runner.run(<String>['test', '--key=value']);
+
+    expect(command.stringArg('key'), 'value');
+    expect(command.stringArg('empty'), null);
+
+    expect(command.stringArgDeprecated('key'), 'value');
+    expect(() => command.stringArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+  });
 }
 
 void verifyCommandRunner(CommandRunner<Object> runner) {

@@ -660,7 +660,8 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
-  testWidgets('use DefaultSelectionStyle for selection color', (WidgetTester tester) async {
+  testWidgets('EditableText does not derive selection color from DefaultSelectionStyle', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103341.
     const TextEditingValue value = TextEditingValue(
       text: 'test test',
       selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 5, extentOffset: 7),
@@ -687,7 +688,7 @@ void main() {
       ),
     );
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    expect(state.renderEditable.selectionColor, selectionColor);
+    expect(state.renderEditable.selectionColor, null);
   });
 
   testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {

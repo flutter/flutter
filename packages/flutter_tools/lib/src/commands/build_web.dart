@@ -90,12 +90,12 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final String target = stringArg('target')!;
+    final String target = stringArgDeprecated('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    final String? baseHref = stringArg('base-href');
+    final String? baseHref = stringArgDeprecated('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit('base-href should start and end with /');
     }
@@ -118,12 +118,12 @@ class BuildWebCommand extends BuildSubCommand {
       flutterProject,
       target,
       buildInfo,
-      boolArg('csp'),
-      stringArg('pwa-strategy')!,
-      boolArg('source-maps'),
-      boolArg('native-null-assertions'),
+      boolArgDeprecated('csp'),
+      stringArgDeprecated('pwa-strategy')!,
+      boolArgDeprecated('source-maps'),
+      boolArgDeprecated('native-null-assertions'),
       baseHref,
-      stringArg('dart2js-optimization'),
+      stringArgDeprecated('dart2js-optimization'),
     );
     return FlutterCommandResult.success();
   }

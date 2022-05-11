@@ -200,6 +200,10 @@ abstract class MaterialLocalizations {
   String get popupMenuLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
+  /// MenuBarMenu widget is opened.
+  String get menuBarMenuLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// dialog widget is opened.
   String get dialogLabel;
 
@@ -520,9 +524,6 @@ abstract class MaterialLocalizations {
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.delete].
   String get keyboardKeyDelete;
 
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.eisu].
-  String get keyboardKeyEisu;
-
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.eject].
   String get keyboardKeyEject;
 
@@ -535,35 +536,11 @@ abstract class MaterialLocalizations {
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.fn].
   String get keyboardKeyFn;
 
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hangulMode].
-  String get keyboardKeyHangulMode;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hanjaMode].
-  String get keyboardKeyHanjaMode;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hankaku].
-  String get keyboardKeyHankaku;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hiragana].
-  String get keyboardKeyHiragana;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hiraganaKatakana].
-  String get keyboardKeyHiraganaKatakana;
-
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.home].
   String get keyboardKeyHome;
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.insert].
   String get keyboardKeyInsert;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.kanaMode].
-  String get keyboardKeyKanaMode;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.kanjiMode].
-  String get keyboardKeyKanjiMode;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.katakana].
-  String get keyboardKeyKatakana;
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.meta].
   String get keyboardKeyMeta;
@@ -652,9 +629,6 @@ abstract class MaterialLocalizations {
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.printScreen].
   String get keyboardKeyPrintScreen;
 
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.romaji].
-  String get keyboardKeyRomaji;
-
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.scrollLock].
   String get keyboardKeyScrollLock;
 
@@ -663,12 +637,6 @@ abstract class MaterialLocalizations {
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.space].
   String get keyboardKeySpace;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.zenkaku].
-  String get keyboardKeyZenkaku;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.zenkakuHankaku].
-  String get keyboardKeyZenkakuHankaku;
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -1084,6 +1052,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get drawerLabel => 'Navigation menu';
 
   @override
+  String get menuBarMenuLabel => 'Menu bar menu';
+
+  @override
   String get popupMenuLabel => 'Popup menu';
 
   @override
@@ -1285,9 +1256,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -1300,34 +1268,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -1417,9 +1361,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -1427,10 +1368,4 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 }
