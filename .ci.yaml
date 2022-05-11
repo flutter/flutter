@@ -4110,6 +4110,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      ignore_flakiness: true
       tags: >
         ["framework","hostonly"]
       validation: analyze
@@ -4121,6 +4122,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4142,6 +4144,7 @@ targets:
     recipe: infra/ci_yaml
     timeout: 30
     properties:
+      ignore_flakiness: true
       tags: >
         ["framework", "hostonly", "shard"]
     runIf:
@@ -4153,6 +4156,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      ignore_flakiness: true
       tags: >
         ["framework", "hostonly"]
       validation: customer_testing
@@ -4167,6 +4171,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "dashing"},
@@ -4185,6 +4190,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "dashing"}
@@ -4210,6 +4216,7 @@ targets:
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"}
@@ -4224,6 +4231,7 @@ targets:
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"}
@@ -4238,6 +4246,7 @@ targets:
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"}
@@ -4252,6 +4261,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       shard: flutter_plugins
       subshard: analyze
       tags: >
@@ -4263,6 +4273,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "goldctl"}
@@ -4290,6 +4301,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "goldctl"},
@@ -4322,6 +4334,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "goldctl"}
@@ -4349,6 +4362,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      ignore_flakiness: true
       validation: fuchsia_precache
       validation_name: Fuchsia precache
       tags: >
@@ -4360,6 +4374,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4385,6 +4400,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4410,6 +4426,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4435,6 +4452,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4460,6 +4478,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4485,6 +4504,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4511,6 +4531,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4536,6 +4557,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4562,6 +4584,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4588,6 +4611,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4617,6 +4641,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       shard: skp_generator
       subshard: "0"
       tags: >
@@ -4634,6 +4659,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4651,6 +4677,7 @@ targets:
       - main
       - master
     properties:
+      ignore_flakiness: true
       tags: >
         ["framework", "hostonly", "shard"]
     runIf:
@@ -4662,6 +4689,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -4688,6 +4716,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -4714,6 +4743,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -4740,6 +4770,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -4766,6 +4797,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -4788,6 +4820,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -4810,6 +4843,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4830,6 +4864,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       caches: >-
         [
           {"name": "gradle", "path": "gradle"},
@@ -4854,6 +4889,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4876,6 +4912,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4898,6 +4935,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4920,6 +4958,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4942,6 +4981,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4964,6 +5004,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -4987,6 +5028,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5010,6 +5052,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5033,6 +5076,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5056,6 +5100,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5079,6 +5124,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5102,6 +5148,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5125,6 +5172,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5148,6 +5196,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5170,6 +5219,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5192,6 +5242,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5214,6 +5265,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5236,6 +5288,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5258,6 +5311,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5280,6 +5334,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5302,6 +5357,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -5324,6 +5380,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: true
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
