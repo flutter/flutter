@@ -2207,6 +2207,7 @@ targets:
     scheduler: luci
 
   - name: Staging_build_linux analyze
+    presubmit: false
     bringup: true
     recipe: flutter/flutter
     timeout: 60
@@ -2217,6 +2218,7 @@ targets:
       validation_name: Analyze
 
   - name: Staging_build_linux framework_tests_misc
+    presubmit: false
     bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
