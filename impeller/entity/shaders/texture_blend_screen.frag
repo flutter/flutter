@@ -26,9 +26,11 @@ vec4 Unpremultiply(vec4 color) {
 }
 
 void main() {
-  vec4 dst = texture(texture_sampler_dst, v_dst_texture_coords);
+  vec4 dst = SampleWithBorder(texture_sampler_dst, v_dst_texture_coords);
   vec4 d = Unpremultiply(dst);
   vec4 src = SampleWithBorder(texture_sampler_src, v_src_texture_coords);
   vec4 s = Unpremultiply(src);
-  frag_color = 1 - ((1 - s) * (1 - d));
+
+  vec3 color = d.rgb + s.rgb - (d.rgb * s.rgb);
+  frag_color = vec4(color, d.a - s.a + s.a);
 }
