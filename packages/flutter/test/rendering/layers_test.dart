@@ -878,7 +878,10 @@ void main() {
     root.buildScene(builder).dispose();
 
     expect(compositedB1, true);
-  });
+  }, skip: isBrowser); // This test fails on web because of the
+  // HTML backend asserting things about the retained layer. But this test is
+  // only meant to exercise fraemwork code anyway, so coverage on non-browser
+  // platforms should be fine.
 
   test('Observe layer tree composition - asserts on mutation', () {
     final ContainerLayer root = ContainerLayer();
