@@ -206,10 +206,10 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
       ? widget.endpoints[1]
       : widget.endpoints[0];
     final double topAmountInEditableRegion = startTextSelectionPoint.point.dy - widget.textLineHeight;
-    final double anchorTop = (topAmountInEditableRegion > 0 ? topAmountInEditableRegion : 0) + widget.globalEditableRegion.top - _kToolbarContentDistance;
+    final double anchorTop = math.max(topAmountInEditableRegion, 0) + widget.globalEditableRegion.top - _kToolbarContentDistance;
 
     final double bottomAmountInEditableRegion =  endTextSelectionPoint.point.dy;
-    final double anchorBottom = (bottomAmountInEditableRegion < widget.globalEditableRegion.size.height ? bottomAmountInEditableRegion : widget.globalEditableRegion.size.height) + widget.globalEditableRegion.top + _kToolbarContentDistanceBelow;
+    final double anchorBottom = math.min(bottomAmountInEditableRegion, widget.globalEditableRegion.size.height) + widget.globalEditableRegion.top + _kToolbarContentDistanceBelow;
     final Offset anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
       anchorTop,

@@ -615,10 +615,8 @@ void main() {
             tester.getTopLeft(find.byType(TextField));
         expect(cutOffset.dy + 25, equals(textFieldOffset.dy));
       },
-      skip:
-          isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
-      variant: const TargetPlatformVariant(
-          <TargetPlatform>{TargetPlatform.android, TargetPlatform.iOS}),
+      skip: isBrowser, // [intended] the selection menu isn't required by web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
   });
 

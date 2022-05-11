@@ -97,10 +97,10 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     );
 
     final double topAmountInEditableRegion = widget.endpoints.first.point.dy - widget.textLineHeight;
-    final double anchorTop = (topAmountInEditableRegion > 0 ? topAmountInEditableRegion : 0) + widget.globalEditableRegion.top;
+    final double anchorTop = math.max(topAmountInEditableRegion, 0) + widget.globalEditableRegion.top;
 
     final double bottomAmountInEditableRegion = widget.endpoints.last.point.dy;
-    final double anchorBottom = (bottomAmountInEditableRegion < widget.globalEditableRegion.size.height ? bottomAmountInEditableRegion : widget.globalEditableRegion.size.height) + widget.globalEditableRegion.top;
+    final double anchorBottom = math.min(bottomAmountInEditableRegion, widget.globalEditableRegion.size.height) + widget.globalEditableRegion.top;
 
     // The y-coordinate has to be calculated instead of directly quoting
     // selectionMidpoint.dy, since the caller

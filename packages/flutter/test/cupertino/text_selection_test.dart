@@ -533,6 +533,64 @@ void main() {
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
+
+    testWidgets(
+      'When select multiple lines over max lines',
+      (WidgetTester tester) async {
+        final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
+        await tester.pumpWidget(CupertinoApp(
+          home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: const MediaQueryData(size: Size(800.0, 600.0)),
+                child: Center(
+                  child: CupertinoTextField(
+                    controller: controller,
+                    maxLines: 2,
+                  ),
+                ),
+              ),
+            ),
+        ));
+
+        // Initially, the menu isn't shown at all.
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
+
+        // Long press on an space to show the selection menu.
+        await tester.longPressAt(textOffsetToPosition(tester, 1));
+        await tester.pumpAndSettle();
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select All'), findsOneWidget);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
+        
+        // Tap to select all.
+        await tester.tap(find.text('Select All'));
+        await tester.pumpAndSettle();
+
+        // Only Cut, Copy, and Paste are shown.
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
+
+        final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
+        final Offset textFieldOffset =
+            tester.getTopLeft(find.byType(CupertinoTextField));
+        expect(cutOffset.dy + 36, equals(textFieldOffset.dy));
+      },
+      skip: isBrowser, // [intended] the selection menu isn't required by web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    );
   });
 
   testWidgets('iOS selection handles scale with rich text (selection style 1)', (WidgetTester tester) async {
