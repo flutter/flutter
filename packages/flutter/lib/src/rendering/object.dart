@@ -20,6 +20,10 @@ export 'package:flutter/foundation.dart' show FlutterError, InformationCollector
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
 
+/// This is an experimental flag which should not be used in production and will
+/// be removed without warning.
+bool forceOpacityCompositing = true;
+
 /// Base class for data associated with a [RenderObject] by its parent.
 ///
 /// Some render objects wish to store data on their children, such as the
@@ -673,6 +677,9 @@ class PaintingContext extends ClipContext {
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   OpacityLayer? pushOpacity(bool needsCompositing, Offset offset, double opacity, PaintingContextCallback painter, { OpacityLayer? oldLayer, Size? size }) {
+    if (forceOpacityCompositing) {
+      needsCompositing = true;
+    }
     assert(opacity >= 0 && opacity <= 1);
     if (opacity <= 0) {
       return null;
