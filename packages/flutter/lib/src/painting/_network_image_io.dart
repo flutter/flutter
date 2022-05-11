@@ -109,7 +109,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       if (bytes.lengthInBytes == 0)
         throw Exception('NetworkImage is an empty file: $resolved');
 
-      return decode(bytes);
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      return decode(buffer);
     } catch (e) {
       // Depending on where the exception was thrown, the image cache may not
       // have had a chance to track the key in the cache at all.

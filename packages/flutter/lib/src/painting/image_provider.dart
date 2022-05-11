@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui show Codec;
+import 'dart:ui' as ui show Codec, ImmutableBuffer;
 import 'dart:ui' show Size, Locale, TextDirection;
 
 import 'package:flutter/foundation.dart';
@@ -166,7 +166,7 @@ class ImageConfiguration {
 ///
 ///  * [ResizeImage], which uses this to override the `cacheWidth`,
 ///    `cacheHeight`, and `allowUpscaling` parameters.
-typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
+typedef DecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
 
 /// Identifies an image without committing to the precise final asset. This
 /// allows a set of images to be identified and for the precise image to later
@@ -485,7 +485,7 @@ abstract class ImageProvider<T extends Object> {
     }
     final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
       key,
-      () => load(key, PaintingBinding.instance.instantiateImageCodec),
+      () => load(key, PaintingBinding.instance.instantiateImageCodecFromBuffer),
       onError: handleError,
     );
     if (completer != null) {
@@ -651,11 +651,11 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// This function is used by [load].
   @protected
   Future<ui.Codec> _loadAsync(AssetBundleImageKey key, DecoderCallback decode) async {
-    ByteData? data;
+    ui.ImmutableBuffer? data;
     // Hot reload/restart could change whether an asset bundle or key in a
     // bundle are available, or if it is a network backed bundle.
     try {
-      data = await key.bundle.load(key.name);
+      data = await key.bundle.loadBuffer(key.name);
     } on FlutterError {
       PaintingBinding.instance.imageCache.evict(key);
       rethrow;
@@ -664,7 +664,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('Unable to read data');
     }
-    return decode(data.buffer.asUint8List());
+    return decode(data);
   }
 }
 
@@ -749,7 +749,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
   @override
   ImageStreamCompleter load(ResizeImageKey key, DecoderCallback decode) {
-    Future<ui.Codec> decodeResize(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    Future<ui.Codec> decodeResize(ui.ImmutableBuffer bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
@@ -871,6 +871,7 @@ class FileImage extends ImageProvider<FileImage> {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
+    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
 
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
@@ -878,7 +879,7 @@ class FileImage extends ImageProvider<FileImage> {
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
-    return decode(bytes);
+    return decode(buffer);
   }
 
   @override
@@ -950,10 +951,10 @@ class MemoryImage extends ImageProvider<MemoryImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(MemoryImage key, DecoderCallback decode) {
+  Future<ui.Codec> _loadAsync(MemoryImage key, DecoderCallback decode) async {
     assert(key == this);
-
-    return decode(bytes);
+    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
   }
 
   @override

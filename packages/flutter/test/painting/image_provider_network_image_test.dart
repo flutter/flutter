@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui' show Codec, FrameInfo;
+import 'dart:ui' show Codec, FrameInfo, ImmutableBuffer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -18,8 +18,8 @@ import '../rendering/rendering_tester.dart';
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
-  Future<Codec>  basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+  Future<Codec>  basicDecoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   }
 
   late _FakeHttpClient httpClient;
@@ -189,7 +189,7 @@ void main() {
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
-  Future<Codec> decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
