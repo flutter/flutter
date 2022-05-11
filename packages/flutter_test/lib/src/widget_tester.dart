@@ -932,7 +932,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Returns the exception details most recently caught by the Flutter framework.
   ///
   /// See [TestWidgetsFlutterBinding.takeExceptionDetails] for details.
-  dynamic takeExceptionDetails() {
+  FlutterErrorDetails? takeExceptionDetails() {
     return binding.takeExceptionDetails();
   }
 
