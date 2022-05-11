@@ -1081,10 +1081,13 @@ Future<void> refreshPluginsList(
 /// only at build-time.
 ///
 /// This method is similar to [injectPlugins], but used only for platforms where
-/// the plugin files are not required at compile-time (currently: Web).
+/// the plugin files are not required when the app is created (currently: Web).
 ///
-/// It requires a `destination` parameter to specify the root directory (in the
-/// filesystem or memory-fs) of current build output.
+/// This method will create files in the temporary flutter build directory
+/// specified by `destination`.
+///
+/// In the Web platform, `destination` can point to a real filesystem (`flutter build`)
+/// or an in-memory filesystem (`flutter run`).
 Future<void> injectBuildTimePluginFiles(
   FlutterProject project, {
   required Directory destination,
@@ -1100,11 +1103,14 @@ Future<void> injectBuildTimePluginFiles(
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
 ///
-/// These files are required at compile-time.
+/// The injected files are required by the flutter app as soon as possible, so
+/// it can be built.
 ///
-/// This method used to generate the plugin registrar for the webPlatform too,
-/// but now the web tooling is able to call [injectBuildTimePluginFiles] as
-/// needed (at build time).
+/// Files written by this method end up in platform-specific locations that are
+/// configured by each [FlutterProject] subclass (except for the Web).
+///
+/// Web tooling uses [injectBuildTimePluginFiles] instead, which places files in the
+/// current build (temp) directory, and doesn't modify the users' working copy.
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(
