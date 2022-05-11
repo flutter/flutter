@@ -588,6 +588,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     return result;
   }
+
+  /// Returns the details of the exception most recently caught by the 
+  /// Flutter framework.
+  ///
+  /// See [takeException] for more description. This method is similar to
+  /// that one except it provides more details such as stack traces.
+  FlutterErrorDetails? takeExceptionDetails() {
+    assert(inTest);
+    final result = _pendingExceptionDetails;
+    _pendingExceptionDetails = null;
+    return result;
+  }
   FlutterExceptionHandler? _oldExceptionHandler;
   late StackTraceDemangler _oldStackTraceDemangler;
   FlutterErrorDetails? _pendingExceptionDetails;
