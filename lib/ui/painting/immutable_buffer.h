@@ -39,6 +39,19 @@ class ImmutableBuffer : public RefCountedDartWrappable<ImmutableBuffer> {
   /// when the copy has completed.
   static void init(Dart_NativeArguments args);
 
+  /// Initializes a new ImmutableData from an asset matching a provided
+  /// asset string.
+  ///
+  /// The zero indexed argument is the caller that will be registered as the
+  /// Dart peer of the native ImmutableBuffer object.
+  ///
+  /// The first indexed argumented is a String corresponding to the asset
+  /// to load.
+  ///
+  /// The second indexed argument is expected to be a void callback to signal
+  /// when the copy has completed.
+  static void initFromAsset(Dart_NativeArguments args);
+
   /// The length of the data in bytes.
   size_t length() const {
     FML_DCHECK(data_);

@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#include "flutter/assets/asset_manager.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/macros.h"
@@ -613,6 +614,9 @@ class RuntimeController : public PlatformConfigurationClient {
 
   // |PlatformConfigurationClient|
   FontCollection& GetFontCollection() override;
+
+  // |PlatformConfigurationClient|
+  std::shared_ptr<AssetManager> GetAssetManager() override;
 
   // |PlatformConfigurationClient|
   void UpdateIsolateDescription(const std::string isolate_name,
