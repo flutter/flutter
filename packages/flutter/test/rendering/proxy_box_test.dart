@@ -14,7 +14,7 @@ import 'rendering_tester.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
-  forcedOpacityCompositing = false;
+  forceOpacityCompositing = false;
 
   test('RenderFittedBox handles applying paint transform and hit-testing with empty size', () {
     final RenderFittedBox fittedBox = RenderFittedBox(
