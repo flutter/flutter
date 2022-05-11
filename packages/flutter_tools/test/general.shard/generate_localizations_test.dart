@@ -743,8 +743,7 @@ void main() {
     );
   });
 
-  group('generateLocalizations', ()
-  {
+  group('generateLocalizations', () {
     testWithoutContext('forwards arguments correctly', () async {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationOptions options = LocalizationOptions(
