@@ -98,8 +98,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// above its native resolution should prefer scaling the canvas the image is
   /// drawn into.
   @Deprecated(
-    'Use instantiateImageCodecBuffer instead. '
-    'This was deprecated after TODO.'
+    'Use instantiateImageCodecFromBuffer with an ImmutableBuffer instance instead. '
+    'This was deprecated after v2.13.0.'
   )
   Future<ui.Codec> instantiateImageCodec(
     Uint8List bytes, {
@@ -118,7 +118,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     );
   }
 
-  /// Calls through to [dart:ui.instantiateImageCodec] from [ImageCache].
+  /// Calls through to [instantiateImageCodecFromBuffer] from [ImageCache].
   ///
   /// The `cacheWidth` and `cacheHeight` parameters, when specified, indicate
   /// the size to decode the image to.

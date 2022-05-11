@@ -262,7 +262,11 @@ class PlatformAssetBundle extends CachingAssetBundle {
       final ByteData bytes = await load(key);
       return ui.ImmutableBuffer.fromUint8List(bytes.buffer.asUint8List());
     }
-    return ui.ImmutableBuffer.fromAsset(key);
+    try {
+      return await ui.ImmutableBuffer.fromAsset(key);
+    } on Exception {
+      throw FlutterError('Unable to load asset: $key');
+    }
   }
 }
 
