@@ -45,7 +45,7 @@ import 'package:intl/intl.dart' as intl;
 ///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
-///   intl: any # Pinned by flutter_localizations
+///   intl: any # Use the pinned version from flutter_localizations
 ///
 ///   # Rest of dependencies
 /// ```
