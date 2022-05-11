@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as js_util;
 
@@ -55,6 +57,7 @@ extension DomNavigatorExtension on DomNavigator {
 class DomDocument {}
 
 extension DomDocumentExtension on DomDocument {
+  external DomElement? querySelector(String selectors);
   external /* List<Node> */ List<Object?> querySelectorAll(String selectors);
   external DomElement createElement(String name, [dynamic options]);
   external DomHTMLScriptElement? get currentScript;
@@ -206,6 +209,13 @@ DomHTMLScriptElement createDomHTMLScriptElement() =>
 
 @JS()
 @staticInterop
+class DomHTMLDivElement extends DomHTMLElement {}
+
+DomHTMLDivElement createDomHTMLDivElement() =>
+    domDocument.createElement('div') as DomHTMLDivElement;
+
+@JS()
+@staticInterop
 class DomPerformance extends DomEventTarget {}
 
 extension DomPerformanceExtension on DomPerformance {
@@ -252,7 +262,7 @@ extension DomCanvasElementExtension on DomCanvasElement {
     ]);
   }
 
-  DomCanvasRenderingContext2D get getContext2D =>
+  DomCanvasRenderingContext2D get context2D =>
       getContext('2d')! as DomCanvasRenderingContext2D;
 }
 
@@ -265,7 +275,19 @@ abstract class DomCanvasImageSource {}
 class DomCanvasRenderingContext2D {}
 
 extension DomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
+  external Object? get fillStyle;
+  external set fillStyle(Object? style);
   external void drawImage(DomCanvasImageSource source, num destX, num destY);
+  external void fillRect(num x, num y, num width, num height);
+  external DomImageData getImageData(int x, int y, int sw, int sh);
+}
+
+@JS()
+@staticInterop
+class DomImageData {}
+
+extension DomImageDataExtension on DomImageData {
+  external Uint8ClampedList get data;
 }
 
 @JS()

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -48,6 +46,6 @@ void testMain() {
   }, skip: isIosSafari);
 }
 
-html.Element? findGlassPane() {
-  return html.document.querySelector('flt-glass-pane');
+DomElement? findGlassPane() {
+  return domDocument.querySelector('flt-glass-pane');
 }
