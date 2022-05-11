@@ -133,6 +133,16 @@ void main() {
     listenerLogs.clear();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/90838
+  test('should not crash if the first event is a Removed event', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    setUpWithOneAnnotation(logEvents: events);
+    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, Offset.zero),
+    ]));
+    events.clear();
+  });
+
   test('should correctly handle multiple devices', () {
     final List<PointerEvent> events = <PointerEvent>[];
     setUpWithOneAnnotation(logEvents: events);

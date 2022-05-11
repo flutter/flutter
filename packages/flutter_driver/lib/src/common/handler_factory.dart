@@ -413,7 +413,7 @@ mixin CommandHandlerFactory {
     }
 
     if (text == null) {
-      throw UnsupportedError('Type ${widget.runtimeType.toString()} is currently not supported by getText');
+      throw UnsupportedError('Type ${widget.runtimeType} is currently not supported by getText');
     }
 
     return GetTextResult(text);

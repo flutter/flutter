@@ -1073,6 +1073,35 @@ void main() {
     await tester.tap(dismissTarget);
     await tester.pumpAndSettle();
   });
+
+  testWidgets('ScaffoldMessenger will alert for MaterialBanners that cannot be presented', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103004
+    await tester.pumpWidget(const MaterialApp(
+      home: Center(),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
+      find.byType(ScaffoldMessenger),
+    );
+    expect(
+      () {
+        scaffoldMessengerState.showMaterialBanner(const MaterialBanner(
+          content: Text('Banner'),
+          actions: <Widget>[],
+        ));
+      },
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'description',
+          contains(
+            'ScaffoldMessenger.showMaterialBanner was called, but there are currently '
+            'no descendant Scaffolds to present to.'
+          )
+        ),
+      ),
+    );
+  });
 }
 
 Material _getMaterialFromBanner(WidgetTester tester) {

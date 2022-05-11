@@ -93,9 +93,9 @@ class CreateCommand extends CreateBase {
   @override
   Future<CustomDimensions> get usageValues async {
     return CustomDimensions(
-      commandCreateProjectType: stringArg('template'),
-      commandCreateAndroidLanguage: stringArg('android-language'),
-      commandCreateIosLanguage: stringArg('ios-language'),
+      commandCreateProjectType: stringArgDeprecated('template'),
+      commandCreateAndroidLanguage: stringArgDeprecated('android-language'),
+      commandCreateIosLanguage: stringArgDeprecated('ios-language'),
     );
   }
 
@@ -162,7 +162,7 @@ class CreateCommand extends CreateBase {
     FlutterProjectType detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     if (argResults['template'] != null) {
-      template = stringToProjectType(stringArg('template'));
+      template = stringToProjectType(stringArgDeprecated('template'));
     }
     // If the project directory exists and isn't empty, then try to determine the template
     // type from the project directory.
@@ -190,7 +190,7 @@ class CreateCommand extends CreateBase {
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['list-samples'] != null) {
       // _writeSamplesJson can potentially be long-lived.
-      await _writeSamplesJson(stringArg('list-samples'));
+      await _writeSamplesJson(stringArgDeprecated('list-samples'));
       return FlutterCommandResult.success();
     }
 
@@ -199,12 +199,12 @@ class CreateCommand extends CreateBase {
     String sampleCode;
     if (argResults['sample'] != null) {
       if (argResults['template'] != null &&
-        stringToProjectType(stringArg('template') ?? 'app') != FlutterProjectType.app) {
+        stringToProjectType(stringArgDeprecated('template') ?? 'app') != FlutterProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
           '"${flutterProjectTypeToString(FlutterProjectType.app)}"');
       }
       // Fetch the sample from the server.
-      sampleCode = await _fetchSampleFromServer(stringArg('sample'));
+      sampleCode = await _fetchSampleFromServer(stringArgDeprecated('sample'));
     }
 
     final FlutterProjectType template = _getProjectType(projectDir);
@@ -245,10 +245,10 @@ class CreateCommand extends CreateBase {
 
     final String organization = await getOrganization();
 
-    final bool overwrite = boolArg('overwrite');
+    final bool overwrite = boolArgDeprecated('overwrite');
     validateProjectDir(overwrite: overwrite);
 
-    if (boolArg('with-driver-test')) {
+    if (boolArgDeprecated('with-driver-test')) {
       globals.printWarning(
         'The "--with-driver-test" argument has been deprecated and will no longer add a flutter '
         'driver template. Instead, learn how to use package:integration_test by '
@@ -276,12 +276,12 @@ class CreateCommand extends CreateBase {
       organization: organization,
       projectName: projectName,
       titleCaseProjectName: titleCaseProjectName,
-      projectDescription: stringArg('description'),
+      projectDescription: stringArgDeprecated('description'),
       flutterRoot: flutterRoot,
       withPlatformChannelPluginHook: generateMethodChannelsPlugin,
       withFfiPluginHook: generateFfiPlugin,
-      androidLanguage: stringArg('android-language'),
-      iosLanguage: stringArg('ios-language'),
+      androidLanguage: stringArgDeprecated('android-language'),
+      iosLanguage: stringArgDeprecated('ios-language'),
       iosDevelopmentTeam: developmentTeam,
       ios: includeIos,
       android: featureFlags.isAndroidEnabled && platforms.contains('android'),
@@ -291,7 +291,7 @@ class CreateCommand extends CreateBase {
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
       // Enable null safety everywhere.
       dartSdkVersionBounds: "'>=$dartSdk <3.0.0'",
-      implementationTests: boolArg('implementation-tests'),
+      implementationTests: boolArgDeprecated('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
       gradleVersion: gradle.templateDefaultGradleVersion,
@@ -438,7 +438,7 @@ Your $application code is in $relativeAppMain.
   }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
-        ? stringArg('description')
+        ? stringArgDeprecated('description')
         : 'A new Flutter module project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
@@ -448,11 +448,11 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       await pub.get(
         context: PubContext.create,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: false,
       );
       final FlutterProject project = FlutterProject.fromDirectory(directory);
@@ -472,7 +472,7 @@ Your $application code is in $relativeAppMain.
   }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
-        ? stringArg('description')
+        ? stringArgDeprecated('description')
         : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
@@ -482,11 +482,11 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       await pub.get(
         context: PubContext.createPackage,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: false,
       );
     }
@@ -518,7 +518,7 @@ Your $application code is in $relativeAppMain.
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
-        ? stringArg('description')
+        ? stringArgDeprecated('description')
         : 'A new Flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
@@ -529,11 +529,11 @@ Your $application code is in $relativeAppMain.
       printStatusWhenWriting: printStatusWhenWriting,
     );
 
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: false,
       );
     }
@@ -597,7 +597,7 @@ Your $application code is in $relativeAppMain.
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
-        ? stringArg('description')
+        ? stringArgDeprecated('description')
         : 'A new Flutter FFI plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
@@ -608,11 +608,11 @@ Your $application code is in $relativeAppMain.
       printStatusWhenWriting: printStatusWhenWriting,
     );
 
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: false,
       );
     }

@@ -2296,12 +2296,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         return;
       }
     }
-    assert(() {
-      final AbstractNode? parent = this.parent;
-      if (parent is RenderObject)
-        return parent._needsCompositing;
-      return true;
-    }());
     // parent is fine (or there isn't one), but we are dirty
     if (owner != null)
       owner!._nodesNeedingCompositingBitsUpdate.add(this);

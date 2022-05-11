@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 
-import 'base/common.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'resident_runner.dart';
@@ -161,7 +160,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       );
     } on Exception catch (e) {
       _logger.printError(
-        'Failed to set DevTools server address: ${e.toString()}. Deep links to'
+        'Failed to set DevTools server address: $e. Deep links to'
         ' DevTools will not show in Flutter errors.',
       );
     }
@@ -215,7 +214,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     } on Exception catch (e) {
       _logger.printError(e.toString());
       _logger.printError(
-        'Failed to set vm service URI: ${e.toString()}. Deep links to DevTools'
+        'Failed to set vm service URI: $e. Deep links to DevTools'
         ' will not show in Flutter errors.',
       );
     }

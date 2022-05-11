@@ -189,7 +189,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       if (!mounted) {
         return;
       }
-      showMessage(context, 'Failed saving ${e.toString()}');
+      showMessage(context, 'Failed saving $e');
     }
   }
 
@@ -309,6 +309,6 @@ class TouchEventDiff extends StatelessWidget {
     for (int i = 0; i < coords.length; i++) {
       buffer.write('p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ');
     }
-    print(buffer.toString());
+    print(buffer);
   }
 }

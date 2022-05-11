@@ -296,6 +296,7 @@ class WebAssetServer implements AssetReader {
         ReloadConfiguration.none,
         server,
         digestProvider,
+        server.basePath,
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
