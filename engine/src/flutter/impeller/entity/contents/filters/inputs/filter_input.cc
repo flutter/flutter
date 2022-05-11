@@ -4,6 +4,8 @@
 
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 
+#include <memory>
+
 #include "flutter/fml/logging.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/contents_filter_input.h"
@@ -26,11 +28,16 @@ FilterInput::Ref FilterInput::Make(Variant input) {
   }
 
   if (auto texture = std::get_if<std::shared_ptr<Texture>>(&input)) {
-    return std::static_pointer_cast<FilterInput>(
-        std::shared_ptr<TextureFilterInput>(new TextureFilterInput(*texture)));
+    return Make(*texture, Matrix());
   }
 
   FML_UNREACHABLE();
+}
+
+FilterInput::Ref FilterInput::Make(std::shared_ptr<Texture> texture,
+                                   Matrix local_transform) {
+  return std::shared_ptr<TextureFilterInput>(
+      new TextureFilterInput(texture, local_transform));
 }
 
 FilterInput::Vector FilterInput::Make(std::initializer_list<Variant> inputs) {

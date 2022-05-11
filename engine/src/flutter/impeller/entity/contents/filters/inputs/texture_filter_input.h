@@ -6,6 +6,8 @@
 
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 
+#include "impeller/geometry/matrix.h"
+
 namespace impeller {
 
 class TextureFilterInput final : public FilterInput {
@@ -22,10 +24,15 @@ class TextureFilterInput final : public FilterInput {
   // |FilterInput|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
+  // |FilterInput|
+  Matrix GetLocalTransform(const Entity& entity) const override;
+
  private:
-  TextureFilterInput(std::shared_ptr<Texture> texture);
+  TextureFilterInput(std::shared_ptr<Texture> texture,
+                     Matrix local_transform = Matrix());
 
   std::shared_ptr<Texture> texture_;
+  Matrix local_transform_;
 
   friend FilterInput;
 };
