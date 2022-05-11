@@ -16,7 +16,6 @@ void main() {
   FileSystem fileSystem;
 
   group('Flutter SDK configuration for web', () {
-    final SdkConfigurationProvider provider = SdkWebConfigurationProvider(Artifacts.test(fileSystem: fileSystem));
     SdkConfiguration configuration;
 
     setUp(() async {
@@ -26,6 +25,8 @@ void main() {
       fileSystem.file('HostArtifact.webPlatformSoundKernelDill').createSync();
       fileSystem.file('HostArtifact.flutterWebLibrariesJson').createSync();
 
+      final SdkWebConfigurationProvider provider =
+        SdkWebConfigurationProvider(Artifacts.test(fileSystem: fileSystem));
       configuration = await provider.configuration;
     });
 
