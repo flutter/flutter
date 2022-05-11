@@ -460,6 +460,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     super.enabled,
     super.padding,
     super.height,
+    super.mouseCursor,
     super.child,
   }) : assert(checked != null);
 
@@ -512,13 +513,15 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
 
   @override
   Widget buildChild() {
-    return ListTile(
-      enabled: widget.enabled,
-      leading: FadeTransition(
-        opacity: _opacity,
-        child: Icon(_controller.isDismissed ? null : Icons.done),
+    return IgnorePointer(
+      child: ListTile(
+        enabled: widget.enabled,
+        leading: FadeTransition(
+          opacity: _opacity,
+          child: Icon(_controller.isDismissed ? null : Icons.done),
+        ),
+        title: widget.child,
       ),
-      title: widget.child,
     );
   }
 }
