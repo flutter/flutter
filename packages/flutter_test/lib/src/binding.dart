@@ -589,7 +589,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return result;
   }
 
-  /// Returns the details of the exception most recently caught by the 
+  /// Returns the details of the exception most recently caught by the
   /// Flutter framework.
   ///
   /// See [takeException] for more description. This method is similar to
