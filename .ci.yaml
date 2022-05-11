@@ -5650,4 +5650,4 @@ targets:
       - dev/
       - packages/flutter_tools/
       - bin/
-      - .ci.yaml 
+      - .ci.yaml
