@@ -166,7 +166,20 @@ class ImageConfiguration {
 ///
 ///  * [ResizeImage], which uses this to override the `cacheWidth`,
 ///    `cacheHeight`, and `allowUpscaling` parameters.
-typedef DecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
+typedef DecoderCallback = Future<ui.Codec> Function(Uint8List buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
+
+
+/// Performs the decode process for use in [ImageProvider.loadBuffer].
+///
+/// This callback allows decoupling of the `cacheWidth`, `cacheHeight`, and
+/// `allowUpscaling` parameters from implementations of [ImageProvider] that do
+/// not expose them.
+///
+/// See also:
+///
+///  * [ResizeImage], which uses this to override the `cacheWidth`,
+///    `cacheHeight`, and `allowUpscaling` parameters.
+typedef DecoderBufferCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
 
 /// Identifies an image without committing to the precise final asset. This
 /// allows a set of images to be identified and for the precise image to later
@@ -485,7 +498,14 @@ abstract class ImageProvider<T extends Object> {
     }
     final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
       key,
-      () => load(key, PaintingBinding.instance.instantiateImageCodecFromBuffer),
+      () {
+        final ImageStreamCompleter completer = loadBuffer(key, PaintingBinding.instance.instantiateImageCodecFromBuffer);
+        // Image provider has not been migrated yet.
+        if (identical(completer, _noOpCompleter)) {
+          return load(key, PaintingBinding.instance.instantiateImageCodec);
+        }
+        return completer;
+      },
       onError: handleError,
     );
     if (completer != null) {
@@ -564,7 +584,25 @@ abstract class ImageProvider<T extends Object> {
   ///
   ///  * [ResizeImage], for modifying the key to account for cache dimensions.
   @protected
+  @Deprecated(
+    'Implement loadBuffer for faster image loading. '
+    'This feature was deprecated after v2.13.0-1.0.pre.',
+  )
   ImageStreamCompleter load(T key, DecoderCallback decode);
+
+  /// Converts a key into an [ImageStreamCompleter], and begins fetching the
+  /// image.
+  ///
+  /// The [decode] callback provides the logic to obtain the codec for the
+  /// image.
+  ///
+  /// See also:
+  ///
+  ///  * [ResizeImage], for modifying the key to account for cache dimensions.
+  @protected
+  ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) {
+    return _noOpCompleter;
+  }
 
   @override
   String toString() => '${objectRuntimeType(this, 'ImageConfiguration')}()';
@@ -628,7 +666,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   @override
-  ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(AssetBundleImageKey key, DecoderBufferCallback decode) {
     InformationCollector? collector;
     assert(() {
       collector = () => <DiagnosticsNode>[
@@ -645,12 +683,17 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     );
   }
 
+  @override
+  ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
+    throw UnsupportedError('use ImageProvider.loadBuffer instead.');
+  }
+
   /// Fetches the image from the asset bundle, decodes it, and returns a
   /// corresponding [ImageInfo] object.
   ///
   /// This function is used by [load].
   @protected
-  Future<ui.Codec> _loadAsync(AssetBundleImageKey key, DecoderCallback decode) async {
+  Future<ui.Codec> _loadAsync(AssetBundleImageKey key, DecoderBufferCallback decode) async {
     ui.ImmutableBuffer? data;
     // Hot reload/restart could change whether an asset bundle or key in a
     // bundle are available, or if it is a network backed bundle.
@@ -748,7 +791,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   @override
-  ImageStreamCompleter load(ResizeImageKey key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(ResizeImageKey key, DecoderBufferCallback decode) {
     Future<ui.Codec> decodeResize(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
@@ -757,11 +800,16 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       );
       return decode(buffer, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
     }
-    final ImageStreamCompleter completer = imageProvider.load(key._providerCacheKey, decodeResize);
+    final ImageStreamCompleter completer = imageProvider.loadBuffer(key._providerCacheKey, decodeResize);
     if (!kReleaseMode) {
       completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
     return completer;
+  }
+
+  @override
+  ImageStreamCompleter load(ResizeImageKey key, DecoderCallback decode) {
+    throw UnsupportedError('use ImageProvider.loadBuffer instead.');
   }
 
   @override
@@ -824,6 +872,9 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 
   @override
   ImageStreamCompleter load(NetworkImage key, DecoderCallback decode);
+
+  @override
+  ImageStreamCompleter loadBuffer(NetworkImage key, DecoderBufferCallback decode);
 }
 
 /// Decodes the given [File] object as an image, associating it with the given
@@ -856,7 +907,7 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  ImageStreamCompleter load(FileImage key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(FileImage key, DecoderBufferCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
@@ -867,7 +918,12 @@ class FileImage extends ImageProvider<FileImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(FileImage key, DecoderCallback decode) async {
+  @override
+  ImageStreamCompleter load(FileImage key, DecoderCallback decode) {
+    throw UnsupportedError('use ImageProvider.loadBuffer instead.');
+  }
+
+  Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback decode) async {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
@@ -943,7 +999,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  ImageStreamCompleter load(MemoryImage key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(MemoryImage key, DecoderBufferCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
@@ -951,7 +1007,12 @@ class MemoryImage extends ImageProvider<MemoryImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(MemoryImage key, DecoderCallback decode) async {
+  @override
+  ImageStreamCompleter load(MemoryImage key, DecoderCallback decode) {
+    throw UnsupportedError('use ImageProvider.loadBuffer instead.');
+  }
+
+  Future<ui.Codec> _loadAsync(MemoryImage key, DecoderBufferCallback decode) async {
     assert(key == this);
     final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
     return decode(buffer);
@@ -1139,4 +1200,65 @@ class NetworkImageLoadException implements Exception {
 
   @override
   String toString() => _message;
+}
+
+const _SentinelImageStreamCompleter _noOpCompleter = _SentinelImageStreamCompleter();
+
+// A no-op implementation of the ImageStreamCompleter to detect unmigrated
+// image providers.
+class _SentinelImageStreamCompleter implements ImageStreamCompleter {
+  const _SentinelImageStreamCompleter();
+
+  @override
+  String? get debugLabel => null;
+
+  @override
+  set debugLabel(String? value) {}
+
+  @override
+  void addListener(ImageStreamListener listener) { }
+
+  @override
+  void addOnLastListenerRemovedCallback(VoidCallback callback) {  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {  }
+
+  @override
+  bool get hasListeners => throw UnimplementedError();
+
+  @override
+  ImageStreamCompleterHandle keepAlive() {
+    throw UnimplementedError();
+  }
+
+  @override
+  void removeListener(ImageStreamListener listener) { }
+
+  @override
+  void removeOnLastListenerRemovedCallback(VoidCallback callback) { }
+
+  @override
+  void reportError({DiagnosticsNode? context, required Object exception, StackTrace? stack, InformationCollector? informationCollector, bool silent = false}) { }
+
+  @override
+  void reportImageChunkEvent(ImageChunkEvent event) { }
+
+  @override
+  void setImage(ImageInfo image) { }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({String? name, DiagnosticsTreeStyle? style}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  String toStringShort() {
+    throw UnimplementedError();
+  }
+
+  @override
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+     throw UnimplementedError();
+  }
 }

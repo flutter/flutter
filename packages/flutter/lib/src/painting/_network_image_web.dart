@@ -57,7 +57,7 @@ class NetworkImage
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(image_provider.NetworkImage key, image_provider.DecoderBufferCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -71,6 +71,11 @@ class NetworkImage
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
     );
+  }
+
+  @override
+  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+    throw UnsupportedError('use ImageProvider.loadBuffer instead.');
   }
 
   InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
@@ -93,7 +98,7 @@ class NetworkImage
   // directly in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
-    image_provider.DecoderCallback decode,
+    image_provider.DecoderBufferCallback decode,
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
     assert(key == this);

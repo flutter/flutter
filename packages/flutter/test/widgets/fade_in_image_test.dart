@@ -58,8 +58,8 @@ class LoadTestImageProvider extends ImageProvider<Object> {
 
   final ImageProvider provider;
 
-  ImageStreamCompleter testLoad(Object key, DecoderCallback decode) {
-    return provider.load(key, decode);
+  ImageStreamCompleter testLoad(Object key, DecoderBufferCallback decode) {
+    return provider.loadBuffer(key, decode);
   }
 
   @override

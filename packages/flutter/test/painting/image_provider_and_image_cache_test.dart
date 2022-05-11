@@ -76,7 +76,7 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
-      imageProvider, () => imageProvider.load(imageProvider, basicDecoder),
+      imageProvider, () => imageProvider.loadBuffer(imageProvider, basicDecoder),
     )!;
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     final Completer<void> completer = Completer<void>();

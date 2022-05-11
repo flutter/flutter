@@ -77,7 +77,7 @@ void main() {
 
     Future<void> loadNetworkImage() async {
       final NetworkImage networkImage = NetworkImage(nonconst('foo'));
-      final ImageStreamCompleter completer = networkImage.load(networkImage, basicDecoder);
+      final ImageStreamCompleter completer = networkImage.loadBuffer(networkImage, basicDecoder);
       completer.addListener(ImageStreamListener(
         (ImageInfo image, bool synchronousCall) { },
         onError: (dynamic error, StackTrace? stackTrace) {
@@ -207,7 +207,7 @@ void main() {
 
     const NetworkImage provider = NetworkImage(url);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, url);
   });

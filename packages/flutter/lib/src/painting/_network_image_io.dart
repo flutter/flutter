@@ -39,7 +39,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(image_provider.NetworkImage key, image_provider.DecoderBufferCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -55,6 +55,11 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         DiagnosticsProperty<image_provider.NetworkImage>('Image key', key),
       ],
     );
+  }
+
+  @override
+  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+    throw UnsupportedError('use ImageProvider.loadBuffer instead.');
   }
 
   // Do not access this field directly; use [_httpClient] instead.
@@ -76,7 +81,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
-    image_provider.DecoderCallback decode,
+    image_provider.DecoderBufferCallback decode,
   ) async {
     try {
       assert(key == this);
