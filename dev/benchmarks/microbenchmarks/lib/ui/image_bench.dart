@@ -118,6 +118,8 @@ const List<String> assets = <String>[
   'packages/shrine_images/37-0.jpg',
 ];
 
+// Measures the time it takes to load a fixed number of assets into an
+// immutable buffer to later be decoded by skia.
 Future<void> main() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
@@ -143,39 +145,4 @@ Future<void> main() async {
     name: 'image_load_ms',
   );
   printer.printToStdout();
-}
-
-class Example extends StatefulWidget {
-  const Example({super.key});
-
-  @override
-  State<Example> createState() => _ExampleState();
-}
-
-class _ExampleState extends State<Example> {
-  static final Stopwatch sw = Stopwatch();
-  static final Completer<void> completer = Completer<void>();
-
-  @override
-  void initState() {
-    super.initState();
-    _bench();
-  }
-
-  Future<void> _bench() async {
-    sw.start();
-    await Future.wait(<Future<ui.ImmutableBuffer>>[
-      for (String asset in assets)
-        rootBundle.load(asset).then((ByteData data) {
-          return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
-        })
-    ]);
-    sw.stop();
-    completer.complete();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
 }
