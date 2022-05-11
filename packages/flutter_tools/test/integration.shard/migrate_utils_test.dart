@@ -40,6 +40,10 @@ void main() {
       projectRootPath = projectRoot.path;
     });
 
+    tearDown(() async {
+      tryToDelete(projectRoot);
+    });
+
     testWithoutContext('init', () async {
       expect(projectRoot.existsSync(), true);
       expect(projectRoot.childDirectory('.git').existsSync(), false);
