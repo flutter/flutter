@@ -596,7 +596,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// that one except it provides more details such as stack traces.
   FlutterErrorDetails? takeExceptionDetails() {
     assert(inTest);
-    final result = _pendingExceptionDetails;
+    final FlutterErrorDetails? result = _pendingExceptionDetails;
     _pendingExceptionDetails = null;
     return result;
   }
