@@ -755,8 +755,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   // |RuntimeDelegate|
   FontCollection& GetFontCollection() override;
 
-  // Return the asset manager associated with the current engine, or nullptr.
-  std::shared_ptr<AssetManager> GetAssetManager();
+  // |RuntimeDelegate|
+  std::shared_ptr<AssetManager> GetAssetManager() override;
 
   // Return the weak_ptr of ImageDecoder.
   fml::WeakPtr<ImageDecoder> GetImageDecoderWeakPtr();

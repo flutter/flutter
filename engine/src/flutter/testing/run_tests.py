@@ -286,6 +286,7 @@ def RunDartTest(build_dir, test_packages, dart_file, verbose_dart_snapshot, mult
   command_args += [
     '--use-test-fonts',
     '--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat'),
+    '--flutter-assets-dir=%s' % os.path.join(build_dir, 'gen', 'flutter', 'lib', 'ui'),
     kernel_file_output,
   ]
 

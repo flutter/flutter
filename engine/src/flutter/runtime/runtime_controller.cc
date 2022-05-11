@@ -299,6 +299,11 @@ FontCollection& RuntimeController::GetFontCollection() {
   return client_.GetFontCollection();
 }
 
+// |PlatfromConfigurationClient|
+std::shared_ptr<AssetManager> RuntimeController::GetAssetManager() {
+  return client_.GetAssetManager();
+}
+
 // |PlatformConfigurationClient|
 void RuntimeController::UpdateIsolateDescription(const std::string isolate_name,
                                                  int64_t isolate_port) {

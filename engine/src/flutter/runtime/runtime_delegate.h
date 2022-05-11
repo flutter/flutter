@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#include "flutter/assets/asset_manager.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
@@ -32,6 +33,8 @@ class RuntimeDelegate {
       std::unique_ptr<PlatformMessage> message) = 0;
 
   virtual FontCollection& GetFontCollection() = 0;
+
+  virtual std::shared_ptr<AssetManager> GetAssetManager() = 0;
 
   virtual void OnRootIsolateCreated() = 0;
 
