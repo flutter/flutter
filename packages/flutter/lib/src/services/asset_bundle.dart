@@ -59,7 +59,11 @@ abstract class AssetBundle {
   /// buffer.
   ///
   /// Throws an exception if the asset is not found.
-  Future<ui.ImmutableBuffer> loadBuffer(String key);
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    final ByteData data = await load(key);
+    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+  }
 
   /// Retrieve a string from the asset bundle.
   ///
@@ -157,12 +161,6 @@ class NetworkAssetBundle extends AssetBundle {
 
   @override
   String toString() => '${describeIdentity(this)}($_baseUrl)';
-
-  @override
-  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
-    final ByteData data = await load(key);
-    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
-  }
 }
 
 /// An [AssetBundle] that permanently caches string and structured resources
