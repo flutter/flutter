@@ -6,8 +6,9 @@
 
 namespace impeller {
 
-TextureFilterInput::TextureFilterInput(std::shared_ptr<Texture> texture)
-    : texture_(texture) {}
+TextureFilterInput::TextureFilterInput(std::shared_ptr<Texture> texture,
+                                       Matrix local_transform)
+    : texture_(texture), local_transform_(local_transform) {}
 
 TextureFilterInput::~TextureFilterInput() = default;
 
@@ -25,6 +26,10 @@ std::optional<Rect> TextureFilterInput::GetCoverage(
     const Entity& entity) const {
   return Rect::MakeSize(Size(texture_->GetSize()))
       .TransformBounds(GetTransform(entity));
+}
+
+Matrix TextureFilterInput::GetLocalTransform(const Entity& entity) const {
+  return local_transform_;
 }
 
 }  // namespace impeller

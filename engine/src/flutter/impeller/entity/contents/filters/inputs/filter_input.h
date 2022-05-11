@@ -38,6 +38,9 @@ class FilterInput {
 
   static FilterInput::Ref Make(Variant input);
 
+  static FilterInput::Ref Make(std::shared_ptr<Texture> input,
+                               Matrix local_transform);
+
   static FilterInput::Vector Make(std::initializer_list<Variant> inputs);
 
   virtual Variant GetInput() const = 0;

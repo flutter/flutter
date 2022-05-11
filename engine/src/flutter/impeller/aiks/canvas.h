@@ -104,7 +104,8 @@ class Canvas {
 
   size_t GetStencilDepth() const;
 
-  void Save(bool create_subpass);
+  void Save(bool create_subpass,
+            Entity::BlendMode = Entity::BlendMode::kSourceOver);
 
   void RestoreClip();
 

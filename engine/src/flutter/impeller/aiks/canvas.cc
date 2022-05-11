@@ -39,6 +39,21 @@ void Canvas::Save() {
   Save(false);
 }
 
+void Canvas::Save(bool create_subpass, Entity::BlendMode blend_mode) {
+  auto entry = CanvasStackEntry{};
+  entry.xformation = xformation_stack_.back().xformation;
+  entry.stencil_depth = xformation_stack_.back().stencil_depth;
+  if (create_subpass) {
+    entry.is_subpass = true;
+    auto subpass = std::make_unique<EntityPass>();
+    subpass->SetBlendMode(blend_mode);
+    current_pass_ = GetCurrentPass().AddSubpass(std::move(subpass));
+    current_pass_->SetTransformation(xformation_stack_.back().xformation);
+    current_pass_->SetStencilDepth(xformation_stack_.back().stencil_depth);
+  }
+  xformation_stack_.emplace_back(std::move(entry));
+}
+
 bool Canvas::Restore() {
   FML_DCHECK(xformation_stack_.size() > 0);
   if (xformation_stack_.size() == 1) {
@@ -135,23 +150,6 @@ void Canvas::DrawRect(Rect rect, Paint paint) {
 void Canvas::DrawCircle(Point center, Scalar radius, Paint paint) {
   DrawPath(PathBuilder{}.AddCircle(center, radius).TakePath(),
            std::move(paint));
-}
-
-void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
-  Save(true);
-  GetCurrentPass().SetBlendMode(paint.blend_mode);
-
-  GetCurrentPass().SetDelegate(
-      std::make_unique<PaintPassDelegate>(paint, bounds));
-
-  if (bounds.has_value()) {
-    // Render target switches due to a save layer can be elided. In such cases
-    // where passes are collapsed into their parent, the clipping effect to
-    // the size of the render target that would have been allocated will be
-    // absent. Explicitly add back a clip to reproduce that behavior. Since
-    // clips never require a render target switch, this is a cheap operation.
-    ClipPath(PathBuilder{}.AddRect(bounds.value()).TakePath());
-  }
 }
 
 void Canvas::ClipPath(Path path, Entity::ClipOperation clip_op) {
@@ -264,17 +262,20 @@ size_t Canvas::GetStencilDepth() const {
   return xformation_stack_.back().stencil_depth;
 }
 
-void Canvas::Save(bool create_subpass) {
-  auto entry = CanvasStackEntry{};
-  entry.xformation = xformation_stack_.back().xformation;
-  entry.stencil_depth = xformation_stack_.back().stencil_depth;
-  if (create_subpass) {
-    entry.is_subpass = true;
-    current_pass_ = GetCurrentPass().AddSubpass(std::make_unique<EntityPass>());
-    current_pass_->SetTransformation(xformation_stack_.back().xformation);
-    current_pass_->SetStencilDepth(xformation_stack_.back().stencil_depth);
+void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
+  Save(true, paint.blend_mode);
+
+  GetCurrentPass().SetDelegate(
+      std::make_unique<PaintPassDelegate>(paint, bounds));
+
+  if (bounds.has_value()) {
+    // Render target switches due to a save layer can be elided. In such cases
+    // where passes are collapsed into their parent, the clipping effect to
+    // the size of the render target that would have been allocated will be
+    // absent. Explicitly add back a clip to reproduce that behavior. Since
+    // clips never require a render target switch, this is a cheap operation.
+    ClipPath(PathBuilder{}.AddRect(bounds.value()).TakePath());
   }
-  xformation_stack_.emplace_back(std::move(entry));
 }
 
 void Canvas::DrawTextFrame(TextFrame text_frame, Point position, Paint paint) {

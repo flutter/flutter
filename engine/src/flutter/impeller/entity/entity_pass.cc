@@ -119,10 +119,12 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   }
   FML_DCHECK(pass->superpass_ == nullptr);
   pass->superpass_ = this;
-  auto subpass_pointer = pass.get();
+
   if (pass->blend_mode_ > Entity::BlendMode::kLastPipelineBlendMode) {
     contains_advanced_blends_ = true;
   }
+
+  auto subpass_pointer = pass.get();
   elements_.emplace_back(std::move(pass));
   return subpass_pointer;
 }
@@ -137,11 +139,17 @@ bool EntityPass::Render(ContentContext& renderer,
     }
 
     auto command_buffer = renderer.GetContext()->CreateRenderCommandBuffer();
-    auto render_pass = command_buffer->CreateRenderPass(offscreen_target);
+    command_buffer->SetLabel("EntityPass Root Command Buffer");
+    auto render_pass = command_buffer->CreateRenderPass(render_target);
+    render_pass->SetLabel("EntityPass Root Render Pass");
 
     {
+      auto size_rect =
+          Rect::MakeSize(Size(offscreen_target.GetRenderTargetSize()));
       auto contents = std::make_shared<TextureContents>();
+      contents->SetPath(PathBuilder{}.AddRect(size_rect).TakePath());
       contents->SetTexture(offscreen_target.GetRenderTargetTexture());
+      contents->SetSourceRect(size_rect);
 
       Entity entity;
       entity.SetContents(contents);
@@ -307,11 +315,13 @@ bool EntityPass::RenderInternal(ContentContext& renderer,
       }
       auto color0 = render_target.GetColorAttachments().find(0)->second;
 
-      auto input = FilterInput::Make({
-          element_entity.GetContents(),
-          color0.resolve_texture ? color0.resolve_texture : color0.texture,
-      });
-      element_entity.SetContents(FilterContents::MakeBlend(blend_mode_, input));
+      FilterInput::Vector inputs = {
+          FilterInput::Make(element_entity.GetContents()),
+          FilterInput::Make(
+              color0.resolve_texture ? color0.resolve_texture : color0.texture,
+              element_entity.GetTransformation().Invert())};
+      element_entity.SetContents(
+          FilterContents::MakeBlend(element_entity.GetBlendMode(), inputs));
       element_entity.SetBlendMode(Entity::BlendMode::kSource);
     }
 
