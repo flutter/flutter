@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -690,9 +691,11 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     });
     return result;
   }
+
   Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> get _indexedShortcuts {
     return _indexedShortcutsCache ??= _indexShortcuts(_shortcuts);
   }
+
   Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>>? _indexedShortcutsCache;
 
   /// Returns the [Intent], if any, that matches the current set of pressed
@@ -1056,5 +1059,220 @@ class CallbackShortcuts extends StatelessWidget {
       },
       child: child,
     );
+  }
+}
+
+/// An interface that allows adding or removing shortcut bindings to a
+/// [ShortcutsRegistrar].
+///
+/// Objects that implement this interface are returned from
+/// [ShortcutsRegistrar.of] and [ShortcutsRegistrar.maybeOf].
+class ShortcutsRegistry extends ChangeNotifier {
+  /// Gets the shortcut bindings that are registered with this
+  /// [ShortcutsRegistry].
+  ///
+  /// Do not modify the returned map, as that will bypass the change
+  /// notification mechanism..
+  final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
+
+  /// Adds a shortcut binding to this [ShortcutsRegistry].
+  ///
+  /// Will assert in debug mode if the given shortcut is already bound to an
+  /// intent.
+  ///
+  /// If two equivalent, but different, [ShortcutActivator]s are added, all
+  /// of them will be executed. For example, if both
+  /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
+  /// are added, then both will be executed when an "a" key is pressed.
+  void add(ShortcutActivator activator, Intent intent) {
+    assert(!shortcuts.containsKey(activator),
+    '$ShortcutsRegistrar: Received a duplicate registration for the shortcut activator $activator.');
+    shortcuts[activator] = intent;
+    notifyListeners();
+  }
+
+  /// Adds all given shortcut bindings to this [ShortcutsRegistry].
+  ///
+  /// Will assert in debug mode if a given shortcut in the map is already bound
+  /// to an intent.
+  ///
+  /// If two equivalent, but different, [ShortcutActivator]s are added, all
+  /// of them will be executed. For example, if both
+  /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
+  /// are added, then both will be executed when an "a" key is pressed.
+  void addAll(Map<ShortcutActivator, Intent> bindings) {
+    ShortcutActivator? found;
+    assert(() {
+      shortcuts.forEach((ShortcutActivator key, Intent value) {
+        if (bindings.containsKey(key)) {
+          found = key;
+        }
+      });
+      return found == null;
+    } (),
+    '$ShortcutsRegistrar: Received a duplicate registration for the shortcut activator $found.');
+    shortcuts.addAll(bindings);
+    notifyListeners();
+  }
+
+  /// Removes the shortcut with the given [ShortcutActivator] binding.
+  void remove(ShortcutActivator activator) {
+    if (shortcuts.containsKey(activator)) {
+      shortcuts.remove(activator);
+      notifyListeners();
+    }
+  }
+
+  /// Removes the shortcut with the given [ShortcutActivator] binding.
+  void removeAll(Iterable<ShortcutActivator> activators) {
+    bool removed = false;
+    shortcuts.removeWhere((ShortcutActivator key, Intent value) {
+      if (activators.contains(key)) {
+        removed = true;
+        return true;
+      }
+      return false;
+    });
+    if (removed) {
+      notifyListeners();
+    }
+  }
+  
+}
+
+/// A registry for shortcuts which allows descendants to add or remove shortcuts
+/// that act at the level where this registry is defined.
+///
+/// The registered callbacks are valid whenever a widget below this one in the
+/// hierarchy has focus.
+///
+/// To add shortcuts to the registry, call [ShortcutsRegistrar.of] or
+/// [ShortcutsRegistrar.maybeOf] to get the [ShortcutsRegistry], and then add
+/// them using [ShortcutsRegistry.add] or [ShortcutsRegistry.addAll].
+///
+/// To remove shortcuts to the registry, call [ShortcutsRegistrar.of] or
+/// [ShortcutsRegistrar.maybeOf] to get the [ShortcutsRegistry], and then remove
+/// them using [ShortcutsRegistry.remove] or [ShortcutsRegistry.removeAll].
+class ShortcutsRegistrar extends StatefulWidget {
+  /// Creates a const [ShortcutsRegistrar].
+  ///
+  /// The [child] parameter is required.
+  const ShortcutsRegistrar({super.key, required this.child});
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  /// Returns the [ShortcutsRegistry] that belongs to the [ShortcutsRegistrar]
+  /// which most tightly encloses the given [BuildContext].
+  ///
+  /// If no [ShortcutsRegistrar] widget encloses the context given, `of` will
+  /// throw an exception in debug mode.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is similar to this function, but will return null if
+  ///    it doesn't find a [ShortcutsRegistrar] ancestor.
+  static ShortcutsRegistry of(BuildContext context) {
+    assert(context != null);
+    final _ShortcutsRegistrarMarker? inherited =
+        context.dependOnInheritedWidgetOfExactType<_ShortcutsRegistrarMarker>();
+    assert(() {
+      if (inherited == null) {
+        throw FlutterError(
+          'Unable to find a $ShortcutsRegistrar widget in the context.\n'
+          '$ShortcutsRegistrar.of() was called with a context that does not contain a '
+          '$ShortcutsRegistrar widget.\n'
+          'No $ShortcutsRegistrar ancestor could be found starting from the context that was '
+          'passed to $ShortcutsRegistrar.of().\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return inherited!.registry;
+  }
+
+  /// Returns [ShortcutsRegistry] of the [ShortcutsRegistrar] that
+  /// most tightly encloses the given [BuildContext].
+  ///
+  /// If no [ShortcutsRegistrar] widget encloses the given context,
+  /// `maybeOf` will return null.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is similar to this function, but returns a non-nullable
+  ///    result, and will throw an exception if it doesn't find a
+  ///    [ShortcutsRegistrar] ancestor.
+  static ShortcutsRegistry? maybeOf(BuildContext context) {
+    assert(context != null);
+    final _ShortcutsRegistrarMarker? inherited =
+        context.dependOnInheritedWidgetOfExactType<_ShortcutsRegistrarMarker>();
+    return inherited?.registry;
+  }
+
+  @override
+  State<ShortcutsRegistrar> createState() => _ShortcutsRegistrarState();
+}
+
+class _ShortcutsRegistrarState extends State<ShortcutsRegistrar> {
+  late ShortcutsRegistry registry;
+  
+  @override
+  void initState() {
+    super.initState();
+    registry = ShortcutsRegistry();
+    registry.addListener(_markDirty);
+  }
+
+  @override
+  void dispose() {
+    registry.removeListener(_markDirty);
+    super.dispose();
+  }
+  
+  int rebuild = 0;
+
+  void _markDirty() {
+    if (!mounted) {
+      return;
+    }
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      if (mounted) {
+        setState(() {
+          rebuild += 1;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _ShortcutsRegistrarMarker(
+      rebuild: rebuild,
+      registry: registry,
+      child: Shortcuts(
+        shortcuts: registry.shortcuts,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _ShortcutsRegistrarMarker extends InheritedWidget {
+  const _ShortcutsRegistrarMarker({
+    required this.registry,
+    required this.rebuild,
+    required super.child,
+  });
+
+  final ShortcutsRegistry registry;
+  final int rebuild;
+
+  @override
+  bool updateShouldNotify(covariant _ShortcutsRegistrarMarker oldWidget) {
+    return rebuild != oldWidget.rebuild || registry.shortcuts != oldWidget.registry.shortcuts;
   }
 }
