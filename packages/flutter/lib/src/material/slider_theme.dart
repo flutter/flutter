@@ -3180,7 +3180,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     // factor of the value indicator.
     final double neckStretchBaseline = math.max(0.0, rightBottomNeckCenterY - math.max(leftTopNeckCenter.dy, neckRightCenter.dy));
     final double t = math.pow(inverseTextScale, 3.0) as double;
-    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
+    final double stretch = clampDouble(neckStretchBaseline * t, 0.0, 10.0 * neckStretchBaseline);
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
     assert(!_debuggingLabelLocation || () {

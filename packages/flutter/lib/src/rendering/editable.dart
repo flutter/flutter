@@ -1651,8 +1651,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       final Offset start = Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[TextSelectionPoint(start, null)];
     } else {
-      final Offset start = Offset(boxes.first.start.clamp(0, _textPainter.size.width), boxes.first.bottom) + paintOffset;
-      final Offset end = Offset(boxes.last.end.clamp(0, _textPainter.size.width), boxes.last.bottom) + paintOffset;
+      final Offset start = Offset(clampDouble(boxes.first.start, 0, _textPainter.size.width), boxes.first.bottom) + paintOffset;
+      final Offset end = Offset(clampDouble(boxes.last.end, 0, _textPainter.size.width), boxes.last.bottom) + paintOffset;
       return <TextSelectionPoint>[
         TextSelectionPoint(start, boxes.first.direction),
         TextSelectionPoint(end, boxes.last.direction),
@@ -2480,8 +2480,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints) {
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
-      startPoint.dx.clamp(0.0, size.width),
-      startPoint.dy.clamp(0.0, size.height),
+      clampDouble(startPoint.dx, 0.0, size.width),
+      clampDouble(startPoint.dy, 0.0, size.height),
     );
     context.pushLayer(
       LeaderLayer(link: startHandleLayerLink, offset: startPoint),
@@ -2491,8 +2491,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (endpoints.length == 2) {
       Offset endPoint = endpoints[1].point;
       endPoint = Offset(
-        endPoint.dx.clamp(0.0, size.width),
-        endPoint.dy.clamp(0.0, size.height),
+        clampDouble(endPoint.dx, 0.0, size.width),
+        clampDouble(endPoint.dy, 0.0, size.height),
       );
       context.pushLayer(
         LeaderLayer(link: endHandleLayerLink, offset: endPoint),

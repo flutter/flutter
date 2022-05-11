@@ -1252,7 +1252,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final bool isScrolledUnder = overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
-      ? (visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight)).clamp(0.0, 1.0)
+      ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
       : 1.0;
 
     final Widget appBar = FlexibleSpaceBar.createSettings(
@@ -1289,7 +1289,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         titleSpacing: titleSpacing,
         shape: shape,
         toolbarOpacity: toolbarOpacity,
-        bottomOpacity: pinned ? 1.0 : ((visibleMainHeight / _bottomHeight).clamp(0.0, 1.0)),
+        bottomOpacity: pinned ? 1.0 : clampDouble(visibleMainHeight / _bottomHeight, 0.0, 1.0),
         toolbarHeight: toolbarHeight,
         leadingWidth: leadingWidth,
         backwardsCompatibility: backwardsCompatibility,

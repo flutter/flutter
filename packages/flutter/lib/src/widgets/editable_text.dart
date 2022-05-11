@@ -2264,7 +2264,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ? editableSize.width / 2 - rect.center.dx
         // Valid additional offsets range from (rect.right - size.width)
         // to (rect.left). Pick the closest one if out of range.
-        : 0.0.clamp(rect.right - editableSize.width, rect.left);
+        : clampDouble(0.0, rect.right - editableSize.width, rect.left);
       unitOffset = const Offset(1, 0);
     } else {
       // The caret is vertically centered within the line. Expand the caret's
@@ -2278,17 +2278,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       additionalOffset = expandedRect.height >= editableSize.height
         ? editableSize.height / 2 - expandedRect.center.dy
-        : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top);
+        : clampDouble(0.0, expandedRect.bottom - editableSize.height, expandedRect.top);
       unitOffset = const Offset(0, 1);
     }
 
     // No overscrolling when encountering tall fonts/scripts that extend past
     // the ascent.
-    final double targetOffset = (additionalOffset + _scrollController.offset)
-      .clamp(
-        _scrollController.position.minScrollExtent,
-        _scrollController.position.maxScrollExtent,
-      );
+    final double targetOffset = clampDouble(
+      additionalOffset + _scrollController.offset,
+      _scrollController.position.minScrollExtent,
+      _scrollController.position.maxScrollExtent,
+    );
 
     final double offsetDelta = _scrollController.offset - targetOffset;
     return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);

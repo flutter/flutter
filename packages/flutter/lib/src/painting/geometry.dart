@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'basic_types.dart';
 
 /// Position a child box within a container box, either above or below a target
@@ -64,7 +65,7 @@ Offset positionDependentBox({
   if (size.width - margin * 2.0 < childSize.width) {
     x = (size.width - childSize.width) / 2.0;
   } else {
-    final double normalizedTargetX = target.dx.clamp(margin, size.width - margin);
+    final double normalizedTargetX = clampDouble(target.dx, margin, size.width - margin);
     final double edge = margin + childSize.width / 2.0;
     if (normalizedTargetX < edge) {
       x = margin;

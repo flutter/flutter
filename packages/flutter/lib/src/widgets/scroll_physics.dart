@@ -554,7 +554,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
     double result = super.adjustPositionForNewDimensions(oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
     if (enforceBoundary) {
       // ...but if they put us out of range then reinforce the boundary.
-      result = result.clamp(newPosition.minScrollExtent, newPosition.maxScrollExtent);
+      result = clampDouble(result, newPosition.minScrollExtent, newPosition.maxScrollExtent);
     }
     return result;
   }
