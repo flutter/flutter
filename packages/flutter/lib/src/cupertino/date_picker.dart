@@ -218,6 +218,7 @@ enum _PickerColumnType {
 ///
 ///  * [CupertinoTimerPicker], the class that implements the iOS-style timer picker.
 ///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/pickers/>
 class CupertinoDatePicker extends StatefulWidget {
   /// Constructs an iOS style date picker.
   ///
@@ -1508,6 +1509,7 @@ enum CupertinoTimerPickerMode {
 ///  * [CupertinoDatePicker], the class that implements different display modes
 ///    of the iOS-style date picker.
 ///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/pickers/>
 class CupertinoTimerPicker extends StatefulWidget {
   /// Constructs an iOS style countdown timer picker.
   ///
@@ -1974,6 +1976,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   TextStyle _textStyleFrom(BuildContext context, [double magnification = 1.0]) {
     final TextStyle textStyle = CupertinoTheme.of(context).textTheme.pickerTextStyle;
     return textStyle.copyWith(
+      color: CupertinoDynamicColor.maybeResolve(textStyle.color, context),
       fontSize: textStyle.fontSize! * magnification,
     );
   }

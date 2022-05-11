@@ -520,8 +520,7 @@ class RenderStack extends RenderBox
     assert(_resolvedAlignment != null);
     bool hasNonPositionedChildren = false;
     if (childCount == 0) {
-      assert(constraints.biggest.isFinite);
-      return constraints.biggest;
+      return (constraints.biggest.isFinite) ? constraints.biggest : constraints.smallest;
     }
 
     double width = constraints.minWidth;

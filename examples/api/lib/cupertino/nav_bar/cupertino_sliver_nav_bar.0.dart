@@ -6,24 +6,22 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const SliverNavBarApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'CupertinoSliverNavigationBar Sample';
+class SliverNavBarApp extends StatelessWidget {
+  const SliverNavBarApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: CupertinoNavBarSample(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: SliverNavBarExample(),
     );
   }
 }
 
-class CupertinoNavBarSample extends StatelessWidget {
-  const CupertinoNavBarSample({Key? key}) : super(key: key);
+class SliverNavBarExample extends StatelessWidget {
+  const SliverNavBarExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

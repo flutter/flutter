@@ -265,6 +265,11 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
+    assert(
+      _scaffolds.isNotEmpty,
+      'ScaffoldMessenger.showSnackBar was called, but there are currently no '
+      'descendant Scaffolds to present to.',
+    );
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChanged);
     if (_snackBars.isEmpty) {
@@ -391,6 +396,11 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_material_banner.0.dart **
   /// {@end-tool}
   ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason> showMaterialBanner(MaterialBanner materialBanner) {
+    assert(
+      _scaffolds.isNotEmpty,
+      'ScaffoldMessenger.showMaterialBanner was called, but there are currently no '
+      'descendant Scaffolds to present to.',
+    );
     _materialBannerController ??= MaterialBanner.createAnimationController(vsync: this)
       ..addStatusListener(_handleMaterialBannerStatusChanged);
     if (_materialBanners.isEmpty) {

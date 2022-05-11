@@ -2514,11 +2514,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
-
-      // if cursor is inactive, e.g. while selecting text, do not jump away
-      if (!_cursorActive) {
-        return;
-      }
       if (_currentCaretRect == null || !_scrollController.hasClients) {
         return;
       }
@@ -3258,8 +3253,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(debugCheckHasMediaQuery(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
-    final Color? effectiveSelectionColor = widget.selectionColor ?? DefaultSelectionStyle.of(context).selectionColor;
-
     final TextSelectionControls? controls = widget.selectionControls;
     return MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -3321,7 +3314,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                         minLines: widget.minLines,
                         expands: widget.expands,
                         strutStyle: widget.strutStyle,
-                        selectionColor: effectiveSelectionColor,
+                        selectionColor: widget.selectionColor,
                         textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                         textAlign: widget.textAlign,
                         textDirection: _textDirection,

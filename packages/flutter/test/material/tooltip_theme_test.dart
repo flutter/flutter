@@ -97,8 +97,8 @@ void main() {
       'semantics: excluded',
       'decoration: BoxDecoration(color: Color(0xffffffff))',
       'textStyle: TextStyle(inherit: true, decoration: TextDecoration.underline)',
-      'wait duration: ${wait.toString()}',
-      'show duration: ${show.toString()}',
+      'wait duration: $wait',
+      'show duration: $show',
       'triggerMode: $triggerMode',
       'enableFeedback: true',
     ]);
