@@ -858,10 +858,15 @@ void main() {
     root.append(a2);
     a1.append(b1);
 
+    // Actually build the retained layer so that the engine sees it as real and
+    // reusable.
+    SceneBuilder builder = SceneBuilder();
+    b1.engineLayer = builder.pushOffset(0, 0);
+    builder.build().dispose();
+    builder = SceneBuilder();
+
     // Force the layer to appear clean and have an engine layer for retained
     // rendering.
-    final SceneBuilder builder = SceneBuilder();
-    b1.engineLayer = builder.pushOffset(0, 0);
     expect(b1.engineLayer, isNotNull);
     b1.debugMarkClean();
     expect(b1.debugSubtreeNeedsAddToScene, false);
@@ -878,10 +883,7 @@ void main() {
     root.buildScene(builder).dispose();
 
     expect(compositedB1, true);
-  }, skip: isBrowser); // This test fails on web because of the
-  // HTML backend asserting things about the retained layer. But this test is
-  // only meant to exercise fraemwork code anyway, so coverage on non-browser
-  // platforms should be fine.
+  });
 
   test('Observe layer tree composition - asserts on mutation', () {
     final ContainerLayer root = ContainerLayer();
