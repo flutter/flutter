@@ -775,12 +775,10 @@ void main() {
       expect(generator.templateArbFile.path, '/lib/l10n/app_en.arb');
       expect(generator.baseOutputFile.path, '/lib/l10n/bar.dart');
       expect(generator.className, 'Foo');
-      expect(generator.preferredSupportedLocales.single,
-          LocaleInfo.fromString('es'));
+      expect(generator.preferredSupportedLocales.single, LocaleInfo.fromString('es'));
       expect(generator.header, 'HEADER');
       expect(generator.useDeferredLoading, isTrue);
-      expect(generator.inputsAndOutputsListFile?.path,
-          '/gen_l10n_inputs_and_outputs.json');
+      expect(generator.inputsAndOutputsListFile?.path, '/gen_l10n_inputs_and_outputs.json');
       expect(generator.useSyntheticPackage, isFalse);
       expect(generator.projectDirectory?.path, '/');
       expect(generator.areResourceAttributesRequired, isTrue);
@@ -803,8 +801,7 @@ class FooEn extends Foo {
 ''');
     });
 
-    testWithoutContext(
-        'throws exception on missing flutter: generate: true flag', () async {
+    testWithoutContext('throws exception on missing flutter: generate: true flag', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Missing flutter: generate: true should throw exception.
@@ -828,14 +825,13 @@ flutter:
       );
 
       expect(
-            () =>
-            generateLocalizations(
-              fileSystem: fs,
-              options: options,
-              logger: BufferLogger.test(),
-              projectDir: fs.currentDirectory,
-              dependenciesDir: fs.currentDirectory,
-            ),
+        () => generateLocalizations(
+          fileSystem: fs,
+          options: options,
+          logger: BufferLogger.test(),
+          projectDir: fs.currentDirectory,
+          dependenciesDir: fs.currentDirectory,
+        ),
         throwsToolExit(
           message: 'Attempted to generate localizations code without having the '
               'flutter: generate flag turned on.',
@@ -860,8 +856,7 @@ flutter:
         dependenciesDir: fs.currentDirectory,
       );
 
-      expect(
-          fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
+      expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
 import 'app_localizations.dart';
 
 /// The translations for English (`en`).
