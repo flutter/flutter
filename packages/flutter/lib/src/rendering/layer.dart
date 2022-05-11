@@ -480,7 +480,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       markNeedsAddToScene();
     }
     if (child._childrenWithCompositionCallbacks != 0) {
-      _updateSubtreeCompositionObserverCount(child._childrenWithCompositionCallbacks);
+      _updateSubtreeCompositionObserverCount(-child._childrenWithCompositionCallbacks);
     }
     super.dropChild(child);
   }
@@ -1006,7 +1006,7 @@ class PerformanceOverlayLayer extends Layer {
   }
 }
 
-/// The signature of the callback added in [ContainerLayer.addCompositionCallback].
+/// The signature of the callback added in [Layer.addCompositionCallback].
 typedef CompositionCallback = void Function(ContainerLayer);
 
 /// A composited layer that has a list of children.

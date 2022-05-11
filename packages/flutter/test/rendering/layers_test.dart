@@ -775,6 +775,37 @@ void main() {
     expect(b1.subtreeHasCompositionCallbacks, false);
   });
 
+  test('Subtree has composition callbacks - removeChild', () {
+    final ContainerLayer root = ContainerLayer();
+    expect(root.subtreeHasCompositionCallbacks, false);
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    expect(b1.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+
+    b1.addCompositionCallback((_) { });
+
+    expect(b1.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+
+    b1.remove();
+
+    expect(b1.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+  });
+
   test('No callback if removed', () {
     final ContainerLayer root = ContainerLayer();
 
