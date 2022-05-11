@@ -4472,7 +4472,6 @@ targets:
       - main
       - master
     recipe: flutter/flutter
-    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
