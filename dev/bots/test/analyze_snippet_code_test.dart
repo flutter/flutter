@@ -14,58 +14,58 @@ void main() {
     return;
   }
 
-  test('analyze_sample_code smoke test', () {
+  test('analyze_snippet_code smoke test', () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
-      <String>['analyze_sample_code.dart', '--no-include-dart-ui', 'test/analyze-sample-code-test-input'],
+      <String>['analyze_snippet_code.dart', '--no-include-dart-ui', 'test/analyze-snippet-code-test-input'],
     );
     final List<String> stdoutLines = process.stdout.toString().split('\n');
     final List<String> stderrLines = process.stderr.toString().split('\n');
     expect(process.exitCode, isNot(equals(0)));
     expect(stderrLines, containsAll(<Object>[
-      'In sample starting at dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:125:    child: Text(title),',
+      'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:138:25:     child: Text(title),',
       matches(RegExp(r">>> error: The final variable 'title' can't be read because (it is|it's) potentially unassigned at this point \(read_potentially_unassigned_final\)")),
-      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:30:9: new Opacity(',
+      'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:30:9: new Opacity(',
       '>>> info: Unnecessary new keyword (unnecessary_new)',
-      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:62:9: new Opacity(',
+      'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:62:9: new Opacity(',
       '>>> info: Unnecessary new keyword (unnecessary_new)',
-      "dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:111:9: final String? bar = 'Hello';",
+      "dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:111:9: final String? bar = 'Hello';",
       '>>> info: Prefer const over final for declarations (prefer_const_declarations)',
-      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:112:9: final int foo = null;',
+      'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:112:9: final int foo = null;',
       '>>> info: Prefer const over final for declarations (prefer_const_declarations)',
-      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:112:25: final int foo = null;',
+      'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:112:25: final int foo = null;',
       ">>> error: A value of type 'Null' can't be assigned to a variable of type 'int' (invalid_assignment)",
-      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:120:24: const SizedBox(),',
-      '>>> error: Unexpected comma at end of sample code. (missing_identifier)',
-      'Found 2 sample code errors.',
+      'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:120:24: const SizedBox(),',
+      '>>> error: Unexpected comma at end of snippet code. (missing_identifier)',
+      'Found 1 snippet code errors.',
     ]));
     expect(stdoutLines, containsAll(<String>[
-      'Found 9 snippet code blocks, 0 sample code sections, and 2 dartpad sections.',
-      'Starting analysis of code samples.',
+      'Found 13 snippet code blocks',
+      'Starting analysis of code snippets.',
     ]));
   });
   test('Analyzes dart:ui code', () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
       <String>[
-        'analyze_sample_code.dart',
-        '--dart-ui-location=test/analyze-sample-code-test-dart-ui',
-        'test/analyze-sample-code-test-input',
+        'analyze_snippet_code.dart',
+        '--dart-ui-location=test/analyze-snippet-code-test-dart-ui',
+        'test/analyze-snippet-code-test-input',
       ],
     );
     final List<String> stdoutLines = process.stdout.toString().split('\n');
     final List<String> stderrLines = process.stderr.toString().split('\n');
     expect(process.exitCode, isNot(equals(0)));
     expect(stderrLines, containsAll(<String>[
-      'In sample starting at dev/bots/test/analyze-sample-code-test-dart-ui/ui.dart:15:class MyStatelessWidget extends StatelessWidget {',
-      ">>> error: Missing concrete implementation of 'StatelessWidget.build' (non_abstract_class_inherits_abstract_member)",
-      'In sample starting at dev/bots/test/analyze-sample-code-test-dart-ui/ui.dart:15:class MyStringBuffer {',
-      ">>> error: Classes can't be declared inside other classes (class_in_class)",
+      'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:19:11:   error;',
+      ">>> error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name (missing_const_final_var_or_type)",
+      'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:23:11:   @keepToString',
+      ">>> error: Undefined name 'keepToString' used as an annotation (undefined_annotation)",
     ]));
     expect(stdoutLines, containsAll(<String>[
-      // There is one sample code section in the test's dummy dart:ui code.
-      'Found 9 snippet code blocks, 1 sample code sections, and 2 dartpad sections.',
-      'Starting analysis of code samples.',
+      // There is one snippet code section in the test's dummy dart:ui code.
+      'Found 14 snippet code blocks',
+      'Starting analysis of code snippets.',
     ]));
   });
 }

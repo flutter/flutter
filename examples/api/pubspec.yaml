@@ -1,3 +1,5 @@
+# This file is also used by dev/bots/analyze_snippet_code.dart to analyze code snippets (`{@tool snippet}` sections).
+
 name: flutter_api_samples
 description: API code samples for the Flutter repo.
 publish_to: 'none'

@@ -27,7 +27,7 @@ import 'scroll_controller.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// dynamic routeObserver;
+// late RouteObserver<Route<void>> routeObserver;
 // late NavigatorState navigator;
 // late BuildContext context;
 // Future<bool> askTheUserIfTheyAreSure() async { return true; }
@@ -1058,7 +1058,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// defined in the same way.
   ///
   /// ```dart
-  /// PageRouteBuilder(
+  /// PageRouteBuilder<void>(
   ///   pageBuilder: (BuildContext context,
   ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
@@ -1105,7 +1105,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// route has been popped off.
   ///
   /// ```dart
-  /// PageRouteBuilder(
+  /// PageRouteBuilder<void>(
   ///   pageBuilder: (BuildContext context,
   ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
