@@ -59,7 +59,6 @@ abstract class AssetBundle {
   /// buffer.
   ///
   /// Throws an exception if the asset is not found.
-  @override
   Future<ui.ImmutableBuffer> loadBuffer(String key) async {
     final ByteData data = await load(key);
     return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
