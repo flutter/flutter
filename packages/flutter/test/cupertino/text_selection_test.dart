@@ -570,7 +570,7 @@ void main() {
         expect(find.text('Select All'), findsOneWidget);
         expect(find.text('◀'), findsNothing);
         expect(find.text('▶'), findsNothing);
-        
+
         // Tap to select all.
         await tester.tap(find.text('Select All'));
         await tester.pumpAndSettle();
