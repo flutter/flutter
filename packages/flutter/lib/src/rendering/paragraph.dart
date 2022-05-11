@@ -72,7 +72,7 @@ class RenderParagraph extends RenderBox
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  /// 
+  ///
   /// The [minLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than or equal to zero.
   RenderParagraph(InlineSpan text, {
@@ -240,11 +240,11 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  /// An optional minimum number of lines for the text to span. If the text 
-  /// falls short of the given number of lines, lines will be added below until 
+  /// An optional minimum number of lines for the text to span. If the text
+  /// falls short of the given number of lines, lines will be added below until
   /// there are the given number of lines.
   int? get minLines => _textPainter.minLines;
-  /// The value may be null. If it is not null, then it must be greater than or 
+  /// The value may be null. If it is not null, then it must be greater than or
   /// equal to zero.
   set minLines(int? value) {
     assert(value == null || value >= 0);

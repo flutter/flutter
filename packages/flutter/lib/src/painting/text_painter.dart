@@ -351,7 +351,7 @@ class TextPainter {
   /// After this is set, you must call [layout] before the next call to [paint].
   int? get minLines => _minLines;
   int? _minLines;
-  /// The value may be null. If it is not null, then it must be greater than or 
+  /// The value may be null. If it is not null, then it must be greater than or
   /// equal to zero.
   set minLines(int? value) {
     assert(value == null || value >= 0);
@@ -648,8 +648,8 @@ class TextPainter {
       if (newWidth != _applyFloatingPointHack(_paragraph!.width)) {
         _paragraph!.layout(ui.ParagraphConstraints(width: newWidth));
       }
-    }   
-    
+    }
+
     _layoutMinLines();
   }
 
@@ -666,11 +666,11 @@ class TextPainter {
 
     if (lines.isEmpty) {
       // No lines are present, but the paragraph still takes up one line of space.
-      // That's why we need to subtract this line from the calculation for the 
+      // That's why we need to subtract this line from the calculation for the
       // minLines height.
       _additionalMinLinesHeight = preferredLineHeight * (minLines! - 1);
       return;
-    } 
+    }
 
     if (lines.isNotEmpty) {
       final int fillerLineCount = minLines! - lines.length;
