@@ -5116,7 +5116,6 @@ targets:
     presubmit: false
     bringup: true
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       caches: >-
