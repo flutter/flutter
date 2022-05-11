@@ -588,6 +588,14 @@ void main() {
       expect(tester.takeException(), isArgumentError);
     });
 
+    testWidgets('reports errors via framework with details', (WidgetTester tester) async {
+      final String? value = await tester.runAsync<String>(() async {
+        throw ArgumentError();
+      });
+      expect(value, isNull);
+      expect(tester.takeExceptionDetails()?.exception, isArgumentError);
+    });
+
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
