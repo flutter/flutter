@@ -2207,7 +2207,6 @@ targets:
     scheduler: luci
 
   - name: Staging_build_linux analyze
-    bringup: true
     recipe: flutter/flutter
     timeout: 60
     properties:
