@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -361,7 +362,14 @@ Future<void> main() async {
         expect(image.placeholder, isA<ResizeImage>());
         expect(called, false);
         final LoadTestImageProvider testProvider = LoadTestImageProvider(image.placeholder);
-        testProvider.testLoad(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+        final ImageStreamCompleter streamCompleter = testProvider.testLoad(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+
+        final Completer<void> completer = Completer<void>();
+        streamCompleter.addListener(ImageStreamListener((ImageInfo imageInfo, bool syncCall) {
+          completer.complete();
+        }));
+        await completer.future;
+
         expect(called, true);
       });
 
@@ -385,7 +393,14 @@ Future<void> main() async {
         expect(image.placeholder, isA<MemoryImage>());
         expect(called, false);
         final LoadTestImageProvider testProvider = LoadTestImageProvider(image.placeholder);
-        testProvider.testLoad(await memoryImage.obtainKey(ImageConfiguration.empty), decode);
+        final ImageStreamCompleter streamCompleter = testProvider.testLoad(await memoryImage.obtainKey(ImageConfiguration.empty), decode);
+
+        final Completer<void> completer = Completer<void>();
+        streamCompleter.addListener(ImageStreamListener((ImageInfo imageInfo, bool syncCall) {
+          completer.complete();
+        }));
+        await completer.future;
+
         expect(called, true);
       });
     });

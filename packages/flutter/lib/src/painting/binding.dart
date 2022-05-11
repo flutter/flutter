@@ -99,7 +99,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// drawn into.
   @Deprecated(
     'Use instantiateImageCodecFromBuffer with an ImmutableBuffer instance instead. '
-    'This was deprecated after v2.13.0.'
+    'This was deprecated after v2.13.0-1.0.pre.'
   )
   Future<ui.Codec> instantiateImageCodec(
     Uint8List bytes, {
