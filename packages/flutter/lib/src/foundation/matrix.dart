@@ -15,10 +15,10 @@ Float32x4List _loadMatrixIntoSimd(Matrix4 matrix) {
   assert(!kIsWeb);
   final Float32x4List result = Float32x4List(4);
   final Float64List storage = matrix.storage;
-  result[0] = Float32x4(storage[0], storage[4], storage[8], storage[12]);
-  result[1] = Float32x4(storage[1], storage[5], storage[9], storage[13]);
-  result[2] = Float32x4(storage[2], storage[6], storage[10], storage[14]);
-  result[3] = Float32x4(storage[3], storage[7], storage[11], storage[15]);
+  result[0] = Float32x4(storage[0],  storage[1],  storage[2],  storage[3]);
+  result[1] = Float32x4(storage[4],  storage[5],  storage[6],  storage[7]);
+  result[2] = Float32x4(storage[8],  storage[9],  storage[10], storage[11]);
+  result[3] = Float32x4(storage[12], storage[13], storage[14], storage[15]);
   return result;
 }
 
@@ -47,10 +47,10 @@ Float64List _multiplySimd(Float32x4List left, Float32x4List right, Float64List r
   assert(left.length == 4);
   assert(right.length == 4);
 
-  final Float32x4 a0 = left[0];
-  final Float32x4 a1 = left[1];
-  final Float32x4 a2 = left[2];
   final Float32x4 a3 = left[3];
+  final Float32x4 a2 = left[2];
+  final Float32x4 a1 = left[1];
+  final Float32x4 a0 = left[0];
 
   final Float32x4 b0 = right[0];
   final Float32x4 result0 = b0.shuffle(Float32x4.xxxx) * a0 +
@@ -72,21 +72,26 @@ Float64List _multiplySimd(Float32x4List left, Float32x4List right, Float64List r
       b3.shuffle(Float32x4.yyyy) * a1 +
       b3.shuffle(Float32x4.zzzz) * a2 +
       b3.shuffle(Float32x4.wwww) * a3;
-  result[0]  = result0.x;
-  result[1]  = result0.y;
-  result[2]  = result0.z;
-  result[3]  = result0.w;
-  result[4]  = result1.x;
-  result[5]  = result1.y;
-  result[6]  = result1.z;
-  result[7]  = result1.w;
-  result[8]  = result2.x;
-  result[9]  = result2.y;
-  result[10] = result2.z;
-  result[11] = result2.w;
-  result[12] = result3.x;
-  result[13] = result3.y;
-  result[14] = result3.z;
+
   result[15] = result3.w;
+  result[14] = result3.z;
+  result[13] = result3.y;
+  result[12] = result3.x;
+
+  result[11] = result2.w;
+  result[10] = result2.z;
+  result[9]  = result2.y;
+  result[8]  = result2.x;
+
+  result[7] = result1.w;
+  result[6] = result1.z;
+  result[5] = result1.y;
+  result[4] = result1.x;
+
+  result[3] = result0.w;
+  result[2] = result0.z;
+  result[1] = result0.y;
+  result[0] = result0.x;
+
   return result;
 }
