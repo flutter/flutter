@@ -43,6 +43,7 @@ import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
+import 'sdk_web_configuration.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   @required AssetReader assetReader,
@@ -300,6 +301,7 @@ class WebAssetServer implements AssetReader {
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
+      sdkConfigurationProvider: SdkWebConfigurationProvider(globals.artifacts),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -1011,16 +1013,6 @@ void log(logging.LogRecord event) {
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {
-    // TODO(elliette): Remove the following message suppressions after DWDS is
-    // >13.1.0, https://github.com/flutter/flutter/issues/101639
-    const String dartUri = 'DartUri';
-    if (event.loggerName == dartUri) {
-      const String webSqlWarning = 'Unresolved uri: dart:web_sql';
-      const String uiWarning = 'Unresolved uri: dart:ui';
-      if (event.message == webSqlWarning || event.message == uiWarning) {
-        return;
-      }
-    }
     globals.printWarning('${event.loggerName}: ${event.message}$error');
   } else  {
     globals.printTrace('${event.loggerName}: ${event.message}$error');
