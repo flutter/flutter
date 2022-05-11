@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('SliverReorderableList works well when having gestureSettings', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103404
-    debugPrintGestureArenaDiagnostics = true;
     const int itemCount = 5;
     int onReorderCallCount = 0;
     final List<int> items = List<int>.generate(itemCount, (int index) => index);
@@ -63,7 +62,6 @@ void main() {
 
     expect(onReorderCallCount, 1);
     expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
-    debugPrintGestureArenaDiagnostics = false;
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
