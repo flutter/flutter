@@ -64,6 +64,7 @@ TaskFunction createMicrobenchmarkTask() {
       ...await runMicrobench('lib/foundation/standard_method_codec_bench.dart'),
       ...await runMicrobench('lib/foundation/standard_message_codec_bench.dart'),
       ...await runMicrobench('lib/foundation/timeline_bench.dart'),
+      ...await runMicrobench('lib/ui/image_bench.dart'),
     };
 
     return TaskResult.success(allResults,
