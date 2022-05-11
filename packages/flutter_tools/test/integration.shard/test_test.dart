@@ -222,10 +222,8 @@ Future<void> _testFile(
     extraArguments: extraArguments,
   );
 
-  final List<String> output = (exec.stdout as String).split('\n');
-  print(output);
-  print(exec.stderr);
   expect(exec.exitCode, exitCode);
+  final List<String> output = (exec.stdout as String).split('\n');
   if (output.first.startsWith('Waiting for another flutter command to release the startup lock...')) {
     output.removeAt(0);
   }
@@ -317,7 +315,6 @@ Future<ProcessResult> _runFlutterTest(
     '--no-color',
     '--no-version-check',
     '--no-pub',
-    '-v',
     ...extraArguments,
     testPath,
   ];
