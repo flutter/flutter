@@ -4465,6 +4465,7 @@ targets:
 # Names should begin with `Staging_build_` prefix.
 # Task should include presubmit: false
 # Task should inherit ignore_flakiness: true
+# Task should include bringup: true
   - name: Staging_build_linux docs_publish
     presubmit: false
     bringup: true
