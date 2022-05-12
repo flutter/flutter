@@ -611,6 +611,9 @@ if (is_win) {
     default_warning_flags += [
       # No support for #pragma optimize. https://crbug.com/505314#c13
       "-Wno-ignored-pragma-optimize",
+
+      # Unqualified std::move is pretty common.
+      "-Wno-unqualified-std-cast-call",
     ]
   }
 } else {
@@ -623,6 +626,8 @@ if (is_win) {
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
     "-Wno-unused-parameter",  # Unused function parameters.
+    # Unqualified std::move is pretty common.
+    "-Wno-unqualified-std-cast-call",
   ]
 
   if (is_wasm) {
@@ -712,6 +717,10 @@ config("no_chromium_code") {
       "_CRT_NONSTDC_NO_DEPRECATE",
     ]
   }
+
+  # TODO(zra): Remove when zlib no longer needs this.
+  # https://github.com/flutter/flutter/issues/103568
+  cflags += [ "-Wno-deprecated-non-prototype" ]
 
   cflags += default_warning_flags
   cflags_cc += default_warning_flags_cc
