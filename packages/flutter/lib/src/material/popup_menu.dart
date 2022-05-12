@@ -395,44 +395,11 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 /// layout uses [ListTile]; the checkmark is an [Icons.done] icon, shown in the
 /// [ListTile.leading] position.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// The example shows how to implement [CheckedPopupMenuItem]'s to toggle menu
+/// items and includes the use of [PopupMenuDivider] to divide the menu items.
 ///
-/// Suppose a `Commands` enum exists that lists the possible commands from a
-/// particular popup menu, including `Commands.heroAndScholar` and
-/// `Commands.hurricaneCame`, and further suppose that there is a
-/// `_heroAndScholar` member field which is a boolean. The example below shows a
-/// menu with one menu item with a checkmark that can toggle the boolean, and
-/// one menu item without a checkmark for selecting the second option. (It also
-/// shows a divider placed between the two menu items.)
-///
-/// ```dart
-/// PopupMenuButton<Commands>(
-///   onSelected: (Commands result) {
-///     switch (result) {
-///       case Commands.heroAndScholar:
-///         setState(() { _heroAndScholar = !_heroAndScholar; });
-///         break;
-///       case Commands.hurricaneCame:
-///         // ...handle hurricane option
-///         break;
-///       // ...other items handled here
-///     }
-///   },
-///   itemBuilder: (BuildContext context) => <PopupMenuEntry<Commands>>[
-///     CheckedPopupMenuItem<Commands>(
-///       checked: _heroAndScholar,
-///       value: Commands.heroAndScholar,
-///       child: const Text('Hero and scholar'),
-///     ),
-///     const PopupMenuDivider(),
-///     const PopupMenuItem<Commands>(
-///       value: Commands.hurricaneCame,
-///       child: ListTile(leading: Icon(null), title: Text('Bring hurricane')),
-///     ),
-///     // ...other items listed here
-///   ],
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/popup_menu/checked_popup_menu.0.dart **
 /// {@end-tool}
 ///
 /// In particular, observe how the second menu item uses a [ListTile] with a
@@ -991,9 +958,16 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 ///
 /// {@tool dartpad}
 /// This example shows a menu with four items, selecting between an enum's
-/// values and setting a `_selectedMenu` field based on the selection
+/// values and setting a `selectedMenu` field based on the selection.
 ///
-/// ** See code in examples/api/lib/material/popupmenu/popupmenu.0.dart **
+/// ** See code in examples/api/lib/material/popup_menu/popup_menu_button.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of [PopupMenuButton] as described in:
+/// ttps://m3.material.io/components/menus/overview
+///
+/// ** See code in examples/api/lib/material/popup_menu/popup_menu_button.1.dart **
 /// {@end-tool}
 ///
 /// See also:
