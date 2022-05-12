@@ -208,6 +208,10 @@ static AtkRole fl_accessible_node_get_role(AtkObject* accessible) {
   if ((self->flags & kFlutterSemanticsFlagIsSlider) != 0) {
     return ATK_ROLE_SLIDER;
   }
+  if ((self->flags & kFlutterSemanticsFlagIsTextField) != 0 &&
+      (self->flags & kFlutterSemanticsFlagIsObscured) != 0) {
+    return ATK_ROLE_PASSWORD_TEXT;
+  }
   if ((self->flags & kFlutterSemanticsFlagIsTextField) != 0) {
     return ATK_ROLE_TEXT;
   }

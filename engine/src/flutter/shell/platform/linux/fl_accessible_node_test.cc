@@ -108,6 +108,14 @@ TEST(FlAccessibleNodeTest, GetRole) {
   fl_accessible_node_set_flags(node, static_cast<FlutterSemanticsFlag>(
                                          kFlutterSemanticsFlagHasToggledState));
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_TOGGLE_BUTTON);
+
+  fl_accessible_node_set_flags(node, kFlutterSemanticsFlagIsTextField);
+  EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_TEXT);
+
+  fl_accessible_node_set_flags(
+      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsTextField |
+                                              kFlutterSemanticsFlagIsObscured));
+  EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_PASSWORD_TEXT);
 }
 
 // Checks Flutter actions are mapped to the appropriate ATK actions.
