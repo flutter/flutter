@@ -23,28 +23,31 @@ class GeneralInfoValidator extends ProjectValidator{
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     final YamlMap pubContent = loadYaml(project.pubspecFile.readAsStringSync()) as YamlMap;
     final String appName = pubContent['name'] as String;
-
     final ProjectValidatorResult appNameValidatorResult = ProjectValidatorResult(
         name: 'App Name',
         value: appName,
         status: StatusProjectValidator.success
     );
-
+    final String supportedPlatforms = getSupportedPlatforms(project);
+    if (supportedPlatforms.isEmpty) {
+      return [appNameValidatorResult];
+    }
+    final ProjectValidatorResult supportedPlatformsResult = ProjectValidatorResult(
+        name: 'Supported Platforms',
+        value: supportedPlatforms,
+        status: StatusProjectValidator.success
+    );
     final ProjectValidatorResult isFlutterPackage = isFlutterPackageValidatorResult(pubContent);
-    final ProjectValidatorResult supportedPlatforms = supportedPlatformValidatorResult(project);
-
     final List<ProjectValidatorResult> result = <ProjectValidatorResult>[
       appNameValidatorResult,
-      supportedPlatforms,
+      supportedPlatformsResult,
       isFlutterPackage,
     ];
-
     if (isFlutterPackage.value == 'yes') {
       final YamlMap flutterNode = pubContent['flutter'] as YamlMap;
       result.add(materialDesignResult(flutterNode));
       result.add(pluginValidatorResult(flutterNode));
     }
-
     return result;
   }
 
@@ -87,19 +90,14 @@ class GeneralInfoValidator extends ProjectValidator{
     );
   }
 
-  ProjectValidatorResult supportedPlatformValidatorResult(FlutterProject project) {
+  String getSupportedPlatforms(FlutterProject project) {
     final List<SupportedPlatform> supportedPlatforms = project.getSupportedPlatforms();
     final List<String> allPlatforms = <String>[];
 
     for (final SupportedPlatform platform in supportedPlatforms) {
       allPlatforms.add(platform.name);
     }
-    final String value = allPlatforms.join(', ');
-    return ProjectValidatorResult(
-      name: 'Supported Platforms',
-      value: value,
-      status: StatusProjectValidator.success
-    );
+    return allPlatforms.join(', ');
   }
 
   ProjectValidatorResult pluginValidatorResult(YamlMap flutterNode) {
@@ -113,7 +111,7 @@ class GeneralInfoValidator extends ProjectValidator{
 
   @override
   bool supportsProject(FlutterProject project) {
-    // this validator will run for any type of flutter project
+    // this validator will run for any type of project
     return true;
   }
 
