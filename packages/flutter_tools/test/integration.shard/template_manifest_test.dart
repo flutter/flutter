@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/convert.dart';
 import '../src/common.dart';
@@ -16,7 +14,7 @@ void main() {
       fileSystem.file('templates/template_manifest.json').readAsStringSync(),
     ) as Map<String, Object>;
     final Set<Uri> declaredFileList = Set<Uri>.from(
-      (manifest['files'] as List<Object>).cast<String>().map<Uri>(fileSystem.path.toUri));
+      (manifest['files'] as List<Object?>?)!.cast<String>().map<Uri>(fileSystem.path.toUri));
 
     final Set<Uri> activeTemplateList = fileSystem.directory('templates')
       .listSync(recursive: true)

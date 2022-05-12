@@ -863,7 +863,7 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
   return byteStream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
 }
 
-Map<String, Object?>? parseFlutterResponse(String line) {
+Map<String, Object?>? parseFlutterResponse(String? line) {
   if (line.startsWith('[') && line.endsWith(']') && line.length > 2) {
     try {
       final Map<String, Object?>? response = castStringKeyedMap((json.decode(line) as List<Object?>)[0]);
