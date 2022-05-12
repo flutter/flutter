@@ -62,6 +62,18 @@ class TesterExternalViewEmbedder : public ExternalViewEmbedder {
   SkCanvas canvas_;
 };
 
+class TesterGPUSurfaceSoftware : public GPUSurfaceSoftware {
+ public:
+  TesterGPUSurfaceSoftware(GPUSurfaceSoftwareDelegate* delegate,
+                           bool render_to_surface)
+      : GPUSurfaceSoftware(delegate, render_to_surface) {}
+
+#if DISABLE_SOFTWARE_RASTER_CACHE
+  // |Surface|
+  bool EnableRasterCache() const override { return false; }
+#endif  // DISABLE_SOFTWARE_RASTER_CACHE
+};
+
 class TesterPlatformView : public PlatformView,
                            public GPUSurfaceSoftwareDelegate {
  public:
@@ -70,7 +82,7 @@ class TesterPlatformView : public PlatformView,
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override {
-    auto surface = std::make_unique<GPUSurfaceSoftware>(
+    auto surface = std::make_unique<TesterGPUSurfaceSoftware>(
         this, true /* render to surface */);
     FML_DCHECK(surface->IsValid());
     return surface;
