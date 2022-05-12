@@ -13,6 +13,7 @@
 #include "flutter/display_list/display_list_image_filter.h"
 #include "flutter/display_list/display_list_mask_filter.h"
 #include "flutter/display_list/display_list_paint.h"
+#include "flutter/display_list/display_list_path_effect.h"
 #include "flutter/display_list/display_list_vertices.h"
 
 namespace flutter {
@@ -52,7 +53,7 @@ class Dispatcher {
   virtual void setInvertColors(bool invert) = 0;
   virtual void setBlendMode(DlBlendMode mode) = 0;
   virtual void setBlender(sk_sp<SkBlender> blender) = 0;
-  virtual void setPathEffect(sk_sp<SkPathEffect> effect) = 0;
+  virtual void setPathEffect(const DlPathEffect* effect) = 0;
   virtual void setMaskFilter(const DlMaskFilter* filter) = 0;
   virtual void setImageFilter(const DlImageFilter* filter) = 0;
 

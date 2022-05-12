@@ -275,10 +275,25 @@ void DisplayListBuilder::onSetColorFilter(const DlColorFilter* filter) {
   }
   UpdateCurrentOpacityCompatibility();
 }
-void DisplayListBuilder::onSetPathEffect(sk_sp<SkPathEffect> effect) {
-  (current_path_effect_ = effect)  //
-      ? Push<SetPathEffectOp>(0, 0, std::move(effect))
-      : Push<ClearPathEffectOp>(0, 0);
+void DisplayListBuilder::onSetPathEffect(const DlPathEffect* effect) {
+  if (effect == nullptr) {
+    current_.setPathEffect(nullptr);
+    Push<ClearPathEffectOp>(0, 0);
+  } else {
+    current_.setPathEffect(effect->shared());
+    switch (effect->type()) {
+      case DlPathEffectType::kDash: {
+        const DlDashPathEffect* dash_effect = effect->asDash();
+        void* pod = Push<SetPodPathEffectOp>(dash_effect->size(), 0);
+        new (pod) DlDashPathEffect(dash_effect);
+        break;
+      }
+      case DlPathEffectType::kUnknown: {
+        Push<SetSkPathEffectOp>(0, 0, effect->skia_object());
+        break;
+      }
+    }
+  }
 }
 void DisplayListBuilder::onSetMaskFilter(const DlMaskFilter* filter) {
   if (filter == nullptr) {
@@ -389,7 +404,8 @@ void DisplayListBuilder::setAttributesFromPaint(
     setImageFilter(DlImageFilter::From(paint.getImageFilter()).get());
   }
   if (flags.applies_path_effect()) {
-    setPathEffect(sk_ref_sp(paint.getPathEffect()));
+    SkPathEffect* path_effect = paint.getPathEffect();
+    setPathEffect(DlPathEffect::From(path_effect).get());
   }
   if (flags.applies_mask_filter()) {
     SkMaskFilter* mask_filter = paint.getMaskFilter();

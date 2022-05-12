@@ -58,7 +58,7 @@ class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
   void setColorSource(const DlColorSource* source) override {}
   void setImageFilter(const DlImageFilter* filter) override {}
   void setColorFilter(const DlColorFilter* filter) override {}
-  void setPathEffect(sk_sp<SkPathEffect> effect) override {}
+  void setPathEffect(const DlPathEffect* effect) override {}
   void setMaskFilter(const DlMaskFilter* filter) override {}
 };
 
@@ -185,7 +185,7 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   void setInvertColors(bool invert) override;
   void setBlendMode(DlBlendMode mode) override;
   void setBlender(sk_sp<SkBlender> blender) override;
-  void setPathEffect(sk_sp<SkPathEffect> effect) override;
+  void setPathEffect(const DlPathEffect* effect) override;
   void setMaskFilter(const DlMaskFilter* filter) override;
   void setImageFilter(const DlImageFilter* filter) override;
 
@@ -404,7 +404,7 @@ class DisplayListBoundsCalculator final
   void setBlender(sk_sp<SkBlender> blender) override;
   void setImageFilter(const DlImageFilter* filter) override;
   void setColorFilter(const DlColorFilter* filter) override;
-  void setPathEffect(sk_sp<SkPathEffect> effect) override;
+  void setPathEffect(const DlPathEffect* effect) override;
   void setMaskFilter(const DlMaskFilter* filter) override;
 
   void save() override;
@@ -582,7 +582,7 @@ class DisplayListBoundsCalculator final
   bool join_is_miter_ = true;
   bool cap_is_square_ = false;
   std::shared_ptr<DlImageFilter> image_filter_;
-  sk_sp<SkPathEffect> path_effect_;
+  std::shared_ptr<const DlPathEffect> path_effect_;
   std::shared_ptr<const DlMaskFilter> mask_filter_;
 
   bool paint_nops_on_transparency();

@@ -74,7 +74,9 @@ namespace flutter {
                                     \
   V(SetBlender)                     \
   V(ClearBlender)                   \
-  V(SetPathEffect)                  \
+                                    \
+  V(SetSkPathEffect)                \
+  V(SetPodPathEffect)               \
   V(ClearPathEffect)                \
                                     \
   V(ClearColorFilter)               \
