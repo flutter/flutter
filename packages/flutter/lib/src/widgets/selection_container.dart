@@ -2,34 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 
-/// A container that handles selection events for the [Selectable]s in
+/// A container that handles [SelectionEvent]s for the [Selectable]s in
 /// the subtree.
 ///
 /// This widget is useful when one wants to customize selection behaviors for
 /// a group of [Selectable]s
 ///
-/// The render object of this container is a single selectable and will register
-/// itself to the [registrar]. The containers handle the [SelectionEvent]s from
-/// the [registrar] and delegate the events to the [delegate].
+/// The state of this container is a single selectable and will register
+/// itself to the [registrar] if provided. Otherwise, it will register to the
+/// [SelectionRegistrar] from the context.
+///
+/// The containers handle the [SelectionEvent]s from the registered
+/// [SelectionRegistrar] and delegate the events to the [delegate].
 ///
 /// This widget uses [SelectionRegistrarScope] to host the [delegate] as the
 /// [SelectionRegistrar] for the subtree to collect the [Selectable]s, and
 /// [SelectionEvent]s received by this container are sent to the [delegate] using
 /// the [SelectionHandler] API of the delegate.
 ///
-/// To use this widget, set the [registrar] this container received the
-/// [SelectionEvent]s from. Use [SelectionRegistrarScope.maybeOf] to retrieve
-/// the registrar that is relevant to the current context, and then create a
-/// subclass of [SelectionContainerDelegate] to decide how the selections are
-/// handled.
-///
 /// {@tool dartpad}
-/// This sample demonstrates how to create a select-all-or-none container
+/// This sample demonstrates how to create a [SelectionContainer] that only
+/// allows selecting everything or nothing with no partial selection.
 ///
 /// ** See code in examples/api/lib/material/selection_area/custom_container.dart **
 /// {@end-tool}
@@ -41,16 +38,22 @@ import 'framework.dart';
 class SelectionContainer extends StatefulWidget {
   /// Creates a selection container to collect the [Selectable]s in the subtree.
   ///
-  /// The [registrar] and [delegate] must not be null.
+  /// If [registrar] is not provided, this selection container gets the
+  /// [SelectionRegistrar] from the context instead.
+  ///
+  /// The [delegate] must not be null.
   const SelectionContainer({
     super.key,
-    required this.registrar,
+    this.registrar,
     required this.delegate,
     required this.child
-  }) : assert(registrar != null && delegate != null);
+  }) : assert(delegate != null);
 
   /// The [SelectionRegistrar] this container is registered to.
-  final SelectionRegistrar registrar;
+  ///
+  /// If null, this widget gets the [SelectionRegistrar] from the current
+  /// context.
+  final SelectionRegistrar? registrar;
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
@@ -70,19 +73,13 @@ class SelectionContainer extends StatefulWidget {
 
 class _SelectionContainerState extends State<SelectionContainer> with Selectable, SelectionRegistrant {
   final Set<Selectable> _registeredSelectables = <Selectable>{};
-  late final ValueNotifier<SelectionGeometry> _notifier;
-
+  final Set<VoidCallback> _listeners = <VoidCallback>{};
   @override
   void initState() {
     super.initState();
     widget.delegate._selectionContainerContext = context;
-    widget.delegate.addListener(_onSelectionGeometryChange);
-    _notifier = ValueNotifier<SelectionGeometry>(widget.delegate.value);
-    registrar = widget.registrar;
-  }
-
-  void _onSelectionGeometryChange() {
-    _notifier.value = widget.delegate.value;
+    if (widget.registrar != null)
+      registrar = widget.registrar;
   }
 
   @override
@@ -90,22 +87,37 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
     super.didUpdateWidget(oldWidget);
     if (oldWidget.delegate != widget.delegate) {
       oldWidget.delegate._selectionContainerContext = null;
-      oldWidget.delegate.removeListener(_onSelectionGeometryChange);
+      _listeners.forEach(oldWidget.delegate.removeListener);
       widget.delegate._selectionContainerContext = context;
-      widget.delegate.addListener(_onSelectionGeometryChange);
-      _notifier.value = widget.delegate.value;
+      _listeners.forEach(widget.delegate.addListener);
+      if (oldWidget.delegate.value != widget.delegate.value) {
+        for (final VoidCallback listener in _listeners) {
+          listener();
+        }
+      }
     }
-    registrar = widget.registrar;
+    if (widget.registrar != null)
+      registrar = widget.registrar;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.registrar == null) {
+      registrar = SelectionRegistrarScope.maybeOf(context);
+    }
   }
 
   @override
   void addListener(VoidCallback listener) {
-    _notifier.addListener(listener);
+    widget.delegate.addListener(listener);
+    _listeners.add(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    _notifier.removeListener(listener);
+    widget.delegate.removeListener(listener);
+    _listeners.remove(listener);
   }
 
   @override
@@ -135,9 +147,8 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   @override
   void dispose() {
     _registeredSelectables.clear();
-    widget.delegate.removeListener(_onSelectionGeometryChange);
     widget.delegate._selectionContainerContext = null;
-    _notifier.dispose();
+    _listeners.forEach(widget.delegate.removeListener);
     super.dispose();
   }
 
@@ -193,7 +204,7 @@ class SelectionRegistrarScope extends InheritedWidget {
   }
 }
 
-/// A delegate to handle selection events for a [SelectionContainer].
+/// A delegate to handle [SelectionEvent]s for a [SelectionContainer].
 ///
 /// This delegate needs to implement [SelectionRegistrar] to register
 /// [Selectable]s in the [SelectionContainer] subtree.

@@ -1341,7 +1341,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtil.selectionBasedOnRect(_rect, localPosition);
+      return SelectionUtil.getResultBasedOnRect(_rect, localPosition);
     }
     final Offset adjustedOffset = SelectionUtil.adjustDragOffset(
       _rect,
@@ -1361,10 +1361,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
     // selection result. This is a workaround to RenderParagraph, where it does
     // not have a way to get accurate text length if its text is truncated due to
     // layout constraint.
-    if (!_rect.contains(localPosition)) {
-      return SelectionUtil.selectionBasedOnRect(_rect, localPosition);
-    }
-    return SelectionResult.end;
+    return SelectionUtil.getResultBasedOnRect(_rect, localPosition);
   }
 
   TextPosition _clampTextPosition(TextPosition position) {
@@ -1423,7 +1420,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
   /// Whether the given selection text range is contained in current selection
   /// range.
   ///
-  /// The parameters `start` must be smaller than `end`.
+  /// The parameter `start` must be smaller than `end`.
   bool _newSelectionWithinCurrent(TextPosition start, TextPosition end) {
     assert(_compareTextPositions(start, end) >= 0);
     if (_textSelectionStart == null || _textSelectionEnd == null)

@@ -5456,10 +5456,11 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ## Selections
 ///
 /// To make this [RichText] Selectable, the [RichText] needs to be in the
-/// subtree of a [SelectionArea] and assigned a [SelectionRegistrar] to the
-/// [RichText.selectionRegistrar]. One can use [SelectionRegistrarScope.maybeOf]
-/// to get the [SelectionRegistrar] from a context. This enable users to select
-/// the texts in [RichText]s with mice or touches.
+/// subtree of a [SelectionArea] or [SelectableRegion] and assigned a
+/// [SelectionRegistrar] to the [RichText.selectionRegistrar]. One can use
+/// [SelectionRegistrarScope.maybeOf] to get the [SelectionRegistrar] from a
+/// context. This enable users to select the texts in [RichText]s with mice or
+/// touches.
 ///
 /// The [selectionColor] also needs to be set if the selection is enabled to
 /// draw the selection highlights.
@@ -5488,7 +5489,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///    [DefaultTextStyle] to a single string.
 ///  * [Text.rich], a const text widget that provides similar functionality
 ///    as [RichText]. [Text.rich] will inherit [TextStyle] from [DefaultTextStyle].
-///  * [SelectionArea], which provides an overview of the selection system.
+///  * [SelectableRegion], which provides an overview of the selection system.
 class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///

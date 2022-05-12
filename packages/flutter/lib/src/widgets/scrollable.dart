@@ -820,7 +820,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   String? get restorationId => widget.restorationId;
 }
 
-/// A widget to handle selection for the scrollable.
+/// A widget to handle selection for a scrollable.
 ///
 /// This widget registers itself to the [registrar] and uses
 /// [SelectionContainer] to collect selectables from its subtree.
@@ -887,7 +887,7 @@ class EdgeDraggingAutoScroller {
   /// Creates a auto scroller that scrolls the [scrollable].
   EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled, this.velocityScalar = _kDefaultAutoScrollVelocityScalar});
 
-  // An eyeball value for a smooth scrolling experience.
+  // An eyeballed value for a smooth scrolling experience.
   static const double _kDefaultAutoScrollVelocityScalar = 7;
 
   /// The [Scrollable] this auto scroller is scrolling.
@@ -1013,10 +1013,10 @@ class EdgeDraggingAutoScroller {
 /// This updater handles the case where the selectables change frequently, and
 /// it optimizes toward scrolling updates.
 ///
-/// This updater keeps track of the drag start offset related to scroll origin
-/// for every selectable. The records are used to determine whether the
-/// selection is up to date with the scroll position when it sends the drag
-/// update event to a selectable.
+/// It keeps track of the drag start offset relative to scroll origin for every
+/// selectable. The records are used to determine whether the selection is up to
+/// date with the scroll position when it sends the drag update event to a
+/// selectable.
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _ScrollableSelectionContainerDelegate({
     required this.state,
@@ -1074,10 +1074,10 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   /// [SelectionEdgeUpdateEvent] and dispatches the event before dispatching the
   /// new event.
   ///
-  /// For example, if a selectable receives [SelectionEndEdgeUpdateEvent] and
+  /// For example, if a selectable receives end [SelectionEdgeUpdateEvent] and
   /// its scroll offset in the records is different from the current, it
-  /// synthesizes a [SelectionStartEdgeUpdateEvent] and dispatches it before
-  /// dispatching the original [SelectionEndEdgeUpdateEvent].
+  /// synthesizes a start [SelectionEdgeUpdateEvent] and dispatches it before
+  /// dispatching the original end [SelectionEdgeUpdateEvent].
   final Map<Selectable, double> _selectableStartEdgeUpdateRecords = <Selectable, double>{};
   final Map<Selectable, double> _selectableEndEdgeUpdateRecords = <Selectable, double>{};
 
@@ -1138,7 +1138,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     final Offset localPosition = box.globalToLocal(globalPosition);
     if (!_selectionStartsInScrollable) {
       // If the selection starts outside of the scrollable, selecting across the
-      // scrollable boundary will act as select the entire content in the
+      // scrollable boundary will act as selecting the entire content in the
       // scrollable. This logic move the offset to the 0.0 or infinity to cover
       // the entire content if the input position is outside of the scrollable.
       if (localPosition.dy < 0 || localPosition.dx < 0) {
@@ -1152,6 +1152,13 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     return box.localToGlobal(localPosition.translate(deltaToOrigin.dx, deltaToOrigin.dy));
   }
 
+  /// Infers the [_currentDragStartRelatedToOrigin] and
+  /// [_currentDragEndRelatedToOrigin] from the geometry.
+  ///
+  /// This method is called after a select word and select all event where the
+  /// selection is triggered by none drag events. The
+  /// [_currentDragStartRelatedToOrigin] and [_currentDragEndRelatedToOrigin]
+  /// are essential to handle future [SelectionEdgeUpdateEvent]s.
   void _updateDragLocationsFromGeometries() {
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
     final RenderBox box = state.context.findRenderObject()! as RenderBox;
@@ -1193,7 +1200,6 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
-    assert(!_selectionStartsInScrollable);
     _selectionStartsInScrollable = _globalPositionInScrollable(event.globalPosition);
     final SelectionResult result = super.handleSelectWord(event);
     _updateDragLocationsFromGeometries();

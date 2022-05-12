@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This sample demonstrates how to create an adapter widget that makes any child
+// widget selectable.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -47,7 +50,7 @@ class MySelectableAdapter extends StatelessWidget {
     }
     return MouseRegion(
       cursor: SystemMouseCursors.text,
-      child: _ProxySelectable(
+      child: _SelectableAdapter(
         registrar: registrar,
         child: child,
       ),
@@ -55,8 +58,8 @@ class MySelectableAdapter extends StatelessWidget {
   }
 }
 
-class _ProxySelectable extends SingleChildRenderObjectWidget {
-  const _ProxySelectable({
+class _SelectableAdapter extends SingleChildRenderObjectWidget {
+  const _SelectableAdapter({
     required this.registrar,
     required Widget child,
   }) : super(child: child);
@@ -64,24 +67,23 @@ class _ProxySelectable extends SingleChildRenderObjectWidget {
   final SelectionRegistrar registrar;
 
   @override
-  _RenderProxySelectable createRenderObject(BuildContext context) {
-    return _RenderProxySelectable(
+  _RenderSelectableAdapter createRenderObject(BuildContext context) {
+    return _RenderSelectableAdapter(
       DefaultSelectionStyle.of(context).selectionColor!,
       registrar,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderProxySelectable renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSelectableAdapter renderObject) {
     renderObject
       ..selectionColor = DefaultSelectionStyle.of(context).selectionColor!
       ..registrar = registrar;
   }
-
 }
 
-class _RenderProxySelectable extends RenderProxyBox with Selectable, SelectionRegistrant {
-  _RenderProxySelectable(
+class _RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
+  _RenderSelectableAdapter(
     Color selectionColor,
     SelectionRegistrar registrar,
   ) : _selectionColor = selectionColor,
@@ -156,7 +158,7 @@ class _RenderProxySelectable extends RenderProxyBox with Selectable, SelectionRe
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
         final Rect renderObjectRect = getCurrentRect();
-        // Normalize offset in case they are out side of the rect.
+        // Normalize offset in case it is out side of the rect.
         final Offset point = globalToLocal((event as SelectionEdgeUpdateEvent).globalPosition);
         final Offset adjustedPoint = SelectionUtil.adjustDragOffset(renderObjectRect, point);
         if (event.type == SelectionEventType.startEdgeUpdate) {
@@ -164,9 +166,7 @@ class _RenderProxySelectable extends RenderProxyBox with Selectable, SelectionRe
         } else {
           _end = adjustedPoint;
         }
-        result = renderObjectRect.contains(point)
-            ? SelectionResult.end
-            : SelectionUtil.selectionBasedOnRect(renderObjectRect, point);
+        result = SelectionUtil.getResultBasedOnRect(renderObjectRect, point);
         break;
       case SelectionEventType.clear:
         _start = _end = null;
@@ -212,14 +212,14 @@ class _RenderProxySelectable extends RenderProxyBox with Selectable, SelectionRe
       ..color = _selectionColor;
     context.canvas.drawRect(getCurrentRect().shift(offset), selectionPaint);
 
-    // Paint the layer links if any.
+    // Push the layer links if any.
     if (_startHandle != null) {
       context.pushLayer(
         LeaderLayer(
           link: _startHandle!,
           offset: offset + value.startSelectionPoint!.localPosition,
         ),
-            (PaintingContext context, Offset offset) { },
+        (PaintingContext context, Offset offset) { },
         Offset.zero,
       );
     }
@@ -229,7 +229,7 @@ class _RenderProxySelectable extends RenderProxyBox with Selectable, SelectionRe
           link: _endHandle!,
           offset: offset + value.endSelectionPoint!.localPosition,
         ),
-            (PaintingContext context, Offset offset) { },
+        (PaintingContext context, Offset offset) { },
         Offset.zero,
       );
     }

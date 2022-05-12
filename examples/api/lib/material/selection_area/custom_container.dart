@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This sample demonstrates how to create a [SelectionContainer] that only
+// allows selecting everything or nothing with no partial selection.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -65,24 +68,23 @@ class _SelectionAllOrNoneContainerState extends State<SelectionAllOrNoneContaine
       return widget.child;
     }
     return SelectionContainer(
-        registrar: registrar,
-        delegate: delegate,
-        child: widget.child
+      registrar: registrar,
+      delegate: delegate,
+      child: widget.child,
     );
   }
 }
 
-
 class MySelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   Offset? _adjustedStartEdge;
   Offset? _adjustedEndEdge;
-  bool isSelected = false;
+  bool _isSelected = false;
 
   @override
   void ensureChildUpdated(Selectable selectable) {
     // This method is called when newly added selectable is in the current
     // selected range.
-    if (isSelected) {
+    if (_isSelected) {
       dispatchSelectionEventToChild(selectable, const SelectAllSelectionEvent());
     }
   }
@@ -115,22 +117,20 @@ class MySelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContain
     } else {
       super.handleClearSelection(const ClearSelectionEvent());
     }
-    return containerRect.contains(localOffset)
-        ? SelectionResult.end
-        : SelectionUtil.selectionBasedOnRect(containerRect, localOffset);
+    return SelectionUtil.getResultBasedOnRect(containerRect, localOffset);
   }
 
   @override
   SelectionResult handleClearSelection(ClearSelectionEvent event) {
     _adjustedStartEdge = null;
     _adjustedEndEdge = null;
-    isSelected = false;
+    _isSelected = false;
     return super.handleClearSelection(event);
   }
 
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
-    isSelected = true;
+    _isSelected = true;
     return super.handleSelectAll(event);
   }
 }

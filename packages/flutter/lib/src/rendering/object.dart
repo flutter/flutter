@@ -2738,7 +2738,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [PipelineOwner.rootNode].
   /// {@endtemplate}
   ///
-  /// For the render tree owner by the [RendererBinding] (i.e. for the main
+  /// For the render tree owned by the [RendererBinding] (i.e. for the main
   /// render tree displayed on the device) this means that this method maps to
   /// the global coordinate system in logical pixels. To get physical pixels,
   /// use [applyPaintTransform] from the [RenderView] to further transform the

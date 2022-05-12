@@ -10,33 +10,56 @@ import 'object.dart';
 
 /// The result after handling a [SelectionEvent].
 ///
+/// [SelectionEvent]s are sent from [SelectionRegistrar] to be handled by
+/// [SelectionHandler.dispatchSelectionEvent]. The subclasses of
+/// [SelectionHandler] or [Selectable] must return appropriate
+/// [SelectionResult]s after handling the events.
+///
 /// This is used by the [SelectionContainer] to determine how a selection
 /// expands across its [Selectable] children.
 enum SelectionResult {
-  /// There is nothing left to select forward, and further selection should
-  /// extend to the next [Selectable] in screen order.
+  /// There is nothing left to select forward in this [Selectable], and further
+  /// selection should extend to the next [Selectable] in screen order.
+  ///
+  /// This is used after subclasses [SelectionHandler] or [Selectable] handled
+  /// [SelectionEdgeUpdateEvent].
   next,
   /// Selection does not reach this [Selectable] and should look at the
   /// previous [Selectable] in screen order.
+  ///
+  /// This is used after subclasses [SelectionHandler] or [Selectable] handled
+  /// [SelectionEdgeUpdateEvent].
   previous,
   /// Selection ends in this [Selectable].
   ///
-  /// Part of the [Selectable] may or may not be selected, but there are still
+  /// Part of the [Selectable] may or may not be selected, but there is still
   /// content to select forward or backward.
+  ///
+  /// This is used after subclasses [SelectionHandler] or [Selectable] handled
+  /// [SelectionEdgeUpdateEvent].
   end,
   /// The result can't be determined in this frame.
   ///
-  /// This is typically used when the subtree is scrolling to reveal more content.
+  /// This is typically used when the subtree is scrolling to reveal more
+  /// content.
+  ///
+  /// This is used after subclasses [SelectionHandler] or [Selectable] handled
+  /// [SelectionEdgeUpdateEvent].
+  // See `_SelectableRegionState._triggerSelectionEndEdgeUpdate` for how this
+  // result affects the selection.
   pending,
   /// There is no result for the selection event.
   ///
-  /// This is used when the a selection result is not applicable, e.g.
+  /// This is used when a selection result is not applicable, e.g.
   /// [SelectAllSelectionEvent], [ClearSelectionEvent], and
   /// [SelectWordSelectionEvent].
   none,
 }
 
-/// The abstract interface to handle selection events.
+/// The abstract interface to handle [SelectionEvent]s.
+///
+/// This interface is extended by [Selectable] and [SelectionContainerDelegate]
+/// and is typically not use directly.
 ///
 /// {@template flutter.rendering.SelectionHandler}
 /// This class returns a [SelectionGeometry] as its [value], and is responsible
@@ -44,17 +67,19 @@ enum SelectionResult {
 /// of receiving selection events.
 /// {@endtemplate}
 abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
-  /// Marks this handler to be responsible for painting leader layers for the
+  /// Marks this handler to be responsible for pushing leader layers for the
   /// selection handles.
   ///
-  /// This handler is responsible for painting the leader layers with the
+  /// This handler is responsible for pushing the leader layers with the
   /// given layer links if they are not null. It is possible that only one layer
-  /// is non-null if this handler is only responsible for painting one layer
+  /// is non-null if this handler is only responsible for pushing one layer
   /// link.
   ///
   /// The `startHandle` needs to be placed at the visual location of selection
   /// start, the `endHandle` needs to be placed at the visual location of selection
-  /// end
+  /// end. Typically, the visual locations should be the same as
+  /// [SelectionGeometry.startSelectionPoint] and
+  /// [SelectionGeometry.endSelectionPoint].
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle);
 
   /// Gets the selected content in this object.
@@ -65,15 +90,19 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// Handles the [SelectionEvent] sent to this object.
   ///
   /// The subclasses need to update their selections or delegate the
-  /// [SelectionEvent]s to its subtree.
+  /// [SelectionEvent]s to their subtrees.
   ///
-  /// The `event`s are subclasses of [SelectionEvent]. Use runtime type check to
-  /// determine what kinds of event are dispatched to this handler and handle
-  /// them accordingly.
+  /// The `event`s are subclasses of [SelectionEvent]. Check
+  /// [SelectionEvent.type] to determine what kinds of event are dispatched to
+  /// this handler and handle them accordingly.
+  ///
+  /// See also:
+  ///  * [SelectionEventType], which contains all of the possible types.
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 }
 
-/// The selected content in a [Selectable].
+/// The selected content in a [Selectable] or [SelectionHandler].
+// TODO(chunhtai): Add more support for rich content.
 class SelectedContent {
   /// Creates a selected content object.
   ///
@@ -92,14 +121,15 @@ class SelectedContent {
 ///
 /// This object is responsible for drawing selection highlight.
 ///
-/// In order to receive the selection event, the mixer need to register
-/// themselves to [SelectionRegistrar]s. Use the
-/// [SelectionRegistrarScope.maybeOf] to get the the selection registrar, and
+/// In order to receive the selection event, the mixer needs to register
+/// itself to [SelectionRegistrar]s. Use the
+/// [SelectionRegistrarScope.maybeOf] to get the selection registrar, and
 /// mix the [SelectionRegistrant] to subscribe to the [SelectionRegistrar]
 /// automatically.
 ///
-/// The mixer also need to paints [LayerLink]s of selection handles in a
-/// mobile application.
+/// This mixin is typically mixed by [RenderObject]s. The [RenderObject.paint]
+/// methods are responsible to push the [LayerLink]s provided to
+/// [pushHandleLayers].
 ///
 /// {@macro flutter.rendering.SelectionHandler}
 ///
@@ -112,7 +142,7 @@ mixin Selectable implements SelectionHandler {
   /// The size of this [Selectable].
   Size get size;
 
-  /// The dispose method to enable mixer to use [SelectionRegistrant].
+  /// Disposes resources held by the mixer.
   void dispose();
 }
 
@@ -126,7 +156,7 @@ mixin Selectable implements SelectionHandler {
 mixin SelectionRegistrant on Selectable {
   /// The [SelectionRegistrar] the mixer will be or is registered to.
   ///
-  /// This [Selectable] only registers mixer if the
+  /// This [Selectable] only registers the mixer if the
   /// [SelectionGeometry.hasContent] returned by the [Selectable] is true.
   SelectionRegistrar? get registrar => _registrar;
   SelectionRegistrar? _registrar;
@@ -134,10 +164,10 @@ mixin SelectionRegistrant on Selectable {
     if (value == _registrar)
       return;
     if (value == null) {
-      // when registrar go from non-null to null;
+      // When registrar go from non-null to null;
       removeListener(_updateSelectionRegistrarSubscription);
     } else if (_registrar == null) {
-      // when registrar go from null to non-null;
+      // When registrar go from null to non-null;
       addListener(_updateSelectionRegistrarSubscription);
     }
     _removeSelectionRegistrarSubscription();
@@ -178,13 +208,17 @@ mixin SelectionRegistrant on Selectable {
 class SelectionUtil {
   SelectionUtil._();
 
-  /// Determine [SelectionResult] purely based on the target rectangle.
+  /// Determines [SelectionResult] purely based on the target rectangle.
   ///
-  /// This method only returns [SelectionResult.previous] or
-  /// [SelectionResult.next]. This is useful when the drag offset is outside of
-  /// the target rectangle or the target does not contain any selectable
-  /// contents; therefore, the selection can't end in this [Selectable].
-  static SelectionResult selectionBasedOnRect(Rect targetRect, Offset point) {
+  /// This method returns [SelectionResult.end] if the `point` is inside the
+  /// `targetRect`. Returns [SelectionResult.previous] if the `point` is
+  /// considered to be lower than `targetRect` in screen order. Returns
+  /// [SelectionResult.next] if the point is considered to be higher than
+  /// `targetRect` in screen order.
+  static SelectionResult getResultBasedOnRect(Rect targetRect, Offset point) {
+    if (targetRect.contains(point)) {
+      return SelectionResult.end;
+    }
     if (point.dy < targetRect.top)
       return SelectionResult.previous;
     if (point.dy > targetRect.bottom)
@@ -194,7 +228,7 @@ class SelectionUtil {
         : SelectionResult.previous;
   }
 
-  /// Adjust the dragging offset based on target rect.
+  /// Adjusts the dragging offset based on target rect.
   ///
   /// This method moves the offsets to be within the target rect in case they are
   /// outside the rect.
@@ -203,13 +237,7 @@ class SelectionUtil {
   /// of a [Selectable].
   ///
   /// The logic works as the following:
-  ///
-  ///     Area 1
-  ///
-  ///            +============+ - - - - - -
-  ///            | Rect       |
-  ///  - - - - - +============+
-  ///                              Area 2
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/rendering/SelectionUtil.adjustDragOffset.png)
   ///
   /// For points inside the rect:
   ///   Their effective locations are unchanged.
@@ -236,7 +264,7 @@ class SelectionUtil {
   }
 }
 
-/// The type of selection event.
+/// The type of a [SelectionEvent].
 ///
 /// Used by [SelectionEvent.type] to distinguish different types of events.
 enum SelectionEventType {
@@ -294,14 +322,14 @@ class SelectAllSelectionEvent extends SelectionEvent {
   const SelectAllSelectionEvent(): super._(SelectionEventType.selectAll);
 }
 
-/// Clear the selection from the [Selectable] and remove any existing
+/// Clears the selection from the [Selectable] and removes any existing
 /// highlight as if there is no selection at all.
 class ClearSelectionEvent extends SelectionEvent {
   /// Create a clear selection event.
   const ClearSelectionEvent(): super._(SelectionEventType.clear);
 }
 
-/// Select the whole word at the location.
+/// Selects the whole word at the location.
 ///
 /// This event can be sent as the result of mobile long press selection.
 class SelectWordSelectionEvent extends SelectionEvent {
@@ -312,12 +340,18 @@ class SelectWordSelectionEvent extends SelectionEvent {
   final Offset globalPosition;
 }
 
-/// An abstract subclass for all of the selection edge related selection events.
+/// Updates a selection edge.
+///
+/// An active selection contains two edges, start and end. Use the [type] to
+/// determine which edge this event applies to. If the [type] is
+/// [SelectionEventType.startEdgeUpdate], the event updates start edge. If the
+/// [type] is [SelectionEventType.endEdgeUpdate], the event updates end edge.
+///
+/// The [globalPosition] contains the new offset of the edge.
 ///
 /// This event is dispatched when the framework detects [DragStartDetails] in
-/// [SelectionArea]'s gesture recognizer for mouse devices, or the selection
-/// handles have been dragged to a new location. The [globalPosition]
-/// contains the location of the selection edge.
+/// [SelectionArea]'s gesture recognizers for mouse devices, or the selection
+/// handles have been dragged to new locations.
 class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// Creates a selection start edge update event.
   ///
@@ -344,13 +378,16 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
 
 /// A registrar that keeps track of [Selectable]s in the subtree.
 ///
-/// A [Selectable] is only included in the selection event loop if they are
-/// registered with its immediate [SelectionRegistrar] in its ancestor chain.
+/// A [Selectable] is only included in the [SelectableRegion] if they are
+/// registered with a [SelectionRegistrar]. Once a [Selectable] is registered,
+/// it will receive [SelectionEvent]s in
+/// [SelectionHandler.dispatchSelectionEvent].
 ///
 /// Use [SelectionRegistrarScope.maybeOf] to get the immediate [SelectionRegistrar]
 /// in the ancestor chain above the build context.
 ///
 /// See also:
+///  * [SelectableRegion], which provides an overview of the selection system.
 ///  * [SelectionRegistrarScope], which hosts the [SelectionRegistrar] for the
 ///    subtree.
 ///  * [SelectionRegistrant], which auto registers the object with the mixin to
@@ -362,14 +399,15 @@ abstract class SelectionRegistrar {
   /// receive selection events.
   void add(Selectable selectable);
 
-  /// Remove the [selectable] from the registrar.
+  /// Removes the [selectable] from the registrar.
   ///
   /// A [Selectable] must unregister itself if it is removed from the rendering
   /// tree.
   void remove(Selectable selectable);
 }
 
-/// The status that indicates whether and how a selection is collapsed.
+/// The status that indicates whether there is a selection and whether the
+/// selection is collapsed.
 ///
 /// A collapsed selection means the selection starts and ends at the same
 /// location.
@@ -393,16 +431,18 @@ enum SelectionStatus {
 
 /// The geometry of the current selection.
 ///
-/// This includes details such as the location of the selection start or end,
-/// line height, etc. This information is used for drawing selection handles
+/// This includes details such as the locations of the selection start and end,
+/// line height, etc. This information is used for drawing selection controls
 /// for mobile platforms.
 ///
-/// The positions in geometry are in local coordinate.
+/// The positions in geometry are in local coordinates of the [SelectionHandler]
+/// or [Selectable].
 @immutable
 class SelectionGeometry {
-  /// Creates a selection geometry object with the input.
+  /// Creates a selection geometry object.
   ///
-  /// the [startSelectionPoint] and [endSelectionPoint] must not be null.
+  /// If any of the [startSelectionPoint] and [endSelectionPoint] is not null,
+  /// the [status] must not be [SelectionStatus.none].
   const SelectionGeometry({
     this.startSelectionPoint,
     this.endSelectionPoint,
@@ -412,23 +452,23 @@ class SelectionGeometry {
 
   /// The geometry information at the selection start.
   ///
-  /// This information is used for drawing mobile selections. The
-  /// [SelectionPoint.localPosition] of the selection start is usually at the start
-  /// of the selection highlight at where the start selection handle should be
-  /// drawn.
+  /// This information is used for drawing mobile selection controls. The
+  /// [SelectionPoint.localPosition] of the selection start is typically at the
+  /// start of the selection highlight at where the start selection handle
+  /// should be drawn.
   ///
   /// The [SelectionPoint.handleType] should be [TextSelectionHandleType.left]
   /// for forward selection or [TextSelectionHandleType.right] for backward
   /// selection in most cases.
   ///
-  /// Can be null if the selection end is offstage, for example, when the
+  /// Can be null if the selection start is offstage, for example, when the
   /// selection is outside of the viewport or is kept alive by a scrollable.
   final SelectionPoint? startSelectionPoint;
 
   /// The geometry information at the selection end.
   ///
-  /// This information is used for drawing mobile selections. The
-  /// [SelectionPoint.localPosition] of the selection end is usually at the end
+  /// This information is used for drawing mobile selection controls. The
+  /// [SelectionPoint.localPosition] of the selection end is typically at the end
   /// of the selection highlight at where the end selection handle should be
   /// drawn.
   ///
@@ -494,7 +534,7 @@ class SelectionGeometry {
 class SelectionPoint {
   /// Creates a selection point object.
   ///
-  /// All the properties must not be null.
+  /// All properties must not be null.
   const SelectionPoint({
     required this.localPosition,
     required this.lineHeight,

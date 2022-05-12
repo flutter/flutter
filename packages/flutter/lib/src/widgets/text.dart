@@ -347,12 +347,14 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 ///
 /// ## Selections
 ///
-/// [Text] is selectable by default if it is under a [SelectionArea]. To disable
-/// the selection, wrap the Text or part of the subtree with
-/// [SelectionRegistrarScope.disabled].
+/// [Text] is not selectable by default. To make a [Text] selectable, one can
+/// wrap a subtree with a [SelectionArea] widget. To exclude a part of a subtree
+/// under [SelectionArea] from selection, once can also wrap that part of the
+/// subtree with [SelectionRegistrarScope.disabled].
 ///
 /// {@tool dartpad}
-/// This sample demonstrates how to disable selection for a Text in a Column.
+/// This sample demonstrates how to disable selection for a Text under a
+/// SelectionArea.
 ///
 /// ** See code in examples/api/lib/material/selection_area/disable_partial_selection.dart **
 /// {@end-tool}

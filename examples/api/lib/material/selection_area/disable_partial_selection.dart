@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This example excludes a Text widget from the SelectionArea.
+
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: const <Widget>[
                 Text('Selectable text'),
-                SelectionRegistrarScope.disabled(child: Text('Non-selectable text 1')),
+                SelectionRegistrarScope.disabled(child: Text('Non-selectable text')),
                 Text('Selectable text'),
               ],
             ),

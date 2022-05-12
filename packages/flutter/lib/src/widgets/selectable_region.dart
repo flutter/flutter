@@ -10,30 +10,47 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'gesture_detector.dart';
 import 'selection_container.dart';
+import 'text_editing_intents.dart';
 import 'text_selection.dart';
 
-/// A widget to provide APIs to select [Selectable]s in the subtree.
+const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
+  PointerDeviceKind.touch,
+  PointerDeviceKind.stylus,
+  PointerDeviceKind.invertedStylus,
+};
+
+
+/// A widget that introduces an area for user selections.
 ///
-/// The subtree wrapped by [SelectableRegion] can be selected through
-/// the [SelectableRegionState] APIs.
+/// Flutter widgets are not selectable by default. To enable selection for
+/// a Flutter application, consider wrapping a portion of widget subtree with
+/// [SelectableRegion]. The wrapped subtree can be selected by users using mouse
+/// or touch gestures, e.g. users can select widgets by holding the mouse
+/// left-click and dragging across widgets, or they can use long press gestures
+/// to select words on touch devices.
 ///
 /// ## An overview of the selection system.
 ///
 /// Every [Selectable] under the [SelectableRegion] can be selected. They form a
 /// selection tree structure to handle the selection.
 ///
-/// The [SelectableRegion] is a wrapper over [SelectionContainer]. The
-/// [SelectableRegionState] APIs send corresponding [SelectionEvent]s to the
+/// The [SelectableRegion] is a wrapper over [SelectionContainer]. It listens to
+/// user gestures and sends corresponding [SelectionEvent]s to the
 /// [SelectionContainer] it creates.
 ///
 /// A [SelectionContainer] is a single [Selectable] that handles
 /// [SelectionEvent]s on behalf of child [Selectable]s in the subtree. It
-/// creates an abstract for the parent [SelectionContainer] as if the parent is
+/// creates a [SelectionRegistrarScope] with its [SelectionContainer.delegate]
+/// to collect child [Selectable]s and sends the [SelectionEvent]s it receives
+/// from the parent [SelectionRegistrar] to the appropriate child [Selectable]s.
+/// It creates an abstraction for the parent [SelectionRegistrar] as if it is
 /// interacting with a single [Selectable].
 ///
 /// The [SelectionContainer] created by [SelectableRegion] is the root node of a
@@ -48,25 +65,32 @@ import 'text_selection.dart';
 /// selection.
 ///
 /// An example selection tree will look like:
+///
+/// {@tool snippet}
+///
 /// ```dart
 /// MaterialApp(
 ///   home: SelectableRegion(
-///     // ...
+///     selectionControls: materialTextSelectionControls,
+///     focusNode: FocusNode(),
 ///     child: Scaffold(
-///       appBar: AppBar(title: Text('Flutter Code Sample')),
+///       appBar: AppBar(title: const Text('Flutter Code Sample')),
 ///       body: ListView(
-///         children: <Widget>[
+///         children: const <Widget>[
 ///           Text('Item 0', style: TextStyle(fontSize: 50.0)),
 ///           Text('Item 1', style: TextStyle(fontSize: 50.0)),
 ///         ],
 ///       ),
 ///     ),
 ///   ),
-///);
+/// )
+/// ```
+/// {@end-tool}
+///
 /// ```
 ///
 ///               SelectionContainer
-///                (SelectableRegion)
+///               (SelectableRegion)
 ///                  /         \
 ///                 /           \
 ///                /             \
@@ -81,6 +105,7 @@ import 'text_selection.dart';
 ///                     Selectable        Selectable
 ///                     ("Item 0")         ("Item 1")
 ///
+///```
 ///
 /// ## Making a widget selectable
 ///
@@ -92,15 +117,17 @@ import 'text_selection.dart';
 /// [Selectable] and implement the required APIs to handle [SelectionEvent]s
 /// as well as paint appropriate selection highlights.
 ///
+/// The render object also needs to register itself to a [SelectionRegistrar].
+/// For the most cases, one can use [SelectionRegistrant] to auto-register
+/// itself with the register returned from [SelectionRegistrarScope.maybeOf] as
+/// seen in the example below.
+///
 /// {@tool dartpad}
-/// This sample demonstrates how to create an custom selectable widget.
+/// This sample demonstrates how to create an adapter widget that makes any
+/// child widget selectable.
 ///
 /// ** See code in examples/api/lib/material/selection_area/custom_selectable.dart **
 /// {@end-tool}
-///
-/// The render object also needs to register itself to a [SelectionRegistrar].
-/// For the most cases, one can use [SelectionRegistrant] to auto-register
-/// itself with the register returned from [SelectionRegistrarScope.maybeOf].
 ///
 /// ## Complex layout
 ///
@@ -109,7 +136,8 @@ import 'text_selection.dart';
 /// [SelectionContainer] to customize its selection behavior.
 ///
 /// {@tool dartpad}
-/// This sample demonstrates how to create a select-all-or-none container
+/// This sample demonstrates how to create a [SelectionContainer] that only
+/// allows selecting everything or nothing with no partial selection.
 ///
 /// ** See code in examples/api/lib/material/selection_area/custom_container.dart **
 /// {@end-tool}
@@ -126,11 +154,12 @@ import 'text_selection.dart';
 ///
 /// To create a separate selection system from its parent selection area,
 /// wrap part of the subtree with another [SelectableRegion]. The selection of the
-/// child selection area can not extend pass its subtree, and the selection of
+/// child selection area can not extend past its subtree, and the selection of
 /// the parent selection area can not extend inside the child selection area.
 ///
 /// See also:
-///  * [SelectionArea], which wires up user gestures to enable user selections.
+///  * [SelectionArea], which creates a [SelectableRegion] with
+///    platform-adaptive selection controls.
 ///  * [SelectionHandler], which contains APIs to handle selection events from the
 ///    [SelectableRegion].
 ///  * [Selectable], which provides API to participate in the selection system.
@@ -141,7 +170,7 @@ import 'text_selection.dart';
 class SelectableRegion extends StatefulWidget {
   /// Create a new [SelectableRegion] widget.
   ///
-  /// The [selectionControls] is used for building the selection handles and
+  /// The [selectionControls] are used for building the selection handles and
   /// toolbar for mobile devices.
   const SelectableRegion({
     super.key,
@@ -163,18 +192,20 @@ class SelectableRegion extends StatefulWidget {
   final TextSelectionControls selectionControls;
 
   @override
-  State<StatefulWidget> createState() => SelectableRegionState();
+  State<StatefulWidget> createState() => _SelectableRegionState();
 }
 
-/// State for a [SelectableRegion].
-///
-/// The state provides APIs to modify the selection in a [SelectableRegion].
-class SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
+class _SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
+  late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+    SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
+    CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
+  };
+  final Map<Type, GestureRecognizerFactory> _gestureRecognizers = <Type, GestureRecognizerFactory>{};
   SelectionOverlay? _selectionOverlay;
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
   final LayerLink _toolbarLayerLink = LayerLink();
-  late _SelectableRegionContainerDelegate _selectionDelegate;
+  final _SelectableRegionContainerDelegate _selectionDelegate = _SelectableRegionContainerDelegate();
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
@@ -184,8 +215,17 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   void initState() {
     super.initState();
-    _selectionDelegate = _SelectableRegionContainerDelegate();
     widget.focusNode.addListener(_handleFocusChanged);
+    _initMouseGestureRecognizer();
+    _initTouchGestureRecognizer();
+    // Taps and right clicks.
+    _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+          () => TapGestureRecognizer(debugOwner: this),
+          (TapGestureRecognizer instance) {
+        instance.onTap = _clearSelection;
+        instance.onSecondaryTapDown = _handleRightClickDown;
+      },
+    );
   }
 
   @override
@@ -199,19 +239,21 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
+  Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
+    return Action<T>.overridable(context: context, defaultAction: defaultAction);
+  }
+
   void _handleFocusChanged() {
     if (!widget.focusNode.hasFocus) {
-      clearSelection();
+      _clearSelection();
     }
   }
 
   void _updateSelectionStatus() {
-    late TextSelection selection;
+    final TextSelection selection;
     final SelectionGeometry geometry = _selectionDelegate.value;
     switch(geometry.status) {
       case SelectionStatus.uncollapsed:
-        selection = const TextSelection(baseOffset: 0, extentOffset: 1);
-        break;
       case SelectionStatus.collapsed:
         selection = const TextSelection(baseOffset: 0, extentOffset: 1);
         break;
@@ -228,11 +270,87 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
+  // gestures.
+
+  void _initMouseGestureRecognizer() {
+    _gestureRecognizers[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+          () => PanGestureRecognizer(debugOwner:this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+          (PanGestureRecognizer instance) {
+        instance
+          ..onDown = _startNewMouseSelectionGesture
+          ..onStart = _handleMouseDragStart
+          ..onUpdate = _handleMouseDragUpdate
+          ..onEnd = _handleMouseDragEnd
+          ..onCancel = _clearSelection
+          ..dragStartBehavior = DragStartBehavior.down;
+      },
+    );
+  }
+
+  void _initTouchGestureRecognizer() {
+    _gestureRecognizers[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+          () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: _kLongPressSelectionDevices),
+          (LongPressGestureRecognizer instance) {
+        instance
+          ..onLongPressStart = _handleTouchLongPressStart
+          ..onLongPressMoveUpdate = _handleTouchLongPressMoveUpdate
+          ..onLongPressEnd = _handleTouchLongPressEnd
+          ..onLongPressCancel = _clearSelection;
+      },
+    );
+  }
+
+  void _startNewMouseSelectionGesture(DragDownDetails details) {
+    widget.focusNode.requestFocus();
+    hideToolbar();
+    _clearSelection();
+  }
+
+  void _handleMouseDragStart(DragStartDetails details) {
+    _selectStartTo(offset: details.globalPosition);
+  }
+
+  void _handleMouseDragUpdate(DragUpdateDetails details) {
+    _selectEndTo(offset: details.globalPosition, continuous: true);
+  }
+
+  void _handleMouseDragEnd(DragEndDetails details) {
+    _finalizeSelection();
+  }
+
+  void _handleTouchLongPressStart(LongPressStartDetails details) {
+    widget.focusNode.requestFocus();
+    _selectWordAt(offset: details.globalPosition);
+    _showToolbar();
+    _showHandles();
+  }
+
+  void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    _selectEndTo(offset: details.globalPosition);
+  }
+
+  void _handleTouchLongPressEnd(LongPressEndDetails details) {
+    _finalizeSelection();
+  }
+
+  void _handleRightClickDown(TapDownDetails details) {
+    widget.focusNode.requestFocus();
+    _selectWordAt(offset: details.globalPosition);
+    _showHandles();
+    _showToolbar(location: details.globalPosition);
+  }
+
   // Selection update helper methods.
 
   Offset? _selectionEndPosition;
   bool get _userDraggingSelectionEnd => _selectionEndPosition != null;
   bool _scheduledSelectionEndEdgeUpdate = false;
+
+  /// Sends end [SelectionEdgeUpdateEvent] to the selectable subtree.
+  ///
+  /// If the selectable subtree returns a [SelectionResult.pending], this method
+  /// continues to send [SelectionEdgeUpdateEvent]s every frame until the result
+  /// is not pending or users end their gestures.
   void _triggerSelectionEndEdgeUpdate() {
     // This method can be called when the drag is not in progress. This can
     // happen if the the child scrollable returns SelectionResult.pending, and
@@ -261,6 +379,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   Offset? _selectionStartPosition;
   bool get _userDraggingSelectionStart => _selectionStartPosition != null;
   bool _scheduledSelectionStartEdgeUpdate = false;
+
+  /// Sends start [SelectionEdgeUpdateEvent] to the selectable subtree.
+  ///
+  /// If the selectable subtree returns a [SelectionResult.pending], this method
+  /// continues to send [SelectionEdgeUpdateEvent]s every frame until the result
+  /// is not pending or users end their gestures.
   void _triggerSelectionStartEdgeUpdate() {
     // This method can be called when the drag is not in progress. This can
     // happen if the the child scrollable returns SelectionResult.pending, and
@@ -388,11 +512,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       ..selectionEndPoints = points;
   }
 
-  /// {@macro flutter.widgets.SelectionOverlay.showHandles}
+  /// Shows the selection handles.
   ///
   /// Returns true if the handles are shown, false if the handles can't be
   /// shown.
-  bool showHandles() {
+  bool _showHandles() {
     if (_selectionOverlay != null) {
       _selectionOverlay!.showHandles();
       return true;
@@ -406,14 +530,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     return true;
   }
 
-  /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
+  /// Shows the text selection toolbar.
   ///
   /// If the parameter `location` is set, the toolbar will be shown at the
   /// location. Otherwise, the toolbar location will be calculated based on the
-  /// handles' locations. The `location` is in global coordinates.
+  /// handles' locations. The `location` is in the coordinates system of the
+  /// [Overlay].
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
-  bool showToolbar({Offset? location}) {
+  bool _showToolbar({Offset? location}) {
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null)
       return false;
 
@@ -428,26 +553,28 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// Sets or updates selection end edge to the `offset` location.
   ///
   /// A selection always contains a select start edge and selection end edge.
-  /// They can be created by calling both [selectStartTo] and [selectEndTo], or
-  /// use other selection APIs, such as [selectWordAt] or [selectAll].
+  /// They can be created by calling both [_selectStartTo] and [_selectEndTo], or
+  /// use other selection APIs, such as [_selectWordAt] or [selectAll].
   ///
-  /// If there is already an existing select end edge, this method will update
-  /// it to the new location.
+  /// This method sets or updates the selection end edge by sending
+  /// [SelectionEdgeUpdateEvent]s to the child [Selectable]s.
   ///
-  /// If the `continuous` is set to true and the update causes scrolling, the
-  /// method will continue sending the update until the scrolling finishes.
+  /// If `continuous` is set to true and the update causes scrolling, the
+  /// method will continue sending the same [SelectionEdgeUpdateEvent]s to the
+  /// child [Selectable]s every frame until the scrolling finishes or a
+  /// [_finalizeSelection] is called.
   ///
-  /// The `continuous` defaults to false if not set.
+  /// The `continuous` argument defaults to false.
   ///
   /// The `offset` is in global coordinates.
   ///
   /// See also:
-  ///  * [selectStartTo], which sets or updates selection start edge.
-  ///  * [finalizeSelection], which stops the `continuous` updates.
-  ///  * [clearSelection], which clear the ongoing selection.
-  ///  * [selectWordAt], which selects a whole word at the location.
+  ///  * [_selectStartTo], which sets or updates selection start edge.
+  ///  * [_finalizeSelection], which stops the `continuous` updates.
+  ///  * [_clearSelection], which clear the ongoing selection.
+  ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
-  void selectEndTo({required Offset offset, bool continuous = false}) {
+  void _selectEndTo({required Offset offset, bool continuous = false}) {
     if (!continuous) {
       _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: offset));
       return;
@@ -461,26 +588,28 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// Sets or updates selection start edge to the `offset` location.
   ///
   /// A selection always contains a select start edge and selection end edge.
-  /// They can be created by calling both [selectStartTo] and [selectEndTo], or
-  /// use other selection APIs, such as [selectWordAt] or [selectAll].
+  /// They can be created by calling both [_selectStartTo] and [_selectEndTo], or
+  /// use other selection APIs, such as [_selectWordAt] or [selectAll].
   ///
-  /// If there is already an existing select start edge, this method will update
-  /// it to the new location.
+  /// This method sets or updates the selection start edge by sending
+  /// [SelectionEdgeUpdateEvent]s to the child [Selectable]s.
   ///
-  /// If the `continuous` is set to true and the update causes scrolling, the
-  /// method will continue sending the update until the scrolling finishes.
+  /// If `continuous` is set to true and the update causes scrolling, the
+  /// method will continue sending the same [SelectionEdgeUpdateEvent]s to the
+  /// child [Selectable]s every frame until the scrolling finishes or a
+  /// [_finalizeSelection] is called.
   ///
-  /// The `continuous` defaults to false if not set.
+  /// The `continuous` argument defaults to false.
   ///
   /// The `offset` is in global coordinates.
   ///
   /// See also:
-  ///  * [selectEndTo], which sets or updates selection end edge.
-  ///  * [finalizeSelection], which stops the `continuous` updates.
-  ///  * [clearSelection], which clear the ongoing selection.
-  ///  * [selectWordAt], which selects a whole word at the location.
+  ///  * [_selectEndTo], which sets or updates selection end edge.
+  ///  * [_finalizeSelection], which stops the `continuous` updates.
+  ///  * [_clearSelection], which clear the ongoing selection.
+  ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
-  void selectStartTo({required Offset offset, bool continuous = false}) {
+  void _selectStartTo({required Offset offset, bool continuous = false}) {
     if (!continuous) {
       _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: offset));
       return;
@@ -494,49 +623,50 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// Selects a whole word at the `offset` location.
   ///
   /// If the whole word is already in the current selection, selection won't
-  /// change. One call [clearSelection] first if the selection needs to be
+  /// change. One call [_clearSelection] first if the selection needs to be
   /// updated even if the word is already covered by the current selection.
   ///
-  /// One can also use [selectEndTo] or [selectStartTo] to adjust the selection
+  /// One can also use [_selectEndTo] or [_selectStartTo] to adjust the selection
   /// edges after calling this method.
   ///
   /// See also:
-  ///  * [selectStartTo], which sets or updates selection start edge.
-  ///  * [selectEndTo], which sets or updates selection end edge.
-  ///  * [finalizeSelection], which stops the `continuous` updates.
-  ///  * [clearSelection], which clear the ongoing selection.
+  ///  * [_selectStartTo], which sets or updates selection start edge.
+  ///  * [_selectEndTo], which sets or updates selection end edge.
+  ///  * [_finalizeSelection], which stops the `continuous` updates.
+  ///  * [_clearSelection], which clear the ongoing selection.
   ///  * [selectAll], which selects the entire content.
-  void selectWordAt({required Offset offset}) {
+  void _selectWordAt({required Offset offset}) {
     // There may be other selection ongoing.
-    finalizeSelection();
+    _finalizeSelection();
     _selectable?.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: offset));
   }
 
   /// Stops any ongoing selection updates.
   ///
-  /// This method is different from [clearSelection] that it does not remove
+  /// This method is different from [_clearSelection] that it does not remove
   /// the current selection. It only stops the continuous updates.
   ///
-  /// A continuous update can happen as result of calling [selectStartTo] or
-  /// [selectEndTo] with `continuous` sets to true which causes a [Selectable]
+  /// A continuous update can happen as result of calling [_selectStartTo] or
+  /// [_selectEndTo] with `continuous` sets to true which causes a [Selectable]
   /// to scroll. Calling this method will stop the update as well as the
   /// scrolling.
-  void finalizeSelection() {
+  void _finalizeSelection() {
     _stopSelectionEndEdgeUpdate();
     _stopSelectionStartEdgeUpdate();
   }
 
   /// Removes the ongoing selection.
-  void clearSelection() {
-    finalizeSelection();
+  void _clearSelection() {
+    _finalizeSelection();
     _selectable?.dispatchSelectionEvent(const ClearSelectionEvent());
   }
 
-  /// Gets the selected content in the region.
-  ///
-  /// Return `null` if nothing is selected.
-  SelectedContent? getSelectedContent() {
-    return _selectable?.getSelectedContent();
+  Future<void> _copy() async {
+    final SelectedContent? data = _selectable?.getSelectedContent();
+    if (data == null) {
+      return;
+    }
+    await Clipboard.setData(ClipboardData(text: data.plainText));
   }
 
   // [TextSelectionDelegate] overrides.
@@ -555,29 +685,20 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
-  /// Copy
-  Future<void> copy() async {
-    final SelectedContent? data = getSelectedContent();
-    if (data == null) {
-      return;
-    }
-    await Clipboard.setData(ClipboardData(text: data.plainText));
-  }
-
   @override
   void selectAll([SelectionChangedCause? cause]) {
-    clearSelection();
+    _clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
-      showToolbar();
-      showHandles();
+      _showToolbar();
+      _showHandles();
     }
   }
 
   @override
   void copySelection(SelectionChangedCause cause) {
-    copy();
-    clearSelection();
+    _copy();
+    _clearSelection();
   }
 
   // TODO(chunhtai): remove this workaround after decoupling text selection
@@ -586,7 +707,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   TextEditingValue textEditingValue = const TextEditingValue(text: '_');
 
   @override
-  void bringIntoView(TextPosition position) {}
+  void bringIntoView(TextPosition position) {/* SelectableRegion must be in view at this point. */}
 
   @override
   void cutSelection(SelectionChangedCause cause) {
@@ -594,7 +715,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {}
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {/* SelectableRegion maintains its own state */}
 
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
@@ -608,13 +729,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     assert(_selectable == null);
     _selectable = selectable;
     _selectable!.addListener(_updateSelectionStatus);
-    selectable.pushHandleLayers(_startHandleLayerLink, _endHandleLayerLink);
+    _selectable!.pushHandleLayers(_startHandleLayerLink, _endHandleLayerLink);
   }
 
   @override
   void remove(Selectable selectable) {
-    _selectable?.removeListener(_updateSelectionStatus);
-    _selectable?.pushHandleLayers(null, null);
+    assert(_selectable == selectable);
+    _selectable!.removeListener(_updateSelectionStatus);
+    _selectable!.pushHandleLayers(null, null);
     _selectable = null;
   }
 
@@ -632,15 +754,45 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
       link: _toolbarLayerLink,
-      child: Focus(
-        focusNode: widget.focusNode,
-        child: SelectionContainer(
-          registrar: this,
-          delegate: _selectionDelegate,
-          child: widget.child,
+      child: RawGestureDetector(
+        gestures: _gestureRecognizers,
+        behavior: HitTestBehavior.translucent,
+        excludeFromSemantics: true,
+        child: Actions(
+          actions: _actions,
+          child: Focus(
+            focusNode: widget.focusNode,
+            child: SelectionContainer(
+              registrar: this,
+              delegate: _selectionDelegate,
+              child: widget.child,
+            ),
+          ),
         ),
       ),
     );
+  }
+}
+
+class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
+  _SelectAllAction(this.state);
+
+  final _SelectableRegionState state;
+
+  @override
+  void invoke(SelectAllTextIntent intent, [BuildContext? context]) {
+    state.selectAll(SelectionChangedCause.keyboard);
+  }
+}
+
+class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
+  _CopySelectionAction(this.state);
+
+  final _SelectableRegionState state;
+
+  @override
+  void invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
+    state._copy();
   }
 }
 
@@ -973,7 +1125,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   }
 
   /// Compares two rectangles in the screen order solely by their vertical
-  /// position.
+  /// positions.
   ///
   /// Returns positive if a is lower, negative if a is higher, 0 if their
   /// order can't be determine solely by their vertical position.
@@ -987,8 +1139,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return a.bottom > b.bottom ? 1 : -1;
   }
 
-  /// Compares two rectangles in the screen order by their horizontal position
-  /// assuming one of the rectangles enclose the other rect in vertically.
+  /// Compares two rectangles in the screen order by their horizontal positions
+  /// assuming one of the rectangles enclose the other rect vertically.
   ///
   /// Returns positive if a is lower, negative if a is higher.
   static int _compareHorizontally(Rect a, Rect b) {
@@ -1049,7 +1201,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (startGeometry.startSelectionPoint != null) {
       final Matrix4 startTransform =  selectables[startIndexWalker].getTransformTo(_box);
       final Offset start = MatrixUtils.transformPoint(startTransform, startGeometry.startSelectionPoint!.localPosition);
-      // It can be NaN if it is detached or off screen.
+      // It can be NaN if it is detached or off-screen.
       if (start.isFinite) {
         startPoint = SelectionPoint(
           localPosition: start,
@@ -1070,7 +1222,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (endGeometry.endSelectionPoint != null) {
       final Matrix4 endTransform =  selectables[endIndexWalker].getTransformTo(_box);
       final Offset end = MatrixUtils.transformPoint(endTransform, endGeometry.endSelectionPoint!.localPosition);
-      // It can be NaN if it is detached or off screen.
+      // It can be NaN if it is detached or off-screen.
       if (end.isFinite) {
         endPoint = SelectionPoint(
           localPosition: end,

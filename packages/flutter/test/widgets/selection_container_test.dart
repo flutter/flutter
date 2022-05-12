@@ -101,6 +101,27 @@ void main() {
       );
       expect(registrar.selectables.length, 0);
     });
+
+    testWidgets('selection container gets registrar from context if not provided', (WidgetTester tester) async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final TestContainerDelegate delegate = TestContainerDelegate();
+
+      await pumpContainer(
+        tester,
+        SelectionRegistrarScope(
+          registrar: registrar,
+          child: SelectionContainer(
+            delegate: delegate,
+            child: Column(
+              children: const <Widget>[
+                Text('column1', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(registrar.selectables.length, 1);
+    });
   });
 }
 

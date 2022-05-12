@@ -21,40 +21,40 @@ void main() {
   group('selection utils', () {
     test('selectionBasedOnRect works', () {
       expect(
-        SelectionUtil.selectionBasedOnRect(rect, outsideTopLeft),
+        SelectionUtil.getResultBasedOnRect(rect, outsideTopLeft),
         SelectionResult.previous,
       );
       expect(
-        SelectionUtil.selectionBasedOnRect(rect, outsideLeft),
+        SelectionUtil.getResultBasedOnRect(rect, outsideLeft),
         SelectionResult.previous,
       );
       expect(
-        SelectionUtil.selectionBasedOnRect(rect, outsideBottomLeft),
+        SelectionUtil.getResultBasedOnRect(rect, outsideBottomLeft),
         SelectionResult.next,
       );
       expect(
-        SelectionUtil.selectionBasedOnRect(rect, outsideTop),
+        SelectionUtil.getResultBasedOnRect(rect, outsideTop),
         SelectionResult.previous,
       );
       expect(
-        SelectionUtil.selectionBasedOnRect(rect, outsideTopRight),
+        SelectionUtil.getResultBasedOnRect(rect, outsideTopRight),
         SelectionResult.previous,
       );
       expect(
-        SelectionUtil.selectionBasedOnRect(rect, outsideRight),
+        SelectionUtil.getResultBasedOnRect(rect, outsideRight),
         SelectionResult.next,
       );
       expect(
-        SelectionUtil.selectionBasedOnRect(rect, outsideBottomRight),
+        SelectionUtil.getResultBasedOnRect(rect, outsideBottomRight),
         SelectionResult.next,
       );
       expect(
-        SelectionUtil.selectionBasedOnRect(rect, outsideBottom),
+        SelectionUtil.getResultBasedOnRect(rect, outsideBottom),
         SelectionResult.next,
       );
       expect(
-        SelectionUtil.selectionBasedOnRect(rect, center),
-        SelectionResult.previous,
+        SelectionUtil.getResultBasedOnRect(rect, center),
+        SelectionResult.end,
       );
     });
 
