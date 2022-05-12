@@ -62,8 +62,7 @@ vec2 Hash(float seed) {
 }
 
 vec4 BlueNoise(vec2 uv) {
-  // Remove mod once repeat sampling works.
-  return texture(blue_noise, mod(uv, 1.0));
+  return texture(blue_noise, uv);
 }
 
 vec4 BlueNoiseWithRandomOffset(vec2 screen_position, float seed) {

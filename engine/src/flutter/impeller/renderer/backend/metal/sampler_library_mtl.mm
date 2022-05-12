@@ -25,9 +25,9 @@ std::shared_ptr<const Sampler> SamplerLibraryMTL::GetSampler(
   auto desc = [[MTLSamplerDescriptor alloc] init];
   desc.minFilter = ToMTLSamplerMinMagFilter(descriptor.min_filter);
   desc.magFilter = ToMTLSamplerMinMagFilter(descriptor.mag_filter);
-  desc.sAddressMode = MTLSamplerAddressMode(descriptor.width_address_mode);
-  desc.tAddressMode = MTLSamplerAddressMode(descriptor.height_address_mode);
-  desc.rAddressMode = MTLSamplerAddressMode(descriptor.depth_address_mode);
+  desc.sAddressMode = ToMTLSamplerAddressMode(descriptor.width_address_mode);
+  desc.tAddressMode = ToMTLSamplerAddressMode(descriptor.height_address_mode);
+  desc.rAddressMode = ToMTLSamplerAddressMode(descriptor.depth_address_mode);
 
   if (!descriptor.label.empty()) {
     desc.label = @(descriptor.label.c_str());
