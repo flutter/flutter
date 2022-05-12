@@ -112,7 +112,7 @@ class ComplexityCalculatorHelper
   void setColorSource(const DlColorSource* source) override {}
   void setImageFilter(const DlImageFilter* filter) override {}
   void setColorFilter(const DlColorFilter* filter) override {}
-  void setPathEffect(sk_sp<SkPathEffect> effect) override {}
+  void setPathEffect(const DlPathEffect* effect) override {}
   void setMaskFilter(const DlMaskFilter* filter) override {}
 
   void save() override {}

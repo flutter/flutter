@@ -25,7 +25,9 @@
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/core/SkVertices.h"
+#include "third_party/skia/include/effects/SkCornerPathEffect.h"
+#include "third_party/skia/include/effects/SkDashPathEffect.h"
+#include "third_party/skia/include/effects/SkDiscretePathEffect.h"
 #include "third_party/skia/include/gpu/GrTypes.h"
 #include "third_party/skia/include/utils/SkShadowUtils.h"
-
 #endif  // FLUTTER_DISPLAY_LIST_TYPES_H_

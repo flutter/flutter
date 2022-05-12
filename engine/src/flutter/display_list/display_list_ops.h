@@ -176,7 +176,6 @@ struct SetBlendModeOp final : DLOp {
     }                                                                          \
   };
 DEFINE_SET_CLEAR_SKREF_OP(Blender, blender)
-DEFINE_SET_CLEAR_SKREF_OP(PathEffect, effect)
 #undef DEFINE_SET_CLEAR_SKREF_OP
 
 // Clear: 4 byte header + unused 4 byte payload uses 8 bytes
@@ -224,6 +223,7 @@ DEFINE_SET_CLEAR_DLATTR_OP(ColorFilter, ColorFilter, filter)
 DEFINE_SET_CLEAR_DLATTR_OP(ImageFilter, ImageFilter, filter)
 DEFINE_SET_CLEAR_DLATTR_OP(MaskFilter, MaskFilter, filter)
 DEFINE_SET_CLEAR_DLATTR_OP(ColorSource, Shader, source)
+DEFINE_SET_CLEAR_DLATTR_OP(PathEffect, PathEffect, effect)
 #undef DEFINE_SET_CLEAR_DLATTR_OP
 
 // 4 byte header + 80 bytes for the embedded DlImageColorSource

@@ -46,6 +46,8 @@ source_set("display_list") {
     "display_list_ops.h",
     "display_list_paint.cc",
     "display_list_paint.h",
+    "display_list_path_effect.cc",
+    "display_list_path_effect.h",
     "display_list_tile_mode.h",
     "display_list_utils.cc",
     "display_list_utils.h",
@@ -94,6 +96,7 @@ if (enable_unittests) {
       "display_list_image_filter_unittests.cc",
       "display_list_mask_filter_unittests.cc",
       "display_list_paint_unittests.cc",
+      "display_list_path_effect_unittests.cc",
       "display_list_unittests.cc",
       "display_list_vertices_unittests.cc",
     ]
