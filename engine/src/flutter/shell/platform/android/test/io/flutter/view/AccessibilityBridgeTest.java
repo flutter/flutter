@@ -27,6 +27,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.LocaleSpan;
 import android.text.style.TtsSpan;
@@ -719,6 +720,65 @@ public class AccessibilityBridgeTest {
     assertEquals(spellOutSpan.getType(), TtsSpan.TYPE_VERBATIM);
     assertEquals(actual.getSpanStart(spellOutSpan), 8);
     assertEquals(actual.getSpanEnd(spellOutSpan), 9);
+  }
+
+  @TargetApi(21)
+  @Test
+  public void itSetsTextCorrectly() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /*rootAccessibilityView=*/ mockRootView,
+            /*accessibilityChannel=*/ mockChannel,
+            /*accessibilityManager=*/ mockManager,
+            /*contentResolver=*/ null,
+            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
+            /*platformViewsAccessibilityDelegate=*/ null);
+
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    root.value = "value";
+    TestStringAttribute attribute = new TestStringAttributeSpellOut();
+    attribute.start = 1;
+    attribute.end = 2;
+    attribute.type = TestStringAttributeType.SPELLOUT;
+    root.valueAttributes = new ArrayList<>();
+    root.valueAttributes.add(attribute);
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    SpannableString actual = (SpannableString) nodeInfo.getContentDescription();
+    assertEquals(actual.toString(), "value");
+    Object[] objectSpans = actual.getSpans(0, actual.length(), Object.class);
+    assertEquals(objectSpans.length, 1);
+    TtsSpan spellOutSpan = (TtsSpan) objectSpans[0];
+    assertEquals(spellOutSpan.getType(), TtsSpan.TYPE_VERBATIM);
+    assertEquals(actual.getSpanStart(spellOutSpan), 1);
+    assertEquals(actual.getSpanEnd(spellOutSpan), 2);
+
+    // Perform a set text action.
+    Bundle bundle = new Bundle();
+    String expectedText = "a";
+    bundle.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, expectedText);
+    accessibilityBridge.performAction(0, AccessibilityNodeInfo.ACTION_SET_TEXT, bundle);
+
+    // The action should remove the string attributes.
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    actual = (SpannableString) nodeInfo.getContentDescription();
+    assertEquals(actual.toString(), expectedText);
+    objectSpans = actual.getSpans(0, actual.length(), Object.class);
+    assertEquals(objectSpans.length, 0);
   }
 
   @TargetApi(28)

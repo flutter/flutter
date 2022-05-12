@@ -1297,9 +1297,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       newText = arguments.getString(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE);
     }
     accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SET_TEXT, newText);
-    // The voice access expects the semantics node to update immediately. We update the semantics
+    // The voice access expects the semantics node to update immediately. Update the semantics
     // node based on prediction. If the result is incorrect, it will be updated in the next frame.
     node.value = newText;
+    node.valueAttributes = null;
     return true;
   }
 
