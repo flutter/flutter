@@ -431,6 +431,8 @@ TEST_F(ClipRectLayerTest, OpacityInheritanceSaveLayerPainting) {
   auto mock1 = MockLayer::MakeOpacityCompatible(path1);
   auto path2 = SkPath().addRect({20, 20, 40, 40});
   auto mock2 = MockLayer::MakeOpacityCompatible(path2);
+  auto children_bounds = path1.getBounds();
+  children_bounds.join(path2.getBounds());
   SkRect clip_rect = SkRect::MakeWH(500, 500);
   auto clip_rect_layer =
       std::make_shared<ClipRectLayer>(clip_rect, Clip::antiAliasWithSaveLayer);
@@ -466,7 +468,7 @@ TEST_F(ClipRectLayerTest, OpacityInheritanceSaveLayerPainting) {
         expected_builder.save();
         expected_builder.clipRect(clip_rect, SkClipOp::kIntersect, true);
         expected_builder.setColor(opacity_alpha << 24);
-        expected_builder.saveLayer(&clip_rect, true);
+        expected_builder.saveLayer(&children_bounds, true);
         /* child layer1 paint */ {
           expected_builder.setColor(0xFF000000);
           expected_builder.drawPath(path1);
