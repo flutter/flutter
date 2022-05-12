@@ -25,6 +25,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'text_button.dart';
+import 'text_field.dart';
 import 'text_form_field.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -1728,8 +1729,6 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
           borderSide: BorderSide(color: colorScheme.error, width: 2.0),
         ),
         hintStyle: widget.style.copyWith(color: colorScheme.onSurface.withOpacity(0.36)),
-        // TODO(rami-a): Remove this logic once https://github.com/flutter/flutter/issues/54104 is fixed.
-        errorStyle: const TextStyle(fontSize: 0.0, height: 0.0), // Prevent the error text from appearing.
       );
     }
     final Color unfocusedFillColor = timePickerTheme.hourMinuteColor ?? colorScheme.onSurface.withOpacity(0.12);
@@ -1753,17 +1752,10 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: UnmanagedRestorationScope(
           bucket: bucket,
-          child: TextFormField(
+          child: _TimePickerTextFormField(
             restorationId: 'hour_minute_text_form_field',
             autofocus: widget.autofocus ?? false,
-            expands: true,
-            maxLines: null,
-            inputFormatters: <TextInputFormatter>[
-              LengthLimitingTextInputFormatter(2),
-            ],
             focusNode: focusNode,
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
             style: widget.style.copyWith(color: timePickerTheme.hourMinuteTextColor ?? colorScheme.onSurface),
             controller: controller.value,
             decoration: inputDecoration,
@@ -2452,4 +2444,105 @@ Future<TimeOfDay?> showTimePicker({
 
 void _announceToAccessibility(BuildContext context, String message) {
   SemanticsService.announce(message, Directionality.of(context));
+}
+
+/// Copy from text_form_field.dart with modification
+/// Because using InputDecoration(errorStyle: const TextStyle(fontSize: 0.0, height: 0.0)
+/// to hide TextFormField is not working anymore
+// TODO(rami-a): Remove this logic once https://github.com/flutter/flutter/issues/54104 is fixed.
+
+class _TimePickerTextFormField extends FormField<String> {
+  final TextEditingController controller;
+
+  _TimePickerTextFormField({
+    super.key,
+    required this.controller,
+    super.restorationId,
+    bool autofocus = false,
+    FocusNode? focusNode,
+    TextStyle? style,
+    InputDecoration? decoration = const InputDecoration(), // Remove .copyWith(errorText: field.errorText) to avoid show error message
+    super.validator,
+    VoidCallback? onEditingComplete,
+    super.onSaved,
+    ValueChanged<String>? onFieldSubmitted,
+    ValueChanged<String>? onChanged,
+  }) : super(
+    builder: (FormFieldState<String> field) {
+
+      return UnmanagedRestorationScope(
+        bucket: field.bucket,
+        child: TextField(
+          autofocus: autofocus,
+          controller: controller,
+          expands: true,
+          maxLines: null,
+          inputFormatters: <TextInputFormatter>[
+            LengthLimitingTextInputFormatter(2),
+          ],
+          textAlign: TextAlign.center,
+          keyboardType: TextInputType.number,
+          focusNode: focusNode,
+          style: style,
+          decoration: decoration,
+          restorationId: restorationId,
+          onEditingComplete: onEditingComplete,
+          onChanged: onChanged,
+          onSubmitted: onFieldSubmitted,
+        ),
+      );
+    },
+  );
+
+  @override
+  FormFieldState<String> createState() => _TextFormFieldState();
+}
+
+class _TextFormFieldState extends FormFieldState<String> {
+  @override
+  _TimePickerTextFormField get widget =>
+      super.widget as _TimePickerTextFormField;
+
+  @override
+  void initState() {
+    super.initState();
+    setValue(widget.controller.text);
+    widget.controller.addListener(_handleControllerChanged);
+  }
+
+  @override
+  void didUpdateWidget(_TimePickerTextFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_handleControllerChanged);
+      widget.controller.addListener(_handleControllerChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_handleControllerChanged);
+    widget.controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChange(String? value) {
+    super.didChange(value);
+
+    if (widget.controller.text != value)
+      widget.controller.text = value ?? '';
+  }
+
+  @override
+  void reset() {
+    widget.controller.text = widget.initialValue ?? '';
+    super.reset();
+  }
+
+  void _handleControllerChanged() {
+    if (widget.controller.text != value) {
+      didChange(widget.controller.text);
+    }
+  }
 }
