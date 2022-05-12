@@ -13,6 +13,7 @@ if (build_engine_artifacts) {
       "//flutter/impeller/tessellator:tessellator_shared",
       "//flutter/lib/snapshot:generate_snapshot_bin",
       "//flutter/shell/testing:testing",
+      "//flutter/shell/testing:testing_fractional_translation",
     ]
     prefix = "$full_target_platform_name/"
     if (flutter_runtime_mode != "debug") {
