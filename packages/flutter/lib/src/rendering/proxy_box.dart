@@ -897,6 +897,15 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    if (_alpha == 0 && !alwaysIncludeSemantics) {
+      transform.setZero();
+    } else {
+      super.applyPaintTransform(child, transform);
+    }
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       if (_alpha == 0) {
@@ -985,6 +994,15 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
       return;
     _alwaysIncludeSemantics = value;
     markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    if (_alpha == 0 && !alwaysIncludeSemantics) {
+      transform.setZero();
+    } else {
+      super.applyPaintTransform(child, transform);
+    }
   }
 
   @override
@@ -3587,6 +3605,15 @@ class RenderOffstage extends RenderProxyBox {
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     return !offstage && super.hitTest(result, position: position);
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    if (offstage) {
+      transform.setZero();
+    } else {
+      super.applyPaintTransform(child, transform);
+    }
   }
 
   @override

@@ -686,6 +686,70 @@ void main() {
 
     expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
   });
+
+  test('Offstage sets paint matrix to zero when offstage == true', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
+    parent.adoptChild(offstage);
+
+    final Matrix4 transform = Matrix4.identity();
+    offstage.applyPaintTransform(box, transform);
+
+    expect(transform.isIdentity(), true);
+
+    offstage.offstage = true;
+    offstage.applyPaintTransform(box, transform);
+
+    expect(transform.isZero(), true);
+  });
+
+  test('Opacity sets paint matrix to zero when alpha == 0', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOpacity opacity = RenderOpacity(child: box);
+    parent.adoptChild(opacity);
+
+    final Matrix4 transform = Matrix4.identity();
+
+    opacity.applyPaintTransform(box, transform);
+    expect(transform.isIdentity(), true);
+
+    opacity.opacity = 0;
+    opacity.applyPaintTransform(box, transform);
+    expect(transform.isZero(), true);
+
+
+    transform.setIdentity();
+    opacity.alwaysIncludeSemantics = true;
+    opacity.applyPaintTransform(box, transform);
+    expect(transform.isIdentity(), true);
+  });
+
+  test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
+    parent.adoptChild(opacity);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    final Matrix4 transform = Matrix4.identity();
+
+    opacity.applyPaintTransform(box, transform);
+    expect(transform.isIdentity(), true);
+
+    opacityAnimation.value = 0;
+    opacity.applyPaintTransform(box, transform);
+    expect(transform.isZero(), true);
+
+    transform.setIdentity();
+    opacity.alwaysIncludeSemantics = true;
+    opacity.applyPaintTransform(box, transform);
+    expect(transform.isIdentity(), true);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
