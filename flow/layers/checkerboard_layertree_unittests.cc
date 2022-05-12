@@ -60,8 +60,8 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerNotCheckBoard) {
                1, MockCanvas::ClipRectData{layer_bounds, SkClipOp::kIntersect,
                                            MockCanvas::kSoft_ClipEdgeStyle}},
            MockCanvas::DrawCall{
-               1,
-               MockCanvas::SaveLayerData{layer_bounds, clip_paint, nullptr, 2}},
+               1, MockCanvas::SaveLayerData{layer->paint_bounds(), clip_paint,
+                                            nullptr, 2}},
            MockCanvas::DrawCall{
                2, MockCanvas::DrawPathData{child_path, child_paint}},
            MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
@@ -110,8 +110,8 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerCheckBoard) {
                1, MockCanvas::ClipRectData{layer_bounds, SkClipOp::kIntersect,
                                            MockCanvas::kSoft_ClipEdgeStyle}},
            MockCanvas::DrawCall{
-               1,
-               MockCanvas::SaveLayerData{layer_bounds, clip_paint, nullptr, 2}},
+               1, MockCanvas::SaveLayerData{layer->paint_bounds(), clip_paint,
+                                            nullptr, 2}},
            MockCanvas::DrawCall{
                2, MockCanvas::DrawPathData{child_path, child_paint}},
            MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
