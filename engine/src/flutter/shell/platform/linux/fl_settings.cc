@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/linux/fl_settings.h"
 #include "flutter/shell/platform/linux/fl_gnome_settings.h"
+#include "flutter/shell/platform/linux/fl_settings_portal.h"
 
 G_DEFINE_INTERFACE(FlSettings, fl_settings, G_TYPE_OBJECT)
 
@@ -44,6 +45,13 @@ void fl_settings_emit_changed(FlSettings* self) {
 }
 
 FlSettings* fl_settings_new() {
-  // TODO(jpnurmi): add support for other desktop environments
-  return FL_SETTINGS(fl_gnome_settings_new());
+  g_autoptr(FlSettingsPortal) portal = fl_settings_portal_new();
+
+  g_autoptr(GError) error = nullptr;
+  if (!fl_settings_portal_start(portal, &error)) {
+    g_debug("XDG desktop portal settings unavailable: %s", error->message);
+    return fl_gnome_settings_new();
+  }
+
+  return FL_SETTINGS(g_object_ref(portal));
 }

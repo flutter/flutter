@@ -2182,6 +2182,9 @@ FILE: ../../../flutter/shell/platform/linux/fl_settings.h
 FILE: ../../../flutter/shell/platform/linux/fl_settings_plugin.cc
 FILE: ../../../flutter/shell/platform/linux/fl_settings_plugin.h
 FILE: ../../../flutter/shell/platform/linux/fl_settings_plugin_test.cc
+FILE: ../../../flutter/shell/platform/linux/fl_settings_portal.cc
+FILE: ../../../flutter/shell/platform/linux/fl_settings_portal.h
+FILE: ../../../flutter/shell/platform/linux/fl_settings_portal_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_standard_message_codec.cc
 FILE: ../../../flutter/shell/platform/linux/fl_standard_message_codec_private.h
 FILE: ../../../flutter/shell/platform/linux/fl_standard_message_codec_test.cc
