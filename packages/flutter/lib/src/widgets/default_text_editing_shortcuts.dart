@@ -432,19 +432,16 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget result = child;
     if (kIsWeb) {
-      // On web platform, these shortcuts makes sure the following:
+      // On the web, these shortcuts make sure of the following:
       //
-      // 1. Shortcuts fired when a TextField is focused are ignored and
-      //    forwarded to the browser.
-      // 2. Shortcuts fired when no TextField is focused will still trigger
-      //    default text editing Shortcuts
-      //
-      // In (2), the disabling shortcuts will still fire; however, the
-      // [DoNothingAndStopPropagationTextIntent] will not be handled because the
-      // context is above the TextField. The key event will then trigger the
-      // default Text Editing Shortcuts.
+      // 1. Shortcuts fired when an EditableText is focused are ignored and
+      //    forwarded to the browser by the EditableText's Actions, because it
+      //    maps DoNothingAndStopPropagationTextIntent to DoNothingAction.
+      // 2. Shortcuts fired when no EditableText is focused will still trigger
+      //    _shortcuts assuming DoNothingAndStopPropagationTextIntent is
+      //    unhandled elsewhere.
       result = Shortcuts(
-        debugLabel: '<Web disabling text shortcuts>',
+        debugLabel: '<Web Disabling Text Editing Shortcuts>',
         shortcuts: _webDisablingTextShortcuts,
         child: result
       );
