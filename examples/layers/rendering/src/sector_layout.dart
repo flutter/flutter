@@ -198,7 +198,7 @@ abstract class RenderDecoratedSector extends RenderSector {
 class SectorChildListParentData extends SectorParentData with ContainerParentDataMixin<RenderSector> { }
 
 class RenderSectorWithChildren extends RenderDecoratedSector with ContainerRenderObjectMixin<RenderSector, SectorChildListParentData> {
-  RenderSectorWithChildren(BoxDecoration? decoration) : super(decoration);
+  RenderSectorWithChildren(super.decoration);
 
   @override
   void hitTestChildren(SectorHitTestResult result, { required double radius, required double theta }) {
@@ -620,7 +620,7 @@ class SectorHitTestResult extends HitTestResult {
   ///
   ///  * [HitTestResult.wrap], which turns a [SectorHitTestResult] back into a
   ///    generic [HitTestResult].
-  SectorHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+  SectorHitTestResult.wrap(super.result) : super.wrap();
 
   // TODO(goderbauer): Add convenience methods to transform hit test positions
   //    once we have RenderSector implementations that move the origin of their
@@ -632,10 +632,9 @@ class SectorHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
   ///
   /// The [radius] and [theta] argument must not be null.
-  SectorHitTestEntry(RenderSector target, { required this.radius,  required this.theta })
+  SectorHitTestEntry(RenderSector super.target, { required this.radius,  required this.theta })
       : assert(radius != null),
-        assert(theta != null),
-        super(target);
+        assert(theta != null);
 
   @override
   RenderSector get target => super.target as RenderSector;

@@ -37,7 +37,9 @@ class AppBarTheme with Diagnosticable {
     Color? backgroundColor,
     this.foregroundColor,
     this.elevation,
+    this.scrolledUnderElevation,
     this.shadowColor,
+    this.surfaceTintColor,
     this.shape,
     this.iconTheme,
     this.actionsIconTheme,
@@ -121,9 +123,17 @@ class AppBarTheme with Diagnosticable {
   /// descendant [AppBar] widgets.
   final double? elevation;
 
+  /// Overrides the default value of [AppBar.scrolledUnderElevation] in all
+  /// descendant [AppBar] widgets.
+  final double? scrolledUnderElevation;
+
   /// Overrides the default value for [AppBar.shadowColor] in all
   /// descendant widgets.
   final Color? shadowColor;
+
+  /// Overrides the default value for [AppBar.surfaceTintColor] in all
+  /// descendant widgets.
+  final Color? surfaceTintColor;
 
   /// Overrides the default value for [AppBar.shape] in all
   /// descendant widgets.
@@ -237,7 +247,9 @@ class AppBarTheme with Diagnosticable {
     Color? backgroundColor,
     Color? foregroundColor,
     double? elevation,
+    double? scrolledUnderElevation,
     Color? shadowColor,
+    Color? surfaceTintColor,
     ShapeBorder? shape,
     IconThemeData? iconTheme,
     @Deprecated(
@@ -266,7 +278,9 @@ class AppBarTheme with Diagnosticable {
       backgroundColor: backgroundColor ?? color ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       elevation: elevation ?? this.elevation,
+      scrolledUnderElevation: scrolledUnderElevation ?? this.scrolledUnderElevation,
       shadowColor: shadowColor ?? this.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       shape: shape ?? this.shape,
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
@@ -298,7 +312,9 @@ class AppBarTheme with Diagnosticable {
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      scrolledUnderElevation: lerpDouble(a?.scrolledUnderElevation, b?.scrolledUnderElevation, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
@@ -314,26 +330,26 @@ class AppBarTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      brightness,
-      backgroundColor,
-      foregroundColor,
-      elevation,
-      shadowColor,
-      shape,
-      iconTheme,
-      actionsIconTheme,
-      textTheme,
-      centerTitle,
-      titleSpacing,
-      toolbarHeight,
-      toolbarTextStyle,
-      titleTextStyle,
-      systemOverlayStyle,
-      backwardsCompatibility,
-    );
-  }
+  int get hashCode => Object.hash(
+    brightness,
+    backgroundColor,
+    foregroundColor,
+    elevation,
+    scrolledUnderElevation,
+    shadowColor,
+    surfaceTintColor,
+    shape,
+    iconTheme,
+    actionsIconTheme,
+    textTheme,
+    centerTitle,
+    titleSpacing,
+    toolbarHeight,
+    toolbarTextStyle,
+    titleTextStyle,
+    systemOverlayStyle,
+    backwardsCompatibility,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -346,7 +362,9 @@ class AppBarTheme with Diagnosticable {
         && other.backgroundColor == backgroundColor
         && other.foregroundColor == foregroundColor
         && other.elevation == elevation
+        && other.scrolledUnderElevation == scrolledUnderElevation
         && other.shadowColor == shadowColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.shape == shape
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
@@ -367,7 +385,9 @@ class AppBarTheme with Diagnosticable {
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('scrolledUnderElevation', scrolledUnderElevation, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));

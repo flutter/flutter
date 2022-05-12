@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -289,11 +290,11 @@ void main() {
 
     const TextStyle titleTextStyle = TextStyle(
       fontSize: 20,
-      color: Colors.black,
+      color: Colors.indigo,
     );
     const TextStyle subtitleTextStyle = TextStyle(
       fontSize: 15,
-      color: Colors.red,
+      color: Colors.indigo,
     );
 
     await tester.pumpWidget(
@@ -315,6 +316,7 @@ void main() {
               headline6: titleTextStyle,
               subtitle2: subtitleTextStyle,
             ),
+            foregroundColor: Colors.indigo,
           ),
         ),
         home: const Center(
@@ -592,6 +594,135 @@ void main() {
     expect(nestedObserver.dialogCount, 1);
   });
 
+  group('showAboutDialog avoids overlapping display features', () {
+    testWidgets('default positioning', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Display has a vertical hinge down the middle
+            data: const MediaQueryData(
+              size: Size(800, 600),
+              displayFeatures: <DisplayFeature>[
+                DisplayFeature(
+                  bounds: Rect.fromLTRB(390, 0, 410, 600),
+                  type: DisplayFeatureType.hinge,
+                  state: DisplayFeatureState.unknown,
+                ),
+              ],
+            ),
+            child: child!,
+          );
+        },
+        home: Builder(
+          builder: (BuildContext context) => ElevatedButton(
+            onPressed: () {
+              showAboutDialog(
+                context: context,
+                useRootNavigator: false,
+                applicationName: 'A',
+              );
+            },
+            child: const Text('Show About Dialog'),
+          ),
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(AboutDialog)), Offset.zero);
+      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(390.0, 600.0));
+    });
+
+    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Display has a vertical hinge down the middle
+            data: const MediaQueryData(
+              size: Size(800, 600),
+              displayFeatures: <DisplayFeature>[
+                DisplayFeature(
+                  bounds: Rect.fromLTRB(390, 0, 410, 600),
+                  type: DisplayFeatureType.hinge,
+                  state: DisplayFeatureState.unknown,
+                ),
+              ],
+            ),
+            child: child!,
+          );
+        },
+        home: Builder(
+          builder: (BuildContext context) => ElevatedButton(
+            onPressed: () {
+              showAboutDialog(
+                context: context,
+                useRootNavigator: false,
+                applicationName: 'A',
+                anchorPoint: const Offset(1000, 0),
+              );
+            },
+            child: const Text('Show About Dialog'),
+          ),
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      // The anchorPoint hits the right side of the display
+      expect(tester.getTopLeft(find.byType(AboutDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Display has a vertical hinge down the middle
+            data: const MediaQueryData(
+              size: Size(800, 600),
+              displayFeatures: <DisplayFeature>[
+                DisplayFeature(
+                  bounds: Rect.fromLTRB(390, 0, 410, 600),
+                  type: DisplayFeatureType.hinge,
+                  state: DisplayFeatureState.unknown,
+                ),
+              ],
+            ),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: child!,
+            ),
+          );
+        },
+        home: Builder(
+          builder: (BuildContext context) => ElevatedButton(
+            onPressed: () {
+              showAboutDialog(
+                context: context,
+                useRootNavigator: false,
+                applicationName: 'A',
+              );
+            },
+            child: const Text('Show About Dialog'),
+          ),
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      // Since this is rtl, the first screen is the on the right
+      expect(tester.getTopLeft(find.byType(AboutDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(800.0, 600.0));
+    });
+  });
+
   testWidgets("AboutListTile's child should not be offset when the icon is not specified.", (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -750,6 +881,82 @@ void main() {
     expect(find.byType(RawScrollbar), findsNothing);
 
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('LicensePage padding', (WidgetTester tester) async {
+    const FlutterLogo logo = FlutterLogo();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: 'Pirate app',
+        home: Center(
+          child: LicensePage(
+            applicationName: 'LicensePage test app',
+            applicationIcon: logo,
+            applicationVersion: '0.1.2',
+            applicationLegalese: 'I am the very model of a modern major general.',
+          ),
+        ),
+      ),
+    );
+
+    final Finder appName = find.text('LicensePage test app');
+    final Finder appIcon = find.byType(FlutterLogo);
+    final Finder appVersion = find.text('0.1.2');
+    final Finder appLegalese = find.text('I am the very model of a modern major general.');
+    final Finder appPowered = find.text('Powered by Flutter');
+
+    expect(appName, findsOneWidget);
+    expect(appIcon, findsOneWidget);
+    expect(appVersion, findsOneWidget);
+    expect(appLegalese, findsOneWidget);
+    expect(appPowered, findsOneWidget);
+
+    // Bottom padding is applied to the app version and app legalese text.
+    final double appNameBottomPadding = tester.getTopLeft(appIcon).dy - tester.getBottomLeft(appName).dy;
+    expect(appNameBottomPadding, 0.0);
+
+    final double appIconBottomPadding = tester.getTopLeft(appVersion).dy - tester.getBottomLeft(appIcon).dy;
+    expect(appIconBottomPadding, 0.0);
+
+    final double appVersionBottomPadding = tester.getTopLeft(appLegalese).dy - tester.getBottomLeft(appVersion).dy;
+    expect(appVersionBottomPadding, 18.0);
+
+    final double appLegaleseBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appLegalese).dy;
+    expect(appLegaleseBottomPadding, 18.0);
+  });
+
+  testWidgets('LicensePage has no extra padding between app icon and app powered text', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/99559
+
+    const FlutterLogo logo = FlutterLogo();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: 'Pirate app',
+        home: Center(
+          child: LicensePage(
+            applicationIcon: logo,
+          ),
+        ),
+      ),
+    );
+
+    final Finder appName = find.text('LicensePage test app');
+    final Finder appIcon = find.byType(FlutterLogo);
+    final Finder appVersion = find.text('0.1.2');
+    final Finder appLegalese = find.text('I am the very model of a modern major general.');
+    final Finder appPowered = find.text('Powered by Flutter');
+
+    expect(appName, findsNothing);
+    expect(appIcon, findsOneWidget);
+    expect(appVersion, findsNothing);
+    expect(appLegalese, findsNothing);
+    expect(appPowered, findsOneWidget);
+
+    // Padding between app icon and app powered text.
+    final double appIconBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appIcon).dy;
+    expect(appIconBottomPadding, 18.0);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {

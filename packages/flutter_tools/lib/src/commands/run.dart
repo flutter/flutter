@@ -46,6 +46,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'FLUTTER_TEST_OUTPUTS_DIR environment variable is set, the file '
               'will be written there instead.',
       )
+      ..addFlag('cache-startup-profile',
+        help: 'Caches the CPU profile collected before the first frame for startup '
+              'analysis.',
+      )
       ..addFlag('verbose-system-logs',
         negatable: false,
         help: 'Include verbose logging from the Flutter engine.',
@@ -140,7 +144,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'startup. By default this is main(List<String> args). Specify '
               'this option multiple times each with one argument to pass '
               'multiple arguments to the Dart entrypoint. Currently this is '
-              'only supported on desktop platforms.'
+              'only supported on desktop platforms.',
     );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -155,6 +159,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addDevToolsOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
+    addEnableImpellerFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -162,8 +167,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
+  bool get cacheStartupProfile => boolArg('cache-startup-profile');
   bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
+  bool get enableImpeller => boolArg('enable-impeller');
 
   @override
   bool get reportNullSafety => true;
@@ -193,12 +200,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
+        enableImpeller: enableImpeller,
       );
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         dartFlags: stringArg('dart-flags') ?? '',
@@ -228,12 +237,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
+        webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
           && !runningWithPrebuiltApplication,
         nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
+        enableImpeller: enableImpeller,
       );
     }
   }
@@ -437,6 +448,7 @@ class RunCommand extends RunCommandBase {
       commandRunProjectModule: FlutterProject.current().isModule,
       commandRunProjectHostLanguage: hostLanguage.join(','),
       commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
+      commandRunEnableImpeller: enableImpeller,
     );
   }
 
@@ -558,7 +570,7 @@ class RunCommand extends RunCommandBase {
       }
       final Daemon daemon = Daemon(
         DaemonConnection(
-          daemonStreams: StdioDaemonStreams(globals.stdio),
+          daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
           logger: globals.logger,
         ),
         notifyingLogger: (globals.logger is NotifyingLogger)

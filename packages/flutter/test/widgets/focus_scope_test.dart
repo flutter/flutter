@@ -1085,6 +1085,7 @@ void main() {
       focusScopeNode.onKey = ignoreCallback;
       focusScopeNode.onKeyEvent = ignoreEventCallback;
       focusScopeNode.descendantsAreFocusable = false;
+      focusScopeNode.descendantsAreTraversable = false;
       focusScopeNode.skipTraversal = false;
       focusScopeNode.canRequestFocus = true;
       FocusScope focusScopeWidget = FocusScope.withExternalFocusNode(
@@ -1095,11 +1096,13 @@ void main() {
       expect(focusScopeNode.onKey, equals(ignoreCallback));
       expect(focusScopeNode.onKeyEvent, equals(ignoreEventCallback));
       expect(focusScopeNode.descendantsAreFocusable, isFalse);
+      expect(focusScopeNode.descendantsAreTraversable, isFalse);
       expect(focusScopeNode.skipTraversal, isFalse);
       expect(focusScopeNode.canRequestFocus, isTrue);
       expect(focusScopeWidget.onKey, equals(focusScopeNode.onKey));
       expect(focusScopeWidget.onKeyEvent, equals(focusScopeNode.onKeyEvent));
       expect(focusScopeWidget.descendantsAreFocusable, equals(focusScopeNode.descendantsAreFocusable));
+      expect(focusScopeWidget.descendantsAreTraversable, equals(focusScopeNode.descendantsAreTraversable));
       expect(focusScopeWidget.skipTraversal, equals(focusScopeNode.skipTraversal));
       expect(focusScopeWidget.canRequestFocus, equals(focusScopeNode.canRequestFocus));
 
@@ -1111,6 +1114,7 @@ void main() {
       focusScopeNode.onKey = handleCallback;
       focusScopeNode.onKeyEvent = handleEventCallback;
       focusScopeNode.descendantsAreFocusable = true;
+      focusScopeNode.descendantsAreTraversable = true;
       focusScopeWidget = FocusScope.withExternalFocusNode(
         focusScopeNode: focusScopeNode,
         child: Container(key: key1),
@@ -1119,11 +1123,13 @@ void main() {
       expect(focusScopeNode.onKey, equals(handleCallback));
       expect(focusScopeNode.onKeyEvent, equals(handleEventCallback));
       expect(focusScopeNode.descendantsAreFocusable, isTrue);
+      expect(focusScopeNode.descendantsAreTraversable, isTrue);
       expect(focusScopeNode.skipTraversal, isFalse);
       expect(focusScopeNode.canRequestFocus, isTrue);
       expect(focusScopeWidget.onKey, equals(focusScopeNode.onKey));
       expect(focusScopeWidget.onKeyEvent, equals(focusScopeNode.onKeyEvent));
       expect(focusScopeWidget.descendantsAreFocusable, equals(focusScopeNode.descendantsAreFocusable));
+      expect(focusScopeWidget.descendantsAreTraversable, equals(focusScopeNode.descendantsAreTraversable));
       expect(focusScopeWidget.skipTraversal, equals(focusScopeNode.skipTraversal));
       expect(focusScopeWidget.canRequestFocus, equals(focusScopeNode.canRequestFocus));
 
@@ -1639,12 +1645,47 @@ void main() {
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
     });
+
+    testWidgets('descendantsAreTraversable works as expected.', (WidgetTester tester) async {
+      final FocusScopeNode scopeNode = FocusScopeNode(debugLabel: 'scope');
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1');
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2');
+      final FocusNode node3 = FocusNode(debugLabel: 'node 3');
+
+      await tester.pumpWidget(
+        FocusScope(
+          node: scopeNode,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                focusNode: node1,
+                child: Container(),
+              ),
+              Focus(
+                focusNode: node2,
+                descendantsAreTraversable: false,
+                child: Focus(
+                  focusNode: node3,
+                  child: Container(),
+                )
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(scopeNode.traversalDescendants, equals(<FocusNode>[node1, node2]));
+      expect(node2.traversalDescendants, equals(<FocusNode>[]));
+    });
+
     testWidgets("Focus doesn't introduce a Semantics node when includeSemantics is false", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });
+
     testWidgets('Focus updates the onKey handler when the widget updates', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
@@ -1695,6 +1736,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(keyEventHandled, isTrue);
     });
+
     testWidgets('Focus updates the onKeyEvent handler when the widget updates', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
@@ -1745,6 +1787,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(keyEventHandled, isTrue);
     });
+
     testWidgets("Focus doesn't update the focusNode attributes when the widget updates if withExternalFocusNode is used", (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
@@ -1766,6 +1809,7 @@ void main() {
       focusNode.onKey = ignoreCallback;
       focusNode.onKeyEvent = ignoreEventCallback;
       focusNode.descendantsAreFocusable = false;
+      focusNode.descendantsAreTraversable = false;
       focusNode.skipTraversal = false;
       focusNode.canRequestFocus = true;
       Focus focusWidget = Focus.withExternalFocusNode(
@@ -1776,11 +1820,13 @@ void main() {
       expect(focusNode.onKey, equals(ignoreCallback));
       expect(focusNode.onKeyEvent, equals(ignoreEventCallback));
       expect(focusNode.descendantsAreFocusable, isFalse);
+      expect(focusNode.descendantsAreTraversable, isFalse);
       expect(focusNode.skipTraversal, isFalse);
       expect(focusNode.canRequestFocus, isTrue);
       expect(focusWidget.onKey, equals(focusNode.onKey));
       expect(focusWidget.onKeyEvent, equals(focusNode.onKeyEvent));
       expect(focusWidget.descendantsAreFocusable, equals(focusNode.descendantsAreFocusable));
+      expect(focusWidget.descendantsAreTraversable, equals(focusNode.descendantsAreTraversable));
       expect(focusWidget.skipTraversal, equals(focusNode.skipTraversal));
       expect(focusWidget.canRequestFocus, equals(focusNode.canRequestFocus));
 
@@ -1792,6 +1838,7 @@ void main() {
       focusNode.onKey = handleCallback;
       focusNode.onKeyEvent = handleEventCallback;
       focusNode.descendantsAreFocusable = true;
+      focusNode.descendantsAreTraversable = true;
       focusWidget = Focus.withExternalFocusNode(
         focusNode: focusNode,
         child: Container(key: key1),
@@ -1800,18 +1847,29 @@ void main() {
       expect(focusNode.onKey, equals(handleCallback));
       expect(focusNode.onKeyEvent, equals(handleEventCallback));
       expect(focusNode.descendantsAreFocusable, isTrue);
+      expect(focusNode.descendantsAreTraversable, isTrue);
       expect(focusNode.skipTraversal, isFalse);
       expect(focusNode.canRequestFocus, isTrue);
       expect(focusWidget.onKey, equals(focusNode.onKey));
       expect(focusWidget.onKeyEvent, equals(focusNode.onKeyEvent));
       expect(focusWidget.descendantsAreFocusable, equals(focusNode.descendantsAreFocusable));
+      expect(focusWidget.descendantsAreTraversable, equals(focusNode.descendantsAreTraversable));
       expect(focusWidget.skipTraversal, equals(focusNode.skipTraversal));
       expect(focusWidget.canRequestFocus, equals(focusNode.canRequestFocus));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(keyEventHandled, isTrue);
     });
+
+    testWidgets('Focus passes changes in attribute values to its focus node', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Focus(
+          child: Container(),
+        ),
+      );
+    });
   });
+
   group('ExcludeFocus', () {
     testWidgets("Descendants of ExcludeFocus aren't focusable.", (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
@@ -1919,6 +1977,7 @@ void main() {
       expect(parentFocusNode.hasFocus, isFalse);
       expect(parentFocusNode.enclosingScope!.hasPrimaryFocus, isTrue);
     });
+
     testWidgets("ExcludeFocus doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(ExcludeFocus(child: Container()));

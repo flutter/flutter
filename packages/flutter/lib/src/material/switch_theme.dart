@@ -108,16 +108,14 @@ class SwitchThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      thumbColor,
-      trackColor,
-      materialTapTargetSize,
-      mouseCursor,
-      overlayColor,
-      splashRadius,
-    );
-  }
+  int get hashCode => Object.hash(
+    thumbColor,
+    trackColor,
+    materialTapTargetSize,
+    mouseCursor,
+    overlayColor,
+    splashRadius,
+  );
 
   @override
   bool operator ==(Object other) {

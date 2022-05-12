@@ -25,25 +25,35 @@ File _getMultiDexApplicationFile(Directory projectDir) {
 void ensureMultiDexApplicationExists(final Directory projectDir) {
   final File applicationFile = _getMultiDexApplicationFile(projectDir);
   if (applicationFile.existsSync()) {
-    return;
+    // This checks for instances of legacy versions of this file. Legacy versions maintained
+    // compatibility with v1 embedding by extending FlutterApplication. If we detect this,
+    // we replace the file with the modern v2 embedding version.
+    if (applicationFile.readAsStringSync().contains('android.app.Application;')) {
+      return;
+    }
   }
   applicationFile.createSync(recursive: true);
 
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
 // Generated file.
+//
 // If you wish to remove Flutter's multidex support, delete this entire file.
+//
+// Modifications to this file should be done in a copy under a different name
+// as this file may be regenerated.
 
 package io.flutter.app;
 
+import android.app.Application;
 import android.content.Context;
 import androidx.annotation.CallSuper;
 import androidx.multidex.MultiDex;
 
 /**
- * Extension of {@link io.flutter.app.FlutterApplication}, adding multidex support.
+ * Extension of {@link android.app.Application}, adding multidex support.
  */
-public class FlutterMultiDexApplication extends FlutterApplication {
+public class FlutterMultiDexApplication extends Application {
   @Override
   @CallSuper
   protected void attachBaseContext(Context base) {

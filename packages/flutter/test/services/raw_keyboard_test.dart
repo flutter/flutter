@@ -434,7 +434,7 @@ void main() {
         isDown: false,
       )..['metaState'] = 0;
       // Dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data2),
         (ByteData? data) {},
@@ -453,7 +453,7 @@ void main() {
       );
       data['metaState'] = (data['metaState'] as int) | RawKeyEventDataWeb.modifierShift;
       // Dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data3),
         (ByteData? data) {},
@@ -474,7 +474,7 @@ void main() {
         isDown: false,
       )..['metaState'] = 0;
       // Dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data4),
         (ByteData? data) {},
@@ -575,7 +575,7 @@ void main() {
           RawKeyEventDataIos.modifierCommand |
           RawKeyEventDataIos.modifierControl;
       // dispatch the modified data.
-      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -611,7 +611,11 @@ void main() {
         LogicalKeyboardKey.keyA,
         platform: 'windows',
       );
+<<<<<<< HEAD
       await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+=======
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+>>>>>>> ee4e09cce01d6f2d7f4baebd247fde02e5008851
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(downData),
         (ByteData? data) {},
@@ -619,7 +623,11 @@ void main() {
       expect(receivedEvent.repeat, false);
 
       // Dispatch another down event, which should be recognized as a repeat.
+<<<<<<< HEAD
       await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+=======
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+>>>>>>> ee4e09cce01d6f2d7f4baebd247fde02e5008851
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(downData),
         (ByteData? data) {},
@@ -627,7 +635,11 @@ void main() {
       expect(receivedEvent.repeat, true);
 
       // Dispatch an up event.
+<<<<<<< HEAD
       await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+=======
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+>>>>>>> ee4e09cce01d6f2d7f4baebd247fde02e5008851
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(KeyEventSimulator.getKeyData(
           LogicalKeyboardKey.keyA,
@@ -1923,7 +1935,7 @@ void main() {
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       // Simulate raw events because VK_PROCESSKEY does not exist in the key mapping.
       Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
-        return ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        return ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
           SystemChannels.keyEvent.name,
           SystemChannels.keyEvent.codec.encodeMessage(<String, Object?>{
             'type': type,
@@ -2479,6 +2491,14 @@ void main() {
       RawKeyEventDataWeb.modifierScrollLock: ModifierKey.scrollLockModifier,
     };
 
+    const Map<String, LogicalKeyboardKey> modifierTestsWithNoLocation =
+        <String, LogicalKeyboardKey>{
+      'Alt': LogicalKeyboardKey.altLeft,
+      'Shift': LogicalKeyboardKey.shiftLeft,
+      'Control': LogicalKeyboardKey.controlLeft,
+      'Meta': LogicalKeyboardKey.metaLeft,
+    };
+
     test('modifier keys are recognized individually', () {
       for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
@@ -2539,6 +2559,19 @@ void main() {
       }
     });
 
+    test('modifier keys with no location are mapped to left', () {
+      for (final String modifierKey in modifierTestsWithNoLocation.keys) {
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'key': modifierKey,
+          'location': 0,
+        });
+        final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
+        expect(data.logicalKey, modifierTestsWithNoLocation[modifierKey]);
+      }
+    });
+
     test('Lower letter keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
@@ -2547,11 +2580,13 @@ void main() {
         'key': 'a',
         'location': 0,
         'metaState': 0x0,
+        'keyCode': 0x41,
       });
       final RawKeyEventDataWeb data = keyAEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
+      expect(data.keyCode, equals(0x41));
     });
 
     test('Upper letter keys are correctly translated', () {
@@ -2562,11 +2597,13 @@ void main() {
         'key': 'A',
         'location': 0,
         'metaState': 0x1, // Shift
+        'keyCode': 0x41,
       });
       final RawKeyEventDataWeb data = keyAEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('A'));
+      expect(data.keyCode, equals(0x41));
     });
 
     test('Control keyboard keys are correctly translated', () {
@@ -2577,11 +2614,13 @@ void main() {
         'key': 'Escape',
         'location': 0,
         'metaState': 0x0,
+        'keyCode': 0x1B,
       });
       final RawKeyEventDataWeb data = escapeKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isEmpty);
+      expect(data.keyCode, equals(0x1B));
     });
 
     test('Modifier keyboard keys are correctly translated', () {
@@ -2592,11 +2631,13 @@ void main() {
         'key': 'Shift',
         'location': 1,
         'metaState': RawKeyEventDataWeb.modifierShift,
+        'keyCode': 0x10,
       });
       final RawKeyEventDataWeb data = shiftKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isEmpty);
+      expect(data.keyCode, equals(0x10));
     });
 
     test('Arrow keys from a keyboard give correct physical key mappings', () {
@@ -2607,11 +2648,13 @@ void main() {
         'key': 'ArrowDown',
         'location': 0,
         'metaState': 0x0,
+        'keyCode': 0x28,
       });
       final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isEmpty);
+      expect(data.keyCode, equals(0x28));
     });
 
     test('Unrecognized keys are mapped to Web plane', () {
@@ -2631,6 +2674,7 @@ void main() {
       expect(data.logicalKey.keyId, greaterThan(0x01700000000));
       expect(data.logicalKey.keyId, lessThan(0x01800000000));
       expect(data.keyLabel, isEmpty);
+      expect(data.keyCode, equals(0));
     });
 
     test('data.toString', () {
@@ -2641,8 +2685,9 @@ void main() {
         'key': 'a',
         'location': 2,
         'metaState': 0x10,
+        'keyCode': 0x41,
       }).data.toString(), equalsIgnoringHashCodes(
-        'RawKeyEventDataWeb#00000(code: KeyA, key: a, location: 2, metaState: 16)'));
+        'RawKeyEventDataWeb#00000(code: KeyA, key: a, location: 2, metaState: 16, keyCode: 65)'));
 
       // Without location
       expect(RawKeyEvent.fromMessage(const <String, Object?>{
@@ -2651,8 +2696,9 @@ void main() {
         'code': 'KeyA',
         'key': 'a',
         'metaState': 0x10,
+        'keyCode': 0x41,
       }).data.toString(), equalsIgnoringHashCodes(
-        'RawKeyEventDataWeb#00000(code: KeyA, key: a, location: 0, metaState: 16)'));
+        'RawKeyEventDataWeb#00000(code: KeyA, key: a, location: 0, metaState: 16, keyCode: 65)'));
     });
 
     test('data.equality', () {
@@ -2663,11 +2709,13 @@ void main() {
         'key': 'a',
         'location': 2,
         'metaState': 0x10,
+        'keyCode': 0x41,
       }).data, const RawKeyEventDataWeb(
         key: 'a',
         code: 'KeyA',
         location: 2,
         metaState: 0x10,
+        keyCode: 0x41
       ));
 
       expect(RawKeyEvent.fromMessage(const <String, Object?>{
@@ -2677,6 +2725,7 @@ void main() {
         'key': 'a',
         'location': 2,
         'metaState': 0x10,
+        'keyCode': 0x41,
       }).data, isNot(equals(const RawKeyEventDataWeb(code: 'KeyA', key: 'a'))));
     });
   });

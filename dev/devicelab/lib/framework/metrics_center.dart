@@ -133,5 +133,49 @@ Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? t
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
   final List<MetricPoint> metricPoints = parse(resultsJson, benchmarkTagsMap, taskName);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
-  await upload(metricsDestination, metricPoints, commitTimeSinceEpoch, taskName);
+  await upload(
+    metricsDestination,
+    metricPoints,
+    commitTimeSinceEpoch,
+    metricFileName(taskName, benchmarkTagsMap),
+  );
+}
+
+/// Create metric file name based on `taskName`, `arch`, `host type`, and `device type`.
+///
+/// Same `taskName` may run on different platforms. Considering host/device tags to
+/// use different metric file names.
+///
+/// This affects only the metric file name which contains metric data, and does not affect
+/// real host/device tags.
+///
+/// For example:
+///   Old file name: `backdrop_filter_perf__timeline_summary`
+///   New file name: `backdrop_filter_perf__timeline_summary_intel_linux_motoG4`
+String metricFileName(
+  String taskName,
+  Map<String, dynamic> benchmarkTagsMap,
+) {
+  final StringBuffer fileName = StringBuffer(taskName);
+  if (benchmarkTagsMap.containsKey('arch')) {
+    fileName
+      ..write('_')
+      ..write(_fileNameFormat(benchmarkTagsMap['arch'] as String));
+  }
+  if (benchmarkTagsMap.containsKey('host_type')) {
+    fileName
+      ..write('_')
+      ..write(_fileNameFormat(benchmarkTagsMap['host_type'] as String));
+  }
+  if (benchmarkTagsMap.containsKey('device_type')) {
+    fileName
+      ..write('_')
+      ..write(_fileNameFormat(benchmarkTagsMap['device_type'] as String));
+  }
+  return fileName.toString();
+}
+
+/// Format `fileName` removing non letter and number characters.
+String _fileNameFormat(String fileName) {
+  return fileName.replaceAll(RegExp('[^a-zA-Z0-9]'), '');
 }

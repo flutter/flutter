@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../doctor.dart';
 import '../project.dart';
 import 'github_template.dart';
 import 'reporting.dart';
@@ -49,7 +50,7 @@ class CrashDetails {
   final String command;
   final Object error;
   final StackTrace stackTrace;
-  final String doctorText;
+  final DoctorText doctorText;
 }
 
 /// Reports information about the crash to the user.
@@ -58,16 +59,13 @@ class CrashReporter {
     required FileSystem fileSystem,
     required Logger logger,
     required FlutterProjectFactory flutterProjectFactory,
-    required HttpClient client,
   }) : _fileSystem = fileSystem,
        _logger = logger,
-       _flutterProjectFactory = flutterProjectFactory,
-       _client = client;
+       _flutterProjectFactory = flutterProjectFactory;
 
   final FileSystem _fileSystem;
   final Logger _logger;
   final FlutterProjectFactory _flutterProjectFactory;
-  final HttpClient _client;
 
   /// Prints instructions for filing a bug about the crash.
   Future<void> informUser(CrashDetails details, File crashFile) async {
@@ -85,14 +83,13 @@ class CrashReporter {
       fileSystem: _fileSystem,
       logger: _logger,
       flutterProjectFactory: _flutterProjectFactory,
-      client: _client,
     );
 
     final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
       details.command,
       details.error,
       details.stackTrace,
-      details.doctorText,
+      await details.doctorText.piiStrippedText,
     );
     _logger.printStatus('$gitHubTemplateURL\n', wrap: false);
   }

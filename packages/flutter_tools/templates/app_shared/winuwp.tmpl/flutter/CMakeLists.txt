@@ -1,3 +1,4 @@
+# This file controls Flutter-level build steps. It should not be edited.
 cmake_minimum_required(VERSION 3.8)
 set(CMAKE_SYSTEM_NAME WindowsStore)
 set(CMAKE_SYSTEM_VERSION 10.0)

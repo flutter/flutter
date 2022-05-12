@@ -25,6 +25,7 @@ ScrollbarPainter _buildPainter({
   double mainAxisMargin = 0.0,
   double crossAxisMargin = 0.0,
   Radius? radius,
+  Radius? trackRadius,
   double minLength = _kMinThumbExtent,
   double? minOverscrollLength,
   ScrollbarOrientation? scrollbarOrientation,
@@ -38,6 +39,7 @@ ScrollbarPainter _buildPainter({
     mainAxisMargin: mainAxisMargin,
     crossAxisMargin: crossAxisMargin,
     radius: radius,
+    trackRadius: trackRadius,
     minLength: minLength,
     minOverscrollLength: minOverscrollLength ?? minLength,
     fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
@@ -47,10 +49,16 @@ ScrollbarPainter _buildPainter({
 
 class _DrawRectOnceCanvas extends Fake implements Canvas {
   List<Rect> rects = <Rect>[];
+  List<RRect> rrects = <RRect>[];
 
   @override
   void drawRect(Rect rect, Paint paint) {
     rects.add(rect);
+  }
+
+  @override
+  void drawRRect(ui.RRect rrect, ui.Paint paint) {
+    rrects.add(rrect);
   }
 
   @override
@@ -62,9 +70,11 @@ void main() {
   ScrollbarPainter painter;
 
   Rect captureRect() => testCanvas.rects.removeLast();
+  RRect captureRRect() => testCanvas.rrects.removeLast();
 
   tearDown(() {
     testCanvas.rects.clear();
+    testCanvas.rrects.clear();
   });
 
   final ScrollMetrics defaultMetrics = FixedScrollMetrics(
@@ -629,6 +639,37 @@ void main() {
     },
   );
 
+  test('trackRadius and radius is respected', () {
+    const double minLen = 3.5;
+    const Size size = Size(600, 10);
+    final ScrollMetrics metrics = defaultMetrics.copyWith(
+      maxScrollExtent: 100000,
+      viewportDimension: size.height,
+    );
+
+    painter = _buildPainter(
+      trackRadius: const Radius.circular(2.0),
+      radius: const Radius.circular(3.0),
+      minLength: minLen,
+      minOverscrollLength: minLen,
+      scrollMetrics: metrics,
+    );
+
+    painter.paint(testCanvas, size);
+
+    final RRect thumbRRect = captureRRect(); // thumb
+    expect(thumbRRect.blRadius, const Radius.circular(3.0));
+    expect(thumbRRect.brRadius, const Radius.circular(3.0));
+    expect(thumbRRect.tlRadius, const Radius.circular(3.0));
+    expect(thumbRRect.trRadius, const Radius.circular(3.0));
+
+    final RRect trackRRect = captureRRect(); // track
+    expect(trackRRect.blRadius, const Radius.circular(2.0));
+    expect(trackRRect.brRadius, const Radius.circular(2.0));
+    expect(trackRRect.tlRadius, const Radius.circular(2.0));
+    expect(trackRRect.trRadius, const Radius.circular(2.0));
+  });
+
   testWidgets('ScrollbarPainter asserts if no TextDirection has been provided', (WidgetTester tester) async {
     final ScrollbarPainter painter = ScrollbarPainter(
       color: _kScrollbarColor,
@@ -691,7 +732,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 240.0, 800.0, 600.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     // Tap on the track area above the thumb.
@@ -706,7 +747,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
   });
 
@@ -736,7 +777,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     await tester.pump(const Duration(seconds: 3));
@@ -749,7 +790,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     await gesture.up();
@@ -764,7 +805,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x4fbcbcbc),
-      ),
+        ),
     );
   });
 
@@ -794,7 +835,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
@@ -811,7 +852,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 3.0, 800.0, 93.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
   });
 
@@ -940,7 +981,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
 
     // Drag the thumb down to scroll down.
@@ -962,7 +1003,7 @@ void main() {
         ..rect(
           rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 100.0),
           color: const Color(0x66BCBCBC),
-      ),
+        ),
     );
   });
 
@@ -1302,6 +1343,93 @@ void main() {
           color: const Color(0x66BCBCBC),
         ),
     );
+  });
+
+  testWidgets('hit test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/99324
+    final ScrollController scrollController = ScrollController();
+    bool onTap = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              trackVisibility: true,
+              thumbVisibility: true,
+              controller: scrollController,
+              child: SingleChildScrollView(
+                child: GestureDetector(
+                  onTap: () => onTap = true,
+                  child: const SizedBox(
+                    width: 4000.0,
+                    height: 4000.0,
+                    child: ColoredBox(color: Color(0x00000000)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(onTap, false);
+
+    // Tap on track area.
+    await tester.tapAt(const Offset(795.0, 550.0));
+    await tester.pumpAndSettle();
+    expect(onTap, false);
+
+    // Tap on thumb area.
+    await tester.tapAt(const Offset(795.0, 10.0));
+    await tester.pumpAndSettle();
+    expect(onTap, false);
+
+    // Tap on content area.
+    await tester.tapAt(const Offset(400.0, 300.0));
+    await tester.pumpAndSettle();
+    expect(onTap, true);
+  });
+
+  testWidgets('RawScrollbar.thumbVisibility asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thumbVisibility: true,
+            controller: ScrollController(),
+            thumbColor: const Color(0x11111111),
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                height: 1000.0,
+                width: 50.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(error, isNotNull);
+    final AssertionError exception = error!.exception as AssertionError;
+    expect(
+      exception.message,
+      contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
+    );
+
+    FlutterError.onError = handler;
   });
 
   testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
@@ -2075,6 +2203,87 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Scrollbar thumb can be dragged when the scrollable widget has a negative minScrollExtent', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/95840
+
+    final ScrollController scrollController = ScrollController();
+    final UniqueKey uniqueKey = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(
+              scrollbars: false,
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: RawScrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
+                child: CustomScrollView(
+                  center: uniqueKey,
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      key: uniqueKey,
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 200.0, 800.0, 400.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Drag the thumb up to scroll up.
+    const double scrollAmount = -10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 300.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // The view has scrolled more than it would have by a swipe gesture of the
+    // same distance.
+    expect(scrollController.offset, lessThan(scrollAmount * 2));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 190.0, 800.0, 390.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  }, variant: TargetPlatformVariant.all());
+
   test('ScrollbarPainter.shouldRepaint returns true when any of the properties changes', () {
     ScrollbarPainter createPainter({
       Color color = const Color(0xFF000000),
@@ -2087,6 +2296,7 @@ void main() {
       double mainAxisMargin = 0.0,
       double crossAxisMargin = 0.0,
       Radius? radius,
+      Radius? trackRadius,
       OutlinedBorder? shape,
       double minLength = _kMinThumbExtent,
       double? minOverscrollLength,
@@ -2103,6 +2313,7 @@ void main() {
         mainAxisMargin: mainAxisMargin,
         crossAxisMargin: crossAxisMargin,
         radius: radius,
+        trackRadius: trackRadius,
         shape: shape,
         minLength: minLength,
         minOverscrollLength: minOverscrollLength,
@@ -2121,9 +2332,116 @@ void main() {
     expect(painter.shouldRepaint(createPainter(mainAxisMargin: 1.0)), true);
     expect(painter.shouldRepaint(createPainter(crossAxisMargin: 1.0)), true);
     expect(painter.shouldRepaint(createPainter(radius: const Radius.circular(1.0))), true);
+    expect(painter.shouldRepaint(createPainter(trackRadius: const Radius.circular(1.0))), true);
     expect(painter.shouldRepaint(createPainter(shape: const CircleBorder(side: BorderSide(width: 2.0)))), true);
     expect(painter.shouldRepaint(createPainter(minLength: _kMinThumbExtent + 1.0)), true);
     expect(painter.shouldRepaint(createPainter(minOverscrollLength: 1.0)), true);
     expect(painter.shouldRepaint(createPainter(scrollbarOrientation: ScrollbarOrientation.bottom)), true);
+  });
+
+  testWidgets('Scrollbar track can be drawn', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              trackVisibility: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(794.0, 0.0),
+          p2: const Offset(794.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x1a000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
+
+  testWidgets('trackRadius and radius properties of RawScrollbar can draw RoundedRectangularRect', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              trackVisibility: true,
+              trackRadius: const Radius.circular(1.0),
+              radius: const Radius.circular(2.0),
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rrect(
+          rrect: RRect.fromLTRBR(794.0, 0.0, 800.0, 600.0, const Radius.circular(1.0)),
+          color: const Color(0x08000000),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(794.0, 0.0, 800.0, 90.0, const Radius.circular(2.0)),
+          color: const Color(0x66bcbcbc),
+        )
+    );
+  });
+
+  testWidgets('Scrollbar asserts that a visible track has a visible thumb', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    Widget _buildApp() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: false,
+              trackVisibility: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    expect(() => tester.pumpWidget(_buildApp()), throwsAssertionError);
   });
 }

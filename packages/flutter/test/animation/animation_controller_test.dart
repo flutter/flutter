@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
@@ -16,9 +14,10 @@ import '../scheduler/scheduler_tester.dart';
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance!.resetEpoch();
-    ui.window.onBeginFrame = null;
-    ui.window.onDrawFrame = null;
+    WidgetsBinding.instance
+        ..resetEpoch()
+        ..platformDispatcher.onBeginFrame = null
+        ..platformDispatcher.onDrawFrame = null;
   });
 
   test('Can set value during status callback', () {
@@ -516,7 +515,7 @@ void main() {
     controller.forward(from: 0.2);
     expect(controller.value, 0.2);
     controller.animateTo(1.0, duration: Duration.zero);
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0), reason: 'Expected no animation.');
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
     expect(controller.value, 1.0);
     controller.dispose();
   });

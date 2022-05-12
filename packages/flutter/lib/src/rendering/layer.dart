@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -2108,35 +2109,53 @@ class PhysicalModelLayer extends ContainerLayer {
 ///  * [RenderLeaderLayer] and [RenderFollowerLayer], the corresponding
 ///    render objects.
 class LayerLink {
+  /// The [LeaderLayer] connected to this link.
+  LeaderLayer? get leader => _leader;
   LeaderLayer? _leader;
 
-  int _connectedFollowers = 0;
-
-  /// Whether a [LeaderLayer] is currently connected to this link.
-  bool get leaderConnected => _leader != null;
-
-  /// Called by the [FollowerLayer] to establish a link to a [LeaderLayer].
-  ///
-  /// The returned [LayerLinkHandle] provides access to the leader via
-  /// [LayerLinkHandle.leader].
-  ///
-  /// When the [FollowerLayer] no longer wants to follow the [LeaderLayer],
-  /// [LayerLinkHandle.dispose] must be called to disconnect the link.
-  _LayerLinkHandle _registerFollower() {
-    assert(_connectedFollowers >= 0);
-    _connectedFollowers++;
-    return _LayerLinkHandle(this);
+  void _registerLeader(LeaderLayer leader) {
+    assert(_leader != leader);
+    assert((){
+      if (_leader != null) {
+        _debugPreviousLeaders ??= <LeaderLayer>{};
+        _debugScheduleLeadersCleanUpCheck();
+        return _debugPreviousLeaders!.add(_leader!);
+      }
+      return true;
+    }());
+    _leader = leader;
   }
 
-  /// Returns the [LeaderLayer] currently connected to this link.
-  ///
-  /// Valid in debug mode only. Returns null in all other modes.
-  LeaderLayer? get debugLeader {
-    LeaderLayer? result;
-    if (kDebugMode) {
-      result = _leader;
+  void _unregisterLeader(LeaderLayer leader) {
+    if (_leader == leader) {
+      _leader = null;
+    } else {
+      assert(_debugPreviousLeaders!.remove(leader));
     }
-    return result;
+  }
+
+  /// Stores the previous leaders that were replaced by the current [_leader]
+  /// in the current frame.
+  ///
+  /// These leaders need to give up their leaderships of this link by the end of
+  /// the current frame.
+  Set<LeaderLayer>? _debugPreviousLeaders;
+  bool _debugLeaderCheckScheduled = false;
+
+  /// Schedules the check as post frame callback to make sure the
+  /// [_debugPreviousLeaders] is empty.
+  void _debugScheduleLeadersCleanUpCheck() {
+    assert(_debugPreviousLeaders != null);
+    assert(() {
+      if (_debugLeaderCheckScheduled)
+        return true;
+      _debugLeaderCheckScheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        _debugLeaderCheckScheduled = false;
+        assert(_debugPreviousLeaders!.isEmpty);
+      });
+      return true;
+    }());
   }
 
   /// The total size of the content of the connected [LeaderLayer].
@@ -2149,30 +2168,6 @@ class LayerLink {
 
   @override
   String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
-}
-
-/// A handle provided by [LayerLink.registerFollower] to a calling
-/// [FollowerLayer] to establish a link between that [FollowerLayer] and a
-/// [LeaderLayer].
-///
-/// If the link is no longer needed, [dispose] must be called to disconnect it.
-class _LayerLinkHandle {
-  _LayerLinkHandle(this._link);
-
-  LayerLink? _link;
-
-  /// The currently-registered [LeaderLayer], if any.
-  LeaderLayer? get leader => _link!._leader;
-
-  /// Disconnects the link between the [FollowerLayer] owning this handle and
-  /// the [leader].
-  ///
-  /// The [LayerLinkHandle] becomes unusable after calling this method.
-  void dispose() {
-    assert(_link!._connectedFollowers > 0);
-    _link!._connectedFollowers--;
-    _link = null;
-  }
 }
 
 /// A composited layer that can be followed by a [FollowerLayer].
@@ -2202,7 +2197,10 @@ class LeaderLayer extends ContainerLayer {
     if (_link == value) {
       return;
     }
-    _link._leader = null;
+    if (attached) {
+      _link._unregisterLeader(this);
+      value._registerLeader(this);
+    }
     _link = value;
   }
 
@@ -2226,32 +2224,17 @@ class LeaderLayer extends ContainerLayer {
     }
   }
 
-  /// {@macro flutter.rendering.FollowerLayer.alwaysNeedsAddToScene}
-  @override
-  bool get alwaysNeedsAddToScene => _link._connectedFollowers > 0;
-
   @override
   void attach(Object owner) {
     super.attach(owner);
-    assert(link._leader == null);
-    _lastOffset = null;
-    link._leader = this;
+    _link._registerLeader(this);
   }
 
   @override
   void detach() {
-    assert(link._leader == this);
-    link._leader = null;
-    _lastOffset = null;
+    _link._unregisterLeader(this);
     super.detach();
   }
-
-  /// The offset the last time this layer was composited.
-  ///
-  /// This is reset to null when the layer is attached or detached, to help
-  /// catch cases where the follower layer ends up before the leader layer, but
-  /// not every case can be detected.
-  Offset? _lastOffset;
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
@@ -2261,14 +2244,13 @@ class LeaderLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(offset != null);
-    _lastOffset = offset;
-    if (_lastOffset != Offset.zero)
+    if (offset != Offset.zero)
       engineLayer = builder.pushTransform(
-        Matrix4.translationValues(_lastOffset!.dx, _lastOffset!.dy, 0.0).storage,
+        Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
     addChildrenToScene(builder);
-    if (_lastOffset != Offset.zero)
+    if (offset != Offset.zero)
       builder.pop();
   }
 
@@ -2281,9 +2263,8 @@ class LeaderLayer extends ContainerLayer {
   /// children.
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
-    assert(_lastOffset != null);
-    if (_lastOffset != Offset.zero)
-      transform.translate(_lastOffset!.dx, _lastOffset!.dy);
+    if (offset != Offset.zero)
+      transform.translate(offset.dx, offset.dy);
   }
 
   @override
@@ -2326,10 +2307,6 @@ class FollowerLayer extends ContainerLayer {
   LayerLink get link => _link;
   set link(LayerLink value) {
     assert(value != null);
-    if (value != _link && _leaderHandle != null) {
-      _leaderHandle!.dispose();
-      _leaderHandle = value._registerFollower();
-    }
     _link = value;
   }
   LayerLink _link;
@@ -2376,21 +2353,6 @@ class FollowerLayer extends ContainerLayer {
   ///  * [unlinkedOffset], for when the layer is not linked.
   Offset? linkedOffset;
 
-  _LayerLinkHandle? _leaderHandle;
-
-  @override
-  void attach(Object owner) {
-    super.attach(owner);
-    _leaderHandle = _link._registerFollower();
-  }
-
-  @override
-  void detach() {
-    super.detach();
-    _leaderHandle?.dispose();
-    _leaderHandle = null;
-  }
-
   Offset? _lastOffset;
   Matrix4? _lastTransform;
   Matrix4? _invertedTransform;
@@ -2410,7 +2372,7 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (_leaderHandle!.leader == null) {
+    if (_link.leader == null) {
       if (showWhenUnlinked!) {
         return super.findAnnotations(result, localPosition - unlinkedOffset!, onlyFirst: onlyFirst);
       }
@@ -2485,11 +2447,39 @@ class FollowerLayer extends ContainerLayer {
     return _pathsToCommonAncestor(a.parent, b.parent, ancestorsA, ancestorsB);
   }
 
+  bool _debugCheckLeaderBeforeFollower(
+    List<ContainerLayer> leaderToCommonAncestor,
+    List<ContainerLayer> followerToCommonAncestor,
+  ) {
+    if (followerToCommonAncestor.length <= 1) {
+      // Follower is the common ancestor, ergo the leader must come AFTER the follower.
+      return false;
+    }
+    if (leaderToCommonAncestor.length <= 1) {
+      // Leader is the common ancestor, ergo the leader must come BEFORE the follower.
+      return true;
+    }
+
+    // Common ancestor is neither the leader nor the follower.
+    final ContainerLayer leaderSubtreeBelowAncestor = leaderToCommonAncestor[leaderToCommonAncestor.length - 2];
+    final ContainerLayer followerSubtreeBelowAncestor = followerToCommonAncestor[followerToCommonAncestor.length - 2];
+
+    Layer? sibling = leaderSubtreeBelowAncestor;
+    while (sibling != null) {
+      if (sibling == followerSubtreeBelowAncestor) {
+        return true;
+      }
+      sibling = sibling.nextSibling;
+    }
+    // The follower subtree didn't come after the leader subtree.
+    return false;
+  }
+
   /// Populate [_lastTransform] given the current state of the tree.
   void _establishTransform() {
     assert(link != null);
     _lastTransform = null;
-    final LeaderLayer? leader = _leaderHandle!.leader;
+    final LeaderLayer? leader = _link.leader;
     // Check to see if we are linked.
     if (leader == null)
       return;
@@ -2498,27 +2488,30 @@ class FollowerLayer extends ContainerLayer {
       leader.owner == owner,
       'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.',
     );
-    assert(
-      leader._lastOffset != null,
-      'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
-    );
 
     // Stores [leader, ..., commonAncestor] after calling _pathsToCommonAncestor.
-    final List<ContainerLayer?> forwardLayers = <ContainerLayer>[leader];
+    final List<ContainerLayer> forwardLayers = <ContainerLayer>[leader];
     // Stores [this (follower), ..., commonAncestor] after calling
     // _pathsToCommonAncestor.
-    final List<ContainerLayer?> inverseLayers = <ContainerLayer>[this];
+    final List<ContainerLayer> inverseLayers = <ContainerLayer>[this];
 
     final Layer? ancestor = _pathsToCommonAncestor(
       leader, this,
       forwardLayers, inverseLayers,
     );
-    assert(ancestor != null);
+    assert(
+      ancestor != null,
+      'LeaderLayer and FollowerLayer do not have a common ancestor.',
+    );
+    assert(
+      _debugCheckLeaderBeforeFollower(forwardLayers, inverseLayers),
+      'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
+    );
 
     final Matrix4 forwardTransform = _collectTransformForLayerChain(forwardLayers);
     // Further transforms the coordinate system to a hypothetical child (null)
     // of the leader layer, to account for the leader's additional paint offset
-    // and layer offset (LeaderLayer._lastOffset).
+    // and layer offset (LeaderLayer.offset).
     leader.applyTransform(null, forwardTransform);
     forwardTransform.translate(linkedOffset!.dx, linkedOffset!.dy);
 
@@ -2551,7 +2544,7 @@ class FollowerLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder) {
     assert(link != null);
     assert(showWhenUnlinked != null);
-    if (_leaderHandle!.leader == null && !showWhenUnlinked!) {
+    if (_link.leader == null && !showWhenUnlinked!) {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;
@@ -2560,13 +2553,13 @@ class FollowerLayer extends ContainerLayer {
     }
     _establishTransform();
     if (_lastTransform != null) {
+      _lastOffset = unlinkedOffset;
       engineLayer = builder.pushTransform(
         _lastTransform!.storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
       addChildrenToScene(builder);
       builder.pop();
-      _lastOffset = unlinkedOffset;
     } else {
       _lastOffset = null;
       final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset!.dx, unlinkedOffset!.dy, .0);

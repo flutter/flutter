@@ -490,8 +490,6 @@ class _MonthPicker extends StatefulWidget {
 class _MonthPickerState extends State<_MonthPicker> {
   final GlobalKey _pageViewKey = GlobalKey();
   late DateTime _currentMonth;
-  late DateTime _nextMonthDate;
-  late DateTime _previousMonthDate;
   late PageController _pageController;
   late MaterialLocalizations _localizations;
   late TextDirection _textDirection;
@@ -504,8 +502,6 @@ class _MonthPickerState extends State<_MonthPicker> {
   void initState() {
     super.initState();
     _currentMonth = widget.initialMonth;
-    _previousMonthDate = DateUtils.addMonthsToMonthDate(_currentMonth, -1);
-    _nextMonthDate = DateUtils.addMonthsToMonthDate(_currentMonth, 1);
     _pageController = PageController(initialPage: DateUtils.monthDelta(widget.firstDate, _currentMonth));
     _shortcutMap = const <ShortcutActivator, Intent>{
       SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
@@ -533,7 +529,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     super.didUpdateWidget(oldWidget);
     if (widget.initialMonth != oldWidget.initialMonth && widget.initialMonth != _currentMonth) {
       // We can't interrupt this widget build with a scroll, so do it next frame
-      WidgetsBinding.instance!.addPostFrameCallback(
+      WidgetsBinding.instance.addPostFrameCallback(
         (Duration timeStamp) => _showMonth(widget.initialMonth, jump: true),
       );
     }
@@ -556,8 +552,6 @@ class _MonthPickerState extends State<_MonthPicker> {
       final DateTime monthDate = DateUtils.addMonthsToMonthDate(widget.firstDate, monthPage);
       if (!DateUtils.isSameMonth(_currentMonth, monthDate)) {
         _currentMonth = DateTime(monthDate.year, monthDate.month);
-        _previousMonthDate = DateUtils.addMonthsToMonthDate(_currentMonth, -1);
-        _nextMonthDate = DateUtils.addMonthsToMonthDate(_currentMonth, 1);
         widget.onDisplayedMonthChanged(_currentMonth);
         if (_focusedDay != null && !DateUtils.isSameMonth(_focusedDay, _currentMonth)) {
           // We have navigated to a new month with the grid focused, but the
@@ -565,6 +559,10 @@ class _MonthPickerState extends State<_MonthPicker> {
           // the same day of the month.
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
+        SemanticsService.announce(
+          _localizations.formatMonthYear(_currentMonth),
+          _textDirection,
+        );
       }
     });
   }
@@ -596,10 +594,6 @@ class _MonthPickerState extends State<_MonthPicker> {
   /// Navigate to the next month.
   void _handleNextMonth() {
     if (!_isDisplayingLastMonth) {
-      SemanticsService.announce(
-        _localizations.formatMonthYear(_nextMonthDate),
-        _textDirection,
-      );
       _pageController.nextPage(
         duration: _monthScrollDuration,
         curve: Curves.ease,
@@ -610,10 +604,6 @@ class _MonthPickerState extends State<_MonthPicker> {
   /// Navigate to the previous month.
   void _handlePreviousMonth() {
     if (!_isDisplayingFirstMonth) {
-      SemanticsService.announce(
-        _localizations.formatMonthYear(_previousMonthDate),
-        _textDirection,
-      );
       _pageController.previousPage(
         duration: _monthScrollDuration,
         curve: Curves.ease,
@@ -748,8 +738,6 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final String previousTooltipText = '${_localizations.previousMonthTooltip} ${_localizations.formatMonthYear(_previousMonthDate)}';
-    final String nextTooltipText = '${_localizations.nextMonthTooltip} ${_localizations.formatMonthYear(_nextMonthDate)}';
     final Color controlColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.60);
 
     return Semantics(
@@ -764,13 +752,13 @@ class _MonthPickerState extends State<_MonthPicker> {
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
                   color: controlColor,
-                  tooltip: _isDisplayingFirstMonth ? null : previousTooltipText,
+                  tooltip: _isDisplayingFirstMonth ? null : _localizations.previousMonthTooltip,
                   onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   color: controlColor,
-                  tooltip: _isDisplayingLastMonth ? null : nextTooltipText,
+                  tooltip: _isDisplayingLastMonth ? null : _localizations.nextMonthTooltip,
                   onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
                 ),
               ],
@@ -1224,6 +1212,7 @@ class _YearPickerState extends State<YearPicker> {
         child: Center(
           child: Semantics(
             selected: isSelected,
+            button: true,
             child: Text(year.toString(), style: itemStyle),
           ),
         ),

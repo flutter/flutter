@@ -10,10 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
-    renderer;
-
     final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
     final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {
@@ -153,6 +153,76 @@ void main() {
     expect(renderObject.toStringShort(), contains('DISPOSED'));
   });
 
+  test('Leader layer can switch to a different render object within one frame', () {
+    List<FlutterErrorDetails?>? caughtErrors;
+    TestRenderingFlutterBinding.instance.onErrors = () {
+      caughtErrors = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails().toList();
+    };
+
+    final LayerLink layerLink = LayerLink();
+    // renderObject1 paints the leader layer first.
+    final LeaderLayerRenderObject renderObject1 = LeaderLayerRenderObject();
+    renderObject1.layerLink = layerLink;
+    renderObject1.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    final OffsetLayer rootLayer1 = OffsetLayer();
+    rootLayer1.attach(renderObject1);
+    renderObject1.scheduleInitialPaint(rootLayer1);
+    renderObject1.layout(const BoxConstraints.tightForFinite());
+
+    final LeaderLayerRenderObject renderObject2 = LeaderLayerRenderObject();
+    final OffsetLayer rootLayer2 = OffsetLayer();
+    rootLayer2.attach(renderObject2);
+    renderObject2.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    renderObject2.scheduleInitialPaint(rootLayer2);
+    renderObject2.layout(const BoxConstraints.tightForFinite());
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+
+    // Swap the layer link to renderObject2 in the same frame
+    renderObject1.layerLink = null;
+    renderObject1.markNeedsPaint();
+    renderObject2.layerLink = layerLink;
+    renderObject2.markNeedsPaint();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+
+    // Swap the layer link to renderObject1 in the same frame
+    renderObject1.layerLink = layerLink;
+    renderObject1.markNeedsPaint();
+    renderObject2.layerLink = null;
+    renderObject2.markNeedsPaint();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+
+    TestRenderingFlutterBinding.instance.onErrors = null;
+    expect(caughtErrors, isNull);
+  });
+
+  test('Leader layer append to two render objects does crash', () {
+    List<FlutterErrorDetails?>? caughtErrors;
+    TestRenderingFlutterBinding.instance.onErrors = () {
+      caughtErrors = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails().toList();
+    };
+    final LayerLink layerLink = LayerLink();
+    // renderObject1 paints the leader layer first.
+    final LeaderLayerRenderObject renderObject1 = LeaderLayerRenderObject();
+    renderObject1.layerLink = layerLink;
+    renderObject1.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    final OffsetLayer rootLayer1 = OffsetLayer();
+    rootLayer1.attach(renderObject1);
+    renderObject1.scheduleInitialPaint(rootLayer1);
+    renderObject1.layout(const BoxConstraints.tightForFinite());
+
+    final LeaderLayerRenderObject renderObject2 = LeaderLayerRenderObject();
+    renderObject2.layerLink = layerLink;
+    final OffsetLayer rootLayer2 = OffsetLayer();
+    rootLayer2.attach(renderObject2);
+    renderObject2.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    renderObject2.scheduleInitialPaint(rootLayer2);
+    renderObject2.layout(const BoxConstraints.tightForFinite());
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+
+    TestRenderingFlutterBinding.instance.onErrors = null;
+    expect(caughtErrors!.isNotEmpty, isTrue);
+  });
+
   test('RenderObject.dispose null the layer on repaint boundaries', () {
     final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
     // Force a layer to get set.
@@ -253,6 +323,39 @@ class TestRenderObject extends RenderObject {
     config.isSemanticBoundary = true;
     describeSemanticsConfigurationCallCount++;
   }
+}
+
+class LeaderLayerRenderObject extends RenderObject {
+  LeaderLayerRenderObject();
+
+  LayerLink? layerLink;
+
+  @override
+  bool isRepaintBoundary = true;
+
+  @override
+  void debugAssertDoesMeetConstraints() { }
+
+  @override
+  Rect get paintBounds {
+    return Rect.zero;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (layerLink != null) {
+      context.pushLayer(LeaderLayer(link: layerLink!), super.paint, offset);
+    }
+  }
+
+  @override
+  void performLayout() { }
+
+  @override
+  void performResize() { }
+
+  @override
+  Rect get semanticBounds => const Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
 }
 
 class TestThrowingRenderObject extends RenderObject {

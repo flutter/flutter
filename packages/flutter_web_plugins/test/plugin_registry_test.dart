@@ -54,7 +54,7 @@ void main() {
       const StandardMessageCodec codec = StandardMessageCodec();
 
       final List<String> loggedMessages = <String>[];
-      ServicesBinding.instance!.defaultBinaryMessenger
+      ServicesBinding.instance.defaultBinaryMessenger
           .setMessageHandler('test_send', (ByteData? data) {
         loggedMessages.add(codec.decodeMessage(data)! as String);
         return Future<ByteData?>.value();
@@ -68,7 +68,7 @@ void main() {
           'test_send', codec.encodeMessage('world'));
       expect(loggedMessages, equals(<String>['hello', 'world']));
 
-      ServicesBinding.instance!.defaultBinaryMessenger
+      ServicesBinding.instance.defaultBinaryMessenger
           .setMessageHandler('test_send', null);
     });
   });

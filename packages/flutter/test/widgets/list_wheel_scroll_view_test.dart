@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestClipPaintingContext, TestCallbackPainter;
 
 void main() {
   testWidgets('ListWheelScrollView respects clipBehavior', (WidgetTester tester) async {
@@ -230,6 +230,7 @@ void main() {
     });
 
     testWidgets('child builder with lower and upper limits', (WidgetTester tester) async {
+      // Adjust the content dimensions at the end of `RenderListWheelViewport.performLayout()`
       final List<int> paintedChildren = <int>[];
 
       final FixedExtentScrollController controller =
@@ -285,6 +286,69 @@ void main() {
   });
 
   group('layout', () {
+    // Regression test for https://github.com/flutter/flutter/issues/90953
+    testWidgets('ListWheelScrollView childDelegate update test 2', (WidgetTester tester) async {
+      final FixedExtentScrollController controller = FixedExtentScrollController( initialItem: 2 );
+      Widget buildFrame(int childCount) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 400.0,
+            onSelectedItemChanged: (_) { },
+            childDelegate: ListWheelChildBuilderDelegate(
+              childCount: childCount,
+              builder: (BuildContext context, int index) {
+                return SizedBox(
+                  width: 400.0,
+                  height: 400.0,
+                  child: Text(index.toString()),
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(5));
+      expect(find.text('0'), findsNothing);
+      expect(tester.renderObject(find.text('1')).attached, true);
+      expect(tester.renderObject(find.text('2')).attached, true);
+      expect(tester.renderObject(find.text('3')).attached, true);
+      expect(find.text('4'), findsNothing);
+
+      // Remove the last 3 items.
+      await tester.pumpWidget(buildFrame(2));
+      expect(tester.renderObject(find.text('0')).attached, true);
+      expect(tester.renderObject(find.text('1')).attached, true);
+      expect(find.text('3'), findsNothing);
+
+      // Add 3 items at the end.
+      await tester.pumpWidget(buildFrame(5));
+      expect(tester.renderObject(find.text('0')).attached, true);
+      expect(tester.renderObject(find.text('1')).attached, true);
+      expect(tester.renderObject(find.text('2')).attached, true);
+      expect(find.text('3'), findsNothing);
+      expect(find.text('4'), findsNothing);
+
+
+      // Scroll to the last item.
+      final TestGesture scrollGesture = await tester.startGesture(const Offset(10.0, 10.0));
+      await scrollGesture.moveBy(const Offset(0.0, -1200.0));
+      await tester.pump();
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsNothing);
+      expect(tester.renderObject(find.text('3')).attached, true);
+      expect(tester.renderObject(find.text('4')).attached, true);
+
+      // Remove the last 3 items.
+      await tester.pumpWidget(buildFrame(2));
+      expect(tester.renderObject(find.text('0')).attached, true);
+      expect(tester.renderObject(find.text('1')).attached, true);
+      expect(find.text('3'), findsNothing);
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/58144
     testWidgets('ListWheelScrollView childDelegate update test', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController();
