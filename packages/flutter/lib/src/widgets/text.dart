@@ -492,6 +492,10 @@ class Text extends StatelessWidget {
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   final double? textScaleFactor;
 
+  /// An optional minimum number of lines for the text to span.
+  ///
+  /// If the text falls short of the given number of lines, lines will be added
+  /// below until there are the given number of lines.
   final int? minLines;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.

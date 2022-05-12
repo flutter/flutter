@@ -1504,7 +1504,7 @@ void main() {
                 child: RichText(
                   textDirection: TextDirection.ltr,
                   minLines: 5,
-                  text: const TextSpan(children: [
+                  text: const TextSpan(children: <TextSpan>[
                     TextSpan(text: 'Pppp ', style: TextStyle(color: Colors.red, fontSize: 24)),
                     TextSpan(text: 'Pppp ', style: TextStyle(color: Colors.black, fontSize: 16)),
                     TextSpan(text: 'Ppppp ', style: TextStyle(color: Colors.yellow, fontSize: 8))

@@ -383,7 +383,7 @@ void main() {
 
     layoutAt(3);
     expect(paragraph.size.height, 60.0);
-  }, skip: isBrowser);
+  });
 
   test('minLines', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -418,7 +418,7 @@ void main() {
 
     layoutAt(20);
     expect(paragraph.size.height, 200.0);
-  }, skip: isBrowser);
+  });
 
   test('minLines and maxLines', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -457,7 +457,7 @@ void main() {
 
     layoutAt(20, 25);
     expect(paragraph.size.height, 200.0);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
 
   test('changing color does not do layout', () {
