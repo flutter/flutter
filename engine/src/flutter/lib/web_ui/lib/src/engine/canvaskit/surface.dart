@@ -165,8 +165,6 @@ class Surface {
       return _surface!;
     }
 
-    _currentDevicePixelRatio = window.devicePixelRatio;
-
     // If the current canvas size is smaller than the requested size then create
     // a new, larger, canvas. Then update the GR context so we can create a new
     // SkSurface.
@@ -188,8 +186,11 @@ class Surface {
 
       _createNewCanvas(newSize);
       _currentCanvasPhysicalSize = newSize;
+    } else if (window.devicePixelRatio != _currentDevicePixelRatio) {
+      _updateLogicalHtmlCanvasSize();
     }
 
+    _currentDevicePixelRatio = window.devicePixelRatio;
     _currentSurfaceSize = size;
     _translateCanvas();
     return _surface = _createNewSurface(size);

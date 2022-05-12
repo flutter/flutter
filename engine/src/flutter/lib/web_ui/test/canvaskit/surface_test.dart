@@ -176,6 +176,15 @@ void testMain() {
       expect(lowDpr.height(), 16);
       expect(surface.htmlCanvas!.style.width, '20px');
       expect(surface.htmlCanvas!.style.height, '32px');
+
+      // See https://github.com/flutter/flutter/issues/77084#issuecomment-1120151172
+      window.debugOverrideDevicePixelRatio(2.0);
+      final CkSurface changeRatioAndSize =
+          surface.acquireFrame(const ui.Size(9.9, 15.9)).skiaSurface;
+      expect(changeRatioAndSize.width(), 10);
+      expect(changeRatioAndSize.height(), 16);
+      expect(surface.htmlCanvas!.style.width, '5px');
+      expect(surface.htmlCanvas!.style.height, '8px');
     });
   }, skip: isIosSafari);
 }
