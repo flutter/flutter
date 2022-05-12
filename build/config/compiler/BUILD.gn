@@ -165,16 +165,6 @@ config("compiler") {
         "-arch",
         "i386",
       ]
-    } else if (current_cpu == "arm") {
-      common_mac_flags += [
-        "-arch",
-        "armv7",
-      ]
-
-      # Aligned allocation are only available on iOS 11 or above on armv7.
-      # Till we support older iOS version, disabled aligned allocations for this
-      # target architecture.
-      common_mac_flags += [ "-fno-aligned-allocation" ]
     } else if (current_cpu == "arm64") {
       common_mac_flags += [
         "-arch",
