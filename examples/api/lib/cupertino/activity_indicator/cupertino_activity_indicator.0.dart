@@ -25,8 +25,10 @@ class CupertinoIndicatorExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoActivityIndicator Sample'),
+      ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -101,7 +101,7 @@ class _IconsDemoCard extends StatelessWidget {
   TableRow _buildIconRow(double size) {
     return TableRow(
       children: <Widget> [
-        _centeredText('${size.floor().toString()} ${icon.toString()}'),
+        _centeredText('${size.floor()} $icon'),
         _buildIconButton(size, icon, true),
         _buildIconButton(size, icon, false),
       ],
@@ -122,9 +122,9 @@ class _IconsDemoCard extends StatelessWidget {
             children: <TableRow> [
               TableRow(
                 children: <Widget> [
-                  _centeredText('Size ${icon.toString()}'),
-                  _centeredText('Enabled ${icon.toString()}'),
-                  _centeredText('Disabled ${icon.toString()}'),
+                  _centeredText('Size $icon'),
+                  _centeredText('Enabled $icon'),
+                  _centeredText('Disabled $icon'),
                 ]
               ),
               _buildIconRow(18.0),

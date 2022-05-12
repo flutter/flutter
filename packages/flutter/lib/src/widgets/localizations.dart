@@ -11,7 +11,7 @@ import 'debug.dart';
 import 'framework.dart';
 
 // Examples can assume:
-// class Intl { static String message(String s, { String? name, String? locale }) => ''; }
+// class Intl { Intl._(); static String message(String s, { String? name, String? locale }) => ''; }
 // Future<void> initializeMessages(String locale) => Future<void>.value();
 
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're

@@ -373,7 +373,6 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
-      webPlatform: webPlatform,
     );
   }
 

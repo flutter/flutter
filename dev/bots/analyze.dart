@@ -171,10 +171,10 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
-  // Analyze all the sample code in the repo.
-  print('$clock Sample code...');
+  // Analyze the code in `{@tool snippet}` sections in the repo.
+  print('$clock Snippet code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart'), '--verbose'],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 
@@ -742,6 +742,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
+      '--remove-undefined',
     ],
     workingDirectory: workingDirectory,
   );
@@ -750,6 +751,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
+      '--remove-undefined',
     ],
     workingDirectory: workingDirectory,
   );

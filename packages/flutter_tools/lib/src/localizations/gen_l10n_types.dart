@@ -442,7 +442,7 @@ class AppResourceBundle {
     } on FormatException catch (e) {
       throw L10nException(
         'The arb file ${file.path} has the following formatting issue: \n'
-        '${e.toString()}',
+        '$e',
       );
     }
 

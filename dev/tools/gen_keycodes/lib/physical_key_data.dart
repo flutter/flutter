@@ -158,7 +158,7 @@ class PhysicalKeyData {
     input = input.replaceAll(commentRegExp, '');
     for (final RegExpMatch match in usbMapRegExp.allMatches(input)) {
       final int usbHidCode = getHex(match.namedGroup('usb')!);
-      final int linuxScanCode = getHex(match.namedGroup('evdev')!);
+      final int evdevCode = getHex(match.namedGroup('evdev')!);
       final int xKbScanCode = getHex(match.namedGroup('xkb')!);
       final int windowsScanCode = getHex(match.namedGroup('win')!);
       final int macScanCode = getHex(match.namedGroup('mac')!);
@@ -174,7 +174,7 @@ class PhysicalKeyData {
       final PhysicalKeyEntry newEntry = PhysicalKeyEntry(
         usbHidCode: usbHidCode,
         androidScanCodes: nameToAndroidScanCodes[name] ?? <int>[],
-        linuxScanCode: linuxScanCode == 0 ? null : linuxScanCode,
+        evdevCode: evdevCode == 0 ? null : evdevCode,
         xKbScanCode: xKbScanCode == 0 ? null : xKbScanCode,
         windowsScanCode: windowsScanCode == 0 ? null : windowsScanCode,
         macOSScanCode: macScanCode == 0xffff ? null : macScanCode,
@@ -210,7 +210,7 @@ class PhysicalKeyEntry {
     required this.usbHidCode,
     required this.name,
     required this.androidScanCodes,
-    required this.linuxScanCode,
+    required this.evdevCode,
     required this.xKbScanCode,
     required this.windowsScanCode,
     required this.macOSScanCode,
@@ -227,7 +227,7 @@ class PhysicalKeyEntry {
       chromiumCode: names['chromium'] as String?,
       usbHidCode: scanCodes['usb'] as int,
       androidScanCodes: (scanCodes['android'] as List<dynamic>?)?.cast<int>() ?? <int>[],
-      linuxScanCode: scanCodes['linux'] as int?,
+      evdevCode: scanCodes['linux'] as int?,
       xKbScanCode: scanCodes['xkb'] as int?,
       windowsScanCode: scanCodes['windows'] as int?,
       macOSScanCode: scanCodes['macos'] as int?,
@@ -238,8 +238,8 @@ class PhysicalKeyEntry {
   /// The USB HID code of the key
   final int usbHidCode;
 
-  /// The Linux scan code of the key, from Chromium's header file.
-  final int? linuxScanCode;
+  /// The Evdev scan code of the key, from Chromium's header file.
+  final int? evdevCode;
   /// The XKb scan code of the key from Chromium's header file.
   final int? xKbScanCode;
   /// The Windows scan code of the key from Chromium's header file.
@@ -269,7 +269,7 @@ class PhysicalKeyEntry {
       'scanCodes': <String, dynamic>{
         'android': androidScanCodes,
         'usb': usbHidCode,
-        'linux': linuxScanCode,
+        'linux': evdevCode,
         'xkb': xKbScanCode,
         'windows': windowsScanCode,
         'macos': macOSScanCode,
@@ -318,7 +318,7 @@ class PhysicalKeyEntry {
   @override
   String toString() {
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """
-        'linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
+        'linuxScanCode: ${toHex(evdevCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
         'windowsKeyCode: ${toHex(windowsScanCode)}, macOSScanCode: ${toHex(macOSScanCode)}, '
         'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumCode '
         'iOSScanCode: ${toHex(iOSScanCode)})';
