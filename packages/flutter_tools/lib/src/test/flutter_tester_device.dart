@@ -93,6 +93,8 @@ class FlutterTesterTestDevice extends TestDevice {
     // Let the server choose an unused port.
     _server = await bind(host, /*port*/ 0);
     logger.printTrace('test $id: test harness socket server is running at port:${_server.port}');
+    final String assetDirectory = fileSystem.path
+      .join(flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets');
 
     final List<String> command = <String>[
       // Until an arm64 flutter tester binary is available, force to run in Rosetta
@@ -129,6 +131,8 @@ class FlutterTesterTestDevice extends TestDevice {
       '--non-interactive',
       '--use-test-fonts',
       '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      if (buildTestAssets)
+        '--flutter-assets-dir=$assetDirectory',
       if (debuggingOptions.nullAssertions)
         '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
@@ -149,7 +153,7 @@ class FlutterTesterTestDevice extends TestDevice {
       'SERVER_PORT': _server.port.toString(),
       'APP_NAME': flutterProject?.manifest?.appName ?? '',
       if (buildTestAssets)
-        'UNIT_TEST_ASSETS': fileSystem.path.join(flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets'),
+        'UNIT_TEST_ASSETS': assetDirectory,
     };
 
     logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');
