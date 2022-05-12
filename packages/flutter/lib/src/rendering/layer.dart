@@ -118,7 +118,6 @@ class AnnotationResult<T> {
 ///       offset,
 ///       Offset.zero & size,
 ///       super.paint,
-///       clipBehavior: Clip.hardEdge,
 ///       oldLayer: _clipRectLayer.layer,
 ///     );
 ///   }

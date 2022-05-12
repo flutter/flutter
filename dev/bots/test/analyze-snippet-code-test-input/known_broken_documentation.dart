@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is used by ../analyze_sample_code_test.dart, which depends on the
+// This file is used by ../analyze_snippet_code_test.dart, which depends on the
 // precise contents (including especially the comments) of this file.
 
 // Examples can assume:
@@ -34,7 +34,7 @@
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool snippet}
 /// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
 /// blabla it when it is blabla:
 ///
@@ -121,7 +121,7 @@
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool snippet}
 /// Dartpad with null-safe syntax
 ///
 /// ```dart preamble

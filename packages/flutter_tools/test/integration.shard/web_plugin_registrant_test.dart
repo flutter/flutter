@@ -49,12 +49,20 @@ void main() {
     // the generated_plugin_registrant generation.
     await _addDependency(projectDir, 'shared_preferences',
         version: '^2.0.0');
-    await _analyzeProject(projectDir);
+    // The plugin registrant is only created after a build...
+    await _buildWebProject(projectDir);
+
+    // Find the web_plugin_registrant, now that it lives outside "lib":
+    final Directory buildDir = projectDir
+        .childDirectory('.dart_tool/flutter_build')
+        .listSync()
+        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
 
     expect(
-      projectDir.childFile('lib/generated_plugin_registrant.dart'),
+      buildDir.childFile('web_plugin_registrant.dart'),
       exists,
     );
+    await _analyzeEntity(buildDir.childFile('web_plugin_registrant.dart'));
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
           fileSystem: globals.fs,
@@ -88,12 +96,20 @@ void main() {
       'test_web_plugin_with_a_purposefully_extremely_long_package_name',
       path: '../test_plugin',
     );
-    await _analyzeProject(projectDir);
+    // The plugin registrant is only created after a build...
+    await _buildWebProject(projectDir);
+
+    // Find the web_plugin_registrant, now that it lives outside "lib":
+    final Directory buildDir = projectDir
+        .childDirectory('.dart_tool/flutter_build')
+        .listSync()
+        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
 
     expect(
-      projectDir.childFile('lib/generated_plugin_registrant.dart'),
+      buildDir.childFile('web_plugin_registrant.dart'),
       exists,
     );
+    await _analyzeEntity(buildDir.childFile('web_plugin_registrant.dart'));
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
           fileSystem: globals.fs,
@@ -215,7 +231,7 @@ ${linterRules.map((String rule) => '    - $rule').join('\n')}
   ''');
 }
 
-Future<void> _analyzeProject(Directory workingDir) async {
+Future<void> _analyzeEntity(FileSystemEntity target) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
     globals.fs.path.join(
       '..',
@@ -229,6 +245,35 @@ Future<void> _analyzeProject(Directory workingDir) async {
   final List<String> args = <String>[
     flutterToolsSnapshotPath,
     'analyze',
+    target.path,
+  ];
+
+  final ProcessResult exec = await Process.run(
+    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    args,
+    workingDirectory: target is Directory ? target.path : target.dirname,
+  );
+  printOnFailure('Output of flutter analyze:');
+  printOnFailure(exec.stdout.toString());
+  printOnFailure(exec.stderr.toString());
+  expect(exec.exitCode, 0);
+}
+
+Future<void> _buildWebProject(Directory workingDir) async {
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
+    globals.fs.path.join(
+      '..',
+      '..',
+      'bin',
+      'cache',
+      'flutter_tools.snapshot',
+    ),
+  );
+
+  final List<String> args = <String>[
+    flutterToolsSnapshotPath,
+    'build',
+    'web',
   ];
 
   final ProcessResult exec = await Process.run(
@@ -236,7 +281,7 @@ Future<void> _analyzeProject(Directory workingDir) async {
     args,
     workingDirectory: workingDir.path,
   );
-  printOnFailure('Output of flutter analyze:');
+  printOnFailure('Output of flutter build web:');
   printOnFailure(exec.stdout.toString());
   printOnFailure(exec.stderr.toString());
   expect(exec.exitCode, 0);
