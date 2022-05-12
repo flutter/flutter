@@ -17,6 +17,10 @@ source_set("libcxx") {
     "src/condition_variable_destructor.cpp",
     "src/debug.cpp",
     "src/exception.cpp",
+    "src/filesystem/directory_iterator.cpp",
+    "src/filesystem/filesystem_common.h",
+    "src/filesystem/int128_builtins.cpp",
+    "src/filesystem/operations.cpp",
     "src/functional.cpp",
     "src/future.cpp",
     "src/hash.cpp",
@@ -43,19 +47,7 @@ source_set("libcxx") {
     "src/vector.cpp",
   ]
 
-  # filesystem uses statvfs, which requires API level 19+.
-  if (!is_android) {
-    sources += [
-      "src/filesystem/directory_iterator.cpp",
-      "src/filesystem/filesystem_common.h",
-      "src/filesystem/int128_builtins.cpp",
-      "src/filesystem/operations.cpp",
-    ]
-  }
-
-  deps = [
-    "//third_party/libcxxabi",
-  ]
+  deps = [ "//third_party/libcxxabi" ]
 
   # TODO(goderbauer): remove when all sources build with LTO for android_arm64 and android_x64.
   if (is_android && (current_cpu == "arm64" || current_cpu == "x64")) {
@@ -90,15 +82,11 @@ source_set("libcxx") {
 source_set("libcxx_nolto") {
   visibility = [ ":*" ]
 
-  sources = [
-    "src/new.cpp",
-  ]
+  sources = [ "src/new.cpp" ]
 
   cflags_cc = [ "-fno-lto" ]
 
-  deps = [
-    "//third_party/libcxxabi",
-  ]
+  deps = [ "//third_party/libcxxabi" ]
 
   public_configs = [
     ":libcxx_config",
