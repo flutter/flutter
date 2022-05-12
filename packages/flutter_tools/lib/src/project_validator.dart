@@ -22,12 +22,7 @@ class GeneralInfoValidator extends ProjectValidator{
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     final YamlMap pubContent = loadYaml(project.pubspecFile.readAsStringSync()) as YamlMap;
-    final String appName = pubContent['name'] as String;
-    final ProjectValidatorResult appNameValidatorResult = ProjectValidatorResult(
-        name: 'App Name',
-        value: appName,
-        status: StatusProjectValidator.success
-    );
+    final ProjectValidatorResult appNameValidatorResult = getAppNameResult(pubContent);
     final String supportedPlatforms = getSupportedPlatforms(project);
     if (supportedPlatforms.isEmpty) {
       return [appNameValidatorResult];
@@ -51,6 +46,23 @@ class GeneralInfoValidator extends ProjectValidator{
     return result;
   }
 
+  ProjectValidatorResult getAppNameResult(YamlMap pubContent) {
+    final String? appName = pubContent['name'] as String?;
+    const String name = 'App Name';
+    if (appName == null) {
+      return const ProjectValidatorResult(
+          name: name,
+          value: 'name not found',
+          status: StatusProjectValidator.error
+      );
+    }
+    return ProjectValidatorResult(
+        name: name,
+        value: appName,
+        status: StatusProjectValidator.success
+    );
+  }
+
   ProjectValidatorResult isFlutterPackageValidatorResult(YamlMap pubContent) {
     String value;
     StatusProjectValidator status;
@@ -70,8 +82,6 @@ class GeneralInfoValidator extends ProjectValidator{
   }
 
   ProjectValidatorResult materialDesignResult(YamlMap flutterNode) {
-    String value;
-    StatusProjectValidator status;
     bool isMaterialDesign;
 
     if (flutterNode.containsKey('uses-material-design')) {
@@ -80,13 +90,11 @@ class GeneralInfoValidator extends ProjectValidator{
       isMaterialDesign = false;
     }
 
-    value = isMaterialDesign? 'yes' : 'no';
-    status = StatusProjectValidator.success;
-
+    final String value = isMaterialDesign? 'yes' : 'no';
     return ProjectValidatorResult(
       name: 'Uses Material Design',
       value: value,
-      status: status
+      status: StatusProjectValidator.success
     );
   }
 
