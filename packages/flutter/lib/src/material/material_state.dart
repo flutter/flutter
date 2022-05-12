@@ -695,7 +695,8 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// [TextButton.statesController] for example.
 ///
 /// The controller's [value] is its current set of states. Listeners
-/// are notified whenever the [value] changes.
+/// are notified whenever the [value] changes. The [value] should only be
+/// changed with [add] and [remove], it should not be modified directly.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStateController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
