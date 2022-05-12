@@ -10,9 +10,9 @@ import 'test_utils.dart';
 /// Checks that all active template files are defined in the template_manifest.json file.
 void main() {
   testWithoutContext('Check template manifest is up to date', () {
-    final Map<String, Object> manifest = json.decode(
+    final Map<String, Object?> manifest = json.decode(
       fileSystem.file('templates/template_manifest.json').readAsStringSync(),
-    ) as Map<String, Object>;
+    ) as Map<String, Object?>;
     final Set<Uri> declaredFileList = Set<Uri>.from(
       (manifest['files'] as List<Object?>?)!.cast<String>().map<Uri>(fileSystem.path.toUri));
 
