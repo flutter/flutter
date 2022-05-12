@@ -49,7 +49,6 @@ import 'image_provider.dart';
 ///       fit: BoxFit.cover,
 ///     ),
 ///     border: Border.all(
-///       color: Colors.black,
 ///       width: 8,
 ///     ),
 ///     borderRadius: BorderRadius.circular(12),

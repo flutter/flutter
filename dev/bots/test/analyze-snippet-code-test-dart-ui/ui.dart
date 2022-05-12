@@ -11,7 +11,7 @@ library dart.ui;
 /// Annotation used by Flutter's Dart compiler to indicate that an
 /// [Object.toString] override should not be replaced with a supercall.
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool snippet}
 /// A sample if using keepToString to prevent replacement by a supercall.
 ///
 /// ```dart

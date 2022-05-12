@@ -3213,7 +3213,6 @@ mixin Diagnosticable {
   ///       value: isCurrent,
   ///       ifTrue: 'active',
   ///       ifFalse: 'inactive',
-  ///       showName: false,
   ///     ));
   ///
   ///     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
