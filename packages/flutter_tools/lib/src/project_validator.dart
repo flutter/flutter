@@ -14,11 +14,11 @@ abstract class ProjectValidator {
   Future<List<ProjectValidatorResult>> start(FlutterProject project);
   /// new ProjectValidators should be added here for the ValidateProjectCommand to run
   static List <ProjectValidator> allProjectValidators = <ProjectValidator>[
-    GeneralInfoValidator(),
+    GeneralInfoProjectValidator(),
   ];
 }
 
-class GeneralInfoValidator extends ProjectValidator{
+class GeneralInfoProjectValidator extends ProjectValidator{
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     final YamlMap pubContent = loadYaml(project.pubspecFile.readAsStringSync()) as YamlMap;
