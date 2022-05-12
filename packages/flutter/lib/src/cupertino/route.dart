@@ -920,10 +920,9 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
 class _CupertinoEdgeShadowPainter extends BoxPainter {
   _CupertinoEdgeShadowPainter(
     this._decoration,
-    VoidCallback? onChange,
+    super.onChange,
   ) : assert(_decoration != null),
-      assert(_decoration._colors == null || _decoration._colors!.length > 1),
-      super(onChange);
+      assert(_decoration._colors == null || _decoration._colors!.length > 1);
 
   final _CupertinoEdgeShadowDecoration _decoration;
 
