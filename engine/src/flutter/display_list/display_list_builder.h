@@ -12,6 +12,7 @@
 #include "flutter/display_list/display_list_flags.h"
 #include "flutter/display_list/display_list_image.h"
 #include "flutter/display_list/display_list_paint.h"
+#include "flutter/display_list/display_list_path_effect.h"
 #include "flutter/display_list/types.h"
 #include "flutter/fml/macros.h"
 
@@ -102,9 +103,9 @@ class DisplayListBuilder final : public virtual Dispatcher,
       onSetColorFilter(filter);
     }
   }
-  void setPathEffect(sk_sp<SkPathEffect> effect) override {
-    if (current_path_effect_ != effect) {
-      onSetPathEffect(std::move(effect));
+  void setPathEffect(const DlPathEffect* effect) override {
+    if (NotEquals(current_.getPathEffect(), effect)) {
+      onSetPathEffect(effect);
     }
   }
   void setMaskFilter(const DlMaskFilter* filter) override {
@@ -139,7 +140,9 @@ class DisplayListBuilder final : public virtual Dispatcher,
     return current_blender_ ? current_blender_
                             : SkBlender::Mode(ToSk(current_.getBlendMode()));
   }
-  sk_sp<SkPathEffect> getPathEffect() const { return current_path_effect_; }
+  std::shared_ptr<const DlPathEffect> getPathEffect() const {
+    return current_.getPathEffect();
+  }
   std::shared_ptr<const DlMaskFilter> getMaskFilter() const {
     return current_.getMaskFilter();
   }
@@ -453,14 +456,13 @@ class DisplayListBuilder final : public virtual Dispatcher,
   void onSetColorSource(const DlColorSource* source);
   void onSetImageFilter(const DlImageFilter* filter);
   void onSetColorFilter(const DlColorFilter* filter);
-  void onSetPathEffect(sk_sp<SkPathEffect> effect);
+  void onSetPathEffect(const DlPathEffect* effect);
   void onSetMaskFilter(const DlMaskFilter* filter);
   void onSetMaskBlurFilter(SkBlurStyle style, SkScalar sigma);
 
   DlPaint current_;
   // If |current_blender_| is set then ignore |current_.getBlendMode()|
   sk_sp<SkBlender> current_blender_;
-  sk_sp<SkPathEffect> current_path_effect_;
 };
 
 }  // namespace flutter

@@ -9,6 +9,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_dispatcher.h"
+#include "flutter/display_list/display_list_path_effect.h"
 
 namespace flutter {
 namespace testing {
@@ -53,7 +54,7 @@ class DisplayListStreamDispatcher final : public Dispatcher {
   void setInvertColors(bool invert) override;
   void setBlendMode(DlBlendMode mode) override;
   void setBlender(sk_sp<SkBlender> blender) override;
-  void setPathEffect(sk_sp<SkPathEffect> effect) override;
+  void setPathEffect(const DlPathEffect* effect) override;
   void setMaskFilter(const DlMaskFilter* filter) override;
   void setImageFilter(const DlImageFilter* filter) override;
 

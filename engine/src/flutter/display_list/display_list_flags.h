@@ -11,6 +11,7 @@
 
 namespace flutter {
 
+class DlPathEffect;
 /// The base class for the classes that maintain a list of
 /// attributes that might be important for a number of operations
 /// including which rendering attributes need to be set before
@@ -159,26 +160,7 @@ class DisplayListSpecialGeometryFlags : DisplayListFlagsBase {
 class DisplayListAttributeFlags : DisplayListFlagsBase {
  public:
   const DisplayListSpecialGeometryFlags WithPathEffect(
-      sk_sp<SkPathEffect> effect) const {
-    if (is_geometric() && effect) {
-      SkPathEffect::DashInfo info;
-      if (effect->asADash(&info) == SkPathEffect::kDash_DashType) {
-        // A dash effect has a very simple impact. It cannot introduce any
-        // miter joins that weren't already present in the original path
-        // and it does not grow the bounds of the path, but it can add
-        // end caps to areas that might not have had them before so all
-        // we need to do is to indicate the potential for diagonal
-        // end caps and move on.
-        return special_flags_.with(kMayHaveCaps_ | kMayHaveDiagonalCaps_);
-      } else {
-        // An arbitrary path effect can introduce joins at an arbitrary
-        // angle and may change the geometry of the end caps
-        return special_flags_.with(kMayHaveCaps_ | kMayHaveDiagonalCaps_ |
-                                   kMayHaveJoins_ | kMayHaveAcuteJoins_);
-      }
-    }
-    return special_flags_;
-  }
+      const DlPathEffect* effect) const;
 
   bool ignores_paint() const { return has_any(kIgnoresPaint_); }
 

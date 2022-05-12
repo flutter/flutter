@@ -479,7 +479,7 @@ void DisplayListStreamDispatcher::setBlendMode(DlBlendMode mode) {
 void DisplayListStreamDispatcher::setBlender(sk_sp<SkBlender> blender) {
   startl() << "setBlender(" << blender << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::setPathEffect(sk_sp<SkPathEffect> effect) {
+void DisplayListStreamDispatcher::setPathEffect(const DlPathEffect* effect) {
   startl() << "setPathEffect(" << effect << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::setMaskFilter(const DlMaskFilter* filter) {
