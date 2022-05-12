@@ -627,7 +627,7 @@ class DataTable extends StatelessWidget {
   /// The icon to customize sorting icon in header.
   ///
   /// By default uses Icon(Icons.arrow_upward,size: 16.0)
-  final Icon? sortIcon;
+  final Widget? sortIcon;
 
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
@@ -1137,7 +1137,7 @@ class _SortArrow extends StatefulWidget {
 
   final Duration duration;
 
-  final Icon? sortIcon;
+  final Widget? sortIcon;
 
   @override
   _SortArrowState createState() => _SortArrowState();
