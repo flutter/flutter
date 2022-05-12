@@ -55,6 +55,10 @@ if (build_engine_artifacts) {
         destination = "flutter_tester$exe"
       },
       {
+        source = "$root_out_dir/flutter_tester_fractional_translation$exe"
+        destination = "flutter_tester_fractional_translation$exe"
+      },
+      {
         source = "$root_out_dir/impellerc$exe"
         destination = "impellerc$exe"
       },
