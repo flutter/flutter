@@ -57,11 +57,6 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     );
   }
 
-  @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
-    throw UnsupportedError('use ImageProvider.loadBuffer instead.');
-  }
-
   // Do not access this field directly; use [_httpClient] instead.
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-Length` HTTP header. We automatically uncompress the content

@@ -73,11 +73,6 @@ class NetworkImage
     );
   }
 
-  @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
-    throw UnsupportedError('use ImageProvider.loadBuffer instead.');
-  }
-
   InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
