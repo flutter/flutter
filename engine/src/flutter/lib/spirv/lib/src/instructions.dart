@@ -85,7 +85,7 @@ class _Block {
         instructions.whereType<_CompoundAssignment>().toList();
     if (assignments.isEmpty) {
       throw TranspileException._(
-          _opLoopMerge, 'loop continue block $id has no compound asignments.');
+          _opLoopMerge, 'loop continue block $id has no compound assignments.');
     }
     if (assignments.length > 1) {
       throw TranspileException._(_opLoopMerge,
