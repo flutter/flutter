@@ -38,6 +38,10 @@ void main() {
       projectRootPath = projectRoot.path;
     });
 
+    tearDown(() async {
+      tryToDelete(projectRoot);
+    });
+
     testWithoutContext('init', () async {
       expect(projectRoot.existsSync(), true);
       expect(projectRoot.childDirectory('.git').existsSync(), false);
@@ -217,5 +221,16 @@ void main() {
 
       projectRoot.deleteSync(recursive: true);
     });
+  });
+
+  testWithoutContext('conflictsResolved', () async {
+    expect(utils.conflictsResolved(''), true);
+    expect(utils.conflictsResolved('hello'), true);
+    expect(utils.conflictsResolved('hello\n'), true);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n\nhi\n'), true);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n>>>>>>>\nhi\n'), false);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n=======\nhi\n'), false);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n<<<<<<<\nhi\n'), false);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n<<<<<<<\n=======\n<<<<<<<\nhi\n'), false);
   });
 }
