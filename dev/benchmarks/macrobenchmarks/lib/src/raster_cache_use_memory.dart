@@ -50,8 +50,8 @@ class _RasterCacheUseMemoryState extends State<RasterCacheUseMemory>
               ),
               child: RepaintBoundary(
                 child: Container(
-                  width: 100,
-                  height: 100,
+                  width: 50,
+                  height: 50,
                   color: Colors.red,
                 ),
               ),
@@ -96,7 +96,7 @@ class _RasterCacheUseMemoryState extends State<RasterCacheUseMemory>
                                 borderRadius: BorderRadius.circular(5.0),
                               ),
                               child: const FlutterLogo(
-                                size: 300,
+                                size: 50,
                               ),
                             ),
                           ),
@@ -109,13 +109,13 @@ class _RasterCacheUseMemoryState extends State<RasterCacheUseMemory>
             ),
           ),
           const RepaintBoundary(
-            child: SizedBox(
-              height: 800,
-              child: FlutterLogo(
-                size: 100,
-              ),
+            child: FlutterLogo(
+              size: 50,
             ),
-          )
+          ),
+          Container(
+            height: 800,
+          ),
         ],
       ),
     );
