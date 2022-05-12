@@ -863,6 +863,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       platform: Theme.of(context).platform,
       hasFocus: hasFocus,
       hovering: hovering,
+      gestureSettings: MediaQuery.of(context).gestureSettings,
     );
   }
 
@@ -884,7 +885,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..semanticFormatterCallback = semanticFormatterCallback
       ..platform = Theme.of(context).platform
       ..hasFocus = hasFocus
-      ..hovering = hovering;
+      ..hovering = hovering
+      ..gestureSettings = MediaQuery.of(context).gestureSettings;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -907,6 +909,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required TextDirection textDirection,
     required bool hasFocus,
     required bool hovering,
+    required DeviceGestureSettings gestureSettings,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
         assert(state != null),
         assert(textDirection != null),
@@ -930,11 +933,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
-      ..onCancel = _endInteraction;
+      ..onCancel = _endInteraction
+      ..gestureSettings = gestureSettings;
     _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
-      ..onTapUp = _handleTapUp;
+      ..onTapUp = _handleTapUp
+      ..gestureSettings = gestureSettings;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -1017,6 +1022,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _state.positionController.value = convertedValue;
     }
     markNeedsSemanticsUpdate();
+  }
+
+  DeviceGestureSettings? get gestureSettings => _drag.gestureSettings;
+  set gestureSettings(DeviceGestureSettings? gestureSettings) {
+    _drag.gestureSettings = gestureSettings;
+    _tap.gestureSettings = gestureSettings;
   }
 
   TargetPlatform _platform;
