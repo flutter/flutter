@@ -55,7 +55,7 @@ Future<void> main() async {
       if (!Platform.isWindows) {
         await exec('chmod', <String>[
           '444',
-          readonlyTxtAssetFile.path
+          readonlyTxtAssetFile.path,
         ]);
       }
 

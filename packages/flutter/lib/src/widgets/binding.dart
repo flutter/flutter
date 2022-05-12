@@ -435,6 +435,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
             debugProfileBuildsEnabled = value;
         },
       );
+      registerBoolServiceExtension(
+        name: 'profileUserWidgetBuilds',
+        getter: () async => debugProfileBuildsEnabledUserWidgets,
+        setter: (bool value) async {
+          if (debugProfileBuildsEnabledUserWidgets != value)
+            debugProfileBuildsEnabledUserWidgets = value;
+        },
+      );
     }
 
     assert(() {

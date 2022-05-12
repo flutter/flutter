@@ -20,6 +20,12 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=AENVH-ZqKDQ}
 ///
+/// {@tool dartpad}
+/// This example shows how [CupertinoActivityIndicator] can be customized.
+///
+/// ** See code in examples/api/lib/cupertino/activity_indicator/cupertino_activity_indicator.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/progress-indicators/#activity-indicators>

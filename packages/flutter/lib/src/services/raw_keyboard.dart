@@ -288,7 +288,7 @@ abstract class RawKeyEvent with Diagnosticable {
   /// instead of using the message information.
   factory RawKeyEvent.fromMessage(Map<String, Object?> message) {
     String? character;
-    RawKeyEventData _dataFromWeb() {
+    RawKeyEventData dataFromWeb() {
       final String? key = message['key'] as String?;
       if (key != null && key.isNotEmpty && key.length == 1) {
         character = key;
@@ -304,7 +304,7 @@ abstract class RawKeyEvent with Diagnosticable {
 
     final RawKeyEventData data;
     if (kIsWeb) {
-      data = _dataFromWeb();
+      data = dataFromWeb();
     } else {
       final String keymap = message['keymap']! as String;
       switch (keymap) {
@@ -364,6 +364,7 @@ abstract class RawKeyEvent with Diagnosticable {
             scanCode: message['scanCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
             isDown: message['type'] == 'keydown',
+            specifiedLogicalKey: message['specifiedLogicalKey'] as int?,
           );
           if (unicodeScalarValues != 0) {
             character = String.fromCharCode(unicodeScalarValues);
@@ -382,7 +383,7 @@ abstract class RawKeyEvent with Diagnosticable {
           }
           break;
         case 'web':
-          data = _dataFromWeb();
+          data = dataFromWeb();
           break;
         default:
           /// This exception would only be hit on platforms that haven't yet

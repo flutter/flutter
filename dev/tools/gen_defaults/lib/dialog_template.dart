@@ -30,7 +30,7 @@ class _TokenDefaultsM3 extends DialogTheme {
   Color? get backgroundColor => ElevationOverlay.colorWithOverlay(${componentColor("md.comp.dialog.container")}, _colors.primary, ${elevation("md.comp.dialog.container")});
 
   @override
-  TextStyle? get titleTextStyle => ${textStyle("md.comp.dialog.subhead")};
+  TextStyle? get titleTextStyle => ${textStyle("md.comp.dialog.headline")};
 
   @override
   TextStyle? get contentTextStyle => ${textStyle("md.comp.dialog.supporting-text")};

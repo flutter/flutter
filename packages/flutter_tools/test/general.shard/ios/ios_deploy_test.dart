@@ -53,6 +53,7 @@ void main () {
             '/',
             '--app_deltas',
             'app-delta',
+            '--uninstall',
             '--debug',
             '--args',
             <String>[
@@ -73,6 +74,7 @@ void main () {
         appDeltaDirectory: appDeltaDirectory,
         launchArguments: <String>['--enable-dart-profiling'],
         interfaceType: IOSDeviceConnectionInterface.network,
+        uninstallFirst: true,
       );
 
       expect(iosDeployDebugger.logLines, emits('Did finish launching.'));
@@ -114,7 +116,7 @@ void main () {
           'Log on attach2',
           '',
           '',
-          'Log after process stop'
+          'Log after process stop',
         ]));
         expect(stdin.stream.transform<String>(const Utf8Decoder()), emitsInOrder(<String>[
           'thread backtrace all',
@@ -409,7 +411,7 @@ process continue
           '--uninstall_only',
           '--bundle_id',
           bundleId,
-        ])
+        ]),
       ]);
       final IOSDeploy iosDeploy = setUpIOSDeploy(processManager, artifacts: artifacts);
       final int exitCode = await iosDeploy.uninstallApp(
@@ -432,7 +434,7 @@ process continue
           '--uninstall_only',
           '--bundle_id',
           bundleId,
-        ], exitCode: 1)
+        ], exitCode: 1),
       ]);
       final IOSDeploy iosDeploy = setUpIOSDeploy(processManager, artifacts: artifacts);
       final int exitCode = await iosDeploy.uninstallApp(
@@ -452,7 +454,7 @@ IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
   final FakePlatform macPlatform = FakePlatform(
     operatingSystem: 'macos',
     environment: <String, String>{
-      'PATH': '/usr/local/bin:/usr/bin'
+      'PATH': '/usr/local/bin:/usr/bin',
     }
   );
   final Cache cache = Cache.test(

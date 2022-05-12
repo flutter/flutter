@@ -47,7 +47,7 @@ enum TabBarIndicatorSize {
   label,
 }
 
-/// A material design [TabBar] tab.
+/// A Material Design [TabBar] tab.
 ///
 /// If both [icon] and [text] are provided, the text is displayed below
 /// the icon.
@@ -59,7 +59,7 @@ enum TabBarIndicatorSize {
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.io/design/components/tabs.html>
 class Tab extends StatelessWidget implements PreferredSizeWidget {
-  /// Creates a material design [TabBar] tab.
+  /// Creates a Material Design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]
   /// and [child] arguments must not be used at the same time. The
@@ -403,7 +403,7 @@ class _IndicatorPainter extends CustomPainter {
     if (!(rect.size >= insets.collapsedSize)) {
       throw FlutterError(
           'indicatorPadding insets should be less than Tab Size\n'
-          'Rect Size : ${rect.size}, Insets: ${insets.toString()}',
+          'Rect Size : ${rect.size}, Insets: $insets',
       );
     }
     return insets.deflateRect(rect);
@@ -552,7 +552,7 @@ class _TabBarScrollController extends ScrollController {
   }
 }
 
-/// A material design widget that displays a horizontal row of tabs.
+/// A Material Design widget that displays a horizontal row of tabs.
 ///
 /// Typically created as the [AppBar.bottom] part of an [AppBar] and in
 /// conjunction with a [TabBarView].
@@ -588,7 +588,7 @@ class _TabBarScrollController extends ScrollController {
 ///  * [TabBarView], which displays page views that correspond to each tab.
 ///  * [TabBar], which is used to display the [Tab] that corresponds to each page of the [TabBarView].
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
-  /// Creates a material design tab bar.
+  /// Creates a Material Design tab bar.
   ///
   /// The [tabs] argument must not be null and its length must match the [controller]'s
   /// [TabController.length].
@@ -1310,6 +1310,7 @@ class TabBarView extends StatefulWidget {
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
     this.viewportFraction = 1.0,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(children != null),
        assert(dragStartBehavior != null);
 
@@ -1341,6 +1342,11 @@ class TabBarView extends StatefulWidget {
 
   /// {@macro flutter.widgets.pageview.viewportFraction}
   final double viewportFraction;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   @override
   State<TabBarView> createState() => _TabBarViewState();
@@ -1531,6 +1537,7 @@ class _TabBarViewState extends State<TabBarView> {
       onNotification: _handleScrollNotification,
       child: PageView(
         dragStartBehavior: widget.dragStartBehavior,
+        clipBehavior: widget.clipBehavior,
         controller: _pageController,
         physics: widget.physics == null
           ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())

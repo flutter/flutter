@@ -62,6 +62,8 @@ enum _ScaffoldSlot {
 
 /// Manages [SnackBar]s and [MaterialBanner]s for descendant [Scaffold]s.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lytQi-slT5Y}
+///
 /// This class provides APIs for showing snack bars and material banners at the
 /// bottom and top of the screen, respectively.
 ///
@@ -263,6 +265,11 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
   /// {@end-tool}
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
+    assert(
+      _scaffolds.isNotEmpty,
+      'ScaffoldMessenger.showSnackBar was called, but there are currently no '
+      'descendant Scaffolds to present to.',
+    );
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChanged);
     if (_snackBars.isEmpty) {
@@ -389,6 +396,11 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_material_banner.0.dart **
   /// {@end-tool}
   ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason> showMaterialBanner(MaterialBanner materialBanner) {
+    assert(
+      _scaffolds.isNotEmpty,
+      'ScaffoldMessenger.showMaterialBanner was called, but there are currently no '
+      'descendant Scaffolds to present to.',
+    );
     _materialBannerController ??= MaterialBanner.createAnimationController(vsync: this)
       ..addStatusListener(_handleMaterialBannerStatusChanged);
     if (_materialBanners.isEmpty) {
@@ -474,8 +486,8 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     }
   }
 
-  /// Removes all the materialBanners currently in queue by clearing the queue
-  /// and running normal exit animation on the current materialBanner.
+  /// Removes all the [MaterialBanner]s currently in queue by clearing the queue
+  /// and running normal exit animation on the current [MaterialBanner].
   void clearMaterialBanners() {
     if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed)
       return;
@@ -1333,7 +1345,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
-/// Implements the basic material design visual layout structure.
+/// Implements the basic Material Design visual layout structure.
 ///
 /// This class provides APIs for showing drawers and bottom sheets.
 ///
@@ -1454,7 +1466,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * <https://material.io/design/layout/responsive-layout-grid.html>
 ///  * Cookbook: [Add a Drawer to a screen](https://flutter.dev/docs/cookbook/design/drawer)
 class Scaffold extends StatefulWidget {
-  /// Creates a visual scaffold for material design widgets.
+  /// Creates a visual scaffold for Material Design widgets.
   const Scaffold({
     super.key,
     this.appBar,
@@ -1463,6 +1475,7 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButtonLocation,
     this.floatingActionButtonAnimator,
     this.persistentFooterButtons,
+    this.persistentFooterAlignment = AlignmentDirectional.centerEnd,
     this.drawer,
     this.onDrawerChanged,
     this.endDrawer,
@@ -1568,6 +1581,11 @@ class Scaffold extends StatefulWidget {
   /// The [persistentFooterButtons] are rendered above the
   /// [bottomNavigationBar] but below the [body].
   final List<Widget>? persistentFooterButtons;
+
+  /// The alignment of the [persistentFooterButtons] inside the [OverflowBar].
+  ///
+  /// Defaults to [AlignmentDirectional.centerEnd].
+  final AlignmentDirectional persistentFooterAlignment;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
@@ -1917,19 +1935,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   /// Whether this scaffold has a non-null [Scaffold.appBar].
   bool get hasAppBar => widget.appBar != null;
-
   /// Whether this scaffold has a non-null [Scaffold.drawer].
   bool get hasDrawer => widget.drawer != null;
-
   /// Whether this scaffold has a non-null [Scaffold.endDrawer].
   bool get hasEndDrawer => widget.endDrawer != null;
-
   /// Whether this scaffold has a non-null [Scaffold.floatingActionButton].
   bool get hasFloatingActionButton => widget.floatingActionButton != null;
-
-  /// Whether this scaffold requires [Scaffold.appBar] to automatically add
-  /// dismiss button.
-  bool get requiresAppBarDismiss => _persistentSheetHistoryEntry != null;
 
   double? _appBarMaxHeight;
   /// The max height the [Scaffold.appBar] uses.
@@ -2058,28 +2069,28 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   PersistentBottomSheetController<dynamic>? _currentBottomSheet;
   final GlobalKey _currentBottomSheetKey = GlobalKey();
 
-  LocalHistoryEntry? _persistentSheetHistoryEntry;
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
       final AnimationController animationController = BottomSheet.createAnimationController(this)..value = 1.0;
-      bool _persistentBottomSheetExtentChanged(DraggableScrollableNotification notification) {
+      LocalHistoryEntry? persistentSheetHistoryEntry;
+      bool persistentBottomSheetExtentChanged(DraggableScrollableNotification notification) {
         if (notification.extent > notification.initialExtent) {
-          if (_persistentSheetHistoryEntry == null) {
-            _persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
+          if (persistentSheetHistoryEntry == null) {
+            persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
               if (notification.extent > notification.initialExtent) {
                 DraggableScrollableActuator.reset(notification.context);
               }
               showBodyScrim(false, 0.0);
               _floatingActionButtonVisibilityValue = 1.0;
-              _persistentSheetHistoryEntry = null;
+              persistentSheetHistoryEntry = null;
             });
-            ModalRoute.of(context)!.addLocalHistoryEntry(_persistentSheetHistoryEntry!);
+            ModalRoute.of(context)!.addLocalHistoryEntry(persistentSheetHistoryEntry!);
           }
-        } else if (_persistentSheetHistoryEntry != null) {
-          ModalRoute.of(context)!.removeLocalHistoryEntry(_persistentSheetHistoryEntry!);
+        } else if (persistentSheetHistoryEntry != null) {
+          ModalRoute.of(context)!.removeLocalHistoryEntry(persistentSheetHistoryEntry!);
         }
         return false;
       }
@@ -2087,7 +2098,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) {
           return NotificationListener<DraggableScrollableNotification>(
-            onNotification: _persistentBottomSheetExtentChanged,
+            onNotification: persistentBottomSheetExtentChanged,
             child: DraggableScrollableActuator(
               child: StatefulBuilder(
                 key: _currentBottomSheetKey,
@@ -2167,7 +2178,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     bool removedEntry = false;
     bool doingDispose = false;
-    void _removeCurrentBottomSheet() {
+    void removeCurrentBottomSheet() {
       removedEntry = true;
       if (_currentBottomSheet == null) {
         return;
@@ -2191,11 +2202,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       ? null
       : LocalHistoryEntry(onRemove: () {
           if (!removedEntry && _currentBottomSheet?._widget == bottomSheet && !doingDispose) {
-            _removeCurrentBottomSheet();
+            removeCurrentBottomSheet();
           }
         });
 
-    void _removeEntryIfNeeded() {
+    void removeEntryIfNeeded() {
       if (!isPersistent && !removedEntry) {
         assert(entry != null);
         entry!.remove();
@@ -2212,7 +2223,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           return;
         }
         assert(_currentBottomSheet!._widget == bottomSheet);
-        _removeEntryIfNeeded();
+        removeEntryIfNeeded();
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
@@ -2223,7 +2234,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       },
       onDispose: () {
         doingDispose = true;
-        _removeEntryIfNeeded();
+        removeEntryIfNeeded();
         if (shouldDisposeAnimationController) {
           animationController.dispose();
         }
@@ -2245,13 +2256,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       completer,
       entry != null
         ? entry.remove
-        : _removeCurrentBottomSheet,
+        : removeCurrentBottomSheet,
       (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); },
       !isPersistent,
     );
   }
 
-  /// Shows a material design bottom sheet in the nearest [Scaffold]. To show
+  /// Shows a Material Design bottom sheet in the nearest [Scaffold]. To show
   /// a persistent bottom sheet, use the [Scaffold.bottomSheet].
   ///
   /// Returns a controller that can be used to close and otherwise manipulate the
@@ -2732,7 +2743,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             top: false,
             child: IntrinsicHeight(
               child: Container(
-                alignment: AlignmentDirectional.centerEnd,
+                alignment: widget.persistentFooterAlignment,
                 padding: const EdgeInsets.all(8),
                 child: OverflowBar(
                   spacing: 8,

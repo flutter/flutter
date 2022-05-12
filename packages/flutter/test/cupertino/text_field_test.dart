@@ -17,6 +17,7 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind, kSecondaryMouseButton, kDoubleTapTimeout;
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -405,6 +406,89 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'uses DefaultSelectionStyle for selection and cursor colors if provided',
+    (WidgetTester tester) async {
+      const Color selectionColor = Colors.black;
+      const Color cursorColor = Colors.white;
+
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: DefaultSelectionStyle(
+              selectionColor: selectionColor,
+              cursorColor: cursorColor,
+              child: CupertinoTextField(
+                autofocus: true,
+              )
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.widget.selectionColor, selectionColor);
+      expect(state.widget.cursorColor, cursorColor);
+    },
+  );
+
+  testWidgets('Text field drops selection color when losing focus', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103341.
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    final TextEditingController controller1 = TextEditingController();
+    const Color selectionColor = Colors.orange;
+    const Color cursorColor = Colors.red;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: DefaultSelectionStyle(
+            selectionColor: selectionColor,
+            cursorColor: cursorColor,
+            child: Column(
+              children: <Widget>[
+                CupertinoTextField(
+                  key: key1,
+                  controller: controller1,
+                ),
+                CupertinoTextField(key: key2),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const TextSelection selection = TextSelection(baseOffset: 0, extentOffset: 4);
+    final EditableTextState state1 = tester.state<EditableTextState>(find.byType(EditableText).first);
+    final EditableTextState state2 = tester.state<EditableTextState>(find.byType(EditableText).last);
+
+    await tester.tap(find.byKey(key1));
+    await tester.enterText(find.byKey(key1), 'abcd');
+    await tester.pump();
+
+    await tester.tap(find.byKey(key2));
+    await tester.enterText(find.byKey(key2), 'dcba');
+    await tester.pump();
+
+    // Focus and selection is active on first TextField, so the second TextFields
+    // selectionColor should be dropped.
+    await tester.tap(find.byKey(key1));
+    controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+    expect(controller1.selection, selection);
+    expect(state1.widget.selectionColor, selectionColor);
+    expect(state2.widget.selectionColor, null);
+
+    // Focus and selection is active on second TextField, so the first TextFields
+    // selectionColor should be dropped.
+    await tester.tap(find.byKey(key2));
+    await tester.pump();
+    expect(state1.widget.selectionColor, null);
+    expect(state2.widget.selectionColor, selectionColor);
+  });
 
   testWidgets(
     'multi-lined text fields are intrinsically taller no-strut',

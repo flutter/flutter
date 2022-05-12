@@ -46,6 +46,13 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of [NavigationRail] widget used within a Scaffold with 3
+/// [NavigationRailDestination]s, as described in: https://m3.material.io/components/navigation-rail/overview
+///
+/// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], which can display the navigation rail within a [Row] of the
@@ -56,7 +63,7 @@ import 'theme.dart';
 ///     out horizontally.
 ///  * https://material.io/components/navigation-rail/
 class NavigationRail extends StatefulWidget {
-  /// Creates a material design navigation rail.
+  /// Creates a Material Design navigation rail.
   ///
   /// The value of [destinations] must be a list of one or more
   /// [NavigationRailDestination] values.
@@ -948,7 +955,7 @@ class _DefaultsM2 extends NavigationRailThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _TokenDefaultsM3 extends NavigationRailThemeData {
   _TokenDefaultsM3(this.context)
       : super(

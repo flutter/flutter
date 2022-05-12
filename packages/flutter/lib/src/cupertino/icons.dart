@@ -912,7 +912,7 @@ class CupertinoIcons {
   static const IconData mail_solid = IconData(0xf423, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// <i class='cupertino-icons md-36'>location</i> &#x2014; Cupertino icon for a location pin.
-  static const IconData location = IconData(0xf455, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData location = IconData(0xf6ee, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// <i class='cupertino-icons md-36'>placemark_fill</i> &#x2014; Cupertino icon for a location pin. This icon is filled in.
   /// This is the same icon as [placemark_fill] in cupertino_icons 1.0.0+.

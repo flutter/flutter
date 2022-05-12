@@ -13,19 +13,29 @@ import '../src/common.dart';
 import '../src/darwin_common.dart';
 
 void main() {
+  final String flutterBin = fileSystem.path.join(
+    getFlutterRoot(),
+    'bin',
+    'flutter',
+  );
+
+  setUpAll(() {
+    processManager.runSync(<String>[
+      flutterBin,
+      'config',
+      '--enable-macos-desktop',
+    ]);
+  });
+
   for (final String buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
+
     test('flutter build macos --$buildModeLower builds a valid app', () {
       final String workingDirectory = fileSystem.path.join(
         getFlutterRoot(),
         'dev',
         'integration_tests',
         'flutter_gallery',
-      );
-      final String flutterBin = fileSystem.path.join(
-        getFlutterRoot(),
-        'bin',
-        'flutter',
       );
 
       processManager.runSync(<String>[

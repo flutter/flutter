@@ -11,24 +11,22 @@ void main() => runApp(const MyApp());
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  static const String _title = 'Flutter Code Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('AlertDialog Sample')),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: DialogExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class DialogExample extends StatelessWidget {
+  const DialogExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

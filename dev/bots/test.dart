@@ -1268,7 +1268,7 @@ Future<void> _runFlutterPluginsTests() async {
         'core.longPaths=true',
         'clone',
         'https://github.com/flutter/plugins.git',
-        '.'
+        '.',
       ],
       workingDirectory: checkout.path,
     );
@@ -1329,7 +1329,7 @@ Future<void> _runSkpGeneratorTests() async {
       'core.longPaths=true',
       'clone',
       'https://github.com/flutter/tests.git',
-      '.'
+      '.',
     ],
     workingDirectory: checkout.path,
   );
@@ -1654,7 +1654,7 @@ Future<void> _dartRunTest(String workingDirectory, {
     if (coverage != null)
       '--coverage=$coverage',
     if (perTestTimeout != null)
-      '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
+      '--timeout=${perTestTimeout.inMilliseconds}ms',
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,

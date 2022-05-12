@@ -20,7 +20,6 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
-import '../features.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -45,7 +44,6 @@ const List<String> kAllCreatePlatforms = <String>[
   'linux',
   'macos',
   'web',
-  'winuwp',
 ];
 
 const String _kDefaultPlatformArgumentHelp =
@@ -165,13 +163,9 @@ abstract class CreateBase extends FlutterCommand {
       aliases: <String>[ 'platform' ],
       defaultsTo: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled)
-          'winuwp',
       ],
       allowed: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled)
-          'winuwp',
       ],
     );
   }
@@ -249,7 +243,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `--org` is not specified, returns the organization from the existing project.
   @protected
   Future<String> getOrganization() async {
-    String organization = stringArg('org');
+    String organization = stringArgDeprecated('org');
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = await project.organizationNames;
@@ -321,8 +315,8 @@ abstract class CreateBase extends FlutterCommand {
   @protected
   String get projectName {
     final String projectName =
-        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
-    if (!boolArg('skip-name-checks')) {
+        stringArgDeprecated('project-name') ?? globals.fs.path.basename(projectDirPath);
+    if (!boolArgDeprecated('skip-name-checks')) {
       final String error = _validateProjectName(projectName);
       if (error != null) {
         throwToolExit(error);
@@ -355,7 +349,6 @@ abstract class CreateBase extends FlutterCommand {
     bool linux = false,
     bool macos = false,
     bool windows = false,
-    bool windowsUwp = false,
     bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
@@ -418,7 +411,6 @@ abstract class CreateBase extends FlutterCommand {
       'linux': linux,
       'macos': macos,
       'windows': windows,
-      'winuwp': windowsUwp,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
       'implementationTests': implementationTests,
@@ -522,9 +514,8 @@ abstract class CreateBase extends FlutterCommand {
     final bool macOSPlatform = templateContext['macos'] as bool ?? false;
     final bool windowsPlatform = templateContext['windows'] as bool ?? false;
     final bool webPlatform = templateContext['web'] as bool ?? false;
-    final bool winUwpPlatform = templateContext['winuwp'] as bool ?? false;
 
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       final Environment environment = Environment(
         artifacts: globals.artifacts,
         logger: globals.logger,
@@ -549,7 +540,7 @@ abstract class CreateBase extends FlutterCommand {
       await pub.get(
         context: PubContext.create,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         // For templates that use the l10n localization tooling, make sure
         // importing the generated package works right after `flutter create`.
         generateSyntheticPackage: true,
@@ -562,7 +553,6 @@ abstract class CreateBase extends FlutterCommand {
         macOSPlatform: macOSPlatform,
         windowsPlatform: windowsPlatform,
         webPlatform: webPlatform,
-        winUwpPlatform: winUwpPlatform,
       );
     }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
@@ -585,9 +575,6 @@ abstract class CreateBase extends FlutterCommand {
     if (windowsPlatform) {
       platformsForMigrateConfig.add(SupportedPlatform.windows);
     }
-    if (winUwpPlatform) {
-      platformsForMigrateConfig.add(SupportedPlatform.windowsuwp);
-    }
     if (templateContext['fuchsia'] == true) {
       platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
     }
@@ -606,7 +593,7 @@ abstract class CreateBase extends FlutterCommand {
         projectDirectory: directory,
         create: true,
         update: false,
-        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+        currentRevision: stringArgDeprecated('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
         createRevision: globals.flutterVersion.frameworkRevision,
         logger: globals.logger,
       );

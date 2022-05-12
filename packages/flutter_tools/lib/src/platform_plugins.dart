@@ -26,9 +26,6 @@ const String kSupportedVariants = 'supportedVariants';
 enum PluginPlatformVariant {
   /// Win32 variant of Windows.
   win32,
-
-  // UWP variant of Windows.
-  winuwp,
 }
 
 /// Marker interface for all platform specific plugin config implementations.
@@ -183,7 +180,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
         'kotlin',
         package.replaceAll('.', _fileSystem.path.separator),
         '$pluginClass.kt',
-      )
+      ),
     ];
 
     File? mainPluginClass;
@@ -396,7 +393,6 @@ class WindowsPlugin extends PluginPlatform
     } else {
       const Map<String, PluginPlatformVariant> variantByName = <String, PluginPlatformVariant>{
         'win32': PluginPlatformVariant.win32,
-        'uwp': PluginPlatformVariant.winuwp,
       };
       for (final String variantName in variantList.cast<String>()) {
         final PluginPlatformVariant? variant = variantByName[variantName];
@@ -453,11 +449,11 @@ class WindowsPlugin extends PluginPlatform
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass!,
+      if (pluginClass != null) 'class': pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage!,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage,
     };
   }
 }
@@ -523,11 +519,11 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass!,
+      if (pluginClass != null) 'class': pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
+      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage!,
+      if (defaultPackage != null) kDefaultPackage: defaultPackage,
     };
   }
 }

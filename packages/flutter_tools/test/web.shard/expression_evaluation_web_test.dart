@@ -23,6 +23,9 @@ void main() {
       tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
       await project.setUpIn(tempDir);
       flutter = FlutterRunTestDriver(tempDir);
+      flutter.stdout.listen((String line) {
+        expect(line, isNot(contains('Unresolved uri:')));
+      });
     });
 
     tearDown(() async {

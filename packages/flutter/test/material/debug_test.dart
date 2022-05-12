@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
-    await tester.pumpWidget(const ListTile());
+    await tester.pumpWidget(const Chip(label: Text('label')));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
@@ -28,8 +28,8 @@ void main() {
       error.toStringDeep(),
       'FlutterError\n'
       '   No Material widget found.\n'
-      '   ListTile widgets require a Material widget ancestor.\n'
-      '   In material design, most widgets are conceptually "printed" on a\n'
+      '   Chip widgets require a Material widget ancestor.\n'
+      '   In Material Design, most widgets are conceptually "printed" on a\n'
       "   sheet of material. In Flutter's material library, that material\n"
       '   is represented by the Material widget. It is the Material widget\n'
       '   that renders ink splashes, for instance. Because of this, many\n'
@@ -39,7 +39,7 @@ void main() {
       '   one, or use a widget that contains Material itself, such as a\n'
       '   Card, Dialog, Drawer, or Scaffold.\n'
       '   The specific widget that could not find a Material ancestor was:\n'
-      '     ListTile\n'
+      '     Chip\n'
       '   The ancestors of this widget were:\n'
       '     [root]\n',
     );
@@ -163,6 +163,7 @@ void main() {
       '     Listener\n'
       '     HeroControllerScope\n'
       '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
+      '     DefaultSelectionStyle\n'
       '     IconTheme\n'
       '     IconTheme\n'
       '     _InheritedCupertinoTheme\n'
@@ -170,6 +171,7 @@ void main() {
       '     _InheritedTheme\n'
       '     Theme\n'
       '     AnimatedTheme\n'
+      '     DefaultSelectionStyle\n'
       '     _ScaffoldMessengerScope\n'
       '     ScaffoldMessenger\n'
       '     Builder\n'
@@ -302,6 +304,7 @@ void main() {
       '     Padding\n'
       '     SafeArea\n'
       '     FadeTransition\n'
+      '     DefaultSelectionStyle\n'
       '     IconTheme\n'
       '     IconTheme\n'
       '     _InheritedCupertinoTheme\n'
@@ -346,6 +349,7 @@ void main() {
       '     Material\n'
       '     _ScrollNotificationObserverScope\n'
       '     NotificationListener<ScrollNotification>\n'
+      '     NotificationListener<ScrollMetricsNotification>\n'
       '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00000]\n'

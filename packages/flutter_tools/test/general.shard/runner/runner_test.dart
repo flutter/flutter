@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
@@ -98,7 +97,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
-      HttpClientFactory: () => () => FakeHttpClient.any()
+      HttpClientFactory: () => () => FakeHttpClient.any(),
     });
 
     // This Completer completes when CrashingFlutterCommand.runCommand
@@ -141,7 +140,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
       Artifacts: () => Artifacts.test(),
-      HttpClientFactory: () => () => FakeHttpClient.any()
+      HttpClientFactory: () => () => FakeHttpClient.any(),
     });
 
     testUsingContext('create local report', () async {
@@ -211,7 +210,7 @@ void main() {
       UserMessages: () => CustomBugInstructions(),
       Artifacts: () => Artifacts.test(),
       CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
-      HttpClientFactory: () => () => FakeHttpClient.any()
+      HttpClientFactory: () => () => FakeHttpClient.any(),
     });
   });
 }

@@ -198,7 +198,7 @@ Future<vm_service.VmService> setUpVmService(
       return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
-        }
+        },
       };
     });
     registrationRequests.add(vmService.registerService('reloadSources', 'Flutter Tools'));
@@ -211,7 +211,7 @@ Future<vm_service.VmService> setUpVmService(
       return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
-        }
+        },
       };
     });
     registrationRequests.add(vmService.registerService('hotRestart', 'Flutter Tools'));
@@ -226,7 +226,7 @@ Future<vm_service.VmService> setUpVmService(
       'result': <String, Object>{
         'type': 'Success',
         ...versionJson,
-      }
+      },
     };
   });
   registrationRequests.add(vmService.registerService('flutterVersion', 'Flutter Tools'));
@@ -258,7 +258,7 @@ Future<vm_service.VmService> setUpVmService(
         'result': <String, Object>{
           'type': 'Success',
           ...result.toJson(),
-        }
+        },
       };
     });
     registrationRequests.add(vmService.registerService('flutterMemoryInfo', 'Flutter Tools'));
@@ -270,7 +270,7 @@ Future<vm_service.VmService> setUpVmService(
         'result': <String, Object>{
           'type': 'Success',
           'filename': filename,
-        }
+        },
       };
     });
     registrationRequests.add(vmService.registerService('flutterGetSkSL', 'Flutter Tools'));
@@ -847,7 +847,7 @@ class FlutterVmService {
       final List<FlutterView> views = <FlutterView>[
         if (rawViews != null)
           for (final Map<String, Object?> rawView in rawViews.whereType<Map<String, Object?>>())
-            FlutterView.parse(rawView)
+            FlutterView.parse(rawView),
       ];
       if (views.isNotEmpty || returnEarly) {
         return views;

@@ -61,12 +61,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             Text(
-              'Linear progress indicator with a fixed color',
+              'Circular progress indicator with a fixed color',
               style: Theme.of(context).textTheme.headline6,
             ),
             CircularProgressIndicator(
               value: controller.value,
-              semanticsLabel: 'Linear progress indicator',
+              semanticsLabel: 'Circular progress indicator',
             ),
           ],
         ),

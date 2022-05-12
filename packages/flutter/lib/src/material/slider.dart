@@ -317,7 +317,8 @@ class Slider extends StatefulWidget {
   /// If null, the slider is continuous.
   final int? divisions;
 
-  /// A label to show above the slider when the slider is active.
+  /// A label to show above the slider when the slider is active and
+  /// [SliderThemeData.showValueIndicator] is satisfied.
   ///
   /// It is used to display the value of a discrete slider, and it is displayed
   /// as part of the value indicator shape.
@@ -474,13 +475,22 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   Timer? interactionTimer;
 
   final GlobalKey _renderObjectKey = GlobalKey();
+
   // Keyboard mapping for a focused slider.
-  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _traditionalNavShortcutMap = <ShortcutActivator, Intent>{
       SingleActivator(LogicalKeyboardKey.arrowUp): _AdjustSliderIntent.up(),
       SingleActivator(LogicalKeyboardKey.arrowDown): _AdjustSliderIntent.down(),
       SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
       SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
     };
+
+  // Keyboard mapping for a focused slider when using directional navigation.
+  // The vertical inputs are not handled to allow navigating out of the slider.
+  static const Map<ShortcutActivator, Intent> _directionalNavShortcutMap = <ShortcutActivator, Intent>{
+      SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
+      SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
+    };
+
   // Action mapping for a focused slider.
   late Map<Type, Action<Intent>> _actionMap;
 
@@ -714,7 +724,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
     // in range_slider.dart.
-    Size _screenSize() => MediaQuery.of(context).size;
+    Size screenSize() => MediaQuery.of(context).size;
 
     VoidCallback? handleDidGainAccessibilityFocus;
     switch (theme.platform) {
@@ -734,13 +744,23 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         break;
     }
 
+    final Map<ShortcutActivator, Intent> shortcutMap;
+    switch (MediaQuery.of(context).navigationMode) {
+      case NavigationMode.directional:
+        shortcutMap = _directionalNavShortcutMap;
+        break;
+      case NavigationMode.traditional:
+        shortcutMap = _traditionalNavShortcutMap;
+        break;
+    }
+
     return Semantics(
       container: true,
       slider: true,
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: FocusableActionDetector(
         actions: _actionMap,
-        shortcuts: _shortcutMap,
+        shortcuts: shortcutMap,
         focusNode: focusNode,
         autofocus: widget.autofocus,
         enabled: _enabled,
@@ -756,7 +776,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             label: widget.label,
             sliderTheme: sliderTheme,
             textScaleFactor: MediaQuery.of(context).textScaleFactor,
-            screenSize: _screenSize(),
+            screenSize: screenSize(),
             onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
             onChangeStart: _handleDragStart,
             onChangeEnd: _handleDragEnd,
@@ -861,6 +881,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       platform: Theme.of(context).platform,
       hasFocus: hasFocus,
       hovering: hovering,
+      gestureSettings: MediaQuery.of(context).gestureSettings,
     );
   }
 
@@ -882,7 +903,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..semanticFormatterCallback = semanticFormatterCallback
       ..platform = Theme.of(context).platform
       ..hasFocus = hasFocus
-      ..hovering = hovering;
+      ..hovering = hovering
+      ..gestureSettings = MediaQuery.of(context).gestureSettings;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -905,6 +927,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required TextDirection textDirection,
     required bool hasFocus,
     required bool hovering,
+    required DeviceGestureSettings gestureSettings,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
         assert(state != null),
         assert(textDirection != null),
@@ -928,11 +951,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
-      ..onCancel = _endInteraction;
+      ..onCancel = _endInteraction
+      ..gestureSettings = gestureSettings;
     _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
-      ..onTapUp = _handleTapUp;
+      ..onTapUp = _handleTapUp
+      ..gestureSettings = gestureSettings;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -1015,6 +1040,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _state.positionController.value = convertedValue;
     }
     markNeedsSemanticsUpdate();
+  }
+
+  DeviceGestureSettings? get gestureSettings => _drag.gestureSettings;
+  set gestureSettings(DeviceGestureSettings? gestureSettings) {
+    _drag.gestureSettings = gestureSettings;
+    _tap.gestureSettings = gestureSettings;
   }
 
   TargetPlatform _platform;
@@ -1506,7 +1537,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
     }
-    config.label = _label ?? '';
+
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback!(_state._lerp(value));
       config.increasedValue = semanticFormatterCallback!(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));

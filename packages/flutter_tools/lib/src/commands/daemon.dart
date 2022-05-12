@@ -69,7 +69,7 @@ class DaemonCommand extends FlutterCommand {
     if (argResults['listen-on-tcp-port'] != null) {
       int port;
       try {
-        port = int.parse(stringArg('listen-on-tcp-port'));
+        port = int.parse(stringArgDeprecated('listen-on-tcp-port'));
       } on FormatException catch (error) {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
@@ -1103,7 +1103,7 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
       'flutterExit': device.supportsFlutterExit,
       'hardwareRendering': await device.supportsHardwareRendering,
       'startPaused': device.supportsStartPaused,
-    }
+    },
   };
 }
 

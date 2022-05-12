@@ -1885,7 +1885,7 @@ class Colors {
   );
   static const int _blueGreyPrimaryValue = 0xFF607D8B;
 
-  /// The material design primary color swatches, excluding grey.
+  /// The Material Design primary color swatches, excluding grey.
   static const List<MaterialColor> primaries = <MaterialColor>[
     red,
     pink,
@@ -1910,7 +1910,7 @@ class Colors {
     blueGrey,
   ];
 
-  /// The material design accent color swatches.
+  /// The Material Design accent color swatches.
   static const List<MaterialAccentColor> accents = <MaterialAccentColor>[
     redAccent,
     pinkAccent,

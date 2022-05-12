@@ -587,7 +587,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -647,15 +647,15 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
           'success': false,
           'notices': <Object>[
             <String, Object>{
-              'message': 'Failed to hot reload'
-            }
+              'message': 'Failed to hot reload',
+            },
           ],
           'details': <String, Object>{},
         },
@@ -711,7 +711,7 @@ void main() {
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill'
+          'rootLibUri': 'main.dart.incremental.dill',
         },
         jsonResponse: <String, Object>{
           'type': 'ReloadReport',
@@ -883,7 +883,7 @@ void main() {
           timestamp: 0,
           kind: vm_service.EventKind.kIsolateRunnable,
         )
-      )
+      ),
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -962,8 +962,8 @@ void main() {
         event: vm_service.Event(
           timestamp: 0,
           kind: vm_service.EventKind.kIsolateRunnable,
-        )
-      )
+        ),
+      ),
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -1084,7 +1084,7 @@ void main() {
           timestamp: 0,
           kind: vm_service.EventKind.kIsolateRunnable,
         ),
-      )
+      ),
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -1404,7 +1404,7 @@ flutter:
           commandHelp.hWithDetails,
           commandHelp.c,
           commandHelp.q,
-          ''
+          '',
         ].join('\n')
     ));
   }));
@@ -1437,7 +1437,7 @@ flutter:
           commandHelp.hWithoutDetails,
           commandHelp.c,
           commandHelp.q,
-          ''
+          '',
         ].join('\n')
     ));
   }));
@@ -1451,7 +1451,7 @@ flutter:
           'viewId': fakeFlutterView.id,
         },
         jsonResponse: <String, Object>{
-          'SkSLs': <String, Object>{}
+          'SkSLs': <String, Object>{},
         }
       ),
     ]);
@@ -1472,9 +1472,9 @@ flutter:
         jsonResponse: <String, Object>{
           'SkSLs': <String, Object>{
             'A': 'B',
-          }
-        }
-      )
+          },
+        },
+      ),
     ]);
     await residentRunner.writeSkSL();
 
@@ -1484,7 +1484,7 @@ flutter:
       'platform': 'android',
       'name': 'FakeDevice',
       'engineRevision': 'abcdefg',
-      'data': <String, Object>{'A': 'B'}
+      'data': <String, Object>{'A': 'B'},
     });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -1492,7 +1492,7 @@ flutter:
       fileSystem: globals.fs,
       platform: globals.platform,
     ),
-    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg')
+    FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg'),
   }));
 
   testUsingContext('ResidentRunner ignores DevtoolsLauncher when attaching with enableDevTools: false - cold mode', () => testbed.run(() async {
@@ -1868,7 +1868,7 @@ flutter:
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true)
+    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
   });
 
    testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag', () async {

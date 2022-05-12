@@ -65,7 +65,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               value: Menu.itemFour,
               child: Text('Item 4'),
             ),
-          ])
+          ]),
         ],
       ),
       body: Center(

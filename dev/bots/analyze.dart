@@ -171,10 +171,10 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
-  // Analyze all the sample code in the repo.
-  print('$clock Sample code...');
+  // Analyze the code in `{@tool snippet}` sections in the repo.
+  print('$clock Snippet code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart'), '--verbose'],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 
@@ -472,6 +472,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', trailingBlank: false, header: r'<!DOCTYPE HTML>\n');
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', header: r'(<\?xml version="1.0" encoding="utf-8"\?>\n)?');
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'frag', overrideMinimumMatches ?? 1, _generateLicense('// '), header: r'#version 320 es(\n)+');
   if (failed > 0) {
     exitWithError(<String>['License check failed.']);
   }
@@ -638,7 +639,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
       'These are the exported packages:',
       ...packages.map<String>((String path) => '  lib/$path.dart'),
       'These are the directories:',
-      ...directories.map<String>((String path) => '  lib/src/$path/')
+      ...directories.map<String>((String path) => '  lib/src/$path/'),
     ].join('\n'));
   }
   // Verify that the imports are well-ordered.
@@ -741,6 +742,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
+      '--remove-undefined',
     ],
     workingDirectory: workingDirectory,
   );
@@ -749,6 +751,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
+      '--remove-undefined',
     ],
     workingDirectory: workingDirectory,
   );
@@ -822,21 +825,21 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
     for (int index = 0; index < lines.length; index++) {
       if (toStringRegExp.hasMatch(lines[index])) {
         final int sourceLine = index + 1;
-        bool _checkForRuntimeType(String line) {
+        bool checkForRuntimeType(String line) {
           if (line.contains(r'$runtimeType') || line.contains('runtimeType.toString()')) {
             problems.add('${file.path}:$sourceLine}: toString calls runtimeType.toString');
             return true;
           }
           return false;
         }
-        if (_checkForRuntimeType(lines[index])) {
+        if (checkForRuntimeType(lines[index])) {
           continue;
         }
         if (lines[index].contains('=>')) {
           while (!lines[index].contains(';')) {
             index++;
             assert(index < lines.length, 'Source file $file has unterminated toString method.');
-            if (_checkForRuntimeType(lines[index])) {
+            if (checkForRuntimeType(lines[index])) {
               break;
             }
           }
@@ -845,7 +848,7 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
           while (!lines[index].contains('}') && openBraceCount > 0) {
             index++;
             assert(index < lines.length, 'Source file $file has unbalanced braces in a toString method.');
-            if (_checkForRuntimeType(lines[index])) {
+            if (checkForRuntimeType(lines[index])) {
               break;
             }
             openBraceCount += '{'.allMatches(lines[index]).length;
@@ -1585,7 +1588,7 @@ Future<void> _checkConsumerDependencies() async {
       'pub',
       'deps',
       '--json',
-      '--directory=${path.join(flutterRoot, 'packages', package)}'
+      '--directory=${path.join(flutterRoot, 'packages', package)}',
     ]);
     if (result.exitCode != 0) {
       print(result.stdout as Object);

@@ -24,11 +24,11 @@ import 'theme_data.dart';
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
-/// A material design dialog.
+/// A Material Design dialog.
 ///
 /// This dialog widget does not have any opinion about the contents of the
 /// dialog. Rather than using this widget directly, consider using [AlertDialog]
-/// or [SimpleDialog], which implement specific kinds of material design
+/// or [SimpleDialog], which implement specific kinds of Material Design
 /// dialogs.
 ///
 /// See also:
@@ -166,7 +166,7 @@ class Dialog extends StatelessWidget {
   }
 }
 
-/// A material design alert dialog.
+/// A Material Design alert dialog.
 ///
 /// An alert dialog informs the user about situations that require
 /// acknowledgement. An alert dialog has an optional title and an optional list
@@ -232,6 +232,13 @@ class Dialog extends StatelessWidget {
 /// This demo shows a [TextButton] which when pressed, calls [showDialog]. When called, this method
 /// displays a Material dialog above the current contents of the app and returns
 /// a [Future] that completes when the dialog is dismissed.
+///
+/// ** See code in examples/api/lib/material/dialog/alert_dialog.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of [AlertDialog], as described in:
+/// https://m3.material.io/components/dialogs/overview
 ///
 /// ** See code in examples/api/lib/material/dialog/alert_dialog.1.dart **
 /// {@end-tool}
@@ -693,7 +700,7 @@ class SimpleDialogOption extends StatelessWidget {
   }
 }
 
-/// A simple material design dialog.
+/// A simple Material Design dialog.
 ///
 /// A simple dialog offers the user a choice between several options. A simple
 /// dialog has an optional title that is displayed above the choices.
@@ -1013,6 +1020,19 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to use [showDialog] to display a dialog box.
+///
+/// ** See code in examples/api/lib/material/dialog/show_dialog.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of [showDialog], as described in:
+/// https://m3.material.io/components/dialogs/overview
+///
+/// ** See code in examples/api/lib/material/dialog/show_dialog.1.dart **
+/// {@end-tool}
+///
 /// ### State Restoration in Dialogs
 ///
 /// Using this method will not enable state restoration for the dialog. In order
@@ -1021,7 +1041,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1029,7 +1049,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ** See code in examples/api/lib/material/dialog/show_dialog.0.dart **
+/// ** See code in examples/api/lib/material/dialog/show_dialog.2.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1194,7 +1214,7 @@ class _DefaultsM2 extends DialogTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _TokenDefaultsM3 extends DialogTheme {
   _TokenDefaultsM3(this.context)
     : super(

@@ -170,7 +170,7 @@ void main() {
               '-d',
               'pixel',
             ],
-          )
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -207,7 +207,7 @@ void main() {
               '-d',
               'pixel',
             ],
-          )
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -245,8 +245,8 @@ void main() {
             ],
             exitCode: 1,
             stderr: "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
-              'Use --force if you want to replace it.'
-          )
+              'Use --force if you want to replace it.',
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -288,7 +288,7 @@ void main() {
               '-d',
               'pixel',
             ],
-          )
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -323,7 +323,7 @@ void main() {
             'open',
             '-a',
             '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
-          ])
+          ]),
         ],
       );
 

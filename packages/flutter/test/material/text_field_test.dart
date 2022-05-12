@@ -431,6 +431,27 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
+  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
+    const Color selectionColor = Colors.orange;
+    const Color cursorColor = Colors.red;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: DefaultSelectionStyle(
+            selectionColor: selectionColor,
+            cursorColor: cursorColor,
+            child: TextField(autofocus: true),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.selectionColor, selectionColor);
+    expect(state.widget.cursorColor, cursorColor);
+  });
+
   testWidgets('Activates the text field when receives semantics focus on Mac, Windows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
@@ -2297,7 +2318,7 @@ void main() {
 
   // Show the selection menu at the given index into the text by tapping to
   // place the cursor and then tapping on the handle.
-  Future<void> _showSelectionMenuAt(WidgetTester tester, TextEditingController controller, int index) async {
+  Future<void> showSelectionMenuAt(WidgetTester tester, TextEditingController controller, int index) async {
     await tester.tapAt(tester.getCenter(find.byType(EditableText)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
@@ -2344,7 +2365,7 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position is below the text.
       Offset toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
@@ -2365,7 +2386,7 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position
       toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
@@ -2411,7 +2432,7 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position is above the text.
       expect(find.text('Select all'), findsOneWidget);
@@ -2472,7 +2493,7 @@ void main() {
 
       // Show the selection menu on the first line and verify the selection
       // toolbar position is below the first line.
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('c'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('c'));
       expect(find.text('Select all'), findsOneWidget);
       final Offset firstLineToolbarTopLeft = tester.getTopLeft(find.text('Select all'));
       final Offset firstLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('a'));
@@ -2481,7 +2502,7 @@ void main() {
       // Show the selection menu on the second to last line and verify the
       // selection toolbar position is above that line and above the first
       // line's toolbar.
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('o'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('o'));
       expect(find.text('Select all'), findsOneWidget);
       final Offset penultimateLineToolbarTopLeft = tester.getTopLeft(find.text('Select all'));
       final Offset penultimateLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
@@ -2491,7 +2512,7 @@ void main() {
       // Show the selection menu on the last line and verify the selection
       // toolbar position is above that line and below the position of the
       // second to last line's toolbar.
-      await _showSelectionMenuAt(tester, controller, testValue.indexOf('r'));
+      await showSelectionMenuAt(tester, controller, testValue.indexOf('r'));
       expect(find.text('Select all'), findsOneWidget);
       final Offset lastLineToolbarTopLeft = tester.getTopLeft(find.text('Select all'));
       final Offset lastLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
@@ -4177,6 +4198,61 @@ void main() {
     feedback.dispose();
   });
 
+  testWidgets('Text field drops selection color when losing focus', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103341.
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    final TextEditingController controller1 = TextEditingController();
+    const Color selectionColor = Colors.orange;
+    const Color cursorColor = Colors.red;
+
+    await tester.pumpWidget(
+      overlay(
+        child: DefaultSelectionStyle(
+          selectionColor: selectionColor,
+          cursorColor: cursorColor,
+          child: Column(
+            children: <Widget>[
+              TextField(
+                key: key1,
+                controller: controller1,
+              ),
+              TextField(key: key2),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    const TextSelection selection = TextSelection(baseOffset: 0, extentOffset: 4);
+    final EditableTextState state1 = tester.state<EditableTextState>(find.byType(EditableText).first);
+    final EditableTextState state2 = tester.state<EditableTextState>(find.byType(EditableText).last);
+
+    await tester.tap(find.byKey(key1));
+    await tester.enterText(find.byKey(key1), 'abcd');
+    await tester.pump();
+
+    await tester.tap(find.byKey(key2));
+    await tester.enterText(find.byKey(key2), 'dcba');
+    await tester.pump();
+
+    // Focus and selection is active on first TextField, so the second TextFields
+    // selectionColor should be dropped.
+    await tester.tap(find.byKey(key1));
+    controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+    expect(controller1.selection, selection);
+    expect(state1.widget.selectionColor, selectionColor);
+    expect(state2.widget.selectionColor, null);
+
+    // Focus and selection is active on second TextField, so the first TextFields
+    // selectionColor should be dropped.
+    await tester.tap(find.byKey(key2));
+    await tester.pump();
+    expect(state1.widget.selectionColor, null);
+    expect(state2.widget.selectionColor, selectionColor);
+  });
+
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -4658,7 +4734,7 @@ void main() {
         child: Center(
             child: TextField(
               buildCounter: (BuildContext context, { required int currentLength, int? maxLength, required bool isFocused }) {
-                return Text('${currentLength.toString()} of ${maxLength.toString()}');
+                return Text('$currentLength of $maxLength');
               },
               maxLength: 10,
             ),
@@ -9806,7 +9882,7 @@ void main() {
     });
 
     group('intrinsics', () {
-      Widget _buildTest({ required bool isDense }) {
+      Widget buildTest({ required bool isDense }) {
         return MaterialApp(
           home: Scaffold(
             body: CustomScrollView(
@@ -9836,14 +9912,14 @@ void main() {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        await tester.pumpWidget(_buildTest(isDense: false));
+        await tester.pumpWidget(buildTest(isDense: false));
       });
 
       testWidgets('When isDense, intrinsic height can go below kMinInteractiveDimension height', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
-        await tester.pumpWidget(_buildTest(isDense: true));
+        await tester.pumpWidget(buildTest(isDense: true));
       });
     });
   });
@@ -10037,7 +10113,7 @@ void main() {
         ),
       ));
 
-      await _showSelectionMenuAt(tester, controller, controller.text.indexOf('test'));
+      await showSelectionMenuAt(tester, controller, controller.text.indexOf('test'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     },

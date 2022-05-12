@@ -1733,7 +1733,7 @@ void main() {
     const Key snackTarget = Key('snack-target');
     const Key transitionTarget = Key('transition-target');
 
-    Widget _buildApp() {
+    Widget buildApp() {
       return MaterialApp(
         routes: <String, WidgetBuilder> {
           '/': (BuildContext context) {
@@ -1765,7 +1765,7 @@ void main() {
         },
       );
     }
-    await tester.pumpWidget(_buildApp());
+    await tester.pumpWidget(buildApp());
 
     expect(find.text(snackBarText), findsNothing);
     expect(find.text(firstHeader), findsOneWidget);
@@ -1959,7 +1959,7 @@ void main() {
     expect(find.text(snackBars[2]), findsNothing);
   });
 
-  Widget _buildApp({
+  Widget doBuildApp({
     required SnackBarBehavior? behavior,
     EdgeInsetsGeometry? margin,
     double? width,
@@ -1993,7 +1993,7 @@ void main() {
 
   testWidgets('Setting SnackBarBehavior.fixed will still assert for margin', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(doBuildApp(
       behavior: SnackBarBehavior.fixed,
       margin: const EdgeInsets.all(8.0),
     ));
@@ -2010,7 +2010,7 @@ void main() {
 
   testWidgets('Default SnackBarBehavior will still assert for margin', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(doBuildApp(
       behavior: null,
       margin: const EdgeInsets.all(8.0),
     ));
@@ -2027,7 +2027,7 @@ void main() {
 
   testWidgets('Setting SnackBarBehavior.fixed will still assert for width', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(doBuildApp(
       behavior: SnackBarBehavior.fixed,
       width: 5.0,
     ));
@@ -2044,7 +2044,7 @@ void main() {
 
   testWidgets('Default SnackBarBehavior will still assert for width', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(doBuildApp(
       behavior: null,
       width: 5.0,
     ));
@@ -2089,6 +2089,34 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('snack_bar.goldenTest.backdropFilter.png'));
+  });
+
+  testWidgets('ScaffoldMessenger will alert for snackbars that cannot be presented', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103004
+    await tester.pumpWidget(const MaterialApp(
+      home: Center(),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
+      find.byType(ScaffoldMessenger),
+    );
+    expect(
+      () {
+        scaffoldMessengerState.showSnackBar(const SnackBar(
+          content: Text('SnackBar'),
+        ));
+      },
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'description',
+          contains(
+            'ScaffoldMessenger.showSnackBar was called, but there are currently '
+            'no descendant Scaffolds to present to.'
+          )
+        ),
+      ),
+    );
   });
 }
 

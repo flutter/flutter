@@ -526,8 +526,8 @@ void main() {
                 position: location,
                 buttons: kSecondaryMouseButton,
                 pointer: 1,
-              )
-            ])
+              ),
+            ]),
         ],
         PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
           PointerUpEvent(
@@ -535,8 +535,8 @@ void main() {
             position: location,
             buttons: kSecondaryMouseButton,
             pointer: 1,
-          )
-        ])
+          ),
+        ]),
       ];
       final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
       expect(timeDiffs.length, records.length);

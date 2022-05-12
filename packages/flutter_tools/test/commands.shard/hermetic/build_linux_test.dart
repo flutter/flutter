@@ -299,7 +299,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       cmakeCommand('debug'),
       ninjaCommand('debug',
         environment: const <String, String>{
-          'VERBOSE_SCRIPT_LOGGING': 'true'
+          'VERBOSE_SCRIPT_LOGGING': 'true',
         },
         stdout: 'STDOUT STUFF',
       ),

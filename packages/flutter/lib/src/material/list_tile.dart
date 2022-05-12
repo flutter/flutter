@@ -95,7 +95,7 @@ enum ListTileControlAffinity {
 /// widget, like `Container(color: Colors.white)`, is included in
 /// between the [ListTile] and its [Material] ancestor, then the
 /// opaque widget will obscure the material widget and its background
-/// [tileColor], etc. If this a problem, one can wrap a material
+/// [tileColor], etc. If this a problem, one can wrap a [Material]
 /// widget around the list tile, e.g.:
 ///
 /// ```dart

@@ -80,12 +80,69 @@ export 'package:flutter/services.dart' show
 
 // BIDIRECTIONAL TEXT SUPPORT
 
+/// An [InheritedElement] that has hundreds of dependencies but will
+/// infrequently change.  This provides a performance tradeoff where building
+/// the [Widget]s is faster but performing updates is slower.
+///
+/// |                     | _UbiquitiousInheritedElement | InheritedElement |
+/// |---------------------|------------------------------|------------------|
+/// | insert (best case)  | O(1)                         | O(1)             |
+/// | insert (worst case) | O(1)                         | O(n)             |
+/// | search (best case)  | O(n)                         | O(1)             |
+/// | search (worst case) | O(n)                         | O(n)             |
+///
+/// Insert happens when building the [Widget] tree, search happens when updating
+/// [Widget]s.
+class _UbiquitousInheritedElement extends InheritedElement {
+  /// Creates an element that uses the given widget as its configuration.
+  _UbiquitousInheritedElement(super.widget);
+
+  @override
+  void setDependencies(Element dependent, Object? value) {
+    // This is where the cost of [InheritedElement] is incurred during build
+    // time of the widget tree.  Omitting this bookkeeping is where the
+    // performance savings come from.
+    assert(value == null);
+  }
+
+  @override
+  Object? getDependencies(Element dependent) {
+    return null;
+  }
+
+  @override
+  void notifyClients(InheritedWidget oldWidget) {
+    _recurseChildren(this, (Element element) {
+      if (element.doesDependOnInheritedElement(this)) {
+        notifyDependent(oldWidget, element);
+      }
+    });
+  }
+
+  static void _recurseChildren(Element element, ElementVisitor visitor) {
+    element.visitChildren((Element child) {
+      _recurseChildren(child, visitor);
+    });
+    visitor(element);
+  }
+}
+
+/// See also:
+///
+///  * [_UbiquitousInheritedElement], the [Element] for [_UbiquitousInheritedWidget].
+abstract class _UbiquitousInheritedWidget extends InheritedWidget {
+  const _UbiquitousInheritedWidget({super.key, required super.child});
+
+  @override
+  InheritedElement createElement() => _UbiquitousInheritedElement(this);
+}
+
 /// A widget that determines the ambient directionality of text and
 /// text-direction-sensitive render objects.
 ///
 /// For example, [Padding] depends on the [Directionality] to resolve
 /// [EdgeInsetsDirectional] objects into absolute [EdgeInsets] objects.
-class Directionality extends InheritedWidget {
+class Directionality extends _UbiquitousInheritedWidget {
   /// Creates a widget that determines the directionality of text and
   /// text-direction-sensitive render objects.
   ///
@@ -704,6 +761,27 @@ class ClipRect extends SingleChildRenderObjectWidget {
 /// [clipper].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=eI43jkQkrvs}
+///
+/// {@tool dartpad}
+/// This example shows various [ClipRRect]s applied to containers.
+///
+/// ** See code in examples/api/lib/widgets/basic/clip_rrect.0.dart **
+/// {@end-tool}
+///
+/// ## Troubleshooting
+///
+/// ### Why doesn't my [ClipRRect] child have rounded corners?
+///
+/// When a [ClipRRect] is bigger than the child it contains, its rounded corners
+/// could be drawn in unexpected positions. Make sure that [ClipRRect] and its child
+/// have the same bounds (by shrinking the [ClipRRect] with a [FittedBox] or by
+/// growing the child).
+///
+/// {@tool dartpad}
+/// This example shows a [ClipRRect] that adds round corners to an image.
+///
+/// ** See code in examples/api/lib/widgets/basic/clip_rrect.1.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -4488,7 +4566,6 @@ class Flex extends MultiChildRenderObjectWidget {
 ///     ),
 ///     Expanded(
 ///       child: FittedBox(
-///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: FlutterLogo(),
 ///       ),
 ///     ),
@@ -4687,7 +4764,6 @@ class Row extends Flex {
 ///     Text('Craft beautiful UIs'),
 ///     Expanded(
 ///       child: FittedBox(
-///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: FlutterLogo(),
 ///       ),
 ///     ),
@@ -5240,6 +5316,8 @@ class Wrap extends MultiChildRenderObjectWidget {
 
 /// A widget that sizes and positions children efficiently, according to the
 /// logic in a [FlowDelegate].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=NG6pvXpnIso}
 ///
 /// Flow layouts are optimized for repositioning children using transformation
 /// matrices.
@@ -6331,6 +6409,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
 
 /// A widget that creates a separate display list for its child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=cVAGLDuc2xE}
+///
 /// This widget creates a separate display list for its child, which
 /// can improve performance if the subtree repaints at different times than
 /// the surrounding parts of the tree.
@@ -6674,6 +6754,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     AttributedString? attributedDecreasedValue,
     String? hint,
     AttributedString? attributedHint,
+    String? tooltip,
     String? onTapHint,
     String? onLongPressHint,
     TextDirection? textDirection,
@@ -6738,6 +6819,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       attributedDecreasedValue: attributedDecreasedValue,
       hint: hint,
       attributedHint: attributedHint,
+      tooltip: tooltip,
       textDirection: textDirection,
       sortKey: sortKey,
       tagForChildren: tagForChildren,
@@ -6880,6 +6962,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       attributedIncreasedValue: _effectiveAttributedIncreasedValue,
       attributedDecreasedValue: _effectiveAttributedDecreasedValue,
       attributedHint: _effectiveAttributedHint,
+      tooltip: properties.tooltip,
       hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
@@ -6915,7 +6998,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     final bool containsText = properties.attributedLabel != null ||
                               properties.label != null ||
                               properties.value != null ||
-                              properties.hint != null;
+                              properties.hint != null ||
+                              properties.tooltip != null;
 
     if (!containsText)
       return null;
@@ -6956,6 +7040,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..attributedIncreasedValue = _effectiveAttributedIncreasedValue
       ..attributedDecreasedValue = _effectiveAttributedDecreasedValue
       ..attributedHint = _effectiveAttributedHint
+      ..tooltip = properties.tooltip
       ..hintOverrides = properties.hintOverrides
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
@@ -7324,6 +7409,8 @@ class Builder extends StatelessWidget {
 typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=syvT63CosNE}
 ///
 /// The [StateSetter] function passed to the [builder] is used to invoke a
 /// rebuild instead of a typical [State]'s [State.setState].

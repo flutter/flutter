@@ -2143,7 +2143,7 @@ void main() {
 
     test('Code points with more than three Unicode scalar values are not allowed', () {
       // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
-      void _createFailingKey() {
+      void createFailingKey() {
         RawKeyEvent.fromMessage(const <String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
@@ -2155,7 +2155,7 @@ void main() {
         });
       }
 
-      expect(() => _createFailingKey(), throwsAssertionError);
+      expect(() => createFailingKey(), throwsAssertionError);
     });
 
     test('Control keyboard keys are correctly translated', () {
@@ -2375,7 +2375,7 @@ void main() {
 
     test('Code points with more than three Unicode scalar values are not allowed', () {
       // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
-      void _createFailingKey() {
+      void createFailingKey() {
         RawKeyEvent.fromMessage(const <String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
@@ -2387,7 +2387,7 @@ void main() {
         });
       }
 
-      expect(() => _createFailingKey(), throwsAssertionError);
+      expect(() => createFailingKey(), throwsAssertionError);
     });
 
     test('Control keyboard keys are correctly translated', () {
@@ -2419,6 +2419,21 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isEmpty);
+    });
+
+    test('Prioritize logical key from specifiedLogicalKey', () {
+      final RawKeyEvent digit1FromFrench = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'linux',
+        'toolkit': 'gtk',
+        'keyCode': 0x6c6,
+        'scanCode': 0x26,
+        'unicodeScalarValues': 0x424,
+        'specifiedLogicalKey': 0x61,
+      });
+      final RawKeyEventDataLinux data = digit1FromFrench.data as RawKeyEventDataLinux;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
     });
 
     test('data.toString', () {

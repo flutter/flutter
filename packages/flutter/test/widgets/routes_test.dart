@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1503,7 +1504,7 @@ void main() {
       ));
 
       final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
-      int _getExpectedBarrierTweenAlphaValue(double t) {
+      int getExpectedBarrierTweenAlphaValue(double t) {
         return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }
 
@@ -1520,21 +1521,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
@@ -1566,7 +1567,7 @@ void main() {
       ));
 
       final CurveTween customBarrierTween = CurveTween(curve: Curves.linear);
-      int _getExpectedBarrierTweenAlphaValue(double t) {
+      int getExpectedBarrierTweenAlphaValue(double t) {
         return Color.getAlphaFromOpacity(customBarrierTween.transform(t));
       }
 
@@ -1583,21 +1584,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
@@ -1629,7 +1630,7 @@ void main() {
       ));
 
       final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
-      int _getExpectedBarrierTweenAlphaValue(double t) {
+      int getExpectedBarrierTweenAlphaValue(double t) {
         return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }
 
@@ -1646,21 +1647,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
@@ -1976,6 +1977,143 @@ void main() {
     await tester.restoreFrom(restorationData);
     expect(find.byType(AlertDialog), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('FocusTrap moves focus to given focus scope when triggered', (WidgetTester tester) async {
+    final FocusScopeNode focusScope = FocusScopeNode();
+    final FocusNode focusNode = FocusNode(debugLabel: 'Test');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusScope(
+          node: focusScope,
+          child: FocusTrap(
+            focusScopeNode: focusScope,
+            child: Column(
+              children: <Widget>[
+                const Text('Other Widget'),
+                FocusTrapTestWidget('Focusable', focusNode: focusNode, onTap: () {
+                  focusNode.requestFocus();
+                }),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(focusScope.hasFocus, isFalse);
+    expect(focusNode.hasFocus, isFalse);
+
+    await click(find.text('Focusable'));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(focusScope.hasFocus, isTrue);
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await click(find.text('Other Widget'));
+    // Have to wait out the double click timer.
+    await tester.pump(const Duration(seconds: 1));
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        if (kIsWeb) {
+          // Web is a desktop platform.
+          expect(focusScope.hasPrimaryFocus, isTrue);
+          expect(focusNode.hasFocus, isFalse);
+        } else {
+          expect(focusScope.hasFocus, isTrue);
+          expect(focusNode.hasPrimaryFocus, isTrue);
+        }
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(focusScope.hasPrimaryFocus, isTrue);
+        expect(focusNode.hasFocus, isFalse);
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets("FocusTrap doesn't unfocus if focus was set to something else before the frame ends", (WidgetTester tester) async {
+    final FocusScopeNode focusScope = FocusScopeNode();
+    final FocusNode focusNode = FocusNode(debugLabel: 'Test');
+    final FocusNode otherFocusNode = FocusNode(debugLabel: 'Other');
+    FocusNode? previousFocus;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusScope(
+          node: focusScope,
+          child: FocusTrap(
+            focusScopeNode: focusScope,
+            child: Column(
+              children: <Widget>[
+                FocusTrapTestWidget(
+                  'Other Widget',
+                  focusNode: otherFocusNode,
+                  onTap: () {
+                    previousFocus = FocusManager.instance.primaryFocus;
+                    otherFocusNode.requestFocus();
+                  },
+                ),
+                FocusTrapTestWidget(
+                  'Focusable',
+                  focusNode: focusNode,
+                  onTap: () {
+                    focusNode.requestFocus();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    await tester.pump();
+    expect(focusScope.hasFocus, isFalse);
+    expect(focusNode.hasPrimaryFocus, isFalse);
+
+    await click(find.text('Focusable'));
+
+    expect(focusScope.hasFocus, isTrue);
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await click(find.text('Other Widget'));
+    await tester.pump(const Duration(seconds: 1));
+
+    // The previous focus as collected by the "Other Widget" should be the
+    // previous focus, not be unfocused to the scope, since the primary focus
+    // was set by something other than the FocusTrap (the "Other Widget") during
+    // the frame.
+    expect(previousFocus, equals(focusNode));
+
+    expect(focusScope.hasFocus, isTrue);
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(otherFocusNode.hasPrimaryFocus, isTrue);
+  }, variant: TargetPlatformVariant.all());
 }
 
 double _getOpacity(GlobalKey key, WidgetTester tester) {
@@ -2227,6 +2365,71 @@ class _RestorableDialogTestWidget extends StatelessWidget {
             Navigator.of(context).restorablePush(_dialogBuilder);
           },
           child: const Text('X'),
+        ),
+      ),
+    );
+  }
+}
+
+class FocusTrapTestWidget extends StatefulWidget {
+  const FocusTrapTestWidget(
+    this.label, {
+    super.key,
+    required this.focusNode,
+    this.onTap,
+    this.autofocus = false,
+  });
+
+  final String label;
+  final FocusNode focusNode;
+  final VoidCallback? onTap;
+  final bool autofocus;
+
+  @override
+  State<FocusTrapTestWidget> createState() => _FocusTrapTestWidgetState();
+}
+
+class _FocusTrapTestWidgetState extends State<FocusTrapTestWidget> {
+  Color color = Colors.white;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_handleFocusChange);
+  }
+
+  void _handleFocusChange() {
+    if (widget.focusNode.hasPrimaryFocus) {
+      setState(() {
+        color = Colors.grey.shade500;
+      });
+    } else {
+      setState(() {
+        color = Colors.white;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_handleFocusChange);
+    widget.focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      autofocus: widget.autofocus,
+      focusNode: widget.focusNode,
+      child: GestureDetector(
+        onTap: () {
+          widget.onTap?.call();
+        },
+        child: Container(
+          color: color,
+          alignment: Alignment.center,
+          child: Text(widget.label, style: const TextStyle(color: Colors.black)),
         ),
       ),
     );

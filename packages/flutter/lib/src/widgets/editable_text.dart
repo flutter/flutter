@@ -21,6 +21,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'default_selection_style.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
@@ -445,6 +446,30 @@ class ToolbarOptions {
 ///  * When the user changes the selection of the text field, or changes the
 ///    text when the text field is not [readOnly].
 ///  * When the virtual keyboard pops up.
+/// {@endtemplate}
+///
+/// {@template flutter.widgets.editableText.accessibility}
+/// ## Troubleshooting Common Accessibility Issues
+///
+/// ### Customizing User Input Accessibility Announcements
+///
+/// To customize user input accessibility announcements triggered by text
+/// changes, use [SemanticsService.announce] to make the desired
+/// accessibility announcement.
+///
+/// On iOS, the on-screen keyboard may announce the most recent input
+/// incorrectly when a [TextInputFormatter] inserts a thousands separator to
+/// a currency value text field. The following example demonstrates how to
+/// suppress the default accessibility announcements by always announcing
+/// the content of the text field as a US currency value:
+/// ```dart
+/// onChanged: (String newText) {
+///   if (newText.isNotEmpty) {
+///     SemanticsService.announce('\$' + newText, Directionality.of(context));
+///   }
+/// }
+/// ```
+///
 /// {@endtemplate}
 ///
 /// See also:
@@ -973,6 +998,9 @@ class EditableText extends StatefulWidget {
   final bool autofocus;
 
   /// The color to use when painting the selection.
+  ///
+  /// If this property is null, this widget gets the selection color from the
+  /// [DefaultSelectionStyle].
   ///
   /// For [CupertinoTextField]s, the value is set to the ambient
   /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
@@ -4185,7 +4213,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
 
     final bool collapseSelection = intent.collapseSelection || !state.widget.selectionEnabled;
     // Collapse to the logical start/end.
-    TextSelection _collapse(TextSelection selection) {
+    TextSelection collapse(TextSelection selection) {
       assert(selection.isValid);
       assert(!selection.isCollapsed);
       return selection.copyWith(
@@ -4197,7 +4225,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     if (!selection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
       return Actions.invoke(
         context!,
-        UpdateSelectionIntent(state._value, _collapse(selection), SelectionChangedCause.keyboard),
+        UpdateSelectionIntent(state._value, collapse(selection), SelectionChangedCause.keyboard),
       );
     }
 
@@ -4209,7 +4237,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     if (!textBoundarySelection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
       return Actions.invoke(
         context!,
-        UpdateSelectionIntent(state._value, _collapse(textBoundarySelection), SelectionChangedCause.keyboard),
+        UpdateSelectionIntent(state._value, collapse(textBoundarySelection), SelectionChangedCause.keyboard),
       );
     }
 
