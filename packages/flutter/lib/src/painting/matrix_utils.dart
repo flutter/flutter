@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart' as matrix show multiply, multiplied;
+import 'package:flutter/foundation.dart' as matrix show multiply, multiplied, multiplied32;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic_types.dart';
@@ -45,6 +45,8 @@ class MatrixUtils {
 
   /// Multiply [left] with [right], returning a new matrix.
   static Matrix4 multiplied(Matrix4 left, Matrix4 right) => matrix.multiplied(left, right);
+
+  static Float32List multiplied32(Float32List left, Float32List right) => matrix.multiplied32(left, right);
 
   /// Multiply [left] with [right], returning the result into left.
   static void multiply(Matrix4 left, Matrix4 right) => matrix.multiply(left, right);

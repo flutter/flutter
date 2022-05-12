@@ -31,6 +31,11 @@ Matrix4 multiplied(Matrix4 left, Matrix4 right) {
   return left.multiplied(right);
 }
 
+Float32List multiplied32(Float32List left, Float32List right) {
+  final Float32List result = Float32List(16);
+  return _multiplySimd32(left.buffer.asFloat32x4List(), right.buffer.asFloat32x4List(), result);
+}
+
 /// Multiply [left] with [right], returning the result into left.
 void multiply(Matrix4 left, Matrix4 right) {
   if (_kUseSimd) {
@@ -92,6 +97,45 @@ Float64List _multiplySimd(Float32x4List left, Float32x4List right, Float64List r
   result[2] = result0.z;
   result[1] = result0.y;
   result[0] = result0.x;
+
+  return result;
+}
+
+Float32List _multiplySimd32(Float32x4List left, Float32x4List right, Float32List result) {
+  assert(result.length == 16);
+  assert(left.length == 4);
+  assert(right.length == 4);
+
+  final Float32x4 a3 = left[3];
+  final Float32x4 a2 = left[2];
+  final Float32x4 a1 = left[1];
+  final Float32x4 a0 = left[0];
+
+  final Float32x4 b0 = right[0];
+  final Float32x4 result0 = b0.shuffle(Float32x4.xxxx) * a0 +
+      b0.shuffle(Float32x4.yyyy) * a1 +
+      b0.shuffle(Float32x4.zzzz) * a2 +
+      b0.shuffle(Float32x4.wwww) * a3;
+  final Float32x4 b1 = right[1];
+  final Float32x4 result1 = b1.shuffle(Float32x4.xxxx) * a0 +
+      b1.shuffle(Float32x4.yyyy) * a1 +
+      b1.shuffle(Float32x4.zzzz) * a2 +
+      b1.shuffle(Float32x4.wwww) * a3;
+  final Float32x4 b2 = right[2];
+  final Float32x4 result2 = b2.shuffle(Float32x4.xxxx) * a0 +
+      b2.shuffle(Float32x4.yyyy) * a1 +
+      b2.shuffle(Float32x4.zzzz) * a2 +
+      b2.shuffle(Float32x4.wwww) * a3;
+  final Float32x4 b3 = right[3];
+  final Float32x4 result3 = b3.shuffle(Float32x4.xxxx) * a0 +
+      b3.shuffle(Float32x4.yyyy) * a1 +
+      b3.shuffle(Float32x4.zzzz) * a2 +
+      b3.shuffle(Float32x4.wwww) * a3;
+  final Float32x4List resultView = result.buffer.asFloat32x4List();
+  resultView[3] = result3;
+  resultView[2] = result2;
+  resultView[1] = result1;
+  resultView[0] = result0;
 
   return result;
 }
