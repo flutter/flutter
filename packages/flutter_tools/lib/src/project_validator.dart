@@ -25,7 +25,7 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     final ProjectValidatorResult appNameValidatorResult = getAppNameResult(pubContent);
     final String supportedPlatforms = getSupportedPlatforms(project);
     if (supportedPlatforms.isEmpty) {
-      return [appNameValidatorResult];
+      return <ProjectValidatorResult>[appNameValidatorResult];
     }
     final ProjectValidatorResult supportedPlatformsResult = ProjectValidatorResult(
         name: 'Supported Platforms',

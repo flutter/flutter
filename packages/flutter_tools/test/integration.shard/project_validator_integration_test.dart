@@ -28,7 +28,7 @@ void main() {
       final ValidateProjectCommand command = ValidateProjectCommand(
           fileSystem: fileSystem,
           logger: loggerTest,
-          allProjectValidators: [GeneralInfoProjectValidator()]
+          allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()]
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
