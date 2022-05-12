@@ -148,6 +148,13 @@ config("compiler") {
 
     if (enable_bitcode) {
       if (bitcode_marker) {
+        # lld, which is the default, does not support the -bitcode_process_mode
+        # flag that gets plumbed to it as a result of -fembed-bitcode-marker, so
+        # we fall back on ld64.
+        # See: https://github.com/llvm/llvm-project/issues/55415
+        if (!use_xcode) {
+          ldflags += [ "-fuse-ld=ld" ]
+        }
         common_mac_flags += [ "-fembed-bitcode-marker" ]
       } else {
         common_mac_flags += [ "-fembed-bitcode" ]
