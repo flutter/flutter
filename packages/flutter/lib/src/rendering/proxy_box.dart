@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
+import 'debug.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
