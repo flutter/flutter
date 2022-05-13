@@ -124,6 +124,9 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   final bool needCrossBuildOptionsForArm64 = needCrossBuild
       && targetPlatform == TargetPlatform.linux_arm64;
   int result;
+  if (!globals.processManager.canRun('cmake')) {
+    throwToolExit(globals.userMessages.cmakeMissing);
+  }
   try {
     result = await globals.processUtils.stream(
       <String>[
