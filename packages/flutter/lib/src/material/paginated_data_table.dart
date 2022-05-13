@@ -20,7 +20,7 @@ import 'material_localizations.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
-/// A material design data table that shows data using multiple pages.
+/// A Material Design data table that shows data using multiple pages.
 ///
 /// A paginated data table shows [rowsPerPage] rows of data per page and
 /// provides controls for showing other pages.
@@ -64,7 +64,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// To modify the border or background color of the [PaginatedDataTable], use
   /// [CardTheme], since a [Card] wraps the inner [DataTable].
   PaginatedDataTable({
-    Key? key,
+    super.key,
     this.header,
     this.actions,
     required this.columns,
@@ -86,6 +86,8 @@ class PaginatedDataTable extends StatefulWidget {
     this.arrowHeadColor,
     required this.source,
     this.checkboxHorizontalMargin,
+    this.controller,
+    this.primary,
   }) : assert(actions == null || (actions != null && header != null)),
        assert(columns != null),
        assert(dragStartBehavior != null),
@@ -106,7 +108,10 @@ class PaginatedDataTable extends StatefulWidget {
          return true;
        }()),
        assert(source != null),
-       super(key: key);
+       assert(!(controller != null && (primary ?? false)),
+          'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
+          'You cannot both set primary to true and pass an explicit controller.',
+       );
 
   /// The table card's optional header.
   ///
@@ -237,6 +242,12 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// Defines the color of the arrow heads in the footer.
   final Color? arrowHeadColor;
+
+  /// {@macro flutter.widgets.scroll_view.controller}
+  final ScrollController? controller;
+
+  /// {@macro flutter.widgets.scroll_view.primary}
+  final bool? primary;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -502,6 +513,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                primary: widget.primary,
+                controller: widget.controller,
                 dragStartBehavior: widget.dragStartBehavior,
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minWidth: constraints.minWidth),

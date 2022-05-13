@@ -11,7 +11,6 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import '../common.dart';
 import 'devices.dart';
 import 'host_agent.dart';
 import 'task_result.dart';
@@ -471,15 +470,40 @@ Future<int> flutter(String command, {
     canFail: canFail, environment: environment);
 }
 
+/// Starts a Flutter subprocess.
+///
+/// The first argument is the flutter command to run.
+///
+/// The second argument is the list of arguments to provide on the command line.
+/// This argument can be null, indicating no arguments (same as the empty list).
+///
+/// The `environment` argument can be provided to configure environment variables
+/// that will be made available to the subprocess. The `BOT` environment variable
+/// is always set and overrides any value provided in the `environment` argument.
+/// The `isBot` argument controls the value of the `BOT` variable. It will either
+/// be "true", if `isBot` is true (the default), or "false" if it is false.
+///
+/// The `isBot` argument controls whether the `BOT` environment variable is set
+/// to `true` or `false` and is used by the `flutter` tool to determine how
+/// verbose to be and whether to enable analytics by default.
+///
+/// Information regarding the execution of the subprocess is printed to the
+/// console.
+///
+/// The actual process executes asynchronously. A handle to the subprocess is
+/// returned in the form of a [Future] that completes to a [Process] object.
 Future<Process> startFlutter(String command, {
   List<String> options = const <String>[],
   Map<String, String> environment = const <String, String>{},
+  bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
 }) {
+  assert(isBot != null);
   final List<String> args = flutterCommandArgs(command, options);
   return startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     args,
     environment: environment,
+    isBot: isBot,
   );
 }
 
@@ -733,7 +757,7 @@ void checkDirectoryNotExists(String directory) {
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
   for (final T value in values) {
     if (!collection.contains(value)) {
-      throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
+      throw TaskResult.failure('Expected to find `$value` in `$collection`.');
     }
   }
 }

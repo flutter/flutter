@@ -33,7 +33,7 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
 }
 
 class LeaveBehindDemo extends StatefulWidget {
-  const LeaveBehindDemo({ Key? key }) : super(key: key);
+  const LeaveBehindDemo({ super.key });
 
   static const String routeName = '/material/leave-behind';
 
@@ -188,13 +188,12 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
 
 class _LeaveBehindListItem extends StatelessWidget {
   const _LeaveBehindListItem({
-    Key? key,
     required this.item,
     required this.onArchive,
     required this.onDelete,
     required this.dismissDirection,
     required this.confirmDismiss,
-  }) : super(key: key);
+  });
 
   final LeaveBehindItem item;
   final DismissDirection dismissDirection;

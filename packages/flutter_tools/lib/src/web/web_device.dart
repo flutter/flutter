@@ -191,15 +191,13 @@ class GoogleChromeDevice extends ChromiumDevice {
     required Platform platform,
     required ProcessManager processManager,
     required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-    required FileSystem fileSystem,
+    required super.logger,
+    required super.fileSystem,
   }) : _platform = platform,
        _processManager = processManager,
        super(
           name: 'chrome',
           chromeLauncher: chromiumLauncher,
-          logger: logger,
-          fileSystem: fileSystem,
        );
 
   final Platform _platform;
@@ -247,15 +245,13 @@ class GoogleChromeDevice extends ChromiumDevice {
 class MicrosoftEdgeDevice extends ChromiumDevice {
   MicrosoftEdgeDevice({
     required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-    required FileSystem fileSystem,
+    required super.logger,
+    required super.fileSystem,
     required ProcessManager processManager,
   }) : _processManager = processManager,
        super(
          name: 'edge',
          chromeLauncher: chromiumLauncher,
-         logger: logger,
-         fileSystem: fileSystem,
        );
 
   final ProcessManager _processManager;

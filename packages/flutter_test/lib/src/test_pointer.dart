@@ -33,9 +33,8 @@ class TestPointer {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.touch:
+      case PointerDeviceKind.trackpad:
       case PointerDeviceKind.unknown:
-      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         _device = device ?? 0;
         break;
     }
@@ -70,11 +69,26 @@ class TestPointer {
   bool get isDown => _isDown;
   bool _isDown = false;
 
+  /// Whether the pointer simulated by this object currently has
+  /// an active pan/zoom gesture.
+  ///
+  /// A pan/zoom gesture begins when [panZoomStart] is called, and
+  /// ends when [panZoomEnd] is called.
+  bool get isPanZoomActive => _isPanZoomActive;
+  bool _isPanZoomActive = false;
+
   /// The position of the last event sent by this object.
   ///
   /// If no event has ever been sent by this object, returns null.
   Offset? get location => _location;
   Offset? _location;
+
+
+  /// The pan offset of the last pointer pan/zoom event sent by this object.
+  ///
+  /// If no pan/zoom event has ever been sent by this object, returns null.
+  Offset? get pan => _pan;
+  Offset? _pan;
 
   /// If a custom event is created outside of this class, this function is used
   /// to set the [isDown].
@@ -115,6 +129,7 @@ class TestPointer {
     int? buttons,
   }) {
     assert(!isDown);
+    assert(!isPanZoomActive);
     _isDown = true;
     _location = newLocation;
     if (buttons != null)
@@ -149,6 +164,7 @@ class TestPointer {
         'Move events can only be generated when the pointer is down. To '
         'create a movement event simulating a pointer move when the pointer is '
         'up, use hover() instead.');
+    assert(!isPanZoomActive);
     final Offset delta = newLocation - location!;
     _location = newLocation;
     if (buttons != null)
@@ -171,6 +187,7 @@ class TestPointer {
   ///
   /// The object is no longer usable after this method has been called.
   PointerUpEvent up({ Duration timeStamp = Duration.zero }) {
+    assert(!isPanZoomActive);
     assert(isDown);
     _isDown = false;
     return PointerUpEvent(
@@ -281,6 +298,79 @@ class TestPointer {
       device: _device,
       position: location!,
       scrollDelta: scrollDelta,
+    );
+  }
+
+  /// Create a [PointerPanZoomStartEvent] (e.g., trackpad scroll; not scroll wheel
+  /// or finger-drag scroll) with the given delta.
+  ///
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
+  PointerPanZoomStartEvent panZoomStart(
+    Offset location, {
+    Duration timeStamp = Duration.zero
+  }) {
+    assert(!isPanZoomActive);
+    _location = location;
+    _pan = Offset.zero;
+    _isPanZoomActive = true;
+    return PointerPanZoomStartEvent(
+      timeStamp: timeStamp,
+      kind: kind,
+      device: _device,
+      pointer: pointer,
+      position: location,
+    );
+  }
+
+  /// Create a [PointerPanZoomUpdateEvent] to update the active pan/zoom sequence
+  /// on this pointer with updated pan, scale, and/or rotation values.
+  ///
+  /// [rotation] is in units of radians.
+  ///
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
+  PointerPanZoomUpdateEvent panZoomUpdate(
+    Offset location, {
+    Offset pan = Offset.zero,
+    double scale = 1,
+    double rotation = 0,
+    Duration timeStamp = Duration.zero,
+  }) {
+    assert(isPanZoomActive);
+    _location = location;
+    final Offset panDelta = pan - _pan!;
+    _pan = pan;
+    return PointerPanZoomUpdateEvent(
+      timeStamp: timeStamp,
+      kind: kind,
+      device: _device,
+      pointer: pointer,
+      position: location,
+      pan: pan,
+      panDelta: panDelta,
+      scale: scale,
+      rotation: rotation,
+    );
+  }
+
+  /// Create a [PointerPanZoomEndEvent] to end the active pan/zoom sequence
+  /// on this pointer.
+  ///
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
+  PointerPanZoomEndEvent panZoomEnd({
+    Duration timeStamp = Duration.zero
+  }) {
+    assert(isPanZoomActive);
+    _isPanZoomActive = false;
+    _pan = null;
+    return PointerPanZoomEndEvent(
+      timeStamp: timeStamp,
+      kind: kind,
+      device: _device,
+      pointer: pointer,
+      position: location!,
     );
   }
 }

@@ -137,7 +137,7 @@ class _CardDataItem extends StatelessWidget {
 }
 
 class TabsDemo extends StatelessWidget {
-  const TabsDemo({Key? key}) : super(key: key);
+  const TabsDemo({super.key});
 
   static const String routeName = '/material/tabs';
 

@@ -505,6 +505,39 @@ void main() {
       localPosition: localPosition,
     );
 
+    const PointerPanZoomStartEvent panZoomStart = PointerPanZoomStartEvent(
+      timeStamp: Duration(seconds: 2),
+      device: 1,
+      position: Offset(20, 30),
+    );
+    _expectTransformedEvent(
+      original: panZoomStart,
+      transform: transform,
+      localPosition: localPosition,
+    );
+
+    const PointerPanZoomUpdateEvent panZoomUpdate = PointerPanZoomUpdateEvent(
+      timeStamp: Duration(seconds: 2),
+      device: 1,
+      position: Offset(20, 30),
+    );
+    _expectTransformedEvent(
+      original: panZoomUpdate,
+      transform: transform,
+      localPosition: localPosition,
+    );
+
+    const PointerPanZoomEndEvent panZoomEnd = PointerPanZoomEndEvent(
+      timeStamp: Duration(seconds: 2),
+      device: 1,
+      position: Offset(20, 30),
+    );
+    _expectTransformedEvent(
+      original: panZoomEnd,
+      transform: transform,
+      localPosition: localPosition,
+    );
+
     const PointerUpEvent up = PointerUpEvent(
       timeStamp: Duration(seconds: 2),
       pointer: 45,

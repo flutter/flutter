@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class ExampleDragTarget extends StatefulWidget {
-  const ExampleDragTarget({Key? key}) : super(key: key);
+  const ExampleDragTarget({super.key});
 
   @override
   ExampleDragTargetState createState() => ExampleDragTargetState();
@@ -44,7 +44,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 }
 
 class Dot extends StatefulWidget {
-  const Dot({ Key? key, this.color, this.size, this.child, this.tappable = false }) : super(key: key);
+  const Dot({ super.key, this.color, this.size, this.child, this.tappable = false });
 
   final Color? color;
   final double? size;
@@ -77,12 +77,12 @@ class DotState extends State<Dot> {
 
 class ExampleDragSource extends StatelessWidget {
   const ExampleDragSource({
-    Key? key,
+    super.key,
     this.color,
     this.heavy = false,
     this.under = true,
     this.child,
-  }) : super(key: key);
+  });
 
   final Color? color;
   final bool heavy;
@@ -176,7 +176,7 @@ class DashOutlineCirclePainter extends CustomPainter {
 }
 
 class MovableBall extends StatelessWidget {
-  const MovableBall(this.position, this.ballPosition, this.callback, {Key? key}) : super(key: key);
+  const MovableBall(this.position, this.ballPosition, this.callback, {super.key});
 
   final int position;
   final int ballPosition;
@@ -225,7 +225,7 @@ class MovableBall extends StatelessWidget {
 }
 
 class DragAndDropApp extends StatefulWidget {
-  const DragAndDropApp({Key? key}) : super(key: key);
+  const DragAndDropApp({super.key});
 
   @override
   DragAndDropAppState createState() => DragAndDropAppState();

@@ -639,7 +639,7 @@ void main() {
       tester.getBottomRight(_findButtonBar()).dx - 8.0,
     ); // right
 
-    // Dismiss it and test materail 3 dialog
+    // Dismiss it and test material 3 dialog
     await tester.tapAt(const Offset(10.0, 10.0));
     await tester.pumpAndSettle();
 
@@ -1921,6 +1921,123 @@ void main() {
     expect(nestedObserver.dialogCount, 1);
   });
 
+  group('showDialog avoids overlapping display features', () {
+    testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+      final BuildContext context = tester.element(find.text('Test'));
+
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning with Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              ),
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+      final BuildContext context = tester.element(find.text('Test'));
+
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // Since this is RTL, it should place the dialog on the right screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning by default', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+      final BuildContext context = tester.element(find.text('Test'));
+
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
+    });
+  });
+
   group('AlertDialog.scrollable: ', () {
     testWidgets('Title is scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
@@ -2149,7 +2266,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, 800 - 20);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, 800);
 
-    // All possible alginment values
+    // All possible alignment values
 
     await tester.pumpWidget(buildFrame(MainAxisAlignment.start));
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, 0);

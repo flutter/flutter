@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class OnTapPage extends StatelessWidget {
-  const OnTapPage({Key? key, required this.id, required this.onTap}) : super(key: key);
+  const OnTapPage({super.key, required this.id, required this.onTap});
 
   final String id;
   final VoidCallback onTap;
@@ -381,7 +381,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 }
 
 class TestPage extends Page<void> {
-  const TestPage({LocalKey? key, String? name}) : super(key: key, name: name);
+  const TestPage({super.key, super.name});
 
   @override
   Route<void> createRoute(BuildContext context) {

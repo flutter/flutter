@@ -30,8 +30,6 @@ import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
-import '../platform_plugins.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_devtools_handler.dart';
@@ -40,6 +38,7 @@ import '../run_hot.dart';
 import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'devfs_web.dart';
@@ -302,6 +301,7 @@ class ResidentWebRunner extends ResidentRunner {
             true,
             debuggingOptions.nativeNullAssertions,
             null,
+            null,
           );
         }
         await device.device.startApp(
@@ -375,6 +375,7 @@ class ResidentWebRunner extends ResidentRunner {
           true,
           debuggingOptions.nativeNullAssertions,
           kBaseHref,
+          null,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -431,15 +432,12 @@ class ResidentWebRunner extends ResidentRunner {
         ..createSync();
       result = _generatedEntrypointDirectory.childFile('web_entrypoint.dart');
 
-      final bool hasWebPlugins = (await findPlugins(flutterProject))
-        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-      await injectPlugins(flutterProject, webPlatform: true);
+      // Generates the generated_plugin_registrar
+      await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: _generatedEntrypointDirectory);
+      // The below works because `injectBuildTimePluginFiles` is configured to write
+      // the web_plugin_registrant.dart file alongside the generated main.dart
+      const String/*?*/ generatedImport = 'web_plugin_registrant.dart';
 
-      final Uri generatedUri = _fileSystem.currentDirectory
-        .childDirectory('lib')
-        .childFile('generated_plugin_registrant.dart')
-        .absolute.uri;
-      final Uri generatedImport = packageConfig.toPackageUri(generatedUri);
       Uri importedEntrypoint = packageConfig.toPackageUri(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
@@ -451,38 +449,17 @@ class ResidentWebRunner extends ResidentRunner {
           path: '/${mainUri.pathSegments.last}',
         );
       }
-      final LanguageVersion languageVersion =  determineLanguageVersion(
+      final LanguageVersion languageVersion = determineLanguageVersion(
         _fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
         Cache.flutterRoot,
       );
 
-      final String entrypoint = <String>[
-        '// @dart=${languageVersion.major}.${languageVersion.minor}',
-        '// Flutter web bootstrap script for $importedEntrypoint.',
-        '',
-        "import 'dart:ui' as ui;",
-        "import 'dart:async';",
-        '',
-        "import '$importedEntrypoint' as entrypoint;",
-        if (hasWebPlugins)
-          "import 'package:flutter_web_plugins/flutter_web_plugins.dart';",
-        if (hasWebPlugins)
-          "import '$generatedImport';",
-        '',
-        'typedef _UnaryFunction = dynamic Function(List<String> args);',
-        'typedef _NullaryFunction = dynamic Function();',
-        'Future<void> main() async {',
-        if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistrar);',
-        '  await ui.webOnlyInitializePlatform();',
-        '  if (entrypoint.main is _UnaryFunction) {',
-        '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
-        '  }',
-        '  return (entrypoint.main as _NullaryFunction)();',
-        '}',
-        '',
-      ].join('\n');
+      final String entrypoint = main_dart.generateMainDartFile(importedEntrypoint.toString(),
+        languageVersion: languageVersion,
+        pluginRegistrantEntrypoint: generatedImport,
+      );
+
       result.writeAsStringSync(entrypoint);
     }
     return result.absolute.uri;

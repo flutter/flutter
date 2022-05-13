@@ -38,6 +38,7 @@ void main() {
     expect(localizations.timePickerMinuteModeAnnouncement, isNotNull);
     expect(localizations.modalBarrierDismissLabel, isNotNull);
     expect(localizations.drawerLabel, isNotNull);
+    expect(localizations.menuBarMenuLabel, isNotNull);
     expect(localizations.popupMenuLabel, isNotNull);
     expect(localizations.dialogLabel, isNotNull);
     expect(localizations.alertDialogLabel, isNotNull);
@@ -82,21 +83,12 @@ void main() {
     expect(localizations.keyboardKeyChannelUp, isNotNull);
     expect(localizations.keyboardKeyControl, isNotNull);
     expect(localizations.keyboardKeyDelete, isNotNull);
-    expect(localizations.keyboardKeyEisu, isNotNull);
     expect(localizations.keyboardKeyEject, isNotNull);
     expect(localizations.keyboardKeyEnd, isNotNull);
     expect(localizations.keyboardKeyEscape, isNotNull);
     expect(localizations.keyboardKeyFn, isNotNull);
-    expect(localizations.keyboardKeyHangulMode, isNotNull);
-    expect(localizations.keyboardKeyHanjaMode, isNotNull);
-    expect(localizations.keyboardKeyHankaku, isNotNull);
-    expect(localizations.keyboardKeyHiragana, isNotNull);
-    expect(localizations.keyboardKeyHiraganaKatakana, isNotNull);
     expect(localizations.keyboardKeyHome, isNotNull);
     expect(localizations.keyboardKeyInsert, isNotNull);
-    expect(localizations.keyboardKeyKanaMode, isNotNull);
-    expect(localizations.keyboardKeyKanjiMode, isNotNull);
-    expect(localizations.keyboardKeyKatakana, isNotNull);
     expect(localizations.keyboardKeyMeta, isNotNull);
     expect(localizations.keyboardKeyMetaMacOs, isNotNull);
     expect(localizations.keyboardKeyMetaWindows, isNotNull);
@@ -126,12 +118,9 @@ void main() {
     expect(localizations.keyboardKeyPower, isNotNull);
     expect(localizations.keyboardKeyPowerOff, isNotNull);
     expect(localizations.keyboardKeyPrintScreen, isNotNull);
-    expect(localizations.keyboardKeyRomaji, isNotNull);
     expect(localizations.keyboardKeyScrollLock, isNotNull);
     expect(localizations.keyboardKeySelect, isNotNull);
     expect(localizations.keyboardKeySpace, isNotNull);
-    expect(localizations.keyboardKeyZenkaku, isNotNull);
-    expect(localizations.keyboardKeyZenkakuHankaku, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

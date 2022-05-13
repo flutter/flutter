@@ -38,7 +38,7 @@ import 'theme.dart';
 ///
 /// This example demonstrates using the [proxyDecorator] callback to customize
 /// the appearance of a list item while it's being dragged.
-/// {@tool snippet}
+/// {@tool dartpad}
 ///
 /// While a drag is underway, the widget returned by the [proxyDecorator]
 /// serves as a "proxy" (a substitute) for the item in the list. The proxy is
@@ -61,7 +61,7 @@ class ReorderableListView extends StatefulWidget {
   ///   * [ReorderableListView.builder], which allows you to build a reorderable
   ///     list where the items are built as needed when scrolling the list.
   ReorderableListView({
-    Key? key,
+    super.key,
     required List<Widget> children,
     required this.onReorder,
     this.onReorderStart,
@@ -98,8 +98,7 @@ class ReorderableListView extends StatefulWidget {
        ),
        assert(buildDefaultDragHandles != null),
        itemBuilder = ((BuildContext context, int index) => children[index]),
-       itemCount = children.length,
-       super(key: key);
+       itemCount = children.length;
 
   /// Creates a reorderable list from widget items that are created on demand.
   ///
@@ -130,7 +129,7 @@ class ReorderableListView extends StatefulWidget {
   ///   * [ReorderableListView], which allows you to build a reorderable
   ///     list with all the items passed into the constructor.
   const ReorderableListView.builder({
-    Key? key,
+    super.key,
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
@@ -162,8 +161,7 @@ class ReorderableListView extends StatefulWidget {
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
        ),
-       assert(buildDefaultDragHandles != null),
-       super(key: key);
+       assert(buildDefaultDragHandles != null);
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;

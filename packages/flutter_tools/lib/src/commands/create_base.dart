@@ -20,7 +20,6 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
-import '../features.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -45,7 +44,6 @@ const List<String> kAllCreatePlatforms = <String>[
   'linux',
   'macos',
   'web',
-  'winuwp',
 ];
 
 const String _kDefaultPlatformArgumentHelp =
@@ -134,6 +132,13 @@ abstract class CreateBase extends FlutterCommand {
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
+    argParser.addOption(
+      'initial-create-revision',
+      defaultsTo: null,
+      help: 'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
+            'internally and should generally not be used manually.',
+      hide: !verboseHelp,
+    );
   }
 
   /// The output directory of the command.
@@ -158,13 +163,9 @@ abstract class CreateBase extends FlutterCommand {
       aliases: <String>[ 'platform' ],
       defaultsTo: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled)
-          'winuwp',
       ],
       allowed: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled)
-          'winuwp',
       ],
     );
   }
@@ -242,7 +243,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `--org` is not specified, returns the organization from the existing project.
   @protected
   Future<String> getOrganization() async {
-    String organization = stringArg('org');
+    String organization = stringArgDeprecated('org');
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = await project.organizationNames;
@@ -314,8 +315,8 @@ abstract class CreateBase extends FlutterCommand {
   @protected
   String get projectName {
     final String projectName =
-        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
-    if (!boolArg('skip-name-checks')) {
+        stringArgDeprecated('project-name') ?? globals.fs.path.basename(projectDirPath);
+    if (!boolArgDeprecated('skip-name-checks')) {
       final String error = _validateProjectName(projectName);
       if (error != null) {
         throwToolExit(error);
@@ -348,7 +349,6 @@ abstract class CreateBase extends FlutterCommand {
     bool linux = false,
     bool macos = false,
     bool windows = false,
-    bool windowsUwp = false,
     bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
@@ -358,6 +358,8 @@ abstract class CreateBase extends FlutterCommand {
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase =
         pluginClassSnakeCase.toUpperCase();
+    final String pluginClassLowerCamelCase =
+        pluginClass[0].toLowerCase() + pluginClass.substring(1);
     final String appleIdentifier =
         createUTIIdentifier(organization, projectName);
     final String androidIdentifier =
@@ -389,6 +391,7 @@ abstract class CreateBase extends FlutterCommand {
       'androidSdkVersion': kAndroidSdkMinVersion,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
+      'pluginClassLowerCamelCase': pluginClassLowerCamelCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
       'pluginProjectUUID': const Uuid().v4().toUpperCase(),
@@ -408,13 +411,17 @@ abstract class CreateBase extends FlutterCommand {
       'linux': linux,
       'macos': macos,
       'windows': windows,
-      'winuwp': windowsUwp,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
       'implementationTests': implementationTests,
       'agpVersion': agpVersion,
       'kotlinVersion': kotlinVersion,
       'gradleVersion': gradleVersion,
+      'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
+      'compileSdkVersion': gradle.compileSdkVersion,
+      'minSdkVersion': gradle.minSdkVersion,
+      'ndkVersion': gradle.ndkVersion,
+      'targetSdkVersion': gradle.targetSdkVersion,
     };
   }
 
@@ -485,6 +492,8 @@ abstract class CreateBase extends FlutterCommand {
     bool overwrite = false,
     bool pluginExampleApp = false,
     bool printStatusWhenWriting = true,
+    bool generateMetadata = true,
+    FlutterProjectType projectType,
   }) async {
     int generatedCount = 0;
     generatedCount += await renderMerged(
@@ -499,7 +508,14 @@ abstract class CreateBase extends FlutterCommand {
       generatedCount += _injectGradleWrapper(project);
     }
 
-    if (boolArg('pub')) {
+    final bool androidPlatform = templateContext['android'] as bool ?? false;
+    final bool iosPlatform = templateContext['ios'] as bool ?? false;
+    final bool linuxPlatform = templateContext['linux'] as bool ?? false;
+    final bool macOSPlatform = templateContext['macos'] as bool ?? false;
+    final bool windowsPlatform = templateContext['windows'] as bool ?? false;
+    final bool webPlatform = templateContext['web'] as bool ?? false;
+
+    if (boolArgDeprecated('pub')) {
       final Environment environment = Environment(
         artifacts: globals.artifacts,
         logger: globals.logger,
@@ -524,25 +540,66 @@ abstract class CreateBase extends FlutterCommand {
       await pub.get(
         context: PubContext.create,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         // For templates that use the l10n localization tooling, make sure
         // importing the generated package works right after `flutter create`.
         generateSyntheticPackage: true,
       );
 
       await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: templateContext['android'] as bool ?? false,
-        iosPlatform: templateContext['ios'] as bool ?? false,
-        linuxPlatform: templateContext['linux'] as bool ?? false,
-        macOSPlatform: templateContext['macos'] as bool ?? false,
-        windowsPlatform: templateContext['windows'] as bool ?? false,
-        webPlatform: templateContext['web'] as bool ?? false,
-        winUwpPlatform: templateContext['winuwp'] as bool ?? false,
+        androidPlatform: androidPlatform,
+        iosPlatform: iosPlatform,
+        linuxPlatform: linuxPlatform,
+        macOSPlatform: macOSPlatform,
+        windowsPlatform: windowsPlatform,
+        webPlatform: webPlatform,
       );
     }
-    if (templateContext['android'] == true) {
+    final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
+    if (androidPlatform) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      platformsForMigrateConfig.add(SupportedPlatform.android);
     }
+    if (iosPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.ios);
+    }
+    if (linuxPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.linux);
+    }
+    if (macOSPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.macos);
+    }
+    if (webPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.web);
+    }
+    if (windowsPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.windows);
+    }
+    if (templateContext['fuchsia'] == true) {
+      platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
+    }
+    if (generateMetadata) {
+      final File metadataFile = globals.fs
+          .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
+      final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
+        file: metadataFile,
+        versionRevision: globals.flutterVersion.frameworkRevision,
+        versionChannel: globals.flutterVersion.channel,
+        projectType: projectType,
+        migrateConfig: MigrateConfig(),
+        logger: globals.logger);
+      metadata.populate(
+        platforms: platformsForMigrateConfig,
+        projectDirectory: directory,
+        create: true,
+        update: false,
+        currentRevision: stringArgDeprecated('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+        createRevision: globals.flutterVersion.frameworkRevision,
+        logger: globals.logger,
+      );
+      metadata.writeFile();
+    }
+
     return generatedCount;
   }
 

@@ -31,7 +31,7 @@ import 'widget_inspector_test_utils.dart';
 // columns will impact whether tests pass.
 
 class ClockDemo extends StatefulWidget {
-  const ClockDemo({ Key? key }) : super(key: key);
+  const ClockDemo({ super.key });
   @override
   State<ClockDemo> createState() => _ClockDemoState();
 }
@@ -69,9 +69,9 @@ class _ClockDemoState extends State<ClockDemo> {
 
 class ClockText extends StatefulWidget {
   const ClockText({
-    Key? key,
+    super.key,
     this.utcOffset = 0,
-  }) : super(key: key);
+  });
 
   final int utcOffset;
 
@@ -216,9 +216,9 @@ class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
 class RepaintBoundaryWithDebugPaint extends RepaintBoundary {
   /// Creates a widget that isolates repaints.
   const RepaintBoundaryWithDebugPaint({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.key,
+    super.child,
+  });
 
   @override
   RenderRepaintBoundary createRenderObject(BuildContext context) {
@@ -2997,6 +2997,46 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(debugIsLocalCreationLocation(paddingElement), isFalse);
       expect(debugIsLocalCreationLocation(paddingElement.widget), isFalse);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets('debugIsWidgetLocalCreation test', (WidgetTester tester) async {
+      setupDefaultPubRootDirectory(service);
+
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Text('target', key: key, textDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      final Element element = key.currentContext! as Element;
+      expect(debugIsWidgetLocalCreation(element.widget), isTrue);
+
+      final Finder paddingFinder = find.byType(Padding);
+      final Element paddingElement = paddingFinder.evaluate().first;
+      expect(debugIsWidgetLocalCreation(paddingElement.widget), isFalse);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets('debugIsWidgetLocalCreation false test', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Text('target', key: key, textDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      final Element element = key.currentContext! as Element;
+      expect(debugIsWidgetLocalCreation(element.widget), isFalse);
+    }, skip: WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --no-track-widget-creation flag.
 
     test('devToolsInspectorUri test', () {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';

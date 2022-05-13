@@ -26,6 +26,13 @@ import 'thumb_painter.dart';
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [CupertinoSwitch]. When the thumb slides to
+/// the other side of the track, the switch is toggled between on/off.
+///
+/// ** See code in examples/api/lib/cupertino/switch/cupertino_switch.0.dart **
+/// {@end-tool}
+///
 /// {@tool snippet}
 ///
 /// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
@@ -48,7 +55,7 @@ import 'thumb_painter.dart';
 ///
 /// See also:
 ///
-///  * [Switch], the material design equivalent.
+///  * [Switch], the Material Design equivalent.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/switches/>
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
@@ -56,7 +63,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// The [value] parameter must not be null.
   /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start] and must not be null.
   const CupertinoSwitch({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -64,8 +71,7 @@ class CupertinoSwitch extends StatefulWidget {
     this.thumbColor,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+       assert(dragStartBehavior != null);
 
   /// Whether this switch is on or off.
   ///
@@ -298,19 +304,22 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   Widget build(BuildContext context) {
     if (needsPositionAnimation)
       _resumePositionAnimation();
-    return Opacity(
-      opacity: widget.onChanged == null ? _kCupertinoSwitchDisabledOpacity : 1.0,
-      child: _CupertinoSwitchRenderObjectWidget(
-        value: widget.value,
-        activeColor: CupertinoDynamicColor.resolve(
-          widget.activeColor ?? CupertinoColors.systemGreen,
-          context,
+    return MouseRegion(
+      cursor: isInteractive && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: Opacity(
+        opacity: widget.onChanged == null ? _kCupertinoSwitchDisabledOpacity : 1.0,
+        child: _CupertinoSwitchRenderObjectWidget(
+          value: widget.value,
+          activeColor: CupertinoDynamicColor.resolve(
+            widget.activeColor ?? CupertinoColors.systemGreen,
+            context,
+          ),
+          trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
+          thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
+          onChanged: widget.onChanged,
+          textDirection: Directionality.of(context),
+          state: this,
         ),
-        trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
-        thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
-        onChanged: widget.onChanged,
-        textDirection: Directionality.of(context),
-        state: this,
       ),
     );
   }
@@ -328,7 +337,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
 class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   const _CupertinoSwitchRenderObjectWidget({
-    Key? key,
     required this.value,
     required this.activeColor,
     required this.trackColor,
@@ -336,7 +344,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.onChanged,
     required this.textDirection,
     required this.state,
-  }) : super(key: key);
+  });
 
   final bool value;
   final Color activeColor;

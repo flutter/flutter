@@ -2423,7 +2423,7 @@ void main() {
 
   testWidgets('Scrollbar asserts that a visible track has a visible thumb', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    Widget _buildApp() {
+    Widget buildApp() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
@@ -2442,6 +2442,6 @@ void main() {
         ),
       );
     }
-    expect(() => tester.pumpWidget(_buildApp()), throwsAssertionError);
+    expect(() => tester.pumpWidget(buildApp()), throwsAssertionError);
   });
 }

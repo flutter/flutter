@@ -112,7 +112,7 @@ void main() {
 }
 
 class SpyStringValueNotifier extends ValueNotifier<String?> {
-  SpyStringValueNotifier(String? initialValue) : super(initialValue);
+  SpyStringValueNotifier(super.initialValue);
 
   /// Override for test visibility only.
   @override

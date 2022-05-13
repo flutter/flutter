@@ -20,25 +20,20 @@ import 'theme_data.dart';
 /// Creates a button based on [Semantics], [Material], and [InkWell]
 /// widgets.
 ///
-/// ### This class is obsolete.
-///
-/// Custom button classes can be created by configuring the
-/// [ButtonStyle] of a [TextButton], [ElevatedButton] or an
-/// [OutlinedButton].
-///
-/// FlatButton, RaisedButton, and OutlineButton have been replaced by
-/// TextButton, ElevatedButton, and OutlinedButton respectively.
-/// ButtonTheme has been replaced by TextButtonTheme,
-/// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
-/// have been deprecated, please migrate code that uses them.
-/// There's a detailed migration guide for the new button and button
-/// theme classes in
-/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
-///
 /// This class does not use the current [Theme] or [ButtonTheme] to
 /// compute default values for unspecified parameters. It's intended to
 /// be used for custom Material buttons that optionally incorporate defaults
 /// from the themes or from app-specific sources.
+///
+/// This class is planned to be deprecated in a future release, see
+/// [ButtonStyleButton], the base class of [TextButton], [ElevatedButton], and
+/// [OutlinedButton].
+///
+/// See also:
+///
+///  * [TextButton], a simple flat button without a shadow.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [OutlinedButton], a [TextButton] with a border outline.
 @Category(<String>['Material', 'Button'])
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
@@ -49,7 +44,7 @@ class RawMaterialButton extends StatefulWidget {
   /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], and
   /// [disabledElevation] must be non-negative.
   const RawMaterialButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
@@ -87,8 +82,7 @@ class RawMaterialButton extends StatefulWidget {
        assert(constraints != null),
        assert(animationDuration != null),
        assert(clipBehavior != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -381,6 +375,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
         shape: effectiveShape,
         color: widget.fillColor,
+        // For compatibility during the M3 migration the default shadow needs to be passed.
+        shadowColor: Theme.of(context).useMaterial3 ? Theme.of(context).shadowColor : null,
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: widget.animationDuration,
         clipBehavior: widget.clipBehavior,
@@ -448,10 +444,9 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
 /// "tap target", but not its material or its ink splashes.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.minSize,
-  }) : super(key: key, child: child);
+  });
 
   final Size minSize;
 

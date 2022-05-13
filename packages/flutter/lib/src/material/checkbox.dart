@@ -12,7 +12,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
-/// A material design checkbox.
+/// A Material Design checkbox.
 ///
 /// The checkbox itself does not maintain any state. Instead, when the state of
 /// the checkbox changes, the widget calls the [onChanged] callback. Most
@@ -46,7 +46,7 @@ import 'toggleable.dart';
 ///  * <https://material.io/design/components/selection-controls.html#checkboxes>
 ///  * <https://material.io/design/components/lists.html#types>
 class Checkbox extends StatefulWidget {
-  /// Creates a material design checkbox.
+  /// Creates a Material Design checkbox.
   ///
   /// The checkbox itself does not maintain any state. Instead, when the state of
   /// the checkbox changes, the widget calls the [onChanged] callback. Most
@@ -63,7 +63,7 @@ class Checkbox extends StatefulWidget {
   ///
   /// The values of [tristate] and [autofocus] must not be null.
   const Checkbox({
-    Key? key,
+    super.key,
     required this.value,
     this.tristate = false,
     required this.onChanged,
@@ -83,8 +83,7 @@ class Checkbox extends StatefulWidget {
     this.side,
   }) : assert(tristate != null),
        assert(tristate || value != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// Whether this checkbox is checked.
   ///
@@ -172,7 +171,7 @@ class Checkbox extends StatefulWidget {
   /// Checkbox(
   ///   value: true,
   ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }

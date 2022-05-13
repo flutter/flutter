@@ -278,7 +278,7 @@ class VelocityTracker {
 ///   the iOS method that reports the fling velocity when the touch is released.
 class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
   /// Create a new IOSScrollViewFlingVelocityTracker.
-  IOSScrollViewFlingVelocityTracker(PointerDeviceKind kind) : super.withKind(kind);
+  IOSScrollViewFlingVelocityTracker(super.kind) : super.withKind();
 
   /// The velocity estimation uses at most 4 `_PointAtTime` samples. The extra
   /// samples are there to make the `VelocityEstimate.offset` sufficiently large

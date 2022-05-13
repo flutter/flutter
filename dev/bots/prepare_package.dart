@@ -160,11 +160,11 @@ class ProcessRunner {
       }
     } on ProcessException catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
-          'failed with:\n${e.toString()}';
+          'failed with:\n$e';
       throw PreparePackageException(message);
     } on ArgumentError catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
-          'failed with:\n${e.toString()}';
+          'failed with:\n$e';
       throw PreparePackageException(message);
     }
 
@@ -684,7 +684,9 @@ class ArchivePublisher {
     final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
     jsonData['releases'] = <Map<String, dynamic>>[
       for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
-        if (entry['hash'] != newEntry['hash'] || entry['channel'] != newEntry['channel'])
+        if (entry['hash'] != newEntry['hash'] ||
+            entry['channel'] != newEntry['channel'] ||
+            entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
           entry,
       newEntry,
     ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {

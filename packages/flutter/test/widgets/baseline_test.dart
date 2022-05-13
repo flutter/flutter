@@ -116,7 +116,7 @@ void main() {
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
-  const BaselineDetector(this.callback, { Key? key }) : super(key: key);
+  const BaselineDetector(this.callback, { super.key });
 
   final VoidCallback callback;
 

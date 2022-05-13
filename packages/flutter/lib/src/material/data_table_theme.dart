@@ -229,10 +229,10 @@ class DataTableTheme extends InheritedWidget {
   ///
   /// The [data] must not be null.
   const DataTableTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties used for all descendant [DataTable] widgets.
   final DataTableThemeData data;

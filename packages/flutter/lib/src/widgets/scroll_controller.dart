@@ -317,14 +317,10 @@ class TrackingScrollController extends ScrollController {
   /// Creates a scroll controller that continually updates its
   /// [initialScrollOffset] to match the last scroll notification it received.
   TrackingScrollController({
-    double initialScrollOffset = 0.0,
-    bool keepScrollOffset = true,
-    String? debugLabel,
-  }) : super(
-         initialScrollOffset: initialScrollOffset,
-         keepScrollOffset: keepScrollOffset,
-         debugLabel: debugLabel,
-       );
+    super.initialScrollOffset,
+    super.keepScrollOffset,
+    super.debugLabel,
+  });
 
   final Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
   ScrollPosition? _lastUpdated;

@@ -72,16 +72,16 @@ class CupertinoScrollbar extends RawScrollbar {
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
   const CupertinoScrollbar({
-    Key? key,
-    required Widget child,
-    ScrollController? controller,
+    super.key,
+    required super.child,
+    super.controller,
     bool? thumbVisibility,
-    double thickness = defaultThickness,
+    double super.thickness = defaultThickness,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
-    Radius radius = defaultRadius,
+    Radius super.radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
-    ScrollbarOrientation? scrollbarOrientation,
+    super.scrollbarOrientation,
     @Deprecated(
       'Use thumbVisibility instead. '
       'This feature was deprecated after v2.9.0-1.0.pre.',
@@ -99,17 +99,11 @@ class CupertinoScrollbar extends RawScrollbar {
          'isAlwaysShown is deprecated.'
        ),
        super(
-         key: key,
-         child: child,
-         controller: controller,
          thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
-         thickness: thickness,
-         radius: radius,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
-         scrollbarOrientation: scrollbarOrientation,
        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].

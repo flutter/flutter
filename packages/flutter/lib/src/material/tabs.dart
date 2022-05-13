@@ -47,7 +47,7 @@ enum TabBarIndicatorSize {
   label,
 }
 
-/// A material design [TabBar] tab.
+/// A Material Design [TabBar] tab.
 ///
 /// If both [icon] and [text] are provided, the text is displayed below
 /// the icon.
@@ -59,22 +59,21 @@ enum TabBarIndicatorSize {
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.io/design/components/tabs.html>
 class Tab extends StatelessWidget implements PreferredSizeWidget {
-  /// Creates a material design [TabBar] tab.
+  /// Creates a Material Design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]
   /// and [child] arguments must not be used at the same time. The
   /// [iconMargin] is only useful when [icon] and either one of [text] or
   /// [child] is non-null.
   const Tab({
-    Key? key,
+    super.key,
     this.text,
     this.icon,
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
     this.height,
     this.child,
   }) : assert(text != null || child != null || icon != null),
-       assert(text == null || child == null),
-       super(key: key);
+       assert(text == null || child == null);
 
   /// The text to display as the tab's label.
   ///
@@ -163,7 +162,6 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
 
 class _TabStyle extends AnimatedWidget {
   const _TabStyle({
-    Key? key,
     required Animation<double> animation,
     required this.selected,
     required this.labelColor,
@@ -171,7 +169,7 @@ class _TabStyle extends AnimatedWidget {
     required this.labelStyle,
     required this.unselectedLabelStyle,
     required this.child,
-  }) : super(key: key, listenable: animation);
+  }) : super(listenable: animation);
 
   final TextStyle? labelStyle;
   final TextStyle? unselectedLabelStyle;
@@ -228,25 +226,15 @@ typedef _LayoutCallback = void Function(List<double> xOffsets, TextDirection tex
 
 class _TabLabelBarRenderer extends RenderFlex {
   _TabLabelBarRenderer({
-    List<RenderBox>? children,
-    required Axis direction,
-    required MainAxisSize mainAxisSize,
-    required MainAxisAlignment mainAxisAlignment,
-    required CrossAxisAlignment crossAxisAlignment,
-    required TextDirection textDirection,
-    required VerticalDirection verticalDirection,
+    required super.direction,
+    required super.mainAxisSize,
+    required super.mainAxisAlignment,
+    required super.crossAxisAlignment,
+    required TextDirection super.textDirection,
+    required super.verticalDirection,
     required this.onPerformLayout,
   }) : assert(onPerformLayout != null),
-       assert(textDirection != null),
-       super(
-         children: children,
-         direction: direction,
-         mainAxisSize: mainAxisSize,
-         mainAxisAlignment: mainAxisAlignment,
-         crossAxisAlignment: crossAxisAlignment,
-         textDirection: textDirection,
-         verticalDirection: verticalDirection,
-       );
+       assert(textDirection != null);
 
   _LayoutCallback onPerformLayout;
 
@@ -283,12 +271,9 @@ class _TabLabelBarRenderer extends RenderFlex {
 // or in response to input.
 class _TabLabelBar extends Flex {
   _TabLabelBar({
-    Key? key,
-    List<Widget> children = const <Widget>[],
+    super.children,
     required this.onPerformLayout,
   }) : super(
-    key: key,
-    children: children,
     direction: Axis.horizontal,
     mainAxisSize: MainAxisSize.max,
     mainAxisAlignment: MainAxisAlignment.start,
@@ -418,7 +403,7 @@ class _IndicatorPainter extends CustomPainter {
     if (!(rect.size >= insets.collapsedSize)) {
       throw FlutterError(
           'indicatorPadding insets should be less than Tab Size\n'
-          'Rect Size : ${rect.size}, Insets: ${insets.toString()}',
+          'Rect Size : ${rect.size}, Insets: $insets',
       );
     }
     return insets.deflateRect(rect);
@@ -517,15 +502,12 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
 // pixels value) after the TabBar viewport width and scroll limits are known.
 class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
   _TabBarScrollPosition({
-    required ScrollPhysics physics,
-    required ScrollContext context,
-    required ScrollPosition? oldPosition,
+    required super.physics,
+    required super.context,
+    required super.oldPosition,
     required this.tabBar,
   }) : super(
-    physics: physics,
-    context: context,
     initialPixels: null,
-    oldPosition: oldPosition,
   );
 
   final _TabBarState tabBar;
@@ -570,7 +552,7 @@ class _TabBarScrollController extends ScrollController {
   }
 }
 
-/// A material design widget that displays a horizontal row of tabs.
+/// A Material Design widget that displays a horizontal row of tabs.
 ///
 /// Typically created as the [AppBar.bottom] part of an [AppBar] and in
 /// conjunction with a [TabBarView].
@@ -606,7 +588,7 @@ class _TabBarScrollController extends ScrollController {
 ///  * [TabBarView], which displays page views that correspond to each tab.
 ///  * [TabBar], which is used to display the [Tab] that corresponds to each page of the [TabBarView].
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
-  /// Creates a material design tab bar.
+  /// Creates a Material Design tab bar.
   ///
   /// The [tabs] argument must not be null and its length must match the [controller]'s
   /// [TabController.length].
@@ -621,7 +603,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If [indicator] is not null or provided from [TabBarTheme],
   /// then [indicatorWeight], [indicatorPadding], and [indicatorColor] are ignored.
   const TabBar({
-    Key? key,
+    super.key,
     required this.tabs,
     this.controller,
     this.isScrollable = false,
@@ -649,8 +631,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
-       assert(indicator != null || (indicatorPadding != null)),
-       super(key: key);
+       assert(indicator != null || (indicatorPadding != null));
 
   /// Typically a list of two or more [Tab] widgets.
   ///
@@ -1323,15 +1304,15 @@ class TabBarView extends StatefulWidget {
   ///
   /// The length of [children] must be the same as the [controller]'s length.
   const TabBarView({
-    Key? key,
+    super.key,
     required this.children,
     this.controller,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
     this.viewportFraction = 1.0,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(children != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+       assert(dragStartBehavior != null);
 
   /// This widget's selection and animation state.
   ///
@@ -1361,6 +1342,11 @@ class TabBarView extends StatefulWidget {
 
   /// {@macro flutter.widgets.pageview.viewportFraction}
   final double viewportFraction;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   @override
   State<TabBarView> createState() => _TabBarViewState();
@@ -1551,6 +1537,7 @@ class _TabBarViewState extends State<TabBarView> {
       onNotification: _handleScrollNotification,
       child: PageView(
         dragStartBehavior: widget.dragStartBehavior,
+        clipBehavior: widget.clipBehavior,
         controller: _pageController,
         physics: widget.physics == null
           ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
@@ -1570,15 +1557,14 @@ class TabPageSelectorIndicator extends StatelessWidget {
   ///
   /// The [backgroundColor], [borderColor], and [size] parameters must not be null.
   const TabPageSelectorIndicator({
-    Key? key,
+    super.key,
     required this.backgroundColor,
     required this.borderColor,
     required this.size,
     this.borderStyle = BorderStyle.solid,
   }) : assert(backgroundColor != null),
        assert(borderColor != null),
-       assert(size != null),
-       super(key: key);
+       assert(size != null);
 
   /// The indicator circle's background color.
   final Color backgroundColor;
@@ -1622,14 +1608,13 @@ class TabPageSelectorIndicator extends StatelessWidget {
 class TabPageSelector extends StatelessWidget {
   /// Creates a compact widget that indicates which tab has been selected.
   const TabPageSelector({
-    Key? key,
+    super.key,
     this.controller,
     this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
     this.borderStyle,
-  }) : assert(indicatorSize != null && indicatorSize > 0.0),
-       super(key: key);
+  }) : assert(indicatorSize != null && indicatorSize > 0.0);
 
   /// This widget's selection and animation state.
   ///

@@ -227,8 +227,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 
 
 class FuchsiaDevice extends Device {
-  FuchsiaDevice(String id, {required this.name}) : super(
-      id,
+  FuchsiaDevice(super.id, {required this.name}) : super(
       platformType: PlatformType.fuchsia,
       category: null,
       ephemeral: true,

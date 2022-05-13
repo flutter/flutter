@@ -194,6 +194,10 @@ abstract class SliverChildDelegate {
   /// This will be called during `performRebuild` in [SliverMultiBoxAdaptorElement]
   /// to check if a child has moved to a different position. It should return the
   /// index of the child element with associated key, null if not found.
+  ///
+  /// If not provided, a child widget may not map to its existing [RenderObject]
+  /// when the order of children returned from the children builder changes.
+  /// This may result in state-loss.
   int? findIndexByKey(Key key) => null;
 
   @override
@@ -219,7 +223,7 @@ abstract class SliverChildDelegate {
 }
 
 class _SaltedValueKey extends ValueKey<Key> {
-  const _SaltedValueKey(Key key): assert(key != null), super(key);
+  const _SaltedValueKey(super.key): assert(key != null);
 }
 
 /// Called to find the new index of a child based on its `key` in case of
@@ -429,14 +433,16 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Defaults to providing an index for each widget.
   final SemanticIndexCallback semanticIndexCallback;
 
+  /// {@template flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
   /// Called to find the new index of a child based on its key in case of reordering.
   ///
   /// If not provided, a child widget may not map to its existing [RenderObject]
-  /// when the order in which children are returned from [builder] changes.
+  /// when the order of children returned from the children builder changes.
   /// This may result in state-loss.
   ///
   /// This callback should take an input [Key], and it should return the
   /// index of the child element with that associated key, or null if not found.
+  /// {@endtemplate}
   final ChildIndexGetter? findChildIndexCallback;
 
   @override
@@ -768,8 +774,8 @@ class SliverChildListDelegate extends SliverChildDelegate {
 abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   const SliverWithKeepAliveWidget({
-    Key? key,
-  }) : super(key : key);
+    super.key,
+  });
 
   @override
   RenderSliverWithKeepAliveMixin createRenderObject(BuildContext context);
@@ -785,10 +791,9 @@ abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
 abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// Initializes fields for subclasses.
   const SliverMultiBoxAdaptorWidget({
-    Key? key,
+    super.key,
     required this.delegate,
-  }) : assert(delegate != null),
-       super(key: key);
+  }) : assert(delegate != null);
 
   /// {@template flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
   /// The delegate that provides the children for this widget.
@@ -885,9 +890,9 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 class SliverList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children in a linear array.
   const SliverList({
-    Key? key,
-    required SliverChildDelegate delegate,
-  }) : super(key: key, delegate: delegate);
+    super.key,
+    required super.delegate,
+  });
 
   @override
   SliverMultiBoxAdaptorElement createElement() => SliverMultiBoxAdaptorElement(this, replaceMovedChildren: true);
@@ -947,10 +952,10 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children with the same main axis extent
   /// in a linear array.
   const SliverFixedExtentList({
-    Key? key,
-    required SliverChildDelegate delegate,
+    super.key,
+    required super.delegate,
     required this.itemExtent,
-  }) : super(key: key, delegate: delegate);
+  });
 
   /// The extent the children are forced to have in the main axis.
   final double itemExtent;
@@ -1019,10 +1024,10 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement.
   const SliverGrid({
-    Key? key,
-    required SliverChildDelegate delegate,
+    super.key,
+    required super.delegate,
     required this.gridDelegate,
-  }) : super(key: key, delegate: delegate);
+  });
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with a fixed number of tiles in the cross axis.
@@ -1032,9 +1037,9 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   /// See also:
   ///
-  ///  * [new GridView.count], the equivalent constructor for [GridView] widgets.
+  ///  * [GridView.count], the equivalent constructor for [GridView] widgets.
   SliverGrid.count({
-    Key? key,
+    super.key,
     required int crossAxisCount,
     double mainAxisSpacing = 0.0,
     double crossAxisSpacing = 0.0,
@@ -1046,7 +1051,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       super(key: key, delegate: SliverChildListDelegate(children));
+       super(delegate: SliverChildListDelegate(children));
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with tiles that each have a maximum cross-axis extent.
@@ -1056,9 +1061,9 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   /// See also:
   ///
-  ///  * [new GridView.extent], the equivalent constructor for [GridView] widgets.
+  ///  * [GridView.extent], the equivalent constructor for [GridView] widgets.
   SliverGrid.extent({
-    Key? key,
+    super.key,
     required double maxCrossAxisExtent,
     double mainAxisSpacing = 0.0,
     double crossAxisSpacing = 0.0,
@@ -1070,7 +1075,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       super(key: key, delegate: SliverChildListDelegate(children));
+       super(delegate: SliverChildListDelegate(children));
 
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
@@ -1120,9 +1125,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   /// layout offset of their children without looking at the layout offset of
   /// existing children this should be set to false (example:
   /// [RenderSliverFixedExtentList]) to avoid inflating unnecessary children.
-  SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget, {bool replaceMovedChildren = false})
-     : _replaceMovedChildren = replaceMovedChildren,
-       super(widget);
+  SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget super.widget, {bool replaceMovedChildren = false})
+     : _replaceMovedChildren = replaceMovedChildren;
 
   final bool _replaceMovedChildren;
 
@@ -1527,13 +1531,13 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   /// The [opacity] argument must not be null and must be between 0.0 and 1.0
   /// (inclusive).
   const SliverOpacity({
-    Key? key,
+    super.key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
     Widget? sliver,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        assert(alwaysIncludeSemantics != null),
-       super(key: key, child: sliver);
+       super(child: sliver);
 
   /// The fraction to scale the sliver child's alpha value.
   ///
@@ -1600,12 +1604,12 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
   /// this render object will be ignored for semantics if [ignoring] is true.
   const SliverIgnorePointer({
-    Key? key,
+    super.key,
     this.ignoring = true,
     this.ignoringSemantics,
     Widget? sliver,
   }) : assert(ignoring != null),
-       super(key: key, child: sliver);
+       super(child: sliver);
 
   /// Whether this sliver is ignored during hit testing.
   ///
@@ -1658,11 +1662,11 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
 class SliverOffstage extends SingleChildRenderObjectWidget {
   /// Creates a sliver that visually hides its sliver child.
   const SliverOffstage({
-    Key? key,
+    super.key,
     this.offstage = true,
     Widget? sliver,
   }) : assert(offstage != null),
-       super(key: key, child: sliver);
+       super(child: sliver);
 
   /// Whether the sliver child is hidden from the rest of the tree.
   ///
@@ -1692,7 +1696,7 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
 }
 
 class _SliverOffstageElement extends SingleChildRenderObjectElement {
-  _SliverOffstageElement(SliverOffstage widget) : super(widget);
+  _SliverOffstageElement(SliverOffstage super.widget);
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
@@ -1726,12 +1730,11 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   ///
   /// The [child] and [keepAlive] arguments must not be null.
   const KeepAlive({
-    Key? key,
+    super.key,
     required this.keepAlive,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(keepAlive != null),
-       super(key: key, child: child);
+       assert(keepAlive != null);
 
   /// Whether to keep the child alive.
   ///

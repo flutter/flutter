@@ -65,19 +65,49 @@ class CommonFinders {
     );
   }
 
-  /// Finds [Text] and [EditableText] widgets which contain the given
-  /// `pattern` argument.
+  /// Finds [Text] and [EditableText], and optionally [RichText] widgets
+  /// which contain the given `pattern` argument.
+  ///
+  /// If `findRichText` is false, all standalone [RichText] widgets are
+  /// ignored and `pattern` is matched with [Text.data] or [Text.textSpan].
+  /// If `findRichText` is true, [RichText] widgets (and therefore also
+  /// [Text] and [Text.rich] widgets) are matched by comparing the
+  /// [InlineSpan.toPlainText] with the given `pattern`.
+  ///
+  /// For [EditableText] widgets, the `pattern` is always compared to the currentt
+  /// value of the [EditableText.controller].
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   ///
   /// ## Sample code
   ///
   /// ```dart
-  /// expect(find.textContain('Back'), findsOneWidget);
-  /// expect(find.textContain(RegExp(r'(\w+)')), findsOneWidget);
+  /// expect(find.textContaining('Back'), findsOneWidget);
+  /// expect(find.textContaining(RegExp(r'(\w+)')), findsOneWidget);
   /// ```
   ///
-  /// If the `skipOffstage` argument is true (the default), then this skips
-  /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder textContaining(Pattern pattern, { bool skipOffstage = true }) => _TextContainingFinder(pattern, skipOffstage: skipOffstage);
+  /// This will match [Text], [Text.rich], and [EditableText] widgets that
+  /// contain the given pattern : 'Back' or RegExp(r'(\w+)').
+  ///
+  /// ```dart
+  /// expect(find.textContaining('Close', findRichText: true), findsOneWidget);
+  /// expect(find.textContaining(RegExp(r'(\w+)'), findRichText: true), findsOneWidget);
+  /// ```
+  ///
+  /// This will match [Text], [Text.rich], [EditableText], as well as standalone
+  /// [RichText] widgets that contain the given pattern : 'Close' or RegExp(r'(\w+)').
+  Finder textContaining(
+    Pattern pattern, {
+    bool findRichText = false,
+    bool skipOffstage = true,
+  }) {
+    return _TextContainingFinder(
+      pattern,
+      findRichText: findRichText,
+      skipOffstage: skipOffstage
+    );
+  }
 
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
@@ -554,7 +584,7 @@ abstract class ChainedFinder extends Finder {
 }
 
 class _FirstFinder extends ChainedFinder {
-  _FirstFinder(Finder parent) : super(parent);
+  _FirstFinder(super.parent);
 
   @override
   String get description => '${parent.description} (ignoring all but first)';
@@ -566,7 +596,7 @@ class _FirstFinder extends ChainedFinder {
 }
 
 class _LastFinder extends ChainedFinder {
-  _LastFinder(Finder parent) : super(parent);
+  _LastFinder(super.parent);
 
   @override
   String get description => '${parent.description} (ignoring all but last)';
@@ -578,7 +608,7 @@ class _LastFinder extends ChainedFinder {
 }
 
 class _IndexFinder extends ChainedFinder {
-  _IndexFinder(Finder parent, this.index) : super(parent);
+  _IndexFinder(super.parent, this.index);
 
   final int index;
 
@@ -592,7 +622,7 @@ class _IndexFinder extends ChainedFinder {
 }
 
 class _HitTestableFinder extends ChainedFinder {
-  _HitTestableFinder(Finder parent, this.alignment) : super(parent);
+  _HitTestableFinder(super.parent, this.alignment);
 
   final Alignment alignment;
 
@@ -621,7 +651,7 @@ class _HitTestableFinder extends ChainedFinder {
 abstract class MatchFinder extends Finder {
   /// Initializes a predicate-based Finder. Used by subclasses to initialize the
   /// [skipOffstage] property.
-  MatchFinder({ bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  MatchFinder({ super.skipOffstage });
 
   /// Returns true if the given element matches the pattern.
   ///
@@ -634,14 +664,11 @@ abstract class MatchFinder extends Finder {
   }
 }
 
-class _TextFinder extends MatchFinder {
-  _TextFinder(
-    this.text, {
+abstract class _MatchTextFinder extends MatchFinder {
+  _MatchTextFinder({
     this.findRichText = false,
-    bool skipOffstage = true,
-  }) : super(skipOffstage: skipOffstage);
-
-  final String text;
+    super.skipOffstage,
+  });
 
   /// Whether standalone [RichText] widgets should be found or not.
   ///
@@ -656,17 +683,18 @@ class _TextFinder extends MatchFinder {
   /// In either case, [EditableText] widgets will also be matched.
   final bool findRichText;
 
-  @override
-  String get description => 'text "$text"';
+  bool matchesText(String textToMatch);
 
   @override
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
-    if (widget is EditableText)
+    if (widget is EditableText) {
       return _matchesEditableText(widget);
+    }
 
-    if (!findRichText)
+    if (!findRichText) {
       return _matchesNonRichText(widget);
+    }
     // It would be sufficient to always use _matchesRichText if we wanted to
     // match both standalone RichText widgets as well as Text widgets. However,
     // the find.text() finder used to always ignore standalone RichText widgets,
@@ -676,29 +704,52 @@ class _TextFinder extends MatchFinder {
   }
 
   bool _matchesRichText(Widget widget) {
-    if (widget is RichText)
-      return widget.text.toPlainText() == text;
+    if (widget is RichText) {
+      return matchesText(widget.text.toPlainText());
+    }
     return false;
   }
 
   bool _matchesNonRichText(Widget widget) {
     if (widget is Text) {
-      if (widget.data != null)
-        return widget.data == text;
+      if (widget.data != null) {
+        return matchesText(widget.data!);
+      }
       assert(widget.textSpan != null);
-      return widget.textSpan!.toPlainText() == text;
+      return matchesText(widget.textSpan!.toPlainText());
     }
     return false;
   }
 
   bool _matchesEditableText(EditableText widget) {
-    return widget.controller.text == text;
+    return matchesText(widget.controller.text);
   }
 }
 
-class _TextContainingFinder extends MatchFinder {
-  _TextContainingFinder(this.pattern, {bool skipOffstage = true})
-      : super(skipOffstage: skipOffstage);
+class _TextFinder extends _MatchTextFinder {
+  _TextFinder(
+    this.text, {
+    super.findRichText,
+    super.skipOffstage,
+  });
+
+  final String text;
+
+  @override
+  String get description => 'text "$text"';
+
+  @override
+  bool matchesText(String textToMatch) {
+    return textToMatch == text;
+  }
+}
+
+class _TextContainingFinder extends _MatchTextFinder {
+  _TextContainingFinder(
+    this.pattern, {
+    super.findRichText,
+    super.skipOffstage,
+  });
 
   final Pattern pattern;
 
@@ -706,22 +757,13 @@ class _TextContainingFinder extends MatchFinder {
   String get description => 'text containing $pattern';
 
   @override
-  bool matches(Element candidate) {
-    final Widget widget = candidate.widget;
-    if (widget is Text) {
-      if (widget.data != null)
-        return widget.data!.contains(pattern);
-      assert(widget.textSpan != null);
-      return widget.textSpan!.toPlainText().contains(pattern);
-    } else if (widget is EditableText) {
-      return widget.controller.text.contains(pattern);
-    }
-    return false;
+  bool matchesText(String textToMatch) {
+    return textToMatch.contains(pattern);
   }
 }
 
 class _KeyFinder extends MatchFinder {
-  _KeyFinder(this.key, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  _KeyFinder(this.key, { super.skipOffstage });
 
   final Key key;
 
@@ -735,7 +777,7 @@ class _KeyFinder extends MatchFinder {
 }
 
 class _WidgetSubtypeFinder<T extends Widget> extends MatchFinder {
-  _WidgetSubtypeFinder({ bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  _WidgetSubtypeFinder({ super.skipOffstage });
 
   @override
   String get description => 'is "$T"';
@@ -747,7 +789,7 @@ class _WidgetSubtypeFinder<T extends Widget> extends MatchFinder {
 }
 
 class _WidgetTypeFinder extends MatchFinder {
-  _WidgetTypeFinder(this.widgetType, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  _WidgetTypeFinder(this.widgetType, { super.skipOffstage });
 
   final Type widgetType;
 
@@ -761,7 +803,7 @@ class _WidgetTypeFinder extends MatchFinder {
 }
 
 class _WidgetImageFinder extends MatchFinder {
-  _WidgetImageFinder(this.image, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  _WidgetImageFinder(this.image, { super.skipOffstage });
 
   final ImageProvider image;
 
@@ -781,7 +823,7 @@ class _WidgetImageFinder extends MatchFinder {
 }
 
 class _WidgetIconFinder extends MatchFinder {
-  _WidgetIconFinder(this.icon, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  _WidgetIconFinder(this.icon, { super.skipOffstage });
 
   final IconData icon;
 
@@ -796,7 +838,7 @@ class _WidgetIconFinder extends MatchFinder {
 }
 
 class _ElementTypeFinder extends MatchFinder {
-  _ElementTypeFinder(this.elementType, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  _ElementTypeFinder(this.elementType, { super.skipOffstage });
 
   final Type elementType;
 
@@ -810,7 +852,7 @@ class _ElementTypeFinder extends MatchFinder {
 }
 
 class _WidgetFinder extends MatchFinder {
-  _WidgetFinder(this.widget, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  _WidgetFinder(this.widget, { super.skipOffstage });
 
   final Widget widget;
 
@@ -824,9 +866,8 @@ class _WidgetFinder extends MatchFinder {
 }
 
 class _WidgetPredicateFinder extends MatchFinder {
-  _WidgetPredicateFinder(this.predicate, { String? description, bool skipOffstage = true })
-    : _description = description,
-      super(skipOffstage: skipOffstage);
+  _WidgetPredicateFinder(this.predicate, { String? description, super.skipOffstage })
+    : _description = description;
 
   final WidgetPredicate predicate;
   final String? _description;
@@ -841,9 +882,8 @@ class _WidgetPredicateFinder extends MatchFinder {
 }
 
 class _ElementPredicateFinder extends MatchFinder {
-  _ElementPredicateFinder(this.predicate, { String? description, bool skipOffstage = true })
-    : _description = description,
-      super(skipOffstage: skipOffstage);
+  _ElementPredicateFinder(this.predicate, { String? description, super.skipOffstage })
+    : _description = description;
 
   final ElementPredicate predicate;
   final String? _description;
@@ -862,8 +902,8 @@ class _DescendantFinder extends Finder {
     this.ancestor,
     this.descendant, {
     this.matchRoot = false,
-    bool skipOffstage = true,
-  }) : super(skipOffstage: skipOffstage);
+    super.skipOffstage,
+  });
 
   final Finder ancestor;
   final Finder descendant;

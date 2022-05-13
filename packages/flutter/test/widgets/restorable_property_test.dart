@@ -504,7 +504,7 @@ class _TestRestorableValue extends RestorableValue<Object?> {
 }
 
 class _RestorableWidget extends StatefulWidget {
-  const _RestorableWidget({Key? key}) : super(key: key);
+  const _RestorableWidget();
 
   @override
   State<_RestorableWidget> createState() => _RestorableWidgetState();

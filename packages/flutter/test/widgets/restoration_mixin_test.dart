@@ -642,7 +642,7 @@ void _clearLogs(_TestRestorableWidgetState state) {
 
 class _TestRestorableWidget extends StatefulWidget {
 
-  const _TestRestorableWidget({Key? key, this.restorationId}) : super(key: key);
+  const _TestRestorableWidget({super.key, this.restorationId});
 
   final String? restorationId;
 

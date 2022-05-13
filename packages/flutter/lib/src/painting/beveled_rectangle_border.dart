@@ -24,11 +24,10 @@ class BeveledRectangleBorder extends OutlinedBorder {
   ///
   /// The arguments must not be null.
   const BeveledRectangleBorder({
-    BorderSide side = BorderSide.none,
+    super.side,
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
-       assert(borderRadius != null),
-       super(side: side);
+       assert(borderRadius != null);
 
   /// The radii for each corner.
   ///

@@ -28,7 +28,7 @@ const double _kSwitchHeightCollapsed = _kSwitchMinSize;
 
 enum _SwitchType { material, adaptive }
 
-/// A material design switch.
+/// A Material Design switch.
 ///
 /// Used to toggle the on/off state of a single setting.
 ///
@@ -53,7 +53,7 @@ enum _SwitchType { material, adaptive }
 ///  * [Slider], for selecting a value in a range.
 ///  * <https://material.io/design/components/selection-controls.html#switches>
 class Switch extends StatelessWidget {
-  /// Creates a material design switch.
+  /// Creates a Material Design switch.
   ///
   /// The switch itself does not maintain any state. Instead, when the state of
   /// the switch changes, the widget calls the [onChanged] callback. Most widgets
@@ -65,7 +65,7 @@ class Switch extends StatelessWidget {
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
   const Switch({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -90,8 +90,7 @@ class Switch extends StatelessWidget {
   })  : _switchType = _SwitchType.material,
         assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        super(key: key);
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   /// Creates an adaptive [Switch] based on whether the target platform is iOS
   /// or macOS, following Material design's
@@ -109,7 +108,7 @@ class Switch extends StatelessWidget {
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Switch.adaptive({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -134,8 +133,7 @@ class Switch extends StatelessWidget {
   })  : assert(autofocus != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        _switchType = _SwitchType.adaptive,
-        super(key: key);
+        _switchType = _SwitchType.adaptive;
 
   /// Whether this switch is on or off.
   ///
@@ -240,7 +238,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -281,7 +279,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -493,7 +491,6 @@ class Switch extends StatelessWidget {
 
 class _MaterialSwitch extends StatefulWidget {
   const _MaterialSwitch({
-    Key? key,
     required this.value,
     required this.onChanged,
     required this.size,
@@ -518,8 +515,7 @@ class _MaterialSwitch extends StatefulWidget {
     this.autofocus = false,
   })  : assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        super(key: key);
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   final bool value;
   final ValueChanged<bool>? onChanged;

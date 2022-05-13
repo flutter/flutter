@@ -8,6 +8,11 @@ import 'dart:ui' as ui;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 
+/// A function which takes the name of the method channel, it's handler,
+/// platform message and asynchronously returns an encoded response.
+typedef AllMessagesHandler = Future<ByteData?>? Function(
+    String channel, MessageHandler? handler, ByteData? message);
+
 /// A [BinaryMessenger] subclass that is used as the default binary messenger
 /// under testing environment.
 ///
@@ -116,11 +121,17 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   // can implement the [checkMockMessageHandler] method.
   final Map<String, Object> _outboundHandlerIdentities = <String, Object>{};
 
+  /// Handler that intercepts and responds to outgoing messages, pretending
+  /// to be the platform, for all channels.
+  AllMessagesHandler? allMessagesHandler;
+
   @override
   Future<ByteData?>? send(String channel, ByteData? message) {
     final Future<ByteData?>? resultFuture;
     final MessageHandler? handler = _outboundHandlers[channel];
-    if (handler != null) {
+    if (allMessagesHandler != null) {
+      resultFuture = allMessagesHandler!(channel, handler, message);
+    } else if (handler != null) {
       resultFuture = handler(message);
     } else {
       resultFuture = delegate.send(channel, message);

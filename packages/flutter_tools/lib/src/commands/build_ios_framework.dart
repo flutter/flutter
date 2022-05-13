@@ -126,13 +126,13 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   Future<List<BuildInfo>> getBuildInfos() async {
     final List<BuildInfo> buildInfos = <BuildInfo>[];
 
-    if (boolArg('debug')) {
+    if (boolArgDeprecated('debug')) {
       buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.debug));
     }
-    if (boolArg('profile')) {
+    if (boolArgDeprecated('profile')) {
       buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.profile));
     }
-    if (boolArg('release')) {
+    if (boolArgDeprecated('release')) {
       buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.release));
     }
 
@@ -149,7 +149,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
-    if (boolArg('universal')) {
+    if (boolArgDeprecated('universal')) {
       throwToolExit('--universal has been deprecated, only XCFrameworks are supported.');
     }
     if ((await getBuildInfos()).isEmpty) {
@@ -159,7 +159,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String outputArgument = stringArg('output')
+    final String outputArgument = stringArgDeprecated('output')
         ?? globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
@@ -183,8 +183,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         modeDirectory.deleteSync(recursive: true);
       }
 
-      if (boolArg('cocoapods')) {
-        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
+      if (boolArgDeprecated('cocoapods')) {
+        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArgDeprecated('force'));
       } else {
         // Copy Flutter.xcframework.
         await _produceFlutterFramework(buildInfo, modeDirectory);
@@ -284,7 +284,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra_release/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
-  s.platform              = :ios, '9.0'
+  s.platform              = :ios, '11.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
@@ -490,7 +490,7 @@ end
             podProduct as Directory,
             simulatorBuildConfiguration
                 .childDirectory(builtProduct.basename)
-                .childDirectory(podFrameworkName)
+                .childDirectory(podFrameworkName),
           ];
 
           await _produceXCFramework(frameworks, binaryName, modeDirectory);
@@ -503,7 +503,7 @@ end
 
   Future<void> _produceXCFramework(Iterable<Directory> frameworks,
       String frameworkBinaryName, Directory outputDirectory) async {
-    if (!boolArg('xcframework')) {
+    if (!boolArgDeprecated('xcframework')) {
       return;
     }
     final List<String> xcframeworkCommand = <String>[
@@ -520,10 +520,10 @@ end
                 entity.basename.endsWith('dSYM'))
             .map((FileSystemEntity entity) =>
                 <String>['-debug-symbols', entity.path])
-            .expand<String>((List<String> parameter) => parameter)
+            .expand<String>((List<String> parameter) => parameter),
       ],
       '-output',
-      outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path
+      outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path,
     ];
 
     final RunResult xcframeworkResult = await globals.processUtils.run(

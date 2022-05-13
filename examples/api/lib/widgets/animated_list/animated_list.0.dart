@@ -4,7 +4,6 @@
 
 // Flutter code sample for AnimatedList
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() {

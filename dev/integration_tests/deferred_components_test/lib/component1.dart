@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 
 class LogoScreen extends StatelessWidget {
-  const LogoScreen({Key? key}) : super(key: key);
+  const LogoScreen({super.key});
 
   static const String _testSentinel = 'Running deferred code';
 

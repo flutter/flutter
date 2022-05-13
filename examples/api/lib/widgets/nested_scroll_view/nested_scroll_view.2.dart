@@ -40,7 +40,7 @@ class MyStatelessWidget extends StatelessWidget {
             expandedHeight: 200.0,
             forceElevated: innerBoxIsScrolled,
           ),
-        )
+        ),
       ];
     }, body: Builder(builder: (BuildContext context) {
       return CustomScrollView(

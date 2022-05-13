@@ -49,7 +49,6 @@ import 'image_provider.dart';
 ///       fit: BoxFit.cover,
 ///     ),
 ///     border: Border.all(
-///       color: Colors.black,
 ///       width: 8,
 ///     ),
 ///     borderRadius: BorderRadius.circular(12),
@@ -320,6 +319,7 @@ class BoxDecoration extends Decoration {
         && other.borderRadius == borderRadius
         && listEquals<BoxShadow>(other.boxShadow, boxShadow)
         && other.gradient == gradient
+        && other.backgroundBlendMode == backgroundBlendMode
         && other.shape == shape;
   }
 
@@ -331,6 +331,7 @@ class BoxDecoration extends Decoration {
     borderRadius,
     boxShadow == null ? null : Object.hashAll(boxShadow!),
     gradient,
+    backgroundBlendMode,
     shape,
   );
 

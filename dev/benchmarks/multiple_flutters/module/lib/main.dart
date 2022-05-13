@@ -15,7 +15,7 @@ void topMain() => runApp(const MyApp(Colors.green));
 void bottomMain() => runApp(const MyApp(Colors.purple));
 
 class MyApp extends StatelessWidget {
-  const MyApp(this.color, {Key? key}) : super(key: key);
+  const MyApp(this.color, {super.key});
 
   final Color color;
 
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({super.key, this.title});
   final String? title;
 
   @override
@@ -160,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             0.0), // 10% of the width, so there are ten blinds.
                         colors: <Color>[
                           Color(0xffee0000),
-                          Color(0xffeeee00)
+                          Color(0xffeeee00),
                         ], // red to yellow
                         tileMode: TileMode
                             .repeated, // repeats the gradient over the canvas
@@ -172,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
               CustomPaint(
                 painter: Sky(),
                 size: const Size(200.0, 36.0),
-              )
+              ),
             ],
           ),
         ),

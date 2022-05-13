@@ -14,7 +14,7 @@ import 'base/utils.dart';
 import 'plugins.dart';
 
 const Set<String> _kValidPluginPlatforms = <String>{
-  'android', 'ios', 'web', 'windows', 'linux', 'macos'
+  'android', 'ios', 'web', 'windows', 'linux', 'macos',
 };
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
@@ -636,7 +636,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       errors.add('Expected "fonts" to either be null or a list.');
       continue;
     }
-    for (final Object? fontMapList in fontMap['fonts']) {
+    for (final Object? fontMapList in fontMap['fonts'] as List<Object?>) {
       if (fontMapList is! YamlMap) {
         errors.add('Expected "fonts" to be a list of maps.');
         continue;

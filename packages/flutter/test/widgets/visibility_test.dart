@@ -9,7 +9,7 @@ import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
-  const TestState({ Key? key, required this.child, required this.log }) : super(key: key);
+  const TestState({ super.key, required this.child, required this.log });
   final Widget child;
   final List<String> log;
   @override

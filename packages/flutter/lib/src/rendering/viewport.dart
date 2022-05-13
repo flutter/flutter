@@ -1254,31 +1254,23 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// list, if any, is used.
   ///
   /// The [offset] must be specified. For testing purposes, consider passing a
-  /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
+  /// [ViewportOffset.zero] or [ViewportOffset.fixed].
   RenderViewport({
-    AxisDirection axisDirection = AxisDirection.down,
-    required AxisDirection crossAxisDirection,
-    required ViewportOffset offset,
+    super.axisDirection,
+    required super.crossAxisDirection,
+    required super.offset,
     double anchor = 0.0,
     List<RenderSliver>? children,
     RenderSliver? center,
-    double? cacheExtent,
-    CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
-    Clip clipBehavior = Clip.hardEdge,
+    super.cacheExtent,
+    super.cacheExtentStyle,
+    super.clipBehavior,
   }) : assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
        assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        assert(clipBehavior != null),
        _anchor = anchor,
-       _center = center,
-       super(
-         axisDirection: axisDirection,
-         crossAxisDirection: crossAxisDirection,
-         offset: offset,
-         cacheExtent: cacheExtent,
-         cacheExtentStyle: cacheExtentStyle,
-         clipBehavior: clipBehavior,
-       ) {
+       _center = center {
     addAll(children);
     if (center == null && firstChild != null)
       _center = firstChild;
@@ -1791,19 +1783,14 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   /// contents.
   ///
   /// The [offset] must be specified. For testing purposes, consider passing a
-  /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
+  /// [ViewportOffset.zero] or [ViewportOffset.fixed].
   RenderShrinkWrappingViewport({
-    AxisDirection axisDirection = AxisDirection.down,
-    required AxisDirection crossAxisDirection,
-    required ViewportOffset offset,
-    Clip clipBehavior = Clip.hardEdge,
+    super.axisDirection,
+    required super.crossAxisDirection,
+    required super.offset,
+    super.clipBehavior,
     List<RenderSliver>? children,
-  }) : super(
-        axisDirection: axisDirection,
-        crossAxisDirection: crossAxisDirection,
-        offset: offset,
-        clipBehavior: clipBehavior,
-       ) {
+  }) {
     addAll(children);
   }
 

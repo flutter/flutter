@@ -11,12 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({
-    Key? key,
+    super.key,
     this.onHover,
     this.child,
     this.onEnter,
     this.onExit,
-  }) : super(key: key);
+  });
 
   final ValueChanged<bool>? onHover;
   final Widget? child;
@@ -49,7 +49,7 @@ class HoverClientState extends State<HoverClient> {
 }
 
 class HoverFeedback extends StatefulWidget {
-  const HoverFeedback({Key? key, this.onEnter, this.onExit}) : super(key: key);
+  const HoverFeedback({super.key, this.onEnter, this.onExit});
 
   final VoidCallback? onEnter;
   final VoidCallback? onExit;
@@ -76,6 +76,110 @@ class _HoverFeedbackState extends State<HoverFeedback> {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/73330
+  testWidgets('hitTestBehavior test - HitTestBehavior.deferToChild/opaque', (WidgetTester tester) async {
+    bool onEnter = false;
+    await tester.pumpWidget(Center(
+      child: MouseRegion(
+        hitTestBehavior: HitTestBehavior.deferToChild,
+        onEnter: (_) => onEnter = true,
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    // The child is null, so `onEnter` does not trigger.
+    expect(onEnter, false);
+
+    // Update to the default value `HitTestBehavior.opaque`
+    await tester.pumpWidget(Center(
+      child: MouseRegion(
+        onEnter: (_) => onEnter = true,
+      ),
+    ));
+
+    expect(onEnter, true);
+  });
+
+  testWidgets('hitTestBehavior test - HitTestBehavior.deferToChild and non-opaque', (WidgetTester tester) async {
+    bool onEnterRegion1 = false;
+    bool onEnterRegion2 = false;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          SizedBox(
+            width: 50.0,
+            height: 50.0,
+            child: MouseRegion(
+              onEnter: (_) => onEnterRegion1 = true,
+            ),
+          ),
+          SizedBox(
+            width: 50.0,
+            height: 50.0,
+            child: MouseRegion(
+              opaque: false,
+              hitTestBehavior: HitTestBehavior.deferToChild,
+              onEnter: (_) => onEnterRegion2 = true,
+              child: Container(
+                color: const Color.fromARGB(0xff, 0xff, 0x10, 0x19),
+                width: 50.0,
+                height: 50.0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    expect(onEnterRegion2, true);
+    expect(onEnterRegion1, true);
+  });
+
+  testWidgets('hitTestBehavior test - HitTestBehavior.translucent', (WidgetTester tester) async {
+    bool onEnterRegion1 = false;
+    bool onEnterRegion2 = false;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          SizedBox(
+            width: 50.0,
+            height: 50.0,
+            child: MouseRegion(
+              onEnter: (_) => onEnterRegion1 = true,
+            ),
+          ),
+          SizedBox(
+            width: 50.0,
+            height: 50.0,
+            child: MouseRegion(
+              hitTestBehavior: HitTestBehavior.translucent,
+              onEnter: (_) => onEnterRegion2 = true,
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    expect(onEnterRegion2, true);
+    expect(onEnterRegion1, true);
+  });
+
   testWidgets('onEnter and onExit can be triggered with mouse buttons pressed', (WidgetTester tester) async {
     PointerEnterEvent? enter;
     PointerExitEvent? exit;
@@ -689,7 +793,7 @@ void main() {
     await tester.pumpWidget(
       MouseRegion(
         onEnter: (PointerEnterEvent _) {},
-        child: const Opacity(opacity: 0.5, child: Placeholder()),
+        child: const RepaintBoundary(child: Placeholder()),
       ),
     );
 
@@ -1452,16 +1556,16 @@ void main() {
     await gesture.addPointer(location: const Offset(5, 5));
     addTearDown(gesture.removePointer);
 
-    void _handleHover(PointerHoverEvent _) {}
-    void _handlePaintChild() { logs.add('paint'); }
+    void handleHover(PointerHoverEvent _) {}
+    void handlePaintChild() { logs.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
-          onHover: _handleHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
+          onHover: handleHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: handlePaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
@@ -1480,8 +1584,8 @@ void main() {
           opaque: false,
           // Dummy callback so that MouseRegion stays affective after opaque
           // turns false.
-          onHover: _handleHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
+          onHover: handleHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: handlePaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
@@ -1706,6 +1810,7 @@ void main() {
       'parentData: MISSING',
       'constraints: MISSING',
       'size: MISSING',
+      'behavior: opaque',
       'listeners: <none>',
     ]);
   });
@@ -1727,6 +1832,7 @@ void main() {
       'parentData: MISSING',
       'constraints: MISSING',
       'size: MISSING',
+      'behavior: opaque',
       'listeners: enter, hover, exit',
       'cursor: SystemMouseCursor(click)',
       'invalid for MouseTracker',

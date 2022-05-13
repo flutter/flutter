@@ -41,7 +41,9 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
+import 'sdk_web_configuration.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   @required AssetReader assetReader,
@@ -59,6 +61,9 @@ typedef DwdsLauncher = Future<Dwds> Function({
   bool spawnDds,
   bool enableDevtoolsLaunch,
   DevtoolsLauncher devtoolsLauncher,
+  bool launchDevToolsInNewWindow,
+  SdkConfigurationProvider sdkConfigurationProvider,
+  bool emitDebugEvents,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -250,7 +255,7 @@ class WebAssetServer implements AssetReader {
 
     // Return a version string for all active modules. This is populated
     // along with the `moduleProvider` update logic.
-    Future<Map<String, String>> _digestProvider() async => digests;
+    Future<Map<String, String>> digestProvider() async => digests;
 
     // Ensure dwds is present and provide middleware to avoid trying to
     // load the through the isolate APIs.
@@ -263,7 +268,7 @@ class WebAssetServer implements AssetReader {
           final String result =
               await globals.fs.file(uri.toFilePath()).readAsString();
           return shelf.Response.ok(result, headers: <String, String>{
-            HttpHeaders.contentTypeHeader: 'application/javascript'
+            HttpHeaders.contentTypeHeader: 'application/javascript',
           });
         }
         return innerHandler(request);
@@ -271,7 +276,7 @@ class WebAssetServer implements AssetReader {
     }
 
     logging.Logger.root.level = logging.Level.ALL;
-    logging.Logger.root.onRecord.listen(_log);
+    logging.Logger.root.onRecord.listen(log);
 
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
@@ -291,10 +296,12 @@ class WebAssetServer implements AssetReader {
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
-        _digestProvider,
+        digestProvider,
+        server.basePath,
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
+      sdkConfigurationProvider: SdkWebConfigurationProvider(globals.artifacts),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -809,6 +816,7 @@ class WebDevFS implements DevFS {
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile(
           'manifest.json', '{"info":"manifest not generated in run mode."}');
+      webAssetServer.writeFile('flutter.js', flutter_js.generateFlutterJsFile());
       webAssetServer.writeFile('flutter_service_worker.js',
           '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -999,7 +1007,8 @@ class ReleaseAssetServer {
   }
 }
 
-void _log(logging.LogRecord event) {
+@visibleForTesting
+void log(logging.LogRecord event) {
   final String error = event.error == null? '': 'Error: ${event.error}';
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);

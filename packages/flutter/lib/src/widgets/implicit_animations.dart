@@ -36,7 +36,7 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as a tight constraint of zero size.
-  BoxConstraintsTween({ BoxConstraints? begin, BoxConstraints? end }) : super(begin: begin, end: end);
+  BoxConstraintsTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -67,7 +67,7 @@ class DecorationTween extends Tween<Decoration> {
   /// result is always null. If [end] is not null, then its lerping logic is
   /// used (via [Decoration.lerpTo]). Otherwise, [begin]'s lerping logic is used
   /// (via [Decoration.lerpFrom]).
-  DecorationTween({ Decoration? begin, Decoration? end }) : super(begin: begin, end: end);
+  DecorationTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -90,7 +90,7 @@ class EdgeInsetsTween extends Tween<EdgeInsets> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an [EdgeInsets] with no inset.
-  EdgeInsetsTween({ EdgeInsets? begin, EdgeInsets? end }) : super(begin: begin, end: end);
+  EdgeInsetsTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -112,7 +112,7 @@ class EdgeInsetsGeometryTween extends Tween<EdgeInsetsGeometry> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an [EdgeInsetsGeometry] with no inset.
-  EdgeInsetsGeometryTween({ EdgeInsetsGeometry? begin, EdgeInsetsGeometry? end }) : super(begin: begin, end: end);
+  EdgeInsetsGeometryTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -130,7 +130,7 @@ class BorderRadiusTween extends Tween<BorderRadius?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as a right angle (no radius).
-  BorderRadiusTween({ BorderRadius? begin, BorderRadius? end }) : super(begin: begin, end: end);
+  BorderRadiusTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -148,7 +148,7 @@ class BorderTween extends Tween<Border?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as having no border.
-  BorderTween({ Border? begin, Border? end }) : super(begin: begin, end: end);
+  BorderTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -169,7 +169,7 @@ class Matrix4Tween extends Tween<Matrix4> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  Matrix4Tween({ Matrix4? begin, Matrix4? end }) : super(begin: begin, end: end);
+  Matrix4Tween({ super.begin, super.end });
 
   @override
   Matrix4 lerp(double t) {
@@ -207,7 +207,7 @@ class TextStyleTween extends Tween<TextStyle> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  TextStyleTween({ TextStyle? begin, TextStyle? end }) : super(begin: begin, end: end);
+  TextStyleTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -277,13 +277,12 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   const ImplicitlyAnimatedWidget({
-    Key? key,
+    super.key,
     this.curve = Curves.linear,
     required this.duration,
     this.onEnd,
   }) : assert(curve != null),
-       assert(duration != null),
-       super(key: key);
+       assert(duration != null);
 
   /// The curve to apply when animating the parameters of this container.
   final Curve curve;
@@ -430,6 +429,8 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
         tween ??= constructor(targetValue);
         if (_shouldAnimateTween(tween, targetValue))
           shouldStartAnimation = true;
+        else
+          tween.end ??= tween.begin;
       } else {
         tween = null;
       }
@@ -600,7 +601,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   AnimatedContainer({
-    Key? key,
+    super.key,
     this.alignment,
     this.padding,
     Color? color,
@@ -614,9 +615,9 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.transformAlignment,
     this.child,
     this.clipBehavior = Clip.none,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
@@ -630,8 +631,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
             ?? BoxConstraints.tightFor(width: width, height: height)
-          : constraints,
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+          : constraints;
 
   /// The [child] contained by the container.
   ///
@@ -808,15 +808,14 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   ///
   /// The [padding], [curve], and [duration] arguments must not be null.
   AnimatedPadding({
-    Key? key,
+    super.key,
     required this.padding,
     this.child,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
   }) : assert(padding != null),
-       assert(padding.isNonNegative),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+       assert(padding.isNonNegative);
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
@@ -898,18 +897,17 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   ///
   /// The [alignment], [curve], and [duration] arguments must not be null.
   const AnimatedAlign({
-    Key? key,
+    super.key,
     required this.alignment,
     this.child,
     this.heightFactor,
     this.widthFactor,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
   }) : assert(alignment != null),
        assert(widthFactor == null || widthFactor >= 0.0),
-       assert(heightFactor == null || heightFactor >= 0.0),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+       assert(heightFactor == null || heightFactor >= 0.0);
 
   /// How to align the child.
   ///
@@ -1038,7 +1036,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedPositioned({
-    Key? key,
+    super.key,
     required this.child,
     this.left,
     this.top,
@@ -1046,30 +1044,28 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.bottom,
     this.width,
     this.height,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
   }) : assert(left == null || right == null || width == null),
-       assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+       assert(top == null || bottom == null || height == null);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
   /// The [curve] and [duration] arguments must not be null.
   AnimatedPositioned.fromRect({
-    Key? key,
+    super.key,
     required this.child,
     required Rect rect,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
        height = rect.height,
        right = null,
-       bottom = null,
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+       bottom = null;
 
   /// The widget below this widget in the tree.
   ///
@@ -1191,7 +1187,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedPositionedDirectional({
-    Key? key,
+    super.key,
     required this.child,
     this.start,
     this.top,
@@ -1199,12 +1195,11 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     this.bottom,
     this.width,
     this.height,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
   }) : assert(start == null || end == null || width == null),
-       assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+       assert(top == null || bottom == null || height == null);
 
   /// The widget below this widget in the tree.
   ///
@@ -1324,8 +1319,8 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///       mainAxisAlignment: MainAxisAlignment.center,
 ///       children: <Widget>[
 ///         ElevatedButton(
-///           child: const Text('Scale Logo'),
 ///           onPressed: _changeScale,
+///           child: const Text('Scale Logo'),
 ///         ),
 ///         Padding(
 ///           padding: const EdgeInsets.all(50),
@@ -1356,16 +1351,15 @@ class AnimatedScale extends ImplicitlyAnimatedWidget {
   /// The [scale] argument must not be null.
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedScale({
-    Key? key,
+    super.key,
     this.child,
     required this.scale,
     this.alignment = Alignment.center,
     this.filterQuality,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
-  }) : assert(scale != null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+    super.curve,
+    required super.duration,
+    super.onEnd,
+  }) : assert(scale != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -1455,8 +1449,8 @@ class _AnimatedScaleState extends ImplicitlyAnimatedWidgetState<AnimatedScale> {
 ///       mainAxisAlignment: MainAxisAlignment.center,
 ///       children: <Widget>[
 ///         ElevatedButton(
-///           child: const Text('Rotate Logo'),
 ///           onPressed: _changeRotation,
+///           child: const Text('Rotate Logo'),
 ///         ),
 ///         Padding(
 ///           padding: const EdgeInsets.all(50),
@@ -1484,16 +1478,15 @@ class AnimatedRotation extends ImplicitlyAnimatedWidget {
   /// The [turns] argument must not be null.
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedRotation({
-    Key? key,
+    super.key,
     this.child,
     required this.turns,
     this.alignment = Alignment.center,
     this.filterQuality,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
-  }) : assert(turns != null),
-        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+    super.curve,
+    required super.duration,
+    super.onEnd,
+  }) : assert(turns != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -1581,13 +1574,13 @@ class AnimatedSlide extends ImplicitlyAnimatedWidget {
   ///
   /// The [offset] and [duration] arguments must not be null.
   const AnimatedSlide({
-    Key? key,
+    super.key,
     this.child,
     required this.offset,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
-  }) : super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+    super.curve,
+    required super.duration,
+    super.onEnd,
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -1673,8 +1666,8 @@ class _AnimatedSlideState extends ImplicitlyAnimatedWidgetState<AnimatedSlide> {
 ///           child: const FlutterLogo(),
 ///         ),
 ///         ElevatedButton(
-///           child: const Text('Fade Logo'),
 ///           onPressed: _changeOpacity,
+///           child: const Text('Fade Logo'),
 ///         ),
 ///       ],
 ///     );
@@ -1697,15 +1690,14 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// The [opacity] argument must not be null and must be between 0.0 and 1.0,
   /// inclusive. The [curve] and [duration] arguments must not be null.
   const AnimatedOpacity({
-    Key? key,
+    super.key,
     this.child,
     required this.opacity,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
     this.alwaysIncludeSemantics = false,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -1793,15 +1785,14 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// The [opacity] argument must not be null and must be between 0.0 and 1.0,
   /// inclusive. The [curve] and [duration] arguments must not be null.
   const SliverAnimatedOpacity({
-    Key? key,
+    super.key,
     this.sliver,
     required this.opacity,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
     this.alwaysIncludeSemantics = false,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-      super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
 
   /// The sliver below this widget in the tree.
   final Widget? sliver;
@@ -1884,7 +1875,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// The [child], [style], [softWrap], [overflow], [curve], and [duration]
   /// arguments must not be null.
   const AnimatedDefaultTextStyle({
-    Key? key,
+    super.key,
     required this.child,
     required this.style,
     this.textAlign,
@@ -1893,16 +1884,15 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
   }) : assert(style != null),
        assert(child != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+       assert(textWidthBasis != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -2012,7 +2002,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   ///
   /// Animating [shadowColor] is optional and is controlled by the [animateShadowColor] flag.
   const AnimatedPhysicalModel({
-    Key? key,
+    super.key,
     required this.child,
     required this.shape,
     this.clipBehavior = Clip.none,
@@ -2022,9 +2012,9 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     this.animateColor = true,
     required this.shadowColor,
     this.animateShadowColor = true,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
+    super.curve,
+    required super.duration,
+    super.onEnd,
   }) : assert(child != null),
        assert(shape != null),
        assert(clipBehavior != null),
@@ -2033,8 +2023,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(color != null),
        assert(shadowColor != null),
        assert(animateColor != null),
-       assert(animateShadowColor != null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+       assert(animateShadowColor != null);
 
   /// The widget below this widget in the tree.
   ///

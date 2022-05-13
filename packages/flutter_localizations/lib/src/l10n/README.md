@@ -43,7 +43,7 @@ names. They correspond to methods from the `MaterialLocalizations` or
 
 ```dart
 Widget build(BuildContext context) {
-  return FlatButton(
+  return TextButton(
     child: Text(
       MaterialLocalizations.of(context).cancelButtonLabel,
     ),

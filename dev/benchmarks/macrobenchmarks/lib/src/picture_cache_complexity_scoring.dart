@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class PictureCacheComplexityScoringPage extends StatelessWidget {
-  const PictureCacheComplexityScoringPage({Key? key}) : super(key: key);
+  const PictureCacheComplexityScoringPage({super.key});
 
   static const List<String> kTabNames = <String>['1', '2'];
 

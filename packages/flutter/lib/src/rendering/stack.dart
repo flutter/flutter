@@ -270,24 +270,6 @@ enum StackFit {
   passthrough,
 }
 
-/// Whether overflowing children should be clipped, or their overflow be
-/// visible.
-///
-/// Deprecated. Use [Stack.clipBehavior] instead.
-@Deprecated(
-  'Use clipBehavior instead. See the migration guide in flutter.dev/go/clip-behavior. '
-  'This feature was deprecated after v1.22.0-12.0.pre.',
-)
-enum Overflow {
-  /// Overflowing children will be visible.
-  ///
-  /// The visible overflow area will not accept hit testing.
-  visible,
-
-  /// Overflowing children will be clipped to the bounds of their parent.
-  clip,
-}
-
 /// Implements the stack layout algorithm.
 ///
 /// In a stack layout, the children are positioned on top of each other in the
@@ -538,8 +520,7 @@ class RenderStack extends RenderBox
     assert(_resolvedAlignment != null);
     bool hasNonPositionedChildren = false;
     if (childCount == 0) {
-      assert(constraints.biggest.isFinite);
-      return constraints.biggest;
+      return (constraints.biggest.isFinite) ? constraints.biggest : constraints.smallest;
     }
 
     double width = constraints.minWidth;
@@ -677,16 +658,11 @@ class RenderIndexedStack extends RenderStack {
   ///
   /// If the [index] parameter is null, nothing is displayed.
   RenderIndexedStack({
-    List<RenderBox>? children,
-    AlignmentGeometry alignment = AlignmentDirectional.topStart,
-    TextDirection? textDirection,
+    super.children,
+    super.alignment,
+    super.textDirection,
     int? index = 0,
-  }) : _index = index,
-       super(
-         children: children,
-         alignment: alignment,
-         textDirection: textDirection,
-       );
+  }) : _index = index;
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {

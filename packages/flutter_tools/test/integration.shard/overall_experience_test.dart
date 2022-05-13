@@ -22,9 +22,6 @@
 // To aid in debugging, consider passing the `debug: true` argument
 // to the runFlutter function.
 
-// @dart = 2.8
-// This file is ready to transition, just uncomment /*?*/, /*!*/, and /*late*/.
-
 // This file intentionally assumes the tests run in order.
 @Tags(<String>['no-shuffle'])
 
@@ -49,7 +46,7 @@ void debugPrint(String message) {
   print(message);
 }
 
-typedef LineHandler = String/*?*/ Function(String line);
+typedef LineHandler = String? Function(String line);
 
 abstract class Transition {
   const Transition({this.handler, this.logging});
@@ -59,12 +56,12 @@ abstract class Transition {
   /// This should not throw, even if the test is failing. (For example, don't use "expect"
   /// in these callbacks.) Throwing here would prevent the [runFlutter] function from running
   /// to completion, which would leave zombie `flutter` processes around.
-  final LineHandler/*?*/ handler;
+  final LineHandler? handler;
 
   /// Whether to enable or disable logging when this transition is matched.
   ///
   /// The default value, null, leaves the logging state unaffected.
-  final bool/*?*/ logging;
+  final bool? logging;
 
   bool matches(String line);
 
@@ -89,7 +86,7 @@ abstract class Transition {
 }
 
 class Barrier extends Transition {
-  const Barrier(this.pattern, {LineHandler/*?*/ handler, bool/*?*/ logging}) : super(handler: handler, logging: logging);
+  const Barrier(this.pattern, {super.handler, super.logging});
   final Pattern pattern;
 
   @override
@@ -101,11 +98,10 @@ class Barrier extends Transition {
 
 class Multiple extends Transition {
   Multiple(List<Pattern> patterns, {
-    LineHandler/*?*/ handler,
-    bool/*?*/ logging,
+    super.handler,
+    super.logging,
   }) : _originalPatterns = patterns,
-       patterns = patterns.toList(),
-       super(handler: handler, logging: logging);
+       patterns = patterns.toList();
 
   final List<Pattern> _originalPatterns;
   final List<Pattern> patterns;
@@ -159,7 +155,7 @@ class LogLine {
         case 0x0D: return '<CR>';
       }
       return '<${rune.toRadixString(16).padLeft(rune <= 0xFF ? 2 : rune <= 0xFFFF ? 4 : 5, '0')}>';
-    }).join('');
+    }).join();
   }
 }
 
@@ -222,7 +218,7 @@ Future<ProcessTestResult> runFlutter(
     }
   }
   bool streamingLogs = false;
-  Timer/*?*/ timeout;
+  Timer? timeout;
   void processTimeout() {
     if (!streamingLogs) {
       streamingLogs = true;
@@ -235,7 +231,7 @@ Future<ProcessTestResult> runFlutter(
       debugPrint('(taking a long time...)');
     }
   }
-  String stamp() => '[${(clock.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1).padLeft(5, " ")}s]';
+  String stamp() => '[${(clock.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1).padLeft(5)}s]';
   void processStdout(String line) {
     final LogLine log = LogLine('stdout', stamp(), line);
     if (logging) {
@@ -249,10 +245,10 @@ Future<ProcessTestResult> runFlutter(
         debugPrint('(matched ${transitions[nextTransition]})');
       }
       if (transitions[nextTransition].logging != null) {
-        if (!logging && transitions[nextTransition].logging/*!*/) {
+        if (!logging && transitions[nextTransition].logging!) {
           logs.add(log);
         }
-        logging = transitions[nextTransition].logging/*!*/;
+        logging = transitions[nextTransition].logging!;
         if (streamingLogs) {
           if (logging) {
             debugPrint('(enabled logging)');
@@ -262,7 +258,7 @@ Future<ProcessTestResult> runFlutter(
         }
       }
       if (transitions[nextTransition].handler != null) {
-        final String/*?*/ command = transitions[nextTransition].handler/*!*/(line);
+        final String? command = transitions[nextTransition].handler!(line);
         if (command != null) {
           final LogLine inLog = LogLine('stdin', stamp(), command);
           logs.add(inLog);
@@ -333,7 +329,7 @@ void main() {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
     final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
-    bool/*?*/ existsDuringTest;
+    bool? existsDuringTest;
     try {
       expect(fileSystem.file(pidFile).existsSync(), isFalse);
       final ProcessTestResult result = await runFlutter(
@@ -361,16 +357,13 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-    // This test is expected to be skipped when Platform.isWindows:
-    // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
-  }, skip: true); // Flake: https://github.com/flutter/flutter/issues/92042
-
+  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
     final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
-    /*late*/ int pid;
+    late int pid;
     try {
       final ProcessTestResult result = await runFlutter(
         <String>['run', '-dflutter-tester', '--report-ready', '--pid-file', pidFile, '--no-devtools', testScript],
@@ -538,7 +531,7 @@ void main() {
         matches(RegExp(r'^The specific RenderFlex in question is: RenderFlex#..... OVERFLOWING:$')),
         startsWith('  creator: Row ← Test ← '),
         contains(' ← '),
-        endsWith(' ← ⋯'),
+        endsWith(' ⋯'),
         '  parentData: <none> (can use size)',
         '  constraints: BoxConstraints(w=800.0, h=600.0)',
         '  size: Size(800.0, 600.0)',
@@ -615,6 +608,7 @@ void main() {
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
       'M Write SkSL shaders to a unique file in the project directory.',
       'g Run source code generators.',
+      'j Dump frame raster stats for the current frame.',
       'h Repeat this help message.',
       'd Detach (terminate "flutter run" but leave application running).',
       'c Clear the screen',

@@ -93,9 +93,9 @@ class TextFormField extends FormField<String> {
   /// to [initialValue] or the empty string.
   ///
   /// For documentation about the various parameters, see the [TextField] class
-  /// and [new TextField], the constructor.
+  /// and [TextField.new], the constructor.
   TextFormField({
-    Key? key,
+    super.key,
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
@@ -118,12 +118,6 @@ class TextFormField extends FormField<String> {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
-    @Deprecated(
-      'Use maxLengthEnforcement parameter which provides more specific '
-      'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.25.0-5.0.pre.',
-    )
-    bool maxLengthEnforced = true,
     MaxLengthEnforcement? maxLengthEnforcement,
     int? maxLines = 1,
     int? minLines,
@@ -133,8 +127,8 @@ class TextFormField extends FormField<String> {
     GestureTapCallback? onTap,
     VoidCallback? onEditingComplete,
     ValueChanged<String>? onFieldSubmitted,
-    FormFieldSetter<String>? onSaved,
-    FormFieldValidator<String>? validator,
+    super.onSaved,
+    super.validator,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     double cursorWidth = 2.0,
@@ -150,8 +144,9 @@ class TextFormField extends FormField<String> {
     Iterable<String>? autofillHints,
     AutovalidateMode? autovalidateMode,
     ScrollController? scrollController,
-    String? restorationId,
+    super.restorationId,
     bool enableIMEPersonalizedLearning = true,
+    MouseCursor? mouseCursor,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -160,11 +155,6 @@ class TextFormField extends FormField<String> {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
-       assert(maxLengthEnforced != null),
-       assert(
-         maxLengthEnforced || maxLengthEnforcement == null,
-         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
-       ),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
@@ -181,11 +171,7 @@ class TextFormField extends FormField<String> {
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        assert(enableIMEPersonalizedLearning != null),
        super(
-         key: key,
-         restorationId: restorationId,
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
-         onSaved: onSaved,
-         validator: validator,
          enabled: enabled ?? decoration?.enabled ?? true,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<String> field) {
@@ -223,7 +209,6 @@ class TextFormField extends FormField<String> {
                smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
                smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
                enableSuggestions: enableSuggestions,
-               maxLengthEnforced: maxLengthEnforced,
                maxLengthEnforcement: maxLengthEnforcement,
                maxLines: maxLines,
                minLines: minLines,
@@ -248,6 +233,7 @@ class TextFormField extends FormField<String> {
                autofillHints: autofillHints,
                scrollController: scrollController,
                enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+               mouseCursor: mouseCursor,
              ),
            );
          },

@@ -159,7 +159,7 @@ class MutatingRoute extends MaterialPageRoute<void> {
 }
 
 class _SimpleStatefulWidget extends StatefulWidget {
-  const _SimpleStatefulWidget({ Key? key }) : super(key: key);
+  const _SimpleStatefulWidget({ super.key });
   @override
   _SimpleState createState() => _SimpleState();
 }
@@ -172,7 +172,7 @@ class _SimpleState extends State<_SimpleStatefulWidget> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({ Key? key, this.value = '123' }) : super(key: key);
+  const MyStatefulWidget({ super.key, this.value = '123' });
   final String value;
   @override
   MyStatefulWidgetState createState() => MyStatefulWidgetState();
@@ -728,7 +728,14 @@ Future<void> main() async {
 
   testWidgets('Hero pop transition interrupted by a push', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(routes: routes),
+      MaterialApp(
+        routes: routes,
+        theme: ThemeData(pageTransitionsTheme: const PageTransitionsTheme(
+          builders: <TargetPlatform, PageTransitionsBuilder>{
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          },
+        )),
+      ),
     );
 
     // Pushes MaterialPageRoute '/two'.
@@ -1178,22 +1185,22 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
-    bool _isVisible(Element node) {
-      bool isVisible = true;
+    bool isVisible(Element node) {
+      bool visible = true;
       node.visitAncestorElements((Element ancestor) {
         final RenderObject r = ancestor.renderObject!;
         if (r is RenderAnimatedOpacity && r.opacity.value == 0) {
-          isVisible = false;
+          visible = false;
           return false;
         }
         return true;
       });
-      return isVisible;
+      return visible;
     }
 
     // Of all heroes only one should be visible now.
     final Iterable<Element> elements = find.text('Hero').evaluate();
-    expect(elements.where(_isVisible).length, 1);
+    expect(elements.where(isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
@@ -2641,7 +2648,6 @@ Future<void> main() async {
       begin: const Size(200, 200),
       end: const Size(100, 100),
     ).chain(CurveTween(curve: Curves.fastOutSlowIn));
-
 
     await tester.pumpWidget(
       MaterialApp(

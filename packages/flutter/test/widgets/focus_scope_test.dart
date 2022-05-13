@@ -13,11 +13,11 @@ import 'semantics_tester.dart';
 
 class TestFocus extends StatefulWidget {
   const TestFocus({
-    Key? key,
+    super.key,
     this.debugLabel,
     this.name = 'a',
     this.autofocus = false,
-  }) : super(key: key);
+  });
 
   final String? debugLabel;
   final String name;

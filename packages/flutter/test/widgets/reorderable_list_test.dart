@@ -7,6 +7,103 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('SliverReorderableList works well when having gestureSettings', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103404
+    const int itemCount = 5;
+    int onReorderCallCount = 0;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorder(int fromIndex, int toIndex) {
+      onReorderCallCount += 1;
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+    // The list has five elements of height 100
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: itemCount,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text('item ${items[index]}'),
+                    ),
+                  );
+                },
+                onReorder: handleReorder,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Start gesture on first item
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag a little bit to make `ImmediateMultiDragGestureRecognizer` compete with `VerticalDragGestureRecognizer`
+    await drag.moveBy(const Offset(0, 10));
+    await tester.pump();
+    // Drag enough to move down the first item
+    await drag.moveBy(const Offset(0, 40));
+    await tester.pump();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(onReorderCallCount, 1);
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('SliverReorderableList.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverReorderableList(
+                  itemCount: itemCount,
+                  itemBuilder: (BuildContext _, int index) => Container(
+                    key: Key('$index'),
+                    height: 2000.0,
+                  ),
+                  findChildIndexCallback: (Key key) {
+                    finderCalled = true;
+                    return null;
+                  },
+                  onReorder: (int oldIndex, int newIndex) { },
+                ),
+              ],
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/88191
   testWidgets('Do not crash when dragging with two fingers simultaneously', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(3, (int index) => index);
@@ -912,7 +1009,7 @@ void main() {
 
 class TestList extends StatefulWidget {
   const TestList({
-    Key? key,
+    super.key,
     this.textColor,
     this.iconColor,
     this.proxyDecorator,
@@ -920,7 +1017,7 @@ class TestList extends StatefulWidget {
     this.reverse = false,
     this.onReorderStart,
     this.onReorderEnd,
-  }) : super(key: key);
+  });
 
   final List<int> items;
   final Color? textColor;

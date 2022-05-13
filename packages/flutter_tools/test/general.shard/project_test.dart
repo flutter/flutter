@@ -318,7 +318,6 @@ void main() {
         final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('flutter_export_environment.sh'));
-        expectExists(flutter.childFile('${project.manifest.appName}.podspec'));
         expectExists(flutter.childFile('Generated.xcconfig'));
         final Directory pluginRegistrantClasses = flutter
             .childDirectory('FlutterPluginRegistrant')
@@ -571,14 +570,14 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       });
 
       testUsingContext('app product name xcodebuild settings', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
         mockXcodeProjectInterpreter.buildSettings = <String, String>{
-          'FULL_PRODUCT_NAME': 'My App.app'
+          'FULL_PRODUCT_NAME': 'My App.app',
         };
         mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
 
@@ -586,7 +585,7 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       });
     });
 
@@ -888,7 +887,7 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
         'name': 'flutter_template_images',
         'rootUri': dummyTemplateImagesDirectory.uri.toString(),
         'packageUri': 'lib/',
-        'languageVersion': '2.6'
+        'languageVersion': '2.6',
       },
     ],
   }));

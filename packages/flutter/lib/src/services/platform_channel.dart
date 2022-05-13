@@ -198,6 +198,9 @@ class MethodChannel {
   ///
   /// ```dart
   /// class Music {
+  ///   // Class cannot be instantiated.
+  ///   const Music._();
+  ///
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
@@ -213,7 +216,7 @@ class MethodChannel {
   ///     // the actual values involved would support such a typed container.
   ///     // The correct type cannot be inferred with any value of `T`.
   ///     final List<dynamic>? songs = await _channel.invokeMethod<List<dynamic>>('getSongs');
-  ///     return songs?.map(Song.fromJson).toList() ?? <Song>[];
+  ///     return songs?.cast<Map<String, Object?>>().map<Song>(Song.fromJson).toList() ?? <Song>[];
   ///   }
   ///
   ///   static Future<void> play(Song song, double volume) async {
@@ -225,7 +228,7 @@ class MethodChannel {
   ///         'volume': volume,
   ///       });
   ///     } on PlatformException catch (e) {
-  ///       throw 'Unable to play ${song.title}: ${e.message}';
+  ///       throw ArgumentError('Unable to play ${song.title}: ${e.message}');
   ///     }
   ///   }
   /// }
@@ -237,8 +240,8 @@ class MethodChannel {
   ///   final String title;
   ///   final String artist;
   ///
-  ///   static Song fromJson(dynamic json) {
-  ///     return Song(json['id'] as String, json['title'] as String, json['artist'] as String);
+  ///   static Song fromJson(Map<String, Object?> json) {
+  ///     return Song(json['id']! as String, json['title']! as String, json['artist']! as String);
   ///   }
   /// }
   /// ```
@@ -427,8 +430,7 @@ class MethodChannel {
 /// {@macro flutter.services.method_channel.FIFO}
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
-  const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
-    : super(name, codec, binaryMessenger);
+  const OptionalMethodChannel(super.name, [super.codec, super.binaryMessenger]);
 
   @override
   Future<T?> invokeMethod<T>(String method, [ dynamic arguments ]) async {
