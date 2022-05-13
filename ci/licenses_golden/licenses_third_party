@@ -1,4 +1,4 @@
-Signature: 850fb07b402a6308e2c796e75ba8b45f
+Signature: 1820012276562856dc2aa6d058fb8bd6
 
 UNUSED LICENSES:
 
@@ -18523,6 +18523,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
@@ -18653,6 +18654,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
@@ -18793,6 +18795,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
@@ -18928,6 +18931,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
@@ -19062,6 +19066,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
@@ -19201,6 +19206,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
@@ -19336,6 +19342,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
@@ -19470,6 +19477,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
@@ -19577,6 +19585,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
@@ -19751,6 +19760,7 @@ FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
 FILE: ../../../third_party/icu/patches/lstmbe-header.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
+FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/unused-var.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
