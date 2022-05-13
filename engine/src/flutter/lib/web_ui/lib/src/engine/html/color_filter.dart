@@ -10,7 +10,6 @@ import 'package:ui/ui.dart' as ui;
 import '../browser_detection.dart';
 import '../canvaskit/color_filter.dart';
 import '../color_filter.dart';
-import '../dom.dart';
 import '../embedder.dart';
 import '../util.dart';
 import 'bitmap_canvas.dart';
@@ -24,12 +23,12 @@ class PersistedColorFilter extends PersistedContainerSurface
       : super(oldLayer);
 
   @override
-  html.Element? get childContainer => _childContainer as html.Element?;
+  html.Element? get childContainer => _childContainer;
 
   /// The dedicated child container element that's separate from the
   /// [rootElement] is used to compensate for the coordinate system shift
   /// introduced by the [rootElement] translation.
-  DomElement? _childContainer;
+  html.Element? _childContainer;
 
   /// Color filter to apply to this surface.
   final ui.ColorFilter filter;
@@ -62,9 +61,9 @@ class PersistedColorFilter extends PersistedContainerSurface
   }
 
   @override
-  DomElement createElement() {
-    final DomElement element = defaultCreateElement('flt-color-filter');
-    final DomElement container = createDomElement('flt-filter-interior');
+  html.Element createElement() {
+    final html.Element element = defaultCreateElement('flt-color-filter');
+    final html.Element container = html.Element.tag('flt-filter-interior');
     container.style.position = 'absolute';
     _childContainer = container;
     element.append(_childContainer!);

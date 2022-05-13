@@ -7,7 +7,6 @@ import 'dart:html' as html;
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../dom.dart';
 import '../frame_reference.dart';
 import '../onscreen_logging.dart';
 import '../semantics.dart';
@@ -370,7 +369,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
       }
     }
     assert(debugAssertSurfaceState(this, PersistedSurfaceState.created));
-    rootElement = createElement() as html.Element;
+    rootElement = createElement();
     assert(rootElement != null);
     applyWebkitClipFix(rootElement);
     if (debugExplainSurfaceStats) {
@@ -500,12 +499,12 @@ abstract class PersistedSurface implements ui.EngineLayer {
   }
 
   /// Creates a DOM element for this surface.
-  DomElement createElement();
+  html.Element createElement();
 
   /// Creates a DOM element for this surface preconfigured with common
   /// attributes, such as absolute positioning and debug information.
-  DomElement defaultCreateElement(String tagName) {
-    final DomElement element = createDomElement(tagName);
+  html.Element defaultCreateElement(String tagName) {
+    final html.Element element = html.Element.tag(tagName);
     element.style.position = 'absolute';
     if (assertionsEnabled) {
       element.setAttribute('flt-layer-state', 'new');

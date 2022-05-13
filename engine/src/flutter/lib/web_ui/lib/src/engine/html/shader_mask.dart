@@ -7,7 +7,6 @@ import 'dart:html' as html;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
-import '../dom.dart';
 import '../embedder.dart';
 import 'bitmap_canvas.dart';
 import 'color_filter.dart';
@@ -35,7 +34,7 @@ class PersistedShaderMask extends PersistedContainerSurface
     this.filterQuality,
   ) : super(oldLayer);
 
-  DomElement? _childContainer;
+  html.Element? _childContainer;
   final ui.Shader shader;
   final ui.Rect maskRect;
   final ui.BlendMode blendMode;
@@ -53,7 +52,7 @@ class PersistedShaderMask extends PersistedContainerSurface
   }
 
   @override
-  html.Element? get childContainer => _childContainer as html.Element?;
+  html.Element? get childContainer => _childContainer;
 
   @override
   void discard() {
@@ -73,9 +72,9 @@ class PersistedShaderMask extends PersistedContainerSurface
   }
 
   @override
-  DomElement createElement() {
-    final DomElement element = defaultCreateElement('flt-shader-mask');
-    final DomElement container = createDomElement('flt-mask-interior');
+  html.Element createElement() {
+    final html.Element element = defaultCreateElement('flt-shader-mask');
+    final html.Element container = html.Element.tag('flt-mask-interior');
     container.style.position = 'absolute';
     _childContainer = container;
     element.append(_childContainer!);

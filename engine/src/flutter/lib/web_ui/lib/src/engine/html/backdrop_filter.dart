@@ -7,7 +7,6 @@ import 'dart:html' as html;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
-import '../dom.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import 'shaders/shader.dart';
@@ -26,9 +25,9 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   /// [rootElement] is used to host child in front of [filterElement] that
   /// is transformed to cover background.
   @override
-  html.Element? get childContainer => _childContainer as html.Element?;
-  DomElement? _childContainer;
-  DomElement? _filterElement;
+  html.Element? get childContainer => _childContainer;
+  html.Element? _childContainer;
+  html.Element? _filterElement;
   ui.Rect? _activeClipBounds;
   // Cached inverted transform for [transform].
   late Matrix4 _invertedTransform;
@@ -44,10 +43,10 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   }
 
   @override
-  DomElement createElement() {
-    final DomElement element = defaultCreateElement('flt-backdrop');
-    element.style.transformOrigin = '0 0 0';
-    _childContainer = createDomElement('flt-backdrop-interior');
+  html.Element createElement() {
+    final html.Element element = defaultCreateElement('flt-backdrop')
+      ..style.transformOrigin = '0 0 0';
+    _childContainer = html.Element.tag('flt-backdrop-interior');
     _childContainer!.style.position = 'absolute';
     if (debugExplainSurfaceStats) {
       // This creates an additional interior element. Count it too.
@@ -103,7 +102,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       }
       parentSurface = parentSurface.parent;
     }
-    final DomCSSStyleDeclaration filterElementStyle = _filterElement!.style;
+    final html.CssStyleDeclaration filterElementStyle = _filterElement!.style;
     filterElementStyle
       ..position = 'absolute'
       ..left = '${left}px'

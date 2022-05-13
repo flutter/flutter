@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
-import '../dom.dart';
 import '../embedder.dart';
 import '../util.dart';
 import 'layout_service.dart';
@@ -744,7 +743,7 @@ void applyTextStyleToElement({
       if (textDecoration != null) {
         if (browserEngine == BrowserEngine.webkit) {
           setElementStyle(
-              element as DomElement, '-webkit-text-decoration', textDecoration);
+              element, '-webkit-text-decoration', textDecoration);
         } else {
           cssStyle.textDecoration = textDecoration;
         }
