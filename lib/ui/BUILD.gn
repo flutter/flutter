@@ -187,6 +187,8 @@ if (enable_unittests) {
       "fixtures/Horizontal.png",
       "fixtures/hello_loop_2.gif",
       "fixtures/hello_loop_2.webp",
+      "fixtures/FontManifest.json",
+      "//flutter/third_party/txt/third_party/fonts/Roboto-Medium.ttf",
     ]
   }
 

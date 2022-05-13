@@ -421,6 +421,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
 
   settings.use_test_fonts =
       command_line.HasOption(FlagForSwitch(Switch::UseTestFonts));
+  settings.use_asset_fonts =
+      !command_line.HasOption(FlagForSwitch(Switch::DisableAssetFonts));
 
   std::string enable_skparagraph = command_line.GetOptionValueWithDefault(
       FlagForSwitch(Switch::EnableSkParagraph), "");
