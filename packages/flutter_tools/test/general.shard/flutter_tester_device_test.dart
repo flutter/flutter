@@ -293,7 +293,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     enableObservatory: enableObservatory,
     machine: false,
     host: InternetAddress.loopbackIPv6,
-    buildTestAssets: false,
+    testAssetDirectory: null,
     flutterProject: null,
     icudtlPath: null,
     compileExpression: null,
