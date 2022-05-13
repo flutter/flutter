@@ -287,7 +287,9 @@ class _MulticastCanvas implements Canvas {
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) {}
+  dynamic noSuchMethod(Invocation invocation) {
+    super.noSuchMethod(invocation);
+  }
 }
 
 Rect _calculateSubtreeBoundsHelper(RenderObject object, Matrix4 transform) {
