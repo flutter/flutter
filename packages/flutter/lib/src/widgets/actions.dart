@@ -533,29 +533,6 @@ class CallbackAction<T extends Intent> extends Action<T> {
   Object? invoke(T intent) => onInvoke(intent);
 }
 
-/// An intent that encapsulates a [VoidCallback] to be invoked by a
-/// [VoidCallbackAction] when it receives this intent.
-class VoidCallbackIntent extends Intent {
-  /// Creates a [VoidCallbackIntent].
-  ///
-  /// The [callback] argument is required.
-  const VoidCallbackIntent(this.callback);
-
-  /// The callback that is to be called by the [VoidCallbackAction] that
-  /// receives this intent.
-  final VoidCallback callback;
-}
-
-/// An action that invokes the [VoidCallback] given to it by the
-/// [VoidCallbackIntent] that configures it when invoked.
-class VoidCallbackAction extends Action<VoidCallbackIntent> {
-  @override
-  Object? invoke(VoidCallbackIntent intent) {
-    intent.callback();
-    return null;
-  }
-}
-
 /// An action dispatcher that simply invokes the actions given to it.
 ///
 /// See also:

@@ -7,118 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
-
-class TestAction extends CallbackAction<Intent> {
-  TestAction({
-    required super.onInvoke,
-  })  : assert(onInvoke != null);
-
-  static const LocalKey key = ValueKey<Type>(TestAction);
-}
-
-class TestDispatcher extends ActionDispatcher {
-  const TestDispatcher({this.postInvoke});
-
-  final PostInvokeCallback? postInvoke;
-
-  @override
-  Object? invokeAction(Action<TestIntent> action, Intent intent, [BuildContext? context]) {
-    final Object? result = super.invokeAction(action, intent, context);
-    postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
-    return result;
-  }
-}
-
-/// An activator that accepts down events that has [key] as the logical key.
-///
-/// This class is used only to tests. It is intentionally designed poorly by
-/// returning null in [triggers], and checks [key] in [accepts].
-class DumbLogicalActivator extends ShortcutActivator {
-  const DumbLogicalActivator(this.key);
-
-  final LogicalKeyboardKey key;
-
-  @override
-  Iterable<LogicalKeyboardKey>? get triggers => null;
-
-  @override
-  bool accepts(RawKeyEvent event, RawKeyboard state) {
-    return event is RawKeyDownEvent
-        && event.logicalKey == key;
-  }
-
-  /// Returns a short and readable description of the key combination.
-  ///
-  /// Intended to be used in debug mode for logging purposes. In release mode,
-  /// [debugDescribeKeys] returns an empty string.
-  @override
-  String debugDescribeKeys() {
-    String result = '';
-    assert(() {
-      result = key.keyLabel;
-      return true;
-    }());
-    return result;
-  }
-}
-
-class TestIntent extends Intent {
-  const TestIntent();
-}
-
-class TestIntent2 extends Intent {
-  const TestIntent2();
-}
-
-class TestShortcutManager extends ShortcutManager {
-  TestShortcutManager(this.keys);
-
-  List<LogicalKeyboardKey> keys;
-
-  @override
-  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
-      keys.add(event.logicalKey);
-    }
-    return super.handleKeypress(context, event);
-  }
-}
-
-Widget activatorTester(
-  ShortcutActivator activator,
-  ValueSetter<Intent> onInvoke, [
-  ShortcutActivator? activator2,
-  ValueSetter<Intent>? onInvoke2,
-]) {
-  final bool hasSecond = activator2 != null && onInvoke2 != null;
-  return Actions(
-    key: GlobalKey(),
-    actions: <Type, Action<Intent>>{
-      TestIntent: TestAction(onInvoke: (Intent intent) {
-        onInvoke(intent);
-        return true;
-      }),
-      if (hasSecond)
-        TestIntent2: TestAction(onInvoke: (Intent intent) {
-          onInvoke2(intent);
-        return null;
-      }),
-    },
-    child: Shortcuts(
-      shortcuts: <ShortcutActivator, Intent>{
-        activator: const TestIntent(),
-        if (hasSecond)
-          activator2: const TestIntent2(),
-      },
-      child: const Focus(
-        autofocus: true,
-        child: SizedBox(width: 100, height: 100),
-      ),
-    ),
-  );
-}
-
 void main() {
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
@@ -1420,24 +1308,24 @@ void main() {
     });
   });
 
-  group('CallbackShortcutRegistry', () {
-    testWidgets('trigger CallbackShortcutRegistry on key events', (WidgetTester tester) async {
+  group('ShortcutsRegistrar', () {
+    testWidgets('trigger ShortcutsRegistrar on key events', (WidgetTester tester) async {
       int invokedA = 0;
       int invokedB = 0;
       await tester.pumpWidget(
         ShortcutsRegistrar(
           child: TestCallbackRegistration(
-            bindings: <ShortcutActivator, Intent>{
-              const SingleActivator(LogicalKeyboardKey.keyA): VoidCallbackIntent(() {
+            shortcuts: <ShortcutActivator, Intent>{
+              const SingleActivator(LogicalKeyboardKey.keyA): _VoidCallbackIntent(() {
                 invokedA += 1;
               }),
-              const SingleActivator(LogicalKeyboardKey.keyB): VoidCallbackIntent(() {
+              const SingleActivator(LogicalKeyboardKey.keyB): _VoidCallbackIntent(() {
                 invokedB += 1;
               }),
             },
             child: Actions(
               actions: <Type, Action<Intent>>{
-                VoidCallbackIntent: VoidCallbackAction(),
+                _VoidCallbackIntent: _VoidCallbackAction(),
               },
               child: const Focus(
                 autofocus: true,
@@ -1473,7 +1361,7 @@ void main() {
           home: Scaffold(
             body: ShortcutsRegistrar(
               child: TestCallbackRegistration(
-                bindings: const <ShortcutActivator, Intent>{
+                shortcuts: const <ShortcutActivator, Intent>{
                   SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(SelectionChangedCause.keyboard),
                 },
                 child: TextField(
@@ -1498,27 +1386,27 @@ void main() {
       expect(controller.selection.extentOffset, equals(7));
     });
 
-    testWidgets('nested CallbackShortcutRegistries stop propagation', (WidgetTester tester) async {
+    testWidgets('nested ShortcutsRegistrars stop propagation', (WidgetTester tester) async {
       int invokedOuter = 0;
       int invokedInner = 0;
       await tester.pumpWidget(
         ShortcutsRegistrar(
           child: TestCallbackRegistration(
-            bindings: <ShortcutActivator, Intent>{
-              const SingleActivator(LogicalKeyboardKey.keyA): VoidCallbackIntent(() {
+            shortcuts: <ShortcutActivator, Intent>{
+              const SingleActivator(LogicalKeyboardKey.keyA): _VoidCallbackIntent(() {
                 invokedOuter += 1;
               }),
             },
             child: ShortcutsRegistrar(
               child: TestCallbackRegistration(
-                bindings: <ShortcutActivator, Intent>{
-                  const SingleActivator(LogicalKeyboardKey.keyA): VoidCallbackIntent(() {
+                shortcuts: <ShortcutActivator, Intent>{
+                  const SingleActivator(LogicalKeyboardKey.keyA): _VoidCallbackIntent(() {
                     invokedInner += 1;
                   }),
                 },
                 child: Actions(
                   actions: <Type, Action<Intent>>{
-                    VoidCallbackIntent: VoidCallbackAction(),
+                    _VoidCallbackIntent: _VoidCallbackAction(),
                   },
                 child: const Focus(
                   autofocus: true,
@@ -1539,27 +1427,27 @@ void main() {
       expect(invokedInner, equals(1));
     });
 
-    testWidgets('non-overlapping nested CallbackShortcutRegistries fire appropriately', (WidgetTester tester) async {
+    testWidgets('non-overlapping nested ShortcutsRegistrars fire appropriately', (WidgetTester tester) async {
       int invokedOuter = 0;
       int invokedInner = 0;
       await tester.pumpWidget(
         ShortcutsRegistrar(
           child: TestCallbackRegistration(
-            bindings: <ShortcutActivator, Intent>{
-              const CharacterActivator('b'): VoidCallbackIntent(() {
+            shortcuts: <ShortcutActivator, Intent>{
+              const CharacterActivator('b'): _VoidCallbackIntent(() {
                 invokedOuter += 1;
               }),
             },
             child: ShortcutsRegistrar(
               child: TestCallbackRegistration(
-                bindings: <ShortcutActivator, Intent>{
-                  const CharacterActivator('a'): VoidCallbackIntent(() {
+                shortcuts: <ShortcutActivator, Intent>{
+                  const CharacterActivator('a'): _VoidCallbackIntent(() {
                     invokedInner += 1;
                   }),
                 },
                 child: Actions(
                   actions: <Type, Action<Intent>>{
-                    VoidCallbackIntent: VoidCallbackAction(),
+                    _VoidCallbackIntent: _VoidCallbackAction(),
                   },
                   child: const Focus(
                     autofocus: true,
@@ -1613,12 +1501,12 @@ void main() {
                 return true;
               },
             ),
-            VoidCallbackIntent: VoidCallbackAction(),
+            _VoidCallbackIntent: _VoidCallbackAction(),
           },
           child: ShortcutsRegistrar(
             child: TestCallbackRegistration(
-              bindings: <ShortcutActivator, Intent>{
-                const CharacterActivator('b'): VoidCallbackIntent(() {
+              shortcuts: <ShortcutActivator, Intent>{
+                const CharacterActivator('b'): _VoidCallbackIntent(() {
                   invokedCallbackB += 1;
                 }),
               },
@@ -1629,8 +1517,8 @@ void main() {
                 },
                 child: ShortcutsRegistrar(
                   child: TestCallbackRegistration(
-                    bindings: <ShortcutActivator, Intent>{
-                      const CharacterActivator('a'): VoidCallbackIntent(() {
+                    shortcuts: <ShortcutActivator, Intent>{
+                      const CharacterActivator('a'): _VoidCallbackIntent(() {
                         invokedCallbackA += 1;
                       }),
                     },
@@ -1661,13 +1549,88 @@ void main() {
       expect(invokedActionB, equals(1));
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
     });
+
+    testWidgets('Updating shortcuts triggers dependency rebuild', (WidgetTester tester) async {
+      final List<Map<ShortcutActivator, Intent>> shortcutsChanged = <Map<ShortcutActivator, Intent>>[];
+      void dependenciesUpdated(Map<ShortcutActivator, Intent> shortcuts) {
+        shortcutsChanged.add(shortcuts);
+      }
+      await tester.pumpWidget(
+        ShortcutsRegistrar(
+          child: TestCallbackRegistration(
+            onDependencyUpdate: dependenciesUpdated,
+            shortcuts: const <ShortcutActivator, Intent>{
+              SingleActivator(LogicalKeyboardKey.keyA): SelectAllTextIntent(SelectionChangedCause.keyboard),
+              SingleActivator(LogicalKeyboardKey.keyB): ActivateIntent(),
+            },
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                _VoidCallbackIntent: _VoidCallbackAction(),
+              },
+              child: const Focus(
+                autofocus: true,
+                child: Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        ShortcutsRegistrar(
+          child: TestCallbackRegistration(
+            onDependencyUpdate: dependenciesUpdated,
+            shortcuts: const <ShortcutActivator, Intent>{
+              SingleActivator(LogicalKeyboardKey.keyA): SelectAllTextIntent(SelectionChangedCause.keyboard),
+            },
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                _VoidCallbackIntent: _VoidCallbackAction(),
+              },
+              child: const Focus(
+                autofocus: true,
+                child: Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        ShortcutsRegistrar(
+          child: TestCallbackRegistration(
+            onDependencyUpdate: dependenciesUpdated,
+            shortcuts: const <ShortcutActivator, Intent>{
+              SingleActivator(LogicalKeyboardKey.keyA): SelectAllTextIntent(SelectionChangedCause.keyboard),
+              SingleActivator(LogicalKeyboardKey.keyB): ActivateIntent(),
+            },
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                _VoidCallbackIntent: _VoidCallbackAction(),
+              },
+              child: const Focus(
+                autofocus: true,
+                child: Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(shortcutsChanged.length, equals(2));
+      expect(shortcutsChanged.last, equals(const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.keyA): SelectAllTextIntent(SelectionChangedCause.keyboard),
+        SingleActivator(LogicalKeyboardKey.keyB): ActivateIntent(),
+      }));
+    });
   });
 }
 
 class TestCallbackRegistration extends StatefulWidget {
-  const TestCallbackRegistration({super.key, required this.bindings, required this.child});
+  const TestCallbackRegistration({super.key, required this.shortcuts, this.onDependencyUpdate, required this.child});
 
-  final Map<ShortcutActivator, Intent> bindings;
+  final Map<ShortcutActivator, Intent> shortcuts;
+  final void Function(Map<ShortcutActivator, Intent> shortcuts)? onDependencyUpdate;
   final Widget child;
 
   @override
@@ -1680,21 +1643,22 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _cachedRegistry ??= ShortcutsRegistrar.of(context)..addAll(widget.bindings);
+    _cachedRegistry ??= ShortcutsRegistrar.of(context)..setShortcuts(context, widget.shortcuts);
   }
 
   @override
   void didUpdateWidget(TestCallbackRegistration oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.bindings != oldWidget.bindings || _cachedRegistry == null) {
-      ShortcutsRegistrar.of(context).removeAll(oldWidget.bindings.keys);
-      _cachedRegistry = ShortcutsRegistrar.of(context)..addAll(widget.bindings);
+    if (widget.shortcuts != oldWidget.shortcuts || _cachedRegistry == null) {
+      _cachedRegistry?.clearShortcuts(context);
+      _cachedRegistry = ShortcutsRegistrar.of(context)..setShortcuts(context, widget.shortcuts);
     }
+    widget.onDependencyUpdate?.call(ShortcutsRegistrar.of(context).shortcuts);
   }
 
   @override
   void dispose() {
-    _cachedRegistry?.removeAll(widget.bindings.keys);
+    _cachedRegistry?.clearShortcuts(context);
     super.dispose();
   }
 
@@ -1702,4 +1666,139 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
   Widget build(BuildContext context) {
     return widget.child;
   }
+}
+
+/// An intent that encapsulates a [VoidCallback] to be invoked by a
+/// [_VoidCallbackAction] when it receives this intent.
+class _VoidCallbackIntent extends Intent {
+  /// Creates a [_VoidCallbackIntent].
+  ///
+  /// The [callback] argument is required.
+  const _VoidCallbackIntent(this.callback);
+
+  /// The callback that is to be called by the [_VoidCallbackAction] that
+  /// receives this intent.
+  final VoidCallback callback;
+}
+
+/// An action that invokes the [VoidCallback] given to it by the
+/// [_VoidCallbackIntent] that configures it when invoked.
+class _VoidCallbackAction extends Action<_VoidCallbackIntent> {
+  @override
+  Object? invoke(_VoidCallbackIntent intent) {
+    intent.callback();
+    return null;
+  }
+}
+
+typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
+
+class TestAction extends CallbackAction<Intent> {
+  TestAction({
+    required super.onInvoke,
+  })  : assert(onInvoke != null);
+
+  static const LocalKey key = ValueKey<Type>(TestAction);
+}
+
+class TestDispatcher extends ActionDispatcher {
+  const TestDispatcher({this.postInvoke});
+
+  final PostInvokeCallback? postInvoke;
+
+  @override
+  Object? invokeAction(Action<TestIntent> action, Intent intent, [BuildContext? context]) {
+    final Object? result = super.invokeAction(action, intent, context);
+    postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
+    return result;
+  }
+}
+
+/// An activator that accepts down events that has [key] as the logical key.
+///
+/// This class is used only to tests. It is intentionally designed poorly by
+/// returning null in [triggers], and checks [key] in [accepts].
+class DumbLogicalActivator extends ShortcutActivator {
+  const DumbLogicalActivator(this.key);
+
+  final LogicalKeyboardKey key;
+
+  @override
+  Iterable<LogicalKeyboardKey>? get triggers => null;
+
+  @override
+  bool accepts(RawKeyEvent event, RawKeyboard state) {
+    return event is RawKeyDownEvent
+        && event.logicalKey == key;
+  }
+
+  /// Returns a short and readable description of the key combination.
+  ///
+  /// Intended to be used in debug mode for logging purposes. In release mode,
+  /// [debugDescribeKeys] returns an empty string.
+  @override
+  String debugDescribeKeys() {
+    String result = '';
+    assert(() {
+      result = key.keyLabel;
+      return true;
+    }());
+    return result;
+  }
+}
+
+class TestIntent extends Intent {
+  const TestIntent();
+}
+
+class TestIntent2 extends Intent {
+  const TestIntent2();
+}
+
+class TestShortcutManager extends ShortcutManager {
+  TestShortcutManager(this.keys);
+
+  List<LogicalKeyboardKey> keys;
+
+  @override
+  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
+      keys.add(event.logicalKey);
+    }
+    return super.handleKeypress(context, event);
+  }
+}
+
+Widget activatorTester(
+    ShortcutActivator activator,
+    ValueSetter<Intent> onInvoke, [
+      ShortcutActivator? activator2,
+      ValueSetter<Intent>? onInvoke2,
+    ]) {
+  final bool hasSecond = activator2 != null && onInvoke2 != null;
+  return Actions(
+    key: GlobalKey(),
+    actions: <Type, Action<Intent>>{
+      TestIntent: TestAction(onInvoke: (Intent intent) {
+        onInvoke(intent);
+        return true;
+      }),
+      if (hasSecond)
+        TestIntent2: TestAction(onInvoke: (Intent intent) {
+          onInvoke2(intent);
+          return null;
+        }),
+    },
+    child: Shortcuts(
+      shortcuts: <ShortcutActivator, Intent>{
+        activator: const TestIntent(),
+        if (hasSecond)
+          activator2: const TestIntent2(),
+      },
+      child: const Focus(
+        autofocus: true,
+        child: SizedBox(width: 100, height: 100),
+      ),
+    ),
+  );
 }

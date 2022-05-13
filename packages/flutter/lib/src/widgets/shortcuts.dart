@@ -1062,88 +1062,85 @@ class CallbackShortcuts extends StatelessWidget {
   }
 }
 
-/// An interface that allows adding or removing shortcut bindings to a
+/// A class that allows adding or removing shortcut bindings to a
 /// [ShortcutsRegistrar].
 ///
-/// Objects that implement this interface are returned from
-/// [ShortcutsRegistrar.of] and [ShortcutsRegistrar.maybeOf].
+/// Objects of this type are returned from [ShortcutsRegistrar.of] and
+/// [ShortcutsRegistrar.maybeOf].
+///
+/// The registry may be listened to (with [addListener]/[removeListener]) for
+/// change notifications when the registered shortcuts change. When shortcuts
+/// are added or removed, change notifications will be dispatched after the
+/// current frame is finished.
 class ShortcutsRegistry extends ChangeNotifier {
   /// Gets the shortcut bindings that are registered with this
   /// [ShortcutsRegistry].
   ///
   /// Do not modify the returned map, as that will bypass the change
   /// notification mechanism..
-  final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
+  Map<ShortcutActivator, Intent> get shortcuts {
+    return <ShortcutActivator, Intent>{
+      for (final BuildContext context in _contextShortcuts.keys) ..._contextShortcuts[context]!,
+    };
+  }
+  final Map<BuildContext, Map<ShortcutActivator, Intent>> _contextShortcuts = <BuildContext, Map<ShortcutActivator, Intent>>{};
 
-  /// Adds a shortcut binding to this [ShortcutsRegistry].
+  /// Sets the given shortcut bindings associated with the given `context`
+  /// in this [ShortcutsRegistry].
   ///
-  /// Will assert in debug mode if the given shortcut is already bound to an
-  /// intent.
+  /// Will assert in debug mode if another context has already defined a given
+  /// shortcut.
   ///
-  /// If two equivalent, but different, [ShortcutActivator]s are added, all
-  /// of them will be executed. For example, if both
+  /// If two equivalent, but different, [ShortcutActivator]s are added, all of
+  /// them will be executed when triggered. For example, if both
   /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
   /// are added, then both will be executed when an "a" key is pressed.
-  void add(ShortcutActivator activator, Intent intent) {
-    assert(!shortcuts.containsKey(activator),
-    '$ShortcutsRegistrar: Received a duplicate registration for the shortcut activator $activator.');
-    shortcuts[activator] = intent;
+  void setShortcuts(BuildContext context, Map<ShortcutActivator, Intent> newShortcuts) {
+    _contextShortcuts[context] = newShortcuts;
+    _debugCheckForDuplicates();
     notifyListeners();
   }
 
-  /// Adds all given shortcut bindings to this [ShortcutsRegistry].
-  ///
-  /// Will assert in debug mode if a given shortcut in the map is already bound
-  /// to an intent.
-  ///
-  /// If two equivalent, but different, [ShortcutActivator]s are added, all
-  /// of them will be executed. For example, if both
-  /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
-  /// are added, then both will be executed when an "a" key is pressed.
-  void addAll(Map<ShortcutActivator, Intent> bindings) {
-    ShortcutActivator? found;
+  /// Removes the shortcuts with the given [ShortcutActivator] bindings.
+  void clearShortcuts(BuildContext context) {
+    if (_contextShortcuts.remove(context) != null) {
+      notifyListeners();
+    }
+  }
+
+  void _debugCheckForDuplicates() {
     assert(() {
-      shortcuts.forEach((ShortcutActivator key, Intent value) {
-        if (bindings.containsKey(key)) {
-          found = key;
+      final Map<ShortcutActivator, BuildContext> previous = <ShortcutActivator, BuildContext>{};
+      ShortcutActivator? found;
+      BuildContext? foundContext;
+      BuildContext? previousContext;
+      for (final MapEntry<BuildContext, Map<ShortcutActivator, Intent>> contextEntry in _contextShortcuts.entries) {
+        for (final MapEntry<ShortcutActivator, Intent> entry in contextEntry.value.entries) {
+          if (previous.containsKey(entry.key)) {
+            found = entry.key;
+            previousContext = previous[entry.key];
+            foundContext = contextEntry.key;
+            break;
+          }
+          previous[entry.key] = contextEntry.key;
         }
-      });
-      return found == null;
-    } (),
-    '$ShortcutsRegistrar: Received a duplicate registration for the shortcut activator $found.');
-    shortcuts.addAll(bindings);
-    notifyListeners();
-  }
-
-  /// Removes the shortcut with the given [ShortcutActivator] binding.
-  void remove(ShortcutActivator activator) {
-    if (shortcuts.containsKey(activator)) {
-      shortcuts.remove(activator);
-      notifyListeners();
-    }
-  }
-
-  /// Removes the shortcut with the given [ShortcutActivator] binding.
-  void removeAll(Iterable<ShortcutActivator> activators) {
-    bool removed = false;
-    shortcuts.removeWhere((ShortcutActivator key, Intent value) {
-      if (activators.contains(key)) {
-        removed = true;
-        return true;
+        if (found != null) {
+          break;
+        }
       }
-      return false;
-    });
-    if (removed) {
-      notifyListeners();
-    }
+      if (found != null) {
+        throw FlutterError(
+            '$ShortcutsRegistrar: Received a duplicate registration for the shortcut activator $found in $foundContext and $previousContext.');
+      }
+      return true;
+    }());
   }
-  
 }
 
 /// A registry for shortcuts which allows descendants to add or remove shortcuts
 /// that act at the level where this registry is defined.
 ///
-/// The registered callbacks are valid whenever a widget below this one in the
+/// The registered shortcuts are valid whenever a widget below this one in the
 /// hierarchy has focus.
 ///
 /// To add shortcuts to the registry, call [ShortcutsRegistrar.of] or
@@ -1169,6 +1166,9 @@ class ShortcutsRegistrar extends StatefulWidget {
   ///
   /// If no [ShortcutsRegistrar] widget encloses the context given, `of` will
   /// throw an exception in debug mode.
+  ///
+  /// The dependencies of [ShortcutsRegistrar] will have their
+  /// [State.didChangeDependencies] called whenever the shortcuts have changed.
   ///
   /// See also:
   ///
@@ -1201,6 +1201,9 @@ class ShortcutsRegistrar extends StatefulWidget {
   /// If no [ShortcutsRegistrar] widget encloses the given context,
   /// `maybeOf` will return null.
   ///
+  /// The dependencies of [ShortcutsRegistrar] will have their
+  /// [State.didChangeDependencies] called whenever the shortcuts have changed.
+  ///
   /// See also:
   ///
   ///  * [of], which is similar to this function, but returns a non-nullable
@@ -1219,42 +1222,40 @@ class ShortcutsRegistrar extends StatefulWidget {
 
 class _ShortcutsRegistrarState extends State<ShortcutsRegistrar> {
   late ShortcutsRegistry registry;
-  
+  bool updateScheduled = false;
+
   @override
   void initState() {
     super.initState();
     registry = ShortcutsRegistry();
-    registry.addListener(_markDirty);
+    registry.addListener(handleRegistryChange);
   }
 
   @override
   void dispose() {
-    registry.removeListener(_markDirty);
+    registry.removeListener(handleRegistryChange);
+    registry.dispose();
     super.dispose();
   }
-  
-  int rebuild = 0;
 
-  void _markDirty() {
-    if (!mounted) {
-      return;
+  void handleRegistryChange() {
+    if (!updateScheduled) {
+      updateScheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        if (mounted && updateScheduled) {
+          updateScheduled = false;
+          setState((){});
+        }
+      });
     }
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      if (mounted) {
-        setState(() {
-          rebuild += 1;
-        });
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return _ShortcutsRegistrarMarker(
-      rebuild: rebuild,
-      registry: registry,
-      child: Shortcuts(
-        shortcuts: registry.shortcuts,
+    return Shortcuts(
+      shortcuts: registry.shortcuts,
+      child: _ShortcutsRegistrarMarker(
+        registry: registry,
         child: widget.child,
       ),
     );
@@ -1264,15 +1265,13 @@ class _ShortcutsRegistrarState extends State<ShortcutsRegistrar> {
 class _ShortcutsRegistrarMarker extends InheritedWidget {
   const _ShortcutsRegistrarMarker({
     required this.registry,
-    required this.rebuild,
     required super.child,
   });
 
   final ShortcutsRegistry registry;
-  final int rebuild;
 
   @override
   bool updateShouldNotify(covariant _ShortcutsRegistrarMarker oldWidget) {
-    return rebuild != oldWidget.rebuild || registry.shortcuts != oldWidget.registry.shortcuts;
+    return registry != oldWidget.registry;
   }
 }
