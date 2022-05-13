@@ -656,7 +656,7 @@ String bytesToHexString(List<int> data) {
 /// [name] is the name of the property. [value] is the value of the property.
 /// If [value] is null, removes the style property.
 void setElementStyle(
-    DomElement element, String name, String? value) {
+    html.Element element, String name, String? value) {
   if (value == null) {
     element.style.removeProperty(name);
   } else {
