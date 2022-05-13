@@ -1,4 +1,4 @@
-Signature: 6c88bc80227271c89af4a2b20c84b038
+Signature: 3a126806d4ac12111144d5a4359833a4
 
 UNUSED LICENSES:
 
@@ -6210,6 +6210,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/LinearTolerances.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLFinalizationChecks.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.h
 FILE: ../../../third_party/skia/src/utils/SkTestCanvas.h
