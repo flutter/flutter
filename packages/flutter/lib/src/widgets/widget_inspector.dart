@@ -103,10 +103,6 @@ class _MulticastCanvas implements Canvas {
     _screenshot.clipRect(rect, clipOp: clipOp, doAntiAlias: doAntiAlias);
   }
 
-  Rect getCurrentClipBounds() {
-    return Rect.zero;
-  }
-
   @override
   void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
     _main.drawArc(rect, startAngle, sweepAngle, useCenter, paint);
@@ -290,9 +286,8 @@ class _MulticastCanvas implements Canvas {
     _screenshot.translate(dx, dy);
   }
 
-  Float64List getCurrentTransform() {
-    return Matrix4.identity().storage;
-  }
+  @override
+  dynamic noSuchMethod(Invocation invocation) {}
 }
 
 Rect _calculateSubtreeBoundsHelper(RenderObject object, Matrix4 transform) {
