@@ -60,6 +60,7 @@ void main() {
       ),
     );
     tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -120,6 +121,7 @@ void main() {
       ),
     );
     tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /************************ 800x600 screen
@@ -179,6 +181,7 @@ void main() {
       ),
     );
     tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -233,6 +236,7 @@ void main() {
       ),
     );
     tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -289,6 +293,7 @@ void main() {
       ),
     );
     tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     // we try to put it here but it doesn't fit:
@@ -356,6 +361,7 @@ void main() {
       ),
     );
     tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -411,6 +417,7 @@ void main() {
       ),
     );
     tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -468,6 +475,7 @@ void main() {
       ),
     );
     tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -571,6 +579,7 @@ void main() {
       ),
     );
     tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final Offset topLeftTipInGlobal = tester.getTopLeft(

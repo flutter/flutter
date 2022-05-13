@@ -594,7 +594,7 @@ void main() {
       ),
     );
     await tester.tap(find.text(value));
-    await tester.pump();
+    await tester.pumpAndSettle();
     final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(itemKey)).toList();
     expect(itemBoxes[0].localToGlobal(Offset.zero).dx, equals(0.0));
     expect(itemBoxes[1].localToGlobal(Offset.zero).dx, equals(16.0));
@@ -640,7 +640,7 @@ void main() {
       ),
     );
     await tester.tap(find.text('First Item'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     final RenderBox secondItem = tester.renderObjectList<RenderBox>(find.text('Second Item')).toList()[1];
     expect(secondItem.localToGlobal(Offset.zero).dx, equals(150.0));
     expect(secondItem.localToGlobal(Offset.zero).dy, equals(176.0));
@@ -1011,7 +1011,7 @@ void main() {
       onChanged: onChanged,
     ));
     await tester.tap(find.byKey(buttonKey));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
     // Make sure there is no overscroll
@@ -3016,6 +3016,7 @@ void main() {
   });
 
   testWidgets('Does not crash when option is selected without waiting for opening animation to complete', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     // Regression test for b/171846624.
 
     final List<String> options = <String>['first', 'second', 'third'];
@@ -3061,6 +3062,7 @@ void main() {
     expect(find.text('third').hitTestable(), findsOneWidget);
     expect(find.text('first').hitTestable(), findsNothing);
     expect(find.text('second').hitTestable(), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Dropdown menu should persistently show a scrollbar if it is scrollable', (WidgetTester tester) async {

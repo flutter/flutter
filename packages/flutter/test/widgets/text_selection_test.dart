@@ -938,6 +938,7 @@ void main() {
     });
 
     testWidgets('can trigger selection handle onTap', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       bool selectionHandleTapped = false;
       void handleTapped() => selectionHandleTapped = true;
       final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
@@ -967,9 +968,11 @@ void main() {
       selectionHandleTapped = false;
       await tester.tap(find.byKey(spy.rightHandleKey));
       expect(selectionHandleTapped, isTrue);
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
 
     testWidgets('can trigger selection handle drag', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       DragStartDetails? startDragStartDetails;
       DragUpdateDetails? startDragUpdateDetails;
       DragEndDetails? startDragEndDetails;
@@ -1039,6 +1042,7 @@ void main() {
       await gesture2.up();
       await tester.pump(const Duration(milliseconds: 20));
       expect(endDragEndDetails, isNotNull);
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
   });
 

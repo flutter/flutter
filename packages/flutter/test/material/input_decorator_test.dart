@@ -145,6 +145,7 @@ double getOpacity(WidgetTester tester, String textValue) {
 
 void main() {
   testWidgets('InputDecorator input/label text layout', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     // The label appears above the input text
     await tester.pumpWidget(
       buildInputDecorator(
@@ -357,9 +358,11 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
     expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
     expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('InputDecorator input/label widget layout', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     const Key key = Key('l');
 
     // The label appears above the input text.
@@ -687,6 +690,7 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
     expect(tester.getTopLeft(find.byKey(key)).dy, tester.getTopLeft(find.text('hint')).dy);
     expect(tester.getBottomLeft(find.byKey(key)).dy, tester.getBottomLeft(find.text('hint')).dy);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   group('alignLabelWithHint', () {
@@ -3466,6 +3470,7 @@ void main() {
   });
 
   testWidgets('InputDecoration outline shape with no border and no floating placeholder not empty', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       buildInputDecorator(
         // isEmpty: false (default)
@@ -3491,6 +3496,7 @@ void main() {
 
     // The label should not be seen.
     expect(getOpacity(tester, 'label'), 0.0);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   test('InputDecorationTheme copyWith, ==, hashCode basics', () {
@@ -5054,6 +5060,7 @@ void main() {
   });
 
   testWidgets('InputDecorator floating label obeys floatingLabelBehavior', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
@@ -5066,6 +5073,7 @@ void main() {
     // Passing floating behavior never results in a dy offset of 20
     // because the label is not initially floating.
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('InputDecorator hint is displayed when floatingLabelBehavior is always', (WidgetTester tester) async {

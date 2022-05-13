@@ -97,6 +97,7 @@ void main() {
     });
 
     testWidgets('Can open CupertinoContextMenu by tap and hold', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byWidget(child), findsOneWidget);
@@ -130,9 +131,11 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
 
     testWidgets('CupertinoContextMenu is in the correct position when within a nested navigator', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       final Widget child = getChild();
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
@@ -195,6 +198,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
 
     testWidgets('Hovering over Cupertino context menu updates cursor to clickable on Web', (WidgetTester tester) async {
@@ -230,6 +234,7 @@ void main() {
     });
 
     testWidgets('CupertinoContextMenu is in the correct position when within a Transform.scale', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       final Widget child = getChild();
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
@@ -283,11 +288,13 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
   });
 
   group('CupertinoContextMenu when open', () {
     testWidgets('Last action does not have border', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       final Widget child  = getChild();
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
@@ -344,9 +351,11 @@ void main() {
       expect(findStatic(), findsOneWidget);
 
       expect(findStaticChildDecoration(tester), findsNWidgets(3));
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
 
     testWidgets('Can close CupertinoContextMenu by background tap', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
 
@@ -362,9 +371,11 @@ void main() {
       await tester.tapAt(const Offset(1.0, 1.0));
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
 
     testWidgets('Can close CupertinoContextMenu by dragging down', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
 
@@ -404,9 +415,11 @@ void main() {
       await swipeGesture.up();
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
 
     testWidgets('Can close CupertinoContextMenu by flinging down', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
 
@@ -429,9 +442,11 @@ void main() {
       await tester.fling(findStaticChild(child), const Offset(0.0, 100.0), 1000.0);
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
 
     testWidgets("Backdrop is added using ModalRoute's filter parameter", (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byType(BackdropFilter), findsNothing);
@@ -444,11 +459,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
       expect(find.byType(BackdropFilter), findsOneWidget);
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
   });
 
   group("Open layout differs depending on child's position on screen", () {
     testWidgets('Portrait', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       const Size portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
 
@@ -518,9 +535,11 @@ void main() {
 
       // Set the screen back to its normal size.
       await binding.setSurfaceSize(const Size(800.0, 600.0));
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
 
     testWidgets('Landscape', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       // Pump a CupertinoContextMenu in the center of the screen and open it.
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(
@@ -582,6 +601,7 @@ void main() {
       expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
       expect(right.dx, lessThan(left.dx));
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
   });
 }

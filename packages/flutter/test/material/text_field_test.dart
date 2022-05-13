@@ -10398,6 +10398,7 @@ void main() {
 
   // Regressing test for https://github.com/flutter/flutter/issues/70625
   testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     final FocusNode focusNode = FocusNode();
     Widget textFieldBuilder({ FloatingLabelBehavior behavior = FloatingLabelBehavior.auto }) {
       return MaterialApp(
@@ -10448,6 +10449,7 @@ void main() {
     await tester.pumpAndSettle(); // label animation.
     // The label will always float above the content.
     expect(tester.getTopLeft(find.text('Label')).dy, 12.0);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   group('MaxLengthEnforcement', () {
@@ -10572,6 +10574,7 @@ void main() {
   });
 
   testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     // Regression test for https://github.com/flutter/flutter/issues/39376.
 
     int textFieldTapCount = 0;
@@ -10608,6 +10611,7 @@ void main() {
     expect(textFieldTapCount, 0);
     expect(prefixTapCount, 1);
     expect(suffixTapCount, 1);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('autofill info has hint text', (WidgetTester tester) async {

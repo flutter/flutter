@@ -1,0 +1,1494 @@
+diff --git a/lib/rendering.dart b/lib/rendering.dart
+index faad56b779..42439edb85 100644
+--- a/lib/rendering.dart
++++ b/lib/rendering.dart
+@@ -51,7 +51,7 @@ export 'src/rendering/object.dart';
+ export 'src/rendering/paragraph.dart';
+ export 'src/rendering/performance_overlay.dart';
+ export 'src/rendering/platform_view.dart';
+-export 'src/rendering/proxy_box.dart';
++export 'src/rendering/proxy_box.dart' hide offstageAndOpacityAffectPaintTransform;
+ export 'src/rendering/proxy_sliver.dart';
+ export 'src/rendering/rotated_box.dart';
+ export 'src/rendering/shifted_box.dart';
+diff --git a/lib/src/rendering/debug.dart b/lib/src/rendering/debug.dart
+index 88f1cd4875..838a598f37 100644
+--- a/lib/src/rendering/debug.dart
++++ b/lib/src/rendering/debug.dart
+@@ -275,6 +275,21 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double
+   }());
+ }
+
++/// Whether or not [RenderOffstage], [RenderOpacity], and
++/// [RenderAnimatedOpacityMixin] affect the paint transform.
++///
++/// By default, these render objects zero out the matrix in cases where they do
++/// not paint their children. Specifically, [RenderOffstage.offstage] being true,
++/// [RenderOpacity.opacity] being 0, and [RenderAnimatedOpacityMixin.opacity]
++/// being 0 will cause the `applyPaintTransform` method to zero out the supplied
++/// matrix. The exception is that the opacity classes will _not_ zero out the
++/// matrix if the object is marked as always including semantics.
++///
++/// Tests may find it more convenient to be able to hit test or otherwise get
++/// the screen rect for a [RenderObject] even if it is not currently onstage or
++/// visible. In that case, they can set this value to `false`.
++bool debugOffstageAndOpacityAffectPaintTransform = true;
++
+ /// Returns true if none of the rendering library debug variables have been changed.
+ ///
+ /// This function is used by the test framework to ensure that debug variables
+@@ -304,7 +319,8 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
+         debugOnProfilePaint != null ||
+         debugDisableClipLayers ||
+         debugDisablePhysicalShapeLayers ||
+-        debugDisableOpacityLayers) {
++        debugDisableOpacityLayers ||
++       !debugOffstageAndOpacityAffectPaintTransform) {
+       throw FlutterError(reason);
+     }
+     return true;
+diff --git a/lib/src/rendering/proxy_box.dart b/lib/src/rendering/proxy_box.dart
+index e593f59641..cda2bd4a9e 100644
+--- a/lib/src/rendering/proxy_box.dart
++++ b/lib/src/rendering/proxy_box.dart
+@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
+ import 'package:flutter/animation.dart';
+ import 'package:flutter/foundation.dart';
+ import 'package:flutter/gestures.dart';
++import 'package:flutter/rendering.dart';
+ import 'package:flutter/semantics.dart';
+ import 'package:flutter/services.dart';
+
+@@ -896,6 +897,15 @@ class RenderOpacity extends RenderProxyBox {
+     markNeedsSemanticsUpdate();
+   }
+
++  @override
++  void applyPaintTransform(RenderObject child, Matrix4 transform) {
++    if (_alpha == 0 && !alwaysIncludeSemantics && (!kDebugMode || debugOffstageAndOpacityAffectPaintTransform)) {
++      transform.setZero();
++    } else {
++      super.applyPaintTransform(child, transform);
++    }
++  }
++
+   @override
+   void paint(PaintingContext context, Offset offset) {
+     if (child != null) {
+@@ -987,6 +997,15 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
+     markNeedsSemanticsUpdate();
+   }
+
++  @override
++  void applyPaintTransform(RenderObject child, Matrix4 transform) {
++    if (_alpha == 0 && !alwaysIncludeSemantics && (!kDebugMode || debugOffstageAndOpacityAffectPaintTransform)) {
++      transform.setZero();
++    } else {
++      super.applyPaintTransform(child, transform);
++    }
++  }
++
+   @override
+   void attach(PipelineOwner owner) {
+     super.attach(owner);
+@@ -3589,6 +3608,15 @@ class RenderOffstage extends RenderProxyBox {
+     return !offstage && super.hitTest(result, position: position);
+   }
+
++  @override
++  void applyPaintTransform(RenderObject child, Matrix4 transform) {
++    if (offstage && (!kDebugMode || debugOffstageAndOpacityAffectPaintTransform)) {
++      transform.setZero();
++    } else {
++      super.applyPaintTransform(child, transform);
++    }
++  }
++
+   @override
+   void paint(PaintingContext context, Offset offset) {
+     if (offstage)
+diff --git a/test/cupertino/context_menu_test.dart b/test/cupertino/context_menu_test.dart
+index 16b4537e3c..5c3e36a45f 100644
+--- a/test/cupertino/context_menu_test.dart
++++ b/test/cupertino/context_menu_test.dart
+@@ -97,6 +97,7 @@ void main() {
+     });
+
+     testWidgets('Can open CupertinoContextMenu by tap and hold', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       final Widget child = getChild();
+       await tester.pumpWidget(getContextMenu(child: child));
+       expect(find.byWidget(child), findsOneWidget);
+@@ -130,9 +131,11 @@ void main() {
+       await gesture.up();
+       await tester.pumpAndSettle();
+       expect(findStatic(), findsOneWidget);
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+
+     testWidgets('CupertinoContextMenu is in the correct position when within a nested navigator', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       final Widget child = getChild();
+       await tester.pumpWidget(CupertinoApp(
+         home: CupertinoPageScaffold(
+@@ -195,6 +198,7 @@ void main() {
+       await gesture.up();
+       await tester.pumpAndSettle();
+       expect(findStatic(), findsOneWidget);
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+
+     testWidgets('Hovering over Cupertino context menu updates cursor to clickable on Web', (WidgetTester tester) async {
+@@ -230,6 +234,7 @@ void main() {
+     });
+
+     testWidgets('CupertinoContextMenu is in the correct position when within a Transform.scale', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       final Widget child = getChild();
+       await tester.pumpWidget(CupertinoApp(
+         home: CupertinoPageScaffold(
+@@ -283,11 +288,13 @@ void main() {
+       await gesture.up();
+       await tester.pumpAndSettle();
+       expect(findStatic(), findsOneWidget);
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+   });
+
+   group('CupertinoContextMenu when open', () {
+     testWidgets('Last action does not have border', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       final Widget child  = getChild();
+       await tester.pumpWidget(CupertinoApp(
+         home: CupertinoPageScaffold(
+@@ -344,9 +351,11 @@ void main() {
+       expect(findStatic(), findsOneWidget);
+
+       expect(findStaticChildDecoration(tester), findsNWidgets(3));
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+
+     testWidgets('Can close CupertinoContextMenu by background tap', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       final Widget child = getChild();
+       await tester.pumpWidget(getContextMenu(child: child));
+
+@@ -362,9 +371,11 @@ void main() {
+       await tester.tapAt(const Offset(1.0, 1.0));
+       await tester.pumpAndSettle();
+       expect(findStatic(), findsNothing);
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+
+     testWidgets('Can close CupertinoContextMenu by dragging down', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       final Widget child = getChild();
+       await tester.pumpWidget(getContextMenu(child: child));
+
+@@ -404,9 +415,11 @@ void main() {
+       await swipeGesture.up();
+       await tester.pumpAndSettle();
+       expect(findStatic(), findsNothing);
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+
+     testWidgets('Can close CupertinoContextMenu by flinging down', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       final Widget child = getChild();
+       await tester.pumpWidget(getContextMenu(child: child));
+
+@@ -429,9 +442,11 @@ void main() {
+       await tester.fling(findStaticChild(child), const Offset(0.0, 100.0), 1000.0);
+       await tester.pumpAndSettle();
+       expect(findStatic(), findsNothing);
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+
+     testWidgets("Backdrop is added using ModalRoute's filter parameter", (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       final Widget child = getChild();
+       await tester.pumpWidget(getContextMenu(child: child));
+       expect(find.byType(BackdropFilter), findsNothing);
+@@ -444,11 +459,13 @@ void main() {
+       await tester.pumpAndSettle();
+       expect(findStatic(), findsOneWidget);
+       expect(find.byType(BackdropFilter), findsOneWidget);
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+   });
+
+   group("Open layout differs depending on child's position on screen", () {
+     testWidgets('Portrait', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       const Size portraitScreenSize = Size(600.0, 800.0);
+       await binding.setSurfaceSize(portraitScreenSize);
+
+@@ -518,9 +535,11 @@ void main() {
+
+       // Set the screen back to its normal size.
+       await binding.setSurfaceSize(const Size(800.0, 600.0));
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+
+     testWidgets('Landscape', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       // Pump a CupertinoContextMenu in the center of the screen and open it.
+       final Widget child = getChild();
+       await tester.pumpWidget(getContextMenu(
+@@ -582,6 +601,7 @@ void main() {
+       expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
+       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
+       expect(right.dx, lessThan(left.dx));
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+   });
+ }
+diff --git a/test/cupertino/dialog_test.dart b/test/cupertino/dialog_test.dart
+index 222bd15877..9b11acf4c0 100644
+--- a/test/cupertino/dialog_test.dart
++++ b/test/cupertino/dialog_test.dart
+@@ -20,6 +20,7 @@ import '../widgets/semantics_tester.dart';
+
+ void main() {
+   testWidgets('Alert dialog control test', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     bool didDelete = false;
+
+     await tester.pumpWidget(
+@@ -56,6 +57,7 @@ void main() {
+
+     expect(didDelete, isTrue);
+     expect(find.text('Delete'), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Dialog not barrier dismissible by default', (WidgetTester tester) async {
+@@ -383,6 +385,7 @@ void main() {
+   });
+
+   testWidgets('Button list is scrollable, has correct position with large text sizes.', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     final ScrollController actionScrollController = ScrollController();
+     await tester.pumpWidget(
+       createAppWithButtonThatLaunchesDialog(
+@@ -440,9 +443,11 @@ void main() {
+     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Three')).height, equals(98.0));
+     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Chocolate Brownies')).height, equals(248.0));
+     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')).height, equals(148.0));
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Title Section is empty, Button section is not empty.', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     const double textScaleFactor = 1.0;
+     final ScrollController actionScrollController = ScrollController();
+     await tester.pumpWidget(
+@@ -493,6 +498,7 @@ void main() {
+       tester.getSize(find.widgetWithText(CupertinoDialogAction, 'One')).height,
+       equals(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two')).height),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Button section is empty, Title section is not empty.', (WidgetTester tester) async {
+@@ -819,6 +825,7 @@ void main() {
+   });
+
+   testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     final ScrollController scrollController = ScrollController();
+     late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
+     await tester.pumpWidget(
+@@ -929,9 +936,11 @@ void main() {
+     // We must explicitly cause an "up" gesture to avoid a crash.
+     // todo(mattcarroll) remove this call, https://github.com/flutter/flutter/issues/19540
+     await gesture.up();
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       CupertinoApp(
+         home: Center(
+@@ -1007,9 +1016,11 @@ void main() {
+
+     // No scaling on exit animation.
+     expect(find.byType(Transform), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('FadeTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       CupertinoApp(
+         home: Center(
+@@ -1100,9 +1111,11 @@ void main() {
+     await tester.pump(const Duration(milliseconds: 50));
+     transition = tester.firstWidget(fadeTransitionFinder);
+     expect(transition.opacity.value, moreOrLessEquals(0.0, epsilon: 0.001));
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Actions are accessible by key', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       createAppWithButtonThatLaunchesDialog(
+         dialogBuilder: (BuildContext context) {
+@@ -1130,9 +1143,11 @@ void main() {
+     expect(find.byKey(const Key('option_1')), findsOneWidget);
+     expect(find.byKey(const Key('option_2')), findsOneWidget);
+     expect(find.byKey(const Key('option_3')), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Dialog widget insets by MediaQuery viewInsets', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       const MaterialApp(
+         home: MediaQuery(
+@@ -1160,9 +1175,11 @@ void main() {
+
+     // once animation settles the dialog is padded by the new viewInsets
+     expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Default cupertino dialog golden', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       createAppWithButtonThatLaunchesDialog(
+         dialogBuilder: (BuildContext context) {
+@@ -1190,9 +1207,11 @@ void main() {
+       find.byType(CupertinoAlertDialog),
+       matchesGoldenFile('dialog_test.cupertino.default.png'),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('showCupertinoDialog - custom barrierLabel', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     final SemanticsTester semantics = SemanticsTester(tester);
+
+     await tester.pumpWidget(
+@@ -1229,9 +1248,11 @@ void main() {
+       label: 'Custom label',
+       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+     )));
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       CupertinoApp(
+         restorationScopeId: 'app',
+@@ -1259,10 +1280,12 @@ void main() {
+
+     await tester.restoreFrom(restorationData);
+     expect(find.byType(CupertinoAlertDialog), findsOneWidget);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+   testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog', (WidgetTester tester) async {
+     // Regression test for https://github.com/flutter/flutter/issues/83819
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     const double textScaleFactor = 1.0;
+     final ScrollController actionScrollController = ScrollController();
+     await tester.pumpWidget(
+@@ -1298,10 +1321,12 @@ void main() {
+     // Built in CupertinoScrollbars should only number 2: one for the actions,
+     // one for the content.
+     expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   }, variant: TargetPlatformVariant.all());
+
+   testWidgets('CupertinoAlertDialog scrollbars controllers should be different', (WidgetTester tester) async {
+     // https://github.com/flutter/flutter/pull/81278
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       const MaterialApp(
+         home: MediaQuery(
+@@ -1324,10 +1349,12 @@ void main() {
+
+     expect(scrollbars.length, 2);
+     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   group('showCupertinoDialog avoids overlapping display features', () {
+     testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       await tester.pumpWidget(
+         CupertinoApp(
+           builder: (BuildContext context, Widget? child) {
+@@ -1363,9 +1390,11 @@ void main() {
+       // Should take the right side of the screen
+       expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+
+     testWidgets('positioning using Directionality', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = true;
+       await tester.pumpWidget(
+         CupertinoApp(
+           builder: (BuildContext context, Widget? child) {
+@@ -1406,6 +1435,7 @@ void main() {
+     });
+
+     testWidgets('default positioning', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       await tester.pumpWidget(
+         CupertinoApp(
+           builder: (BuildContext context, Widget? child) {
+@@ -1440,10 +1470,12 @@ void main() {
+       // By default it should place the dialog on the left screen
+       expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
+       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+   });
+
+   testWidgets('Hovering over Cupertino alert dialog action updates cursor to clickable on Web', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       createAppWithButtonThatLaunchesDialog(
+         dialogBuilder: (BuildContext context) {
+@@ -1486,6 +1518,7 @@ void main() {
+       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+ }
+
+diff --git a/test/cupertino/nav_bar_test.dart b/test/cupertino/nav_bar_test.dart
+index 12ea7cb47d..7b9f29db64 100644
+--- a/test/cupertino/nav_bar_test.dart
++++ b/test/cupertino/nav_bar_test.dart
+@@ -533,6 +533,7 @@ void main() {
+   });
+
+   testWidgets('Small title can be overridden', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     final ScrollController scrollController = ScrollController();
+     await tester.pumpWidget(
+       CupertinoApp(
+@@ -579,7 +580,7 @@ void main() {
+
+     scrollController.jumpTo(600.0);
+     await tester.pump(); // Once to trigger the opacity animation.
+-    await tester.pump(const Duration(milliseconds: 300));
++    await tester.pumpAndSettle(const Duration(milliseconds: 300));
+
+     largeTitleOpacity =
+         tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+@@ -594,6 +595,7 @@ void main() {
+     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
+
+     expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 - 8.0); // Extension gone, (static part - padding) left.
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Auto back/close button', (WidgetTester tester) async {
+diff --git a/test/cupertino/nav_bar_transition_test.dart b/test/cupertino/nav_bar_transition_test.dart
+index 67cdfaf921..8308809be6 100644
+--- a/test/cupertino/nav_bar_transition_test.dart
++++ b/test/cupertino/nav_bar_transition_test.dart
+@@ -129,6 +129,7 @@ void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
+
+ void main() {
+   testWidgets('Bottom middle moves between middle and back label', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(tester, fromTitle: 'Page 1');
+
+     // Be mid-transition.
+@@ -148,9 +149,11 @@ void main() {
+       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
+       const Offset(337.1953125, 13.5),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom middle moves between middle and back label RTL', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       fromTitle: 'Page 1',
+@@ -169,9 +172,11 @@ void main() {
+       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
+       const Offset(362.8046875, 13.5),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom middle never changes size during the animation', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
+     addTearDown(() async {
+       await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
+@@ -190,9 +195,11 @@ void main() {
+       expect(tester.getSize(flying(tester, find.text('Page 1')).first), size);
+       expect(tester.getSize(flying(tester, find.text('Page 1')).last), size);
+     }
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom middle and top back label transitions their font', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(tester, fromTitle: 'Page 1');
+
+     // Be mid-transition.
+@@ -234,9 +241,11 @@ void main() {
+     expect(topBackLabel.text.style!.letterSpacing, -0.41);
+
+     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.7630139589309692);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Font transitions respect themes', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       fromTitle: 'Page 1',
+@@ -282,9 +291,11 @@ void main() {
+     expect(topBackLabel.text.style!.letterSpacing, -0.41);
+
+     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.7630139589309692);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Fullscreen dialogs do not create heroes', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       const CupertinoApp(
+         home: Placeholder(),
+@@ -316,9 +327,11 @@ void main() {
+     expect(find.byType(Hero), findsOneWidget);
+     // No Hero transition happened.
+     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Turning off transition works', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       from: const CupertinoNavigationBar(
+@@ -340,9 +353,11 @@ void main() {
+
+     // No Hero transition happened.
+     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Popping mid-transition is symmetrical', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(tester, fromTitle: 'Page 1');
+
+     // Be mid-transition.
+@@ -381,9 +396,11 @@ void main() {
+
+     // Check that everything's the same as on the way in.
+     checkColorAndPositionAt50ms();
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Popping mid-transition is symmetrical RTL', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       fromTitle: 'Page 1',
+@@ -426,9 +443,11 @@ void main() {
+
+     // Check that everything's the same as on the way in.
+     checkColorAndPositionAt50ms();
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('There should be no global keys in the hero flight', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(tester, fromTitle: 'Page 1');
+
+     // Be mid-transition.
+@@ -441,9 +460,11 @@ void main() {
+       ),
+       findsNothing,
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Multiple nav bars tags do not conflict if in different navigators', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       CupertinoApp(
+         home: CupertinoTabScaffold(
+@@ -516,9 +537,11 @@ void main() {
+     expect(find.text('Tab 1 Page 1', skipOffstage: false), findsOneWidget);
+     // Never navigated to tab 1 page 2.
+     expect(find.text('Tab 1 Page 2', skipOffstage: false), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Transition box grows to large title size', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       fromTitle: 'Page 1',
+@@ -540,9 +563,11 @@ void main() {
+
+     await tester.pump(const Duration(milliseconds: 50));
+     checkBackgroundBoxHeight(tester, 90.53337162733078);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Large transition box shrinks to standard nav bar size', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       from: const CupertinoSliverNavigationBar(),
+@@ -564,9 +589,11 @@ void main() {
+
+     await tester.pump(const Duration(milliseconds: 50));
+     checkBackgroundBoxHeight(tester, 49.46662837266922);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(tester, fromTitle: 'Page 1');
+
+     await tester.pump(const Duration(milliseconds: 50));
+@@ -579,9 +606,11 @@ void main() {
+     await tester.pump(const Duration(milliseconds: 500));
+
+     expect(() => flying(tester, find.text('Page 1')), throwsAssertionError);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Exact widget is reused to build inside the transition', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     const Widget userMiddle = Placeholder();
+     await startTransitionBetween(
+       tester,
+@@ -595,9 +624,11 @@ void main() {
+     await tester.pump(const Duration(milliseconds: 50));
+
+     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('First appearance of back chevron fades in from the right', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       CupertinoApp(
+         home: scaffoldForNavBar(null),
+@@ -628,9 +659,11 @@ void main() {
+     await tester.pump(const Duration(milliseconds: 150));
+     checkOpacity(tester, backChevron, 0.09497911669313908);
+     expect(tester.getTopLeft(backChevron), const Offset(31.055883467197418, 7.0));
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('First appearance of back chevron fades in from the left in RTL', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       CupertinoApp(
+         builder: (BuildContext context, Widget? navigator) {
+@@ -674,9 +707,11 @@ void main() {
+       tester.getTopRight(backChevron),
+       const Offset(742.9441165328026, 7.0),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Back chevron fades out and in when both pages have it', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(tester, fromTitle: 'Page 1');
+
+     await tester.pump(const Duration(milliseconds: 50));
+@@ -700,9 +735,11 @@ void main() {
+     // Still in the same place.
+     expect(tester.getTopLeft(backChevrons.first), const Offset(14.0, 7.0));
+     expect(tester.getTopLeft(backChevrons.last), const Offset(14.0, 7.0));
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom middle just fades if top page has a custom leading', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       fromTitle: 'Page 1',
+@@ -731,9 +768,11 @@ void main() {
+       tester.getCenter(flying(tester, find.text('Page 1'))),
+       const Offset(400.0, 22.0),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom leading fades in place', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       from: const CupertinoSliverNavigationBar(leading: Text('custom')),
+@@ -757,9 +796,11 @@ void main() {
+       tester.getTopLeft(flying(tester, find.text('custom'))),
+       const Offset(16.0, 0.0),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom trailing fades in place', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       from: const CupertinoSliverNavigationBar(trailing: Text('custom')),
+@@ -783,9 +824,11 @@ void main() {
+       tester.getTopLeft(flying(tester, find.text('custom'))),
+       const Offset(684.0, 13.5),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom back label fades and slides to the left', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       fromTitle: 'Page 1',
+@@ -819,9 +862,11 @@ void main() {
+       tester.getTopLeft(flying(tester, find.text('Page 1'))),
+       const Offset(-258.2321922779083, 13.5),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom back label fades and slides to the right in RTL', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       fromTitle: 'Page 1',
+@@ -857,9 +902,11 @@ void main() {
+       // >1000. It's now off the screen.
+       const Offset(1058.2321922779083, 13.5),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom large title moves to top back label', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       from: const CupertinoSliverNavigationBar(),
+@@ -895,9 +942,11 @@ void main() {
+       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
+       const Offset(43.92089730501175, 22.49655644595623),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       from: const CupertinoSliverNavigationBar(),
+@@ -933,6 +982,7 @@ void main() {
+       tester.getTopLeft(flying(tester, find.text('Back'))),
+       const Offset(43.92089730501175, 22.49655644595623),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Bottom large title and top back label transitions their font', (WidgetTester tester) async {
+@@ -975,6 +1025,7 @@ void main() {
+   });
+
+   testWidgets('Top middle fades in and slides in from the right', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       toTitle: 'Page 2',
+@@ -997,6 +1048,7 @@ void main() {
+       tester.getTopLeft(flying(tester, find.text('Page 2'))),
+       const Offset(439.7678077220917, 13.5),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Top middle never changes size during the animation', (WidgetTester tester) async {
+@@ -1023,6 +1075,7 @@ void main() {
+   });
+
+   testWidgets('Top middle fades in and slides in from the left in RTL', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       toTitle: 'Page 2',
+@@ -1046,9 +1099,11 @@ void main() {
+       tester.getTopRight(flying(tester, find.text('Page 2'))),
+       const Offset(360.2321922779083, 13.5),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Top large title fades in and slides in from the right', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       to: const CupertinoSliverNavigationBar(),
+@@ -1072,9 +1127,11 @@ void main() {
+       tester.getTopLeft(flying(tester, find.text('Page 2'))),
+       const Offset(195.53561544418335, 54.0),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Top large title fades in and slides in from the left in RTL', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       to: const CupertinoSliverNavigationBar(),
+@@ -1099,6 +1156,7 @@ void main() {
+       tester.getTopRight(flying(tester, find.text('Page 2'))),
+       const Offset(604.4643845558167, 54.0),
+     );
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Components are not unnecessarily rebuilt during transitions', (WidgetTester tester) async {
+@@ -1147,6 +1205,7 @@ void main() {
+   });
+
+   testWidgets('Back swipe gesture transitions', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await startTransitionBetween(
+       tester,
+       fromTitle: 'Page 1',
+@@ -1198,6 +1257,7 @@ void main() {
+     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
+     // Just the bottom route's middle now.
+     expect(find.text('Page 1'), findsOneWidget);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {
+diff --git a/test/cupertino/route_test.dart b/test/cupertino/route_test.dart
+index a48bbe453d..e711e2a776 100644
+--- a/test/cupertino/route_test.dart
++++ b/test/cupertino/route_test.dart
+@@ -52,6 +52,7 @@ void main() {
+   });
+
+   testWidgets('Large title auto-populates with title', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       const CupertinoApp(
+         home: Placeholder(),
+@@ -114,6 +115,7 @@ void main() {
+     // The smaller, initially invisible title, should still be positioned in the
+     // center.
+     expect(tester.getCenter(find.byWidget(titles[0].widget)).dx, 400.0);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Leading auto-populates with back button with previous title', (WidgetTester tester) async {
+diff --git a/test/cupertino/text_field_test.dart b/test/cupertino/text_field_test.dart
+index a2f09f67b0..25cc55fefb 100644
+--- a/test/cupertino/text_field_test.dart
++++ b/test/cupertino/text_field_test.dart
+@@ -1640,6 +1640,7 @@ void main() {
+   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+
+   testWidgets('Read only text field', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     final TextEditingController controller = TextEditingController(text: 'readonly');
+
+     await tester.pumpWidget(
+@@ -1674,6 +1675,7 @@ void main() {
+     expect(find.text('Copy'), findsOneWidget);
+     expect(find.text('Paste'), findsNothing);
+     expect(find.text('Cut'), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+
+   testWidgets('copy paste', (WidgetTester tester) async {
+diff --git a/test/material/chip_test.dart b/test/material/chip_test.dart
+index ea4c7947a2..f176ecf870 100644
+--- a/test/material/chip_test.dart
++++ b/test/material/chip_test.dart
+@@ -877,6 +877,7 @@ void main() {
+   });
+
+   testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     final GlobalKey labelKey = GlobalKey();
+     Future<void> pushChip({ Widget? avatar }) async {
+       return tester.pumpWidget(
+@@ -986,9 +987,11 @@ void main() {
+     expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+     expect(find.byKey(avatarKey), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     const Key labelKey = Key('label');
+     const Key deleteButtonKey = Key('delete');
+     bool wasDeleted = false;
+@@ -1102,6 +1105,7 @@ void main() {
+     expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+     expect(find.byKey(deleteButtonKey), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Delete button takes up at most half of the chip', (WidgetTester tester) async {
+diff --git a/test/material/dropdown_test.dart b/test/material/dropdown_test.dart
+index 12c3f2045c..e24cccfb0c 100644
+--- a/test/material/dropdown_test.dart
++++ b/test/material/dropdown_test.dart
+@@ -594,7 +594,7 @@ void main() {
+       ),
+     );
+     await tester.tap(find.text(value));
+-    await tester.pump();
++    await tester.pumpAndSettle();
+     final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(itemKey)).toList();
+     expect(itemBoxes[0].localToGlobal(Offset.zero).dx, equals(0.0));
+     expect(itemBoxes[1].localToGlobal(Offset.zero).dx, equals(16.0));
+@@ -640,7 +640,7 @@ void main() {
+       ),
+     );
+     await tester.tap(find.text('First Item'));
+-    await tester.pump();
++    await tester.pumpAndSettle();
+     final RenderBox secondItem = tester.renderObjectList<RenderBox>(find.text('Second Item')).toList()[1];
+     expect(secondItem.localToGlobal(Offset.zero).dx, equals(150.0));
+     expect(secondItem.localToGlobal(Offset.zero).dy, equals(176.0));
+@@ -1011,7 +1011,7 @@ void main() {
+       onChanged: onChanged,
+     ));
+     await tester.tap(find.byKey(buttonKey));
+-    await tester.pump();
++    await tester.pumpAndSettle();
+
+     final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+     // Make sure there is no overscroll
+@@ -3016,6 +3016,7 @@ void main() {
+   });
+
+   testWidgets('Does not crash when option is selected without waiting for opening animation to complete', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     // Regression test for b/171846624.
+
+     final List<String> options = <String>['first', 'second', 'third'];
+@@ -3061,6 +3062,7 @@ void main() {
+     expect(find.text('third').hitTestable(), findsOneWidget);
+     expect(find.text('first').hitTestable(), findsNothing);
+     expect(find.text('second').hitTestable(), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Dropdown menu should persistently show a scrollbar if it is scrollable', (WidgetTester tester) async {
+diff --git a/test/material/input_decorator_test.dart b/test/material/input_decorator_test.dart
+index f81d30f4b9..91d8e4746d 100644
+--- a/test/material/input_decorator_test.dart
++++ b/test/material/input_decorator_test.dart
+@@ -145,6 +145,7 @@ double getOpacity(WidgetTester tester, String textValue) {
+
+ void main() {
+   testWidgets('InputDecorator input/label text layout', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     // The label appears above the input text
+     await tester.pumpWidget(
+       buildInputDecorator(
+@@ -357,9 +358,11 @@ void main() {
+     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+     expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+     expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('InputDecorator input/label widget layout', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     const Key key = Key('l');
+
+     // The label appears above the input text.
+@@ -687,6 +690,7 @@ void main() {
+     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+     expect(tester.getTopLeft(find.byKey(key)).dy, tester.getTopLeft(find.text('hint')).dy);
+     expect(tester.getBottomLeft(find.byKey(key)).dy, tester.getBottomLeft(find.text('hint')).dy);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   group('alignLabelWithHint', () {
+@@ -3466,6 +3470,7 @@ void main() {
+   });
+
+   testWidgets('InputDecoration outline shape with no border and no floating placeholder not empty', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       buildInputDecorator(
+         // isEmpty: false (default)
+@@ -3491,6 +3496,7 @@ void main() {
+
+     // The label should not be seen.
+     expect(getOpacity(tester, 'label'), 0.0);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   test('InputDecorationTheme copyWith, ==, hashCode basics', () {
+@@ -5054,6 +5060,7 @@ void main() {
+   });
+
+   testWidgets('InputDecorator floating label obeys floatingLabelBehavior', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       buildInputDecorator(
+         decoration: const InputDecoration(
+@@ -5066,6 +5073,7 @@ void main() {
+     // Passing floating behavior never results in a dy offset of 20
+     // because the label is not initially floating.
+     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('InputDecorator hint is displayed when floatingLabelBehavior is always', (WidgetTester tester) async {
+diff --git a/test/material/page_test.dart b/test/material/page_test.dart
+index 42b63de600..5a67f97a60 100644
+--- a/test/material/page_test.dart
++++ b/test/material/page_test.dart
+@@ -11,6 +11,7 @@ import '../rendering/mock_canvas.dart';
+
+ void main() {
+   testWidgets('test page transition (_FadeUpwardsPageTransition)', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     await tester.pumpWidget(
+       MaterialApp(
+         home: const Material(child: Text('Page 1')),
+@@ -72,6 +73,7 @@ void main() {
+
+     expect(find.text('Page 1'), isOnstage);
+     expect(find.text('Page 2'), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+   testWidgets('test page transition (CupertinoPageTransition)', (WidgetTester tester) async {
+diff --git a/test/material/text_field_test.dart b/test/material/text_field_test.dart
+index 8112632263..993eac2f81 100644
+--- a/test/material/text_field_test.dart
++++ b/test/material/text_field_test.dart
+@@ -10398,6 +10398,7 @@ void main() {
+
+   // Regressing test for https://github.com/flutter/flutter/issues/70625
+   testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     final FocusNode focusNode = FocusNode();
+     Widget textFieldBuilder({ FloatingLabelBehavior behavior = FloatingLabelBehavior.auto }) {
+       return MaterialApp(
+@@ -10448,6 +10449,7 @@ void main() {
+     await tester.pumpAndSettle(); // label animation.
+     // The label will always float above the content.
+     expect(tester.getTopLeft(find.text('Label')).dy, 12.0);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   group('MaxLengthEnforcement', () {
+@@ -10572,6 +10574,7 @@ void main() {
+   });
+
+   testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     // Regression test for https://github.com/flutter/flutter/issues/39376.
+
+     int textFieldTapCount = 0;
+@@ -10608,6 +10611,7 @@ void main() {
+     expect(textFieldTapCount, 0);
+     expect(prefixTapCount, 1);
+     expect(suffixTapCount, 1);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('autofill info has hint text', (WidgetTester tester) async {
+diff --git a/test/material/tooltip_test.dart b/test/material/tooltip_test.dart
+index c9032100f4..d05c6fecb2 100644
+--- a/test/material/tooltip_test.dart
++++ b/test/material/tooltip_test.dart
+@@ -60,6 +60,7 @@ void main() {
+       ),
+     );
+     tooltipKey.currentState?.ensureTooltipVisible();
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     /********************* 800x600 screen
+@@ -120,6 +121,7 @@ void main() {
+       ),
+     );
+     tooltipKey.currentState?.ensureTooltipVisible();
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     /************************ 800x600 screen
+@@ -179,6 +181,7 @@ void main() {
+       ),
+     );
+     tooltipKey.currentState?.ensureTooltipVisible();
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     /********************* 800x600 screen
+@@ -233,6 +236,7 @@ void main() {
+       ),
+     );
+     tooltipKey.currentState?.ensureTooltipVisible();
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     /********************* 800x600 screen
+@@ -289,6 +293,7 @@ void main() {
+       ),
+     );
+     tooltipKey.currentState?.ensureTooltipVisible();
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     // we try to put it here but it doesn't fit:
+@@ -356,6 +361,7 @@ void main() {
+       ),
+     );
+     tooltipKey.currentState?.ensureTooltipVisible();
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     /********************* 800x600 screen
+@@ -411,6 +417,7 @@ void main() {
+       ),
+     );
+     tooltipKey.currentState?.ensureTooltipVisible();
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     /********************* 800x600 screen
+@@ -468,6 +475,7 @@ void main() {
+       ),
+     );
+     tooltipKey.currentState?.ensureTooltipVisible();
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     /********************* 800x600 screen
+@@ -571,6 +579,7 @@ void main() {
+       ),
+     );
+     tooltipKey.currentState?.ensureTooltipVisible();
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     final Offset topLeftTipInGlobal = tester.getTopLeft(
+diff --git a/test/material/tooltip_theme_test.dart b/test/material/tooltip_theme_test.dart
+index 1500c75885..38be6d529a 100644
+--- a/test/material/tooltip_theme_test.dart
++++ b/test/material/tooltip_theme_test.dart
+@@ -146,6 +146,7 @@ void main() {
+       ),
+     );
+     _ensureTooltipVisible(key);
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     /********************* 800x600 screen
+@@ -204,6 +205,7 @@ void main() {
+       ),
+     );
+     _ensureTooltipVisible(key);
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     /********************* 800x600 screen
+@@ -264,6 +266,7 @@ void main() {
+       ),
+     );
+     _ensureTooltipVisible(key);
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     // we try to put it here but it doesn't fit:
+@@ -333,6 +336,7 @@ void main() {
+       ),
+     );
+     _ensureTooltipVisible(key);
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     // we try to put it here but it doesn't fit:
+@@ -510,6 +514,7 @@ void main() {
+       ),
+     );
+     _ensureTooltipVisible(key);
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
+@@ -566,6 +571,7 @@ void main() {
+       ),
+     );
+     _ensureTooltipVisible(key);
++    await tester.pump();
+     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
+diff --git a/test/material/will_pop_test.dart b/test/material/will_pop_test.dart
+index b99e473d65..e444d0a968 100644
+--- a/test/material/will_pop_test.dart
++++ b/test/material/will_pop_test.dart
+@@ -3,6 +3,7 @@
+ // found in the LICENSE file.
+
+ import 'package:flutter/material.dart';
++import 'package:flutter/rendering.dart';
+ import 'package:flutter_test/flutter_test.dart';
+
+ bool willPopValue = false;
+@@ -245,6 +246,7 @@ void main() {
+   });
+
+   testWidgets('Form.willPop callbacks do not accumulate', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     Future<bool> showYesNoAlert(BuildContext context) async {
+       return (await showDialog<bool>(
+         context: context,
+@@ -334,6 +336,7 @@ void main() {
+     await tester.pump(); // Resolve the willPop callback.
+     await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
+     expect(find.text('Sample Form'), findsNothing);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Route.scopedWillPop callbacks do not accumulate', (WidgetTester tester) async {
+diff --git a/test/rendering/proxy_box_test.dart b/test/rendering/proxy_box_test.dart
+index 1d6eaec566..1c2dbf319f 100644
+--- a/test/rendering/proxy_box_test.dart
++++ b/test/rendering/proxy_box_test.dart
+@@ -686,6 +686,70 @@ void main() {
+
+     expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+   });
++
++  test('Offstage sets paint matrix to zero when offstage == true', () {
++    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
++    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
++    final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
++    parent.adoptChild(offstage);
++
++    final Matrix4 transform = Matrix4.identity();
++    offstage.applyPaintTransform(box, transform);
++
++    expect(transform.isIdentity(), true);
++
++    offstage.offstage = true;
++    offstage.applyPaintTransform(box, transform);
++
++    expect(transform.isZero(), true);
++  });
++
++  test('Opacity sets paint matrix to zero when alpha == 0', () {
++    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
++    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
++    final RenderOpacity opacity = RenderOpacity(child: box);
++    parent.adoptChild(opacity);
++
++    final Matrix4 transform = Matrix4.identity();
++
++    opacity.applyPaintTransform(box, transform);
++    expect(transform.isIdentity(), true);
++
++    opacity.opacity = 0;
++    opacity.applyPaintTransform(box, transform);
++    expect(transform.isZero(), true);
++
++
++    transform.setIdentity();
++    opacity.alwaysIncludeSemantics = true;
++    opacity.applyPaintTransform(box, transform);
++    expect(transform.isIdentity(), true);
++  });
++
++  test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
++    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
++    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
++    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
++    final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
++    parent.adoptChild(opacity);
++
++    // Make it listen to the animation.
++    opacity.attach(PipelineOwner());
++
++    final Matrix4 transform = Matrix4.identity();
++
++    opacity.applyPaintTransform(box, transform);
++    expect(transform.isIdentity(), true);
++
++    opacityAnimation.value = 0;
++    opacity.applyPaintTransform(box, transform);
++    expect(transform.isZero(), true);
++
++    transform.setIdentity();
++    opacity.alwaysIncludeSemantics = true;
++    opacity.applyPaintTransform(box, transform);
++    expect(transform.isIdentity(), true);
++  });
+ }
+
+ class _TestRectClipper extends CustomClipper<Rect> {
+diff --git a/test/widgets/editable_text_test.dart b/test/widgets/editable_text_test.dart
+index af841f5ca0..eb84ff6950 100644
+--- a/test/widgets/editable_text_test.dart
++++ b/test/widgets/editable_text_test.dart
+@@ -4954,6 +4954,7 @@ void main() {
+   }, skip: kIsWeb); // [intended]
+
+   testWidgets('text selection handle visibility', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     // Text with two separate words to select.
+     const String testText = 'XXXXX          XXXXX';
+     final TextEditingController controller = TextEditingController(text: testText);
+@@ -5118,11 +5119,13 @@ void main() {
+     scrollable.controller!.jumpTo(0);
+     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
+
++    debugOffstageAndOpacityAffectPaintTransform = true;
+     // On web, we don't show the Flutter toolbar and instead rely on the browser
+     // toolbar. Until we change that, this test should remain skipped.
+   }, skip: kIsWeb); // [intended]
+
+   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     // Text with two separate words to select.
+     const String testText = 'XXXXX          XXXXX';
+     final TextEditingController controller = TextEditingController(text: testText);
+@@ -5180,6 +5183,7 @@ void main() {
+     expect(controller.selection.base.offset, 0);
+     expect(controller.selection.extent.offset, 5);
+
++    debugOffstageAndOpacityAffectPaintTransform = true;
+     // On web, we don't show the Flutter toolbar and instead rely on the browser
+     // toolbar. Until we change that, this test should remain skipped.
+   }, skip: kIsWeb); // [intended]
+@@ -7660,6 +7664,7 @@ void main() {
+
+   // Regression test for https://github.com/flutter/flutter/issues/31287
+   testWidgets('text selection handle visibility', (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     // Text with two separate words to select.
+     const String testText = 'XXXXX          XXXXX';
+     final TextEditingController controller = TextEditingController(text: testText);
+@@ -7820,7 +7825,7 @@ void main() {
+     // at all. Again, both handles should be invisible.
+     scrollable.controller!.jumpTo(0);
+     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
+-
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   },
+       // On web, we don't show the Flutter toolbar and instead rely on the browser
+       // toolbar. Until we change that, this test should remain skipped.
+diff --git a/test/widgets/heroes_test.dart b/test/widgets/heroes_test.dart
+index c4cbbaeb9f..43e8becb5b 100644
+--- a/test/widgets/heroes_test.dart
++++ b/test/widgets/heroes_test.dart
+@@ -1072,6 +1072,7 @@ Future<void> main() async {
+
+   testWidgets('Aborted flight', (WidgetTester tester) async {
+     // See https://github.com/flutter/flutter/issues/5798
++    debugOffstageAndOpacityAffectPaintTransform = false;
+     const Key heroABKey = Key('AB hero');
+     const Key heroBCKey = Key('BC hero');
+
+@@ -1205,6 +1206,7 @@ Future<void> main() async {
+     // Hero BC's flight finishes normally.
+     await tester.pump(const Duration(milliseconds: 300));
+     expect(tester.getTopLeft(find.byKey(heroBCKey)).dy, 0.0);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+
+   testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {
+@@ -2490,13 +2492,13 @@ Future<void> main() async {
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: <Widget>[
+               Hero(
++                key: imageKey1,
+                 tag: 'hero',
+                 transitionOnUserGestures: true,
+                 child: SizedBox(
+                   width: 100,
+                   child: Image(
+                     image: imageProvider,
+-                    key: imageKey1,
+                   ),
+                 ),
+               ),
+diff --git a/test/widgets/text_selection_test.dart b/test/widgets/text_selection_test.dart
+index 80c36f6d09..9faf417f22 100644
+--- a/test/widgets/text_selection_test.dart
++++ b/test/widgets/text_selection_test.dart
+@@ -938,6 +938,7 @@ void main() {
+     });
+
+     testWidgets('can trigger selection handle onTap', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       bool selectionHandleTapped = false;
+       void handleTapped() => selectionHandleTapped = true;
+       final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+@@ -967,9 +968,11 @@ void main() {
+       selectionHandleTapped = false;
+       await tester.tap(find.byKey(spy.rightHandleKey));
+       expect(selectionHandleTapped, isTrue);
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+
+     testWidgets('can trigger selection handle drag', (WidgetTester tester) async {
++      debugOffstageAndOpacityAffectPaintTransform = false;
+       DragStartDetails? startDragStartDetails;
+       DragUpdateDetails? startDragUpdateDetails;
+       DragEndDetails? startDragEndDetails;
+@@ -1039,6 +1042,7 @@ void main() {
+       await gesture2.up();
+       await tester.pump(const Duration(milliseconds: 20));
+       expect(endDragEndDetails, isNotNull);
++      debugOffstageAndOpacityAffectPaintTransform = true;
+     });
+   });
+
+diff --git a/test/widgets/text_test.dart b/test/widgets/text_test.dart
+index b1c59846d2..4b4831271a 100644
+--- a/test/widgets/text_test.dart
++++ b/test/widgets/text_test.dart
+@@ -1345,6 +1345,7 @@ void main() {
+   testWidgets(
+     'Text can be hit-tested without layout or paint being called in a frame',
+     (WidgetTester tester) async {
++    debugOffstageAndOpacityAffectPaintTransform = false;
+       // Regression test for https://github.com/flutter/flutter/issues/85108.
+       await tester.pumpWidget(
+         const Opacity(
+@@ -1376,6 +1377,7 @@ void main() {
+
+       await tester.tap(find.text('Hello World'));
+       expect(tester.takeException(), isNull);
++    debugOffstageAndOpacityAffectPaintTransform = true;
+   });
+ }
+
+diff --git a/packages/flutter_test/lib/src/widget_tester.dart b/packages/flutter_test/lib/src/widget_tester.dart
+index 7ee9027a86..7063f468d6 100644
+--- a/packages/flutter_test/lib/src/widget_tester.dart
++++ b/packages/flutter_test/lib/src/widget_tester.dart
+@@ -15,6 +15,7 @@ import 'package:meta/meta.dart';
+ // ignore: deprecated_member_use
+ import 'package:test_api/test_api.dart' as test_package;
+
++
+ import 'all_elements.dart';
+ import 'binding.dart';
+ import 'controller.dart';

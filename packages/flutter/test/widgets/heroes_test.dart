@@ -1072,6 +1072,7 @@ Future<void> main() async {
 
   testWidgets('Aborted flight', (WidgetTester tester) async {
     // See https://github.com/flutter/flutter/issues/5798
+    debugOffstageAndOpacityAffectPaintTransform = false;
     const Key heroABKey = Key('AB hero');
     const Key heroBCKey = Key('BC hero');
 
@@ -1205,6 +1206,7 @@ Future<void> main() async {
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
     expect(tester.getTopLeft(find.byKey(heroBCKey)).dy, 0.0);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {
@@ -2490,13 +2492,13 @@ Future<void> main() async {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Hero(
+                key: imageKey1,
                 tag: 'hero',
                 transitionOnUserGestures: true,
                 child: SizedBox(
                   width: 100,
                   child: Image(
                     image: imageProvider,
-                    key: imageKey1,
                   ),
                 ),
               ),

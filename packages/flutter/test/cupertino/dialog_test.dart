@@ -20,6 +20,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Alert dialog control test', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     bool didDelete = false;
 
     await tester.pumpWidget(
@@ -56,6 +57,7 @@ void main() {
 
     expect(didDelete, isTrue);
     expect(find.text('Delete'), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Dialog not barrier dismissible by default', (WidgetTester tester) async {
@@ -383,6 +385,7 @@ void main() {
   });
 
   testWidgets('Button list is scrollable, has correct position with large text sizes.', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     final ScrollController actionScrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -440,9 +443,11 @@ void main() {
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Three')).height, equals(98.0));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Chocolate Brownies')).height, equals(248.0));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')).height, equals(148.0));
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Title Section is empty, Button section is not empty.', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     const double textScaleFactor = 1.0;
     final ScrollController actionScrollController = ScrollController();
     await tester.pumpWidget(
@@ -493,6 +498,7 @@ void main() {
       tester.getSize(find.widgetWithText(CupertinoDialogAction, 'One')).height,
       equals(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two')).height),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Button section is empty, Title section is not empty.', (WidgetTester tester) async {
@@ -819,6 +825,7 @@ void main() {
   });
 
   testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     final ScrollController scrollController = ScrollController();
     late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
@@ -929,9 +936,11 @@ void main() {
     // We must explicitly cause an "up" gesture to avoid a crash.
     // todo(mattcarroll) remove this call, https://github.com/flutter/flutter/issues/19540
     await gesture.up();
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -1007,9 +1016,11 @@ void main() {
 
     // No scaling on exit animation.
     expect(find.byType(Transform), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('FadeTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -1100,9 +1111,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(0.0, epsilon: 0.001));
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Actions are accessible by key', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -1130,9 +1143,11 @@ void main() {
     expect(find.byKey(const Key('option_1')), findsOneWidget);
     expect(find.byKey(const Key('option_2')), findsOneWidget);
     expect(find.byKey(const Key('option_3')), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Dialog widget insets by MediaQuery viewInsets', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
@@ -1160,9 +1175,11 @@ void main() {
 
     // once animation settles the dialog is padded by the new viewInsets
     expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Default cupertino dialog golden', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -1190,9 +1207,11 @@ void main() {
       find.byType(CupertinoAlertDialog),
       matchesGoldenFile('dialog_test.cupertino.default.png'),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('showCupertinoDialog - custom barrierLabel', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1229,9 +1248,11 @@ void main() {
       label: 'Custom label',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'app',
@@ -1259,10 +1280,12 @@ void main() {
 
     await tester.restoreFrom(restorationData);
     expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
   testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
+    debugOffstageAndOpacityAffectPaintTransform = false;
     const double textScaleFactor = 1.0;
     final ScrollController actionScrollController = ScrollController();
     await tester.pumpWidget(
@@ -1298,10 +1321,12 @@ void main() {
     // Built in CupertinoScrollbars should only number 2: one for the actions,
     // one for the content.
     expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
+    debugOffstageAndOpacityAffectPaintTransform = true;
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('CupertinoAlertDialog scrollbars controllers should be different', (WidgetTester tester) async {
     // https://github.com/flutter/flutter/pull/81278
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
@@ -1324,10 +1349,12 @@ void main() {
 
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   group('showCupertinoDialog avoids overlapping display features', () {
     testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -1363,9 +1390,11 @@ void main() {
       // Should take the right side of the screen
       expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
 
     testWidgets('positioning using Directionality', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = true;
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -1406,6 +1435,7 @@ void main() {
     });
 
     testWidgets('default positioning', (WidgetTester tester) async {
+      debugOffstageAndOpacityAffectPaintTransform = false;
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -1440,10 +1470,12 @@ void main() {
       // By default it should place the dialog on the left screen
       expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
+      debugOffstageAndOpacityAffectPaintTransform = true;
     });
   });
 
   testWidgets('Hovering over Cupertino alert dialog action updates cursor to clickable on Web', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -1486,6 +1518,7 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 }
 

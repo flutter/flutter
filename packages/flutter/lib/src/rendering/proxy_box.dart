@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
@@ -23,8 +24,6 @@ export 'package:flutter/gestures.dart' show
   PointerMoveEvent,
   PointerUpEvent,
   PointerCancelEvent;
-
-bool offstageAndOpacityAffectPaintTransform = true;
 
 /// A base class for render boxes that resemble their children.
 ///
@@ -900,7 +899,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    if (_alpha == 0 && !alwaysIncludeSemantics && offstageAndOpacityAffectPaintTransform) {
+    if (_alpha == 0 && !alwaysIncludeSemantics && (!kDebugMode || debugOffstageAndOpacityAffectPaintTransform)) {
       transform.setZero();
     } else {
       super.applyPaintTransform(child, transform);
@@ -1000,7 +999,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    if (_alpha == 0 && !alwaysIncludeSemantics && offstageAndOpacityAffectPaintTransform) {
+    if (_alpha == 0 && !alwaysIncludeSemantics && (!kDebugMode || debugOffstageAndOpacityAffectPaintTransform)) {
       transform.setZero();
     } else {
       super.applyPaintTransform(child, transform);
@@ -3611,7 +3610,7 @@ class RenderOffstage extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    if (offstage && offstageAndOpacityAffectPaintTransform) {
+    if (offstage && (!kDebugMode || debugOffstageAndOpacityAffectPaintTransform)) {
       transform.setZero();
     } else {
       super.applyPaintTransform(child, transform);

@@ -1640,6 +1640,7 @@ void main() {
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Read only text field', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     final TextEditingController controller = TextEditingController(text: 'readonly');
 
     await tester.pumpWidget(
@@ -1674,6 +1675,7 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('copy paste', (WidgetTester tester) async {

@@ -4954,6 +4954,7 @@ void main() {
   }, skip: kIsWeb); // [intended]
 
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
     final TextEditingController controller = TextEditingController(text: testText);
@@ -5118,11 +5119,13 @@ void main() {
     scrollable.controller!.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
 
+    debugOffstageAndOpacityAffectPaintTransform = true;
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
   }, skip: kIsWeb); // [intended]
 
   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
     final TextEditingController controller = TextEditingController(text: testText);
@@ -5180,6 +5183,7 @@ void main() {
     expect(controller.selection.base.offset, 0);
     expect(controller.selection.extent.offset, 5);
 
+    debugOffstageAndOpacityAffectPaintTransform = true;
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
   }, skip: kIsWeb); // [intended]
@@ -7660,6 +7664,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
     final TextEditingController controller = TextEditingController(text: testText);
@@ -7820,7 +7825,7 @@ void main() {
     // at all. Again, both handles should be invisible.
     scrollable.controller!.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
-
+    debugOffstageAndOpacityAffectPaintTransform = true;
   },
       // On web, we don't show the Flutter toolbar and instead rely on the browser
       // toolbar. Until we change that, this test should remain skipped.

@@ -1345,6 +1345,7 @@ void main() {
   testWidgets(
     'Text can be hit-tested without layout or paint being called in a frame',
     (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
       // Regression test for https://github.com/flutter/flutter/issues/85108.
       await tester.pumpWidget(
         const Opacity(
@@ -1376,6 +1377,7 @@ void main() {
 
       await tester.tap(find.text('Hello World'));
       expect(tester.takeException(), isNull);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 }
 

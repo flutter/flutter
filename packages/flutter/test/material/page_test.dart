@@ -11,6 +11,7 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('test page transition (_FadeUpwardsPageTransition)', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       MaterialApp(
         home: const Material(child: Text('Page 1')),
@@ -72,6 +73,7 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('test page transition (CupertinoPageTransition)', (WidgetTester tester) async {

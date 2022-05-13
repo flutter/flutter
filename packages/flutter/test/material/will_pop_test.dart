@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 bool willPopValue = false;
@@ -245,6 +246,7 @@ void main() {
   });
 
   testWidgets('Form.willPop callbacks do not accumulate', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     Future<bool> showYesNoAlert(BuildContext context) async {
       return (await showDialog<bool>(
         context: context,
@@ -334,6 +336,7 @@ void main() {
     await tester.pump(); // Resolve the willPop callback.
     await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Route.scopedWillPop callbacks do not accumulate', (WidgetTester tester) async {

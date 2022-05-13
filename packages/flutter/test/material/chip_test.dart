@@ -877,6 +877,7 @@ void main() {
   });
 
   testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     final GlobalKey labelKey = GlobalKey();
     Future<void> pushChip({ Widget? avatar }) async {
       return tester.pumpWidget(
@@ -986,9 +987,11 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
     expect(find.byKey(avatarKey), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     const Key labelKey = Key('label');
     const Key deleteButtonKey = Key('delete');
     bool wasDeleted = false;
@@ -1102,6 +1105,7 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
     expect(find.byKey(deleteButtonKey), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Delete button takes up at most half of the chip', (WidgetTester tester) async {

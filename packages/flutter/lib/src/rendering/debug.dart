@@ -275,6 +275,21 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double 
   }());
 }
 
+/// Whether or not [RenderOffstage], [RenderOpacity], and
+/// [RenderAnimatedOpacityMixin] affect the paint transform.
+///
+/// By default, these render objects zero out the matrix in cases where they do
+/// not paint their children. Specifically, [RenderOffstage.offstage] being true,
+/// [RenderOpacity.opacity] being 0, and [RenderAnimatedOpacityMixin.opacity]
+/// being 0 will cause the `applyPaintTransform` method to zero out the supplied
+/// matrix. The exception is that the opacity classes will _not_ zero out the
+/// matrix if the object is marked as always including semantics.
+///
+/// Tests may find it more convenient to be able to hit test or otherwise get
+/// the screen rect for a [RenderObject] even if it is not currently onstage or
+/// visible. In that case, they can set this value to `false`.
+bool debugOffstageAndOpacityAffectPaintTransform = true;
+
 /// Returns true if none of the rendering library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
@@ -304,7 +319,8 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugOnProfilePaint != null ||
         debugDisableClipLayers ||
         debugDisablePhysicalShapeLayers ||
-        debugDisableOpacityLayers) {
+        debugDisableOpacityLayers ||
+       !debugOffstageAndOpacityAffectPaintTransform) {
       throw FlutterError(reason);
     }
     return true;

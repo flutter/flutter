@@ -52,6 +52,7 @@ void main() {
   });
 
   testWidgets('Large title auto-populates with title', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -114,6 +115,7 @@ void main() {
     // The smaller, initially invisible title, should still be positioned in the
     // center.
     expect(tester.getCenter(find.byWidget(titles[0].widget)).dx, 400.0);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Leading auto-populates with back button with previous title', (WidgetTester tester) async {

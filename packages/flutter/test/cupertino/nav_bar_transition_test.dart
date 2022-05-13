@@ -129,6 +129,7 @@ void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
 
 void main() {
   testWidgets('Bottom middle moves between middle and back label', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -148,9 +149,11 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
       const Offset(337.1953125, 13.5),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom middle moves between middle and back label RTL', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -169,9 +172,11 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
       const Offset(362.8046875, 13.5),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom middle never changes size during the animation', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
     addTearDown(() async {
       await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
@@ -190,9 +195,11 @@ void main() {
       expect(tester.getSize(flying(tester, find.text('Page 1')).first), size);
       expect(tester.getSize(flying(tester, find.text('Page 1')).last), size);
     }
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom middle and top back label transitions their font', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -234,9 +241,11 @@ void main() {
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.7630139589309692);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Font transitions respect themes', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -282,9 +291,11 @@ void main() {
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.7630139589309692);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Fullscreen dialogs do not create heroes', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -316,9 +327,11 @@ void main() {
     expect(find.byType(Hero), findsOneWidget);
     // No Hero transition happened.
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Turning off transition works', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       from: const CupertinoNavigationBar(
@@ -340,9 +353,11 @@ void main() {
 
     // No Hero transition happened.
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Popping mid-transition is symmetrical', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -381,9 +396,11 @@ void main() {
 
     // Check that everything's the same as on the way in.
     checkColorAndPositionAt50ms();
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Popping mid-transition is symmetrical RTL', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -426,9 +443,11 @@ void main() {
 
     // Check that everything's the same as on the way in.
     checkColorAndPositionAt50ms();
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('There should be no global keys in the hero flight', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -441,9 +460,11 @@ void main() {
       ),
       findsNothing,
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Multiple nav bars tags do not conflict if in different navigators', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -516,9 +537,11 @@ void main() {
     expect(find.text('Tab 1 Page 1', skipOffstage: false), findsOneWidget);
     // Never navigated to tab 1 page 2.
     expect(find.text('Tab 1 Page 2', skipOffstage: false), findsNothing);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Transition box grows to large title size', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -540,9 +563,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
     checkBackgroundBoxHeight(tester, 90.53337162733078);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Large transition box shrinks to standard nav bar size', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -564,9 +589,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
     checkBackgroundBoxHeight(tester, 49.46662837266922);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -579,9 +606,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(() => flying(tester, find.text('Page 1')), throwsAssertionError);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Exact widget is reused to build inside the transition', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -595,9 +624,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('First appearance of back chevron fades in from the right', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: scaffoldForNavBar(null),
@@ -628,9 +659,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
     checkOpacity(tester, backChevron, 0.09497911669313908);
     expect(tester.getTopLeft(backChevron), const Offset(31.055883467197418, 7.0));
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('First appearance of back chevron fades in from the left in RTL', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await tester.pumpWidget(
       CupertinoApp(
         builder: (BuildContext context, Widget? navigator) {
@@ -674,9 +707,11 @@ void main() {
       tester.getTopRight(backChevron),
       const Offset(742.9441165328026, 7.0),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Back chevron fades out and in when both pages have it', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -700,9 +735,11 @@ void main() {
     // Still in the same place.
     expect(tester.getTopLeft(backChevrons.first), const Offset(14.0, 7.0));
     expect(tester.getTopLeft(backChevrons.last), const Offset(14.0, 7.0));
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom middle just fades if top page has a custom leading', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -731,9 +768,11 @@ void main() {
       tester.getCenter(flying(tester, find.text('Page 1'))),
       const Offset(400.0, 22.0),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom leading fades in place', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(leading: Text('custom')),
@@ -757,9 +796,11 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('custom'))),
       const Offset(16.0, 0.0),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom trailing fades in place', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(trailing: Text('custom')),
@@ -783,9 +824,11 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('custom'))),
       const Offset(684.0, 13.5),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom back label fades and slides to the left', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -819,9 +862,11 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 1'))),
       const Offset(-258.2321922779083, 13.5),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom back label fades and slides to the right in RTL', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -857,9 +902,11 @@ void main() {
       // >1000. It's now off the screen.
       const Offset(1058.2321922779083, 13.5),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom large title moves to top back label', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -895,9 +942,11 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
       const Offset(43.92089730501175, 22.49655644595623),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -933,6 +982,7 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Back'))),
       const Offset(43.92089730501175, 22.49655644595623),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Bottom large title and top back label transitions their font', (WidgetTester tester) async {
@@ -975,6 +1025,7 @@ void main() {
   });
 
   testWidgets('Top middle fades in and slides in from the right', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -997,6 +1048,7 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(439.7678077220917, 13.5),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Top middle never changes size during the animation', (WidgetTester tester) async {
@@ -1023,6 +1075,7 @@ void main() {
   });
 
   testWidgets('Top middle fades in and slides in from the left in RTL', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -1046,9 +1099,11 @@ void main() {
       tester.getTopRight(flying(tester, find.text('Page 2'))),
       const Offset(360.2321922779083, 13.5),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Top large title fades in and slides in from the right', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1072,9 +1127,11 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(195.53561544418335, 54.0),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Top large title fades in and slides in from the left in RTL', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1099,6 +1156,7 @@ void main() {
       tester.getTopRight(flying(tester, find.text('Page 2'))),
       const Offset(604.4643845558167, 54.0),
     );
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Components are not unnecessarily rebuilt during transitions', (WidgetTester tester) async {
@@ -1147,6 +1205,7 @@ void main() {
   });
 
   testWidgets('Back swipe gesture transitions', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -1198,6 +1257,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
     // Just the bottom route's middle now.
     expect(find.text('Page 1'), findsOneWidget);
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {

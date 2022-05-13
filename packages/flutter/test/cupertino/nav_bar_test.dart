@@ -533,6 +533,7 @@ void main() {
   });
 
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
+    debugOffstageAndOpacityAffectPaintTransform = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       CupertinoApp(
@@ -579,7 +580,7 @@ void main() {
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     largeTitleOpacity =
         tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
@@ -594,6 +595,7 @@ void main() {
     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
 
     expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 - 8.0); // Extension gone, (static part - padding) left.
+    debugOffstageAndOpacityAffectPaintTransform = true;
   });
 
   testWidgets('Auto back/close button', (WidgetTester tester) async {
