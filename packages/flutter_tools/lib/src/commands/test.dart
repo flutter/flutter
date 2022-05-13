@@ -217,10 +217,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'or as the string "none" to disable the timeout entirely.',
         defaultsTo: '30s',
       )
-      ..addOption('enable-fractional-translation',
+      ..addFlag('enable-fractional-translation',
         help: 'Enables fraction translation of engine composited layers in '
               'the software renderer backend for flutter tester. Also disables '
               'the raster cache.',
+        defaultsTo: true,
       );
     addDdsOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
