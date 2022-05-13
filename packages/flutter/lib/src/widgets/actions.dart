@@ -524,6 +524,8 @@ class CallbackAction<T extends Intent> extends Action<T> {
   CallbackAction({required this.onInvoke}) : assert(onInvoke != null);
 
   /// The callback to be called when invoked.
+  ///
+  /// Must not be null.
   @protected
   final OnInvokeCallback<T> onInvoke;
 
