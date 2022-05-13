@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import 'shaders/shader.dart';
 import 'surface.dart';
 
@@ -17,7 +16,7 @@ class PersistedImageFilter extends PersistedContainerSurface
   final ui.ImageFilter filter;
 
   @override
-  html.Element createElement() {
+  DomElement createElement() {
     return defaultCreateElement('flt-image-filter');
   }
 

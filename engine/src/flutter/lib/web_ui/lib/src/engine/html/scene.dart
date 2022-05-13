@@ -6,6 +6,7 @@ import 'dart:html' as html;
 
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import '../vector_math.dart';
 import 'surface.dart';
 
@@ -59,7 +60,7 @@ class PersistedScene extends PersistedContainerSurface {
       _localTransformInverse ??= Matrix4.identity();
 
   @override
-  html.Element createElement() {
+  DomElement createElement() {
     return defaultCreateElement('flt-scene');
   }
 

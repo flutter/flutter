@@ -396,9 +396,9 @@ class _LoggingTestSurface extends PersistedContainerSurface {
   }
 
   @override
-  html.Element createElement() {
+  DomElement createElement() {
     log.add('createElement');
-    return html.Element.tag('flt-test-layer');
+    return createDomElement('flt-test-layer');
   }
 
   @override

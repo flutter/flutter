@@ -70,7 +70,7 @@ Future<void> testMain() async {
 
     group('createElement', () {
       test('creates slot element that can receive pointer events', () {
-        final html.Element element = view.createElement();
+        final DomElement element = view.createElement();
 
         expect(element.tagName, equalsIgnoringCase('flt-platform-view-slot'));
         expect(element.style.pointerEvents, 'auto');
