@@ -161,7 +161,7 @@ String? _artifactToFileName(Artifact artifact, [ TargetPlatform? platform, Build
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.flutterTester:
-      return 'flutter_Tester$exe';
+      return 'flutter_tester$exe';
     case Artifact.flutterTesterFractionalTranslation:
       return 'flutter_tester_fractional_translation$exe';
     case Artifact.flutterFramework:
