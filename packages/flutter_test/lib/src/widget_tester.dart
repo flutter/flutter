@@ -9,11 +9,16 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+// Import this so that tests can do hit testing on objects that are offstage or
+// fully transparent.
+// ignore: implementation_imports
+import 'package:flutter/src/rendering/proxy_box.dart' show offstageAndOpacityAffectPaintTransform;
 import 'package:meta/meta.dart';
 
 // The test_api package is not for general use... it's literally for our use.
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
+
 
 import 'all_elements.dart';
 import 'binding.dart';
@@ -165,10 +170,13 @@ void testWidgets(
             binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
             debugResetSemanticsIdCounter();
             Object? memento;
+            bool oldOffstageAndOpacityAffectPaintTransform = offstageAndOpacityAffectPaintTransform;
+            offstageAndOpacityAffectPaintTransform = false;
             try {
               memento = await variant.setUp(value);
               await callback(tester);
             } finally {
+              offstageAndOpacityAffectPaintTransform = oldOffstageAndOpacityAffectPaintTransform;
               await variant.tearDown(value, memento);
             }
             semanticsHandle?.dispose();
