@@ -686,6 +686,31 @@ void main() {
 
     expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
   });
+
+  test('RenderCustomClip extenders respect clipBehavior when asked to describeApproximateClip', () {
+    final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
+    final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: Clip.none, child: child);
+    layout(renderClipRect);
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      null,
+    );
+    renderClipRect.clipBehavior = Clip.hardEdge;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+    renderClipRect.clipBehavior = Clip.antiAlias;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+    renderClipRect.clipBehavior = Clip.antiAliasWithSaveLayer;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
