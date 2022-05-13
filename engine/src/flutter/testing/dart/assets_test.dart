@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
 
@@ -10,7 +14,7 @@ void main() {
   test('Loading an asset that does not exist returns null', () async {
     Object? error;
     try {
-      await ui.ImmutableBuffer.fromAsset('ThisDoesNotExist');
+      await ImmutableBuffer.fromAsset('ThisDoesNotExist');
     } catch (err) {
       error = err;
     }
@@ -19,14 +23,62 @@ void main() {
   });
 
   test('returns the bytes of a bundled asset', () async {
-    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromAsset('assets/DashInNooglerHat.jpg');
+    final ImmutableBuffer buffer = await ImmutableBuffer.fromAsset('DashInNooglerHat.jpg');
 
     expect(buffer.length == 354679, true);
   });
 
   test('can dispose immutable buffer', () async {
-    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromAsset('assets/DashInNooglerHat.jpg');
+    final ImmutableBuffer buffer = await ImmutableBuffer.fromAsset('DashInNooglerHat.jpg');
 
     buffer.dispose();
   });
+
+  test('Tester can disable loading fonts from an asset bundle', () async {
+    final List<int> ahemImage = await _createPictureFromFont('Ahem');
+    // Font that is bundled in the asset directory of the test runner.
+    final List<int> bundledFontImage = await _createPictureFromFont('Roboto');
+    // Bundling fonts is disabled, so the font selected in both cases should be ahem.
+    // Therefore each buffer will contain identical contents.
+    expect(ahemImage, equals(bundledFontImage));
+  });
+
+  test('Tester can still load through dart:ui', () async {
+    /// Manually load font asset through dart.
+    final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull('Roboto-Medium.ttf')).path);
+    final Completer<Uint8List> result = Completer<Uint8List>();
+    window.sendPlatformMessage('flutter/assets', encoded.buffer.asByteData(), (ByteData? data) {
+      result.complete(data!.buffer.asUint8List());
+    });
+
+    await loadFontFromList(await result.future, fontFamily: 'Roboto2');
+
+    final List<int> ahemImage = await _createPictureFromFont('Ahem');
+    // Font that is bundled in the asset directory of the test runner.
+    final List<int> bundledFontImage = await _createPictureFromFont('Roboto2');
+    // Bundling fonts is disabled, so the font selected in both cases should be ahem.
+    // Therefore each buffer will contain identical contents.
+    expect(ahemImage, notEquals(bundledFontImage));
+  });
+}
+
+Future<List<int>> _createPictureFromFont(String fontFamily) async {
+  final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    fontFamily: fontFamily,
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.normal,
+    fontSize: 20,
+  ));
+  builder.addText('Test');
+  final Paragraph paragraph = builder.build();
+  paragraph.layout(const ParagraphConstraints(width: 20 * 5.0));
+
+  final PictureRecorder recorder = PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+  canvas.drawParagraph(paragraph, Offset.zero);
+
+  final Picture picture = recorder.endRecording();
+  final Image image = await picture.toImage(100, 100);
+  final ByteData? data = await image.toByteData();
+  return data!.buffer.asUint8List().toList();
 }

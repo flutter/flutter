@@ -176,6 +176,11 @@ DEF_SWITCH(UseTestFonts,
            "will make font resolution default to the Ahem test font on all "
            "platforms (See https://www.w3.org/Style/CSS/Test/Fonts/Ahem/). "
            "This option is only available on the desktop test shells.")
+DEF_SWITCH(DisableAssetFonts,
+           "disable-asset-fonts",
+           "Prevents usage of any non-test fonts unless they were explicitly "
+           "Loaded via dart:ui font APIs. This option is only available on the "
+           "desktop test shells.")
 DEF_SWITCH(PrefetchedDefaultFontManager,
            "prefetched-default-font-manager",
            "Indicates whether the embedding started a prefetch of the "

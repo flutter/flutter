@@ -172,7 +172,9 @@ bool Engine::UpdateAssetManager(
   }
 
   // Using libTXT as the text engine.
-  font_collection_->RegisterFonts(asset_manager_);
+  if (settings_.use_asset_fonts) {
+    font_collection_->RegisterFonts(asset_manager_);
+  }
 
   if (settings_.use_test_fonts) {
     font_collection_->RegisterTestFonts();
