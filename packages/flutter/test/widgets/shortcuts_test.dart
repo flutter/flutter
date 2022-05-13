@@ -1623,6 +1623,34 @@ void main() {
         SingleActivator(LogicalKeyboardKey.keyB): ActivateIntent(),
       }));
     });
+
+    testWidgets('using a disposed or foreign token asserts', (WidgetTester tester) async {
+      final ShortcutRegistry registry = ShortcutRegistry();
+      final ShortcutRegistryToken token = registry.addAll(<ShortcutActivator, Intent>{
+        const SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
+      });
+      token.dispose();
+      final ShortcutRegistry registry2 = ShortcutRegistry();
+      final ShortcutRegistryToken token2 = registry2.addAll(<ShortcutActivator, Intent>{
+        const SingleActivator(LogicalKeyboardKey.keyB): DoNothingIntent(),
+      });
+      expect(() {registry.replaceAll(token, <ShortcutActivator, Intent>{}); }, throwsAssertionError);
+      expect(() {registry.replaceAll(token2, <ShortcutActivator, Intent>{}); }, throwsAssertionError);
+    });
+
+    testWidgets('setting duplicate bindings asserts', (WidgetTester tester) async {
+      final ShortcutRegistry registry = ShortcutRegistry();
+      final ShortcutRegistryToken token = registry.addAll(<ShortcutActivator, Intent>{
+        const SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
+      });
+      expect(() {
+        final ShortcutRegistryToken token2 = registry.addAll(const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.keyA): ActivateIntent(),
+        });
+        token2.dispose();
+      }, throwsAssertionError);
+      token.dispose();
+    });
   });
 }
 
@@ -1638,27 +1666,27 @@ class TestCallbackRegistration extends StatefulWidget {
 }
 
 class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
-  ShortcutRegistry? _cachedRegistry;
+  ShortcutRegistryToken? _registryToken;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _cachedRegistry ??= ShortcutRegistrar.of(context)..addAll(context, widget.shortcuts);
+    _registryToken = ShortcutRegistrar.of(context).addAll(widget.shortcuts);
   }
 
   @override
   void didUpdateWidget(TestCallbackRegistration oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.shortcuts != oldWidget.shortcuts || _cachedRegistry == null) {
-      _cachedRegistry?.removeAll(context);
-      _cachedRegistry = ShortcutRegistrar.of(context)..addAll(context, widget.shortcuts);
+    if (widget.shortcuts != oldWidget.shortcuts || _registryToken == null) {
+      _registryToken?.dispose();
+      _registryToken = ShortcutRegistrar.of(context).addAll(widget.shortcuts);
     }
     widget.onDependencyUpdate?.call(ShortcutRegistrar.of(context).shortcuts);
   }
 
   @override
   void dispose() {
-    _cachedRegistry?.removeAll(context);
+    _registryToken?.dispose();
     super.dispose();
   }
 

@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -1062,6 +1063,29 @@ class CallbackShortcuts extends StatelessWidget {
   }
 }
 
+/// A token returned by [ShortcutRegistry.addAll] that allows the caller to
+/// identify the shortcuts they registered with the [ShortcutRegistry] through
+/// the [ShortcutRegistrar].
+///
+/// When the token is no longer needed, [dispose] should be called, and the
+/// token should no longer be used.
+class ShortcutRegistryToken {
+  // Tokens can only be created by the ShortcutRegistry.
+  const ShortcutRegistryToken._(this.registry);
+
+  /// The [ShortcutRegistry] that this token was issued by.
+  final ShortcutRegistry registry;
+
+  /// Called when the token is no longer needed.
+  ///
+  /// Call this will remove all shortcuts associated with this
+  /// [ShortcutRegistryToken] from the [registry].
+  @mustCallSuper
+  void dispose() {
+    registry._disposeToken(this);
+  }
+}
+
 /// A class used by [ShortcutRegistrar] that allows adding or removing shortcut
 /// bindings.
 ///
@@ -1070,55 +1094,110 @@ class CallbackShortcuts extends StatelessWidget {
 ///
 /// The registry may be listened to (with [addListener]/[removeListener]) for
 /// change notifications when the registered shortcuts change. When shortcuts
-/// are added or removed, change notifications will be dispatched after the
-/// current frame is finished.
+/// are added or removed, change notifications will be dispatched.
 class ShortcutRegistry extends ChangeNotifier {
+  bool _debugDisposed = false;
+
+  bool _debugAssertNotDisposed() {
+    assert(() {
+      if (_debugDisposed) {
+        throw FlutterError(
+          'A $runtimeType was used after being disposed.\n'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  @override
+  void dispose() {
+    _debugDisposed = true;
+    super.dispose();
+  }
+
   /// Gets the combined shortcut bindings from all contexts that are registered
   /// with this [ShortcutRegistry].
   ///
   /// Returns a copy: modifying the returned map will have no effect.
   Map<ShortcutActivator, Intent> get shortcuts {
+    assert(_debugAssertNotDisposed());
     return <ShortcutActivator, Intent>{
-      for (final MapEntry<BuildContext, Map<ShortcutActivator, Intent>> entry in _contextShortcuts.entries) ...entry.value,
+      for (final MapEntry<ShortcutRegistryToken, Map<ShortcutActivator, Intent>> entry in _tokenShortcuts.entries)
+        ...entry.value,
     };
   }
-  final Map<BuildContext, Map<ShortcutActivator, Intent>> _contextShortcuts = <BuildContext, Map<ShortcutActivator, Intent>>{};
+  final Map<ShortcutRegistryToken, Map<ShortcutActivator, Intent>> _tokenShortcuts =
+    <ShortcutRegistryToken, Map<ShortcutActivator, Intent>>{};
 
-  /// Adds the given shortcut bindings associated with the given `context`
-  /// in this [ShortcutRegistry].
+  /// Adds all the given shortcut bindings to this [ShortcutRegistry], and
+  /// returns a token for managing those bindings.
   ///
-  /// Will assert in debug mode if another context has already defined a given
-  /// shortcut.
+  /// The token should have [ShortcutRegistryToken.dispose] called on it when
+  /// these shortcuts are no longer needed. This will remove them from the
+  /// registry, and invalidate the token.
+  ///
+  /// This method will assert in debug mode if another token exists (i.e. hasn't been
+  /// disposed of) has already added a given shortcut.
   ///
   /// If two equivalent, but different, [ShortcutActivator]s are added, all of
   /// them will be executed when triggered. For example, if both
   /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
   /// are added, then both will be executed when an "a" key is pressed.
-  void addAll(BuildContext context, Map<ShortcutActivator, Intent> value) {
-    _contextShortcuts[context] = value;
+  ShortcutRegistryToken addAll(Map<ShortcutActivator, Intent> value) {
+    assert(_debugAssertNotDisposed());
+    final ShortcutRegistryToken token = ShortcutRegistryToken._(this);
+    _tokenShortcuts[token] = value;
+    _debugCheckForDuplicates();
+    notifyListeners();
+    return token;
+  }
+
+  /// Replaces the given shortcut bindings in this [ShortcutRegistry].
+  ///
+  /// This method will assert in debug mode if another [ShortcutRegistryToken]
+  /// exists (i.e. hasn't been disposed of) and has already added a given
+  /// shortcut.
+  ///
+  /// It will also assert if the given token wasn't created by this registry, or
+  /// has already been disposed.
+  ///
+  /// If two equivalent, but different, [ShortcutActivator]s are added, all of
+  /// them will be executed when triggered. For example, if both
+  /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
+  /// are added, then both will be executed when an "a" key is pressed.
+  void replaceAll(ShortcutRegistryToken token, Map<ShortcutActivator, Intent> value) {
+    assert(_debugAssertNotDisposed());
+    assert(_tokenShortcuts.containsKey(token),
+      'Token $token is not present in this ShortcutRegistry.\n'
+      'The token ${token.registry == this
+          ? 'was created by this registry, but has probably already been disposed of'
+          : 'was not created by this registry, it was created by ${token.registry}'}.');
+    _tokenShortcuts[token] = value;
     _debugCheckForDuplicates();
     notifyListeners();
   }
 
-  /// Removes all the shortcuts associated with the given `context` from this
-  /// registry.
-  void removeAll(BuildContext context) {
-    if (_contextShortcuts.remove(context) != null) {
+  // Removes all the shortcuts associated with the given token from this
+  // registry.
+  void _disposeToken(ShortcutRegistryToken token) {
+    if (_tokenShortcuts.remove(token) != null) {
       notifyListeners();
     }
   }
 
   void _debugCheckForDuplicates() {
     assert(() {
-      final Map<ShortcutActivator, BuildContext> previous = <ShortcutActivator, BuildContext>{};
-      for (final MapEntry<BuildContext, Map<ShortcutActivator, Intent>> contextEntry in _contextShortcuts.entries) {
-        for (final ShortcutActivator shortcut in contextEntry.value.keys) {
+      final Map<ShortcutActivator, ShortcutRegistryToken> previous = <ShortcutActivator, ShortcutRegistryToken>{};
+      for (final MapEntry<ShortcutRegistryToken, Map<ShortcutActivator, Intent>> tokenEntry in _tokenShortcuts.entries) {
+        for (final ShortcutActivator shortcut in tokenEntry.value.keys) {
           if (previous.containsKey(shortcut)) {
             throw FlutterError(
-                '$ShortcutRegistry: Received a duplicate registration for the '
-                'shortcut activator $shortcut in ${contextEntry.key} and ${previous[shortcut]}.');
+              '$ShortcutRegistry: Received a duplicate registration for the '
+              'shortcut $shortcut in ${tokenEntry.key} and ${previous[shortcut]}.');
           }
-          previous[shortcut] = contextEntry.key;
+          previous[shortcut] = tokenEntry.key;
         }
       }
       return true;
@@ -1126,8 +1205,8 @@ class ShortcutRegistry extends ChangeNotifier {
   }
 }
 
-/// A registry for shortcuts which allows descendants to add or remove shortcuts
-/// that act at the level where this registry is defined.
+/// A registry for shortcuts which allows descendants to add, remove, or replace
+/// shortcuts.
 ///
 /// The registered shortcuts are valid whenever a widget below this one in the
 /// hierarchy has focus.
@@ -1136,9 +1215,12 @@ class ShortcutRegistry extends ChangeNotifier {
 /// [ShortcutRegistrar.maybeOf] to get the [ShortcutRegistry], and then add
 /// them using [ShortcutRegistry.addAll].
 ///
-/// To remove shortcuts to the registry, call [ShortcutRegistrar.of] or
-/// [ShortcutRegistrar.maybeOf] to get the [ShortcutRegistry], and then remove
-/// them using [ShortcutRegistry.removeAll].
+/// To replace or update the shortcuts in the registry, call
+/// [ShortcutRegistry.replaceAll] and supply the token returned by
+/// [ShortcutRegistry.addAll].
+///
+/// To remove shortcuts from the registry, call [ShortcutRegistryToken.dispose] on
+/// the token returned by [ShortcutRegistry.addAll].
 class ShortcutRegistrar extends StatefulWidget {
   /// Creates a const [ShortcutRegistrar].
   ///
