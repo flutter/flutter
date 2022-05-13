@@ -212,7 +212,7 @@ class HtmlViewEmbedder {
   void _compositeWithParams(int viewId, EmbeddedViewParams params) {
     // If we haven't seen this viewId yet, cache it for clips/transforms.
     final ViewClipChain clipChain = _viewClipChains.putIfAbsent(viewId, () {
-      return ViewClipChain(view: createPlatformViewSlot(viewId));
+      return ViewClipChain(view: createPlatformViewSlot(viewId) as DomElement);
     });
 
     final DomElement slot = clipChain.slot;

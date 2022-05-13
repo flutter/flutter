@@ -8,7 +8,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../dom.dart';
 import '../engine_canvas.dart';
 import '../frame_reference.dart';
 import '../picture.dart';
@@ -122,8 +121,8 @@ class PersistedPicture extends PersistedLeafSurface {
       CrossFrameCache<html.HtmlElement>();
 
   @override
-  DomElement createElement() {
-    final DomElement element = defaultCreateElement('flt-picture');
+  html.Element createElement() {
+    final html.Element element = defaultCreateElement('flt-picture');
 
     // The DOM elements used to render pictures are used purely to put pixels on
     // the screen. They have no semantic information. If an assistive technology

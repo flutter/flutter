@@ -200,7 +200,7 @@ class FlutterViewEmbedder {
       hasAutofillOverlay: browserHasAutofillOverlay(),
     );
 
-    final DomHTMLBodyElement bodyElement = domDocument.body!;
+    final html.BodyElement bodyElement = html.document.body!;
 
     bodyElement.setAttribute(
       'flt-renderer',
@@ -270,8 +270,8 @@ class FlutterViewEmbedder {
     // IMPORTANT: the glass pane element must come after the scene element in the DOM node list so
     //            it can intercept input events.
     _glassPaneElement?.remove();
-    final DomElement glassPaneElement = domDocument.createElement(_glassPaneTagName);
-    _glassPaneElement = glassPaneElement as html.Element;
+    final html.Element glassPaneElement = html.document.createElement(_glassPaneTagName);
+    _glassPaneElement = glassPaneElement;
     glassPaneElement.style
       ..position = 'absolute'
       ..top = '0'
@@ -285,8 +285,7 @@ class FlutterViewEmbedder {
 
     // Create a [HostNode] under the glass pane element, and attach everything
     // there, instead of directly underneath the glass panel.
-    final HostNode glassPaneElementHostNode = _createHostNode(glassPaneElement
-        as html.Element);
+    final HostNode glassPaneElementHostNode = _createHostNode(glassPaneElement);
     _glassPaneShadow = glassPaneElementHostNode;
 
     // Don't allow the scene to receive pointer events.
@@ -336,8 +335,8 @@ class FlutterViewEmbedder {
       _sceneHostElement!.style.opacity = '0.3';
     }
 
-    PointerBinding.initInstance(glassPaneElement as html.Element);
-    KeyboardBinding.initInstance(glassPaneElement as html.Element);
+    PointerBinding.initInstance(glassPaneElement);
+    KeyboardBinding.initInstance(glassPaneElement);
 
     if (html.window.visualViewport == null && isWebKit) {
       // Older Safari versions sometimes give us bogus innerWidth/innerHeight
