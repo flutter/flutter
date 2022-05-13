@@ -216,6 +216,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'as a multiplier of the default timeout (e.g. "2x"), '
               'or as the string "none" to disable the timeout entirely.',
         defaultsTo: '30s',
+      )
+      ..addOption('enable-fractional-translation',
+        help: 'Enables fraction translation of engine composited layers in '
+              'the software renderer backend for flutter tester. Also disables '
+              'the raster cache.',
       );
     addDdsOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
@@ -308,6 +313,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final String tags = stringArgDeprecated('tags');
     final String excludeTags = stringArgDeprecated('exclude-tags');
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
+    final bool enableFractionalTranslation = boolArg('enable-fractional-translation');
 
     if (buildInfo.packageConfig['test_api'] == null) {
       throwToolExit(
@@ -455,6 +461,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       totalShards: totalShards,
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: stringArgDeprecated(FlutterOptions.kDeviceUser),
+      enableFractionalTranslation: enableFractionalTranslation,
     );
 
     if (collector != null) {

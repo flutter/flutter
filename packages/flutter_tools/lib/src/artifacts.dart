@@ -19,6 +19,8 @@ enum Artifact {
   genSnapshot,
   /// The flutter tester binary.
   flutterTester,
+  /// A flutter tester binary without raster cache or fractional translation.
+  flutterTesterFractionalTranslation,
   flutterFramework,
   flutterXcframework,
   /// The framework directory of the macOS desktop.
@@ -159,6 +161,8 @@ String? _artifactToFileName(Artifact artifact, [ TargetPlatform? platform, Build
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.flutterTester:
+      return 'flutter_Tester$exe';
+    case Artifact.flutterTesterFractionalTranslation:
       return 'flutter_tester_fractional_translation$exe';
     case Artifact.flutterFramework:
       return 'Flutter.framework';
@@ -475,6 +479,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
+      case Artifact.flutterTesterFractionalTranslation:
       case Artifact.flutterXcframework:
       case Artifact.fontSubset:
       case Artifact.fuchsiaFlutterRunner:
@@ -508,6 +513,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
+      case Artifact.flutterTesterFractionalTranslation:
       case Artifact.fontSubset:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
@@ -553,6 +559,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterFramework:
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterTester:
+      case Artifact.flutterTesterFractionalTranslation:
       case Artifact.flutterXcframework:
       case Artifact.fontSubset:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
@@ -592,6 +599,7 @@ class CachedArtifacts implements Artifacts {
           _artifactToFileName(artifact),
         );
       case Artifact.flutterTester:
+      case Artifact.flutterTesterFractionalTranslation:
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
       case Artifact.icuData:
@@ -854,6 +862,8 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _genSnapshotPath();
       case Artifact.flutterTester:
         return _flutterTesterPath(platform!);
+      case Artifact.flutterTesterFractionalTranslation:
+        return _flutterTesterFractionalPath(platform!);
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
         return _fileSystem.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', artifactFileName);
@@ -934,6 +944,17 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
   }
 
   String _flutterTesterPath(TargetPlatform platform) {
+    if (_platform.isLinux) {
+      return _fileSystem.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
+    } else if (_platform.isMacOS) {
+      return _fileSystem.path.join(engineOutPath, 'flutter_tester');
+    } else if (_platform.isWindows) {
+      return _fileSystem.path.join(engineOutPath, 'flutter_tester.exe');
+    }
+    throw Exception('Unsupported platform $platform.');
+  }
+
+  String _flutterTesterFractionalPath(TargetPlatform platform) {
     if (_platform.isLinux) {
       return _fileSystem.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
     } else if (_platform.isMacOS) {

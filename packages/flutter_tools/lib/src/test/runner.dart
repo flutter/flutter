@@ -55,6 +55,7 @@ abstract class FlutterTestRunner {
     int totalShards,
     Device integrationTestDevice,
     String integrationTestUserIdentifier,
+    bool enableFractionalTranslation = false,
   });
 }
 
@@ -91,9 +92,12 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     int totalShards,
     Device integrationTestDevice,
     String integrationTestUserIdentifier,
+    bool enableFractionalTranslation = false,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
-    final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
+    final String shellPath = enableFractionalTranslation
+      ? globals.artifacts.getArtifactPath(Artifact.flutterTesterFractionalTranslation)
+      : globals.artifacts.getArtifactPath(Artifact.flutterTester);
 
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = <String>[

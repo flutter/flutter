@@ -605,6 +605,53 @@ dev_dependencies:
     ]),
   });
 
+  testUsingContext('Opts into fractional translation', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    expect(
+      testRunner.lastEnableFractionalTranslation,
+      true,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+    ]),
+  });
+
+  testUsingContext('Can opt out of fractional translation', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-enable-fractional-translation',
+      '--no-pub',
+    ]);
+
+    expect(
+      testRunner.lastEnableFractionalTranslation,
+      false,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+    ]),
+  });
+
   testUsingContext('Integration tests given flavor', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -733,6 +780,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   int exitCode;
   bool lastEnableObservatoryValue;
   DebuggingOptions lastDebuggingOptionsValue;
+  bool lastEnableFractionalTranslation;
 
   @override
   Future<int> runTests(
@@ -768,9 +816,11 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     int totalShards,
     Device integrationTestDevice,
     String integrationTestUserIdentifier,
+    bool enableFractionalTranslation = false,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     lastDebuggingOptionsValue = debuggingOptions;
+    lastEnableFractionalTranslation = enableFractionalTranslation;
     return exitCode;
   }
 }

@@ -135,10 +135,18 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTesterFractionalTranslation),
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester_fractional_translation'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester, platform: TargetPlatform.linux_arm64),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-arm64', 'flutter_tester'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTesterFractionalTranslation, platform: TargetPlatform.linux_arm64),
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-arm64', 'flutter_tester_fractional_translation'),
       );
       expect(
@@ -304,6 +312,10 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'flutter_tester'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTesterFractionalTranslation),
         fileSystem.path.join('/out', 'android_debug_unopt', 'flutter_tester_fractional_translation'),
       );
       expect(
