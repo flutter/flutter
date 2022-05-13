@@ -34,7 +34,7 @@ def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
   # [target.deployment_target] is a [String] formatted as "8.0".
-  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
+  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 11
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
@@ -161,7 +161,8 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
   ios_application_path ||= File.dirname(defined_in_file.realpath) if self.respond_to?(:defined_in_file)
   raise 'Could not find iOS application path' unless ios_application_path
 
-  copied_podspec_path = File.expand_path('Flutter.podspec', File.join(ios_application_path, 'Flutter'))
+  podspec_directory = File.join(ios_application_path, 'Flutter')
+  copied_podspec_path = File.expand_path('Flutter.podspec', podspec_directory)
 
   # Generate a fake podspec to represent the Flutter framework.
   # This is only necessary because plugin podspecs contain `s.dependency 'Flutter'`, and if this Podfile
@@ -190,7 +191,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
   }
 
   # Keep pod path relative so it can be checked into Podfile.lock.
-  pod 'Flutter', :path => 'Flutter'
+  pod 'Flutter', :path => flutter_relative_path_from_podfile(podspec_directory)
 end
 
 # Same as flutter_install_ios_engine_pod for macOS.
@@ -260,7 +261,9 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
       File.symlink(plugin_path, symlink)
 
       # Keep pod path relative so it can be checked into Podfile.lock.
-      pod plugin_name, :path => File.join(relative_symlink_dir, 'plugins', plugin_name, platform)
+      relative = flutter_relative_path_from_podfile(symlink)
+
+      pod plugin_name, :path => File.join(relative, platform)
     end
   end
 end
@@ -278,4 +281,13 @@ def flutter_parse_plugins_file(file, platform)
   return [] unless dependencies_hash.has_key?('plugins')
   return [] unless dependencies_hash['plugins'].has_key?('ios')
   dependencies_hash['plugins'][platform] || []
+end
+
+def flutter_relative_path_from_podfile(path)
+  # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
+  project_directory_pathname = defined_in_file.dirname
+
+  pathname = Pathname.new File.expand_path(path)
+  relative = pathname.relative_path_from project_directory_pathname
+  relative.to_s
 end

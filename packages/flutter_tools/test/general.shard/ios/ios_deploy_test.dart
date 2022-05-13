@@ -53,6 +53,7 @@ void main () {
             '/',
             '--app_deltas',
             'app-delta',
+            '--uninstall',
             '--debug',
             '--args',
             <String>[
@@ -73,6 +74,7 @@ void main () {
         appDeltaDirectory: appDeltaDirectory,
         launchArguments: <String>['--enable-dart-profiling'],
         interfaceType: IOSDeviceConnectionInterface.network,
+        uninstallFirst: true,
       );
 
       expect(iosDeployDebugger.logLines, emits('Did finish launching.'));

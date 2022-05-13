@@ -201,9 +201,7 @@ enum MaterialTapTargetSize {
 /// ```dart
 /// MaterialApp(
 ///   theme: ThemeData(
-///     colorScheme: ColorScheme.fromSwatch(
-///       primarySwatch: Colors.blue,
-///     ).copyWith(
+///     colorScheme: ColorScheme.fromSwatch().copyWith(
 ///       secondary: Colors.green,
 ///     ),
 ///     textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.purple)),
@@ -1077,7 +1075,7 @@ class ThemeData with Diagnosticable {
   /// Obtain with `Theme.of(context).extension<MyThemeExtension>()`.
   ///
   /// See [extensions] for an interactive example.
-  T? extension<T>() => extensions[T] as T;
+  T? extension<T>() => extensions[T] as T?;
 
   /// The default [InputDecoration] values for [InputDecorator], [TextField],
   /// and [TextFormField] are based on this theme.

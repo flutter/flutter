@@ -561,6 +561,14 @@ void main() {
       expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 100)); // Not lerped
     });
+
+    testWidgets('should return null on extension not found', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        extensions: const <ThemeExtension<dynamic>>{},
+      );
+
+      expect(theme.extension<MyThemeExtensionA>(), isNull);
+    });
   });
 
   test('copyWith, ==, hashCode basics', () {

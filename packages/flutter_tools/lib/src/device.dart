@@ -792,6 +792,7 @@ class DebuggingOptions {
     this.nullAssertions = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
+    this.uninstallFirst = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -808,6 +809,7 @@ class DebuggingOptions {
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = false,
+      this.uninstallFirst = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -876,6 +878,7 @@ class DebuggingOptions {
     required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.enableImpeller,
+    required this.uninstallFirst,
   });
 
   final bool debuggingEnabled;
@@ -911,6 +914,11 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final bool enableImpeller;
+
+  /// Whether the tool should try to uninstall a previously installed version of the app.
+  ///
+  /// This is not implemented for every platform.
+  final bool uninstallFirst;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -1026,6 +1034,7 @@ class DebuggingOptions {
       nullAssertions: (json['nullAssertions'] as bool?)!,
       nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
       enableImpeller: (json['enableImpeller'] as bool?) ?? false,
+      uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
     );
 }
 

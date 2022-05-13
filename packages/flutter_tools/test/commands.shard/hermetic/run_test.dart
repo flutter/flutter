@@ -369,6 +369,42 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
+      testUsingContext('forwards --uninstall-only to DebuggingOptions', () async {
+        final RunCommand command = RunCommand();
+        final FakeDevice mockDevice = FakeDevice(
+          sdkNameAndVersion: 'iOS 13',
+        )..startAppSuccess = false;
+
+        mockDeviceManager
+          ..devices = <Device>[
+            mockDevice,
+          ]
+          ..targetDevices = <Device>[
+            mockDevice,
+          ];
+
+        // Causes swift to be detected in the analytics.
+        fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
+
+        await expectToolExitLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          '--uninstall-first',
+        ]), isNull);
+
+        final DebuggingOptions options = await command.createDebuggingOptions(false);
+        expect(options.uninstallFirst, isTrue);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => artifacts,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        DeviceManager: () => mockDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => usage,
+      });
+
+
       testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
@@ -407,7 +443,7 @@ void main() {
         Usage: () => usage,
       });
 
-       group('--machine', () {
+      group('--machine', () {
         testUsingContext('enables multidex by default', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice();

@@ -2636,7 +2636,7 @@ void main() {
     }
 
     group('SliverAppBar', () {
-      Widget _buildSliverApp({
+      Widget buildSliverApp({
         required double contentHeight,
         bool reverse = false,
         bool includeFlexibleSpace = false,
@@ -2674,7 +2674,7 @@ void main() {
 
       testWidgets('backgroundColor', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(contentHeight: 1200.0)
+          buildSliverApp(contentHeight: 1200.0)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2699,7 +2699,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(contentHeight: 1200.0, includeFlexibleSpace: true)
+          buildSliverApp(contentHeight: 1200.0, includeFlexibleSpace: true)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2724,7 +2724,7 @@ void main() {
 
       testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(contentHeight: 1200.0, reverse: true)
+          buildSliverApp(contentHeight: 1200.0, reverse: true)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2749,7 +2749,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(
+          buildSliverApp(
             contentHeight: 1200.0,
             reverse: true,
             includeFlexibleSpace: true,
@@ -2778,7 +2778,7 @@ void main() {
 
       testWidgets('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(contentHeight: 200, reverse: true)
+          buildSliverApp(contentHeight: 200, reverse: true)
         );
 
         // In reverse, the content here is not long enough to scroll under the app
@@ -2797,7 +2797,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(
+          buildSliverApp(
             contentHeight: 200,
             reverse: true,
             includeFlexibleSpace: true,
@@ -2820,7 +2820,7 @@ void main() {
     });
 
     group('AppBar', () {
-      Widget _buildAppBar({
+      Widget buildAppBar({
         required double contentHeight,
         bool reverse = false,
         bool includeFlexibleSpace = false
@@ -2851,7 +2851,7 @@ void main() {
 
       testWidgets('backgroundColor', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(contentHeight: 1200.0)
+          buildAppBar(contentHeight: 1200.0)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2876,7 +2876,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(contentHeight: 1200.0, includeFlexibleSpace: true)
+          buildAppBar(contentHeight: 1200.0, includeFlexibleSpace: true)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2901,7 +2901,7 @@ void main() {
 
       testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(contentHeight: 1200.0, reverse: true)
+          buildAppBar(contentHeight: 1200.0, reverse: true)
         );
         await tester.pump();
 
@@ -2929,7 +2929,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(
+          buildAppBar(
             contentHeight: 1200.0,
             reverse: true,
             includeFlexibleSpace: true,
@@ -3027,7 +3027,7 @@ void main() {
 
       testWidgets('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(
+          buildAppBar(
             contentHeight: 200.0,
             reverse: true,
           )
@@ -3050,7 +3050,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(
+          buildAppBar(
             contentHeight: 200.0,
             reverse: true,
             includeFlexibleSpace: true,
@@ -3072,6 +3072,44 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/80256
+  testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+        key: const ValueKey<String>('1'),
+        child: Scaffold(
+          key: const ValueKey<String>('1'),
+          appBar: AppBar(),
+          endDrawer: const Drawer(),
+        )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+          endDrawer: const Drawer(),
+        )
+    );
+    final List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<Object?> route, Object? result) => false,
+        ),
+      ),
+    );
+
+    // The page2 should have a back button.
+    expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('2')),
+          matching: find.byType(BackButton),
+        ),
+        findsOneWidget
+    );
   });
 
   testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {

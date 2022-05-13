@@ -6,26 +6,22 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const AlertDialogApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'CupertinoAlertDialog Sample';
+class AlertDialogApp extends StatelessWidget {
+  const AlertDialogApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: ActionSheetSample(title: _title),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: AlertDialogExample(),
     );
   }
 }
 
-class ActionSheetSample extends StatelessWidget {
-  const ActionSheetSample({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+class AlertDialogExample extends StatelessWidget {
+  const AlertDialogExample({Key? key}) : super(key: key);
 
   // This shows a CupertinoModalPopup which hosts a CupertinoAlertDialog.
   void _showAlertDialog(BuildContext context) {
@@ -62,8 +58,8 @@ class ActionSheetSample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(title),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoAlertDialog Sample'),
       ),
       child: Center(
         child: CupertinoButton(

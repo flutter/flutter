@@ -489,6 +489,61 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
+  testWidgets('Tooltip should be fully visible when MediaQuery.viewInsets > 0', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/23666
+    Widget materialAppWithViewInsets(double viewInsetsHeight) {
+      final Widget scaffold = Scaffold(
+        body: const TextField(),
+        floatingActionButton: FloatingActionButton(
+          tooltip: tooltipText,
+          onPressed: () { /* do nothing */ },
+          child: const Icon(Icons.add),
+        ),
+      );
+      return MediaQuery.fromWindow(
+        child: MediaQuery(
+          data: MediaQueryData(
+            viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
+          ),
+          child: MaterialApp(
+            useInheritedMediaQuery: true,
+            home: scaffold,
+          ),
+        ),
+      );
+    }
+
+    // Start with MediaQuery.viewInsets.bottom = 0
+    await tester.pumpWidget(materialAppWithViewInsets(0));
+
+    // Show FAB tooltip
+    final Finder fabFinder = find.byType(FloatingActionButton);
+    await tester.longPress(fabFinder);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(Tooltip), findsOneWidget);
+
+    // FAB tooltip should be above FAB
+    RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
+    Offset fabTopRight = tester.getTopRight(fabFinder);
+    Offset tooltipTopRight = tip.localToGlobal(tip.size.topRight(Offset.zero));
+    expect(tooltipTopRight.dy < fabTopRight.dy, true);
+
+    // Simulate Keyboard opening (MediaQuery.viewInsets.bottom = 300))
+    await tester.pumpWidget(materialAppWithViewInsets(300));
+    await tester.pumpAndSettle();
+
+    // Show FAB tooltip
+    await tester.longPress(fabFinder);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(Tooltip), findsOneWidget);
+
+    // FAB tooltip should still be above FAB
+    tip = tester.renderObject(_findTooltipContainer(tooltipText));
+    fabTopRight = tester.getTopRight(fabFinder);
+    tooltipTopRight = tip.localToGlobal(tip.size.topRight(Offset.zero));
+    expect(tooltipTopRight.dy < fabTopRight.dy, true);
+  });
+
   testWidgets('Custom tooltip margin', (WidgetTester tester) async {
     const double customMarginValue = 10.0;
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
@@ -622,6 +677,41 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
+  testWidgets('Custom tooltip message textAlign', (WidgetTester tester) async {
+    Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
+      final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Tooltip(
+            key: tooltipKey,
+            textAlign: textAlign,
+            message: tooltipText,
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: Colors.green[500],
+            ),
+          ),
+        ),
+      );
+      tooltipKey.currentState?.ensureTooltipVisible();
+      await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    }
+
+    // Default value should be TextAlign.start
+    await pumpTooltipWithTextAlign();
+    TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+    expect(textAlign, TextAlign.start);
+
+    await pumpTooltipWithTextAlign(textAlign: TextAlign.center);
+    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+    expect(textAlign, TextAlign.center);
+
+    await pumpTooltipWithTextAlign(textAlign: TextAlign.end);
+    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+    expect(textAlign, TextAlign.end);
+  });
+
   testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/40702.
     Widget buildApp(String text, TextDirection textDirection) {
@@ -700,10 +790,7 @@ void main() {
                 return Tooltip(
                   key: tooltipKey,
                   message: tooltipText,
-                  child: const SizedBox(
-                    width: 0.0,
-                    height: 0.0,
-                  ),
+                  child: const SizedBox.shrink(),
                 );
               },
             ),
@@ -733,10 +820,7 @@ void main() {
         home: Tooltip(
           key: tooltipKey,
           message: tooltipText,
-          child: const SizedBox(
-            width: 0.0,
-            height: 0.0,
-          ),
+          child: const SizedBox.shrink(),
         ),
       ),
     );
@@ -744,15 +828,14 @@ void main() {
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
-    expect(tooltipRenderParagraph.textSize.height, equals(10.0));
+    expect(tooltipRenderParagraph.textSize.height, equals(12.0));
 
-    final RenderBox tip = tester.renderObject(
+    final RenderBox tooltipContainer = tester.renderObject(
       _findTooltipContainer(tooltipText),
     );
-    expect(tip.size.height, equals(24.0));
-    expect(tip.size.width, equals(46.0));
-    expect(tip, paints..rrect(
-      rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
+    expect(tooltipContainer.size.height, equals(24.0));
+    expect(tooltipContainer, paints..rrect(
+      rrect: RRect.fromRectAndRadius(tooltipContainer.paintBounds, const Radius.circular(4.0)),
       color: const Color(0xe6616161),
     ));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));

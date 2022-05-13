@@ -32,6 +32,14 @@ class TestScrollBehavior extends ScrollBehavior {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/89681
+  testWidgets('_WrappedScrollBehavior shouldNotify test', (WidgetTester tester) async {
+    final ScrollBehavior behavior1 = const ScrollBehavior().copyWith();
+    final ScrollBehavior behavior2 = const ScrollBehavior().copyWith();
+
+    expect(behavior1.shouldNotify(behavior2), false);
+  });
+
   testWidgets('Inherited ScrollConfiguration changed', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey(debugLabel: 'scrollable');
     TestScrollBehavior? behavior;

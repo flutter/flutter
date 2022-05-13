@@ -206,6 +206,8 @@ Future<void> main(List<String> rawArguments) async {
     logicalData = LogicalKeyData.fromJson(json.decode(await File(parsedArguments['logical-data'] as String).readAsString()) as Map<String, dynamic>);
   }
 
+  final Map<String, bool> layoutGoals = parseMapOfBool(readDataFile('layout_goals.json'));
+
   final File codeFile = File(parsedArguments['code'] as String);
   if (!codeFile.existsSync()) {
     codeFile.createSync(recursive: true);
@@ -236,6 +238,7 @@ Future<void> main(List<String> rawArguments) async {
     'macos': MacOSCodeGenerator(
       physicalData,
       logicalData,
+      layoutGoals,
     ),
     'ios': IOSCodeGenerator(
       physicalData,
@@ -251,6 +254,7 @@ Future<void> main(List<String> rawArguments) async {
       logicalData,
       readDataFile('gtk_modifier_bit_mapping.json'),
       readDataFile('gtk_lock_bit_mapping.json'),
+      layoutGoals,
     ),
     'web': WebCodeGenerator(
       physicalData,

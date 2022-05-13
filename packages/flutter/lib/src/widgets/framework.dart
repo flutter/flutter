@@ -2832,8 +2832,8 @@ class BuildOwner {
                 ErrorSummary('Multiple widgets used the same GlobalKey.'),
                 ErrorDescription(
                   'The key $key was used by multiple widgets. The parents of those widgets were:\n'
-                  '- ${older.toString()}\n'
-                  '- ${newer.toString()}\n'
+                  '- $older\n'
+                  '- $newer\n'
                   'A GlobalKey can only be specified on one widget at a time in the widget tree.',
                 ),
               ]);
@@ -2843,7 +2843,7 @@ class BuildOwner {
                 ErrorDescription(
                   'The key $key was used by multiple widgets. The parents of those widgets were '
                   'different widgets that both had the following description:\n'
-                  '  ${parent.toString()}\n'
+                  '  $parent\n'
                   'A GlobalKey can only be specified on one widget at a time in the widget tree.',
                 ),
               ]);
