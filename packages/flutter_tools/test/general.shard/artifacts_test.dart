@@ -135,11 +135,11 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester),
-        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester'),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester_fractional_translation'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester, platform: TargetPlatform.linux_arm64),
-        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-arm64', 'flutter_tester'),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-arm64', 'flutter_tester_fractional_translation'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
@@ -304,7 +304,7 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester),
-        fileSystem.path.join('/out', 'android_debug_unopt', 'flutter_tester'),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'flutter_tester_fractional_translation'),
       );
       expect(
         artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,

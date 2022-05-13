@@ -159,7 +159,7 @@ String? _artifactToFileName(Artifact artifact, [ TargetPlatform? platform, Build
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.flutterTester:
-      return 'flutter_tester$exe';
+      return 'flutter_tester_fractional_translation$exe';
     case Artifact.flutterFramework:
       return 'Flutter.framework';
     case Artifact.flutterXcframework:
@@ -937,9 +937,9 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
     if (_platform.isLinux) {
       return _fileSystem.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
     } else if (_platform.isMacOS) {
-      return _fileSystem.path.join(engineOutPath, 'flutter_tester');
+      return _fileSystem.path.join(engineOutPath, 'flutter_tester_fractional_translation');
     } else if (_platform.isWindows) {
-      return _fileSystem.path.join(engineOutPath, 'flutter_tester.exe');
+      return _fileSystem.path.join(engineOutPath, 'flutter_tester_fractional_translation.exe');
     }
     throw Exception('Unsupported platform $platform.');
   }
