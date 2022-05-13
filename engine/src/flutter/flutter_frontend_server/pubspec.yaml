@@ -102,9 +102,9 @@ dependency_overrides:
   protobuf:
     path: ../../third_party/dart/third_party/pkg/protobuf/protobuf
   shelf:
-    path: ../../third_party/dart/third_party/pkg/shelf
+    path: ../../third_party/dart/third_party/pkg/shelf/pkgs/shelf
   shelf_static:
-    path: ../../third_party/dart/third_party/pkg/shelf_static
+    path: ../../third_party/dart/third_party/pkg/shelf/pkgs/shelf_static
   smith:
     path: ../../third_party/dart/pkg/smith
   source_maps:
