@@ -1062,19 +1062,19 @@ class CallbackShortcuts extends StatelessWidget {
   }
 }
 
-/// A class used by [ShortcutsRegistrar] that allows adding or removing shortcut
+/// A class used by [ShortcutRegistrar] that allows adding or removing shortcut
 /// bindings.
 ///
-/// Objects of this type are returned from [ShortcutsRegistrar.of] and
-/// [ShortcutsRegistrar.maybeOf].
+/// Objects of this type are returned from [ShortcutRegistrar.of] and
+/// [ShortcutRegistrar.maybeOf].
 ///
 /// The registry may be listened to (with [addListener]/[removeListener]) for
 /// change notifications when the registered shortcuts change. When shortcuts
 /// are added or removed, change notifications will be dispatched after the
 /// current frame is finished.
-class ShortcutsRegistry extends ChangeNotifier {
+class ShortcutRegistry extends ChangeNotifier {
   /// Gets the combined shortcut bindings from all contexts that are registered
-  /// with this [ShortcutsRegistry].
+  /// with this [ShortcutRegistry].
   ///
   /// Returns a copy: modifying the returned map will have no effect.
   Map<ShortcutActivator, Intent> get shortcuts {
@@ -1085,7 +1085,7 @@ class ShortcutsRegistry extends ChangeNotifier {
   final Map<BuildContext, Map<ShortcutActivator, Intent>> _contextShortcuts = <BuildContext, Map<ShortcutActivator, Intent>>{};
 
   /// Adds the given shortcut bindings associated with the given `context`
-  /// in this [ShortcutsRegistry].
+  /// in this [ShortcutRegistry].
   ///
   /// Will assert in debug mode if another context has already defined a given
   /// shortcut.
@@ -1115,7 +1115,7 @@ class ShortcutsRegistry extends ChangeNotifier {
         for (final ShortcutActivator shortcut in contextEntry.value.keys) {
           if (previous.containsKey(shortcut)) {
             throw FlutterError(
-                '$ShortcutsRegistry: Received a duplicate registration for the '
+                '$ShortcutRegistry: Received a duplicate registration for the '
                 'shortcut activator $shortcut in ${contextEntry.key} and ${previous[shortcut]}.');
           }
           previous[shortcut] = contextEntry.key;
@@ -1132,49 +1132,49 @@ class ShortcutsRegistry extends ChangeNotifier {
 /// The registered shortcuts are valid whenever a widget below this one in the
 /// hierarchy has focus.
 ///
-/// To add shortcuts to the registry, call [ShortcutsRegistrar.of] or
-/// [ShortcutsRegistrar.maybeOf] to get the [ShortcutsRegistry], and then add
-/// them using [ShortcutsRegistry.addAll].
+/// To add shortcuts to the registry, call [ShortcutRegistrar.of] or
+/// [ShortcutRegistrar.maybeOf] to get the [ShortcutRegistry], and then add
+/// them using [ShortcutRegistry.addAll].
 ///
-/// To remove shortcuts to the registry, call [ShortcutsRegistrar.of] or
-/// [ShortcutsRegistrar.maybeOf] to get the [ShortcutsRegistry], and then remove
-/// them using [ShortcutsRegistry.removeAll].
-class ShortcutsRegistrar extends StatefulWidget {
-  /// Creates a const [ShortcutsRegistrar].
+/// To remove shortcuts to the registry, call [ShortcutRegistrar.of] or
+/// [ShortcutRegistrar.maybeOf] to get the [ShortcutRegistry], and then remove
+/// them using [ShortcutRegistry.removeAll].
+class ShortcutRegistrar extends StatefulWidget {
+  /// Creates a const [ShortcutRegistrar].
   ///
   /// The [child] parameter is required.
-  const ShortcutsRegistrar({super.key, required this.child});
+  const ShortcutRegistrar({super.key, required this.child});
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// Returns the [ShortcutsRegistry] that belongs to the [ShortcutsRegistrar]
+  /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
   /// which most tightly encloses the given [BuildContext].
   ///
-  /// If no [ShortcutsRegistrar] widget encloses the context given, `of` will
+  /// If no [ShortcutRegistrar] widget encloses the context given, `of` will
   /// throw an exception in debug mode.
   ///
-  /// The dependencies of [ShortcutsRegistrar] will have their
+  /// The dependencies of [ShortcutRegistrar] will have their
   /// [State.didChangeDependencies] called whenever the shortcuts have changed.
   ///
   /// See also:
   ///
   ///  * [maybeOf], which is similar to this function, but will return null if
-  ///    it doesn't find a [ShortcutsRegistrar] ancestor.
-  static ShortcutsRegistry of(BuildContext context) {
+  ///    it doesn't find a [ShortcutRegistrar] ancestor.
+  static ShortcutRegistry of(BuildContext context) {
     assert(context != null);
-    final _ShortcutsRegistrarMarker? inherited =
-        context.dependOnInheritedWidgetOfExactType<_ShortcutsRegistrarMarker>();
+    final _ShortcutRegistrarMarker? inherited =
+        context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
     assert(() {
       if (inherited == null) {
         throw FlutterError(
-          'Unable to find a $ShortcutsRegistrar widget in the context.\n'
-          '$ShortcutsRegistrar.of() was called with a context that does not contain a '
-          '$ShortcutsRegistrar widget.\n'
-          'No $ShortcutsRegistrar ancestor could be found starting from the context that was '
-          'passed to $ShortcutsRegistrar.of().\n'
+          'Unable to find a $ShortcutRegistrar widget in the context.\n'
+          '$ShortcutRegistrar.of() was called with a context that does not contain a '
+          '$ShortcutRegistrar widget.\n'
+          'No $ShortcutRegistrar ancestor could be found starting from the context that was '
+          'passed to $ShortcutRegistrar.of().\n'
           'The context used was:\n'
           '  $context',
         );
@@ -1184,39 +1184,39 @@ class ShortcutsRegistrar extends StatefulWidget {
     return inherited!.registry;
   }
 
-  /// Returns [ShortcutsRegistry] of the [ShortcutsRegistrar] that
+  /// Returns [ShortcutRegistry] of the [ShortcutRegistrar] that
   /// most tightly encloses the given [BuildContext].
   ///
-  /// If no [ShortcutsRegistrar] widget encloses the given context,
+  /// If no [ShortcutRegistrar] widget encloses the given context,
   /// `maybeOf` will return null.
   ///
-  /// The dependencies of [ShortcutsRegistrar] will have their
+  /// The dependencies of [ShortcutRegistrar] will have their
   /// [State.didChangeDependencies] called whenever the shortcuts have changed.
   ///
   /// See also:
   ///
   ///  * [of], which is similar to this function, but returns a non-nullable
   ///    result, and will throw an exception if it doesn't find a
-  ///    [ShortcutsRegistrar] ancestor.
-  static ShortcutsRegistry? maybeOf(BuildContext context) {
+  ///    [ShortcutRegistrar] ancestor.
+  static ShortcutRegistry? maybeOf(BuildContext context) {
     assert(context != null);
-    final _ShortcutsRegistrarMarker? inherited =
-        context.dependOnInheritedWidgetOfExactType<_ShortcutsRegistrarMarker>();
+    final _ShortcutRegistrarMarker? inherited =
+        context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
     return inherited?.registry;
   }
 
   @override
-  State<ShortcutsRegistrar> createState() => _ShortcutsRegistrarState();
+  State<ShortcutRegistrar> createState() => _ShortcutRegistrarState();
 }
 
-class _ShortcutsRegistrarState extends State<ShortcutsRegistrar> {
-  late ShortcutsRegistry registry;
+class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
+  late ShortcutRegistry registry;
   bool updateScheduled = false;
 
   @override
   void initState() {
     super.initState();
-    registry = ShortcutsRegistry();
+    registry = ShortcutRegistry();
     registry.addListener(handleRegistryChange);
   }
 
@@ -1243,7 +1243,7 @@ class _ShortcutsRegistrarState extends State<ShortcutsRegistrar> {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: registry.shortcuts,
-      child: _ShortcutsRegistrarMarker(
+      child: _ShortcutRegistrarMarker(
         registry: registry,
         child: widget.child,
       ),
@@ -1251,16 +1251,16 @@ class _ShortcutsRegistrarState extends State<ShortcutsRegistrar> {
   }
 }
 
-class _ShortcutsRegistrarMarker extends InheritedWidget {
-  const _ShortcutsRegistrarMarker({
+class _ShortcutRegistrarMarker extends InheritedWidget {
+  const _ShortcutRegistrarMarker({
     required this.registry,
     required super.child,
   });
 
-  final ShortcutsRegistry registry;
+  final ShortcutRegistry registry;
 
   @override
-  bool updateShouldNotify(covariant _ShortcutsRegistrarMarker oldWidget) {
+  bool updateShouldNotify(covariant _ShortcutRegistrarMarker oldWidget) {
     return registry != oldWidget.registry;
   }
 }

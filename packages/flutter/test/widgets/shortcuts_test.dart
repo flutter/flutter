@@ -1308,12 +1308,12 @@ void main() {
     });
   });
 
-  group('ShortcutsRegistrar', () {
-    testWidgets('trigger ShortcutsRegistrar on key events', (WidgetTester tester) async {
+  group('ShortcutRegistrar', () {
+    testWidgets('trigger ShortcutRegistrar on key events', (WidgetTester tester) async {
       int invokedA = 0;
       int invokedB = 0;
       await tester.pumpWidget(
-        ShortcutsRegistrar(
+        ShortcutRegistrar(
           child: TestCallbackRegistration(
             shortcuts: <ShortcutActivator, Intent>{
               const SingleActivator(LogicalKeyboardKey.keyA): _VoidCallbackIntent(() {
@@ -1359,7 +1359,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ShortcutsRegistrar(
+            body: ShortcutRegistrar(
               child: TestCallbackRegistration(
                 shortcuts: const <ShortcutActivator, Intent>{
                   SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(SelectionChangedCause.keyboard),
@@ -1386,18 +1386,18 @@ void main() {
       expect(controller.selection.extentOffset, equals(7));
     });
 
-    testWidgets('nested ShortcutsRegistrars stop propagation', (WidgetTester tester) async {
+    testWidgets('nested ShortcutRegistrars stop propagation', (WidgetTester tester) async {
       int invokedOuter = 0;
       int invokedInner = 0;
       await tester.pumpWidget(
-        ShortcutsRegistrar(
+        ShortcutRegistrar(
           child: TestCallbackRegistration(
             shortcuts: <ShortcutActivator, Intent>{
               const SingleActivator(LogicalKeyboardKey.keyA): _VoidCallbackIntent(() {
                 invokedOuter += 1;
               }),
             },
-            child: ShortcutsRegistrar(
+            child: ShortcutRegistrar(
               child: TestCallbackRegistration(
                 shortcuts: <ShortcutActivator, Intent>{
                   const SingleActivator(LogicalKeyboardKey.keyA): _VoidCallbackIntent(() {
@@ -1427,18 +1427,18 @@ void main() {
       expect(invokedInner, equals(1));
     });
 
-    testWidgets('non-overlapping nested ShortcutsRegistrars fire appropriately', (WidgetTester tester) async {
+    testWidgets('non-overlapping nested ShortcutRegistrars fire appropriately', (WidgetTester tester) async {
       int invokedOuter = 0;
       int invokedInner = 0;
       await tester.pumpWidget(
-        ShortcutsRegistrar(
+        ShortcutRegistrar(
           child: TestCallbackRegistration(
             shortcuts: <ShortcutActivator, Intent>{
               const CharacterActivator('b'): _VoidCallbackIntent(() {
                 invokedOuter += 1;
               }),
             },
-            child: ShortcutsRegistrar(
+            child: ShortcutRegistrar(
               child: TestCallbackRegistration(
                 shortcuts: <ShortcutActivator, Intent>{
                   const CharacterActivator('a'): _VoidCallbackIntent(() {
@@ -1503,7 +1503,7 @@ void main() {
             ),
             _VoidCallbackIntent: _VoidCallbackAction(),
           },
-          child: ShortcutsRegistrar(
+          child: ShortcutRegistrar(
             child: TestCallbackRegistration(
               shortcuts: <ShortcutActivator, Intent>{
                 const CharacterActivator('b'): _VoidCallbackIntent(() {
@@ -1515,7 +1515,7 @@ void main() {
                   SingleActivator(LogicalKeyboardKey.keyA): TestIntent(),
                   SingleActivator(LogicalKeyboardKey.keyB): TestIntent2(),
                 },
-                child: ShortcutsRegistrar(
+                child: ShortcutRegistrar(
                   child: TestCallbackRegistration(
                     shortcuts: <ShortcutActivator, Intent>{
                       const CharacterActivator('a'): _VoidCallbackIntent(() {
@@ -1556,7 +1556,7 @@ void main() {
         shortcutsChanged.add(shortcuts);
       }
       await tester.pumpWidget(
-        ShortcutsRegistrar(
+        ShortcutRegistrar(
           child: TestCallbackRegistration(
             onDependencyUpdate: dependenciesUpdated,
             shortcuts: const <ShortcutActivator, Intent>{
@@ -1577,7 +1577,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        ShortcutsRegistrar(
+        ShortcutRegistrar(
           child: TestCallbackRegistration(
             onDependencyUpdate: dependenciesUpdated,
             shortcuts: const <ShortcutActivator, Intent>{
@@ -1597,7 +1597,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        ShortcutsRegistrar(
+        ShortcutRegistrar(
           child: TestCallbackRegistration(
             onDependencyUpdate: dependenciesUpdated,
             shortcuts: const <ShortcutActivator, Intent>{
@@ -1638,12 +1638,12 @@ class TestCallbackRegistration extends StatefulWidget {
 }
 
 class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
-  ShortcutsRegistry? _cachedRegistry;
+  ShortcutRegistry? _cachedRegistry;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _cachedRegistry ??= ShortcutsRegistrar.of(context)..addAll(context, widget.shortcuts);
+    _cachedRegistry ??= ShortcutRegistrar.of(context)..addAll(context, widget.shortcuts);
   }
 
   @override
@@ -1651,9 +1651,9 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
     super.didUpdateWidget(oldWidget);
     if (widget.shortcuts != oldWidget.shortcuts || _cachedRegistry == null) {
       _cachedRegistry?.removeAll(context);
-      _cachedRegistry = ShortcutsRegistrar.of(context)..addAll(context, widget.shortcuts);
+      _cachedRegistry = ShortcutRegistrar.of(context)..addAll(context, widget.shortcuts);
     }
-    widget.onDependencyUpdate?.call(ShortcutsRegistrar.of(context).shortcuts);
+    widget.onDependencyUpdate?.call(ShortcutRegistrar.of(context).shortcuts);
   }
 
   @override
