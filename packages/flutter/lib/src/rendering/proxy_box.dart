@@ -24,6 +24,8 @@ export 'package:flutter/gestures.dart' show
   PointerUpEvent,
   PointerCancelEvent;
 
+bool offstageAndOpacityAffectPaintTransform = true;
+
 /// A base class for render boxes that resemble their children.
 ///
 /// A proxy box has a single child and simply mimics all the properties of that
@@ -898,7 +900,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    if (_alpha == 0 && !alwaysIncludeSemantics) {
+    if (_alpha == 0 && !alwaysIncludeSemantics && offstageAndOpacityAffectPaintTransform) {
       transform.setZero();
     } else {
       super.applyPaintTransform(child, transform);
@@ -998,7 +1000,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    if (_alpha == 0 && !alwaysIncludeSemantics) {
+    if (_alpha == 0 && !alwaysIncludeSemantics && offstageAndOpacityAffectPaintTransform) {
       transform.setZero();
     } else {
       super.applyPaintTransform(child, transform);
@@ -3609,7 +3611,7 @@ class RenderOffstage extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    if (offstage) {
+    if (offstage && offstageAndOpacityAffectPaintTransform) {
       transform.setZero();
     } else {
       super.applyPaintTransform(child, transform);
