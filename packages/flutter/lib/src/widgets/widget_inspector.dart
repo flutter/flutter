@@ -103,6 +103,10 @@ class _MulticastCanvas implements Canvas {
     _screenshot.clipRect(rect, clipOp: clipOp, doAntiAlias: doAntiAlias);
   }
 
+  Rect getCurrentClipBounds() {
+    return Rect.zero;
+  }
+
   @override
   void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
     _main.drawArc(rect, startAngle, sweepAngle, useCenter, paint);
@@ -284,6 +288,10 @@ class _MulticastCanvas implements Canvas {
   void translate(double dx, double dy) {
     _main.translate(dx, dy);
     _screenshot.translate(dx, dy);
+  }
+
+  Float64List getCurrentTransform() {
+    return Matrix4.identity().storage;
   }
 }
 
