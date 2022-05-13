@@ -686,6 +686,50 @@ void main() {
 
     expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
   });
+
+  test('Offstage implements paintsChild correctly', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
+    parent.adoptChild(offstage);
+
+    expect(offstage.paintsChild(box), true);
+
+    offstage.offstage = true;
+
+    expect(offstage.paintsChild(box), false);
+  });
+
+  test('Opacity implements paintsChild correctly', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOpacity opacity = RenderOpacity(child: box);
+    parent.adoptChild(opacity);
+
+    expect(opacity.paintsChild(box), true);
+
+    opacity.opacity = 0;
+
+    expect(opacity.paintsChild(box), false);
+  });
+
+  test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
+    parent.adoptChild(opacity);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    expect(opacity.paintsChild(box), true);
+
+    opacityAnimation.value = 0;
+
+    expect(opacity.paintsChild(box), false);
+
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
