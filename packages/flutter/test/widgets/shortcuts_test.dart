@@ -1643,22 +1643,22 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _cachedRegistry ??= ShortcutsRegistrar.of(context)..setShortcuts(context, widget.shortcuts);
+    _cachedRegistry ??= ShortcutsRegistrar.of(context)..addAll(context, widget.shortcuts);
   }
 
   @override
   void didUpdateWidget(TestCallbackRegistration oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.shortcuts != oldWidget.shortcuts || _cachedRegistry == null) {
-      _cachedRegistry?.clearShortcuts(context);
-      _cachedRegistry = ShortcutsRegistrar.of(context)..setShortcuts(context, widget.shortcuts);
+      _cachedRegistry?.removeAll(context);
+      _cachedRegistry = ShortcutsRegistrar.of(context)..addAll(context, widget.shortcuts);
     }
     widget.onDependencyUpdate?.call(ShortcutsRegistrar.of(context).shortcuts);
   }
 
   @override
   void dispose() {
-    _cachedRegistry?.clearShortcuts(context);
+    _cachedRegistry?.removeAll(context);
     super.dispose();
   }
 

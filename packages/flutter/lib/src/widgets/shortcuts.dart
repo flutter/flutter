@@ -1062,8 +1062,8 @@ class CallbackShortcuts extends StatelessWidget {
   }
 }
 
-/// A class that allows adding or removing shortcut bindings to a
-/// [ShortcutsRegistrar].
+/// A class used by [ShortcutsRegistrar] that allows adding or removing shortcut
+/// bindings.
 ///
 /// Objects of this type are returned from [ShortcutsRegistrar.of] and
 /// [ShortcutsRegistrar.maybeOf].
@@ -1073,19 +1073,18 @@ class CallbackShortcuts extends StatelessWidget {
 /// are added or removed, change notifications will be dispatched after the
 /// current frame is finished.
 class ShortcutsRegistry extends ChangeNotifier {
-  /// Gets the shortcut bindings that are registered with this
-  /// [ShortcutsRegistry].
+  /// Gets the combined shortcut bindings from all contexts that are registered
+  /// with this [ShortcutsRegistry].
   ///
-  /// Do not modify the returned map, as that will bypass the change
-  /// notification mechanism..
+  /// Returns a copy: modifying the returned map will have no effect.
   Map<ShortcutActivator, Intent> get shortcuts {
     return <ShortcutActivator, Intent>{
-      for (final BuildContext context in _contextShortcuts.keys) ..._contextShortcuts[context]!,
+      for (final MapEntry<BuildContext, Map<ShortcutActivator, Intent>> entry in _contextShortcuts.entries) ...entry.value,
     };
   }
   final Map<BuildContext, Map<ShortcutActivator, Intent>> _contextShortcuts = <BuildContext, Map<ShortcutActivator, Intent>>{};
 
-  /// Sets the given shortcut bindings associated with the given `context`
+  /// Adds the given shortcut bindings associated with the given `context`
   /// in this [ShortcutsRegistry].
   ///
   /// Will assert in debug mode if another context has already defined a given
@@ -1095,14 +1094,15 @@ class ShortcutsRegistry extends ChangeNotifier {
   /// them will be executed when triggered. For example, if both
   /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
   /// are added, then both will be executed when an "a" key is pressed.
-  void setShortcuts(BuildContext context, Map<ShortcutActivator, Intent> newShortcuts) {
-    _contextShortcuts[context] = newShortcuts;
+  void addAll(BuildContext context, Map<ShortcutActivator, Intent> value) {
+    _contextShortcuts[context] = value;
     _debugCheckForDuplicates();
     notifyListeners();
   }
 
-  /// Removes the shortcuts with the given [ShortcutActivator] bindings.
-  void clearShortcuts(BuildContext context) {
+  /// Removes all the shortcuts associated with the given `context` from this
+  /// registry.
+  void removeAll(BuildContext context) {
     if (_contextShortcuts.remove(context) != null) {
       notifyListeners();
     }
@@ -1111,26 +1111,15 @@ class ShortcutsRegistry extends ChangeNotifier {
   void _debugCheckForDuplicates() {
     assert(() {
       final Map<ShortcutActivator, BuildContext> previous = <ShortcutActivator, BuildContext>{};
-      ShortcutActivator? found;
-      BuildContext? foundContext;
-      BuildContext? previousContext;
       for (final MapEntry<BuildContext, Map<ShortcutActivator, Intent>> contextEntry in _contextShortcuts.entries) {
-        for (final MapEntry<ShortcutActivator, Intent> entry in contextEntry.value.entries) {
-          if (previous.containsKey(entry.key)) {
-            found = entry.key;
-            previousContext = previous[entry.key];
-            foundContext = contextEntry.key;
-            break;
+        for (final ShortcutActivator shortcut in contextEntry.value.keys) {
+          if (previous.containsKey(shortcut)) {
+            throw FlutterError(
+                '$ShortcutsRegistry: Received a duplicate registration for the '
+                'shortcut activator $shortcut in ${contextEntry.key} and ${previous[shortcut]}.');
           }
-          previous[entry.key] = contextEntry.key;
+          previous[shortcut] = contextEntry.key;
         }
-        if (found != null) {
-          break;
-        }
-      }
-      if (found != null) {
-        throw FlutterError(
-            '$ShortcutsRegistrar: Received a duplicate registration for the shortcut activator $found in $foundContext and $previousContext.');
       }
       return true;
     }());
@@ -1145,11 +1134,11 @@ class ShortcutsRegistry extends ChangeNotifier {
 ///
 /// To add shortcuts to the registry, call [ShortcutsRegistrar.of] or
 /// [ShortcutsRegistrar.maybeOf] to get the [ShortcutsRegistry], and then add
-/// them using [ShortcutsRegistry.add] or [ShortcutsRegistry.addAll].
+/// them using [ShortcutsRegistry.addAll].
 ///
 /// To remove shortcuts to the registry, call [ShortcutsRegistrar.of] or
 /// [ShortcutsRegistrar.maybeOf] to get the [ShortcutsRegistry], and then remove
-/// them using [ShortcutsRegistry.remove] or [ShortcutsRegistry.removeAll].
+/// them using [ShortcutsRegistry.removeAll].
 class ShortcutsRegistrar extends StatefulWidget {
   /// Creates a const [ShortcutsRegistrar].
   ///
