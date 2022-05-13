@@ -152,6 +152,7 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64-release/gen_snapshot_arm64',
       'artifacts/engine/darwin-x64-release/gen_snapshot_x64',
       'artifacts/engine/darwin-x64/flutter_tester',
+      'artifacts/engine/darwin-x64/flutter_tester_fractional_translation',
       'artifacts/engine/darwin-x64/gen_snapshot',
       'artifacts/engine/darwin-x64/gen_snapshot_arm64',
       'artifacts/engine/darwin-x64/gen_snapshot_x64',
