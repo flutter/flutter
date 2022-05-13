@@ -41,7 +41,6 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
         debugLabel,
         flow.id,
       ),
-      errorsAreFatal: true,
       onExit: port.sendPort,
       onError: port.sendPort,
       debugName: debugLabel,

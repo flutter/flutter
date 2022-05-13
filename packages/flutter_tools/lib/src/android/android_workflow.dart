@@ -402,12 +402,12 @@ class AndroidLicenseValidator extends DoctorValidator {
         .transform<String>(const Utf8Decoder(reportErrors: false))
         .transform<String>(const LineSplitter())
         .listen(handleLine)
-        .asFuture<void>(null);
+        .asFuture<void>();
       final Future<void> errors = process.stderr
         .transform<String>(const Utf8Decoder(reportErrors: false))
         .transform<String>(const LineSplitter())
         .listen(handleLine)
-        .asFuture<void>(null);
+        .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;
     } on ProcessException catch (e) {

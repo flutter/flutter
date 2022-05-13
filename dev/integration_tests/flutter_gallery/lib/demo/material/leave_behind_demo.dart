@@ -275,7 +275,6 @@ class _LeaveBehindListItem extends StatelessWidget {
   Future<bool?> _showConfirmationDialog(BuildContext context, String action) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Do you want to $action this item?'),
