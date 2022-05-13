@@ -307,7 +307,6 @@ abstract class License implements Comparable<License> {
         body = system.File('data/mit').readAsStringSync();
         type = LicenseType.mit;
         break;
-      case 'Unicode-DFS-2016': // SPDX ID
       case 'https://www.unicode.org/copyright.html':
       case 'http://www.unicode.org/copyright.html':
         body = system.File('data/unicode').readAsStringSync();
@@ -871,8 +870,8 @@ License _dereferenceLicense(int groupIndex, String Function(int index) group, Mu
   License result = pattern.checkLocalFirst ? parentDirectory.nearestLicenseWithName(group(groupIndex)) : null;
   if (result == null) {
     String suffix = '';
-    if (pattern.versionIndices != null && pattern.versionIndices.containsKey(groupIndex))
-      suffix = ':${group(pattern.versionIndices[groupIndex])}';
+    if (pattern.versionIndicies != null && pattern.versionIndicies.containsKey(groupIndex))
+      suffix = ':${group(pattern.versionIndicies[groupIndex])}';
     result = License.fromUrl('${group(groupIndex)}$suffix', origin: origin);
   }
   return result;

@@ -85,7 +85,6 @@ final List<RegExp> copyrightStatementPatterns = <RegExp>[
   RegExp(r'^ *others\.?$', caseSensitive: false),
   RegExp(r'^for more details\.$', caseSensitive: false),
   RegExp(r'^ *For more info read ([^ ]+)$', caseSensitive: false),
-  RegExp(r'^ *For terms of use, see ([^ ]+)$', caseSensitive: false),
   RegExp(r'^(?:Google )?Author\(?s?\)?: .+', caseSensitive: false),
   RegExp(r'^Written by .+', caseSensitive: false),
   RegExp(r'^Originally written by .+', caseSensitive: false),
@@ -629,7 +628,7 @@ class MultipleVersionedLicenseReferencePattern {
     this.firstPrefixIndex,
     this.indentPrefixIndex,
     this.licenseIndices,
-    this.versionIndices,
+    this.versionIndicies,
     this.checkLocalFirst = true,
     this.pattern
   });
@@ -638,7 +637,7 @@ class MultipleVersionedLicenseReferencePattern {
   final int indentPrefixIndex;
   final List<int> licenseIndices;
   final bool checkLocalFirst;
-  final Map<int, int> versionIndices;
+  final Map<int, int> versionIndicies;
   final RegExp pattern;
 }
 
@@ -664,7 +663,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
-    versionIndices: const <int, int>{ 3:4 },
+    versionIndicies: const <int, int>{ 3:4 },
     checkLocalFirst: false,
     pattern: RegExp(
       kIndent + r'Licensed under the (Academic Free License) version (3\.0)',
@@ -799,7 +798,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
-    versionIndices: const <int, int>{3:4},
+    versionIndicies: const <int, int>{3:4},
     checkLocalFirst: false,
     pattern: RegExp(
       kIndent +
@@ -817,7 +816,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[5, 6],
-    versionIndices: const <int, int>{5:3, 6:4},
+    versionIndicies: const <int, int>{5:3, 6:4},
     pattern: RegExp(
       kIndent +
       r'This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
@@ -850,7 +849,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[5, 6],
-    versionIndices: const <int, int>{5:3, 6:4},
+    versionIndicies: const <int, int>{5:3, 6:4},
     pattern: RegExp(
       kIndent +
       r'This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
@@ -883,7 +882,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[6, 4],
-    versionIndices: const <int, int>{6:3, 4:5},
+    versionIndicies: const <int, int>{6:3, 4:5},
     pattern: RegExp(
       kIndent +
       r'This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
@@ -915,7 +914,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[5, 6],
-    versionIndices: const <int, int>{5:3, 6:4},
+    versionIndicies: const <int, int>{5:3, 6:4},
     pattern: RegExp(
       kIndent +
       r'This file is part of GCC. *\n'
@@ -949,7 +948,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[5, 6],
-    versionIndices: const <int, int>{ 5:3, 6:4 },
+    versionIndicies: const <int, int>{ 5:3, 6:4 },
     pattern: RegExp(
       kIndent +
       r'This file is part of GCC. *\n'
@@ -983,7 +982,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[4],
-    versionIndices: const <int, int>{ 4:3 },
+    versionIndicies: const <int, int>{ 4:3 },
     pattern: RegExp(
       kIndent +
       r'This library is free software; you can redistribute it and/or *\n'
@@ -1011,7 +1010,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[4],
-    versionIndices: const <int, int>{ 4:3 },
+    versionIndicies: const <int, int>{ 4:3 },
     pattern: RegExp(
       kIndent +
       r'Licensed under the Academic Free License version 2.0 *\n'
@@ -1042,7 +1041,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[4],
-    versionIndices: const <int, int>{ 4:3 },
+    versionIndicies: const <int, int>{ 4:3 },
     pattern: RegExp(
       kIndent +
       r'This Source Code Form is subject to the terms of the Mozilla Public *\n'
@@ -1059,7 +1058,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[3], // 5 is lgpl, which we're actively not selecting
-    versionIndices: const <int, int>{ 3:4 }, // 5:6 for lgpl
+    versionIndicies: const <int, int>{ 3:4 }, // 5:6 for lgpl
     pattern: RegExp(
       kIndent +
       r'(?:Version: [GMPL/012. ]+ *\n'
@@ -1113,7 +1112,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     licenseIndices: const <int>[4],
-    versionIndices: const <int, int>{ 4:3 },
+    versionIndicies: const <int, int>{ 4:3 },
     pattern: RegExp(
       kIndent +
       r'This library is free software; you can redistribute it and/or *\n'
