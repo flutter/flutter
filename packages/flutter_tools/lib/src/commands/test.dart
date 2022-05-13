@@ -222,6 +222,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'the software renderer backend for flutter tester. Also disables '
               'the raster cache.',
         defaultsTo: true,
+        hide: !verboseHelp,
       );
     addDdsOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);

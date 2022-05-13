@@ -861,9 +861,8 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       case Artifact.genSnapshot:
         return _genSnapshotPath();
       case Artifact.flutterTester:
-        return _flutterTesterPath(platform!);
       case Artifact.flutterTesterFractionalTranslation:
-        return _flutterTesterFractionalPath(platform!);
+        return _fileSystem.path.join(engineOutPath, _artifactToFileName(artifact, platform));
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
         return _fileSystem.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', artifactFileName);
@@ -941,28 +940,6 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       }
     }
     throw Exception('Unable to find $genSnapshotName');
-  }
-
-  String _flutterTesterPath(TargetPlatform platform) {
-    if (_platform.isLinux) {
-      return _fileSystem.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
-    } else if (_platform.isMacOS) {
-      return _fileSystem.path.join(engineOutPath, 'flutter_tester');
-    } else if (_platform.isWindows) {
-      return _fileSystem.path.join(engineOutPath, 'flutter_tester.exe');
-    }
-    throw Exception('Unsupported platform $platform.');
-  }
-
-  String _flutterTesterFractionalPath(TargetPlatform platform) {
-    if (_platform.isLinux) {
-      return _fileSystem.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
-    } else if (_platform.isMacOS) {
-      return _fileSystem.path.join(engineOutPath, 'flutter_tester_fractional_translation');
-    } else if (_platform.isWindows) {
-      return _fileSystem.path.join(engineOutPath, 'flutter_tester_fractional_translation.exe');
-    }
-    throw Exception('Unsupported platform $platform.');
   }
 
   @override
