@@ -4,6 +4,7 @@
 
 import 'package:yaml/yaml.dart';
 
+import 'base/pub_spec_content.dart';
 import 'project.dart';
 import 'project_validator_result.dart';
 
@@ -18,10 +19,12 @@ abstract class ProjectValidator {
   ];
 }
 
+// Validator run for all platforms that extract information from the pubspec.yaml
+// specific info from different platforms should be written in their own ProjectValidator
 class GeneralInfoProjectValidator extends ProjectValidator{
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final YamlMap pubContent = loadYaml(project.pubspecFile.readAsStringSync()) as YamlMap;
+    final PubContent pubContent = PubContent(loadYaml(project.pubspecFile.readAsStringSync()) as YamlMap);
     final ProjectValidatorResult appNameValidatorResult = getAppNameResult(pubContent);
     final String supportedPlatforms = getSupportedPlatforms(project);
     if (supportedPlatforms.isEmpty) {
@@ -38,16 +41,15 @@ class GeneralInfoProjectValidator extends ProjectValidator{
       supportedPlatformsResult,
       isFlutterPackage,
     ];
-    if (isFlutterPackage.value == 'yes') {
-      final YamlMap flutterNode = pubContent['flutter'] as YamlMap;
-      result.add(materialDesignResult(flutterNode));
-      result.add(pluginValidatorResult(flutterNode));
+    if (pubContent.isFlutterPackage()) {
+      result.add(materialDesignResult(pubContent));
+      result.add(pluginValidatorResult(pubContent));
     }
     return result;
   }
 
-  ProjectValidatorResult getAppNameResult(YamlMap pubContent) {
-    final String? appName = pubContent['name'] as String?;
+  ProjectValidatorResult getAppNameResult(PubContent pubContent) {
+    final String? appName = pubContent.appName;
     const String name = 'App Name';
     if (appName == null) {
       return const ProjectValidatorResult(
@@ -63,10 +65,10 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     );
   }
 
-  ProjectValidatorResult isFlutterPackageValidatorResult(YamlMap pubContent) {
+  ProjectValidatorResult isFlutterPackageValidatorResult(PubContent pubContent) {
     String value;
     StatusProjectValidator status;
-    if (pubContent.containsKey('flutter')) {
+    if (pubContent.isFlutterPackage()) {
       value = 'yes';
       status = StatusProjectValidator.success;
     } else {
@@ -81,38 +83,22 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     );
   }
 
-  ProjectValidatorResult materialDesignResult(YamlMap flutterNode) {
-    bool isMaterialDesign;
-
-    if (flutterNode.containsKey('uses-material-design')) {
-      isMaterialDesign = flutterNode['uses-material-design'] as bool;
-    } else {
-      isMaterialDesign = false;
-    }
-
-    final String value = isMaterialDesign? 'yes' : 'no';
+  ProjectValidatorResult materialDesignResult(PubContent pubContent) {
     return ProjectValidatorResult(
       name: 'Uses Material Design',
-      value: value,
+      value: pubContent.usesMaterialDesign()? 'yes' : 'no',
       status: StatusProjectValidator.success
     );
   }
 
   String getSupportedPlatforms(FlutterProject project) {
-    final List<SupportedPlatform> supportedPlatforms = project.getSupportedPlatforms();
-    final List<String> allPlatforms = <String>[];
-
-    for (final SupportedPlatform platform in supportedPlatforms) {
-      allPlatforms.add(platform.name);
-    }
-    return allPlatforms.join(', ');
+    return project.getSupportedPlatforms().map((SupportedPlatform platform) => platform.name).join(', ');
   }
 
-  ProjectValidatorResult pluginValidatorResult(YamlMap flutterNode) {
-    final String value = flutterNode.containsKey('plugin')? 'yes' : 'no';
+  ProjectValidatorResult pluginValidatorResult(PubContent pubContent) {
     return ProjectValidatorResult(
       name: 'Is Plugin',
-      value: value,
+      value: pubContent.isPlugin()? 'yes' : 'no',
       status: StatusProjectValidator.success
     );
   }
