@@ -62,17 +62,17 @@ void main() {
   test('RenderPhysicalModel compositing', () {
     final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
 
     // On Fuchsia, the system compositor is responsible for drawing shadows
     // for physical model layers with non-zero elevation.
     root.elevation = 1.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
 
     root.elevation = 0.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
   });
 
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
@@ -127,16 +127,16 @@ void main() {
           clipper: const ShapeBorderClipper(shape: CircleBorder()),
         );
         layout(root, phase: EnginePhase.composite);
-        expect(root.needsCompositing, isFalse);
+        expect(root.needsCompositing, isTrue);
 
         // On non-Fuchsia platforms, we composite physical shape layers
         root.elevation = 1.0;
         pumpFrame(phase: EnginePhase.composite);
-        expect(root.needsCompositing, isFalse);
+        expect(root.needsCompositing, isTrue);
 
         root.elevation = 0.0;
         pumpFrame(phase: EnginePhase.composite);
-        expect(root.needsCompositing, isFalse);
+        expect(root.needsCompositing, isTrue);
       }
       debugDefaultTargetPlatformOverride = null;
     });
