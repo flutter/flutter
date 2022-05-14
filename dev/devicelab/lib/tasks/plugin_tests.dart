@@ -204,7 +204,7 @@ class $dartPluginClass {
     podspecContent = podspecContent.replaceFirst(
       versionString,
       target == 'ios'
-          ? "s.platform = :ios, '7.0'"
+          ? "s.platform = :ios, '10.0'"
           : "s.platform = :osx, '10.8'"
     );
     podspec.writeAsStringSync(podspecContent, flush: true);
@@ -240,8 +240,8 @@ class $dartPluginClass {
           if (target == 'ios') {
             // Plugins with versions lower than the app version should not have IPHONEOS_DEPLOYMENT_TARGET set.
             // The plugintest plugin target should not have IPHONEOS_DEPLOYMENT_TARGET set since it has been lowered
-            // in _reduceDarwinPluginMinimumVersion to 7, which is below the target version of 9.
-            if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 7')) {
+            // in _reduceDarwinPluginMinimumVersion to 10, which is below the target version of 11.
+            if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 10')) {
               throw TaskResult.failure('Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
             }
             if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {

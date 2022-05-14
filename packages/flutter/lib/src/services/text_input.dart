@@ -1575,6 +1575,12 @@ class TextInput {
     TextInputAction.emergencyCall,
   ];
 
+  /// Ensure that a [TextInput] instance has been set up so that the platform
+  /// can handle messages on the text input method channel.
+  static void ensureInitialized() {
+    _instance; // ignore: unnecessary_statements
+  }
+
   /// Begin interacting with the text input control.
   ///
   /// Calling this function helps multiple clients coordinate about which one is
