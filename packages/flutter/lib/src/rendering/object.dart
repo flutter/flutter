@@ -2703,7 +2703,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// one render object into coordinates local to another render object.
   ///
   /// Some RenderObjects will provide a zeroed out matrix in this method,
-  /// indicating that even though
+  /// indicating that the child should not paint anything or respond to hit
+  /// tests currently. A parent may supply a non-zero matrix even though it
+  /// does not paint its child currently, for example if the parent is a
+  /// [RenderOffstage] with `offstage` set to true. In both of these cases,
+  /// the parent must return `false` from [paintsChild].
   void applyPaintTransform(covariant RenderObject child, Matrix4 transform) {
     assert(child.parent == this);
   }
