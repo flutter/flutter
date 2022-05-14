@@ -172,11 +172,6 @@ class CommandHelp {
     'debugDumpApp',
   );
 
-  late final CommandHelpOption e = _makeOption(
-    'e',
-    'Dump current memory issues.',
-  );
-
   // When updating the list above, see the notes above the list regarding order
   // and tests.
 
