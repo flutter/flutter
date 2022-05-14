@@ -15,6 +15,7 @@ import 'focus_manager.dart';
 import 'inherited_model.dart';
 import 'notification_listener.dart';
 import 'widget_inspector.dart';
+import 'package:memory_tools/lib_leak_detector.dart' as leak_detector;
 
 export 'package:flutter/foundation.dart' show
   factory,
@@ -984,6 +985,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
+    leak_detector.startTracking(this);
   }
 
   /// Called whenever the widget configuration changes.
@@ -1215,6 +1217,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   @mustCallSuper
   void dispose() {
+    leak_detector.registerDisposal(this);
     assert(_debugLifecycleState == _StateLifecycle.ready);
     assert(() {
       _debugLifecycleState = _StateLifecycle.defunct;
@@ -3144,7 +3147,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Typically called by an override of [Widget.createElement].
   Element(Widget widget)
     : assert(widget != null),
-      _widget = widget;
+      _widget = widget { leak_detector.startTracking(this); }
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
@@ -4016,6 +4019,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// method, as in `super.unmount()`.
   @mustCallSuper
   void unmount() {
+    leak_detector.registerDisposal(this);
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(depth != null);

@@ -3037,7 +3037,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
         DiagnosticsBlock(
           name: 'The relevant error-causing widget was',
           children: <DiagnosticsNode>[
-            ErrorDescription('${target.widget.toStringShort()} ${_describeCreationLocation(target)}'),
+            ErrorDescription('${target.widget.toStringShort()} ${describeCreationLocation(target)}'),
           ],
         ),
         ErrorSpacer(),
@@ -3109,7 +3109,7 @@ bool debugIsWidgetLocalCreation(Widget widget) {
 /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
-String? _describeCreationLocation(Object object) {
+String? describeCreationLocation(Object object) {
   final _Location? location = _getCreationLocation(object);
   return location?.toString();
 }
