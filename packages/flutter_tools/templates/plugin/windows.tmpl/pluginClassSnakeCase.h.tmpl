@@ -8,13 +8,13 @@
 
 namespace {{projectName}} {
 
-class {{pluginClass}} : public flutter::Plugin {
+class {{pluginClass}} final : public flutter::Plugin {
  public:
   static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
   {{pluginClass}}();
 
-  virtual ~{{pluginClass}}();
+  ~{{pluginClass}}() override;
 
   // Disallow copy and assign.
   {{pluginClass}}(const {{pluginClass}}&) = delete;

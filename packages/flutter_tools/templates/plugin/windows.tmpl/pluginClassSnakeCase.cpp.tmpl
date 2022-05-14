@@ -1,7 +1,7 @@
 #include "{{pluginClassSnakeCase}}.h"
 
 // This must be included before many other Windows headers.
-#include <windows.h>
+#include <Windows.h>
 
 // For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <VersionHelpers.h>
@@ -10,7 +10,6 @@
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
 
-#include <memory>
 #include <sstream>
 
 namespace {{projectName}} {
@@ -18,7 +17,7 @@ namespace {{projectName}} {
 // static
 void {{pluginClass}}::RegisterWithRegistrar(
     flutter::PluginRegistrarWindows *registrar) {
-  auto channel =
+  const auto channel =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
           registrar->messenger(), "{{projectName}}",
           &flutter::StandardMethodCodec::GetInstance());
@@ -40,7 +39,7 @@ void {{pluginClass}}::RegisterWithRegistrar(
 void {{pluginClass}}::HandleMethodCall(
     const flutter::MethodCall<flutter::EncodableValue> &method_call,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-  if (method_call.method_name().compare("getPlatformVersion") == 0) {
+  if (method_call.method_name() == "getPlatformVersion") {
     std::ostringstream version_stream;
     version_stream << "Windows ";
     if (IsWindows10OrGreater()) {
