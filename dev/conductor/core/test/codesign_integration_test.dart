@@ -6,6 +6,8 @@
 // times out with the default 5 minutes: https://github.com/flutter/flutter/issues/100937
 @Timeout(Duration(minutes: 10))
 
+import 'dart:io' as io;
+
 import 'package:args/command_runner.dart';
 import 'package:conductor_core/src/codesign.dart' show CodesignCommand;
 import 'package:conductor_core/src/globals.dart';
@@ -19,13 +21,34 @@ import './common.dart';
 
 /// Verify all binaries in the Flutter cache are expected by Conductor.
 void main() {
+  const Platform platform = LocalPlatform();
+  const FileSystem fileSystem = LocalFileSystem();
+  const ProcessManager processManager = LocalProcessManager();
+
+  late Directory tempDir;
+
+  bool isRelease() {
+    final String? luciBranch = platform.environment['LUCI_BRANCH'];
+    if (luciBranch == null) {
+      return false;
+    }
+    return releaseCandidateBranchRegex.hasMatch(luciBranch!);
+  }
+
+  setUpAll(() {
+  });
+
+  setUp(() {
+    tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_integration_test.');
+  });
+
+  tearDown(() {
+    tempDir.deleteSync(recursive: true);
+  });
+
   test(
       'validate the expected binaries from the conductor codesign command are present in the cache',
       () async {
-    const Platform platform = LocalPlatform();
-    const FileSystem fileSystem = LocalFileSystem();
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_integration_test.');
-    const ProcessManager processManager = LocalProcessManager();
     final TestStdio stdio = TestStdio(verbose: true);
     final Checkouts checkouts = Checkouts(
       fileSystem: fileSystem,
@@ -66,18 +89,73 @@ void main() {
         '--no-signatures',
       ]);
     } on ConductorException catch (e) {
-      print(stdio.error);
-      print(_fixItInstructions);
+      io.stderr.writeln(stdio.error);
+      io.stderr.writeln(_fixItInstructions);
       fail(e.message);
     } on Exception {
-      print('stdout:\n${stdio.stdout}');
-      print('stderr:\n${stdio.error}');
+      io.stderr.writeln('stdout:\n${stdio.stdout}');
+      io.stderr.writeln('stderr:\n${stdio.error}');
       rethrow;
     }
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('codesign command is only supported on macos'),
     'linux': const Skip('codesign command is only supported on macos'),
   });
+
+  if (isRelease()) {
+    test('Verify all release binaries are codesigned', () async {
+      final TestStdio stdio = TestStdio(verbose: true);
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: tempDir,
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final Directory flutterRoot = _flutterRootFromDartBinary(
+        fileSystem.file(platform.executable),
+      );
+
+      final String currentHead = (processManager.runSync(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: flutterRoot.path,
+      ).stdout as String).trim();
+
+      final FrameworkRepository framework = FrameworkRepository.localRepoAsUpstream(
+        checkouts,
+        upstreamPath: flutterRoot.path,
+        initialRef: currentHead,
+      );
+      final CommandRunner<void> runner = CommandRunner<void>('codesign-test', '');
+      runner.addCommand(
+        CodesignCommand(
+          checkouts: checkouts,
+          framework: framework,
+          flutterRoot: flutterRoot,
+        ),
+      );
+
+      try {
+        await runner.run(<String>[
+          'codesign',
+          '--verify',
+          '--signatures',
+        ]);
+      } on ConductorException catch (e) {
+        io.stderr.writeln(stdio.error);
+        io.stderr.writeln(e.message);
+        fail(_unsignedReleaseBinariesInstructions);
+      } on Exception {
+        io.stderr.writeln('stdout:\n${stdio.stdout}');
+        io.stderr.writeln('stderr:\n${stdio.error}');
+        rethrow;
+      }
+    }, onPlatform: <String, dynamic>{
+      'windows': const Skip('codesign command is only supported on macos'),
+      'linux': const Skip('codesign command is only supported on macos'),
+    });
+  }
 }
 
 Directory _flutterRootFromDartBinary(File dartBinary) {
@@ -93,6 +171,18 @@ Codesign integration test failed.
 This means that the binary files found in the Flutter cache do not match those
 expected by the conductor tool (either an expected file was not found in the
 cache or an unexpected file was found in the cache).
+
+This usually happens either during an engine roll or a change to the caching
+logic in flutter_tools. If this is a valid change, then the conductor source
+code should be updated, specifically either the [binariesWithEntitlements] or
+[binariesWithoutEntitlements] lists, depending on if the file should have macOS
+entitlements applied during codesigning.
+''';
+
+const String _unsignedReleaseBinariesInstructions = '''
+Codesign integration test failed.
+
+This means that the test ran in the context of a Flutter release but 
 
 This usually happens either during an engine roll or a change to the caching
 logic in flutter_tools. If this is a valid change, then the conductor source
