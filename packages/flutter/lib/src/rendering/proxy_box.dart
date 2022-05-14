@@ -1404,8 +1404,15 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) {
-    return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
+    }
   }
 
   Paint? _debugPaint;
