@@ -1168,7 +1168,7 @@ abstract class WidgetController {
     RenderObject? renderObject = element.findRenderObject();
     SemanticsNode? result = renderObject?.debugSemantics;
     while (renderObject != null && (result == null || result.isMergedIntoParent)) {
-      renderObject = renderObject.parent as RenderObject?;
+      renderObject = renderObject.parent;
       result = renderObject?.debugSemantics;
     }
     if (result == null)
