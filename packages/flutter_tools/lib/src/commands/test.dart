@@ -461,7 +461,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     );
 
     if (collector != null) {
-      final bool collectionResult = collector.collectCoverageData(
+      final bool collectionResult = await collector.collectCoverageData(
         stringArgDeprecated('coverage-path'),
         mergeCoverageData: boolArgDeprecated('merge-coverage'),
       );
