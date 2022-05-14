@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/clang.gni")
 import("//flutter/common/config.gni")
 import("//flutter/examples/examples.gni")
 import("//flutter/shell/platform/config.gni")
@@ -25,9 +26,21 @@ config("config") {
 }
 
 config("export_dynamic_symbols") {
+  # --dynamic-list is the GNU linker syntax supported by ELF linkers.
+  # -exported_symbols_list is the macOS linker syntax. The different flags
+  # accept files formatted differently, so we have exported_symbols.sym for GNU
+  # linker syntax, and exported_symbols_mac.sym for the macOS linker syntax.
   if (is_linux || is_fuchsia) {
     inputs = [ "//flutter/common/exported_symbols.sym" ]
     ldflags = [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
+  } else if (is_mac && !use_xcode) {
+    inputs = [ "//flutter/common/exported_symbols_mac.sym" ]
+    ldflags = [
+      "-Xlinker",
+      "-exported_symbols_list",
+      "-Xlinker",
+      rebase_path(inputs[0], root_build_dir),
+    ]
   }
 }
 

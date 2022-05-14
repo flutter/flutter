@@ -203,6 +203,7 @@ if (enable_unittests) {
       ":ui",
       ":ui_unittests_fixtures",
       "//flutter/benchmarking",
+      "//flutter/lib/snapshot",
       "//flutter/shell/common",
       "//flutter/testing:fixture_test",
     ]
@@ -231,6 +232,7 @@ if (enable_unittests) {
       ":ui",
       ":ui_unittests_fixtures",
       "//flutter/common",
+      "//flutter/lib/snapshot",
       "//flutter/shell/common:shell_test_fixture_sources",
       "//flutter/testing",
       "//flutter/testing:dart",

@@ -74,8 +74,8 @@ API_AVAILABLE(ios(13.4))
                 }];
 
   XCTAssertEqual([messages count], 1u);
-  XCTAssertEqual([messages lastObject][@"keymap"], @"ios");
-  XCTAssertEqual([messages lastObject][@"type"], @"keydown");
+  XCTAssertStrEqual([messages lastObject][@"keymap"], @"ios");
+  XCTAssertStrEqual([messages lastObject][@"type"], @"keydown");
   XCTAssertEqual([[messages lastObject][@"keyCode"] intValue], keyACode);
   XCTAssertEqual([[messages lastObject][@"modifiers"] intValue], 0x0);
   XCTAssertStrEqual([messages lastObject][@"characters"], @"a");
@@ -95,8 +95,8 @@ API_AVAILABLE(ios(13.4))
                 }];
 
   XCTAssertEqual([messages count], 1u);
-  XCTAssertEqual([messages lastObject][@"keymap"], @"ios");
-  XCTAssertEqual([messages lastObject][@"type"], @"keyup");
+  XCTAssertStrEqual([messages lastObject][@"keymap"], @"ios");
+  XCTAssertStrEqual([messages lastObject][@"type"], @"keyup");
   XCTAssertEqual([[messages lastObject][@"keyCode"] intValue], keyACode);
   XCTAssertEqual([[messages lastObject][@"modifiers"] intValue], 0x0);
 
@@ -132,8 +132,8 @@ API_AVAILABLE(ios(13.4))
                 }];
 
   XCTAssertEqual([messages count], 1u);
-  XCTAssertEqual([messages lastObject][@"keymap"], @"ios");
-  XCTAssertEqual([messages lastObject][@"type"], @"keydown");
+  XCTAssertStrEqual([messages lastObject][@"keymap"], @"ios");
+  XCTAssertStrEqual([messages lastObject][@"type"], @"keydown");
   XCTAssertEqual([[messages lastObject][@"keyCode"] intValue], keyACode);
   XCTAssertEqual([[messages lastObject][@"modifiers"] intValue], 0x0);
   XCTAssertStrEqual([messages lastObject][@"characters"], @"a");

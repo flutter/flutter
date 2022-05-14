@@ -169,6 +169,7 @@ if (enable_unittests) {
     public_deps = [
       ":no_plugin_registrant",
       "//flutter/fml",
+      "//flutter/lib/snapshot",
       "//flutter/testing",
       "//flutter/testing:fixture_test",
     ]
@@ -189,6 +190,7 @@ if (enable_unittests) {
     public_deps = [
       ":plugin_registrant",
       "//flutter/fml",
+      "//flutter/lib/snapshot",
       "//flutter/runtime:dart_plugin_registrant",
       "//flutter/testing",
       "//flutter/testing:fixture_test",
