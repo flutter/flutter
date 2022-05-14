@@ -4,7 +4,7 @@
 
 // This test clones the framework and downloads pre-built binaries; it sometimes
 // times out with the default 5 minutes: https://github.com/flutter/flutter/issues/100937
-@Timeout(Duration(minutes: 10))
+@Timeout(Duration(minutes: 20))
 
 import 'dart:io' as io;
 
