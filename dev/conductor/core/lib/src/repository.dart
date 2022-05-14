@@ -647,6 +647,11 @@ class FrameworkRepository extends Repository {
     return true;
   }
 
+  Future<File> get engineVersionFile async => (await checkoutDirectory)
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version');
+
   /// Update this framework's engine version file.
   ///
   /// Returns [true] if the version file was updated and a commit is needed.
@@ -655,10 +660,7 @@ class FrameworkRepository extends Repository {
     @visibleForTesting File? engineVersionFile,
   }) async {
     assert(newEngine.isNotEmpty);
-    engineVersionFile ??= (await checkoutDirectory)
-        .childDirectory('bin')
-        .childDirectory('internal')
-        .childFile('engine.version');
+    engineVersionFile ??= await this.engineVersionFile;
     assert(engineVersionFile.existsSync());
     final String oldEngine = engineVersionFile.readAsStringSync();
     if (oldEngine.trim() == newEngine.trim()) {

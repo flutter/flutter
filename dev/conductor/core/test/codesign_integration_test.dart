@@ -27,16 +27,18 @@ void main() {
 
   late Directory tempDir;
 
+  /// Whether or not the test is running in the context of a CI release build.
+  ///
+  /// The LUCI_BRANCH env variable is set in the LUCI recipes repo_util module.
+  /// See
+  /// https://flutter.googlesource.com/recipes/+/refs/heads/main/recipe_modules/repo_util/api.py.
   bool isRelease() {
     final String? luciBranch = platform.environment['LUCI_BRANCH'];
     if (luciBranch == null) {
       return false;
     }
-    return releaseCandidateBranchRegex.hasMatch(luciBranch!);
+    return releaseCandidateBranchRegex.hasMatch(luciBranch);
   }
-
-  setUpAll(() {
-  });
 
   setUp(() {
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_integration_test.');
@@ -127,6 +129,7 @@ void main() {
         upstreamPath: flutterRoot.path,
         initialRef: currentHead,
       );
+
       final CommandRunner<void> runner = CommandRunner<void>('codesign-test', '');
       runner.addCommand(
         CodesignCommand(
@@ -145,7 +148,7 @@ void main() {
       } on ConductorException catch (e) {
         io.stderr.writeln(stdio.error);
         io.stderr.writeln(e.message);
-        fail(_unsignedReleaseBinariesInstructions);
+        fail(_unsignedReleaseBinariesInstructions(await framework.engineVersionFile));
       } on Exception {
         io.stderr.writeln('stdout:\n${stdio.stdout}');
         io.stderr.writeln('stderr:\n${stdio.error}');
@@ -179,14 +182,23 @@ code should be updated, specifically either the [binariesWithEntitlements] or
 entitlements applied during codesigning.
 ''';
 
-const String _unsignedReleaseBinariesInstructions = '''
+String _unsignedReleaseBinariesInstructions(File engineVersionFile) {
+  final String engineVersion = engineVersionFile.readAsStringSync();
+  return '''
 Codesign integration test failed.
 
-This means that the test ran in the context of a Flutter release but 
+This means that the test ran in the context of a Flutter release but not all of
+the engine binaries that the tool downloaded were codesigned with the proper
+entitlements.
 
-This usually happens either during an engine roll or a change to the caching
-logic in flutter_tools. If this is a valid change, then the conductor source
-code should be updated, specifically either the [binariesWithEntitlements] or
-[binariesWithoutEntitlements] lists, depending on if the file should have macOS
-entitlements applied during codesigning.
+If the macOS binaries from this release have not already been codesigned, then
+codesign them according to the Flutter release process and re-run this test.
+
+If the macOS binaries from this release have been codesigned, verify that the
+engine version this test checked, $engineVersion is the correct engine version,
+and that it is the same version that was codesigned.
+
+If this is not a release branch, then the definition of the `isRelease()`
+function in the `codesign_integration_test.dart` file needs to be updated.
 ''';
+}
