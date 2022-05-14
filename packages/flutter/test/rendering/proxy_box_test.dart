@@ -728,6 +728,7 @@ void main() {
     opacityAnimation.value = 0;
 
     expect(opacity.paintsChild(box), false);
+  });
 
   test('RenderCustomClip extenders respect clipBehavior when asked to describeApproximateClip', () {
     final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
