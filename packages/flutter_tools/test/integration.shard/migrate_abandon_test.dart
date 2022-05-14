@@ -80,7 +80,7 @@ flutter:
       ]
     );
     expect(logger.errorText, contains('Provided working directory'));
-    expect(logger.errorText, contains('/migrate_working_dir` does not exist or is not valid.'));
+    expect(logger.errorText, contains('migrate_working_dir` does not exist or is not valid.'));
 
     logger.clear();
     await createTestCommandRunner(command).run(

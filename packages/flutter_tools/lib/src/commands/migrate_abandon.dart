@@ -115,7 +115,7 @@ class MigrateAbandonCommand extends FlutterCommand {
     }
 
     workingDirectory.deleteSync(recursive: true);
-    
+
     logger.printStatus('\nAbandon complete. Start a new migration with:');
     printCommandText('flutter migrate start', logger);
     return const FlutterCommandResult(ExitStatus.success);
