@@ -1708,7 +1708,7 @@ class TerminalHandler {
       case 'W':
         return residentRunner.debugDumpApp();
       case 'e':
-        print(lib_leak_detector.getCurrentMemoryIssues());
+        print(leak_detector.getCurrentMemoryIssues());
         return true;
     }
     return false;
