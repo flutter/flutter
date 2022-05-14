@@ -103,7 +103,7 @@ class TextInputType extends EngineInputType {
   const TextInputType();
 
   @override
-  String get inputmodeAttribute => 'text';
+  String? get inputmodeAttribute => null;
 }
 
 /// Numeric input type.
