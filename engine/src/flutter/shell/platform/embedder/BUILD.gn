@@ -224,6 +224,7 @@ if (enable_unittests) {
       ":embedder_gpu_configuration",
       ":fixtures",
       "//flutter/flow",
+      "//flutter/lib/snapshot",
       "//flutter/lib/ui",
       "//flutter/runtime",
       "//flutter/testing",
@@ -273,7 +274,7 @@ if (enable_unittests) {
     }
   }
 
-  # Tests the build in FLUTTER_ENGINE_NO_PROTOTYPES mode.
+  # Tests that build in FLUTTER_ENGINE_NO_PROTOTYPES mode.
   executable("embedder_proctable_unittests") {
     testonly = true
 
@@ -293,6 +294,7 @@ if (enable_unittests) {
       ":embedder",
       ":embedder_gpu_configuration",
       ":fixtures",
+      "//flutter/lib/snapshot",
       "//flutter/testing",
 
       #"//flutter/testing:dart",

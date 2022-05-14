@@ -23,6 +23,7 @@ executable("tonic_unittests") {
 
   public_deps = [
     ":tonic_fixtures",
+    "//flutter/lib/snapshot",
     "//flutter/runtime:libdart",
     "//flutter/runtime:runtime",
     "//flutter/testing",
