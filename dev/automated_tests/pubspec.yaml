@@ -70,6 +70,6 @@ dependencies:
 flutter:
   uses-material-design: true
   assets:
-  - icon/
+    - icon/test.png
 
 # PUBSPEC CHECKSUM: 53c0

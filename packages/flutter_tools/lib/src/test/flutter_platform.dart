@@ -55,7 +55,7 @@ FlutterPlatform installHook({
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
   bool updateGoldens = false,
-  bool buildTestAssets = false,
+  String testAssetDirectory,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
   FlutterProject flutterProject,
@@ -86,7 +86,7 @@ FlutterPlatform installHook({
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
     updateGoldens: updateGoldens,
-    buildTestAssets: buildTestAssets,
+    testAssetDirectory: testAssetDirectory,
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
@@ -280,7 +280,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.precompiledDillPath,
     this.precompiledDillFiles,
     this.updateGoldens,
-    this.buildTestAssets,
+    this.testAssetDirectory,
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
@@ -297,7 +297,7 @@ class FlutterPlatform extends PlatformPlugin {
   final String precompiledDillPath;
   final Map<String, String> precompiledDillFiles;
   final bool updateGoldens;
-  final bool buildTestAssets;
+  final String testAssetDirectory;
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
@@ -419,7 +419,7 @@ class FlutterPlatform extends PlatformPlugin {
       machine: machine,
       debuggingOptions: debuggingOptions,
       host: host,
-      buildTestAssets: buildTestAssets,
+      testAssetDirectory: testAssetDirectory,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
       compileExpression: _compileExpressionService,
