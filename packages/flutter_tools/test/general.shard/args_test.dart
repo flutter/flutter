@@ -15,19 +15,6 @@ import '../src/context.dart';
 import '../src/testbed.dart';
 import 'runner/utils.dart';
 
-class CommandDummy extends FlutterCommand{
-  @override
-  String get description => 'description';
-
-  @override
-  String get name => 'test';
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return FlutterCommandResult.success();
-  }
-}
-
 void main() {
   test('Help for command line arguments is consistently styled and complete', () => Testbed().run(() {
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
@@ -62,7 +49,11 @@ void main() {
   });
 
   testUsingContext('String? safe argResults', () async {
-    final CommandDummy command = CommandDummy();
+    final DummyFlutterCommand command = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+    );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addOption('key');
     runner.addCommand(command);
