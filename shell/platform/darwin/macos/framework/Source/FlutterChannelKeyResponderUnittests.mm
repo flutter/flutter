@@ -232,8 +232,8 @@ TEST(FlutterChannelKeyResponderUnittests, EmptyResponseIsTakenAsHandled) {
   EXPECT_STREQ([[messages lastObject][@"type"] UTF8String], "keydown");
   EXPECT_EQ([[messages lastObject][@"keyCode"] intValue], 0);
   EXPECT_EQ([[messages lastObject][@"modifiers"] intValue], 0);
-  EXPECT_EQ([[messages lastObject][@"characters"] UTF8String], "a");
-  EXPECT_EQ([[messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "a");
+  EXPECT_STREQ([[messages lastObject][@"characters"] UTF8String], "a");
+  EXPECT_STREQ([[messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "a");
 
   EXPECT_EQ([responses count], 1u);
   EXPECT_EQ([[responses lastObject] boolValue], TRUE);

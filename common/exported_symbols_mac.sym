@@ -1,0 +1,6 @@
+# These symbols are looked up from within the executable at runtime and must
+# be exported in the dynamic symbol table.
+_kDartVmSnapshotData
+_kDartVmSnapshotInstructions
+_kDartIsolateSnapshotData
+_kDartIsolateSnapshotInstructions

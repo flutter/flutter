@@ -111,7 +111,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '63f03c89282242d3f2938e0cc17038f35276c1e8',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '897fdb3e87b252f03915e20ba276302d8f029632',
 
    # Fuchsia compatibility
    #
@@ -566,7 +566,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-amd64',
-        'version': 'gi-ivU51hLEmgL3m_giEo-uJOhzJgdYslQ0dvUvAJxcC'
+        'version': 'pjqtsy0EkprqQK20GImo0tXIwVJ5oygbAPUHOqmGRlwC'
       }
     ],
     'condition': 'host_os == "mac"',
@@ -577,7 +577,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-amd64',
-        'version': 'Fn7lDYhKDAwbGQ2SOL_Anwt8fzO1Yho7UjpoS9Hv8N8C'
+        'version': 'xuUT1-3_9KoN3I7wncLinqPEYOMfQ16o53bxWJp0lIkC'
       }
     ],
     'condition': 'host_os == "linux"',
@@ -588,7 +588,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/windows-amd64',
-        'version': '25xTI5-MiVJ87YWFvdlrwmn4O0DVDz-j3oHlszZAyoQC'
+        'version': 'X7Z_tBCdyVsbPRX99U7jBZnMfJ5RS11wocVcia798jwC'
       }
     ],
     'condition': 'download_windows_deps',
