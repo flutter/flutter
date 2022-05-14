@@ -10,3 +10,13 @@ end
 target 'FlutterUITests' do
   inherit! :search_paths
 end
+
+post_install do |installer|
+  flutter_post_install(installer)
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |build_configuration|
+      # GoogleSignIn does not support arm64 simulators.
+      build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
+    end
+  end
+end
