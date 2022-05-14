@@ -1648,7 +1648,6 @@ void main() {
     Future<bool?> confirmDismiss (DismissDirection dismissDirection) async {
       return showDialog<bool>(
         context: scaffoldKey.currentContext!,
-        barrierDismissible: true, // showDialog() returns null if tapped outside the dialog
         builder: (BuildContext context) {
           return AlertDialog(
             actions: <Widget>[

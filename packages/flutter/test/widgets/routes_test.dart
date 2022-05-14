@@ -1019,7 +1019,6 @@ void main() {
               onPressed: () {
                 showGeneralDialog<void>(
                   context: context,
-                  barrierDismissible: false,
                   transitionDuration: Duration.zero,
                   pageBuilder: (BuildContext innerContext, _, __) {
                     return const SizedBox();
@@ -1097,7 +1096,6 @@ void main() {
                   onPressed: () {
                     showGeneralDialog<void>(
                       context: context,
-                      barrierDismissible: false,
                       transitionDuration: Duration.zero,
                       pageBuilder: (BuildContext innerContext, _, __) {
                         return const SizedBox();
@@ -1135,7 +1133,6 @@ void main() {
                     showGeneralDialog<void>(
                       useRootNavigator: false,
                       context: context,
-                      barrierDismissible: false,
                       transitionDuration: Duration.zero,
                       pageBuilder: (BuildContext innerContext, _, __) {
                         return const SizedBox();

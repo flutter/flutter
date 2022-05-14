@@ -1133,14 +1133,14 @@ class LocalizationsGenerator {
     });
 
     return classFileTemplate
-      .replaceAll('@(header)', header)
+      .replaceAll('@(header)', header.isEmpty ? '' : '$header\n\n')
       .replaceAll('@(language)', describeLocale(locale.toString()))
       .replaceAll('@(baseClass)', className)
       .replaceAll('@(fileName)', fileName)
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
       .replaceAll('@(methods)', methods.join('\n\n'))
-      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;" : '');
+      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;\n\n" : '');
   }
 
   String _generateSubclass(
@@ -1284,7 +1284,7 @@ class LocalizationsGenerator {
     );
 
     return fileTemplate
-      .replaceAll('@(header)', header)
+      .replaceAll('@(header)', header.isEmpty ? '' : '$header\n')
       .replaceAll('@(class)', className)
       .replaceAll('@(methods)', _allMessages.map((Message message) => generateBaseClassMethod(message, _templateArbLocale)).join('\n'))
       .replaceAll('@(importFile)', '$directory/$outputFileName')

@@ -500,7 +500,6 @@ class SystemChrome {
     if (callback != null) {
       await SystemChannels.platform.invokeMethod<void>(
         'SystemChrome.setSystemUIChangeListener',
-        null,
       );
     }
   }
@@ -517,7 +516,6 @@ class SystemChrome {
   static Future<void> restoreSystemUIOverlays() async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.restoreSystemUIOverlays',
-      null,
     );
   }
 
