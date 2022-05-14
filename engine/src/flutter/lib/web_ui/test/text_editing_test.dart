@@ -450,8 +450,8 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(clearClient));
     }
 
-    String getEditingInputMode() {
-      return textEditing!.strategy.domElement!.getAttribute('inputmode')!;
+    String? getEditingInputMode() {
+      return textEditing!.strategy.domElement!.getAttribute('inputmode');
     }
 
     setUp(() {
@@ -1815,7 +1815,7 @@ Future<void> testMain() async {
       textEditing = HybridTextEditing();
 
       showKeyboard(inputType: 'text');
-      expect(getEditingInputMode(), 'text');
+      expect(getEditingInputMode(), null);
 
       showKeyboard(inputType: 'number');
       expect(getEditingInputMode(), 'numeric');
@@ -1850,7 +1850,7 @@ Future<void> testMain() async {
         textEditing = HybridTextEditing();
 
         showKeyboard(inputType: 'text');
-        expect(getEditingInputMode(), 'text');
+        expect(getEditingInputMode(), null);
 
         showKeyboard(inputType: 'number');
         expect(getEditingInputMode(), 'numeric');
