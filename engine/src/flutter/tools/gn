@@ -287,7 +287,7 @@ def to_gn_args(args):
 
     if gn_args['target_os'] == 'ios':
       gn_args['use_ios_simulator'] = args.simulator
-    else:
+    elif gn_args['target_os'] == 'mac':
       gn_args['use_ios_simulator'] = False
 
     if args.dart_debug:
