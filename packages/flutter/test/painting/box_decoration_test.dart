@@ -103,8 +103,8 @@ void main() {
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
     final Matcher isLookLikeExpectedPath = isPathThat(
-      includes: const <Offset>[ Offset(2, 9), Offset(50, 0), Offset(98, 9), Offset(50, 19)],
-      excludes: const <Offset>[ Offset(7, 16), Offset(10, 2), Offset(84, 1), Offset(86, 18)],
+      includes: const <Offset>[ Offset(2, 9), Offset(50, 0), Offset(98, 9), Offset(50, 19) ],
+      excludes: const <Offset>[ Offset(7, 16), Offset(10, 2), Offset(84, 1), Offset(86, 18) ],
     );
     expect(clipPath, isLookLikeExpectedPath);
   });
