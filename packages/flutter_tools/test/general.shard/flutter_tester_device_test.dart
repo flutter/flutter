@@ -87,6 +87,7 @@ void main() {
         '--enable-dart-profiling',
         '--non-interactive',
         '--use-test-fonts',
+        '--disable-asset-fonts',
         '--packages=.dart_tool/package_config.json',
         'example.dill',
       ], environment: <String, String>{
@@ -131,6 +132,7 @@ void main() {
         '--enable-dart-profiling',
         '--non-interactive',
         '--use-test-fonts',
+        '--disable-asset-fonts',
         '--packages=.dart_tool/package_config.json',
         'example.dill',
       ], environment: <String, String>{
@@ -203,6 +205,7 @@ void main() {
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
+            '--disable-asset-fonts',
             '--packages=.dart_tool/package_config.json',
             '--foo',
             '--bar',
@@ -244,6 +247,7 @@ void main() {
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
+            '--disable-asset-fonts',
             '--packages=.dart_tool/package_config.json',
             'example.dill',
           ],
