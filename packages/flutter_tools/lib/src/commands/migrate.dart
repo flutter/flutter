@@ -19,7 +19,6 @@ class MigrateCommand extends FlutterCommand {
     required this.logger,
     // TODO(garyq): Add each of these back in as they land.
     required FileSystem fileSystem,
-    // required Terminal terminal,
     required Platform platform,
     required ProcessManager processManager,
   }) {

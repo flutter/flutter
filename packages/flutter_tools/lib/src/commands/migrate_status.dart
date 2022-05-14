@@ -103,7 +103,8 @@ class MigrateStatusCommand extends FlutterCommand {
     }
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
-    if (boolArg('diff') || _verbose) {
+    final bool showDiff = boolArg('diff') ?? true;
+    if ( || _verbose) {
       if (boolArg('show-added-files') || _verbose) {
         for (final String localPath in manifest.addedFiles) {
           logger.printStatus('Newly addded file at $localPath:\n');
