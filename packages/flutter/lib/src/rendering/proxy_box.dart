@@ -1021,7 +1021,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   }
 
   @override
-  bool paintsChild(RenderBox child) {
+  bool paintsChild(RenderObject child) {
     assert(child.parent == this);
     return opacity.value > 0;
   }

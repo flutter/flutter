@@ -730,6 +730,23 @@ void main() {
     expect(opacity.paintsChild(box), false);
   });
 
+  test('AnimatedOpacity sets paint matrix to zero when alpha == 0 (sliver)', () {
+    final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
+    parent.adoptChild(opacity);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    expect(opacity.paintsChild(sliver), true);
+
+    opacityAnimation.value = 0;
+
+    expect(opacity.paintsChild(sliver), false);
+  });
+
   test('RenderCustomClip extenders respect clipBehavior when asked to describeApproximateClip', () {
     final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
     final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: Clip.none, child: child);
