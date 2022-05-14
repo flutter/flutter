@@ -34,6 +34,9 @@ void main() {
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addFlag('key');
     command.argParser.addFlag('key-false');
+    // argResults will be null at this point, if attempt to read them is made,
+    // exception `Null check operator used on a null value` would be thrown.
+    expect(()=>command.boolArg('key'), throwsA( const TypeMatcher<TypeError>()));
 
     runner.addCommand(command);
     await runner.run(<String>['dummy', '--key']);
@@ -56,8 +59,12 @@ void main() {
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addOption('key');
+    // argResults will be null at this point, if attempt to read them is made,
+    // exception `Null check operator used on a null value` would be thrown
+    expect(()=>command.stringArg('key'), throwsA( const TypeMatcher<TypeError>()));
+
     runner.addCommand(command);
-    await runner.run(<String>['test', '--key=value']);
+    await runner.run(<String>['dummy', '--key=value']);
 
     expect(command.stringArg('key'), 'value');
     expect(command.stringArg('empty'), null);
