@@ -190,6 +190,8 @@ class MigrateApplyCommand extends FlutterCommand {
     return const FlutterCommandResult(ExitStatus.success);
   }
 
+  /// Checks if the project uses pubspec dependency locking and prompts if
+  /// the pub upgrade should be run.
   Future<void> updatePubspecDependencies(FlutterProject project) async {
     final File pubspecFile = project.directory.childFile('pubspec.yaml');
     if (!pubspecFile.existsSync()) {
@@ -219,6 +221,8 @@ class MigrateApplyCommand extends FlutterCommand {
     }
   }
 
+  /// Checks if gradle dependency locking is used and prompts the developer to
+  /// remove and back up the gradle dependenc lockfile.
   Future<void> updateGradleDependencyLocking(FlutterProject flutterProject) async {
     final Directory androidDir = flutterProject.directory.childDirectory('android');
     if (!androidDir.existsSync()) {
