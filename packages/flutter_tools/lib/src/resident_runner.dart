@@ -42,6 +42,7 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'sksl_writer.dart';
 import 'vmservice.dart';
+import 'package:memory_tools/lib_leak_detector.dart' as leak_detector;
 
 class FlutterDevice {
   FlutterDevice(
@@ -1706,6 +1707,9 @@ class TerminalHandler {
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
+      case 'e':
+        print(lib_leak_detector.getCurrentMemoryIssues());
+        return true;
     }
     return false;
   }
