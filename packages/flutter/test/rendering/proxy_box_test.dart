@@ -127,16 +127,16 @@ void main() {
           clipper: const ShapeBorderClipper(shape: CircleBorder()),
         );
         layout(root, phase: EnginePhase.composite);
-        expect(root.needsCompositing, isFalse);
+        expect(root.needsCompositing, isTrue);
 
         // On non-Fuchsia platforms, we composite physical shape layers
         root.elevation = 1.0;
         pumpFrame(phase: EnginePhase.composite);
-        expect(root.needsCompositing, isFalse);
+        expect(root.needsCompositing, isTrue);
 
         root.elevation = 0.0;
         pumpFrame(phase: EnginePhase.composite);
-        expect(root.needsCompositing, isFalse);
+        expect(root.needsCompositing, isTrue);
       }
       debugDefaultTargetPlatformOverride = null;
     });
