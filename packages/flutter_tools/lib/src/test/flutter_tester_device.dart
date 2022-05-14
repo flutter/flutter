@@ -39,7 +39,7 @@ class FlutterTesterTestDevice extends TestDevice {
     @required this.enableObservatory,
     @required this.machine,
     @required this.host,
-    @required this.buildTestAssets,
+    @required this.testAssetDirectory,
     @required this.flutterProject,
     @required this.icudtlPath,
     @required this.compileExpression,
@@ -66,7 +66,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final bool enableObservatory;
   final bool machine;
   final InternetAddress host;
-  final bool buildTestAssets;
+  final String testAssetDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
   final CompileExpression compileExpression;
@@ -93,10 +93,6 @@ class FlutterTesterTestDevice extends TestDevice {
     // Let the server choose an unused port.
     _server = await bind(host, /*port*/ 0);
     logger.printTrace('test $id: test harness socket server is running at port:${_server.port}');
-
-    final String assetDirectory = fileSystem.path
-      .join(flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets');
-
     final List<String> command = <String>[
       // Until an arm64 flutter tester binary is available, force to run in Rosetta
       // to avoid "unexpectedly got a signal in sigtramp" crash.
@@ -131,9 +127,10 @@ class FlutterTesterTestDevice extends TestDevice {
       '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
+      '--disable-asset-fonts',
       '--packages=${debuggingOptions.buildInfo.packagesPath}',
-      if (buildTestAssets)
-        '--flutter-assets-dir=$assetDirectory',
+      if (testAssetDirectory != null)
+        '--flutter-assets-dir=$testAssetDirectory',
       if (debuggingOptions.nullAssertions)
         '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
@@ -153,8 +150,8 @@ class FlutterTesterTestDevice extends TestDevice {
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
       'SERVER_PORT': _server.port.toString(),
       'APP_NAME': flutterProject?.manifest?.appName ?? '',
-      if (buildTestAssets)
-        'UNIT_TEST_ASSETS': assetDirectory,
+      if (testAssetDirectory != null)
+        'UNIT_TEST_ASSETS': testAssetDirectory,
     };
 
     logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');

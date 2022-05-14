@@ -757,6 +757,6 @@ void main() {
       await tester.pumpAndSettle();
 
       await expectLater(tester, meetsGuideline(textContrastGuideline));
-    }, skip: true); // https://github.com/flutter/flutter/issues/103526 image load reduces contrast.
+    });
   });
 }

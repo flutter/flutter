@@ -1420,6 +1420,8 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
         'size of the repository as it is distributed to all our developers. If you have a binary',
         'to which you need access, you should consider how to fetch it from another repository;',
         'for example, the "assets-for-api-docs" repository is used for images in API docs.',
+        'To add assets to flutter_tools templates, see the instructions in the wiki:',
+        'https://github.com/flutter/flutter/wiki/Managing-template-image-assets',
       ]);
     }
   }

@@ -34,7 +34,7 @@ def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
   # [target.deployment_target] is a [String] formatted as "8.0".
-  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
+  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 11
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
