@@ -40,6 +40,14 @@ void main() {
       ShapeDecoration.fromBoxDecoration(const BoxDecoration(border: BorderDirectional(start: BorderSide()))),
       const ShapeDecoration(shape: BorderDirectional(start: BorderSide())),
     );
+    expect(
+      ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.oval)),
+      const ShapeDecoration(shape: OvalBorder()),
+    );
+    expect(
+      ShapeDecoration.fromBoxDecoration(BoxDecoration(shape: BoxShape.oval, border: Border.all(color: colorG))),
+      const ShapeDecoration(shape: OvalBorder(side: BorderSide(color: colorG))),
+    );
   });
 
   test('ShapeDecoration.lerp and hit test', () {

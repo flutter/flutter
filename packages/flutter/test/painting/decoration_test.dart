@@ -289,6 +289,7 @@ void main() {
     testDecoration(shape: BoxShape.circle, expectClip: true);
     testDecoration(borderRadius: const BorderRadius.all(Radius.circular(16.0)), expectClip: true);
     testDecoration(expectClip: false);
+    testDecoration(shape: BoxShape.oval, expectClip: false);
   });
 
   test('DecorationImage test', () async {

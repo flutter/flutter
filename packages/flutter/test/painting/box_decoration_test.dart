@@ -96,6 +96,19 @@ void main() {
     expect(clipPath, isLookLikeExpectedPath);
   });
 
+  test('BoxDecoration.getClipPath with shape BoxShape.oval', () {
+    const BoxDecoration decoration = BoxDecoration(
+      shape: BoxShape.oval,
+    );
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
+    final Matcher isLookLikeExpectedPath = isPathThat(
+      includes: const <Offset>[ Offset(2, 9), Offset(50, 0), Offset(98, 9), Offset(50, 19)],
+      excludes: const <Offset>[ Offset(7, 16), Offset(10, 2), Offset(84, 1), Offset(86, 18)],
+    );
+    expect(clipPath, isLookLikeExpectedPath);
+  });
+
   test('BoxDecorations with different blendModes are not equal', () {
     // Regression test for https://github.com/flutter/flutter/issues/100754.
     const BoxDecoration one = BoxDecoration(

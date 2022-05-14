@@ -1541,6 +1541,14 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
       return false;
     }
 
+    if (
+      borderRadius == null &&
+      (shape == BoxShape.oval || shape == BoxShape.oval) &&
+      !assertOval(shapeClipper, matchState)
+    ) {
+      return false;
+    }
+
     if (elevation != null && renderObject.elevation != elevation) {
       return failWithDescription(matchState, 'had elevation: ${renderObject.elevation}');
     }
@@ -1563,6 +1571,12 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
     if (shapeClipper.shape.runtimeType != CircleBorder) {
       return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
     }
+    return true;
+  }
+
+  bool assertOval(ShapeBorderClipper shapeClipper, Map<dynamic, dynamic> matchState) {
+    if (shapeClipper.shape.runtimeType != OvalBorder)
+      return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
     return true;
   }
 

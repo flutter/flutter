@@ -38,6 +38,10 @@ enum BoxShape {
   ///  * [CircleBorder], the equivalent [ShapeBorder].
   circle,
 
+  /// An elliptical shape that behaves as a non-rectangular circle when width and height
+  /// are different. It has elliptical round corners with width and height representing its x/y values. 
+  oval,
+
   // Don't add more, instead create a new ShapeBorder.
 }
 
@@ -255,6 +259,12 @@ abstract class BoxBorder extends ShapeBorder {
         break;
     }
     canvas.drawCircle(rect.center, radius, paint);
+  }
+
+  static void _paintUniformBorderWithOval(Canvas canvas, Rect rect, BorderSide side) {
+    assert(side.style != BorderStyle.none);
+    final Paint paint = side.toPaint();
+    canvas.drawOval(rect.deflate(side.width / 2.0), paint);
   }
 
   static void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect, BorderSide side) {
@@ -567,6 +577,10 @@ class Border extends BoxBorder {
             case BoxShape.circle:
               assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
+              break;
+            case BoxShape.oval:
+              assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
+              BoxBorder._paintUniformBorderWithOval(canvas, rect, top);
               break;
             case BoxShape.rectangle:
               if (borderRadius != null) {
@@ -925,6 +939,10 @@ class BorderDirectional extends BoxBorder {
             case BoxShape.circle:
               assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
+              break;
+            case BoxShape.oval:
+              assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
+              BoxBorder._paintUniformBorderWithOval(canvas, rect, top);
               break;
             case BoxShape.rectangle:
               if (borderRadius != null) {

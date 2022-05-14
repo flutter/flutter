@@ -16,6 +16,7 @@ import 'decoration_image.dart';
 import 'edge_insets.dart';
 import 'gradient.dart';
 import 'image_provider.dart';
+import 'oval_border.dart';
 import 'rounded_rectangle_border.dart';
 
 /// An immutable description of how to paint an arbitrary shape.
@@ -99,6 +100,14 @@ class ShapeDecoration extends Decoration {
           shape = CircleBorder(side: source.border!.top);
         } else {
           shape = const CircleBorder();
+        }
+        break;
+      case BoxShape.oval:
+        if (source.border != null) {
+          assert(source.border!.isUniform);
+          shape = OvalBorder(side: source.border!.top);
+        } else {
+          shape = const OvalBorder();
         }
         break;
       case BoxShape.rectangle:

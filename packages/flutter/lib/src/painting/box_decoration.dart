@@ -219,6 +219,8 @@ class BoxDecoration extends Decoration {
         final double radius = rect.shortestSide / 2.0;
         final Rect square = Rect.fromCircle(center: center, radius: radius);
         return Path()..addOval(square);
+      case BoxShape.oval:
+        return Path()..addOval(rect);
       case BoxShape.rectangle:
         if (borderRadius != null) {
           return Path()..addRRect(borderRadius!.resolve(textDirection).toRRect(rect));
@@ -379,6 +381,9 @@ class BoxDecoration extends Decoration {
         final Offset center = size.center(Offset.zero);
         final double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
+      case BoxShape.oval:
+        final RRect bounds = BorderRadius.all(Radius.elliptical(size.width, size.height)).toRRect(Offset.zero & size);
+        return bounds.contains(position);
     }
   }
 
@@ -430,6 +435,9 @@ class _BoxDecorationPainter extends BoxPainter {
         final double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint);
         break;
+      case BoxShape.oval:
+        canvas.drawOval(rect, paint);
+        break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius == null) {
           canvas.drawRect(rect, paint);
@@ -471,6 +479,10 @@ class _BoxDecorationPainter extends BoxPainter {
         final double radius = rect.shortestSide / 2.0;
         final Rect square = Rect.fromCircle(center: center, radius: radius);
         clipPath = Path()..addOval(square);
+        break;
+      case BoxShape.oval:
+        assert(_decoration.borderRadius == null);
+        clipPath = Path()..addOval(rect);
         break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null) {
