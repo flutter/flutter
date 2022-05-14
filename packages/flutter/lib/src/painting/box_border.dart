@@ -40,6 +40,10 @@ enum BoxShape {
 
   /// An elliptical shape that behaves as a non-rectangular circle when width and height
   /// are different. It has elliptical round corners with width and height representing its x/y values.
+  /// See also:
+  ///
+  ///  * [OvalBorder], the equivalent [ShapeBorder].
+  ///  * [ClipOval], a widget that clips its child using an oval.
   oval,
 
   // Don't add more, instead create a new ShapeBorder.
