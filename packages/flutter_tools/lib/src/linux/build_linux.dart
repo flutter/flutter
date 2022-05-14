@@ -152,8 +152,6 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
       },
       trace: true,
     );
-  } on ArgumentError {
-    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {
     throwToolExit('Unable to generate build files');
