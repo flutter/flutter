@@ -2,13 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
-import '../base/terminal.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
@@ -221,7 +216,8 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       result.trim();
 
       // Display conflict summary for this file and confirm with user if the changes should be commited.
-      if (boolArg('confirm-commit') && skipCount != conflicts.length) {
+      final bool confirm = boolArg('confirm-commit') ?? true;
+      if (confirm && skipCount != conflicts.length) {
         logger.printStatus(terminal.clearScreen(), newline: false);
         logger.printStatus('Conflicts in $localPath complete.\n');
         logger.printStatus('You chose to:\n  Skip $skipCount conflicts\n  Acccept the original lines for $originalCount conflicts\n  Accept the new lines for $newCount conflicts\n');

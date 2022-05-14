@@ -13,6 +13,7 @@ import '../runner/flutter_command.dart';
 import 'migrate_abandon.dart';
 import 'migrate_apply.dart';
 import 'migrate_status.dart';
+import 'migrate_resolve_conflicts.dart';
 
 /// Base command for the migration tool.
 class MigrateCommand extends FlutterCommand {
@@ -46,6 +47,7 @@ class MigrateCommand extends FlutterCommand {
       platform: platform,
       processManager: processManager
     ));
+    addSubcommand(MigrateResolveConflictsCommand(logger: logger, fileSystem: fileSystem, terminal: terminal));
   }
 
   final Logger logger;
