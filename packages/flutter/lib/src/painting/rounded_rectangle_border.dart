@@ -107,8 +107,21 @@ class RoundedRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+    final RRect adjustedRect;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        adjustedRect = borderRect.deflate(side.width);
+        break;
+      case StrokeAlign.center:
+        adjustedRect = borderRect.deflate(side.width / 2);
+        break;
+      case StrokeAlign.outside:
+        adjustedRect = borderRect;
+        break;
+    }
     return Path()
-      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
+      ..addRRect(adjustedRect);
   }
 
   @override
@@ -128,25 +141,19 @@ class RoundedRectangleBorder extends OutlinedBorder {
           canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
           final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-          final RRect inner;
-          final RRect outer;
+          final RRect adjustedRect;
           switch (side.strokeAlign) {
             case StrokeAlign.inside:
-              inner = borderRect.deflate(width);
-              outer = borderRect;
+              adjustedRect = borderRect.deflate(width / 2);
               break;
             case StrokeAlign.center:
-              inner = borderRect.deflate(width / 2);
-              outer = borderRect.inflate(width / 2);
+              adjustedRect = borderRect;
               break;
             case StrokeAlign.outside:
-              inner = borderRect;
-              outer = borderRect.inflate(width);
+              adjustedRect = borderRect.inflate(width / 2);
               break;
           }
-          final Paint paint = Paint()
-            ..color = side.color;
-          canvas.drawDRRect(outer, inner, paint);
+          canvas.drawRRect(adjustedRect, side.toPaint());
         }
     }
   }
@@ -309,11 +316,20 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
         if (width == 0.0) {
           canvas.drawRRect(_adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect)), side.toPaint());
         } else {
-          final RRect outer = _adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect));
-          final RRect inner = outer.deflate(width);
-          final Paint paint = Paint()
-            ..color = side.color;
-          canvas.drawDRRect(outer, inner, paint);
+          final RRect borderRect = _adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect));
+          final RRect adjustedRect;
+          switch (side.strokeAlign) {
+            case StrokeAlign.inside:
+              adjustedRect = borderRect.deflate(width / 2);
+              break;
+            case StrokeAlign.center:
+              adjustedRect = borderRect;
+              break;
+            case StrokeAlign.outside:
+              adjustedRect = borderRect.inflate(width / 2);
+              break;
+          }
+          canvas.drawRRect(adjustedRect, side.toPaint());
         }
     }
   }
