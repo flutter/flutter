@@ -74,7 +74,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
       );
     }
     return super.lerpFrom(a, t);
-  } 
+  }
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
@@ -128,7 +128,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
       ..close();
   }
 
-@override
+  @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
     final RRect adjustedRect;
