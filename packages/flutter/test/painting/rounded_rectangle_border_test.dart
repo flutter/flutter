@@ -52,9 +52,8 @@ void main() {
     expect(
       (Canvas canvas) => c10.paint(canvas, rect),
       paints
-        ..drrect(
-          outer: RRect.fromRectAndRadius(rect, const Radius.circular(100.0)),
-          inner: RRect.fromRectAndRadius(rect.deflate(10.0), const Radius.circular(90.0)),
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(rect, const Radius.circular(100.0)).deflate(5.0),
           strokeWidth: 0.0,
         ),
     );
