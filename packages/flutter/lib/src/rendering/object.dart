@@ -453,7 +453,7 @@ class PaintingContext extends ClipContext {
     return PaintingContext(childLayer, bounds);
   }
 
-  void _checkForClipBehavior(String type) {
+  void _debugCheckForClipBehavior(String type) {
     assert(() {
       final RenderObject active = RenderObject.debugActivePaint!;
       active.visitChildren((RenderObject child) {
@@ -516,7 +516,7 @@ class PaintingContext extends ClipContext {
   /// {@endtemplate}
   ClipRectLayer? pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer? oldLayer }) {
     if (clipBehavior == Clip.none) {
-      _checkForClipBehavior('rect');
+      _debugCheckForClipBehavior('rect');
       painter(this, offset);
       return null;
     }
@@ -556,7 +556,7 @@ class PaintingContext extends ClipContext {
   ClipRRectLayer? pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer? oldLayer }) {
     assert(clipBehavior != null);
     if (clipBehavior == Clip.none) {
-      _checkForClipBehavior('rrect');
+      _debugCheckForClipBehavior('rrect');
       painter(this, offset);
       return null;
     }
@@ -597,7 +597,7 @@ class PaintingContext extends ClipContext {
   ClipPathLayer? pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer? oldLayer }) {
     assert(clipBehavior != null);
     if (clipBehavior == Clip.none) {
-      _checkForClipBehavior('path');
+      _debugCheckForClipBehavior('path');
       painter(this, offset);
       return null;
     }
