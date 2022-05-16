@@ -42,7 +42,7 @@ class ValidateProjectCommand extends FlutterCommand {
     bool hasCrash = false;
     for (final ProjectValidator validator in allProjectValidators) {
       if (!results.containsKey(validator) && validator.supportsProject(project)) {
-        results[validator] = validator.start(project).catchError((Object exception, StackTrace trace) {
+        results[validator] = validator.start(project, logger: logger, fileSystem: fileSystem).catchError((Object exception, StackTrace trace) {
           hasCrash = true;
           return <ProjectValidatorResult>[ProjectValidatorResult.crash(exception, trace)];
         });
