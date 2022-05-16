@@ -48,6 +48,8 @@ abstract class SingletonFlutterWindow extends FlutterWindow {
 
   double get textScaleFactor => platformDispatcher.textScaleFactor;
 
+  bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
+
   bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
 
   bool get alwaysUse24HourFormat => platformDispatcher.alwaysUse24HourFormat;
