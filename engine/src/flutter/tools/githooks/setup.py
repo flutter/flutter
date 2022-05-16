@@ -22,11 +22,13 @@ def IsWindows():
 
 
 def Main(argv):
+  git = 'git'
   githooks = os.path.join(FLUTTER_DIR, 'tools', 'githooks')
   if IsWindows():
+    git = 'git.bat'
     githooks = os.path.join(githooks, 'windows')
   result = subprocess.run([
-    'git',
+    git,
     'config',
     'core.hooksPath',
     githooks,
