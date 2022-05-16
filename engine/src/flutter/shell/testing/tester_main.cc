@@ -68,10 +68,10 @@ class TesterGPUSurfaceSoftware : public GPUSurfaceSoftware {
                            bool render_to_surface)
       : GPUSurfaceSoftware(delegate, render_to_surface) {}
 
-#if DISABLE_SOFTWARE_RASTER_CACHE
+#if SUPPORT_FRACTIONAL_TRANSLATION
   // |Surface|
   bool EnableRasterCache() const override { return false; }
-#endif  // DISABLE_SOFTWARE_RASTER_CACHE
+#endif  // SUPPORT_FRACTIONAL_TRANSLATION
 };
 
 class TesterPlatformView : public PlatformView,
