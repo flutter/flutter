@@ -89,6 +89,15 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
 Matcher matchesToStringOf(TextStyle textStyle) => _DartUiTextStyleToStringMatcher(textStyle);
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/103864
+  test('TextStyle support different inherit lerp', () {
+    const TextStyle inheritStyle = TextStyle();
+    const TextStyle nonInheritStyle = TextStyle(inherit: false);
+
+    expect(TextStyle.lerp(inheritStyle, nonInheritStyle, 0.51)!.inherit, false);
+    expect(TextStyle.lerp(nonInheritStyle, inheritStyle, 0.51)!.inherit, true);
+  });
+
   test('TextStyle control test', () {
     expect(
       const TextStyle(inherit: false).toString(),

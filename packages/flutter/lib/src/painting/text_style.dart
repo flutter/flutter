@@ -1068,7 +1068,6 @@ class TextStyle with Diagnosticable {
   /// based on the [backgroundColor] property).
   static TextStyle? lerp(TextStyle? a, TextStyle? b, double t) {
     assert(t != null);
-    assert(a == null || b == null || a.inherit == b.inherit);
     if (a == null && b == null) {
       return null;
     }
