@@ -27,6 +27,11 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       valueHelp: 'path',
     );
     argParser.addOption(
+      'project-directory',
+      help: 'The root directory of the flutter project.',
+      valueHelp: 'path',
+    );
+    argParser.addOption(
       'context-lines',
       defaultsTo: '5',
       help: 'The number of lines of context to show around the each conflict. Defaults to 5.',
@@ -62,7 +67,10 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject project = FlutterProject.current();
+    final String? projectDirectory = stringArg('project-directory');
+    final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
+    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
+
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
     if (customWorkingDirectoryPath != null) {
@@ -110,7 +118,10 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
           currentConflict.dividerLine = lineNumber;
         } else if (line.contains(_conflictEndMarker)) {
           currentConflict.endLine = lineNumber;
-          assert(currentConflict.startLine! < currentConflict.dividerLine! && currentConflict.dividerLine! < currentConflict.endLine!);
+          assert(
+            (currentConflict.startLine == null || currentConflict.dividerLine == null || currentConflict.startLine! < currentConflict.dividerLine!) &&
+            (currentConflict.dividerLine == null || currentConflict.endLine == null || currentConflict.dividerLine! < currentConflict.endLine!)
+          );
           conflicts.add(currentConflict);
           currentConflict = Conflict.empty();
         }
@@ -121,7 +132,10 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       int newCount = 0;
       int skipCount = 0;
       for (final Conflict conflict in conflicts) {
-        assert(conflict.startLine != null && conflict.dividerLine != null && conflict.endLine != null);
+        if (!conflict.isValid) {
+          conflict.keepOriginal = null;
+          continue;
+        }
         // Print the conflict for reference
         logger.printStatus(terminal.clearScreen(), newline: false);
         logger.printStatus('Cyan', color: TerminalColor.cyan, newline: false);
@@ -183,6 +197,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       String result = '';
       bool hasChanges = false;
       for (final Conflict conflict in conflicts) {
+        if (!conflict.isValid) {
+          continue;
+        }
         if (conflict.keepOriginal != null) {
           hasChanges = true; // don't unecessarily write file if no changes were made.
         }
@@ -275,6 +292,8 @@ class Conflict {
   int? endLine;
 
   bool? keepOriginal;
+
+  bool get isValid => startLine != null && dividerLine != null && endLine != null;
 
   void chooseOriginal() {
     keepOriginal = true;

@@ -163,7 +163,7 @@ class MigrateManifest {
 
     final StringBuffer newFileManifestContents = StringBuffer();
     for (final String localPath in addedFiles) {
-      newFileManifestContents.write('  - $localPath\n)');
+      newFileManifestContents.write('  - $localPath\n');
     }
 
     final StringBuffer deletedFileManifestContents = StringBuffer();
