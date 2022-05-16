@@ -1333,7 +1333,6 @@ class PubspecDependency extends PubspecLine {
     } else {
       versionToUse = version;
     }
-    // final versionToUse = useAnyVersion || version.isEmpty ? 'any' : version;
     switch (kind) {
       case DependencyKind.unknown:
       case DependencyKind.overridden:
