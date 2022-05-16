@@ -6,7 +6,7 @@
 ///
 /// This is faster because it avoids polymorphism, boxing, and special cases for
 /// floating point numbers.
-/// 
+//
 // See also: //dev/benchmarks/microbenchmarks/lib/foundation/clamp.dart
 double clampDouble(double x, double min, double max) {
   assert(min <= max && !max.isNaN && !min.isNaN);
