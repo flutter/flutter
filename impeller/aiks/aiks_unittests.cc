@@ -493,6 +493,7 @@ TEST_P(AiksTest, CanDrawWithAdvancedBlend) {
         {"Modulate", Entity::BlendMode::kModulate},
         // Advanced blends (non Porter-Duff/color blends)
         {"Screen", Entity::BlendMode::kScreen},
+        {"ColorBurn", Entity::BlendMode::kColorBurn},
     };
     assert(blends.size() ==
            static_cast<size_t>(Entity::BlendMode::kLastAdvancedBlendMode) + 1);
@@ -520,6 +521,7 @@ TEST_P(AiksTest, CanDrawWithAdvancedBlend) {
     };
 
     Paint paint;
+    paint.blend_mode = Entity::BlendMode::kSourceOver;
 
     // Draw a fancy color wheel for the backdrop.
     // https://www.desmos.com/calculator/xw7kafthwd
@@ -546,10 +548,16 @@ TEST_P(AiksTest, CanDrawWithAdvancedBlend) {
       ImGui::SetNextWindowPos({325, 550});
     }
 
-    ImGui::Begin("Controls");
+    // UI state.
     static int current_blend_index = 3;
-    ImGui::ListBox("Blending mode", &current_blend_index,
-                   blend_mode_names.data(), blend_mode_names.size());
+    static float alpha = 1;
+
+    ImGui::Begin("Controls");
+    {
+      ImGui::ListBox("Blending mode", &current_blend_index,
+                     blend_mode_names.data(), blend_mode_names.size());
+      ImGui::SliderFloat("Alpha", &alpha, 0, 1);
+    }
     ImGui::End();
 
     Canvas canvas;
@@ -569,11 +577,11 @@ TEST_P(AiksTest, CanDrawWithAdvancedBlend) {
       paint.blend_mode = Entity::BlendMode::kPlus;
       const Scalar x = std::sin(k2Pi / 3);
       const Scalar y = -std::cos(k2Pi / 3);
-      paint.color = Color::Red();
+      paint.color = Color::Red().WithAlpha(alpha);
       canvas.DrawCircle(Point(-x, y) * 45, 65, paint);
-      paint.color = Color::Green();
+      paint.color = Color::Green().WithAlpha(alpha);
       canvas.DrawCircle(Point(0, -1) * 45, 65, paint);
-      paint.color = Color::Blue();
+      paint.color = Color::Blue().WithAlpha(alpha);
       canvas.DrawCircle(Point(x, y) * 45, 65, paint);
     }
     canvas.Restore();
