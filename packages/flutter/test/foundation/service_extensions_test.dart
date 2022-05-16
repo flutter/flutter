@@ -168,9 +168,8 @@ void main() {
     }
 
     // The following service extensions are disabled in web:
-    // 1. exit
-    // 2. showPerformanceOverlay
-    const int disabledExtensions = kIsWeb ? 2 : 0;
+    // 1. showPerformanceOverlay
+    const int disabledExtensions = kIsWeb ? 1 : 0;
 
     // The expected number of registered service extensions in the Flutter
     // framework, excluding any that are for the widget inspector
