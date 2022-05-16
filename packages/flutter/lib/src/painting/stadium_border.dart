@@ -419,8 +419,21 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    final RRect borderRect = _adjustBorderRadius(rect).toRRect(rect);
+    final RRect adjustedRect;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        adjustedRect = borderRect.deflate(side.width);
+        break;
+      case StrokeAlign.center:
+        adjustedRect = borderRect.deflate(side.width / 2);
+        break;
+      case StrokeAlign.outside:
+        adjustedRect = borderRect;
+        break;
+    }
     return Path()
-      ..addRRect(_adjustBorderRadius(rect).toRRect(rect).deflate(side.width));
+      ..addRRect(adjustedRect);
   }
 
   @override

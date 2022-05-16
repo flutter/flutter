@@ -140,21 +140,26 @@ class RoundedRectangleBorder extends OutlinedBorder {
         if (width == 0.0) {
           canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
-          final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-          final RRect adjustedRect;
-          switch (side.strokeAlign) {
-            case StrokeAlign.inside:
-              adjustedRect = borderRect.deflate(width / 2);
-              break;
-            case StrokeAlign.center:
-              adjustedRect = borderRect;
-              break;
-            case StrokeAlign.outside:
-              adjustedRect = borderRect.inflate(width / 2);
-              break;
-          }
-          canvas.drawRRect(adjustedRect, side.toPaint());
+          final Paint paint = Paint()
+            ..color = side.color;
+          if (side.strokeAlign == StrokeAlign.inside) {
+            final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
+            final RRect inner = outer.deflate(width);
+            canvas.drawDRRect(outer, inner, paint);
+          } else {
+            final Rect inner;
+            final Rect outer;
+            if (side.strokeAlign == StrokeAlign.center) {
+                inner = rect.deflate(width / 2);
+                outer = rect.inflate(width / 2);
+            } else {
+                inner = rect;
+                outer = rect.inflate(width);
+            }
+            final BorderRadius borderRadiusResolved = borderRadius.resolve(textDirection);
+            canvas.drawDRRect(borderRadiusResolved.toRRect(outer), borderRadiusResolved.toRRect(inner), paint);
         }
+      }
     }
   }
 
@@ -287,8 +292,21 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    final RRect borderRect = _adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect));
+    final RRect adjustedRect;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        adjustedRect = borderRect.deflate(side.width);
+        break;
+      case StrokeAlign.center:
+        adjustedRect = borderRect.deflate(side.width / 2);
+        break;
+      case StrokeAlign.outside:
+        adjustedRect = borderRect;
+        break;
+    }
     return Path()
-      ..addRRect(_adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect)).deflate(side.width));
+      ..addRRect(adjustedRect);
   }
 
   @override
