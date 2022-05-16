@@ -426,12 +426,6 @@ abstract class BindingBase {
     }());
 
     if (!kReleaseMode) {
-      if (!kIsWeb) {
-        registerSignalServiceExtension(
-          name: 'exit',
-          callback: _exitApplication,
-        );
-      }
       // These service extensions are used in profile mode applications.
       registerStringServiceExtension(
         name: 'connectedVmServiceUri',

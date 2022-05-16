@@ -717,32 +717,6 @@ class FlutterVmService {
     );
   }
 
-  /// Exit the application by calling [exit] from `dart:io`.
-  ///
-  /// This method is only supported by certain embedders. This is
-  /// described by [Device.supportsFlutterExit].
-  Future<bool> flutterExit({
-    required String isolateId,
-  }) async {
-    try {
-      final Map<String, Object?>? result = await invokeFlutterExtensionRpcRaw(
-        'ext.flutter.exit',
-        isolateId: isolateId,
-      );
-      // A response of `null` indicates that `invokeFlutterExtensionRpcRaw` caught an RPCError
-      // with a missing method code. This can happen when attempting to quit a Flutter app
-      // that never registered the methods in the bindings.
-      if (result == null) {
-        return false;
-      }
-    } on vm_service.SentinelException {
-      // Do nothing on sentinel, the isolate already exited.
-    } on vm_service.RPCError {
-      // Do nothing on RPCError, the isolate already exited.
-    }
-    return true;
-  }
-
   /// Return the current platform override for the flutter view running with
   /// the main isolate [isolateId].
   ///

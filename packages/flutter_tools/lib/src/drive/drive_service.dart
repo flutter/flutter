@@ -303,14 +303,6 @@ class FlutterDriverService extends DriverService {
       if (!await _device.uninstallApp(_applicationPackage, userIdentifier: userIdentifier)) {
         _logger.printError('Failed to uninstall app');
       }
-    } else if (_device.supportsFlutterExit) {
-      // Otherwise use the VM Service URI to stop the app as a best effort approach.
-      final vm_service.VM vm = await _vmService.service.getVM();
-      final vm_service.IsolateRef isolateRef = vm.isolates
-        .firstWhere((vm_service.IsolateRef element) {
-          return !element.isSystemIsolate;
-        }, orElse: () => null);
-      unawaited(_vmService.flutterExit(isolateId: isolateRef.id));
     } else {
       _logger.printTrace('No application package for $_device, leaving app running');
     }
