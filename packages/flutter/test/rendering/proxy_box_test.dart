@@ -732,11 +732,10 @@ void main() {
 
   test('AnimatedOpacity sets paint matrix to zero when alpha == 0 (sliver)', () {
     final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
-    final RenderProxyBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderSliverPadding parent = RenderSliverPadding(padding: const EdgeInsets.all(4));
     final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
     final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
-    // ignore: invalid_use_of_protected_member
-    parent.adoptChild(opacity);
+    parent.child = opacity;
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());
