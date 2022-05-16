@@ -15,6 +15,8 @@ import 'package:js/js_util.dart' as js_util;
 /// class name with `Dom`.
 /// NOTE: After the new static interop DOM API is released in the Dart SDK,
 /// these classes will be replaced by typedefs.
+/// NOTE: Currently, optional parameters do not behave as expected.
+/// For the time being, avoid passing optional parameters directly to JS.
 
 @JS()
 @staticInterop
@@ -59,7 +61,9 @@ class DomDocument {}
 extension DomDocumentExtension on DomDocument {
   external DomElement? querySelector(String selectors);
   external /* List<Node> */ List<Object?> querySelectorAll(String selectors);
-  external DomElement createElement(String name, [dynamic options]);
+  DomElement createElement(String name, [Object? options]) =>
+      js_util.callMethod(this, 'createElement',
+          <Object>[name, if (options != null) options]) as DomElement;
   external DomHTMLScriptElement? get currentScript;
   external DomElement createElementNS(
       String namespaceURI, String qualifiedName);
@@ -82,10 +86,21 @@ external DomHTMLDocument get domDocument;
 class DomEventTarget {}
 
 extension DomEventTargetExtension on DomEventTarget {
-  external void addEventListener(String type, DomEventListener? listener,
-      [bool? useCapture]);
-  external void removeEventListener(String type, DomEventListener? listener,
-      [bool? useCapture]);
+  void addEventListener(String type, DomEventListener? listener,
+      [bool? useCapture]) {
+    if (listener != null) {
+      js_util.callMethod(this, 'addEventListener',
+          <Object>[type, listener, if (useCapture != null) useCapture]);
+    }
+  }
+
+  void removeEventListener(String type, DomEventListener? listener,
+      [bool? useCapture]) {
+    if (listener != null) {
+      js_util.callMethod(this, 'removeEventListener',
+          <Object>[type, listener, if (useCapture != null) useCapture]);
+    }
+  }
 }
 
 typedef DomEventListener = void Function(DomEvent event);
@@ -139,6 +154,7 @@ extension DomElementExtension on DomElement {
   external /* List<DomElement> */ List<Object?> get children;
   external String get id;
   external set id(String id);
+  external set spellcheck(bool? value);
   external DomCSSStyleDeclaration get style;
   external void append(DomNode node);
   external String? getAttribute(String attributeName);
@@ -152,14 +168,22 @@ extension DomElementExtension on DomElement {
 class DomCSSStyleDeclaration {}
 
 extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
-  set width(String value) => setProperty('width', value);
-  set height(String value) => setProperty('height', value);
-  set position(String value) => setProperty('position', value);
-  set clip(String value) => setProperty('clip', value);
-  set clipPath(String value) => setProperty('clip-path', value);
-  set transform(String value) => setProperty('transform', value);
-  set transformOrigin(String value) => setProperty('transform-origin', value);
-  set opacity(String value) => setProperty('opacity', value);
+  set width(String value) => setProperty('width', value, '');
+  set height(String value) => setProperty('height', value, '');
+  set position(String value) => setProperty('position', value, '');
+  set clip(String value) => setProperty('clip', value, '');
+  set clipPath(String value) => setProperty('clip-path', value, '');
+  set transform(String value) => setProperty('transform', value, '');
+  set transformOrigin(String value) =>
+      setProperty('transform-origin', value, '');
+  set opacity(String value) => setProperty('opacity', value, '');
+  set color(String value) => setProperty('color', value, '');
+  set top(String value) => setProperty('top', value, '');
+  set left(String value) => setProperty('left', value, '');
+  set right(String value) => setProperty('right', value, '');
+  set bottom(String value) => setProperty('bottom', value, '');
+  set backgroundColor(String value) =>
+      setProperty('background-color', value, '');
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -168,10 +192,21 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get transform => getPropertyValue('transform');
   String get transformOrigin => getPropertyValue('transform-origin');
   String get opacity => getPropertyValue('opacity');
+  String get color => getPropertyValue('color');
+  String get top => getPropertyValue('top');
+  String get left => getPropertyValue('left');
+  String get right => getPropertyValue('right');
+  String get bottom => getPropertyValue('bottom');
+  String get backgroundColor => getPropertyValue('background-color');
 
   external String getPropertyValue(String property);
-  external void setProperty(String propertyName, String value,
-      [String priority]);
+  void setProperty(String propertyName, String value, [String? priority]) {
+    priority ??= '';
+    js_util.callMethod(
+        this, 'setProperty', <Object>[propertyName, value, priority]);
+  }
+
+  external String removeProperty(String property);
 }
 
 @JS()
@@ -253,7 +288,8 @@ extension DomCanvasElementExtension on DomCanvasElement {
   external set width(int? value);
   external int? get height;
   external set height(int? value);
-  external String toDataURL([String? type]);
+  String toDataURL([String? type]) =>
+      js_util.callMethod(this, 'toDataURL', <Object>[if (type != null) type]);
 
   Object? getContext(String contextType, [Map<dynamic, dynamic>? attributes]) {
     return js_util.callMethod(this, 'getContext', <Object?>[
@@ -307,7 +343,8 @@ extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
   external String get responseType;
   external int? get status;
   external set responseType(String value);
-  external void open(String method, String url, [bool? async]);
+  void open(String method, String url, [bool? async]) => js_util.callMethod(
+      this, 'open', <Object>[method, url, if (async != null) async]);
   external void send();
 }
 
