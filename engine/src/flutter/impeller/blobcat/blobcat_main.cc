@@ -33,7 +33,7 @@ bool Main(const fml::CommandLine& command_line) {
   }
 
   auto current_directory =
-      fml::OpenDirectory(std::filesystem::current_path().native().c_str(),
+      fml::OpenDirectory(std::filesystem::current_path().string().c_str(),
                          false, fml::FilePermission::kReadWrite);
   if (!fml::WriteAtomically(current_directory, output.c_str(), *blob)) {
     std::cerr << "Could not write shader blob to path " << output << std::endl;

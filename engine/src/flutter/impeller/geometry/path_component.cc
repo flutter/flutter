@@ -221,8 +221,8 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
         da1 = ::fabs(::atan2(p4.y - p3.y, p4.x - p3.x) -
                      ::atan2(p3.y - p2.y, p3.x - p2.x));
 
-        if (da1 >= M_PI) {
-          da1 = 2.0 * M_PI - da1;
+        if (da1 >= kPi) {
+          da1 = 2.0 * kPi - da1;
         }
 
         if (da1 < approx.angle_tolerance) {
@@ -257,8 +257,8 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
         da1 = ::fabs(::atan2(p3.y - p2.y, p3.x - p2.x) -
                      ::atan2(p2.y - p1.y, p2.x - p1.x));
 
-        if (da1 >= M_PI) {
-          da1 = 2.0 * M_PI - da1;
+        if (da1 >= kPi) {
+          da1 = 2.0 * kPi - da1;
         }
 
         if (da1 < approx.angle_tolerance) {
@@ -298,12 +298,12 @@ static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
         da1 = ::fabs(k - ::atan2(p2.y - p1.y, p2.x - p1.x));
         da2 = ::fabs(::atan2(p4.y - p3.y, p4.x - p3.x) - k);
 
-        if (da1 >= M_PI) {
-          da1 = 2.0 * M_PI - da1;
+        if (da1 >= kPi) {
+          da1 = 2.0 * kPi - da1;
         }
 
-        if (da2 >= M_PI) {
-          da2 = 2.0 * M_PI - da2;
+        if (da2 >= kPi) {
+          da2 = 2.0 * kPi - da2;
         }
 
         if (da1 + da2 < approx.angle_tolerance) {
