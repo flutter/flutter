@@ -453,6 +453,30 @@ class PaintingContext extends ClipContext {
     return PaintingContext(childLayer, bounds);
   }
 
+  void _checkForClipBehavior(String type) {
+    assert(() {
+      final RenderObject active = RenderObject.debugActivePaint!;
+      active.visitChildren((RenderObject child) {
+        final Rect? approximatePaintClip = active.describeApproximatePaintClip(child);
+        if (approximatePaintClip != null) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('A render object pushes a clip $type with clipBehavior Clip.none, but describes a non-null '
+                         'approximate clip for at least one of its children.'),
+            active.describeForError('The parent was'),
+            child.describeForError('The child was'),
+            ErrorDescription('Typically, this means a RenderObject is ignoring its clipBehavior property in '
+                             'describeApproximatePaintClip.'),
+            ErrorDescription('The approximated clip was $approximatePaintClip, but null was expected.'),
+            ErrorDescription('To fix this, make sure that both `paint` and `describeApproximateClip` use the same '
+                             'criteria for determining when the clip behavior is `Clip.none`. When it is `Clip.none`, '
+                             'describeApproximateClip must return null.'),
+          ]);
+        }
+      });
+      return true;
+    }());
+  }
+
   /// Clip further painting using a rectangle.
   ///
   /// {@template flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
@@ -492,6 +516,7 @@ class PaintingContext extends ClipContext {
   /// {@endtemplate}
   ClipRectLayer? pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer? oldLayer }) {
     if (clipBehavior == Clip.none) {
+      _checkForClipBehavior('rect');
       painter(this, offset);
       return null;
     }
@@ -531,6 +556,7 @@ class PaintingContext extends ClipContext {
   ClipRRectLayer? pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer? oldLayer }) {
     assert(clipBehavior != null);
     if (clipBehavior == Clip.none) {
+      _checkForClipBehavior('rrect');
       painter(this, offset);
       return null;
     }
@@ -571,6 +597,7 @@ class PaintingContext extends ClipContext {
   ClipPathLayer? pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer? oldLayer }) {
     assert(clipBehavior != null);
     if (clipBehavior == Clip.none) {
+      _checkForClipBehavior('path');
       painter(this, offset);
       return null;
     }
@@ -2748,6 +2775,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// This is used in the semantics phase to avoid including children
   /// that are not physically visible.
+  ///
+  /// RenderObjects that respect a [Clip] behavior when painting _must_ respect
+  /// that same behavior when describing this value. For example, if passing
+  /// [Clip.none] to [PaintingContext.pushClipRect] as the `clipBehavior`, then
+  /// the implementation of this method must return null.
   Rect? describeApproximatePaintClip(covariant RenderObject child) => null;
 
   /// Returns a rect in this object's coordinate system that describes
