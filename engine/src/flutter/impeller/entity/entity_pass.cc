@@ -153,7 +153,7 @@ bool EntityPass::Render(ContentContext& renderer,
 
       Entity entity;
       entity.SetContents(contents);
-      entity.SetBlendMode(Entity::BlendMode::kSource);
+      entity.SetBlendMode(Entity::BlendMode::kSourceOver);
 
       entity.Render(renderer, *render_pass);
     }
@@ -322,7 +322,7 @@ bool EntityPass::RenderInternal(ContentContext& renderer,
               element_entity.GetTransformation().Invert())};
       element_entity.SetContents(
           FilterContents::MakeBlend(element_entity.GetBlendMode(), inputs));
-      element_entity.SetBlendMode(Entity::BlendMode::kSource);
+      element_entity.SetBlendMode(Entity::BlendMode::kSourceOver);
     }
 
     // Create a new render pass to render the element if one isn't active.

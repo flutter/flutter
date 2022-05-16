@@ -43,9 +43,10 @@ class Entity {
     // pipelines on most graphics devices without extensions, and so they are
     // only able to be used via `BlendFilterContents`.
     kScreen,
+    kColorBurn,
 
     kLastPipelineBlendMode = kModulate,
-    kLastAdvancedBlendMode = kScreen,
+    kLastAdvancedBlendMode = kColorBurn,
   };
 
   enum class ClipOperation {

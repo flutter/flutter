@@ -26,7 +26,7 @@ struct Blob {
     kFragment,
   };
 
-  static constexpr size_t kMaxNameLength = 24u;
+  static constexpr size_t kMaxNameLength = 32u;
 
   ShaderType type = ShaderType::kVertex;
   uint64_t offset = 0;
