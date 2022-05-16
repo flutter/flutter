@@ -82,6 +82,8 @@ abstract class PlatformDispatcher {
 
   double get textScaleFactor => configuration.textScaleFactor;
 
+  bool get nativeSpellCheckServiceDefined => false;
+
   bool get brieflyShowPassword => true;
 
   VoidCallback? get onTextScaleFactorChanged;
