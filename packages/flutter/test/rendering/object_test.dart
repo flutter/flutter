@@ -276,6 +276,21 @@ void main() {
 
     expect(paintCount, 1);
   });
+
+  test('PaintingContext.pushClip* allows a RO clip children with none/hardEdge', () {
+    final RenderSizedBox child = RenderSizedBox(const Size(300, 300));
+    final RenderSizedBox specialChild = RenderSizedBox(const Size(200, 200));
+
+
+    final TestMultiClipBehaviorClipRenderObject object = TestMultiClipBehaviorClipRenderObject(child, specialChild);
+
+    layout(object);
+    object.owner!.flushCompositingBits();
+    expect(
+      () => PaintingContext(ContainerLayer(), Rect.largest).paintChild(object, Offset.zero),
+      returnsNormally,
+    );
+  });
 }
 
 // Tests the create-update cycle by pumping two frames. The first frame has no
@@ -426,5 +441,28 @@ class TestBadClipRenderObject extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     onPaint(context);
+  }
+}
+
+class TestMultiClipBehaviorClipRenderObject extends RenderProxyBox {
+  TestMultiClipBehaviorClipRenderObject(RenderBox super.child, this.specialChild);
+
+  /// A child that is clipped differently from the normal child.
+  final RenderBox specialChild;
+
+  @override
+  Rect? describeApproximatePaintClip(covariant RenderObject? child) {
+    if (child == this.child) {
+      return null;
+    }
+    assert(child == specialChild);
+    return const Rect.fromLTRB(0, 0, 800, 800);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.pushClipRect(false, offset, const Rect.fromLTWH(0, 0, 20, 20), child!.paint, clipBehavior: Clip.none);
+    // Default clip behavior is hardEdge.
+    context.pushClipRect(false, offset, const Rect.fromLTWH(0, 0, 20, 20), specialChild.paint);
   }
 }
