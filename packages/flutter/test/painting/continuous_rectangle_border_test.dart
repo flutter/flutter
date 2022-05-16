@@ -71,31 +71,6 @@ void main() {
     expect(const ContinuousRectangleBorder(side: side).getInnerPath(rect1), looksLikeInnerPath);
   });
 
-  test('ContinuousRectangleBorder with StrokeAlign', () {
-    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(10));
-    const ContinuousRectangleBorder inside = ContinuousRectangleBorder(side: BorderSide(width: 10.0), borderRadius: borderRadius);
-    const ContinuousRectangleBorder center = ContinuousRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.center), borderRadius: borderRadius);
-    const ContinuousRectangleBorder outside = ContinuousRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.outside), borderRadius: borderRadius);
-    expect(inside.dimensions, const EdgeInsets.all(10.0));
-    expect(center.dimensions, const EdgeInsets.all(10.0));
-    expect(outside.dimensions, EdgeInsets.zero);
-
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 120.0, 40.0);
-
-    expect(inside.getInnerPath(rect), isPathThat(
-      includes: const <Offset>[ Offset(10, 20), Offset(100, 10), Offset(50, 30), Offset(50, 20) ],
-      excludes: const <Offset>[ Offset(9, 9), Offset(100, 0), Offset(110, 31), Offset(9, 31) ],
-    ));
-    expect(center.getInnerPath(rect), isPathThat(
-      includes: const <Offset>[ Offset(9, 9), Offset(100, 10), Offset(110, 31), Offset(9, 31) ],
-      excludes: const <Offset>[ Offset(4, 4), Offset(100, 0), Offset(116, 31), Offset(4, 31) ],
-    ));
-    expect(outside.getInnerPath(rect), isPathThat(
-      includes: const <Offset>[ Offset(5, 5), Offset(110, 0), Offset(116, 31), Offset(4, 31) ],
-      excludes: const <Offset>[ Offset.zero, Offset(120, 0), Offset(120, 31), Offset(0, 31) ],
-    ));
-  });
-
   test('ContinuousRectangleBorder non-zero BorderRadius', () {
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect = isPathThat(
