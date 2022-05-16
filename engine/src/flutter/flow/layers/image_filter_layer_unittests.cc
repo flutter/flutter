@@ -401,8 +401,10 @@ TEST_F(ImageFilterLayerTest, OpacityInheritance) {
   opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
   auto opacity_integer_transform = RasterCache::GetIntegralTransCTM(
       SkMatrix::Translate(offset.fX, offset.fY));
+#endif
   auto dl_image_filter = DlImageFilter::From(layer_filter);
   DisplayListBuilder expected_builder;
   /* opacity_layer::Paint() */ {
