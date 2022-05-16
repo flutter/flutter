@@ -842,6 +842,14 @@ class PlatformDispatcher {
     _onTextScaleFactorChangedZone = Zone.current;
   }
 
+  /// Whether the spell check service is supported on the current platform.
+  ///
+  /// This option is used by [EditableTextState] to define its
+  /// [SpellCheckConfiguration] when a default spell check service
+  /// is requested.
+  bool get nativeSpellCheckServiceDefined => _nativeSpellCheckServiceDefined;
+  bool _nativeSpellCheckServiceDefined = false;
+
   /// Whether briefly displaying the characters as you type in obscured text
   /// fields is enabled in system settings.
   ///
@@ -903,6 +911,12 @@ class PlatformDispatcher {
 
     final double textScaleFactor = (data['textScaleFactor']! as num).toDouble();
     final bool alwaysUse24HourFormat = data['alwaysUse24HourFormat']! as bool;
+    final bool? nativeSpellCheckServiceDefined = data['nativeSpellCheckServiceDefined'] as bool?;
+    if (nativeSpellCheckServiceDefined != null) {
+      _nativeSpellCheckServiceDefined = nativeSpellCheckServiceDefined;
+    } else {
+      _nativeSpellCheckServiceDefined = false;
+    }
     // This field is optional.
     final bool? brieflyShowPassword = data['brieflyShowPassword'] as bool?;
     if (brieflyShowPassword != null) {

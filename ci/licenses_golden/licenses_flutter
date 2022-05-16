@@ -1400,6 +1400,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/system
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformViewsChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/RestorationChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/SettingsChannel.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/SpellCheckChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/SystemChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/TextInputChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/ActivityLifecycleListener.java
@@ -1424,6 +1425,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/FlutterT
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/ImeSyncDeferringInsetsCallback.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/InputConnectionAdaptor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/ListenableEditingState.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/SpellCheckPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextEditingDelta.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextInputPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/localization/LocalizationPlugin.java

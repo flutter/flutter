@@ -425,6 +425,15 @@ class SingletonFlutterWindow extends FlutterWindow {
   ///    observe when this value changes.
   double get textScaleFactor => platformDispatcher.textScaleFactor;
 
+  /// Whether the spell check service is supported on the current platform.
+  ///
+  /// {@macro dart.ui.window.accessorForwardWarning}
+  ///
+  /// This option is used by [EditableTextState] to define its
+  /// [SpellCheckConfiguration] when spell check is enabled, but no spell check
+  /// service is specified.
+  bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
+
   /// Whether briefly displaying the characters as you type in obscured text
   /// fields is enabled in system settings.
   ///
