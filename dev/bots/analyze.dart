@@ -246,7 +246,9 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
 /// `// ignore_clamp_double_lint` comment must be added to the line where clamp is
 /// invoked.
 ///
-/// See also: https://github.com/flutter/flutter/pull/103559
+/// See also:
+///   * https://github.com/flutter/flutter/pull/103559
+///   * https://github.com/flutter/flutter/issues/103917
 Future<void> verifyNoDoubleClamp(String workingDirectory) async {
   final String flutterLibPath = '$workingDirectory/packages/flutter/lib';
   final Stream<File> testFiles =
