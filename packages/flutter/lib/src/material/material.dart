@@ -682,7 +682,16 @@ abstract class InkFeature {
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
+      final RenderObject childNode = node;
       node = node.parent!;
+      if (!node.paintsChild(childNode)) {
+        // Some node between the reference box and this would skip painting on
+        // the reference box, so bail out early and avoid unnecessary painting.
+        // Some cases where this can happen are the reference box being
+        // offstage, in a fully transparent opacity node, or in a keep alive
+        // bucket.
+        return;
+      }
       descendants.add(node);
     }
     // determine the transform that gets our coordinate system to be like theirs
