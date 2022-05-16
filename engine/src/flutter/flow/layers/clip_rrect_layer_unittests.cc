@@ -392,7 +392,9 @@ TEST_F(ClipRRectLayerTest, OpacityInheritancePainting) {
   opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
   auto opacity_integer_transform = SkM44::Translate(offset.fX, offset.fY);
+#endif
   DisplayListBuilder expected_builder;
   /* OpacityLayer::Paint() */ {
     expected_builder.save();
@@ -462,7 +464,9 @@ TEST_F(ClipRRectLayerTest, OpacityInheritanceSaveLayerPainting) {
   opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
   auto opacity_integer_transform = SkM44::Translate(offset.fX, offset.fY);
+#endif
   DisplayListBuilder expected_builder;
   /* OpacityLayer::Paint() */ {
     expected_builder.save();
