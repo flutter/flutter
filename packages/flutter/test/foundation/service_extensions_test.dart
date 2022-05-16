@@ -176,7 +176,7 @@ void main() {
     // framework, excluding any that are for the widget inspector
     // (see widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions).
-    const int serviceExtensionCount = 36;
+    const int serviceExtensionCount = 35;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
 
@@ -567,12 +567,6 @@ void main() {
     expect(data, isFalse);
     expect(completed, isTrue);
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
-  });
-
-  test('Service extensions - exit', () async {
-    // no test for _calling_ 'exit', because that should terminate the process!
-    // Not expecting extension to be available for web platform.
-    expect(binding.extensions.containsKey('exit'), !isBrowser);
   });
 
   test('Service extensions - platformOverride', () async {

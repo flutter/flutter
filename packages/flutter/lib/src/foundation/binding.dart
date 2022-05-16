@@ -4,7 +4,6 @@
 
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
-import 'dart:io' show exit;
 import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window;
 // Before adding any more dart:ui imports, please read the README.
 
@@ -866,11 +865,6 @@ abstract class BindingBase {
 
   @override
   String toString() => '<${objectRuntimeType(this, 'BindingBase')}>';
-}
-
-/// Terminate the Flutter application.
-Future<void> _exitApplication() async {
-  exit(0);
 }
 
 /// Additional configuration used for hot reload reassemble optimizations.
