@@ -16,7 +16,7 @@ declare_args() {
   use_ios_simulator = true
 
   # Version of iOS that we're targeting.
-  ios_deployment_target = "9.0"
+  ios_deployment_target = "11.0"
 
   # The path to the iOS device SDK.
   ios_device_sdk_path = ""
