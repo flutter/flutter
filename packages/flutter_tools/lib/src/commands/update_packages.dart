@@ -1323,7 +1323,9 @@ class PubspecDependency extends PubspecLine {
   /// fake package that we'll use to get the version numbers figured out.
   void describeForFakePubspec(StringBuffer dependencies, StringBuffer overrides, { bool doUpgrade = true }) {
     final String versionToUse;
-    if (version.isEmpty) {
+    // This should only happen when manually adding new dependencies; otherwise
+    // versions should always be pinned exactly
+    if (version.isEmpty || version == 'any') {
       versionToUse = 'any';
     } else if (doUpgrade) {
       // Must wrap in quotes for Yaml parsing
