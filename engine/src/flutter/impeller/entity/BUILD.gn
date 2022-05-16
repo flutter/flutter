@@ -8,24 +8,25 @@ impeller_shaders("entity_shaders") {
   name = "entity"
 
   shaders = [
+    "shaders/advanced_blend.vert",
+    "shaders/advanced_blend_colorburn.frag",
+    "shaders/advanced_blend_screen.frag",
+    "shaders/blend.frag",
+    "shaders/blend.vert",
+    "shaders/border_mask_blur.frag",
+    "shaders/border_mask_blur.vert",
+    "shaders/gaussian_blur.frag",
+    "shaders/gaussian_blur.vert",
+    "shaders/glyph_atlas.frag",
+    "shaders/glyph_atlas.vert",
     "shaders/gradient_fill.frag",
     "shaders/gradient_fill.vert",
     "shaders/solid_fill.frag",
     "shaders/solid_fill.vert",
     "shaders/solid_stroke.frag",
     "shaders/solid_stroke.vert",
-    "shaders/texture_blend.frag",
-    "shaders/texture_blend.vert",
-    "shaders/texture_blend_screen.frag",
-    "shaders/texture_blend_screen.vert",
-    "shaders/gaussian_blur.frag",
-    "shaders/gaussian_blur.vert",
-    "shaders/border_mask_blur.frag",
-    "shaders/border_mask_blur.vert",
     "shaders/texture_fill.frag",
     "shaders/texture_fill.vert",
-    "shaders/glyph_atlas.frag",
-    "shaders/glyph_atlas.vert",
   ]
 }
 
