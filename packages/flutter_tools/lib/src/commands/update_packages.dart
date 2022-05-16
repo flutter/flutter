@@ -382,7 +382,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       final File fakePackage = _pubspecFor(tempDir);
       fakePackage.createSync();
       fakePackage.writeAsStringSync(
-        _generateFakePubspec(
+        generateFakePubspec(
           dependencies,
           doUpgrade: doUpgrade,
         ),
@@ -1371,6 +1371,7 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln(lockLine);
         }
+        break;
     }
   }
 
@@ -1388,9 +1389,10 @@ File _pubspecFor(Directory directory) {
 
 /// Generates the source of a fake pubspec.yaml file given a list of
 /// dependencies.
-String _generateFakePubspec(
+@visibleForTesting
+String generateFakePubspec(
   Iterable<PubspecDependency> dependencies, {
-  bool useAnyVersion = false
+  bool doUpgrade = false
 }) {
   final StringBuffer result = StringBuffer();
   final StringBuffer overrides = StringBuffer();
