@@ -4,7 +4,7 @@
 
 import 'package:yaml/yaml.dart';
 
-import 'base/pub_spec_content.dart';
+import 'base/pubspec_content.dart';
 import 'project.dart';
 import 'project_validator_result.dart';
 
@@ -19,13 +19,14 @@ abstract class ProjectValidator {
   ];
 }
 
-// Validator run for all platforms that extract information from the pubspec.yaml
-// specific info from different platforms should be written in their own ProjectValidator
+/// Validator run for all platforms that extract information from the pubspec.yaml
+///
+/// Specific info from different platforms should be written in their own ProjectValidator
 class GeneralInfoProjectValidator extends ProjectValidator{
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final PubContent pubContent = PubContent(loadYaml(project.pubspecFile.readAsStringSync()) as YamlMap);
-    final ProjectValidatorResult appNameValidatorResult = getAppNameResult(pubContent);
+    final PubspecContent pubspecContent = PubspecContent(loadYaml(project.pubspecFile.readAsStringSync()) as YamlMap);
+    final ProjectValidatorResult appNameValidatorResult = getAppNameResult(pubspecContent);
     final String supportedPlatforms = getSupportedPlatforms(project);
     if (supportedPlatforms.isEmpty) {
       return <ProjectValidatorResult>[appNameValidatorResult];
@@ -35,21 +36,21 @@ class GeneralInfoProjectValidator extends ProjectValidator{
         value: supportedPlatforms,
         status: StatusProjectValidator.success
     );
-    final ProjectValidatorResult isFlutterPackage = isFlutterPackageValidatorResult(pubContent);
+    final ProjectValidatorResult isFlutterPackage = isFlutterPackageValidatorResult(pubspecContent);
     final List<ProjectValidatorResult> result = <ProjectValidatorResult>[
       appNameValidatorResult,
       supportedPlatformsResult,
       isFlutterPackage,
     ];
-    if (pubContent.isFlutterPackage()) {
-      result.add(materialDesignResult(pubContent));
-      result.add(pluginValidatorResult(pubContent));
+    if (pubspecContent.isFlutterPackage) {
+      result.add(materialDesignResult(pubspecContent));
+      result.add(pluginValidatorResult(pubspecContent));
     }
     return result;
   }
 
-  ProjectValidatorResult getAppNameResult(PubContent pubContent) {
-    final String? appName = pubContent.appName;
+  ProjectValidatorResult getAppNameResult(PubspecContent pubspecContent) {
+    final String? appName = pubspecContent.appName;
     const String name = 'App Name';
     if (appName == null) {
       return const ProjectValidatorResult(
@@ -65,10 +66,10 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     );
   }
 
-  ProjectValidatorResult isFlutterPackageValidatorResult(PubContent pubContent) {
+  ProjectValidatorResult isFlutterPackageValidatorResult(PubspecContent pubspecContent) {
     String value;
     StatusProjectValidator status;
-    if (pubContent.isFlutterPackage()) {
+    if (pubspecContent.isFlutterPackage) {
       value = 'yes';
       status = StatusProjectValidator.success;
     } else {
@@ -83,10 +84,10 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     );
   }
 
-  ProjectValidatorResult materialDesignResult(PubContent pubContent) {
+  ProjectValidatorResult materialDesignResult(PubspecContent pubspecContent) {
     return ProjectValidatorResult(
       name: 'Uses Material Design',
-      value: pubContent.usesMaterialDesign()? 'yes' : 'no',
+      value: pubspecContent.usesMaterialDesign? 'yes' : 'no',
       status: StatusProjectValidator.success
     );
   }
@@ -95,10 +96,10 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     return project.getSupportedPlatforms().map((SupportedPlatform platform) => platform.name).join(', ');
   }
 
-  ProjectValidatorResult pluginValidatorResult(PubContent pubContent) {
+  ProjectValidatorResult pluginValidatorResult(PubspecContent pubspecContent) {
     return ProjectValidatorResult(
       name: 'Is Plugin',
-      value: pubContent.isPlugin()? 'yes' : 'no',
+      value: pubspecContent.isPlugin? 'yes' : 'no',
       status: StatusProjectValidator.success
     );
   }
