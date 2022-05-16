@@ -34,7 +34,15 @@ void main() {
       logger = BufferLogger.test();
     });
 
+    testUsingContext('Error on non-existing exe file', () {
+      final PrebuiltWindowsApp windowsApp = WindowsApp.fromPrebuiltApp(fileSystem.file('not_existing.exe')) as PrebuiltWindowsApp;
+
+      expect(windowsApp, isNull);
+      expect(logger.errorText, contains('File "not_existing.exe" does not exist.'));
+    }, overrides: overrides);
+
     testUsingContext('Success on exe file', () {
+      fileSystem.file('file.exe').createSync();
       final PrebuiltWindowsApp windowsApp = WindowsApp.fromPrebuiltApp(fileSystem.file('file.exe')) as PrebuiltWindowsApp;
 
       expect(windowsApp.name, 'file.exe');
@@ -87,6 +95,14 @@ void main() {
       expect(logger.errorText, isEmpty);
       expect(windowsApp.name, exePath);
       expect(windowsApp.applicationPackage.path, 'app.zip');
+    }, overrides: overrides);
+
+    testUsingContext('Error on unknown file type', () {
+      fileSystem.file('not_existing.app').createSync();
+      final PrebuiltWindowsApp windowsApp = WindowsApp.fromPrebuiltApp(fileSystem.file('not_existing.app')) as PrebuiltWindowsApp;
+
+      expect(windowsApp, isNull);
+      expect(logger.errorText, contains('Unknown windows application type.'));
     }, overrides: overrides);
   });
 }

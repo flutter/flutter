@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:archive/archive.dart';
+
 import '../application_package.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cmake.dart';
@@ -25,6 +26,11 @@ abstract class WindowsApp extends ApplicationPackage {
   ///
   /// `applicationBinary` is the path to the executable or the zipped archive.
   static WindowsApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
+    if (!applicationBinary.existsSync()) {
+      globals.printError('File "${applicationBinary.path}" does not exist.');
+      return null;
+    }
+
     if (applicationBinary.path.endsWith('.exe')) {
       return PrebuiltWindowsApp(
         executable: applicationBinary.path,
@@ -32,8 +38,9 @@ abstract class WindowsApp extends ApplicationPackage {
       );
     }
 
-    if (!applicationBinary.existsSync()) {
-      globals.printError('File "${applicationBinary.path}" does not exist.');
+    if (!applicationBinary.path.endsWith('.zip')) {
+      // Unknown file type
+      globals.printError('Unknown windows application type.');
       return null;
     }
 
@@ -41,7 +48,7 @@ abstract class WindowsApp extends ApplicationPackage {
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
     try {
       globals.os.unzip(globals.fs.file(applicationBinary), tempDir);
-    } on ProcessException {
+    } on ArchiveException {
       globals.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;
     }
