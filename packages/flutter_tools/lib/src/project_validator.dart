@@ -26,12 +26,12 @@ class GeneralInfoProjectValidator extends ProjectValidator{
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project, {required Logger logger, required FileSystem fileSystem}) async {
     final FlutterManifest? flutterManifest = FlutterManifest.createFromPath(
-        project.pubspecFile.path, 
-        logger: logger, 
+        project.pubspecFile.path,
+        logger: logger,
         fileSystem: fileSystem
     );
     if (flutterManifest == null) {
-      return [_emptyProjectValidatorResult];
+      return <ProjectValidatorResult>[_emptyProjectValidatorResult];
     }
     final ProjectValidatorResult appNameValidatorResult = getAppNameResult(flutterManifest);
     final String supportedPlatforms = getSupportedPlatforms(project);
@@ -55,8 +55,8 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     }
     return result;
   }
-  
-  ProjectValidatorResult get _emptyProjectValidatorResult { 
+
+  ProjectValidatorResult get _emptyProjectValidatorResult {
     return const ProjectValidatorResult(
         name: 'Error',
         value: 'project not found',
