@@ -176,8 +176,8 @@ void main() {
   });
 
   group('generateFakePubspec', () {
+    const String prevVersion = '1.2.0';
     testUsingContext('constrains package versions to >= previous version if doUpgrade: true', () {
-      const String prevVersion = '1.2.0';
       final String pubspecSource = generateFakePubspec(
         <PubspecDependency>[
           PubspecDependency(
@@ -194,6 +194,25 @@ void main() {
       );
       final YamlMap pubspec = loadYaml(pubspecSource) as YamlMap;
       expect((pubspec['dependencies'] as YamlMap)['foo'], '>= $prevVersion');
+    });
+
+    testUsingContext('uses previous package versions doUpgrade: false', () {
+      final String pubspecSource = generateFakePubspec(
+        <PubspecDependency>[
+          PubspecDependency(
+            '  foo: $prevVersion',
+            'foo',
+            '',
+            version: prevVersion,
+            sourcePath: '/path/to/pubspec.yaml',
+            kind: DependencyKind.normal,
+            isTransitive: false,
+          ),
+        ],
+        doUpgrade: false,
+      );
+      final YamlMap pubspec = loadYaml(pubspecSource) as YamlMap;
+      expect((pubspec['dependencies'] as YamlMap)['foo'], prevVersion);
     });
   });
 }
