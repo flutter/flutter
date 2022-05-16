@@ -280,10 +280,7 @@ void main() {
   test('PaintingContext.pushClip* allows a RO clip children with none/hardEdge', () {
     final RenderSizedBox child = RenderSizedBox(const Size(300, 300));
     final RenderSizedBox specialChild = RenderSizedBox(const Size(200, 200));
-
-
     final TestMultiClipBehaviorClipRenderObject object = TestMultiClipBehaviorClipRenderObject(child, specialChild);
-
     layout(object);
     object.owner!.flushCompositingBits();
     expect(
