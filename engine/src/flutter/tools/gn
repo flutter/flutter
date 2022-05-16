@@ -55,6 +55,9 @@ def get_out_dir(args):
     if args.target_os == 'fuchsia' and args.fuchsia_cpu is not None:
       target_dir.append(args.fuchsia_cpu)
 
+    if args.support_fractional_translation:
+      target_dir.append('fractional')
+
     # This exists for backwards compatibility of tests that are being run
     # on LUCI. This can be removed in coordination with a LUCI change:
     # https://github.com/flutter/flutter/issues/76547
@@ -312,10 +315,10 @@ def to_gn_args(args):
       if runtime_mode == 'debug':
           gn_args['dart_runtime_mode'] = 'develop'
       elif runtime_mode == 'jit_release':
-          gn_args['dart_runtime_mode'] = 'release';
+          gn_args['dart_runtime_mode'] = 'release'
       else:
           gn_args['dart_runtime_mode'] = runtime_mode
-      
+
       # Desktop embeddings can have more dependencies than the engine library,
       # which can be problematic in some build environments (e.g., building on
       # Linux will bring in pkg-config dependencies at generation time). These
@@ -329,6 +332,9 @@ def to_gn_args(args):
 
     if args.allow_deprecated_api_calls:
       gn_args['allow_deprecated_api_calls'] = args.allow_deprecated_api_calls
+
+    if args.support_fractional_translation:
+      gn_args['support_fractional_translation'] = args.support_fractional_translation
 
     # DBC is not supported anymore.
     if args.interpreter:
@@ -440,7 +446,7 @@ def to_gn_args(args):
       # dart_platform_sdk=True means exclude web-related files, e.g. dart2js,
       # dartdevc, web SDK kernel and source files.
       gn_args['dart_platform_sdk'] = not args.full_dart_sdk
-    
+
     if args.build_glfw_shell is not None:
       gn_args['build_glfw_shell'] = args.build_glfw_shell
 
@@ -612,6 +618,10 @@ def parse_args(args):
   parser.add_argument('--no-prebuilt-dart-sdk', dest='prebuilt_dart_sdk', action='store_false')
 
   parser.add_argument('--fuchsia-target-api-level', dest='fuchsia_target_api_level')
+
+  parser.add_argument('--support-fractional-translation', dest='support_fractional_translation', default=False,
+                      action='store_true', help='Whether to allow layers to render at fraction pixel '
+                      'boundaries.')
 
   # Flags for Dart features.
   parser.add_argument('--use-mallinfo2', dest='use_mallinfo2', default=False, action='store_true',
