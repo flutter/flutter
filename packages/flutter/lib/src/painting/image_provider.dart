@@ -158,6 +158,9 @@ class ImageConfiguration {
 
 /// Performs the decode process for use in [ImageProvider.load].
 ///
+/// This typedef is deprecated. Use DecoderBufferCallback with
+/// [ImageProvider.loadBuffer] instead.
+///
 /// This callback allows decoupling of the `cacheWidth`, `cacheHeight`, and
 /// `allowUpscaling` parameters from implementations of [ImageProvider] that do
 /// not expose them.
@@ -167,7 +170,7 @@ class ImageConfiguration {
 ///  * [ResizeImage], which uses this to override the `cacheWidth`,
 ///    `cacheHeight`, and `allowUpscaling` parameters.
 @Deprecated(
-  'Use DecoderBufferCallback with loadBuffer instance instead. '
+  'Use DecoderBufferCallback with ImageProvider.loadBuffer instead. '
   'This feature was deprecated after v2.13.0-1.0.pre.',
 )
 typedef DecoderCallback = Future<ui.Codec> Function(Uint8List buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
@@ -224,16 +227,16 @@ typedef DecoderBufferCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buf
 ///      using that key. This is handled by [resolveStreamForKey]. That method
 ///      may fizzle if it determines the image is no longer necessary, use the
 ///      provided [ImageErrorListener] to report an error, set the completer
-///      from the cache if possible, or call [load] to fetch the encoded image
+///      from the cache if possible, or call [loadBuffer] to fetch the encoded image
 ///      bytes and schedule decoding.
-///   4. The [load] method is responsible for both fetching the encoded bytes
+///   4. The [loadBuffer] method is responsible for both fetching the encoded bytes
 ///      and decoding them using the provided [DecoderCallback]. It is called
 ///      in a context that uses the [ImageErrorListener] to report errors back.
 ///
-/// Subclasses normally only have to implement the [load] and [obtainKey]
+/// Subclasses normally only have to implement the [loadBuffer] and [obtainKey]
 /// methods. A subclass that needs finer grained control over the [ImageStream]
 /// type must override [createStream]. A subclass that needs finer grained
-/// control over the resolution, such as delaying calling [load], must override
+/// control over the resolution, such as delaying calling [loadBuffer], must override
 /// [resolveStreamForKey].
 ///
 /// The [resolve] method is marked as [nonVirtual] so that [ImageProvider]s can
@@ -574,6 +577,10 @@ abstract class ImageProvider<T extends Object> {
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   ///
+  /// This method is deprecated. Implement [loadBuffer] for faster image
+  /// loading. Only one of [load] and [loadBuffer] must be implemented, and
+  /// [loadBuffer] is preferred.
+  ///
   /// The [decode] callback provides the logic to obtain the codec for the
   /// image.
   ///
@@ -591,6 +598,10 @@ abstract class ImageProvider<T extends Object> {
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
+  ///
+  /// For backwards-compatibility the default implementation of this method calls
+  /// through to [ImageProvider.load]. However, implementors of this interface should
+  /// only override this method and not [ImageProvider.load], which is deprecated.
   ///
   /// The [decode] callback provides the logic to obtain the codec for the
   /// image.
