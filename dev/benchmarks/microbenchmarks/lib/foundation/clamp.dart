@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart' show clampDouble;
 
 import '../common.dart';
 
-const int _kNumIterations = 1000000;
+const int _kBatchSize = 100000;
+const int _kNumIterations = 1000;
 
 void main() {
   assert(false,
@@ -14,39 +15,59 @@ void main() {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
   final Stopwatch watch = Stopwatch();
-  double tally = 0;
-  watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
-    tally += clampDouble(-1.0, 0.0, 1.0);
-    tally += clampDouble(2.0, 0.0, 1.0);
-    tally += clampDouble(0.0, 0.0, 1.0);
-    tally += clampDouble(double.nan, 0.0, 1.0);
+  {
+    final List<double> clampDoubleValues = <double>[];
+    for (int j = 0; j < _kNumIterations; ++j) {
+      double tally = 0;
+      watch.reset();
+      watch.start();
+      for (int i = 0; i < _kBatchSize; i += 1) {
+        tally += clampDouble(-1.0, 0.0, 1.0);
+        tally += clampDouble(2.0, 0.0, 1.0);
+        tally += clampDouble(0.0, 0.0, 1.0);
+        tally += clampDouble(double.nan, 0.0, 1.0);
+      }
+      watch.stop();
+      clampDoubleValues.add(watch.elapsedMicroseconds.toDouble() / _kBatchSize);
+      if (tally < 0.0) {
+        print("This shouldn't happen.");
+      }
+    }
+
+    printer.addResultStatistics(
+      description: 'clamp - clampDouble',
+      values: clampDoubleValues,
+      unit: 'us per iteration',
+      name: 'clamp_clampDouble',
+    );
   }
-  watch.stop();
 
-  printer.addResult(
-    description: 'clamp - clampDouble',
-    value: watch.elapsedMicroseconds.toDouble() / _kNumIterations,
-    unit: 'us per iteration',
-    name: 'clamp_clampDouble',
-  );
+  {
+    final List<double> doubleClampValues = <double>[];
 
-  watch.reset();
-  watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
-    tally += -1.0.clamp(0.0, 1.0);
-    tally += 2.0.clamp(0.0, 1.0);
-    tally += 0.0.clamp(0.0, 1.0);
-    tally += double.nan.clamp(0.0, 1.0);
+    for (int j = 0; j < _kNumIterations; ++j) {
+      double tally = 0;
+      watch.reset();
+      watch.start();
+      for (int i = 0; i < _kBatchSize; i += 1) {
+        tally += -1.0.clamp(0.0, 1.0);
+        tally += 2.0.clamp(0.0, 1.0);
+        tally += 0.0.clamp(0.0, 1.0);
+        tally += double.nan.clamp(0.0, 1.0);
+      }
+      watch.stop();
+      doubleClampValues.add(watch.elapsedMicroseconds.toDouble() / _kBatchSize);
+      if (tally < 0.0) {
+        print("This shouldn't happen.");
+      }
+    }
+
+    printer.addResultStatistics(
+      description: 'clamp - Double.clamp',
+      values: doubleClampValues,
+      unit: 'us per iteration',
+      name: 'clamp_Double_clamp',
+    );
   }
-  watch.stop();
-
-  printer.addResult(
-    description: 'clamp - Double.clamp',
-    value: watch.elapsedMicroseconds.toDouble() / _kNumIterations,
-    unit: 'us per iteration',
-    name: 'clamp_Double_clamp',
-  );
-
   printer.printToStdout();
 }
