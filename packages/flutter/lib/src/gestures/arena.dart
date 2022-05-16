@@ -49,8 +49,11 @@ class GestureArenaEntry {
   ///
   /// It's fine to attempt to resolve a gesture recognizer for an arena that is
   /// already resolved.
-  void resolve(GestureDisposition disposition) {
-    _arena._resolve(_pointer, _member, disposition);
+  ///
+  /// If a [bid] is provided, the highest bid over 1.0 will be awarded victory upon
+  /// calling [GestureArenaManager.gavel].
+  void resolve(GestureDisposition disposition, {double? bid}) {
+    _arena._resolve(_pointer, _member, disposition, bid: bid);
   }
 }
 
@@ -59,6 +62,7 @@ class _GestureArena {
   bool isOpen = true;
   bool isHeld = false;
   bool hasPendingSweep = false;
+  final Map<GestureArenaMember, double> bids = <GestureArenaMember, double>{};
 
   /// If a member attempts to win while the arena is still open, it becomes the
   /// "eager winner". We look for an eager winner when closing the arena to new
@@ -129,6 +133,20 @@ class GestureArenaManager {
     state.isOpen = false;
     assert(_debugLogDiagnostic(pointer, 'Closing', state));
     _tryToResolveArena(pointer, state);
+  }
+
+  /// Resolves any bidding wars between members.
+  ///
+  /// Called after the framework has finished dispatching events.
+  void gavel(int pointer) {
+    final _GestureArena? state = _arenas[pointer];
+    if (state == null) {
+      return;
+    }
+    assert(_debugLogDiagnostic(pointer, 'Ending Routing', state));
+    if (!state.isOpen && state.bids.isNotEmpty) {
+      _tryToResolveArena(pointer, state);
+    }
   }
 
   /// Forces resolution of the arena, giving the win to the first member.
@@ -213,7 +231,7 @@ class GestureArenaManager {
   /// Reject or accept a gesture recognizer.
   ///
   /// This is called by calling [GestureArenaEntry.resolve] on the object returned from [add].
-  void _resolve(int pointer, GestureArenaMember member, GestureDisposition disposition) {
+  void _resolve(int pointer, GestureArenaMember member, GestureDisposition disposition, {double? bid}) {
     final _GestureArena? state = _arenas[pointer];
     if (state == null) {
       return; // This arena has already resolved.
@@ -228,9 +246,13 @@ class GestureArenaManager {
       }
     } else {
       assert(disposition == GestureDisposition.accepted);
-      if (state.isOpen) {
+      if (bid != null) {
+        state.bids[member] = bid;
+      }
+      else if (state.isOpen) {
         state.eagerWinner ??= member;
-      } else {
+      }
+      else {
         assert(_debugLogDiagnostic(pointer, 'Self-declared winner: $member'));
         _resolveInFavorOf(pointer, state, member);
       }
@@ -248,6 +270,19 @@ class GestureArenaManager {
     } else if (state.eagerWinner != null) {
       assert(_debugLogDiagnostic(pointer, 'Eager winner: ${state.eagerWinner}'));
       _resolveInFavorOf(pointer, state, state.eagerWinner!);
+    } else if (!state.isHeld) {
+      double bestBid = 0.0;
+      GestureArenaMember? winner;
+      for (final MapEntry<GestureArenaMember, double> bid in state.bids.entries) {
+        // Need to use > so that tie is broken by later map insertion (deeper inside element tree)
+        if (bid.value > bestBid) {
+          bestBid = bid.value;
+          winner = bid.key;
+        }
+      }
+      if (winner != null && bestBid >= 1) {
+        _resolveInFavorOf(pointer, state, winner);
+      }
     }
   }
 

@@ -1116,8 +1116,8 @@ void main() {
       await gesture2.up();
       await tester.pumpAndSettle();
       expect(transformationController.value, equals(Matrix4.identity()));
-      expect(initialScale, null);
-      expect(scale, null);
+      expect(initialScale, 1.0);
+      expect(scale, 1.0);
 
       // Pinch to zoom for a larger amount is detected. It starts smoothly at
       // 1.0 despite the fact that the gesture has already moved a bit.

@@ -47,7 +47,7 @@ void main() {
     log.clear();
 
     test(const Offset(0.0, 30.0));
-    expect(log, <String>['vertical-drag-start']);
+    expect(log, <String>['horizontal-drag-start']); // The team won, and horizontal drag is the first member of the team
     log.clear();
 
     horizontalDrag.dispose();

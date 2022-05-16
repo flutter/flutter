@@ -18,6 +18,7 @@ class GestureTester {
 
   void route(PointerEvent event) {
     GestureBinding.instance.pointerRouter.route(event);
+    GestureBinding.instance.gestureArena.gavel(event.pointer);
     async.flushMicrotasks();
   }
 }

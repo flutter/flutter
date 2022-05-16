@@ -250,7 +250,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   }
 
   @override
-  void resolve(GestureDisposition disposition) {
+  void resolve(GestureDisposition disposition, {double? bid}) {
     if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
       // This can happen if the gesture has been canceled. For example, when
       // the pointer has exceeded the touch slop, the buttons have been changed,
@@ -259,7 +259,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
       _checkCancel(null, 'spontaneous');
       _reset();
     }
-    super.resolve(disposition);
+    super.resolve(disposition, bid: bid);
   }
 
   @override

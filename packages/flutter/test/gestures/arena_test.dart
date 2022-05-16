@@ -166,4 +166,30 @@ void main() {
     tester.arena.close(primaryKey);
     tester.expectSecondWin();
   });
+
+  test('Highest bid over 1.0 wins', () {
+    final GestureTester tester = GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.arena.close(primaryKey);
+    tester.expectNothing();
+    tester.firstEntry.resolve(GestureDisposition.accepted, bid: 1.1);
+    tester.secondEntry.resolve(GestureDisposition.accepted, bid: 1.2);
+    tester.expectNothing();
+    tester.arena.gavel(primaryKey);
+    tester.expectSecondWin();
+  });
+
+  test('Synchronous resolve wins over bidder', () {
+    final GestureTester tester = GestureTester();
+    tester.addFirst();
+    tester.addSecond();
+    tester.arena.close(primaryKey);
+    tester.expectNothing();
+    tester.firstEntry.resolve(GestureDisposition.accepted, bid: 1.1);
+    tester.secondEntry.resolve(GestureDisposition.accepted);
+    tester.expectSecondWin();
+    tester.arena.gavel(primaryKey);
+    tester.expectSecondWin();
+  });
 }

@@ -312,7 +312,8 @@ void main() {
     tester.route(down);
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedScale, isNull);
+    expect(updatedScale, 1.0);
+    updatedScale = null;
     expect(updatedFocalPoint, Offset.zero);
     expect(didEndScale, isFalse);
 
@@ -370,9 +371,9 @@ void main() {
     tester.route(down);
     expect(log, isEmpty);
 
-    // Scale will win if focal point delta exceeds 18.0*2.
+    // Scale will win here since delta exceeds 18.0*2 and horizontal delta does not exceed 18.
 
-    tester.route(pointer1.move(const Offset(10.0, 50.0))); // Delta of 40.0 exceeds 18.0*2.
+    tester.route(pointer1.move(const Offset(10.0, 50.0)));
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
@@ -401,10 +402,7 @@ void main() {
     expect(log, isEmpty);
     log.clear();
 
-    // Horizontal moves are either drags or scales, depending on which wins first.
-    // TODO(ianh): https://github.com/flutter/flutter/issues/11384
-    // In this case, we move fast, so that the scale wins. If we moved slowly,
-    // the horizontal drag would win, since it was added first.
+    // Drag has a lower slop value, so when the gesture is in the x-axis, it will win.
     final TestPointer pointer3 = TestPointer(3);
     final PointerDownEvent down3 = pointer3.down(const Offset(30.0, 30.0));
     scale.addPointer(down3);
@@ -415,11 +413,11 @@ void main() {
     expect(log, isEmpty);
 
     tester.route(pointer3.move(const Offset(100.0, 30.0)));
-    expect(log, equals(<String>['scale-start', 'scale-update']));
+    expect(log, equals(<String>['drag-start']));
     log.clear();
 
     tester.route(pointer3.up());
-    expect(log, equals(<String>['scale-end']));
+    expect(log, equals(<String>['drag-end']));
     log.clear();
 
     scale.dispose();
@@ -645,7 +643,8 @@ void main() {
     tester.closeArena(2);
     tester.route(down2);
 
-    expect(updatedRotation, isNull);
+    expect(updatedRotation, 0.0);
+    updatedRotation = null;
 
     // Rotation 45°.
     tester.route(pointer2.move(const Offset(0.0, 10.0)));
@@ -753,20 +752,20 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndScale, isFalse);
 
-    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(20.0, 30.0)));
+    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(10.0, 40.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, const Offset(20.0, 30.0));
+    expect(updatedFocalPoint, const Offset(10.0, 40.0));
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
-    expect(updatedDelta, const Offset(20.0, 30.0));
+    expect(updatedDelta, const Offset(10.0, 40.0));
     updatedDelta = null;
     expect(didEndScale, isFalse);
 
     // Zoom in.
-    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(20.0, 30.0), scale: 2.0));
-    expect(updatedFocalPoint, const Offset(20.0, 30.0));
+    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(10.0, 40.0), scale: 2.0));
+    expect(updatedFocalPoint, const Offset(10.0, 40.0));
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
     expect(updatedHorizontalScale, 2.0);
@@ -779,8 +778,8 @@ void main() {
     expect(didEndScale, isFalse);
 
     // Zoom out.
-    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(20.0, 30.0)));
-    expect(updatedFocalPoint, const Offset(20.0, 30.0));
+    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(10.0, 40.0)));
+    expect(updatedFocalPoint, const Offset(10.0, 40.0));
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     expect(updatedHorizontalScale, 1.0);
@@ -857,14 +856,25 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndScale, isFalse);
 
-    tester.route(panZoomPointer.panZoomUpdate(Offset.zero, pan: const Offset(40, 40)));
+    // Moving mostly in the y-axis to not get recognized as drag
+    tester.route(panZoomPointer.panZoomUpdate(Offset.zero, pan: const Offset(10, 40)));
     expect(didStartScale, isTrue);
     didStartScale = false;
+    expect(updatedFocalPoint, const Offset(10.0, 40.0));
+    updatedFocalPoint = null;
+    expect(updatedScale, 1.0);
+    updatedScale = null;
+    expect(updatedDelta, const Offset(10.0, 40.0));
+    updatedDelta = null;
+    expect(didEndScale, isFalse);
+
+    tester.route(panZoomPointer.panZoomUpdate(Offset.zero, pan: const Offset(40, 40)));
+    expect(didStartScale, isFalse);
     expect(updatedFocalPoint, const Offset(40.0, 40.0));
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
-    expect(updatedDelta, const Offset(40.0, 40.0));
+    expect(updatedDelta, const Offset(30.0, 0.0));
     updatedDelta = null;
     expect(didEndScale, isFalse);
 
@@ -1029,10 +1039,7 @@ void main() {
     expect(log, isEmpty);
     log.clear();
 
-    // Horizontal moves are either drags or scales, depending on which wins first.
-    // TODO(ianh): https://github.com/flutter/flutter/issues/11384
-    // In this case, we move fast, so that the scale wins. If we moved slowly,
-    // the horizontal drag would win, since it was added first.
+    // When moving horizontally the drag recognizer will win since it has a lower slop value.
     final TestPointer pointer3 = TestPointer(4, PointerDeviceKind.trackpad);
     final PointerPanZoomStartEvent down3 = pointer3.panZoomStart(const Offset(30.0, 30.0));
     scale.addPointerPanZoom(down3);
@@ -1043,11 +1050,11 @@ void main() {
     expect(log, isEmpty);
 
     tester.route(pointer3.panZoomUpdate(const Offset(30.0, 30.0), pan: const Offset(70.0, 0.0)));
-    expect(log, equals(<String>['scale-start', 'scale-update']));
+    expect(log, equals(<String>['drag-start']));
     log.clear();
 
     tester.route(pointer3.panZoomEnd());
-    expect(log, equals(<String>['scale-end']));
+    expect(log, equals(<String>['drag-end']));
     log.clear();
 
     scale.dispose();
