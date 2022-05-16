@@ -21,30 +21,29 @@ enum SelectionResult {
   /// There is nothing left to select forward in this [Selectable], and further
   /// selection should extend to the next [Selectable] in screen order.
   ///
+  /// {@template flutter.rendering.selection.SelectionResult.footNote}
   /// This is used after subclasses [SelectionHandler] or [Selectable] handled
   /// [SelectionEdgeUpdateEvent].
+  /// {@endtemplate}
   next,
-  /// Selection does not reach this [Selectable] and should look at the
-  /// previous [Selectable] in screen order.
+  /// Selection does not reach this [Selectable] and is located before it in
+  /// screen order.
   ///
-  /// This is used after subclasses [SelectionHandler] or [Selectable] handled
-  /// [SelectionEdgeUpdateEvent].
+  /// {@macro flutter.rendering.selection.SelectionResult.footNote}
   previous,
   /// Selection ends in this [Selectable].
   ///
   /// Part of the [Selectable] may or may not be selected, but there is still
   /// content to select forward or backward.
   ///
-  /// This is used after subclasses [SelectionHandler] or [Selectable] handled
-  /// [SelectionEdgeUpdateEvent].
+  /// {@macro flutter.rendering.selection.SelectionResult.footNote}
   end,
   /// The result can't be determined in this frame.
   ///
   /// This is typically used when the subtree is scrolling to reveal more
   /// content.
   ///
-  /// This is used after subclasses [SelectionHandler] or [Selectable] handled
-  /// [SelectionEdgeUpdateEvent].
+  /// {@macro flutter.rendering.selection.SelectionResult.footNote}
   // See `_SelectableRegionState._triggerSelectionEndEdgeUpdate` for how this
   // result affects the selection.
   pending,
@@ -119,10 +118,10 @@ class SelectedContent {
 /// current selection in this [Selectable]. The object must also notify its
 /// listener if the [value] ever changes.
 ///
-/// This object is responsible for drawing selection highlight.
+/// This object is responsible for drawing the selection highlight.
 ///
 /// In order to receive the selection event, the mixer needs to register
-/// itself to [SelectionRegistrar]s. Use the
+/// itself to [SelectionRegistrar]s. Use
 /// [SelectionRegistrarScope.maybeOf] to get the selection registrar, and
 /// mix the [SelectionRegistrant] to subscribe to the [SelectionRegistrar]
 /// automatically.
@@ -134,7 +133,7 @@ class SelectedContent {
 /// {@macro flutter.rendering.SelectionHandler}
 ///
 /// See also:
-///  * [SelectionArea]: which provides the overview of selection system.
+///  * [SelectionArea], which provides an overview of selection system.
 mixin Selectable implements SelectionHandler {
   /// {@macro flutter.rendering.RenderObject.getTransformTo}
   Matrix4 getTransformTo(RenderObject? ancestor);
@@ -164,10 +163,10 @@ mixin SelectionRegistrant on Selectable {
     if (value == _registrar)
       return;
     if (value == null) {
-      // When registrar go from non-null to null;
+      // When registrar goes from non-null to null;
       removeListener(_updateSelectionRegistrarSubscription);
     } else if (_registrar == null) {
-      // When registrar go from null to non-null;
+      // When registrar goes from null to non-null;
       addListener(_updateSelectionRegistrarSubscription);
     }
     _removeSelectionRegistrarSubscription();
@@ -205,8 +204,8 @@ mixin SelectionRegistrant on Selectable {
 }
 
 /// A utility class that provides useful methods for handling selection events.
-class SelectionUtil {
-  SelectionUtil._();
+class SelectionUtils {
+  SelectionUtils._();
 
   /// Determines [SelectionResult] purely based on the target rectangle.
   ///
@@ -228,7 +227,7 @@ class SelectionUtil {
         : SelectionResult.previous;
   }
 
-  /// Adjusts the dragging offset based on target rect.
+  /// Adjusts the dragging offset based on the target rect.
   ///
   /// This method moves the offsets to be within the target rect in case they are
   /// outside the rect.
@@ -237,7 +236,7 @@ class SelectionUtil {
   /// of a [Selectable].
   ///
   /// The logic works as the following:
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/rendering/SelectionUtil.adjustDragOffset.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/rendering/adjust_drag_offset.png)
   ///
   /// For points inside the rect:
   ///   Their effective locations are unchanged.
@@ -268,12 +267,12 @@ class SelectionUtil {
 ///
 /// Used by [SelectionEvent.type] to distinguish different types of events.
 enum SelectionEventType {
-  /// An event to indicate the selection start edge has changed.
+  /// An event to update the selection start edge.
   ///
   /// Used by [SelectionEdgeUpdateEvent].
   startEdgeUpdate,
 
-  /// An event to indicate the selection end edge has changed.
+  /// An event to update the selection end edge.
   ///
   /// Used by [SelectionEdgeUpdateEvent].
   endEdgeUpdate,
@@ -288,7 +287,8 @@ enum SelectionEventType {
   /// Used by [SelectAllSelectionEvent].
   selectAll,
 
-  /// An event to select a word at the location.
+  /// An event to select a word at the location
+  /// [SelectWordSelectionEvent.globalPosition].
   ///
   /// Used by [SelectWordSelectionEvent].
   selectWord,
@@ -369,11 +369,6 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
 
   /// The new location of the selection edge.
   final Offset globalPosition;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'SelectionEdgeUpdateEvent')}(offset: $globalPosition)';
-  }
 }
 
 /// A registrar that keeps track of [Selectable]s in the subtree.
@@ -411,18 +406,20 @@ abstract class SelectionRegistrar {
 ///
 /// A collapsed selection means the selection starts and ends at the same
 /// location.
-///
-/// For example if {} represent the selection edges:
-///   'ab{cd}', the collapsing status is [uncollapsed].
-///   'ab{}cd', the collapsing status is [collapsed].
-///   '{}abcd', the collapsing status is [collapsed].
-///   'abcd{}', the collapsing status is [collapsed].
-///   'abcd', the collapsing status is [none].
 enum SelectionStatus {
   /// The selection is not collapsed.
+  ///
+  /// For example if `{}` represent the selection edges:
+  ///   'ab{cd}', the collapsing status is [uncollapsed].
+  ///   '{abcd}', the collapsing status is [uncollapsed].
   uncollapsed,
 
   /// The selection is collapsed.
+  ///
+  /// For example if `{}` represent the selection edges:
+  ///   'ab{}cd', the collapsing status is [collapsed].
+  ///   '{}abcd', the collapsing status is [collapsed].
+  ///   'abcd{}', the collapsing status is [collapsed].
   collapsed,
 
   /// No selection.

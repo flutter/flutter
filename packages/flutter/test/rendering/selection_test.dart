@@ -21,64 +21,64 @@ void main() {
   group('selection utils', () {
     test('selectionBasedOnRect works', () {
       expect(
-        SelectionUtil.getResultBasedOnRect(rect, outsideTopLeft),
+        SelectionUtils.getResultBasedOnRect(rect, outsideTopLeft),
         SelectionResult.previous,
       );
       expect(
-        SelectionUtil.getResultBasedOnRect(rect, outsideLeft),
+        SelectionUtils.getResultBasedOnRect(rect, outsideLeft),
         SelectionResult.previous,
       );
       expect(
-        SelectionUtil.getResultBasedOnRect(rect, outsideBottomLeft),
+        SelectionUtils.getResultBasedOnRect(rect, outsideBottomLeft),
         SelectionResult.next,
       );
       expect(
-        SelectionUtil.getResultBasedOnRect(rect, outsideTop),
+        SelectionUtils.getResultBasedOnRect(rect, outsideTop),
         SelectionResult.previous,
       );
       expect(
-        SelectionUtil.getResultBasedOnRect(rect, outsideTopRight),
+        SelectionUtils.getResultBasedOnRect(rect, outsideTopRight),
         SelectionResult.previous,
       );
       expect(
-        SelectionUtil.getResultBasedOnRect(rect, outsideRight),
+        SelectionUtils.getResultBasedOnRect(rect, outsideRight),
         SelectionResult.next,
       );
       expect(
-        SelectionUtil.getResultBasedOnRect(rect, outsideBottomRight),
+        SelectionUtils.getResultBasedOnRect(rect, outsideBottomRight),
         SelectionResult.next,
       );
       expect(
-        SelectionUtil.getResultBasedOnRect(rect, outsideBottom),
+        SelectionUtils.getResultBasedOnRect(rect, outsideBottom),
         SelectionResult.next,
       );
       expect(
-        SelectionUtil.getResultBasedOnRect(rect, center),
+        SelectionUtils.getResultBasedOnRect(rect, center),
         SelectionResult.end,
       );
     });
 
     test('adjustDragOffset works', () {
       // ltr
-      expect(SelectionUtil.adjustDragOffset(rect, outsideTopLeft), rect.topLeft);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideLeft), rect.topLeft);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideBottomLeft), rect.bottomRight);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideTop), rect.topLeft);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideTopRight), rect.topLeft);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideRight), rect.bottomRight);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideBottomRight), rect.bottomRight);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideBottom), rect.bottomRight);
-      expect(SelectionUtil.adjustDragOffset(rect, center), center);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTopLeft), rect.topLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideLeft), rect.topLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomLeft), rect.bottomRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTop), rect.topLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTopRight), rect.topLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideRight), rect.bottomRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomRight), rect.bottomRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottom), rect.bottomRight);
+      expect(SelectionUtils.adjustDragOffset(rect, center), center);
       // rtl
-      expect(SelectionUtil.adjustDragOffset(rect, outsideTopLeft, direction: TextDirection.rtl), rect.topRight);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideLeft, direction: TextDirection.rtl), rect.topRight);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideBottomLeft, direction: TextDirection.rtl), rect.bottomLeft);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideTop, direction: TextDirection.rtl), rect.topRight);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideTopRight, direction: TextDirection.rtl), rect.topRight);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideRight, direction: TextDirection.rtl), rect.bottomLeft);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideBottomRight, direction: TextDirection.rtl), rect.bottomLeft);
-      expect(SelectionUtil.adjustDragOffset(rect, outsideBottom, direction: TextDirection.rtl), rect.bottomLeft);
-      expect(SelectionUtil.adjustDragOffset(rect, center, direction: TextDirection.rtl), center);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTopLeft, direction: TextDirection.rtl), rect.topRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideLeft, direction: TextDirection.rtl), rect.topRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomLeft, direction: TextDirection.rtl), rect.bottomLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTop, direction: TextDirection.rtl), rect.topRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTopRight, direction: TextDirection.rtl), rect.topRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideRight, direction: TextDirection.rtl), rect.bottomLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomRight, direction: TextDirection.rtl), rect.bottomLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottom, direction: TextDirection.rtl), rect.bottomLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, center, direction: TextDirection.rtl), center);
     });
   });
 }

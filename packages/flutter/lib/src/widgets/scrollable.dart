@@ -1069,14 +1069,14 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   /// [SelectionEdgeUpdateEvent].
   ///
   /// When a new [SelectionEdgeUpdateEvent] is dispatched to a selectable, this
-  /// updater checks the current scroll offset against the one stored in this
+  /// updater checks the current scroll offset against the one stored in these
   /// records. If the scroll offset is different, it synthesizes an opposite
   /// [SelectionEdgeUpdateEvent] and dispatches the event before dispatching the
   /// new event.
   ///
-  /// For example, if a selectable receives end [SelectionEdgeUpdateEvent] and
-  /// its scroll offset in the records is different from the current, it
-  /// synthesizes a start [SelectionEdgeUpdateEvent] and dispatches it before
+  /// For example, if a selectable receives an end [SelectionEdgeUpdateEvent]
+  /// and its scroll offset in the records is different from the current value,
+  /// it synthesizes a start [SelectionEdgeUpdateEvent] and dispatches it before
   /// dispatching the original end [SelectionEdgeUpdateEvent].
   final Map<Selectable, double> _selectableStartEdgeUpdateRecords = <Selectable, double>{};
   final Map<Selectable, double> _selectableEndEdgeUpdateRecords = <Selectable, double>{};

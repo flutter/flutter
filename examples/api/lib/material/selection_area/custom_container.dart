@@ -80,10 +80,10 @@ class MySelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContain
   Offset? _adjustedEndEdge;
   bool _isSelected = false;
 
+  // This method is called when newly added selectable is in the current
+  // selected range.
   @override
   void ensureChildUpdated(Selectable selectable) {
-    // This method is called when newly added selectable is in the current
-    // selected range.
     if (_isSelected) {
       dispatchSelectionEventToChild(selectable, const SelectAllSelectionEvent());
     }
@@ -100,7 +100,7 @@ class MySelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContain
     final RenderBox box = selectionContainerContext.findRenderObject()! as RenderBox;
     final Rect containerRect = Rect.fromLTWH(0, 0, box.size.width, box.size.height);
     final Offset localOffset = box.globalToLocal(event.globalPosition);
-    final Offset adjustOffset = SelectionUtil.adjustDragOffset(containerRect, localOffset);
+    final Offset adjustOffset = SelectionUtils.adjustDragOffset(containerRect, localOffset);
     if (event.type == SelectionEventType.startEdgeUpdate) {
       _adjustedStartEdge = adjustOffset;
     } else {
@@ -117,7 +117,7 @@ class MySelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContain
     } else {
       super.handleClearSelection(const ClearSelectionEvent());
     }
-    return SelectionUtil.getResultBasedOnRect(containerRect, localOffset);
+    return SelectionUtils.getResultBasedOnRect(containerRect, localOffset);
   }
 
   @override

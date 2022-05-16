@@ -1220,7 +1220,7 @@ class RenderParagraph extends RenderBox
 
 /// A continuous, selectable piece of paragraph.
 ///
-/// Since the selections in [PlaceHolderSpan] are handle independently in its
+/// Since the selections in [PlaceHolderSpan] are handled independently in its
 /// subtree, a selection in [RenderParagraph] can't continue across a
 /// [PlaceHolderSpan]. The [RenderParagraph] splits itself on [PlaceHolderSpan]
 /// to create multiple `_SelectableFragment`s so that they can be selected
@@ -1341,9 +1341,9 @@ class _SelectableFragment with Selectable, ChangeNotifier {
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtil.getResultBasedOnRect(_rect, localPosition);
+      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
     }
-    final Offset adjustedOffset = SelectionUtil.adjustDragOffset(
+    final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
       localPosition,
       direction: paragraph.textDirection,
@@ -1361,7 +1361,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
     // selection result. This is a workaround to RenderParagraph, where it does
     // not have a way to get accurate text length if its text is truncated due to
     // layout constraint.
-    return SelectionUtil.getResultBasedOnRect(_rect, localPosition);
+    return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
   }
 
   TextPosition _clampTextPosition(TextPosition position) {
@@ -1410,7 +1410,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
       start = TextPosition(offset: word.start);
       end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
     }
-    if (!_newSelectionWithinCurrent(start, end)) {
+    if (!_newSelectionIsWithinCurrent(start, end)) {
       _textSelectionStart = start;
       _textSelectionEnd = end;
     }
@@ -1421,7 +1421,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
   /// range.
   ///
   /// The parameter `start` must be smaller than `end`.
-  bool _newSelectionWithinCurrent(TextPosition start, TextPosition end) {
+  bool _newSelectionIsWithinCurrent(TextPosition start, TextPosition end) {
     assert(_compareTextPositions(start, end) >= 0);
     if (_textSelectionStart == null || _textSelectionEnd == null)
       return false;
@@ -1442,7 +1442,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
   ///
   /// Returns 1 if `position` < `otherPosition`, -1 if `position` > `otherPosition`,
   /// or 0 if they are equal.
-  int _compareTextPositions(TextPosition position, TextPosition otherPosition) {
+  static int _compareTextPositions(TextPosition position, TextPosition otherPosition) {
     if (position.offset < otherPosition.offset) {
       return 1;
     } else if (position.offset > otherPosition.offset) {

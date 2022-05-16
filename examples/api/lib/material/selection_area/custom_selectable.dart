@@ -26,8 +26,9 @@ class MyApp extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const <Widget>[
-                Text('Select this icon'),
-                MySelectableAdapter(child: Icon(Icons.key)),
+                Text('Select this icon', style: TextStyle(fontSize: 30)),
+                SizedBox(height: 10),
+                MySelectableAdapter(child: Icon(Icons.key, size: 30)),
               ],
             ),
           ),
@@ -118,7 +119,16 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
 
   // Selectable APIs.
 
-  Rect getCurrentRect() => Rect.fromLTWH(0, 0, size.width, size.height);
+  // Adjust this value to enlarge or shrink the selection highlight.
+  static const double _padding = 10.0;
+  Rect _getSelectionHighlightRect() {
+    return Rect.fromLTWH(
+      0 - _padding,
+      0 - _padding,
+      size.width + _padding * 2,
+      size.height + _padding * 2
+    );
+  }
 
   Offset? _start;
   Offset? _end;
@@ -127,26 +137,35 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
       _geometry.value = _noSelection;
       return;
     }
-    final Rect renderObjectRect = getCurrentRect();
+    final Rect renderObjectRect = Rect.fromLTWH(0, 0, size.width, size.height);
     final Rect selectionRect = Rect.fromPoints(_start!, _end!);
     if (renderObjectRect.intersect(selectionRect).isEmpty) {
       _geometry.value = _noSelection;
     } else {
+      final Rect selectionRect = _getSelectionHighlightRect();
       final SelectionPoint firstSelectionPoint = SelectionPoint(
-        localPosition: Offset(0, size.height),
-        lineHeight: size.height,
+        localPosition: selectionRect.bottomLeft,
+        lineHeight: selectionRect.size.height,
         handleType: TextSelectionHandleType.left,
       );
       final SelectionPoint secondSelectionPoint = SelectionPoint(
-        localPosition: Offset(size.width, size.height),
-        lineHeight: size.height,
+        localPosition: selectionRect.bottomRight,
+        lineHeight: selectionRect.size.height,
         handleType: TextSelectionHandleType.right,
       );
+      final bool isReversed;
+      if (_start!.dy > _end!.dy) {
+        isReversed = true;
+      } else if (_start!.dy < _end!.dy) {
+        isReversed = false;
+      } else {
+        isReversed = _start!.dx > _end!.dx;
+      }
       _geometry.value = SelectionGeometry(
         status: SelectionStatus.uncollapsed,
         hasContent: true,
-        startSelectionPoint: _start!.dy < _start!.dy ? firstSelectionPoint : secondSelectionPoint,
-        endSelectionPoint: _start!.dy < _start!.dy ? secondSelectionPoint : firstSelectionPoint,
+        startSelectionPoint: isReversed ? secondSelectionPoint : firstSelectionPoint,
+        endSelectionPoint: isReversed ? firstSelectionPoint : secondSelectionPoint,
       );
     }
   }
@@ -157,16 +176,16 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
-        final Rect renderObjectRect = getCurrentRect();
+        final Rect renderObjectRect = Rect.fromLTWH(0, 0, size.width, size.height);
         // Normalize offset in case it is out side of the rect.
         final Offset point = globalToLocal((event as SelectionEdgeUpdateEvent).globalPosition);
-        final Offset adjustedPoint = SelectionUtil.adjustDragOffset(renderObjectRect, point);
+        final Offset adjustedPoint = SelectionUtils.adjustDragOffset(renderObjectRect, point);
         if (event.type == SelectionEventType.startEdgeUpdate) {
           _start = adjustedPoint;
         } else {
           _end = adjustedPoint;
         }
-        result = SelectionUtil.getResultBasedOnRect(renderObjectRect, point);
+        result = SelectionUtils.getResultBasedOnRect(renderObjectRect, point);
         break;
       case SelectionEventType.clear:
         _start = _end = null;
@@ -181,9 +200,10 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     return result;
   }
 
+  // This method is called when users want to copy selected content in this
+  // widget into clipboard.
   @override
   SelectedContent? getSelectedContent() {
-    // Text that will be copied.
     return value.hasSelection ? const SelectedContent(plainText: 'Custom Text') : null;
   }
 
@@ -210,7 +230,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     final Paint selectionPaint = Paint()
       ..style = PaintingStyle.fill
       ..color = _selectionColor;
-    context.canvas.drawRect(getCurrentRect().shift(offset), selectionPaint);
+    context.canvas.drawRect(_getSelectionHighlightRect().shift(offset), selectionPaint);
 
     // Push the layer links if any.
     if (_startHandle != null) {

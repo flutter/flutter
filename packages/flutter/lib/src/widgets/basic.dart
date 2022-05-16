@@ -5456,18 +5456,19 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ## Selections
 ///
 /// To make this [RichText] Selectable, the [RichText] needs to be in the
-/// subtree of a [SelectionArea] or [SelectableRegion] and assigned a
-/// [SelectionRegistrar] to the [RichText.selectionRegistrar]. One can use
+/// subtree of a [SelectionArea] or [SelectableRegion] and a
+/// [SelectionRegistrar] needs to be assigned to the
+/// [RichText.selectionRegistrar]. One can use
 /// [SelectionRegistrarScope.maybeOf] to get the [SelectionRegistrar] from a
-/// context. This enable users to select the texts in [RichText]s with mice or
-/// touches.
+/// context. This enables users to select the text in [RichText]s with mice or
+/// touch events.
 ///
 /// The [selectionColor] also needs to be set if the selection is enabled to
 /// draw the selection highlights.
 ///
 /// {@tool snippet}
 ///
-/// This sample demonstrates how to assign selection registrar for RichTexts
+/// This sample demonstrates how to assign a [SelectionRegistrar] for RichTexts
 /// in the SelectionArea subtree.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
@@ -5605,7 +5606,7 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
-  /// The selection registrar this rich text is subscribed to.
+  /// The [SelectionRegistrar] this rich text is subscribed to.
   final SelectionRegistrar? selectionRegistrar;
 
   /// The color to use when painting the selection.
