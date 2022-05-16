@@ -220,6 +220,12 @@ class SystemChannels {
       JSONMethodCodec(),
   );
 
+  /// A JSON [MethodChannel] for handling undo events.
+  static const MethodChannel undoManager = OptionalMethodChannel(
+    'flutter/undomanager',
+    JSONMethodCodec(),
+  );
+
   /// A JSON [BasicMessageChannel] for keyboard events.
   ///
   /// Each incoming message received on this channel (registered using

@@ -278,6 +278,7 @@ class TextField extends StatefulWidget {
     super.key,
     this.controller,
     this.focusNode,
+    this.undoController,
     this.decoration = const InputDecoration(),
     TextInputType? keyboardType,
     this.textInputAction,
@@ -766,6 +767,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.undoHistory.controller}
+  final UndoHistoryController? undoController;
+
   @override
   State<TextField> createState() => _TextFieldState();
 
@@ -774,6 +778,7 @@ class TextField extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null));
     properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration, defaultValue: const InputDecoration()));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
@@ -1219,6 +1224,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           showSelectionHandles: _showSelectionHandles,
           controller: controller,
           focusNode: focusNode,
+          undoController: widget.undoController,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
           textCapitalization: widget.textCapitalization,

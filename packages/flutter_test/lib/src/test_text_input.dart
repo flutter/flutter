@@ -352,4 +352,16 @@ class TestTextInput {
       (ByteData? data) { /* response from framework is discarded */ },
     );
   }
+
+  /// Simulates iOS responding to an undo or redo gesture or button.
+  Future<void> handleKeyboardUndo(String direction) async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall('TextInputClient.handleUndo', <dynamic>[direction]),
+      ),
+      (ByteData? data) {/* response from framework is discarded */},
+    );
+  }
 }
