@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import 'surface.dart';
@@ -42,10 +43,10 @@ class PersistedTransform extends PersistedContainerSurface
 
   @override
   html.Element createElement() {
-    final html.Element element = html.document.createElement('flt-transform');
+    final DomElement element = domDocument.createElement('flt-transform');
     setElementStyle(element, 'position', 'absolute');
     setElementStyle(element, 'transform-origin', '0 0 0');
-    return element;
+    return element as html.Element;
   }
 
   @override

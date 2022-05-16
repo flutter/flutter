@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dom.dart';
 import 'embedder.dart';
 import 'util.dart';
 
@@ -67,7 +68,7 @@ class MouseCursor {
 
   void activateSystemCursor(String? kind) {
     setElementStyle(
-      flutterViewEmbedder.glassPaneElement!,
+      flutterViewEmbedder.glassPaneElement! as DomElement,
       'cursor',
       _mapKindToCssValue(kind),
     );
