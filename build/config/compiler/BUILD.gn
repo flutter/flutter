@@ -644,9 +644,13 @@ if (is_win) {
       "-Wno-deprecated-copy",
       # Needed for compiling Skia with clang-12
       "-Wno-psabi",
-      # Unqualified std::move is pretty common.
-      "-Wno-unqualified-std-cast-call",
     ]
+    if (!is_wasm) {
+      default_warning_flags += [
+        # Unqualified std::move is pretty common.
+        "-Wno-unqualified-std-cast-call",
+      ]
+    }
     if (!is_fuchsia) {
       default_warning_flags += [
         "-Wno-non-c-typedef-for-linkage",
@@ -717,7 +721,7 @@ config("no_chromium_code") {
 
   # TODO(zra): Remove when zlib no longer needs this.
   # https://github.com/flutter/flutter/issues/103568
-  if (!use_xcode) {
+  if (!use_xcode && !is_wasm) {
     cflags += [ "-Wno-deprecated-non-prototype" ]
   }
 
