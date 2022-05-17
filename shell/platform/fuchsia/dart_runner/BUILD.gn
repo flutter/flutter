@@ -13,8 +13,8 @@ import("//flutter/tools/fuchsia/fuchsia_libs.gni")
 
 template("runner_sources") {
   assert(defined(invoker.product), "runner_sources must define product")
-
   source_set(target_name) {
+    forward_variables_from(invoker, [ "defines" ])
     sources = [
       "builtin_libraries.cc",
       "builtin_libraries.h",
@@ -75,14 +75,6 @@ template("runner_sources") {
   }
 }
 
-runner_sources("dart_runner_sources") {
-  product = false
-}
-
-runner_sources("dart_runner_sources_product") {
-  product = true
-}
-
 template("runner") {
   assert(defined(invoker.product), "The parameter 'product' must be defined.")
   assert(defined(invoker.output_name),
@@ -95,9 +87,9 @@ template("runner") {
     extra_defines += [ "DEBUG" ]  # Needed due to direct dart dependencies.
   }
 
-  product_suffix = ""
-  if (invoker.product) {
-    product_suffix = "_product"
+  runner_sources(target_name + "_runner_sources") {
+    product = invoker.product
+    defines = extra_defines
   }
 
   executable(target_name) {
@@ -108,7 +100,7 @@ template("runner") {
     defines = extra_defines
 
     deps = [
-             ":dart_runner_sources${product_suffix}",
+             ":" + target_name + "_runner_sources",
              "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
              "$fuchsia_sdk_root/pkg:trace-provider-so",
            ] + extra_deps
@@ -311,6 +303,10 @@ jit_runner_package("dart_jit_product_runner") {
 }
 
 if (enable_unittests) {
+  runner_sources("jit_runner_sources_for_test") {
+    product = false
+  }
+
   executable("dart_test_runner_unittests") {
     testonly = true
 
@@ -322,7 +318,7 @@ if (enable_unittests) {
     libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
     deps = [
-      ":dart_runner_sources",
+      ":jit_runner_sources_for_test",
       "//flutter/fml",
       "//third_party/dart/runtime:libdart_jit",
       "//third_party/dart/runtime/platform:libdart_platform_jit",
