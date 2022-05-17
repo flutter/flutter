@@ -2,9 +2,10 @@
 
 #include <memory>
 #include "flutter/shell/common/thread_host.h"
-#include "flutter/shell/platform/android/android_context_gl.h"
+#include "flutter/shell/platform/android/android_context_gl_skia.h"
+#include "flutter/shell/platform/android/android_egl_surface.h"
 #include "flutter/shell/platform/android/android_environment_gl.h"
-#include "flutter/shell/platform/android/android_surface_gl.h"
+#include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -85,7 +86,7 @@ TEST(AndroidContextGl, Create) {
       thread_label,
       ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
-  auto context = std::make_unique<AndroidContextGL>(
+  auto context = std::make_unique<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
   context->SetMainSkiaContext(main_context);
   EXPECT_NE(context.get(), nullptr);
@@ -106,7 +107,7 @@ TEST(AndroidContextGl, CreateSingleThread) {
   TaskRunners task_runners =
       TaskRunners(thread_label, platform_runner, platform_runner,
                   platform_runner, platform_runner);
-  auto context = std::make_unique<AndroidContextGL>(
+  auto context = std::make_unique<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
   context->SetMainSkiaContext(main_context);
   EXPECT_NE(context.get(), nullptr);
@@ -125,11 +126,11 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNotNull) {
       thread_label,
       ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
-  auto android_context = std::make_shared<AndroidContextGL>(
+  auto android_context = std::make_shared<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto android_surface =
-      std::make_unique<AndroidSurfaceGL>(android_context, jni);
+      std::make_unique<AndroidSurfaceGLSkia>(android_context, jni);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       nullptr, /*is_fake_window=*/true);
   android_surface->SetNativeWindow(window);
@@ -153,11 +154,11 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNull) {
 
   ThreadHost thread_host(host_config);
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
-  auto android_context = std::make_shared<AndroidContextGL>(
+  auto android_context = std::make_shared<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto android_surface =
-      std::make_unique<AndroidSurfaceGL>(android_context, jni);
+      std::make_unique<AndroidSurfaceGLSkia>(android_context, jni);
   EXPECT_EQ(android_surface->GetOnscreenSurface(), nullptr);
   android_surface->CreateSnapshotSurface();
   EXPECT_NE(android_surface->GetOnscreenSurface(), nullptr);
@@ -175,7 +176,7 @@ TEST(AndroidContextGl, MSAAx4) {
       thread_label,
       ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
-  auto context = std::make_unique<AndroidContextGL>(
+  auto context = std::make_unique<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 4);
   context->SetMainSkiaContext(main_context);
 
@@ -197,7 +198,7 @@ TEST(AndroidContextGl, EnsureMakeCurrentChecksCurrentContextStatus) {
       thread_label,
       ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
-  auto context = std::make_unique<AndroidContextGL>(
+  auto context = std::make_unique<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
 
   auto pbuffer_surface = context->CreatePbufferSurface();

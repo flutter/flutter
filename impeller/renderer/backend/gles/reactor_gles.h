@@ -10,7 +10,7 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/backend/gles/gles_handle.h"
+#include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
 namespace impeller {
@@ -29,13 +29,13 @@ class ReactorGLES {
 
   const ProcTableGLES& GetProcTable() const;
 
-  std::optional<GLuint> GetGLHandle(const GLESHandle& handle) const;
+  std::optional<GLuint> GetGLHandle(const HandleGLES& handle) const;
 
-  GLESHandle CreateHandle(HandleType type);
+  HandleGLES CreateHandle(HandleType type);
 
-  void CollectHandle(GLESHandle handle);
+  void CollectHandle(HandleGLES handle);
 
-  void SetDebugLabel(const GLESHandle& handle, std::string label);
+  void SetDebugLabel(const HandleGLES& handle, std::string label);
 
   using Operation = std::function<void(const ReactorGLES& reactor)>;
   [[nodiscard]] bool AddOperation(Operation operation);

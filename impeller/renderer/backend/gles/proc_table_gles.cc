@@ -90,7 +90,7 @@ ProcTableGLES::ProcTableGLES(Resolver resolver) {
 
 #undef IMPELLER_PROC
 
-  description_ = std::make_unique<GLDescription>(*this);
+  description_ = std::make_unique<DescriptionGLES>(*this);
 
   if (!description_->IsValid()) {
     return;
@@ -125,7 +125,7 @@ void ProcTableGLES::ShaderSourceMapping(GLuint shader,
   ShaderSource(shader, 1u, sources, lengths);
 }
 
-const GLDescription* ProcTableGLES::GetDescription() const {
+const DescriptionGLES* ProcTableGLES::GetDescription() const {
   return description_.get();
 }
 
