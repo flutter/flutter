@@ -62,6 +62,16 @@ int convertButtonToButtons(int button) {
   }
 }
 
+/// Wrapping the Safari iOS workaround that adds a dummy event listener
+/// More info about the issue and workaround: https://github.com/flutter/flutter/issues/70858
+class SafariPointerEventWorkaround {
+  static SafariPointerEventWorkaround instance = SafariPointerEventWorkaround();
+
+  void workAroundMissingPointerEvents() {
+    html.document.addEventListener('touchstart', (html.Event event) {});
+  }
+}
+
 class PointerBinding {
   /// The singleton instance of this object.
   static PointerBinding? get instance => _instance;
@@ -69,20 +79,27 @@ class PointerBinding {
 
   static void initInstance(html.Element glassPaneElement) {
     if (_instance == null) {
-      _instance = PointerBinding._(glassPaneElement);
+      _instance = PointerBinding(glassPaneElement);
       assert(() {
-        registerHotRestartListener(() {
-          _instance!._adapter.clearListeners();
-          _instance!._pointerDataConverter.clearPointerState();
-        });
+        registerHotRestartListener(_instance!.dispose);
         return true;
       }());
     }
   }
 
-  PointerBinding._(this.glassPaneElement)
+  /// Performs necessary clean up for PointerBinding including removing event listeners
+  /// and clearing the existing pointer state
+  void dispose() {
+    _adapter.clearListeners();
+    _pointerDataConverter.clearPointerState();
+  }
+
+  PointerBinding(this.glassPaneElement)
     : _pointerDataConverter = PointerDataConverter(),
       _detector = const PointerSupportDetector() {
+    if (isIosSafari) {
+      SafariPointerEventWorkaround.instance.workAroundMissingPointerEvents();
+    }
     _adapter = _createAdapter();
   }
 
@@ -158,10 +175,10 @@ abstract class _BaseAdapter {
   }
 
   /// Listeners that are registered through dart to js api.
-  static final Map<String, html.EventListener> _listeners =
+  final Map<String, html.EventListener> _listeners =
     <String, html.EventListener>{};
   /// Listeners that are registered through native javascript api.
-  static final Map<String, html.EventListener> _nativeListeners =
+  final Map<String, html.EventListener> _nativeListeners =
     <String, html.EventListener>{};
   final html.Element glassPaneElement;
   _PointerDataCallback _callback;
@@ -290,7 +307,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
       'passive': false,
     });
     final html.EventListener jsHandler = allowInterop((html.Event event) => handler(event));
-    _BaseAdapter._nativeListeners['wheel'] = jsHandler;
+    _nativeListeners['wheel'] = jsHandler;
     addJsEventListener(glassPaneElement, 'wheel', jsHandler, eventOptions);
   }
 

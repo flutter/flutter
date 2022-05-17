@@ -11,8 +11,6 @@ import 'package:ui/ui.dart' as ui;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../../common.dart';
-
 /// Class that controls some details of how screenshotting is made.
 ///
 /// (For Googlers: Not really related with internal Scuba anymore)

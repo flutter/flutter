@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine/browser_detection.dart';
 
 import '../engine/semantics/semantics_test.dart';
 import 'common.dart';
