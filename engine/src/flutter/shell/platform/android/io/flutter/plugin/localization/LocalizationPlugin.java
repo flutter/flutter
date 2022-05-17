@@ -188,7 +188,11 @@ public class LocalizationPlugin {
     localizationChannel.sendLocales(locales);
   }
 
-  @VisibleForTesting
+  /**
+   * Computes the {@link Locale} from the provided {@code String} with format
+   * language[-script][-region][-...], where script is an alphabet string of length 4, and region is
+   * either an alphabet string of length 2 or a digit string of length 3.
+   */
   @NonNull
   public static Locale localeFromString(@NonNull String localeString) {
     // Use Locale.forLanguageTag if available (API 21+).
@@ -200,11 +204,6 @@ public class LocalizationPlugin {
 
       // Pre-API 21, we fall back to manually parsing the locale tag.
       String parts[] = localeString.split("-", -1);
-
-      // The format is:
-      // language[-script][-region][-...]
-      // where script is an alphabet string of length 4, and region is either an alphabet string of
-      // length 2 or a digit string of length 3.
 
       // Assume the first part is always the language code.
       String languageCode = parts[0];
