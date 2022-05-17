@@ -817,7 +817,7 @@ void main() {
     a1.append(b1);
 
     // Add and immediately remove the callback.
-    b1.addCompositionCallback((ContainerLayer layer) {
+    b1.addCompositionCallback((Layer layer) {
       fail('Should not have called back');
     })();
 
@@ -836,7 +836,7 @@ void main() {
 
     bool compositedB1 = false;
 
-    b1.addCompositionCallback((ContainerLayer layer) {
+    b1.addCompositionCallback((Layer layer) {
       expect(layer, b1);
       compositedB1 = true;
     });
@@ -873,7 +873,7 @@ void main() {
 
     bool compositedB1 = false;
 
-    b1.addCompositionCallback((ContainerLayer layer) {
+    b1.addCompositionCallback((Layer layer) {
       expect(layer, b1);
       compositedB1 = true;
     });
@@ -897,7 +897,7 @@ void main() {
 
     bool compositedB1 = false;
 
-    b1.addCompositionCallback((ContainerLayer layer) {
+    b1.addCompositionCallback((Layer layer) {
       expect(layer, b1);
       expect(() => layer.remove(), throwsAssertionError);
       expect(() => layer.dispose(), throwsAssertionError);
@@ -906,7 +906,7 @@ void main() {
       expect(() => layer.updateSubtreeNeedsAddToScene(), throwsAssertionError);
       expect(() => layer.dropChild(ContainerLayer()), throwsAssertionError);
       expect(() => layer.adoptChild(ContainerLayer()), throwsAssertionError);
-      expect(() => layer.append(ContainerLayer()), throwsAssertionError);
+      expect(() => (layer as ContainerLayer).append(ContainerLayer()), throwsAssertionError);
       expect(() => layer.engineLayer = null, throwsAssertionError);
       compositedB1 = true;
     });
@@ -930,7 +930,7 @@ void main() {
 
     bool compositedB1 = false;
 
-    b1.addCompositionCallback((ContainerLayer layer) {
+    b1.addCompositionCallback((Layer layer) {
       expect(layer, b1);
       compositedB1 = true;
     });

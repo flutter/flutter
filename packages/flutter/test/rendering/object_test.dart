@@ -253,7 +253,7 @@ void main() {
     final ContainerLayer root = ContainerLayer();
     final PaintingContext context = PaintingContext(root, Rect.zero);
     bool calledBack = false;
-    final TestObservingRenderObject object = TestObservingRenderObject((ContainerLayer layer) {
+    final TestObservingRenderObject object = TestObservingRenderObject((Layer layer) {
       expect(layer, root);
       calledBack = true;
     });

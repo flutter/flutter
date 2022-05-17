@@ -185,6 +185,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// If new callbacks are added or removed within the [callback], the new
   /// callbacks will fire (or stop firing) on the _next_ compositing event.
   ///
+  /// {@template flutter.rendering.Layer.compositionCallbacks}
   /// Composition callbacks are useful in place of pushing a layer that would
   /// otherwise try to observe the layer tree without actually affecting
   /// compositing. For example, a composition callback may be used to observe
@@ -193,6 +194,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Calling the returned callback will remove [callback] from the composition
   /// callbacks.
+  /// {@endtemplate}
   VoidCallback addCompositionCallback(CompositionCallback callback) {
     _updateSubtreeCompositionObserverCount(1);
     final int callbackId = _nextCallbackId += 1;
@@ -201,7 +203,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
         _debugMutationsLocked = true;
         return true;
       }());
-      callback(this is ContainerLayer ? this as ContainerLayer : parent!);
+      callback(this);
       assert(() {
         _debugMutationsLocked = false;
         return true;
@@ -1006,7 +1008,7 @@ class PerformanceOverlayLayer extends Layer {
 }
 
 /// The signature of the callback added in [Layer.addCompositionCallback].
-typedef CompositionCallback = void Function(ContainerLayer);
+typedef CompositionCallback = void Function(Layer);
 
 /// A composited layer that has a list of children.
 ///
