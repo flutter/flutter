@@ -11,6 +11,5 @@ out vec4 frag_color;
 
 void main() {
   vec4 sampled = texture(texture_sampler, v_texture_coords);
-  sampled.w *= v_alpha;
-  frag_color = sampled;
+  frag_color = sampled * v_alpha;
 }
