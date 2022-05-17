@@ -233,7 +233,7 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
     if (isBrowser) {
-      // On the web, TextField gets blurred when focusing outside of the widget.
+      // On the web, TextField loses focus when focusing outside of the widget.
       expect(find.byType(TextField, skipOffstage: false), findsNothing);
     } else {
       expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
@@ -241,7 +241,7 @@ void main() {
     await tester.pumpWidget(makeTest('test'));
     await tester.pump(); // in case the AutomaticKeepAlive widget thinks it needs a cleanup frame
     if (isBrowser) {
-      // On the web, TextField gets blurred when focusing outside of the widget.
+      // On the web, TextField loses focus when focusing outside of the widget.
       expect(find.byType(TextField, skipOffstage: false), findsNothing);
     } else {
       expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
