@@ -284,7 +284,6 @@ class KernelCompiler {
       sdkRoot,
       '--target=$targetModel',
       '--no-print-incremental-dependencies',
-      '--compact-async',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       ...buildModeOptions(buildMode, dartDefines),
