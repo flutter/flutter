@@ -5268,7 +5268,7 @@ class _NamedRestorationInformation extends _RestorationInformation {
 
   @override
   Route<dynamic> createRoute(NavigatorState navigator) {
-    final Route<dynamic> route = navigator._routeNamed<dynamic>(name, arguments: arguments, allowNull: false)!;
+    final Route<dynamic> route = navigator._routeNamed<dynamic>(name, arguments: arguments)!;
     assert(route != null);
     return route;
   }

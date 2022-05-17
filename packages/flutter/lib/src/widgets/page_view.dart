@@ -109,7 +109,6 @@ import 'viewport.dart';
 ///     );
 ///   }
 /// }
-///
 /// ```
 /// {@end-tool}
 class PageController extends ScrollController {

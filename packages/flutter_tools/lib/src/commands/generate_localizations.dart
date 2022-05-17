@@ -225,12 +225,12 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     final List<String> preferredSupportedLocales = stringsArg('preferred-supported-locales');
     final String? headerString = stringArgDeprecated('header');
     final String? headerFile = stringArgDeprecated('header-file');
-    final bool useDeferredLoading = boolArg('use-deferred-loading');
+    final bool useDeferredLoading = boolArgDeprecated('use-deferred-loading');
     final String? inputsAndOutputsListPath = stringArgDeprecated('gen-inputs-and-outputs-list');
-    final bool useSyntheticPackage = boolArg('synthetic-package');
+    final bool useSyntheticPackage = boolArgDeprecated('synthetic-package');
     final String? projectPathString = stringArgDeprecated('project-dir');
-    final bool areResourceAttributesRequired = boolArg('required-resource-attributes');
-    final bool usesNullableGetter = boolArg('nullable-getter');
+    final bool areResourceAttributesRequired = boolArgDeprecated('required-resource-attributes');
+    final bool usesNullableGetter = boolArgDeprecated('nullable-getter');
 
     precacheLanguageAndRegionTags();
 

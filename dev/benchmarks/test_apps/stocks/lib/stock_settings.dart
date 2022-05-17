@@ -143,7 +143,7 @@ class StockSettingsState extends State<StockSettings> {
       ),
     ];
     assert(() {
-      // material grid and size construction lines are only available in checked mode
+      // material grid and size construction lines are only available in debug mode
       rows.addAll(<Widget>[
         ListTile(
           leading: const Icon(Icons.border_clear),

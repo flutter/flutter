@@ -245,10 +245,10 @@ class CreateCommand extends CreateBase {
 
     final String organization = await getOrganization();
 
-    final bool overwrite = boolArg('overwrite');
+    final bool overwrite = boolArgDeprecated('overwrite');
     validateProjectDir(overwrite: overwrite);
 
-    if (boolArg('with-driver-test')) {
+    if (boolArgDeprecated('with-driver-test')) {
       globals.printWarning(
         'The "--with-driver-test" argument has been deprecated and will no longer add a flutter '
         'driver template. Instead, learn how to use package:integration_test by '
@@ -291,7 +291,7 @@ class CreateCommand extends CreateBase {
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
       // Enable null safety everywhere.
       dartSdkVersionBounds: "'>=$dartSdk <3.0.0'",
-      implementationTests: boolArg('implementation-tests'),
+      implementationTests: boolArgDeprecated('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
       gradleVersion: gradle.templateDefaultGradleVersion,
@@ -448,11 +448,11 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       await pub.get(
         context: PubContext.create,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: false,
       );
       final FlutterProject project = FlutterProject.fromDirectory(directory);
@@ -482,11 +482,11 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       await pub.get(
         context: PubContext.createPackage,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: false,
       );
     }
@@ -529,11 +529,11 @@ Your $application code is in $relativeAppMain.
       printStatusWhenWriting: printStatusWhenWriting,
     );
 
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: false,
       );
     }
@@ -608,11 +608,11 @@ Your $application code is in $relativeAppMain.
       printStatusWhenWriting: printStatusWhenWriting,
     );
 
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         generateSyntheticPackage: false,
       );
     }
