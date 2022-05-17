@@ -616,7 +616,7 @@ void main() {
 
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
-  }, skip: !isBrowser);
+  }, skip: !isBrowser); // [intended]
 
   // Regression test for #64245
   testWidgets('A Focused text-field will lose focus when tapping outside of the widget on all browsers', (WidgetTester tester) async {
@@ -664,7 +664,7 @@ void main() {
 
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
-  }, skip: !isBrowser);
+  }, skip: !isBrowser);  // [intended]
 }
 
 class _APage extends Page<void> {
