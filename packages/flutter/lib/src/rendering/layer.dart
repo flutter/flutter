@@ -148,13 +148,13 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///   * [Layer.addCompositionCallback].
-  bool get subtreeHasCompositionCallbacks => _childrenWithCompositionCallbacks > 0;
+  bool get subtreeHasCompositionCallbacks => _compositionCallbackCount > 0;
 
-  int _childrenWithCompositionCallbacks = 0;
+  int _compositionCallbackCount = 0;
   void _updateSubtreeCompositionObserverCount(int delta) {
     assert(delta != 0);
-    _childrenWithCompositionCallbacks += delta;
-    assert(_childrenWithCompositionCallbacks >= 0);
+    _compositionCallbackCount += delta;
+    assert(_compositionCallbackCount >= 0);
     if (parent != null) {
       parent!._updateSubtreeCompositionObserverCount(delta);
     }
@@ -482,8 +482,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
     }
-    if (child._childrenWithCompositionCallbacks != 0) {
-      _updateSubtreeCompositionObserverCount(-child._childrenWithCompositionCallbacks);
+    if (child._compositionCallbackCount != 0) {
+      _updateSubtreeCompositionObserverCount(-child._compositionCallbackCount);
     }
     super.dropChild(child);
   }
@@ -494,8 +494,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
     }
-    if (child._childrenWithCompositionCallbacks != 0) {
-      _updateSubtreeCompositionObserverCount(child._childrenWithCompositionCallbacks);
+    if (child._compositionCallbackCount != 0) {
+      _updateSubtreeCompositionObserverCount(child._compositionCallbackCount);
     }
     super.adoptChild(child);
   }
