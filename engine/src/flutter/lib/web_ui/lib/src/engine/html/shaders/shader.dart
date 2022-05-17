@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
 import '../../browser_detection.dart';
+import '../../dom.dart';
 import '../../safe_browser_api.dart';
 import '../../util.dart';
 import '../../validators.dart';
@@ -48,7 +48,7 @@ abstract class EngineGradient implements ui.Gradient {
   EngineGradient._();
 
   /// Creates a fill style to be used in painting.
-  Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
+  Object createPaintStyle(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density);
 
   /// Creates a CanvasImageSource to paint gradient.
@@ -125,7 +125,7 @@ class GradientSweep extends EngineGradient {
   }
 
   @override
-  Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
+  Object createPaintStyle(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
     final Object imageBitmap = createImageBitmap(shaderBounds, density, false);
     return ctx!.createPattern(imageBitmap, 'no-repeat')!;
@@ -197,7 +197,7 @@ class GradientLinear extends EngineGradient {
   final FastMatrix32? matrix4;
 
   @override
-  Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
+  Object createPaintStyle(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
     if (tileMode == ui.TileMode.clamp || tileMode == ui.TileMode.decal) {
       return _createCanvasGradient(ctx, shaderBounds, density);
@@ -206,10 +206,10 @@ class GradientLinear extends EngineGradient {
     }
   }
 
-  html.CanvasGradient _createCanvasGradient(html.CanvasRenderingContext2D? ctx,
+  DomCanvasGradient _createCanvasGradient(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
     final FastMatrix32? matrix4 = this.matrix4;
-    html.CanvasGradient gradient;
+    DomCanvasGradient gradient;
     final double offsetX = shaderBounds!.left;
     final double offsetY = shaderBounds.top;
     if (matrix4 != null) {
@@ -363,7 +363,7 @@ class GradientLinear extends EngineGradient {
   }
 
   /// Creates a linear gradient with tiling repeat or mirror.
-  html.CanvasPattern _createGlGradient(html.CanvasRenderingContext2D? ctx,
+  DomCanvasPattern _createGlGradient(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
     final Object imageBitmap = createImageBitmap(shaderBounds, density, false);
     return ctx!.createPattern(imageBitmap, 'no-repeat')!;
@@ -392,7 +392,7 @@ class GradientLinear extends EngineGradient {
   }
 }
 
-void _addColorStopsToCanvasGradient(html.CanvasGradient gradient,
+void _addColorStopsToCanvasGradient(DomCanvasGradient gradient,
     List<ui.Color> colors, List<double>? colorStops, bool isDecal) {
   double scale, offset;
   if (isDecal) {
@@ -480,7 +480,7 @@ class GradientRadial extends EngineGradient {
   final Float32List? matrix4;
 
   @override
-  Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
+  Object createPaintStyle(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
     if (tileMode == ui.TileMode.clamp || tileMode == ui.TileMode.decal) {
       return _createCanvasGradient(ctx, shaderBounds, density);
@@ -489,11 +489,11 @@ class GradientRadial extends EngineGradient {
     }
   }
 
-  Object _createCanvasGradient(html.CanvasRenderingContext2D? ctx,
+  Object _createCanvasGradient(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
     final double offsetX = shaderBounds!.left;
     final double offsetY = shaderBounds.top;
-    final html.CanvasGradient gradient = ctx!.createRadialGradient(
+    final DomCanvasGradient gradient = ctx!.createRadialGradient(
         center.dx - offsetX,
         center.dy - offsetY,
         0,
@@ -566,7 +566,7 @@ class GradientRadial extends EngineGradient {
   }
 
   /// Creates a radial gradient with tiling repeat or mirror.
-  html.CanvasPattern _createGlGradient(html.CanvasRenderingContext2D? ctx,
+  DomCanvasPattern _createGlGradient(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
     final Object imageBitmap = createImageBitmap(shaderBounds, density, false);
     return ctx!.createPattern(imageBitmap, 'no-repeat')!;
@@ -615,7 +615,7 @@ class GradientConical extends GradientRadial {
   final double focalRadius;
 
   @override
-  Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
+  Object createPaintStyle(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
     if ((tileMode == ui.TileMode.clamp || tileMode == ui.TileMode.decal) &&
         focalRadius == 0.0 &&
