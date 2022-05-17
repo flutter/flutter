@@ -12,7 +12,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 
@@ -324,6 +323,22 @@ class PaintingContext extends ClipContext {
     _recorder = ui.PictureRecorder();
     _canvas = Canvas(_recorder!);
     _containerLayer.append(_currentLayer!);
+  }
+
+  /// Adds a [CompositionCallback] for the current [ContainerLayer] used by this
+  /// context.
+  ///
+  /// Composition callbacks are called whenever the layer tree containing the
+  /// current layer of this painting context gets composited, or when it gets
+  /// detached and will not be rendered again. This happens regardless of
+  /// whether the layer is added via retained rendering or not.
+  ///
+  /// {@macro flutter.rendering.Layer.compositionCallbacks}
+  ///
+  /// See also:
+  ///   *  [Layer.addCompositionCallback].
+  VoidCallback addCompositionCallback(CompositionCallback callback) {
+    return _containerLayer.addCompositionCallback(callback);
   }
 
   /// Stop recording to a canvas if recording has started.
