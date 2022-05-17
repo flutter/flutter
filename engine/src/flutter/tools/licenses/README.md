@@ -24,7 +24,7 @@ latest upstream main and then run the following in this directory:
 
 ```
 pub get
-gclient sync
+gclient sync -D
 rm -rf ../../../out/licenses
 dart lib/main.dart --src ../../.. --out ../../../out/licenses --golden ../../ci/licenses_golden
 ```
