@@ -1671,7 +1671,8 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _registryToken = ShortcutRegistrar.of(context).addAll(widget.shortcuts);
+    _registryToken?.dispose();
+    _registryToken = ShortcutRegistry.of(context).addAll(widget.shortcuts);
   }
 
   @override
@@ -1679,9 +1680,9 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
     super.didUpdateWidget(oldWidget);
     if (widget.shortcuts != oldWidget.shortcuts || _registryToken == null) {
       _registryToken?.dispose();
-      _registryToken = ShortcutRegistrar.of(context).addAll(widget.shortcuts);
+      _registryToken = ShortcutRegistry.of(context).addAll(widget.shortcuts);
     }
-    widget.onDependencyUpdate?.call(ShortcutRegistrar.of(context).shortcuts);
+    widget.onDependencyUpdate?.call(ShortcutRegistry.of(context).shortcuts);
   }
 
   @override

@@ -119,7 +119,15 @@ class ChangeNotifier implements Listenable {
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
 
-  bool _debugAssertNotDisposed() {
+  /// Used by subclasses to assert that the [ChangeNotifier] has not yet been disposed.
+  ///
+  /// Should only be called inside of an assert, as in:
+  ///
+  /// ```dart
+  /// assert(debugAssertNotDisposed());
+  /// ```
+  @protected
+  bool debugAssertNotDisposed() {
     assert(() {
       if (_debugDisposed) {
         throw FlutterError(
@@ -149,7 +157,7 @@ class ChangeNotifier implements Listenable {
   /// so, stopping that same work.
   @protected
   bool get hasListeners {
-    assert(_debugAssertNotDisposed());
+    assert(debugAssertNotDisposed());
     return _count > 0;
   }
 
@@ -181,7 +189,7 @@ class ChangeNotifier implements Listenable {
   ///    the list of closures that are notified when the object changes.
   @override
   void addListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed());
+    assert(debugAssertNotDisposed());
     if (_count == _listeners.length) {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
@@ -273,7 +281,7 @@ class ChangeNotifier implements Listenable {
   /// This method should only be called by the object's owner.
   @mustCallSuper
   void dispose() {
-    assert(_debugAssertNotDisposed());
+    assert(debugAssertNotDisposed());
     assert(() {
       _debugDisposed = true;
       return true;
@@ -301,7 +309,7 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
-    assert(_debugAssertNotDisposed());
+    assert(debugAssertNotDisposed());
     if (_count == 0)
       return;
 
