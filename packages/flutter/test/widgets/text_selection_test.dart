@@ -708,7 +708,7 @@ void main() {
     expect(controller.selection.isCollapsed, isFalse);
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 10);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.fuchsia }));
+  });
 
   testWidgets('test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
@@ -825,7 +825,7 @@ void main() {
       of: find.byType(CompositedTransformFollower),
       matching: find.descendant(
         of: find.byType(FadeTransition),
-        matching: find.byType(GestureDetector),
+        matching: find.byType(RawGestureDetector),
       ),
     );
 

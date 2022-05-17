@@ -9345,7 +9345,7 @@ void main() {
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('iPad Scribble selection change shows selection handles', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
