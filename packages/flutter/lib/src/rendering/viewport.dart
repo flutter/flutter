@@ -562,7 +562,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderSliver child) {
+  Rect? describeApproximatePaintClip(RenderSliver child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        break;
+    }
+
     final Rect viewportClip = Offset.zero & size;
     // The child's viewportMainAxisExtent can be infinite when a
     // RenderShrinkWrappingViewport is given infinite constraints, such as when
