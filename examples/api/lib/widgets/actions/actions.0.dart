@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -81,7 +81,7 @@ class SaveAction extends Action<SaveIntent> {
 }
 
 class SaveButton extends StatefulWidget {
-  const SaveButton(this.valueNotifier, {Key? key}) : super(key: key);
+  const SaveButton(this.valueNotifier, {super.key});
 
   final ValueNotifier<bool> valueNotifier;
 
@@ -117,7 +117,7 @@ class _SaveButtonState extends State<SaveButton> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();

@@ -64,7 +64,7 @@ class ChipTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Spaceship extends StatelessWidget {
-  ///   const Spaceship({Key? key}) : super(key: key);
+  ///   const Spaceship({super.key});
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -123,7 +123,7 @@ class ChipTheme extends InheritedTheme {
 ///
 /// ```dart
 /// class CarColor extends StatefulWidget {
-///   const CarColor({Key? key}) : super(key: key);
+///   const CarColor({super.key});
 ///
 ///   @override
 ///   State createState() => _CarColorState();

@@ -15,7 +15,7 @@ class Destination {
 }
 
 class RootPage extends StatelessWidget {
-  const RootPage({ Key? key, required this.destination }) : super(key: key);
+  const RootPage({ super.key, required this.destination });
 
   final Destination destination;
 
@@ -117,7 +117,7 @@ class RootPage extends StatelessWidget {
 }
 
 class ListPage extends StatelessWidget {
-  const ListPage({ Key? key, required this.destination }) : super(key: key);
+  const ListPage({ super.key, required this.destination });
 
   final Destination destination;
 
@@ -161,7 +161,7 @@ class ListPage extends StatelessWidget {
 }
 
 class TextPage extends StatefulWidget {
-  const TextPage({ Key? key, required this.destination }) : super(key: key);
+  const TextPage({ super.key, required this.destination });
 
   final Destination destination;
 
@@ -217,10 +217,10 @@ class _TextPageState extends State<TextPage> {
 
 class DestinationView extends StatefulWidget {
   const DestinationView({
-    Key? key,
+    super.key,
     required this.destination,
     required this.navigatorKey,
-  }) : super(key: key);
+  });
 
   final Destination destination;
   final Key navigatorKey;
@@ -256,7 +256,7 @@ class _DestinationViewState extends State<DestinationView> {
 }
 
 class Home extends StatefulWidget {
-  const Home({ Key? key }) : super(key: key);
+  const Home({ super.key });
 
   @override
   State<Home> createState() => _HomeState();

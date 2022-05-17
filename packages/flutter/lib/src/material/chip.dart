@@ -341,7 +341,7 @@ abstract class SelectableChipAttributes {
   ///
   /// ```dart
   /// class Wood extends StatefulWidget {
-  ///   const Wood({Key? key}) : super(key: key);
+  ///   const Wood({super.key});
   ///
   ///   @override
   ///   State<StatefulWidget> createState() => WoodState();
@@ -478,7 +478,7 @@ abstract class TappableChipAttributes {
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
-  ///   const Blacksmith({Key? key}) : super(key: key);
+  ///   const Blacksmith({super.key});
   ///
   ///   void startHammering() {
   ///     print('bang bang bang');

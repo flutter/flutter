@@ -135,7 +135,7 @@ enum AnimationBehavior {
 ///
 /// ```dart
 /// class Foo extends StatefulWidget {
-///   const Foo({ Key? key, required this.duration }) : super(key: key);
+///   const Foo({ super.key, required this.duration });
 ///
 ///   final Duration duration;
 ///
