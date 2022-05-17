@@ -48,7 +48,7 @@ class DoctorCommand extends FlutterCommand {
       }
     }
     final bool success = await globals.doctor?.diagnose(
-      androidLicenses: boolArg('android-licenses'),
+      androidLicenses: boolArgDeprecated('android-licenses'),
       verbose: verbose,
       androidLicenseValidator: androidLicenseValidator,
     ) ?? false;

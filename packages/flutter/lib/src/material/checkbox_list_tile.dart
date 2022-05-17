@@ -11,6 +11,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
+// bool? _throwShotAway = false;
 // void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
@@ -163,6 +164,8 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// If null, the checkbox will be displayed as disabled.
   ///
+  /// {@tool snippet}
+  ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
@@ -170,14 +173,15 @@ class CheckboxListTile extends StatelessWidget {
   /// ```dart
   /// CheckboxListTile(
   ///   value: _throwShotAway,
-  ///   onChanged: (bool newValue) {
+  ///   onChanged: (bool? newValue) {
   ///     setState(() {
   ///       _throwShotAway = newValue;
   ///     });
   ///   },
-  ///   title: Text('Throw away your shot'),
+  ///   title: const Text('Throw away your shot'),
   /// )
   /// ```
+  /// {@end-tool}
   final ValueChanged<bool?>? onChanged;
 
   /// The color to use when this checkbox is checked.

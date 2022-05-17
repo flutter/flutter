@@ -121,7 +121,7 @@ class BuildAarCommand extends BuildSubCommand {
 
     final File targetFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'));
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
-      if (boolArg(buildMode)) {
+      if (boolArgDeprecated(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
             await getBuildInfo(

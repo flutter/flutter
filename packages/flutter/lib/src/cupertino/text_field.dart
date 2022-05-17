@@ -200,6 +200,8 @@ class CupertinoTextField extends StatefulWidget {
   /// [enableSuggestions], and [enableIMEPersonalizedLearning] properties must
   /// not be null.
   ///
+  /// {@macro flutter.widgets.editableText.accessibility}
+  ///
   /// See also:
   ///
   ///  * [minLines], which is the minimum number of lines to occupy when the

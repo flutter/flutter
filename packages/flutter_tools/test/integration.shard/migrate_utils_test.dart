@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -14,12 +12,12 @@ import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 import '../src/common.dart';
 
 void main() {
-  BufferLogger logger;
-  FileSystem fileSystem;
-  Directory projectRoot;
-  String projectRootPath;
-  MigrateUtils utils;
-  ProcessUtils processUtils;
+  late BufferLogger logger;
+  late FileSystem fileSystem;
+  late Directory projectRoot;
+  late String projectRootPath;
+  late MigrateUtils utils;
+  late ProcessUtils processUtils;
 
   setUpAll(() async {
     fileSystem = globals.localFileSystem;
@@ -38,6 +36,10 @@ void main() {
       projectRoot = fileSystem.systemTempDirectory.createTempSync('flutter_migrate_utils_test');
       projectRoot.createSync(recursive: true);
       projectRootPath = projectRoot.path;
+    });
+
+    tearDown(() async {
+      tryToDelete(projectRoot);
     });
 
     testWithoutContext('init', () async {
@@ -219,5 +221,16 @@ void main() {
 
       projectRoot.deleteSync(recursive: true);
     });
+  });
+
+  testWithoutContext('conflictsResolved', () async {
+    expect(utils.conflictsResolved(''), true);
+    expect(utils.conflictsResolved('hello'), true);
+    expect(utils.conflictsResolved('hello\n'), true);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n\nhi\n'), true);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n>>>>>>>\nhi\n'), false);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n=======\nhi\n'), false);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n<<<<<<<\nhi\n'), false);
+    expect(utils.conflictsResolved('hello\nwow a bunch of lines\n<<<<<<<\n=======\n<<<<<<<\nhi\n'), false);
   });
 }
