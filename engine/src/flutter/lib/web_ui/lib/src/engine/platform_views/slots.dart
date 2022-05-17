@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import '../dom.dart';
 
 /// Returns the name of a slot from its `viewId`.
 ///
@@ -32,14 +32,14 @@ String getPlatformViewSlotName(int viewId) {
 ///
 /// (When the framework accesses a `slot`, it's really accessing its wrapper
 /// `flt-platform-view-slot` tag)
-html.Element createPlatformViewSlot(int viewId) {
+DomElement createPlatformViewSlot(int viewId) {
   final String slotName = getPlatformViewSlotName(viewId);
 
-  final html.Element wrapper = html.document
+  final DomElement wrapper = domDocument
       .createElement('flt-platform-view-slot')
       ..style.pointerEvents = 'auto';
 
-  final html.Element slot = html.document.createElement('slot')
+  final DomElement slot = domDocument.createElement('slot')
     ..setAttribute('name', slotName);
 
   return wrapper..append(slot);

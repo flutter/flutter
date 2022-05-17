@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -41,11 +39,11 @@ class PersistedOffset extends PersistedContainerSurface
       _localTransformInverse ??= Matrix4.translationValues(-dx, -dy, 0);
 
   @override
-  html.Element createElement() {
+  DomElement createElement() {
     final DomElement element = domDocument.createElement('flt-offset');
     setElementStyle(element, 'position', 'absolute');
     setElementStyle(element, 'transform-origin', '0 0 0');
-    return element as html.Element;
+    return element;
   }
 
   @override

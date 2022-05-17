@@ -155,6 +155,7 @@ extension DomElementExtension on DomElement {
   external String get id;
   external set id(String id);
   external set spellcheck(bool? value);
+  external String get tagName;
   external DomCSSStyleDeclaration get style;
   external void append(DomNode node);
   external String? getAttribute(String attributeName);
@@ -184,6 +185,8 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   set bottom(String value) => setProperty('bottom', value, '');
   set backgroundColor(String value) =>
       setProperty('background-color', value, '');
+  set pointerEvents(String value) => setProperty('pointer-events', value, '');
+  set filter(String value) => setProperty('filter', value, '');
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -198,6 +201,8 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get right => getPropertyValue('right');
   String get bottom => getPropertyValue('bottom');
   String get backgroundColor => getPropertyValue('background-color');
+  String get pointerEvents => getPropertyValue('pointer-events');
+  String get filter => getPropertyValue('filter');
 
   external String getPropertyValue(String property);
   void setProperty(String propertyName, String value, [String? priority]) {
@@ -313,6 +318,11 @@ class DomCanvasRenderingContext2D {}
 extension DomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
   external Object? get fillStyle;
   external set fillStyle(Object? style);
+  external DomCanvasGradient createLinearGradient(num x0, num y0, num x1, num
+      y1);
+  external DomCanvasPattern? createPattern(Object image, String reptitionType);
+  external DomCanvasGradient createRadialGradient(num x0, num y0, num r0, num
+      x1, num y1, num r1);
   external void drawImage(DomCanvasImageSource source, num destX, num destY);
   external void fillRect(num x, num y, num width, num height);
   external DomImageData getImageData(int x, int y, int sw, int sh);
@@ -324,6 +334,18 @@ class DomImageData {}
 
 extension DomImageDataExtension on DomImageData {
   external Uint8ClampedList get data;
+}
+
+@JS()
+@staticInterop
+class DomCanvasPattern {}
+
+@JS()
+@staticInterop
+class DomCanvasGradient {}
+
+extension DomCanvasGradientExtension on DomCanvasGradient {
+  external void addColorStop(num offset, String color);
 }
 
 @JS()

@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
+import 'dom.dart';
 import 'engine_canvas.dart';
 import 'html/bitmap_canvas.dart';
 import 'html/painting.dart';
@@ -983,7 +984,8 @@ class ContextStateHandle {
       if (paint.shader is EngineGradient) {
         final EngineGradient engineShader = paint.shader! as EngineGradient;
         final Object paintStyle =
-            engineShader.createPaintStyle(_canvasPool.context, shaderBounds,
+            engineShader.createPaintStyle(_canvasPool.context as
+                DomCanvasRenderingContext2D, shaderBounds,
                 density);
         fillStyle = paintStyle;
         strokeStyle = paintStyle;
@@ -993,7 +995,8 @@ class ContextStateHandle {
       } else if (paint.shader is EngineImageShader) {
         final EngineImageShader imageShader = paint.shader! as EngineImageShader;
         final Object paintStyle =
-            imageShader.createPaintStyle(_canvasPool.context, shaderBounds,
+            imageShader.createPaintStyle(_canvasPool.context as
+                DomCanvasRenderingContext2D, shaderBounds,
                 density);
         fillStyle = paintStyle;
         strokeStyle = paintStyle;

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
 import '../../browser_detection.dart';
+import '../../dom.dart';
 import '../../html_image_codec.dart';
 import '../../safe_browser_api.dart';
 import '../../vector_math.dart';
@@ -29,7 +29,7 @@ class EngineImageShader implements ui.ImageShader {
   /// Whether fill pattern requires transform to shift tiling offset.
   bool requiresTileOffset = false;
 
-  Object createPaintStyle(html.CanvasRenderingContext2D context,
+  Object createPaintStyle(DomCanvasRenderingContext2D context,
       ui.Rect? shaderBounds, double density) {
     /// Creates a canvas rendering context pattern based on image and tile modes.
     final ui.TileMode tileX = tileModeX;
@@ -114,16 +114,16 @@ class EngineImageShader implements ui.ImageShader {
         offscreenCanvas.transferToImageBitmapSupported) {
       return offscreenCanvas.transferToImageBitmap();
     } else {
-      final html.CanvasElement canvas =
-          html.CanvasElement(width: newWidth, height: newHeight);
-      final html.CanvasRenderingContext2D ctx = canvas.context2D;
+      final DomCanvasElement canvas =
+          createDomCanvasElement(width: newWidth, height: newHeight);
+      final DomCanvasRenderingContext2D ctx = canvas.context2D;
       offscreenCanvas.transferImage(ctx);
       return canvas;
     }
   }
 
   /// Creates an image with tiled/transformed images.
-  html.CanvasPattern _createGlShader(html.CanvasRenderingContext2D? context,
+  DomCanvasPattern _createGlShader(DomCanvasRenderingContext2D? context,
       ui.Rect shaderBounds, double density) {
     final Matrix4 transform = Matrix4.fromFloat32List(matrix4);
     final double dpr = ui.window.devicePixelRatio;
