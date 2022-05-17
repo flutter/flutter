@@ -469,14 +469,14 @@ TEST_P(AiksTest, PaintBlendModeIsRespected) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_P(AiksTest, CanDrawWithAdvancedBlend) {
+TEST_P(AiksTest, ColorWheel) {
   // Compare with https://fiddle.skia.org/c/@BlendModes
 
   std::vector<const char*> blend_mode_names;
   std::vector<Entity::BlendMode> blend_mode_values;
   {
     const std::vector<std::tuple<const char*, Entity::BlendMode>> blends = {
-        // Pipeline blends (Porter-Duff/alpha blends)
+        // Pipeline blends (Porter-Duff alpha compositing)
         {"Clear", Entity::BlendMode::kClear},
         {"Source", Entity::BlendMode::kSource},
         {"Destination", Entity::BlendMode::kDestination},
@@ -491,7 +491,7 @@ TEST_P(AiksTest, CanDrawWithAdvancedBlend) {
         {"Xor", Entity::BlendMode::kXor},
         {"Plus", Entity::BlendMode::kPlus},
         {"Modulate", Entity::BlendMode::kModulate},
-        // Advanced blends (non Porter-Duff/color blends)
+        // Advanced blends (color component blends)
         {"Screen", Entity::BlendMode::kScreen},
         {"ColorBurn", Entity::BlendMode::kColorBurn},
     };
@@ -572,16 +572,17 @@ TEST_P(AiksTest, CanDrawWithAdvancedBlend) {
     draw_color_wheel(canvas);
 
     // Draw 3 circles to a subpass and blend it in.
-    canvas.SaveLayer({.blend_mode = blend_mode_values[current_blend_index]});
+    canvas.SaveLayer({.color = Color::White().WithAlpha(alpha),
+                      .blend_mode = blend_mode_values[current_blend_index]});
     {
       paint.blend_mode = Entity::BlendMode::kPlus;
       const Scalar x = std::sin(k2Pi / 3);
       const Scalar y = -std::cos(k2Pi / 3);
-      paint.color = Color::Red().WithAlpha(alpha);
+      paint.color = Color::Red();
       canvas.DrawCircle(Point(-x, y) * 45, 65, paint);
-      paint.color = Color::Green().WithAlpha(alpha);
+      paint.color = Color::Green();
       canvas.DrawCircle(Point(0, -1) * 45, 65, paint);
-      paint.color = Color::Blue().WithAlpha(alpha);
+      paint.color = Color::Blue();
       canvas.DrawCircle(Point(x, y) * 45, 65, paint);
     }
     canvas.Restore();
