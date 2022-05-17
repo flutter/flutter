@@ -18,7 +18,7 @@ gcp_credentials: ENCRYPTED[!2c88dee9c9d9805b214c9f7ad8f3bc8fae936cdb0f881d562101
 task:
   gke_container:
     dockerfile: "dev/ci/docker_linux/Dockerfile"
-    builder_image_name: docker-builder # gce vm image
+    builder_image_name: docker-builder-linux # gce vm image
     builder_image_project: flutter-cirrus
     cluster_name: test-cluster
     zone: us-central1-a
@@ -156,21 +156,3 @@ task:
         - git fetch origin master:master
         # The actual logic is in a shell script so that it can be shared between CIs.
         - (cd dev/customer_testing/; ./ci.sh)
-
-    - name: web_smoke_test
-      only_if: "changesInclude('.cirrus.yml', 'examples/hello_world/**' ,'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') && $CIRRUS_PR != ''"
-      environment:
-        # Tests Hello World with Flutter Web Engine using Flutter Driver. Should not need more resources.
-        CPU: 2
-        MEMORY: 2G
-        CHROME_NO_SANDBOX: true
-      script:
-        - flutter config --enable-web
-        - git clone https://github.com/flutter/web_installers.git
-        - cd web_installers/packages/web_drivers/
-        - dart __deprecated_pub get
-        - dart lib/web_driver_installer.dart chromedriver --install-only
-        - chromedriver/chromedriver --port=4444 &
-        - sleep 1
-        - cd ../../../examples/hello_world/
-        - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome

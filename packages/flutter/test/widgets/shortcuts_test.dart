@@ -103,8 +103,8 @@ Widget activatorTester(
       if (hasSecond)
         TestIntent2: TestAction(onInvoke: (Intent intent) {
           onInvoke2(intent);
-	  return null;
-        }),
+        return null;
+      }),
     },
     child: Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
@@ -319,6 +319,30 @@ void main() {
         LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyD).hashCode,
         LogicalKeySet(LogicalKeyboardKey.keyD, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyA).hashCode,
       );
+    });
+
+    testWidgets('isActivatedBy works as expected', (WidgetTester tester) async {
+      // Collect some key events to use for testing.
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      await tester.pumpWidget(
+        Focus(
+          autofocus: true,
+          onKey: (FocusNode node, RawKeyEvent event) {
+            events.add(event);
+            return KeyEventResult.ignored;
+          },
+          child: const SizedBox(),
+        ),
+      );
+
+      final LogicalKeySet set = LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.control);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(set, events[0]), isTrue);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(ShortcutActivator.isActivatedBy(set, events[0]), isFalse);
     });
 
     test('LogicalKeySet diagnostics work.', () {
@@ -541,6 +565,33 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
     });
 
+<<<<<<< HEAD
+=======
+    testWidgets('isActivatedBy works as expected', (WidgetTester tester) async {
+      // Collect some key events to use for testing.
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      await tester.pumpWidget(
+        Focus(
+          autofocus: true,
+          onKey: (FocusNode node, RawKeyEvent event) {
+            events.add(event);
+            return KeyEventResult.ignored;
+          },
+          child: const SizedBox(),
+        ),
+      );
+
+      const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.keyA, control: true);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events[1]), isTrue);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events[1]), isFalse);
+    });
+
+>>>>>>> ee4e09cce01d6f2d7f4baebd247fde02e5008851
     group('diagnostics.', () {
       test('single key', () {
         final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -1167,6 +1218,28 @@ void main() {
       expect(invoked, 2);
       invoked = 0;
     }, variant: KeySimulatorTransitModeVariant.all());
+
+
+    testWidgets('isActivatedBy works as expected', (WidgetTester tester) async {
+      // Collect some key events to use for testing.
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      await tester.pumpWidget(
+        Focus(
+          autofocus: true,
+          onKey: (FocusNode node, RawKeyEvent event) {
+            events.add(event);
+            return KeyEventResult.ignored;
+          },
+          child: const SizedBox(),
+        ),
+      );
+
+      const CharacterActivator characterActivator = CharacterActivator('a');
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(characterActivator, events[0]), isTrue);
+    });
   });
 
   group('CallbackShortcuts', () {

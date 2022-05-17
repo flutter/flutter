@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection' show HashMap;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
@@ -688,7 +689,7 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 ///
 /// Calls to this object are typically made from GUI tools such as the [Flutter
 /// IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/master/README.md)
-/// using the [Dart VM Service protocol](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md).
+/// using the [Dart VM Service](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md).
 /// This class uses its own object id and manages object lifecycles itself
 /// instead of depending on the [object ids](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#getobject)
 /// specified by the VM Service Protocol because the VM Service Protocol ids
@@ -742,6 +743,8 @@ mixin WidgetInspectorService {
   int _nextId = 0;
 
   List<String>? _pubRootDirectories;
+  /// Memoization for [_isLocalCreationLocation].
+  final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
 
   bool _trackRebuildDirtyWidgets = false;
   bool _trackRepaintWidgets = false;
@@ -906,7 +909,7 @@ mixin WidgetInspectorService {
   /// This is expensive and should not be called except during development.
   @protected
   Future<void> forceRebuild() {
-    final WidgetsBinding binding = WidgetsBinding.instance!;
+    final WidgetsBinding binding = WidgetsBinding.instance;
     if (binding.renderViewElement != null) {
       binding.buildOwner!.reassemble(binding.renderViewElement!, null);
       return binding.endOfFrame;
@@ -989,7 +992,7 @@ mixin WidgetInspectorService {
       return true;
     }());
 
-    SchedulerBinding.instance!.addPersistentFrameCallback(_onFrameStart);
+    SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     _registerBoolServiceExtension(
       name: 'structuredErrors',
@@ -1056,7 +1059,7 @@ mixin WidgetInspectorService {
               renderObject.markNeedsPaint();
               renderObject.visitChildren(markTreeNeedsPaint);
             }
-            final RenderObject root = RendererBinding.instance!.renderView;
+            final RenderObject root = RendererBinding.instance.renderView;
             markTreeNeedsPaint(root);
           } else {
             debugOnProfilePaint = null;
@@ -1279,7 +1282,7 @@ mixin WidgetInspectorService {
   @protected
   bool isWidgetTreeReady([ String? groupName ]) {
     return WidgetsBinding.instance != null &&
-           WidgetsBinding.instance!.debugDidSendFirstFrameEvent;
+           WidgetsBinding.instance.debugDidSendFirstFrameEvent;
   }
 
   /// Returns the Dart object associated with a reference id.
@@ -1345,6 +1348,7 @@ mixin WidgetInspectorService {
     _pubRootDirectories = pubRootDirectories
       .map<String>((String directory) => Uri.parse(directory).path)
       .toList();
+    _isLocalCreationCache.clear();
   }
 
   /// Set the [WidgetInspector] selection to the object matching the specified
@@ -1383,12 +1387,12 @@ mixin WidgetInspectorService {
         developer.inspect(selection.current);
       }
       if (selectionChangedCallback != null) {
-        if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.idle) {
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
           selectionChangedCallback!();
         } else {
           // It isn't safe to trigger the selection change callback if we are in
           // the middle of rendering the frame.
-          SchedulerBinding.instance!.scheduleTask(
+          SchedulerBinding.instance.scheduleTask(
             selectionChangedCallback!,
             Priority.touch,
           );
@@ -1419,7 +1423,7 @@ mixin WidgetInspectorService {
 
     final Uri uri = Uri.parse(activeDevToolsServerAddress!).replace(
       queryParameters: <String, dynamic>{
-        'uri': connectedVmServiceUri!,
+        'uri': connectedVmServiceUri,
         'inspectorRef': inspectorRef,
       },
     );
@@ -1518,14 +1522,11 @@ mixin WidgetInspectorService {
     if (creationLocation == null) {
       return false;
     }
-    return _isLocalCreationLocation(creationLocation);
+    return _isLocalCreationLocation(creationLocation.file);
   }
 
-  bool _isLocalCreationLocation(_Location? location) {
-    if (location == null) {
-      return false;
-    }
-    final String file = Uri.parse(location.file).path;
+  bool _isLocalCreationLocationImpl(String locationUri) {
+    final String file = Uri.parse(locationUri).path;
 
     // By default check whether the creation location was within package:flutter.
     if (_pubRootDirectories == null) {
@@ -1539,6 +1540,17 @@ mixin WidgetInspectorService {
       }
     }
     return false;
+  }
+
+  /// Memoized version of [_isLocalCreationLocationImpl].
+  bool _isLocalCreationLocation(String locationUri) {
+    final bool? cachedValue = _isLocalCreationCache[locationUri];
+    if (cachedValue != null) {
+      return cachedValue;
+    }
+    final bool result = _isLocalCreationLocationImpl(locationUri);
+    _isLocalCreationCache[locationUri] = result;
+    return result;
   }
 
   /// Wrapper around `json.encode` that uses a ring of cached values to prevent
@@ -1685,7 +1697,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootWidget(String groupName) {
-    return _nodeToJson(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -1696,7 +1708,7 @@ mixin WidgetInspectorService {
 
   Map<String, Object?>? _getRootWidgetSummaryTree(String groupName) {
     return _nodeToJson(
-      WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(),
+      WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(groupName: groupName, subtreeDepth: 1000000, summaryTree: true, service: this),
     );
   }
@@ -1709,7 +1721,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance?.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(RendererBinding.instance.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -1901,7 +1913,7 @@ mixin WidgetInspectorService {
 
   void _onFrameStart(Duration timeStamp) {
     _frameStart = timeStamp;
-    SchedulerBinding.instance!.addPostFrameCallback(_onFrameEnd);
+    SchedulerBinding.instance.addPostFrameCallback(_onFrameEnd);
   }
 
   void _onFrameEnd(Duration timeStamp) {
@@ -2066,7 +2078,7 @@ class _ElementLocationStatsTracker {
       entry = _LocationCount(
         location: location,
         id: id,
-        local: WidgetInspectorService.instance._isLocalCreationLocation(location),
+        local: WidgetInspectorService.instance._isLocalCreationLocation(location.file),
       );
       if (entry.local) {
         newLocations.add(entry);
@@ -2358,7 +2370,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // on the edge of the display. If the pointer is being dragged off the edge
     // of the display we do not want to select anything. A user can still select
     // a widget that is only at the exact screen margin by tapping.
-    final Rect bounds = (Offset.zero & (WidgetsBinding.instance!.window.physicalSize / WidgetsBinding.instance!.window.devicePixelRatio)).deflate(_kOffScreenMargin);
+    final Rect bounds = (Offset.zero & (WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation!)) {
       setState(() {
         selection.clear();
@@ -2473,7 +2485,7 @@ class InspectorSelection {
 
   Element? _currentElement;
   set currentElement(Element? element) {
-    if (element?.debugIsDefunct == true) {
+    if (element?.debugIsDefunct ?? false) {
       _currentElement = null;
       _current = null;
       return;
@@ -2574,7 +2586,7 @@ class _TransformedRect {
   }
 
   @override
-  int get hashCode => hashValues(rect, transform);
+  int get hashCode => Object.hash(rect, transform);
 }
 
 /// State describing how the inspector overlay should be rendered.
@@ -2609,7 +2621,7 @@ class _InspectorOverlayRenderState {
   }
 
   @override
-  int get hashCode => hashValues(overlayRect, selected, hashList(candidates), tooltip);
+  int get hashCode => Object.hash(overlayRect, selected, Object.hashAll(candidates), tooltip);
 }
 
 const int _kMaxTooltipLines = 5;
@@ -2869,6 +2881,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
+    // ignore: unused_element
     this.name,
   });
 
@@ -3071,12 +3084,22 @@ bool debugIsLocalCreationLocation(Object object) {
   bool isLocal = false;
   assert(() {
     final _Location? location = _getCreationLocation(object);
-    if (location == null)
-      isLocal =  false;
-    isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location);
+    if (location != null) {
+      isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location.file);
+    }
     return true;
   }());
   return isLocal;
+}
+
+/// Returns true if a [Widget] is user created.
+///
+/// This is a faster variant of `debugIsLocalCreationLocation` that is available
+/// in debug and profile builds but only works for [Widget].
+bool debugIsWidgetLocalCreation(Widget widget) {
+  final _Location? location = _getObjectCreationLocation(widget);
+  return location != null &&
+      WidgetInspectorService.instance._isLocalCreationLocation(location.file);
 }
 
 /// Returns the creation location of an object in String format if one is available.
@@ -3091,14 +3114,18 @@ String? _describeCreationLocation(Object object) {
   return location?.toString();
 }
 
+_Location? _getObjectCreationLocation(Object object) {
+  return object is _HasCreationLocation ? object._location : null;
+}
+
 /// Returns the creation location of an object if one is available.
 ///
 /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 _Location? _getCreationLocation(Object? object) {
-  final Object? candidate =  object is Element && !object.debugIsDefunct ? object.widget : object;
-  return candidate is _HasCreationLocation ? candidate._location : null;
+  final Object? candidate = object is Element && !object.debugIsDefunct ? object.widget : object;
+  return candidate == null ? null : _getObjectCreationLocation(candidate);
 }
 
 // _Location objects are always const so we don't need to worry about the GC
@@ -3225,7 +3252,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     if (creationLocation != null) {
       result['locationId'] = _toLocationId(creationLocation);
       result['creationLocation'] = creationLocation.toJsonMap();
-      if (service._isLocalCreationLocation(creationLocation)) {
+      if (service._isLocalCreationLocation(creationLocation.file)) {
         _nodesCreatedByLocalProject.add(node);
         result['createdByLocalProject'] = true;
       }

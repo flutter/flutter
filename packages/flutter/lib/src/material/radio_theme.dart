@@ -120,16 +120,14 @@ class RadioThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      mouseCursor,
-      fillColor,
-      overlayColor,
-      splashRadius,
-      materialTapTargetSize,
-      visualDensity,
-    );
-  }
+  int get hashCode => Object.hash(
+    mouseCursor,
+    fillColor,
+    overlayColor,
+    splashRadius,
+    materialTapTargetSize,
+    visualDensity,
+  );
 
   @override
   bool operator ==(Object other) {

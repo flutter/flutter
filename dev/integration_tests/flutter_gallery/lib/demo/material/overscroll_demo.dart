@@ -11,7 +11,7 @@ import '../../gallery/demo.dart';
 enum IndicatorType { overscroll, refresh }
 
 class OverscrollDemo extends StatefulWidget {
-  const OverscrollDemo({ Key? key }) : super(key: key);
+  const OverscrollDemo({ super.key });
 
   static const String routeName = '/material/overscroll';
 

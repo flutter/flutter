@@ -47,6 +47,19 @@ void main() {
   group('Standard method codec', () {
     const MethodCodec method = StandardMethodCodec();
     const StandardMessageCodec messageCodec = StandardMessageCodec();
+
+    test('Should encode and decode objects produced from codec', () {
+      final ByteData? data = messageCodec.encodeMessage(<Object, Object>{
+        'foo': true,
+        3: 'fizz',
+      });
+
+      expect(messageCodec.decodeMessage(data), <Object?, Object?>{
+        'foo': true,
+        3: 'fizz',
+      });
+    });
+
     test('should decode error envelope without native stacktrace', () {
       final ByteData errorData = method.encodeErrorEnvelope(
         code: 'errorCode',
@@ -63,6 +76,7 @@ void main() {
         )),
       );
     });
+
     test('should decode error envelope with native stacktrace.', () {
       final WriteBuffer buffer = WriteBuffer();
       buffer.putUint8(1);

@@ -18,16 +18,18 @@ export 'dart:ui' show AppLifecycleState, VoidCallback, FrameTiming;
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
 double _timeDilation = 1.0;
-/// Setting the time dilation automatically calls [SchedulerBinding.resetEpoch]
-/// to ensure that time stamps seen by consumers of the scheduler binding are
-/// always increasing.
+/// If the [SchedulerBinding] has been initialized, setting the time dilation
+/// automatically calls [SchedulerBinding.resetEpoch] to ensure that time stamps
+/// seen by consumers of the scheduler binding are always increasing.
+///
+/// It is safe to set this before initializing the binding.
 set timeDilation(double value) {
   assert(value > 0.0);
   if (_timeDilation == value)
     return;
-  // We need to resetEpoch first so that we capture start of the epoch with the
-  // current time dilation.
-  SchedulerBinding.instance?.resetEpoch();
+  // If the binding has been created, we need to resetEpoch first so that we
+  // capture start of the epoch with the current time dilation.
+  SchedulerBinding._instance?.resetEpoch();
   _timeDilation = value;
 }
 
@@ -208,6 +210,14 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
+  /// The current [SchedulerBinding], if one has been created.
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static SchedulerBinding get instance => BindingBase.checkInstance(_instance);
+  static SchedulerBinding? _instance;
+
   final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
 
   /// Add a [TimingsCallback] that receives [FrameTiming] sent from
@@ -261,10 +271,10 @@ mixin SchedulerBinding on BindingBase {
   void addTimingsCallback(TimingsCallback callback) {
     _timingsCallbacks.add(callback);
     if (_timingsCallbacks.length == 1) {
-      assert(window.onReportTimings == null);
-      window.onReportTimings = _executeTimingsCallbacks;
+      assert(platformDispatcher.onReportTimings == null);
+      platformDispatcher.onReportTimings = _executeTimingsCallbacks;
     }
-    assert(window.onReportTimings == _executeTimingsCallbacks);
+    assert(platformDispatcher.onReportTimings == _executeTimingsCallbacks);
   }
 
   /// Removes a callback that was earlier added by [addTimingsCallback].
@@ -272,7 +282,7 @@ mixin SchedulerBinding on BindingBase {
     assert(_timingsCallbacks.contains(callback));
     _timingsCallbacks.remove(callback);
     if (_timingsCallbacks.isEmpty) {
-      window.onReportTimings = null;
+      platformDispatcher.onReportTimings = null;
     }
   }
 
@@ -306,10 +316,6 @@ mixin SchedulerBinding on BindingBase {
       }
     }
   }
-
-  /// The current [SchedulerBinding], if one has been created.
-  static SchedulerBinding? get instance => _instance;
-  static SchedulerBinding? _instance;
 
   @override
   void initServiceExtensions() {
@@ -721,8 +727,8 @@ mixin SchedulerBinding on BindingBase {
   /// [PlatformDispatcher.onDrawFrame] are registered.
   @protected
   void ensureFrameCallbacksRegistered() {
-    window.onBeginFrame ??= _handleBeginFrame;
-    window.onDrawFrame ??= _handleDrawFrame;
+    platformDispatcher.onBeginFrame ??= _handleBeginFrame;
+    platformDispatcher.onDrawFrame ??= _handleDrawFrame;
   }
 
   /// Schedules a new frame using [scheduleFrame] if this object is not
@@ -787,7 +793,7 @@ mixin SchedulerBinding on BindingBase {
       return true;
     }());
     ensureFrameCallbacksRegistered();
-    window.scheduleFrame();
+    platformDispatcher.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
@@ -812,11 +818,6 @@ mixin SchedulerBinding on BindingBase {
   /// Consider using [scheduleWarmUpFrame] instead if the goal is to update the
   /// rendering as soon as possible (e.g. at application startup).
   void scheduleForcedFrame() {
-    // TODO(chunhtai): Removes the if case once the issue is fixed
-    // https://github.com/flutter/flutter/issues/45131
-    if (!framesEnabled)
-      return;
-
     if (_hasScheduledFrame)
       return;
     assert(() {
@@ -824,7 +825,8 @@ mixin SchedulerBinding on BindingBase {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    window.scheduleFrame();
+    ensureFrameCallbacksRegistered();
+    platformDispatcher.scheduleFrame();
     _hasScheduledFrame = true;
   }
 

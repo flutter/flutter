@@ -12,6 +12,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
+import 'platform_menu_bar.dart';
 
 /// A set of [KeyboardKey]s that can be used as the keys in a [Map].
 ///
@@ -117,11 +118,11 @@ class KeySet<T extends KeyboardKey> {
     if (length == 2) {
       // No need to sort if there's two keys, just compare them.
       return h1 < h2
-        ? hashValues(h1, h2)
-        : hashValues(h2, h1);
+        ? Object.hash(h1, h2)
+        : Object.hash(h2, h1);
     }
 
-    // Sort key hash codes and feed to hashList to ensure the aggregate
+    // Sort key hash codes and feed to Object.hashAll to ensure the aggregate
     // hash code does not depend on the key order.
     final List<int> sortedHashes = length == 3
       ? _tempHashStore3
@@ -135,7 +136,7 @@ class KeySet<T extends KeyboardKey> {
       sortedHashes[3] = iterator.current.hashCode;
     }
     sortedHashes.sort();
-    return hashList(sortedHashes);
+    return Object.hashAll(sortedHashes);
   }
 }
 
@@ -210,6 +211,16 @@ abstract class ShortcutActivator {
   ///  * [LogicalKeyboardKey.collapseSynonyms], which helps deciding whether a
   ///    modifier key is pressed when the side variation is not important.
   bool accepts(RawKeyEvent event, RawKeyboard state);
+
+  /// Returns true if the event and keyboard state would cause this
+  /// [ShortcutActivator] to be activated.
+  ///
+  /// If the keyboard `state` isn't supplied, then it defaults to using
+  /// [RawKeyboard.instance].
+  static bool isActivatedBy(ShortcutActivator activator, RawKeyEvent event) {
+    return (activator.triggers?.contains(event.logicalKey) ?? true)
+        && activator.accepts(event, RawKeyboard.instance);
+  }
 
   /// Returns a description of the key set that is short and readable.
   ///
@@ -387,7 +398,11 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///
 ///  * [CharacterActivator], an activator that represents key combinations
 ///    that result in the specified character, such as question mark.
+<<<<<<< HEAD
 class SingleActivator with Diagnosticable implements ShortcutActivator {
+=======
+class SingleActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
+>>>>>>> ee4e09cce01d6f2d7f4baebd247fde02e5008851
   /// Triggered when the [trigger] key is pressed while the modifiers are held.
   ///
   /// The `trigger` should be the non-modifier key that is pressed after all the
@@ -507,6 +522,17 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
       && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
 
+  @override
+  ShortcutSerialization serializeForMenu() {
+    return ShortcutSerialization.modifier(
+      trigger,
+      shift: shift,
+      alt: alt,
+      meta: meta,
+      control: control,
+    );
+  }
+
   /// Returns a short and readable description of the key combination.
   ///
   /// Intended to be used in debug mode for logging purposes. In release mode,
@@ -542,7 +568,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// Keys often produce different characters when combined with modifiers. For
 /// example, it might be helpful for the user to bring up a help menu by
 /// pressing the question mark ('?'). However, there is no logical key that
-/// directly represents a question mark. Althouh 'Shift+Slash' produces a '?'
+/// directly represents a question mark. Although 'Shift+Slash' produces a '?'
 /// character on a US keyboard, its logical key is still considered a Slash key,
 /// and hard-coding 'Shift+Slash' in this situation is unfriendly to other
 /// keyboard layouts.
@@ -562,7 +588,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 ///
 ///  * [SingleActivator], an activator that represents a single key combined
 ///    with modifiers, such as `Ctrl+C`.
-class CharacterActivator with Diagnosticable implements ShortcutActivator {
+class CharacterActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Create a [CharacterActivator] from the triggering character.
   const CharacterActivator(this.character);
 
@@ -596,6 +622,11 @@ class CharacterActivator with Diagnosticable implements ShortcutActivator {
       return true;
     }());
     return result;
+  }
+
+  @override
+  ShortcutSerialization serializeForMenu() {
+    return ShortcutSerialization.character(character);
   }
 
   @override
@@ -1016,11 +1047,9 @@ class CallbackShortcuts extends StatelessWidget {
   // throws, by providing the activator and event as arguments that will appear
   // in the stack trace.
   bool _applyKeyBinding(ShortcutActivator activator, RawKeyEvent event) {
-    if (activator.triggers?.contains(event.logicalKey) ?? true) {
-      if (activator.accepts(event, RawKeyboard.instance)) {
-        bindings[activator]!.call();
-        return true;
-      }
+    if (ShortcutActivator.isActivatedBy(activator, event)) {
+      bindings[activator]!.call();
+      return true;
     }
     return false;
   }

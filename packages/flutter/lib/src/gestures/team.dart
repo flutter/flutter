@@ -61,7 +61,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(!_resolved);
     assert(_pointer == pointer);
     _members.add(member);
-    _entry ??= GestureBinding.instance!.gestureArena.add(pointer, this);
+    _entry ??= GestureBinding.instance.gestureArena.add(pointer, this);
     return _CombiningGestureArenaEntry(this, member);
   }
 

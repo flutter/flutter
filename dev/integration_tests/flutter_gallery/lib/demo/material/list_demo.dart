@@ -21,7 +21,7 @@ enum _MaterialListType {
 }
 
 class ListDemo extends StatefulWidget {
-  const ListDemo({ Key? key }) : super(key: key);
+  const ListDemo({ super.key });
 
   static const String routeName = '/material/list';
 

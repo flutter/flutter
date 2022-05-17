@@ -736,11 +736,12 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           '-o', 'ExitOnForwardFailure=yes',
           if (ipv6) '-6',
           '-L', '$formattedLoopbackIp:\${hostPort}:$formattedLoopbackIp:\${devicePort}',
-          sshTarget
+          sshTarget,
+          "echo 'Port forwarding success'; read"
         ]
         : null,
       forwardPortSuccessRegex: usePortForwarding
-        ? RegExp('Linux')
+        ? RegExp('Port forwarding success')
         : null,
 
       screenshotCommand: screenshotCommand.isNotEmpty

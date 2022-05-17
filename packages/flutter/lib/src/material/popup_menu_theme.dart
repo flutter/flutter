@@ -7,6 +7,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'material_state.dart';
 import 'theme.dart';
 
 /// Defines the visual properties of the routes used to display popup menus
@@ -38,6 +39,7 @@ class PopupMenuThemeData with Diagnosticable {
     this.elevation,
     this.textStyle,
     this.enableFeedback,
+    this.mouseCursor,
   });
 
   /// The background color of the popup menu.
@@ -57,6 +59,11 @@ class PopupMenuThemeData with Diagnosticable {
   /// If [PopupMenuButton.enableFeedback] is provided, [enableFeedback] is ignored.
   final bool? enableFeedback;
 
+  /// {@macro flutter.material.popupmenu.mouseCursor}
+  ///
+  /// If specified, overrides the default value of [PopupMenuItem.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
@@ -65,6 +72,7 @@ class PopupMenuThemeData with Diagnosticable {
     double? elevation,
     TextStyle? textStyle,
     bool? enableFeedback,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
@@ -72,6 +80,7 @@ class PopupMenuThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       textStyle: textStyle ?? this.textStyle,
       enableFeedback: enableFeedback ?? this.enableFeedback,
+      mouseCursor: mouseCursor ?? this.mouseCursor,
     );
   }
 
@@ -90,19 +99,19 @@ class PopupMenuThemeData with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
+      mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
     );
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      shape,
-      elevation,
-      textStyle,
-      enableFeedback,
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    shape,
+    elevation,
+    textStyle,
+    enableFeedback,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -115,7 +124,8 @@ class PopupMenuThemeData with Diagnosticable {
         && other.color == color
         && other.shape == shape
         && other.textStyle == textStyle
-        && other.enableFeedback == enableFeedback;
+        && other.enableFeedback == enableFeedback
+        && other.mouseCursor == mouseCursor;
   }
 
   @override
@@ -126,6 +136,7 @@ class PopupMenuThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
   }
 }
 

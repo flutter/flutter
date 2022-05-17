@@ -243,6 +243,98 @@ void main() {
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
   });
+
+  testWidgets('Local DataTableTheme can override global DataTableTheme', (WidgetTester tester) async {
+    const BoxDecoration gloablThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
+    final MaterialStateProperty<Color> gloablThemeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff0));
+    const double gloablThemeDataRowHeight = 50.0;
+    const TextStyle gloablThemeDataTextStyle = TextStyle(fontSize: 11.5);
+    final MaterialStateProperty<Color> gloablThemeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const double gloablThemeHeadingRowHeight = 51.0;
+    const TextStyle gloablThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
+    const double gloablThemeHorizontalMargin = 2.0;
+    const double gloablThemeColumnSpacing = 3.0;
+    const double gloablThemeDividerThickness = 4.0;
+
+    const BoxDecoration localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
+    final MaterialStateProperty<Color> localThemeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const double localThemeDataRowHeight = 51.0;
+    const TextStyle localThemeDataTextStyle = TextStyle(fontSize: 12.5);
+    final MaterialStateProperty<Color> localThemeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
+    const double localThemeHeadingRowHeight = 52.0;
+    const TextStyle localThemeHeadingTextStyle = TextStyle(fontSize: 14.5);
+    const double localThemeHorizontalMargin = 3.0;
+    const double localThemeColumnSpacing = 4.0;
+    const double localThemeDividerThickness = 5.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          dataTableTheme: DataTableThemeData(
+            decoration: gloablThemeDecoration,
+            dataRowColor: gloablThemeDataRowColor,
+            dataRowHeight: gloablThemeDataRowHeight,
+            dataTextStyle: gloablThemeDataTextStyle,
+            headingRowColor: gloablThemeHeadingRowColor,
+            headingRowHeight: gloablThemeHeadingRowHeight,
+            headingTextStyle: gloablThemeHeadingTextStyle,
+            horizontalMargin: gloablThemeHorizontalMargin,
+            columnSpacing: gloablThemeColumnSpacing,
+            dividerThickness: gloablThemeDividerThickness,
+          ),
+        ),
+        home: Scaffold(
+          body: DataTableTheme(
+            data: DataTableThemeData(
+              decoration: localThemeDecoration,
+              dataRowColor: localThemeDataRowColor,
+              dataRowHeight: localThemeDataRowHeight,
+              dataTextStyle: localThemeDataTextStyle,
+              headingRowColor: localThemeHeadingRowColor,
+              headingRowHeight: localThemeHeadingRowHeight,
+              headingTextStyle: localThemeHeadingTextStyle,
+              horizontalMargin: localThemeHorizontalMargin,
+              columnSpacing: localThemeColumnSpacing,
+              dividerThickness: localThemeDividerThickness,
+            ),
+            child: DataTable(
+              sortColumnIndex: 0,
+              columns: <DataColumn>[
+                DataColumn(
+                  label: const Text('A'),
+                  onSort: (int columnIndex, bool ascending) {},
+                ),
+                const DataColumn(label: Text('B')),
+              ],
+              rows: const <DataRow>[
+                DataRow(cells: <DataCell>[
+                  DataCell(Text('Data')),
+                  DataCell(Text('Data 2')),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
+    expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, localThemeDecoration);
+
+    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    expect(dataRowTextStyle.fontSize, localThemeDataTextStyle.fontSize);
+    expect(_tableRowBoxDecoration(tester: tester, index: 1).color, localThemeDataRowColor.resolve(<MaterialState>{}));
+    expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, localThemeDividerThickness);
+    expect(tester.getSize(_findFirstContainerFor('Data')).height, localThemeDataRowHeight);
+
+    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    expect(headingRowTextStyle.fontSize, localThemeHeadingTextStyle.fontSize);
+    expect(_tableRowBoxDecoration(tester: tester, index: 0).color, localThemeHeadingRowColor.resolve(<MaterialState>{}));
+
+    expect(tester.getSize(_findFirstContainerFor('A')).height, localThemeHeadingRowHeight);
+    expect(tester.getTopLeft(find.text('A')).dx, localThemeHorizontalMargin);
+    expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, localThemeColumnSpacing);
+  });
 }
 
 BoxDecoration _tableRowBoxDecoration({required WidgetTester tester, required int index}) {

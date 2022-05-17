@@ -173,56 +173,12 @@ bool _isInAccessibilityMode(BuildContext context) {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This sample shows how to use a [CupertinoAlertDialog].
 ///	The [CupertinoAlertDialog] shows an alert with a set of two choices
 /// when [CupertinoButton] is pressed.
 ///
-/// ```dart
-/// class MyStatefulWidget extends StatefulWidget {
-///   const MyStatefulWidget({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-/// }
-///
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoPageScaffold(
-///       child: Center(
-///         child: CupertinoButton(
-///           onPressed: () {
-///             showCupertinoDialog<void>(
-///               context: context,
-///               builder: (BuildContext context) => CupertinoAlertDialog(
-///                 title: const Text('Alert'),
-///                 content: const Text('Proceed with destructive action?'),
-///                 actions: <CupertinoDialogAction>[
-///                   CupertinoDialogAction(
-///                     child: const Text('No'),
-///                     onPressed: () {
-///                       Navigator.pop(context);
-///                     },
-///                   ),
-///                   CupertinoDialogAction(
-///                     child: const Text('Yes'),
-///                     isDestructiveAction: true,
-///                     onPressed: () {
-///                       // Do something destructive.
-///                     },
-///                   )
-///                 ],
-///               ),
-///             );
-///           },
-///           child: const Text('CupertinoAlertDialog'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/dialog/cupertino_alert_dialog.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -494,55 +450,12 @@ class CupertinoPopupSurface extends StatelessWidget {
 /// [showCupertinoModalPopup], which displays the action sheet by sliding it up
 /// from the bottom of the screen.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This sample shows how to use a [CupertinoActionSheet].
 ///	The [CupertinoActionSheet] shows a modal popup that slides in from the
 /// bottom when [CupertinoButton] is pressed.
 ///
-/// ```dart
-/// class MyStatefulWidget extends StatefulWidget {
-///   const MyStatefulWidget({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-/// }
-///
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoPageScaffold(
-///       child: Center(
-///         child: CupertinoButton(
-///           onPressed: () {
-///             showCupertinoModalPopup<void>(
-///               context: context,
-///               builder: (BuildContext context) => CupertinoActionSheet(
-///                 title: const Text('Title'),
-///                 message: const Text('Message'),
-///                 actions: <CupertinoActionSheetAction>[
-///                   CupertinoActionSheetAction(
-///                     child: const Text('Action One'),
-///                     onPressed: () {
-///                       Navigator.pop(context);
-///                     },
-///                   ),
-///                   CupertinoActionSheetAction(
-///                     child: const Text('Action Two'),
-///                     onPressed: () {
-///                       Navigator.pop(context);
-///                     },
-///                   )
-///                 ],
-///               ),
-///             );
-///           },
-///           child: const Text('CupertinoActionSheet'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/dialog/cupertino_action_sheet.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -790,25 +703,28 @@ class CupertinoActionSheetAction extends StatelessWidget {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
-    return GestureDetector(
-      onTap: onPressed,
-      behavior: HitTestBehavior.opaque,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: _kActionSheetButtonHeight,
-        ),
-        child: Semantics(
-          button: true,
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(
-              vertical: 16.0,
-              horizontal: 10.0,
-            ),
-            child: DefaultTextStyle(
-              style: style,
-              textAlign: TextAlign.center,
-              child: child,
+    return MouseRegion(
+      cursor: onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: GestureDetector(
+        onTap: onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: _kActionSheetButtonHeight,
+          ),
+          child: Semantics(
+            button: true,
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(
+                vertical: 16.0,
+                horizontal: 10.0,
+              ),
+              child: DefaultTextStyle(
+                style: style,
+                textAlign: TextAlign.center,
+                child: child,
+              ),
             ),
           ),
         ),
@@ -917,9 +833,6 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   Element? _actionsElement;
 
   @override
-  _CupertinoDialogRenderWidget get widget => super.widget as _CupertinoDialogRenderWidget;
-
-  @override
   _RenderCupertinoDialog get renderObject => super.renderObject as _RenderCupertinoDialog;
 
   @override
@@ -935,8 +848,9 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
-    _contentElement = updateChild(_contentElement, widget.contentSection, _AlertDialogSections.contentSection);
-    _actionsElement = updateChild(_actionsElement, widget.actionsSection, _AlertDialogSections.actionsSection);
+    final _CupertinoDialogRenderWidget dialogRenderWidget = widget as _CupertinoDialogRenderWidget;
+    _contentElement = updateChild(_contentElement, dialogRenderWidget.contentSection, _AlertDialogSections.contentSection);
+    _actionsElement = updateChild(_actionsElement, dialogRenderWidget.actionsSection, _AlertDialogSections.actionsSection);
   }
 
   @override
@@ -957,8 +871,9 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   @override
   void update(RenderObjectWidget newWidget) {
     super.update(newWidget);
-    _contentElement = updateChild(_contentElement, widget.contentSection, _AlertDialogSections.contentSection);
-    _actionsElement = updateChild(_actionsElement, widget.actionsSection, _AlertDialogSections.actionsSection);
+    final _CupertinoDialogRenderWidget dialogRenderWidget = widget as _CupertinoDialogRenderWidget;
+    _contentElement = updateChild(_contentElement, dialogRenderWidget.contentSection, _AlertDialogSections.contentSection);
+    _actionsElement = updateChild(_actionsElement, dialogRenderWidget.actionsSection, _AlertDialogSections.actionsSection);
   }
 
   @override
@@ -1675,11 +1590,7 @@ class _ActionButtonParentDataWidget
 // ParentData applied to individual action buttons that report whether or not
 // that button is currently pressed by the user.
 class _ActionButtonParentData extends MultiChildLayoutParentData {
-  _ActionButtonParentData({
-    this.isPressed = false,
-  });
-
-  bool isPressed;
+  bool isPressed = false;
 }
 
 /// A button typically used in a [CupertinoAlertDialog].
@@ -1843,18 +1754,21 @@ class CupertinoDialogAction extends StatelessWidget {
             content: child,
           );
 
-    return GestureDetector(
-      excludeFromSemantics: true,
-      onTap: onPressed,
-      behavior: HitTestBehavior.opaque,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: _kDialogMinButtonHeight,
-        ),
-        child: Container(
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(_calculatePadding(context)),
-          child: sizedContent,
+    return MouseRegion(
+      cursor: onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: GestureDetector(
+        excludeFromSemantics: true,
+        onTap: onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: _kDialogMinButtonHeight,
+          ),
+          child: Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(_calculatePadding(context)),
+            child: sizedContent,
+          ),
         ),
       ),
     );
