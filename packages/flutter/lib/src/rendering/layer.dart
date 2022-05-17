@@ -214,6 +214,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       }());
     };
     return () {
+      assert(_callbacks.containsKey(callbackId));
       _callbacks.remove(callbackId);
       _updateSubtreeCompositionObserverCount(-1);
     };
