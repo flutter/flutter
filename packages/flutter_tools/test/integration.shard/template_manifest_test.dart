@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/convert.dart';
 import '../src/common.dart';
@@ -12,11 +10,11 @@ import 'test_utils.dart';
 /// Checks that all active template files are defined in the template_manifest.json file.
 void main() {
   testWithoutContext('Check template manifest is up to date', () {
-    final Map<String, Object> manifest = json.decode(
+    final Map<String, Object?> manifest = json.decode(
       fileSystem.file('templates/template_manifest.json').readAsStringSync(),
-    ) as Map<String, Object>;
+    ) as Map<String, Object?>;
     final Set<Uri> declaredFileList = Set<Uri>.from(
-      (manifest['files'] as List<Object>).cast<String>().map<Uri>(fileSystem.path.toUri));
+      (manifest['files'] as List<Object?>?)!.cast<String>().map<Uri>(fileSystem.path.toUri));
 
     final Set<Uri> activeTemplateList = fileSystem.directory('templates')
       .listSync(recursive: true)

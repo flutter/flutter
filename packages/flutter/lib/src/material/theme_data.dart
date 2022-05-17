@@ -201,9 +201,7 @@ enum MaterialTapTargetSize {
 /// ```dart
 /// MaterialApp(
 ///   theme: ThemeData(
-///     colorScheme: ColorScheme.fromSwatch(
-///       primarySwatch: Colors.blue,
-///     ).copyWith(
+///     colorScheme: ColorScheme.fromSwatch().copyWith(
 ///       secondary: Colors.green,
 ///     ),
 ///     textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.purple)),

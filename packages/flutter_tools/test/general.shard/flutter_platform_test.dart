@@ -95,7 +95,7 @@ void main() {
         precompiledDillPath: 'def',
         precompiledDillFiles: expectedPrecompiledDillFiles,
         updateGoldens: true,
-        buildTestAssets: true,
+        testAssetDirectory: '/build/test',
         serverType: InternetAddressType.IPv6,
         icudtlPath: 'ghi',
         platformPluginRegistration: (FlutterPlatform platform) {
@@ -114,7 +114,7 @@ void main() {
       expect(flutterPlatform.precompiledDillPath, equals('def'));
       expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
       expect(flutterPlatform.updateGoldens, equals(true));
-      expect(flutterPlatform.buildTestAssets, equals(true));
+      expect(flutterPlatform.testAssetDirectory, '/build/test');
       expect(flutterPlatform.icudtlPath, equals('ghi'));
     });
   });

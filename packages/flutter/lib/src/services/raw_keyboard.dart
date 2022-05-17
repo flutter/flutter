@@ -364,6 +364,7 @@ abstract class RawKeyEvent with Diagnosticable {
             scanCode: message['scanCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
             isDown: message['type'] == 'keydown',
+            specifiedLogicalKey: message['specifiedLogicalKey'] as int?,
           );
           if (unicodeScalarValues != 0) {
             character = String.fromCharCode(unicodeScalarValues);

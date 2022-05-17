@@ -1335,6 +1335,17 @@ targets:
       task_name: channels_integration_test
     scheduler: luci
 
+  - name: Linux_android clipper_cache_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: clipper_cache_perf__e2e_summary
+    scheduler: luci
+
   - name: Linux_android color_filter_and_fade_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3474,26 +3485,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
-    scheduler: luci
-
-  - name: Mac_ios native_ui_tests_ios
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: native_ui_tests_ios
-    scheduler: luci
-
-  - name: Mac_arm64_ios native_ui_tests_ios
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
-      task_name: native_ui_tests_ios
     scheduler: luci
 
   - name: Mac native_ui_tests_macos
