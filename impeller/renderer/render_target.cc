@@ -177,7 +177,13 @@ const std::optional<StencilAttachment>& RenderTarget::GetStencilAttachment()
 
 RenderTarget RenderTarget::CreateOffscreen(const Context& context,
                                            ISize size,
-                                           std::string label) {
+                                           std::string label,
+                                           StorageMode color_storage_mode,
+                                           LoadAction color_load_action,
+                                           StoreAction color_store_action,
+                                           StorageMode stencil_storage_mode,
+                                           LoadAction stencil_load_action,
+                                           StoreAction stencil_store_action) {
   if (size.IsEmpty()) {
     return {};
   }
@@ -196,10 +202,10 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
 
   ColorAttachment color0;
   color0.clear_color = Color::BlackTransparent();
-  color0.load_action = LoadAction::kClear;
-  color0.store_action = StoreAction::kStore;
+  color0.load_action = color_load_action;
+  color0.store_action = color_store_action;
   color0.texture = context.GetPermanentsAllocator()->CreateTexture(
-      StorageMode::kDevicePrivate, color_tex0);
+      color_storage_mode, color_tex0);
 
   if (!color0.texture) {
     return {};
@@ -208,11 +214,11 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
   color0.texture->SetLabel(SPrintF("%sColorTexture", label.c_str()));
 
   StencilAttachment stencil0;
-  stencil0.load_action = LoadAction::kClear;
-  stencil0.store_action = StoreAction::kDontCare;
+  stencil0.load_action = stencil_load_action;
+  stencil0.store_action = stencil_store_action;
   stencil0.clear_stencil = 0u;
   stencil0.texture = context.GetPermanentsAllocator()->CreateTexture(
-      StorageMode::kDeviceTransient, stencil_tex0);
+      stencil_storage_mode, stencil_tex0);
 
   if (!stencil0.texture) {
     return {};
