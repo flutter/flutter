@@ -351,6 +351,58 @@ deps = {
 
   # WARNING: end of dart dependencies list that is cleaned up automatically - see create_updated_flutter_deps.py.
 
+  # Prebuilt Dart SDK of the same revision as the Dart SDK source checkout
+  'src/flutter/prebuilts/linux-x64/dart-sdk': {
+    'packages': [
+      {
+        'package': 'flutter/dart-sdk/linux-amd64',
+        'version': 'git_revision:'+Var('dart_revision')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "linux"'
+  },
+  'src/flutter/prebuilts/linux-arm64/dart-sdk': {
+    'packages': [
+      {
+        'package': 'flutter/dart-sdk/linux-arm64',
+        'version': 'git_revision:'+Var('dart_revision')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "linux"'
+  },
+  'src/flutter/prebuilts/macos-x64/dart-sdk': {
+    'packages': [
+      {
+        'package': 'flutter/dart-sdk/mac-amd64',
+        'version': 'git_revision:'+Var('dart_revision')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "mac"'
+  },
+  'src/flutter/prebuilts/macos-arm64/dart-sdk': {
+    'packages': [
+      {
+        'package': 'flutter/dart-sdk/mac-arm64',
+        'version': 'git_revision:'+Var('dart_revision')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "mac"'
+  },
+  'src/flutter/prebuilts/windows-x64/dart-sdk': {
+    'packages': [
+      {
+        'package': 'flutter/dart-sdk/windows-amd64',
+        'version': 'git_revision:'+Var('dart_revision')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "win"'
+  },
+
   'src/third_party/colorama/src':
    Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
 
@@ -678,16 +730,6 @@ hooks = [
     'action': [
       'python3',
       'src/flutter/tools/pub_get_offline.py',
-    ]
-  },
-  {
-    'name': 'Download prebuilt Dart SDK',
-    'pattern': '.',
-    'condition': 'download_dart_sdk',
-    'action': [
-      'python3',
-      'src/flutter/tools/download_dart_sdk.py',
-      '--fail-loudly',
     ]
   },
   {
