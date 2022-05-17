@@ -10,9 +10,11 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
-#include "flutter/shell/platform/android/android_context_gl.h"
+#include "flutter/shell/platform/android/android_context_gl_impeller.h"
+#include "flutter/shell/platform/android/android_context_gl_skia.h"
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
-#include "flutter/shell/platform/android/android_surface_gl.h"
+#include "flutter/shell/platform/android/android_surface_gl_impeller.h"
+#include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
@@ -26,8 +28,11 @@ namespace flutter {
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-    : android_context_(context), jni_facade_(jni_facade) {}
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    bool enable_impeller)
+    : android_context_(context),
+      jni_facade_(jni_facade),
+      enable_impeller_(enable_impeller) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
@@ -37,7 +42,13 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
       return std::make_unique<AndroidSurfaceSoftware>(android_context_,
                                                       jni_facade_);
     case AndroidRenderingAPI::kOpenGLES:
-      return std::make_unique<AndroidSurfaceGL>(android_context_, jni_facade_);
+      if (enable_impeller_) {
+        return std::make_unique<AndroidSurfaceGLImpeller>(android_context_,
+                                                          jni_facade_);
+      } else {
+        return std::make_unique<AndroidSurfaceGLSkia>(android_context_,
+                                                      jni_facade_);
+      }
     default:
       FML_DCHECK(false);
       return nullptr;
@@ -47,13 +58,20 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
 static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     bool use_software_rendering,
     const flutter::TaskRunners task_runners,
-    uint8_t msaa_samples) {
+    uint8_t msaa_samples,
+    bool enable_impeller) {
   if (use_software_rendering) {
     return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
   }
-  return std::make_unique<AndroidContextGL>(
-      AndroidRenderingAPI::kOpenGLES,
-      fml::MakeRefCounted<AndroidEnvironmentGL>(), task_runners, msaa_samples);
+  if (enable_impeller) {
+    return std::make_unique<AndroidContextGLImpeller>();
+  }
+  return std::make_unique<AndroidContextGLSkia>(
+      AndroidRenderingAPI::kOpenGLES,               //
+      fml::MakeRefCounted<AndroidEnvironmentGL>(),  //
+      task_runners,                                 //
+      msaa_samples                                  //
+  );
 }
 
 PlatformViewAndroid::PlatformViewAndroid(
@@ -62,12 +80,15 @@ PlatformViewAndroid::PlatformViewAndroid(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     bool use_software_rendering,
     uint8_t msaa_samples)
-    : PlatformViewAndroid(delegate,
-                          std::move(task_runners),
-                          std::move(jni_facade),
-                          CreateAndroidContext(use_software_rendering,
-                                               task_runners,
-                                               msaa_samples)) {}
+    : PlatformViewAndroid(
+          delegate,
+          std::move(task_runners),
+          std::move(jni_facade),
+          CreateAndroidContext(
+              use_software_rendering,
+              task_runners,
+              msaa_samples,
+              delegate.OnPlatformViewGetSettings().enable_impeller)) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
@@ -83,7 +104,8 @@ PlatformViewAndroid::PlatformViewAndroid(
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
     surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
-        android_context_, jni_facade_);
+        android_context_, jni_facade_,
+        delegate.OnPlatformViewGetSettings().enable_impeller);
     android_surface_ = surface_factory_->CreateSurface();
 
     FML_CHECK(android_surface_ && android_surface_->IsValid())

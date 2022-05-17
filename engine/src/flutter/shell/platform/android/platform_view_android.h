@@ -27,7 +27,8 @@ namespace flutter {
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
   AndroidSurfaceFactoryImpl(const std::shared_ptr<AndroidContext>& context,
-                            std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+                            std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+                            bool enable_impeller);
 
   ~AndroidSurfaceFactoryImpl() override;
 
@@ -36,6 +37,7 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  private:
   const std::shared_ptr<AndroidContext>& android_context_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  const bool enable_impeller_;
 };
 
 class PlatformViewAndroid final : public PlatformView {
