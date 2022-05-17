@@ -219,6 +219,14 @@ struct RenderPassData {
   if (pass_data.clear_stencil_attachment) {
     clear_bits |= GL_STENCIL_BUFFER_BIT;
   }
+
+  gl.Disable(GL_SCISSOR_TEST);
+  gl.Disable(GL_DEPTH_TEST);
+  gl.Disable(GL_STENCIL_TEST);
+  gl.Disable(GL_CULL_FACE);
+  gl.Disable(GL_BLEND);
+  gl.ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
   gl.Clear(clear_bits);
 
   for (const auto& command : commands) {
