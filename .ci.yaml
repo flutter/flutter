@@ -3487,26 +3487,6 @@ targets:
       task_name: tiles_scroll_perf_ios__timeline_summary
     scheduler: luci
 
-  - name: Mac_ios native_ui_tests_ios
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: native_ui_tests_ios
-    scheduler: luci
-
-  - name: Mac_arm64_ios native_ui_tests_ios
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
-      task_name: native_ui_tests_ios
-    scheduler: luci
-
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
