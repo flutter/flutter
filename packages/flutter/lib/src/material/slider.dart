@@ -523,7 +523,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       vsync: this,
     );
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
-    positionController.value = _unlerp(widget.value);
+    positionController.value = _convert(widget.value);
     _actionMap = <Type, Action<Intent>>{
       _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(
         onInvoke: _actionHandler,
@@ -621,6 +621,22 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(value >= 0.0);
     assert(value <= 1.0);
     return value * (widget.max - widget.min) + widget.min;
+  }
+
+  double _discretize(double value) {
+    assert(widget.divisions != null);
+    assert(value >= 0.0 && value <= 1.0);
+
+    final int divisions = widget.divisions!;
+    return (value * divisions).round() / divisions;
+  }
+
+  double _convert(double value) {
+    double ret = _unlerp(value);
+    if (widget.divisions != null) {
+      ret = _discretize(ret);
+    }
+    return ret;
   }
 
   // Returns a number between 0.0 and 1.0, given a value between min and max.
@@ -771,7 +787,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           link: _layerLink,
           child: _SliderRenderObjectWidget(
             key: _renderObjectKey,
-            value: _unlerp(widget.value),
+            value: _convert(widget.value),
             divisions: widget.divisions,
             label: widget.label,
             sliderTheme: sliderTheme,
