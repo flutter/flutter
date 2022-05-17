@@ -826,7 +826,14 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) {
-    return _isOverflowing ? Offset.zero & size : null;
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _isOverflowing ? Offset.zero & size : null;
+    }
   }
 
   @override

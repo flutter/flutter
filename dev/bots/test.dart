@@ -1654,7 +1654,7 @@ Future<void> _dartRunTest(String workingDirectory, {
     if (coverage != null)
       '--coverage=$coverage',
     if (perTestTimeout != null)
-      '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
+      '--timeout=${perTestTimeout.inMilliseconds}ms',
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,

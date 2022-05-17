@@ -9,83 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, ActionDispatcher dispatcher});
-
-class TestIntent extends Intent {
-  const TestIntent();
-}
-
-class SecondTestIntent extends TestIntent {
-  const SecondTestIntent();
-}
-
-class ThirdTestIntent extends SecondTestIntent {
-  const ThirdTestIntent();
-}
-
-class TestAction extends CallbackAction<TestIntent> {
-  TestAction({
-    required OnInvokeCallback onInvoke,
-  })  : assert(onInvoke != null),
-        super(onInvoke: onInvoke);
-
-  @override
-  bool isEnabled(TestIntent intent) => enabled;
-
-  bool get enabled => _enabled;
-  bool _enabled = true;
-  set enabled(bool value) {
-    if (_enabled == value) {
-      return;
-    }
-    _enabled = value;
-    notifyActionListeners();
-  }
-
-  @override
-  void addActionListener(ActionListenerCallback listener) {
-    super.addActionListener(listener);
-    listeners.add(listener);
-  }
-
-  @override
-  void removeActionListener(ActionListenerCallback listener) {
-    super.removeActionListener(listener);
-    listeners.remove(listener);
-  }
-  List<ActionListenerCallback> listeners = <ActionListenerCallback>[];
-
-  void _testInvoke(TestIntent intent) => invoke(intent);
-}
-
-class TestDispatcher extends ActionDispatcher {
-  const TestDispatcher({this.postInvoke});
-
-  final PostInvokeCallback? postInvoke;
-
-  @override
-  Object? invokeAction(Action<Intent> action, Intent intent, [BuildContext? context]) {
-    final Object? result = super.invokeAction(action, intent, context);
-    postInvoke?.call(action: action, intent: intent, dispatcher: this);
-    return result;
-  }
-}
-
-class TestDispatcher1 extends TestDispatcher {
-  const TestDispatcher1({super.postInvoke});
-}
-
 void main() {
-  testWidgets('CallbackAction passes correct intent when invoked.', (WidgetTester tester) async {
-    late Intent passedIntent;
-    final TestAction action = TestAction(onInvoke: (Intent intent) {
-      passedIntent = intent;
-      return true;
-    });
-    const TestIntent intent = TestIntent();
-    action._testInvoke(intent);
-    expect(passedIntent, equals(intent));
-  });
   group(ActionDispatcher, () {
     testWidgets('ActionDispatcher invokes actions when asked.', (WidgetTester tester) async {
       await tester.pumpWidget(Container());
@@ -1033,6 +957,29 @@ void main() {
     );
   });
 
+  group('Action subclasses', () {
+    testWidgets('CallbackAction passes correct intent when invoked.', (WidgetTester tester) async {
+      late Intent passedIntent;
+      final TestAction action = TestAction(onInvoke: (Intent intent) {
+        passedIntent = intent;
+        return true;
+      });
+      const TestIntent intent = TestIntent();
+      action._testInvoke(intent);
+      expect(passedIntent, equals(intent));
+    });
+    testWidgets('VoidCallbackAction', (WidgetTester tester) async {
+      bool called = false;
+      void testCallback() {
+        called = true;
+      }
+      final VoidCallbackAction action = VoidCallbackAction();
+      final VoidCallbackIntent intent = VoidCallbackIntent(testCallback);
+      action.invoke(intent);
+      expect(called, isTrue);
+    });
+  });
+
   group('Diagnostics', () {
     testWidgets('default Intent debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -1764,6 +1711,72 @@ void main() {
       expect(LogInvocationContextAction.invokeContext, invokingContext);
     });
   });
+}
+
+typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, ActionDispatcher dispatcher});
+
+class TestIntent extends Intent {
+  const TestIntent();
+}
+
+class SecondTestIntent extends TestIntent {
+  const SecondTestIntent();
+}
+
+class ThirdTestIntent extends SecondTestIntent {
+  const ThirdTestIntent();
+}
+
+class TestAction extends CallbackAction<TestIntent> {
+  TestAction({
+    required OnInvokeCallback onInvoke,
+  })  : assert(onInvoke != null),
+        super(onInvoke: onInvoke);
+
+  @override
+  bool isEnabled(TestIntent intent) => enabled;
+
+  bool get enabled => _enabled;
+  bool _enabled = true;
+  set enabled(bool value) {
+    if (_enabled == value) {
+      return;
+    }
+    _enabled = value;
+    notifyActionListeners();
+  }
+
+  @override
+  void addActionListener(ActionListenerCallback listener) {
+    super.addActionListener(listener);
+    listeners.add(listener);
+  }
+
+  @override
+  void removeActionListener(ActionListenerCallback listener) {
+    super.removeActionListener(listener);
+    listeners.remove(listener);
+  }
+  List<ActionListenerCallback> listeners = <ActionListenerCallback>[];
+
+  void _testInvoke(TestIntent intent) => invoke(intent);
+}
+
+class TestDispatcher extends ActionDispatcher {
+  const TestDispatcher({this.postInvoke});
+
+  final PostInvokeCallback? postInvoke;
+
+  @override
+  Object? invokeAction(Action<Intent> action, Intent intent, [BuildContext? context]) {
+    final Object? result = super.invokeAction(action, intent, context);
+    postInvoke?.call(action: action, intent: intent, dispatcher: this);
+    return result;
+  }
+}
+
+class TestDispatcher1 extends TestDispatcher {
+  const TestDispatcher1({super.postInvoke});
 }
 
 class TestContextAction extends ContextAction<TestIntent> {

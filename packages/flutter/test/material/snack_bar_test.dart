@@ -2103,7 +2103,7 @@ void main() {
     expect(
       () {
         scaffoldMessengerState.showSnackBar(const SnackBar(
-          content: Text('I am a snack bar.'),
+          content: Text('SnackBar'),
         ));
       },
       throwsA(

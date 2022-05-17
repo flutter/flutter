@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -13,9 +11,9 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  FlutterRunTestDriver flutterRun, flutterAttach;
+  late FlutterRunTestDriver flutterRun, flutterAttach;
   final BasicProject project = BasicProject();
-  Directory tempDir;
+  late Directory tempDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('attach_test.');
@@ -39,28 +37,28 @@ void main() {
 
   testWithoutContext('can hot reload', () async {
     await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(flutterRun.vmServicePort);
+    await flutterAttach.attach(flutterRun.vmServicePort!);
     await flutterAttach.hotReload();
   });
 
   testWithoutContext('can detach, reattach, hot reload', () async {
     await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(flutterRun.vmServicePort);
+    await flutterAttach.attach(flutterRun.vmServicePort!);
     await flutterAttach.detach();
-    await flutterAttach.attach(flutterRun.vmServicePort);
+    await flutterAttach.attach(flutterRun.vmServicePort!);
     await flutterAttach.hotReload();
   });
 
   testWithoutContext('killing process behaves the same as detach ', () async {
     await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(flutterRun.vmServicePort);
+    await flutterAttach.attach(flutterRun.vmServicePort!);
     await flutterAttach.quit();
     flutterAttach = FlutterRunTestDriver(
       tempDir,
       logPrefix: 'ATTACH-2',
       spawnDdsInstance: false,
     );
-    await flutterAttach.attach(flutterRun.vmServicePort);
+    await flutterAttach.attach(flutterRun.vmServicePort!);
     await flutterAttach.hotReload();
   });
 
@@ -85,11 +83,11 @@ void main() {
     );
 
     final Response response = await flutterRun.callServiceExtension('ext.flutter.connectedVmServiceUri');
-    final String vmServiceUri = response.json['value'] as String;
+    final String vmServiceUri = response.json!['value'] as String;
 
     // Attach with a different DevTools server address.
     await flutterAttach.attach(
-      flutterRun.vmServicePort,
+      flutterRun.vmServicePort!,
       additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
     );
     await pollForServiceExtensionValue<String>(

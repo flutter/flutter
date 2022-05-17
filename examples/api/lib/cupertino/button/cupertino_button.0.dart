@@ -26,6 +26,9 @@ class CupertinoButtonExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoButton Sample'),
+      ),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

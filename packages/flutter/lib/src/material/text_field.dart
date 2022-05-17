@@ -207,6 +207,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// {@macro flutter.widgets.editableText.showCaretOnScreen}
 ///
+/// {@macro flutter.widgets.editableText.accessibility}
+///
 /// See also:
 ///
 ///  * [TextFormField], which integrates with the [Form] widget.

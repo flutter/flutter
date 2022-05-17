@@ -1270,11 +1270,13 @@ class ReorderableDragStartListener extends StatelessWidget {
   }
 
   void _startDragging(BuildContext context, PointerDownEvent event) {
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
     final SliverReorderableListState? list = SliverReorderableList.maybeOf(context);
     list?.startItemDragReorder(
       index: index,
       event: event,
-      recognizer: createRecognizer(),
+      recognizer: createRecognizer()
+        ..gestureSettings = gestureSettings,
     );
   }
 }

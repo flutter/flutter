@@ -862,7 +862,6 @@ class _AppBarState extends State<AppBar> {
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
-    final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     final double toolbarHeight = widget.toolbarHeight ?? appBarTheme.toolbarHeight ?? kToolbarHeight;
@@ -948,9 +947,8 @@ class _AppBarState extends State<AppBar> {
           onPressed: _handleDrawerButton,
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
-      } else {
-        if (!hasEndDrawer && canPop)
-          leading = useCloseButton ? const CloseButton() : const BackButton();
+      } else if (parentRoute?.impliesAppBarDismissal ?? false) {
+        leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
     if (leading != null) {
@@ -1959,7 +1957,7 @@ class _DefaultsM2 extends AppBarTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _TokenDefaultsM3 extends AppBarTheme {
   _TokenDefaultsM3(this.context)
     : super(

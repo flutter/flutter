@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -246,8 +248,39 @@ void main() {
     renderObject.dispose();
     expect(renderObject.debugLayer, null);
   });
+
+  test('Add composition callback works', () {
+    final ContainerLayer root = ContainerLayer();
+    final PaintingContext context = PaintingContext(root, Rect.zero);
+    bool calledBack = false;
+    final TestObservingRenderObject object = TestObservingRenderObject((Layer layer) {
+      expect(layer, root);
+      calledBack = true;
+    });
+
+    expect(calledBack, false);
+    object.paint(context, Offset.zero);
+    expect(calledBack, false);
+
+    root.buildScene(ui.SceneBuilder()).dispose();
+    expect(calledBack, true);
+  });
 }
 
+
+class TestObservingRenderObject extends RenderBox {
+  TestObservingRenderObject(this.callback);
+
+  final CompositionCallback callback;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.addCompositionCallback(callback);
+  }
+}
 // Tests the create-update cycle by pumping two frames. The first frame has no
 // prior layer and forces the painting context to create a new one. The second
 // frame reuses the layer painted on the first frame.
