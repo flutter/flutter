@@ -4,17 +4,15 @@
 
 // @dart = 2.8
 
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/migrate.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/migrate/migrate_manifest.dart';
 import 'package:flutter_tools/src/migrate/migrate_result.dart';
 import 'package:flutter_tools/src/migrate/migrate_utils.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 
 import '../commands.shard/hermetic/custom_devices_test.dart';
@@ -104,8 +102,6 @@ flutter:
       sdkDirs: <String, Directory>{},
     ));
     manifest.writeFile();
-    File manifestFile = workingDir.childFile('.migrate_manifest');
-    print((terminal as FakeTerminal).terminal);
 
     expect(workingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
@@ -179,8 +175,6 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
       sdkDirs: <String, Directory>{},
     ));
     manifest.writeFile();
-    File manifestFile = workingDir.childFile('.migrate_manifest');
-    print((terminal as FakeTerminal).terminal);
 
     expect(workingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
@@ -254,8 +248,6 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
       sdkDirs: <String, Directory>{},
     ));
     manifest.writeFile();
-    File manifestFile = workingDir.childFile('.migrate_manifest');
-    print((terminal as FakeTerminal).terminal);
 
     expect(workingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
@@ -329,8 +321,6 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
       sdkDirs: <String, Directory>{},
     ));
     manifest.writeFile();
-    File manifestFile = workingDir.childFile('.migrate_manifest');
-    print((terminal as FakeTerminal).terminal);
 
     expect(workingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
@@ -391,8 +381,6 @@ Cyan = Original lines.  Green = New lines.
       sdkDirs: <String, Directory>{},
     ));
     manifest.writeFile();
-    File manifestFile = workingDir.childFile('.migrate_manifest');
-    print((terminal as FakeTerminal).terminal);
 
     expect(workingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
