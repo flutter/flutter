@@ -1,4 +1,4 @@
-Signature: 256e46c45a6dcd2aadad0d988358d8d6
+Signature: c9c5e3491b8997e5f13f6d302989a840
 
 UNUSED LICENSES:
 
@@ -693,6 +693,10 @@ FILE: ../../../third_party/skia/bazel/buildrc
 FILE: ../../../third_party/skia/bazel/cc_binary_with_flags.bzl
 FILE: ../../../third_party/skia/bazel/common_config_settings/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/common_config_settings/defs.bzl
+FILE: ../../../third_party/skia/bazel/external/dawn/BUILD.bazel
+FILE: ../../../third_party/skia/bazel/external/vulkan_headers/BUILD.bazel
+FILE: ../../../third_party/skia/bazel/external/vulkan_tools/BUILD.bazel
+FILE: ../../../third_party/skia/bazel/external/vulkanmemoryallocator/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/karma_test.bzl
 FILE: ../../../third_party/skia/bazel/macros.bzl
 FILE: ../../../third_party/skia/bazel/rbe/BUILD.bazel
@@ -6094,7 +6098,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLModifiersPool.h
 FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLRehydrator.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLCodeStringExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructor.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC.
@@ -6136,16 +6139,13 @@ FILE: ../../../third_party/skia/example/VulkanBasic.cpp
 FILE: ../../../third_party/skia/gm/bug12866.cpp
 FILE: ../../../third_party/skia/gm/crbug_1313579.cpp
 FILE: ../../../third_party/skia/include/core/SkAlphaType.h
-FILE: ../../../third_party/skia/include/core/SkCapabilities.h
 FILE: ../../../third_party/skia/include/core/SkColorType.h
 FILE: ../../../third_party/skia/include/gpu/GpuTypes.h
 FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
-FILE: ../../../third_party/skia/include/sksl/SkSLVersion.h
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_build/bazel_build.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_check_includes/bazel_check_includes.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/check_generated_bazel_files/check_generated_bazel_files.go
 FILE: ../../../third_party/skia/src/core/SkBuiltInCodeSnippetID.h
-FILE: ../../../third_party/skia/src/core/SkCapabilities.cpp
 FILE: ../../../third_party/skia/src/core/SkDebugUtils.h
 FILE: ../../../third_party/skia/src/core/SkKeyContext.cpp
 FILE: ../../../third_party/skia/src/core/SkKeyContext.h
@@ -6452,7 +6452,6 @@ FILE: ../../../third_party/skia/experimental/sorttoy/sorttoy.cpp
 FILE: ../../../third_party/skia/experimental/sorttoy/sorttypes.h
 FILE: ../../../third_party/skia/gm/batchedconvexpaths.cpp
 FILE: ../../../third_party/skia/gm/destcolor.cpp
-FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
 FILE: ../../../third_party/skia/include/private/SkSLProgramKind.h
 FILE: ../../../third_party/skia/include/private/SkStringView.h
 FILE: ../../../third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h
@@ -6460,7 +6459,6 @@ FILE: ../../../third_party/skia/include/sksl/DSLBlock.h
 FILE: ../../../third_party/skia/include/sksl/DSLCase.h
 FILE: ../../../third_party/skia/include/sksl/DSLFunction.h
 FILE: ../../../third_party/skia/include/sksl/DSLLayout.h
-FILE: ../../../third_party/skia/include/sksl/DSLRuntimeEffects.h
 FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
 FILE: ../../../third_party/skia/include/sksl/DSLWrapper.h
 FILE: ../../../third_party/skia/include/sksl/SkSLDebugTrace.h
@@ -6488,11 +6486,8 @@ FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLLayout.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLRuntimeEffects.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLSymbols.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.h
 FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSL_priv.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLModifiers.cpp
