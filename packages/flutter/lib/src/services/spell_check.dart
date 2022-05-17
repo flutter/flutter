@@ -89,11 +89,11 @@ abstract class SpellCheckSuggestionsHandler {
 }
 
 class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandler {
-    //TODO(camillesimon): Replace method of building TextSpan tree in three parts with method of building in one part. Attempt started below.
     int scssSpans_consumed_index = 0;
     int text_consumed_index = 0;
 
-    String lastUsedText = "";
+    List<SpellCheckerSuggestionSpan>? reusableSpellCheckResults;
+    String? reusableText;
 
     final TargetPlatform platform;
 
@@ -117,7 +117,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
         }
 
    // Provides a generous guesss of the spell check results for the current text if the spell check results for this text has not been received by the framework yet.
-   // Assumes: [1] order of results matches that of the text, [2] only a shift/deletion occurs at a time (this is verifiable)
+   // Assumes order of results matches that of the text
    List<SpellCheckerSuggestionSpan> correctSpellCheckResults(String newText, String resultsText, List<SpellCheckerSuggestionSpan> results) {
        List<SpellCheckerSuggestionSpan> correctedSpellCheckResults = <SpellCheckerSuggestionSpan>[];
 
@@ -153,7 +153,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
                break;
            } 
            else {
-              oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1); //this is off sometimes...
+              oldSpanText = resultsText.substring(currentSpanStart, currentSpanEnd + 1);
               newSpanText = newText.substring(currentSpanStart, currentSpanEnd + 1);
 
                 if (oldSpanText == newSpanText) {
@@ -179,7 +179,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
        return correctedSpellCheckResults;
    }
 
-   // pretty sure this can be replaced with a String method
+   // TODO(camillesimon): Pretty sure this can be replaced with a String method
    int? findBadSpan(String text, String spanText, int spanLength) {
        bool foundSpan = false;
        int text_pointer = 0;
@@ -204,14 +204,45 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
       text_consumed_index = 0;
 
       List<SpellCheckerSuggestionSpan>? spellCheckResults;
+      TextStyle misspelledStyle;
 
       if (spellCheckResultsText != value.text) {
-        spellCheckResults = correctSpellCheckResults(value.text, spellCheckResultsText!, rawSpellCheckResults!);
+        spellCheckResults = correctSpellCheckResults(value.text, spellCheckResultsText!, rawSpellCheckResults!); /// so if the text is the same, we want to merge results. need to write custom method for this. I probably should define equals method in spellcheckersuggestionspan
+      } else if (reusableText != null && reusableText == spellCheckResultsText && reusableSpellCheckResults != null && rawSpellCheckResults != null &&  reusableSpellCheckResults! != rawSpellCheckResults!) { // this is saying true when its not true
+      print(reusableSpellCheckResults! != rawSpellCheckResults!);
+          print("CORRECTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+          Set<SpellCheckerSuggestionSpan> a = reusableSpellCheckResults!.toSet();
+          Set<SpellCheckerSuggestionSpan> b = rawSpellCheckResults.toSet();
+          Set<SpellCheckerSuggestionSpan> c = a.union(b);
+          print(a);
+          a.forEach((SpellCheckerSuggestionSpan s) {
+              print("${s.start}.${s.end}.${s.replacementSuggestions}");
+          });
+          print(b);
+                    b.forEach((SpellCheckerSuggestionSpan s) {
+              print("${s.start}.${s.end}.${s.replacementSuggestions}");
+          });
+          print(c);
+                    c.forEach((SpellCheckerSuggestionSpan s) {
+              print("${s.start}.${s.end}.${s.replacementSuggestions}");
+          });
+          print(c.toList());
+          spellCheckResults = c.toList();
       } else {
         spellCheckResults = rawSpellCheckResults;
       }
-
-      TextStyle misspelledStyle;
+      if (spellCheckResults != null) {
+      print("_________________________________________________________________________________________________________________________________________________________________");
+     spellCheckResults!.forEach((SpellCheckerSuggestionSpan span) {
+         print(span.start);
+         print(span.end);
+         print(span.replacementSuggestions);
+         print("***************************************************************");
+     });
+    print("_________________________________________________________________________________________________________________________________________________________________");
+      }
+      reusableSpellCheckResults = spellCheckResults;
+      reusableText = value.text;
 
       switch(platform) {
           case TargetPlatform.android:
@@ -239,6 +270,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
       }
     }
 
+//TODO(camillesimon): Replace method of building TextSpan tree in three parts with method of building in one part. Attempt started below.
 //   @override
 //   TextSpan buildTextSpanWithSpellCheckSuggestions(
 //       List<SpellCheckerSuggestionSpan>? spellCheckResults,

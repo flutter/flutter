@@ -34,9 +34,7 @@ class MaterialSpellCheckService implements SpellCheckService {
         'SpellCheck.initiateSpellCheck',
         <String>[ locale.toLanguageTag(), value.text],
       );
-    print("RAW RESULTS BESTIE: ${rawResults}");
     } catch(e) {
-      print("ERROR BESTIE: ${e}");
       return spellCheckResults;
     }
 
@@ -47,7 +45,6 @@ class MaterialSpellCheckService implements SpellCheckService {
     
     results.forEach((String result) {
       List<String> resultParsed = result.split(".");
-      print("Result parsed: ${resultParsed}");
       spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split("\n")));
     });
 

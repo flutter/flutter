@@ -174,7 +174,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 
     bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing; // this is poorly named -- this is if composing range is out of range for current text
 
-    if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null && spellCheckConfiguration.spellCheckResults!.length > 0) {
+    if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null) {
         return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(spellCheckConfiguration.spellCheckResults, spellCheckConfiguration.spellCheckResultsText, value, style, composingWithinCurrentTextRange);
 
     }
@@ -2494,8 +2494,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.updateForScroll();
   }
 
-  SelectionChangedCause? previousCause;
-
   @pragma('vm:notify-debugger-on-exception')
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
@@ -2573,8 +2571,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _startCursorTimer();
     }
 
-    print("------------------------------------------------------------------------------------------------------------------------------------------------------>Selection changed cause: ${cause}");
-    if (_spellCheckEnabled! && _value.text.length > 0) { // && (previousCause != null && cause != null && previousCause == SelectionChangedCause.keyboard && cause == SelectionChangedCause.tap)) {
+    if (_spellCheckEnabled! && _value.text.length > 0 && cause! == SelectionChangedCause.tap) {
       Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
       Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value);
 
@@ -2587,8 +2584,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
       });
     }
-
-    previousCause = cause;
   }
 
   Rect? _currentCaretRect;
