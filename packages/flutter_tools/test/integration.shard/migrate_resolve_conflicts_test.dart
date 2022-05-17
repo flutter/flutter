@@ -7,17 +7,19 @@
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/migrate.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/migrate/migrate_manifest.dart';
 import 'package:flutter_tools/src/migrate/migrate_result.dart';
 import 'package:flutter_tools/src/migrate/migrate_utils.dart';
+import 'package:test/fake.dart';
 
 
-import '../commands.shard/hermetic/custom_devices_test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -616,4 +618,53 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     ProcessManager: () => processManager,
     Platform: () => platform,
   });
+}
+
+class FakeTerminal extends Fake implements Terminal {
+  factory FakeTerminal({Platform platform}) {
+    return FakeTerminal._private(
+        stdio: FakeStdio(),
+        platform: platform
+    );
+  }
+
+  FakeTerminal._private({
+    this.stdio,
+    Platform platform
+  }) :
+    terminal = AnsiTerminal(
+      stdio: stdio,
+      platform: platform
+    );
+
+  final FakeStdio stdio;
+  final AnsiTerminal terminal;
+
+  void simulateStdin(String line) {
+    stdio.simulateStdin(line);
+  }
+
+  @override
+  set usesTerminalUi(bool value) => terminal.usesTerminalUi = value;
+
+  @override
+  bool get usesTerminalUi => terminal.usesTerminalUi;
+
+  @override
+  String clearScreen() => terminal.clearScreen();
+
+  @override
+  Future<String> promptForCharInput(
+    List<String> acceptedCharacters, {
+    Logger logger,
+    String prompt,
+    int defaultChoiceIndex,
+    bool displayAcceptedCharacters = true
+  }) => terminal.promptForCharInput(
+      acceptedCharacters,
+      logger: logger,
+      prompt: prompt,
+      defaultChoiceIndex: defaultChoiceIndex,
+      displayAcceptedCharacters: displayAcceptedCharacters
+    );
 }
