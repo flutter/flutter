@@ -5,6 +5,8 @@
 #include "pointer_delegate.h"
 
 #include <lib/trace/event.h>
+#include <zircon/status.h>
+#include <zircon/types.h>
 
 #include <limits>
 
@@ -318,6 +320,23 @@ void InsertIntoBuffer(
 }
 }  // namespace
 
+PointerDelegate::PointerDelegate(
+    fuchsia::ui::pointer::TouchSourceHandle touch_source,
+    fuchsia::ui::pointer::MouseSourceHandle mouse_source)
+    : touch_source_(touch_source.Bind()), mouse_source_(mouse_source.Bind()) {
+  if (touch_source_) {
+    touch_source_.set_error_handler([](zx_status_t status) {
+      FML_LOG(ERROR) << "TouchSource channel error: << "
+                     << zx_status_get_string(status);
+    });
+  }
+  if (mouse_source_) {
+    mouse_source_.set_error_handler([](zx_status_t status) {
+      FML_LOG(ERROR) << "MouseSource channel error: << "
+                     << zx_status_get_string(status);
+    });
+  }
+}
 // Core logic of this class.
 // Aim to keep state management in this function.
 void PointerDelegate::WatchLoop(
