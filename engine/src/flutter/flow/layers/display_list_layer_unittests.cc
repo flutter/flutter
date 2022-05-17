@@ -137,11 +137,11 @@ TEST_F(DisplayListLayerTest, SimpleDisplayListOpacityInheritance) {
 
   auto save_layer_bounds =
       picture_bounds.makeOffset(layer_offset.fX, layer_offset.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
   auto opacity_integral_matrix =
       RasterCache::GetIntegralTransCTM(SkMatrix::Translate(opacity_offset));
   SkMatrix layer_offset_matrix = opacity_integral_matrix;
   layer_offset_matrix.postTranslate(layer_offset.fX, layer_offset.fY);
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
   auto layer_offset_integral_matrix =
       RasterCache::GetIntegralTransCTM(layer_offset_matrix);
 #endif
@@ -219,11 +219,11 @@ TEST_F(DisplayListLayerTest, IncompatibleDisplayListOpacityInheritance) {
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
   auto opacity_integral_matrix =
       RasterCache::GetIntegralTransCTM(SkMatrix::Translate(opacity_offset));
-#endif
   SkMatrix layer_offset_matrix = opacity_integral_matrix;
   layer_offset_matrix.postTranslate(layer_offset.fX, layer_offset.fY);
   auto layer_offset_integral_matrix =
       RasterCache::GetIntegralTransCTM(layer_offset_matrix);
+#endif
   DisplayListBuilder expected_builder;
   /* opacity_layer::Paint() */ {
     expected_builder.save();
