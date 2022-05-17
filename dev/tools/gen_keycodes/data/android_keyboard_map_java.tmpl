@@ -11,9 +11,30 @@ package io.flutter.embedding.android;
 // Edit the template dev/tools/gen_keycodes/data/android_keyboard_map_java.tmpl instead.
 // See dev/tools/gen_keycodes/README.md for more information.
 
+import android.view.KeyEvent;
 import java.util.HashMap;
 
 public class KeyboardMap {
+  public static class KeyPair {
+    public KeyPair(long physicalKey, long logicalKey) {
+      this.physicalKey = physicalKey;
+      this.logicalKey = logicalKey;
+    }
+
+    public long physicalKey;
+    public long logicalKey;
+  }
+
+  public static class PressingGoal {
+    public PressingGoal(int mask, KeyPair[] keys) {
+      this.mask = mask;
+      this.keys = keys;
+    }
+
+    public final int mask;
+    public final KeyPair[] keys;
+  }
+
   public static final HashMap<Long, Long> scanCodeToPhysical =
       new HashMap<Long, Long>() {
         private static final long serialVersionUID = 1L;
@@ -31,4 +52,11 @@ public class KeyboardMap {
 @@@ANDROID_KEY_CODE_MAP@@@
         }
       };
+
+  public static final PressingGoal[] pressingGoals =
+      new PressingGoal[] {
+@@@PRESSING_GOALS@@@
+      };
+
+@@@MASK_CONSTANTS@@@
 }
