@@ -139,7 +139,7 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester, platform: TargetPlatform.linux_arm64),
-        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-arm64-fractional', 'flutter_tester'),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-arm64', 'flutter_tester'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),

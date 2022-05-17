@@ -533,10 +533,17 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   bool _shouldClipAtPaintOffset(Offset paintOffset) {
     assert(child != null);
-    return paintOffset.dx < 0 ||
-      paintOffset.dy < 0 ||
-      paintOffset.dx + child!.size.width > size.width ||
-      paintOffset.dy + child!.size.height > size.height;
+    switch (clipBehavior) {
+      case Clip.none:
+        return false;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return paintOffset.dx < 0 ||
+               paintOffset.dy < 0 ||
+               paintOffset.dx + child!.size.width > size.width ||
+               paintOffset.dy + child!.size.height > size.height;
+    }
   }
 
   @override
@@ -548,7 +555,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
         context.paintChild(child!, offset + paintOffset);
       }
 
-      if (_shouldClipAtPaintOffset(paintOffset) && clipBehavior != Clip.none) {
+      if (_shouldClipAtPaintOffset(paintOffset)) {
         _clipRectLayer.layer = context.pushClipRect(
           needsCompositing,
           offset,
