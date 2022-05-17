@@ -1179,7 +1179,7 @@ class ShortcutRegistry extends ShortcutManager {
   ///
   /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if you
   /// are using [WidgetsApp], [MaterialApp] or [CupertinoApp], you don't need to
-  /// create your own [ShortcutsRegistrar].
+  /// create your own [ShortcutRegistrar].
   ///
   /// See also:
   ///
@@ -1217,7 +1217,7 @@ class ShortcutRegistry extends ShortcutManager {
   ///
   /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if you
   /// are using [WidgetsApp], [MaterialApp] or [CupertinoApp], you don't need to
-  /// create your own [ShortcutsRegistrar].
+  /// create your own [ShortcutRegistrar].
   ///
   /// See also:
   ///
