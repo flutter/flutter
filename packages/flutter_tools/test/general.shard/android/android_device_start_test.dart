@@ -241,7 +241,7 @@ void main() {
         '--ez', 'dump-skp-on-shader-compilation', 'true',
         '--ez', 'cache-sksl', 'true',
         '--ez', 'purge-persistent-cache', 'true',
-        '--ez', 'purge-persistent-cache', 'true',
+        '--ez', 'enable-impeller', 'true',
         '--ez', 'enable-checked-mode', 'true',
         '--ez', 'verify-entry-points', 'true',
         '--ez', 'start-paused', 'true',
