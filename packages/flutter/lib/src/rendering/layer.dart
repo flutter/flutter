@@ -173,8 +173,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// This callback will fire even if an ancestor layer is added with retained
   /// rendering, meaning that it will fire even if this layer gets added to the
-  /// scene via some call to [ui.SceneBuilder.addRetained] on one of its ancestor
-  /// layers.
+  /// scene via some call to [ui.SceneBuilder.addRetained] on one of its
+  /// ancestor layers.
   ///
   /// The callback receives a reference to this layer. The recipient must not
   /// mutate the layer during the scope of the callback, but may traverse the

@@ -333,14 +333,7 @@ class PaintingContext extends ClipContext {
   /// detached and will not be rendered again. This happens regardless of
   /// whether the layer is added via retained rendering or not.
   ///
-  /// Composition callbacks are useful in place of pushing a layer that would
-  /// otherwise try to observe the layer tree without actually affecting
-  /// compositing. For example, a composition callback may be used to observe
-  /// the total transform and clip of the current container layer to determine
-  /// whether a render object drawn into it is visible or not.
-  ///
-  /// Calling the returned callback will remove [callback] from the composition
-  /// callbacks.
+  /// {@macro flutter.rendering.Layer.compositionCallbacks}
   ///
   /// See also:
   ///   *  [Layer.addCompositionCallback].
