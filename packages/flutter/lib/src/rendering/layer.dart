@@ -168,6 +168,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   bool _debugMutationsLocked = false;
 
+  /// Describes the clip that would be applied to contents of this layer,
+  /// if any.
+  Rect? describeClipBounds() => null;
+
   /// Adds a callback for when the layer tree that this layer is part of gets
   /// composited, or when it is detached and will not be rendered again.
   ///
@@ -1273,10 +1277,6 @@ class ContainerLayer extends Layer {
     assert(child != null);
     assert(transform != null);
   }
-
-  /// Describes the clip that would be applied to children of this layer,
-  /// if any.
-  Rect? describeClipBounds() => null;
 
   /// Returns the descendants of this layer in depth first order.
   @visibleForTesting
