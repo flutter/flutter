@@ -68,7 +68,7 @@ import 'text_editing_intents.dart';
 /// class DecrementCounterIntent extends Intent {}
 ///
 /// class MyWidget extends StatefulWidget {
-///   const MyWidget({ Key? key }) : super(key: key);
+///   const MyWidget({ super.key });
 ///
 ///   @override
 ///   MyWidgetState createState() => MyWidgetState();

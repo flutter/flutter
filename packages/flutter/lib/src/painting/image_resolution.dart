@@ -126,9 +126,9 @@ const double _kLowDprLimit = 2.0;
 /// ```dart
 /// class MyImage extends StatefulWidget {
 ///   const MyImage({
-///     Key? key,
+///     super.key,
 ///     required this.assetImage,
-///   }) : super(key: key);
+///   });
 ///
 ///   final AssetImage assetImage;
 ///

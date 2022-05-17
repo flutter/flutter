@@ -18,14 +18,14 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 
 // Examples can assume:
 // class FooScrollPhysics extends ScrollPhysics {
-//   const FooScrollPhysics({ ScrollPhysics? parent }): super(parent: parent);
+//   const FooScrollPhysics({ super.parent });
 //   @override
 //   FooScrollPhysics applyTo(ScrollPhysics? ancestor) {
 //     return FooScrollPhysics(parent: buildParent(ancestor));
 //   }
 // }
 // class BarScrollPhysics extends ScrollPhysics {
-//   const BarScrollPhysics({ ScrollPhysics? parent }): super(parent: parent);
+//   const BarScrollPhysics({ super.parent });
 // }
 
 /// Determines the physics of a [Scrollable] widget.

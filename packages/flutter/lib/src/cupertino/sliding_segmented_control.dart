@@ -360,7 +360,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
-  ///   const SegmentedControlExample({Key? key}) : super(key: key);
+  ///   const SegmentedControlExample({super.key});
   ///
   ///   @override
   ///   State createState() => SegmentedControlExampleState();

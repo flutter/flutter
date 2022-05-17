@@ -21,7 +21,7 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
-///   const MyThreeOptions({Key? key}) : super(key: key);
+///   const MyThreeOptions({super.key});
 ///
 ///   @override
 ///   State<MyThreeOptions> createState() => _MyThreeOptionsState();

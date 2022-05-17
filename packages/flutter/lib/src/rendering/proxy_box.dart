@@ -3295,7 +3295,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   const PngHome({Key? key}) : super(key: key);
+  ///   const PngHome({super.key});
   ///
   ///   @override
   ///   State<PngHome> createState() => _PngHomeState();
