@@ -61,7 +61,7 @@ void main() {
     command.argParser.addOption('key');
     // argResults will be null at this point, if attempt to read them is made,
     // exception `Null check operator used on a null value` would be thrown
-    expect(() => command.stringArg('key'), throwsA( const TypeMatcher<TypeError>()));
+    expect(() => command.stringArg('key'), throwsA(const TypeMatcher<TypeError>()));
 
     runner.addCommand(command);
     await runner.run(<String>['dummy', '--key=value']);
