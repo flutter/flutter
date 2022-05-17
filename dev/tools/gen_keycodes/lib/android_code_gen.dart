@@ -66,6 +66,22 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     return lines.sortedJoin().trimRight();
   }
 
+  String get _togglingGoals {
+    final OutputLines<int> lines = OutputLines<int>('Android toggling goals');
+    const Map<String, String> goalsSource = <String, String>{
+      'CAPS_LOCK': 'CapsLock',
+    };
+    goalsSource.forEach((String flagName, String keyName) {
+      final PhysicalKeyEntry physicalKey = keyData.entryByName(keyName);
+      final LogicalKeyEntry logicalKey = logicalData.entryByName(keyName);
+      lines.add(physicalKey.usbHidCode,
+          '      new TogglingGoal(KeyEvent.META_${flagName}_ON, '
+          '${toHex(physicalKey.usbHidCode)}L, '
+          '${toHex(logicalKey.value, digits: 10)}L),');
+    });
+    return lines.sortedJoin().trimRight();
+  }
+
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
     final StringBuffer buffer = StringBuffer();
@@ -93,6 +109,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
       'ANDROID_SCAN_CODE_MAP': _androidScanCodeMap,
       'ANDROID_KEY_CODE_MAP': _androidKeyCodeMap,
       'PRESSING_GOALS': _pressingGoals,
+      'TOGGLING_GOALS': _togglingGoals,
       'MASK_CONSTANTS': _maskConstants,
     };
   }

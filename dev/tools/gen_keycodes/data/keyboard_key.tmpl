@@ -313,8 +313,9 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///
 ///  * [RawKeyEvent], the keyboard event object received by widgets that listen
 ///    to keyboard events.
-///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
-///    keyboard events.
+///  * [Focus.onKey], the handler on a widget that lets you handle key events.
+///  * [RawKeyboardListener], a widget used to listen to keyboard events (but
+///    not handle them).
 @immutable
 class PhysicalKeyboardKey extends KeyboardKey {
   /// Creates a new PhysicalKeyboardKey object for a USB HID usage.
