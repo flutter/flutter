@@ -44,9 +44,8 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   }
 
   @override
-  html.Element createElement() {
-    final DomElement element = defaultCreateElement('flt-backdrop') as
-        DomElement;
+  DomElement createElement() {
+    final DomElement element = defaultCreateElement('flt-backdrop');
     element.style.transformOrigin = '0 0 0';
     _childContainer = createDomElement('flt-backdrop-interior');
     _childContainer!.style.position = 'absolute';
@@ -54,10 +53,10 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       // This creates an additional interior element. Count it too.
       surfaceStatsFor(this).allocatedDomNodeCount++;
     }
-    _filterElement = defaultCreateElement('flt-backdrop-filter') as DomElement;
+    _filterElement = defaultCreateElement('flt-backdrop-filter');
     _filterElement!.style.transformOrigin = '0 0 0';
     element..append(_filterElement!)..append(_childContainer!);
-    return element as html.Element;
+    return element;
   }
 
   @override

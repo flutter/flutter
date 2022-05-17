@@ -7,6 +7,7 @@ import 'dart:svg' as svg;
 
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import '../shadow.dart';
 import '../util.dart';
 import 'dom_canvas.dart';
@@ -23,8 +24,8 @@ mixin _DomClip on PersistedContainerSurface {
   /// [rootElement] is used to compensate for the coordinate system shift
   /// introduced by the [rootElement] translation.
   @override
-  html.Element? get childContainer => _childContainer;
-  html.Element? _childContainer;
+  html.Element? get childContainer => _childContainer as html.Element?;
+  DomElement? _childContainer;
 
   @override
   void adoptElements(_DomClip oldSurface) {
@@ -34,9 +35,9 @@ mixin _DomClip on PersistedContainerSurface {
   }
 
   @override
-  html.Element createElement() {
-    final html.Element element = defaultCreateElement('flt-clip');
-    _childContainer = html.Element.tag('flt-clip-interior');
+  DomElement createElement() {
+    final DomElement element = defaultCreateElement('flt-clip');
+    _childContainer = createDomElement('flt-clip-interior');
     if (debugExplainSurfaceStats) {
       // This creates an additional interior element. Count it too.
       surfaceStatsFor(this).allocatedDomNodeCount++;
@@ -96,7 +97,7 @@ class PersistedClipRect extends PersistedContainerSurface
   }
 
   @override
-  html.Element createElement() {
+  DomElement createElement() {
     return super.createElement()..setAttribute('clip-type', 'rect');
   }
 
@@ -153,7 +154,7 @@ class PersistedClipRRect extends PersistedContainerSurface
   }
 
   @override
-  html.Element createElement() {
+  DomElement createElement() {
     return super.createElement()..setAttribute('clip-type', 'rrect');
   }
 
@@ -238,7 +239,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
   }
 
   @override
-  html.Element createElement() {
+  DomElement createElement() {
     return super.createElement()..setAttribute('clip-type', 'physical-shape');
   }
 
@@ -467,7 +468,7 @@ class PersistedClipPath extends PersistedContainerSurface
   html.Element? _clipElement;
 
   @override
-  html.Element createElement() {
+  DomElement createElement() {
     return defaultCreateElement('flt-clippath');
   }
 
