@@ -1316,16 +1316,16 @@ void main() {
         ShortcutRegistrar(
           child: TestCallbackRegistration(
             shortcuts: <ShortcutActivator, Intent>{
-              const SingleActivator(LogicalKeyboardKey.keyA): _VoidCallbackIntent(() {
+              const SingleActivator(LogicalKeyboardKey.keyA): VoidCallbackIntent(() {
                 invokedA += 1;
               }),
-              const SingleActivator(LogicalKeyboardKey.keyB): _VoidCallbackIntent(() {
+              const SingleActivator(LogicalKeyboardKey.keyB): VoidCallbackIntent(() {
                 invokedB += 1;
               }),
             },
             child: Actions(
               actions: <Type, Action<Intent>>{
-                _VoidCallbackIntent: _VoidCallbackAction(),
+                VoidCallbackIntent: VoidCallbackAction(),
               },
               child: const Focus(
                 autofocus: true,
@@ -1393,20 +1393,20 @@ void main() {
         ShortcutRegistrar(
           child: TestCallbackRegistration(
             shortcuts: <ShortcutActivator, Intent>{
-              const SingleActivator(LogicalKeyboardKey.keyA): _VoidCallbackIntent(() {
+              const SingleActivator(LogicalKeyboardKey.keyA): VoidCallbackIntent(() {
                 invokedOuter += 1;
               }),
             },
             child: ShortcutRegistrar(
               child: TestCallbackRegistration(
                 shortcuts: <ShortcutActivator, Intent>{
-                  const SingleActivator(LogicalKeyboardKey.keyA): _VoidCallbackIntent(() {
+                  const SingleActivator(LogicalKeyboardKey.keyA): VoidCallbackIntent(() {
                     invokedInner += 1;
                   }),
                 },
                 child: Actions(
                   actions: <Type, Action<Intent>>{
-                    _VoidCallbackIntent: _VoidCallbackAction(),
+                    VoidCallbackIntent: VoidCallbackAction(),
                   },
                 child: const Focus(
                   autofocus: true,
@@ -1434,20 +1434,20 @@ void main() {
         ShortcutRegistrar(
           child: TestCallbackRegistration(
             shortcuts: <ShortcutActivator, Intent>{
-              const CharacterActivator('b'): _VoidCallbackIntent(() {
+              const CharacterActivator('b'): VoidCallbackIntent(() {
                 invokedOuter += 1;
               }),
             },
             child: ShortcutRegistrar(
               child: TestCallbackRegistration(
                 shortcuts: <ShortcutActivator, Intent>{
-                  const CharacterActivator('a'): _VoidCallbackIntent(() {
+                  const CharacterActivator('a'): VoidCallbackIntent(() {
                     invokedInner += 1;
                   }),
                 },
                 child: Actions(
                   actions: <Type, Action<Intent>>{
-                    _VoidCallbackIntent: _VoidCallbackAction(),
+                    VoidCallbackIntent: VoidCallbackAction(),
                   },
                   child: const Focus(
                     autofocus: true,
@@ -1501,12 +1501,12 @@ void main() {
                 return true;
               },
             ),
-            _VoidCallbackIntent: _VoidCallbackAction(),
+            VoidCallbackIntent: VoidCallbackAction(),
           },
           child: ShortcutRegistrar(
             child: TestCallbackRegistration(
               shortcuts: <ShortcutActivator, Intent>{
-                const CharacterActivator('b'): _VoidCallbackIntent(() {
+                const CharacterActivator('b'): VoidCallbackIntent(() {
                   invokedCallbackB += 1;
                 }),
               },
@@ -1518,7 +1518,7 @@ void main() {
                 child: ShortcutRegistrar(
                   child: TestCallbackRegistration(
                     shortcuts: <ShortcutActivator, Intent>{
-                      const CharacterActivator('a'): _VoidCallbackIntent(() {
+                      const CharacterActivator('a'): VoidCallbackIntent(() {
                         invokedCallbackA += 1;
                       }),
                     },
@@ -1565,7 +1565,7 @@ void main() {
             },
             child: Actions(
               actions: <Type, Action<Intent>>{
-                _VoidCallbackIntent: _VoidCallbackAction(),
+                VoidCallbackIntent: VoidCallbackAction(),
               },
               child: const Focus(
                 autofocus: true,
@@ -1585,7 +1585,7 @@ void main() {
             },
             child: Actions(
               actions: <Type, Action<Intent>>{
-                _VoidCallbackIntent: _VoidCallbackAction(),
+                VoidCallbackIntent: VoidCallbackAction(),
               },
               child: const Focus(
                 autofocus: true,
@@ -1606,7 +1606,7 @@ void main() {
             },
             child: Actions(
               actions: <Type, Action<Intent>>{
-                _VoidCallbackIntent: _VoidCallbackAction(),
+                VoidCallbackIntent: VoidCallbackAction(),
               },
               child: const Focus(
                 autofocus: true,
@@ -1694,29 +1694,6 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
   @override
   Widget build(BuildContext context) {
     return widget.child;
-  }
-}
-
-/// An intent that encapsulates a [VoidCallback] to be invoked by a
-/// [_VoidCallbackAction] when it receives this intent.
-class _VoidCallbackIntent extends Intent {
-  /// Creates a [_VoidCallbackIntent].
-  ///
-  /// The [callback] argument is required.
-  const _VoidCallbackIntent(this.callback);
-
-  /// The callback that is to be called by the [_VoidCallbackAction] that
-  /// receives this intent.
-  final VoidCallback callback;
-}
-
-/// An action that invokes the [VoidCallback] given to it by the
-/// [_VoidCallbackIntent] that configures it when invoked.
-class _VoidCallbackAction extends Action<_VoidCallbackIntent> {
-  @override
-  Object? invoke(_VoidCallbackIntent intent) {
-    intent.callback();
-    return null;
   }
 }
 
