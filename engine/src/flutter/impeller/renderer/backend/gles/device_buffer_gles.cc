@@ -17,7 +17,7 @@ DeviceBufferGLES::DeviceBufferGLES(ReactorGLES::Ref reactor,
     : DeviceBuffer(size, mode),
       reactor_(std::move(reactor)),
       handle_(reactor_ ? reactor_->CreateHandle(HandleType::kBuffer)
-                       : GLESHandle::DeadHandle()) {}
+                       : HandleGLES::DeadHandle()) {}
 
 // |DeviceBuffer|
 DeviceBufferGLES::~DeviceBufferGLES() {
@@ -83,6 +83,7 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
     gl.BufferData(target_type, data_->GetSize(), data_->GetMapping(),
                   GL_STATIC_DRAW);
     uploaded_ = true;
+    reactor_->SetDebugLabel(handle_, label_);
   }
 
   return true;
@@ -90,8 +91,9 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
 
 // |DeviceBuffer|
 bool DeviceBufferGLES::SetLabel(const std::string& label) {
-  if (!handle_.IsDead()) {
-    reactor_->SetDebugLabel(handle_, std::move(label));
+  label_ = label;
+  if (uploaded_) {
+    reactor_->SetDebugLabel(handle_, label_);
   }
   return true;
 }

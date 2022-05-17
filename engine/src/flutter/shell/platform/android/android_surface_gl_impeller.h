@@ -2,29 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_H_
-
-#include <jni.h>
-
-#include <memory>
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_IMPELLER_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_IMPELLER_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/gpu/gpu_surface_gl.h"
-#include "flutter/shell/platform/android/android_context_gl.h"
-#include "flutter/shell/platform/android/android_environment_gl.h"
-#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/impeller/renderer/context.h"
+#include "flutter/impeller/toolkit/egl/display.h"
+#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
+#include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 
 namespace flutter {
 
-class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
-                               public AndroidSurface {
+class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
+                                       public AndroidSurface {
  public:
-  AndroidSurfaceGL(const std::shared_ptr<AndroidContext>& android_context,
-                   std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+  AndroidSurfaceGLImpeller(
+      const std::shared_ptr<AndroidContext>& android_context,
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 
-  ~AndroidSurfaceGL() override;
+  // |AndroidSurface|
+  ~AndroidSurfaceGLImpeller() override;
 
   // |AndroidSurface|
   bool IsValid() const override;
@@ -49,7 +47,7 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
   bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
   // |AndroidSurface|
-  virtual std::unique_ptr<Surface> CreateSnapshotSurface() override;
+  std::unique_ptr<Surface> CreateSnapshotSurface() override;
 
   // |GPUSurfaceGLDelegate|
   std::unique_ptr<GLContextResult> GLContextMakeCurrent() override;
@@ -73,28 +71,26 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
   // |GPUSurfaceGLDelegate|
   sk_sp<const GrGLInterface> GetGLInterface() const override;
 
-  // Obtain a raw pointer to the on-screen AndroidEGLSurface.
-  //
-  // This method is intended for use in tests. Callers must not
-  // delete the returned pointer.
-  AndroidEGLSurface* GetOnscreenSurface() const {
-    return onscreen_surface_.get();
-  }
-
  private:
+  std::unique_ptr<impeller::egl::Display> display_;
+  std::unique_ptr<impeller::egl::Config> onscreen_config_;
+  std::unique_ptr<impeller::egl::Config> offscreen_config_;
+  std::unique_ptr<impeller::egl::Surface> onscreen_surface_;
+  std::unique_ptr<impeller::egl::Surface> offscreen_surface_;
+  std::unique_ptr<impeller::egl::Context> onscreen_context_;
+  std::unique_ptr<impeller::egl::Context> offscreen_context_;
+  std::shared_ptr<impeller::Context> impeller_context_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
-  std::unique_ptr<AndroidEGLSurface> onscreen_surface_;
-  std::unique_ptr<AndroidEGLSurface> offscreen_surface_;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Takes the super class AndroidSurface's AndroidContext and
-  ///             return a raw pointer to an AndroidContextGL.
-  ///
-  AndroidContextGL* GLContextPtr() const;
+  bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGL);
+  bool OnGLContextMakeCurrent();
+
+  bool RecreateOnscreenSurfaceAndMakeOnscreenContextCurrent();
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGLImpeller);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_IMPELLER_H_

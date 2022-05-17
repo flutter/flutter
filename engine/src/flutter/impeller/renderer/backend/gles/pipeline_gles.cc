@@ -12,7 +12,7 @@ PipelineGLES::PipelineGLES(ReactorGLES::Ref reactor,
     : Pipeline(std::move(library), std::move(desc)),
       reactor_(std::move(reactor)),
       handle_(reactor_ ? reactor_->CreateHandle(HandleType::kProgram)
-                       : GLESHandle::DeadHandle()),
+                       : HandleGLES::DeadHandle()),
       is_valid_(!handle_.IsDead()) {
   if (is_valid_) {
     reactor_->SetDebugLabel(handle_, GetDescriptor().GetLabel());
@@ -31,7 +31,7 @@ bool PipelineGLES::IsValid() const {
   return is_valid_;
 }
 
-const GLESHandle& PipelineGLES::GetProgramHandle() const {
+const HandleGLES& PipelineGLES::GetProgramHandle() const {
   return handle_;
 }
 

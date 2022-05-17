@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_MOCK_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_MOCK_H_
 
-#include "flutter/shell/gpu/gpu_surface_gl.h"
+#include "flutter/shell/gpu/gpu_surface_gl_skia.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "gmock/gmock.h"
 

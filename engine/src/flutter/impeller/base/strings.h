@@ -13,4 +13,8 @@ namespace impeller {
 IMPELLER_PRINTF_FORMAT(1, 2)
 std::string SPrintF(const char* format, ...);
 
+bool HasPrefix(const std::string& string, const std::string& prefix);
+
+std::string StripPrefix(const std::string& string, const std::string& to_strip);
+
 }  // namespace impeller

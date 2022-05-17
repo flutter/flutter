@@ -5,9 +5,12 @@
 import("../../../tools/impeller.gni")
 
 config("gles_config") {
-  # Generic GL/GLES/EGL/Vulkan headers. Any will do. We just pick one from Angle
-  # because they are there.
-  include_dirs = [ "//third_party/angle/include" ]
+  include_dirs = []
+  if (!is_android) {
+    # Generic GL/GLES/EGL/Vulkan headers. Any will do. We just pick one from Angle
+    # because they are there.
+    include_dirs = [ "//third_party/angle/include" ]
+  }
 }
 
 impeller_component("gles") {
@@ -22,15 +25,15 @@ impeller_component("gles") {
     "command_buffer_gles.h",
     "context_gles.cc",
     "context_gles.h",
+    "description_gles.cc",
+    "description_gles.h",
     "device_buffer_gles.cc",
     "device_buffer_gles.h",
     "formats_gles.cc",
     "formats_gles.h",
-    "gl_description.cc",
-    "gl_description.h",
     "gles.h",
-    "gles_handle.cc",
-    "gles_handle.h",
+    "handle_gles.cc",
+    "handle_gles.h",
     "pipeline_gles.cc",
     "pipeline_gles.h",
     "pipeline_library_gles.cc",

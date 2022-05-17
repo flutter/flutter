@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/config.gni")
 
 gpu_common_deps = [
@@ -27,13 +28,22 @@ source_set("gpu_surface_software") {
 
 source_set("gpu_surface_gl") {
   sources = [
-    "gpu_surface_gl.cc",
-    "gpu_surface_gl.h",
     "gpu_surface_gl_delegate.cc",
     "gpu_surface_gl_delegate.h",
+    "gpu_surface_gl_skia.cc",
+    "gpu_surface_gl_skia.h",
   ]
 
   public_deps = gpu_common_deps
+
+  if (impeller_enable_opengles) {
+    sources += [
+      "gpu_surface_gl_impeller.cc",
+      "gpu_surface_gl_impeller.h",
+    ]
+
+    public_deps += [ "//flutter/impeller" ]
+  }
 }
 
 source_set("gpu_surface_vulkan") {
