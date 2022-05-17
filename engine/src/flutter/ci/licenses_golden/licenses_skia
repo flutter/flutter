@@ -1,4 +1,4 @@
-Signature: 65323be02acd1f81af36f669b05b6a8e
+Signature: b96fe122d9dd46cf1fbe981a663a2efa
 
 UNUSED LICENSES:
 
@@ -848,6 +848,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/gcloud_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go/asset.json
 FILE: ../../../third_party/skia/infra/bots/assets/go_win/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/gsutil/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-11.4/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.3/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.4/VERSION
@@ -959,8 +960,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-Clang-GCE-GPU-SwiftShader-x86_64-Debug-All-SwiftShader.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-ASAN_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-Vulkan.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-GCC-GCE-CPU-AVX2-x86-Debug-All-Docker.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-GCC-GCE-CPU-AVX2-x86_64-Debug-All-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Mac10.13-Clang-MacBookPro11.5-CPU-AVX2-x86_64-Debug-All-ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Ubuntu18-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/cpu_scale_failed.json
@@ -2899,7 +2898,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/geom/Shape.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/Shape.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/Transform.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/Transform_graphite.h
-FILE: ../../../third_party/skia/src/gpu/graphite/geom/VectorTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCaps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCaps.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCommandBuffer.h
@@ -6086,7 +6084,6 @@ FILE: ../../../third_party/skia/gm/clear_swizzle.cpp
 FILE: ../../../third_party/skia/gm/gpu_blur_utils.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrFinishCallbacks.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrFinishCallbacks.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrVx.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/AtlasInstancedHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeTessellateOp.h
