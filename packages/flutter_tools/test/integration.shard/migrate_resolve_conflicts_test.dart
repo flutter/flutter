@@ -361,4 +361,79 @@ Cyan = Original lines.  Green = New lines.
     ProcessManager: () => processManager,
     Platform: () => platform,
   });
+
+  testUsingContext('partial conflict skipped.', () async {
+    final File conflictFile = workingDir.childFile('conflict_file');
+    conflictFile.createSync(recursive: true);
+    conflictFile.writeAsStringSync('hello\nwow a bunch of lines\n<<<<<<<\noriginal\n=======\nnew\n>>>>>>>\nhi\n<<<<<<<\nskip this partial conflict\n=======\nblah blah', flush: true);
+
+    final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, migrateResult: MigrateResult(
+      mergeResults: <MergeResult>[
+        StringMergeResult.explicit(
+          localPath: 'merged_file',
+          mergedString: 'str',
+          hasConflict: false,
+          exitCode: 0,
+        ),
+        StringMergeResult.explicit(
+          localPath: 'conflict_file',
+          mergedString: 'hello\nwow a bunch of lines\n<<<<<<<\noriginal\n=======\nnew\n>>>>>>>\nhi\n<<<<<<<\nskip this partial conflict\n=======\nblah blah',
+          hasConflict: true,
+          exitCode: 1,
+        ),
+      ],
+      addedFiles: <FilePendingMigration>[FilePendingMigration('added_file', fileSystem.file('added_file'))],
+      deletedFiles: <FilePendingMigration>[FilePendingMigration('deleted_file', fileSystem.file('deleted_file'))],
+      // The following are ignored by the manifest.
+      mergeTypeMap: <String, MergeType>{'test': MergeType.threeWay},
+      diffMap: <String, DiffResult>{},
+      tempDirectories: <Directory>[],
+      sdkDirs: <String, Directory>{},
+    ));
+    manifest.writeFile();
+    File manifestFile = workingDir.childFile('.migrate_manifest');
+    print((terminal as FakeTerminal).terminal);
+
+    expect(workingDir.existsSync(), true);
+    final Future<void> commandFuture = createTestCommandRunner(command).run(
+      <String>[
+        'migrate',
+        'resolve-conflicts',
+        '--working-directory=${workingDir.path}',
+        '--project-directory=${appDir.path}',
+      ]
+    );
+
+    terminal.simulateStdin('o');
+    terminal.simulateStdin('y');
+
+    await commandFuture;
+    expect(logger.statusText, contains('''
+Cyan = Original lines.  Green = New lines.
+
+  2    <<<<<<<
+  3    original
+  4    =======
+  5    new
+  6    >>>>>>>
+  7    hi'''));
+    expect(logger.statusText, contains('''
+Conflict in conflict_file.
+Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually? [o|n|s]: o
+
+
+Conflicts in conflict_file complete.
+
+You chose to:
+  Skip 0 conflicts
+  Acccept the original lines for 1 conflicts
+  Accept the new lines for 0 conflicts
+
+Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n|r]:'''));
+    expect(conflictFile.readAsStringSync(), equals('hello\nwow a bunch of lines\noriginal\nhi\n<<<<<<<\nskip this partial conflict\n=======\nblah blah'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => platform,
+  });
 }
