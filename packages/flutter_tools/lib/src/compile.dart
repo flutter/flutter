@@ -19,6 +19,12 @@ import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
 
+/// Opt-in changes to the dart compilers.
+const List<String> kDartCompilerExperiments = <String>[
+  // improve AOT code size.
+  '--compact-async',
+];
+
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
 class TargetModel {
@@ -183,11 +189,13 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
           '-Ddart.vm.profile=true',
         if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
           '-Ddart.vm.product=false',
+        ...kDartCompilerExperiments,
       ];
     case BuildMode.release:
       return <String>[
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=true',
+        ...kDartCompilerExperiments,
       ];
   }
   throw Exception('Unknown BuildMode: $mode');
@@ -276,6 +284,7 @@ class KernelCompiler {
       sdkRoot,
       '--target=$targetModel',
       '--no-print-incremental-dependencies',
+      '--compact-async',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       ...buildModeOptions(buildMode, dartDefines),
