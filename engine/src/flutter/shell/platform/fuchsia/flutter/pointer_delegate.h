@@ -35,9 +35,7 @@ struct IxnHasher {
 class PointerDelegate {
  public:
   PointerDelegate(fuchsia::ui::pointer::TouchSourceHandle touch_source,
-                  fuchsia::ui::pointer::MouseSourceHandle mouse_source)
-      : touch_source_(touch_source.Bind()),
-        mouse_source_(mouse_source.Bind()) {}
+                  fuchsia::ui::pointer::MouseSourceHandle mouse_source);
 
   // This function collects Fuchsia's TouchPointerSample and MousePointerSample
   // data and transforms them into flutter::PointerData structs. It then calls
