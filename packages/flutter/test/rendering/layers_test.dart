@@ -940,6 +940,31 @@ void main() {
     root.detach();
     expect(compositedB1, true);
   });
+
+  test('Observe layer tree composition - observer count correctly maintained', () {
+    final ContainerLayer root = ContainerLayer();
+    final ContainerLayer a1 = ContainerLayer();
+    root.append(a1);
+
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+
+    final VoidCallback remover1 = a1.addCompositionCallback((_) { });
+    final VoidCallback remover2 = a1.addCompositionCallback((_) { });
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+
+    remover1();
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+
+    remover2();
+
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+  });
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {
