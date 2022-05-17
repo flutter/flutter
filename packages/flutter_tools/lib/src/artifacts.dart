@@ -592,6 +592,9 @@ class CachedArtifacts implements Artifacts {
           _artifactToFileName(artifact),
         );
       case Artifact.flutterTester:
+        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
+        final String platformDirName = _enginePlatformDirectoryName(platform) + '-fractional';
+        return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
       case Artifact.icuData:

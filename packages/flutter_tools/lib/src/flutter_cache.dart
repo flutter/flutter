@@ -241,7 +241,10 @@ class FlutterSdk extends EngineCachedArtifact {
       else if (_platform.isMacOS)
         <String>['darwin-x64', 'darwin-x64/artifacts.zip']
       else if (_platform.isLinux)
-        <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
+        ...<List<String>>[
+          <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
+          <String>['linux-$arch-fractional', 'linux-$arch-fractional/artifacts.zip'],
+        ],
     ];
   }
 
