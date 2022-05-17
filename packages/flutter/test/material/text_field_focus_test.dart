@@ -564,7 +564,8 @@ void main() {
     expect(focusNodeB.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('TextFormField gets blurred when tapping outside of the widget on mobile browsers', (WidgetTester tester) async {
+  // Regression test for #64245
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on all browsers', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final FocusNode focusNodeB = FocusNode();
     final Key key = UniqueKey();
@@ -590,8 +591,7 @@ void main() {
       ),
     );
 
-    final TestGesture down1 = await tester.startGesture(tester.getCenter(find.byType(TextField).first));
-    await tester.pump();
+    final TestGesture down1 = await tester.startGesture(tester.getCenter(find.byType(TextField).first), kind: PointerDeviceKind.mouse);
     await tester.pumpAndSettle();
     await down1.up();
     await down1.removePointer();
@@ -600,8 +600,7 @@ void main() {
     expect(focusNodeB.hasFocus, false);
 
     // Click on the container to not hit either text field.
-    final TestGesture down2 = await tester.startGesture(tester.getCenter(find.byKey(key)));
-    await tester.pump();
+    final TestGesture down2 = await tester.startGesture(tester.getCenter(find.byKey(key)), kind: PointerDeviceKind.mouse);
     await tester.pumpAndSettle();
     await down2.up();
     await down2.removePointer();
@@ -610,16 +609,62 @@ void main() {
     expect(focusNodeB.hasFocus, false);
 
     // Second text field can still gain focus.
-
-    final TestGesture down3 = await tester.startGesture(tester.getCenter(find.byType(TextField).last));
-    await tester.pump();
+    final TestGesture down3 = await tester.startGesture(tester.getCenter(find.byType(TextField).last), kind: PointerDeviceKind.mouse);
     await tester.pumpAndSettle();
     await down3.up();
     await down3.removePointer();
 
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
-  }, skip: !isBrowser); // https://github.com/flutter/flutter/issues/64245
+  }, skip: !isBrowser);
+
+  // Regression test for #64245
+  testWidgets('A Focused text-field will lose focus when tapping outside of the widget on all browsers', (WidgetTester tester) async {
+    final FocusNode focusNodeA = FocusNode();
+    final FocusNode focusNodeB = FocusNode();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              TextField(
+                focusNode: focusNodeA,
+              ),
+              Container(
+                key: key,
+                height: 200,
+              ),
+              TextField(
+                focusNode: focusNodeB,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(tester.getCenter(find.byType(TextField).first));
+    await tester.pump();
+
+    expect(focusNodeA.hasFocus, true);
+    expect(focusNodeB.hasFocus, false);
+
+    // Tap on the container to not hit either text field.
+    await tester.tapAt(tester.getCenter(find.byKey(key)));
+    await tester.pump();
+
+    expect(focusNodeA.hasFocus, false);
+    expect(focusNodeB.hasFocus, false);
+
+    // Second text field can still gain focus.
+    await tester.tapAt(tester.getCenter(find.byType(TextField).last));
+    await tester.pump();
+
+    expect(focusNodeA.hasFocus, false);
+    expect(focusNodeB.hasFocus, true);
+  }, skip: !isBrowser);
 }
 
 class _APage extends Page<void> {

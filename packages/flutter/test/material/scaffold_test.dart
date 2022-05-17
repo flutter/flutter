@@ -1549,8 +1549,8 @@ void main() {
       expect(false, scaffoldState.isEndDrawerOpen);
 
       scaffoldState.openDrawer();
-      expect(true, scaffoldState.isDrawerOpen);
       await tester.pump();
+      expect(true, scaffoldState.isDrawerOpen);
       await tester.tap(endDrawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
       expect(false, scaffoldState.isDrawerOpen);
