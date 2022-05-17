@@ -14,8 +14,6 @@ import 'package:ui/ui.dart' hide TextStyle, ImageShader;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../../common.dart';
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }

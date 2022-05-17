@@ -10,7 +10,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../common.dart';
 import '../matchers.dart';
 
 void main() {
