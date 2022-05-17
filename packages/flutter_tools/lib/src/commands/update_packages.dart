@@ -30,12 +30,14 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'archive': '3.1.11', // Breaking changes in 3.2.0, see https://github.com/flutter/flutter/issues/98536
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
-  'flutter_template_images': '4.0.0', // Must always exactly match flutter_tools template.
+  'flutter_template_images': '4.1.0', // Must always exactly match flutter_tools template.
   // "shelf" is pinned to avoid the performance regression from a reverted
   // feature from https://github.com/dart-lang/shelf/issues/189 . This can be
   // removed when a new major version of shelf is published.
   'shelf': '1.1.4',
   'video_player': '2.2.11',
+  // https://github.com/flutter/flutter/issues/103357 color regressions
+  'material_color_utilities': '0.1.4',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -145,15 +147,15 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner!.getRepoPackages();
 
-    final bool forceUpgrade = boolArg('force-upgrade');
-    final bool isPrintPaths = boolArg('paths');
-    final bool isPrintTransitiveClosure = boolArg('transitive-closure');
-    final bool isVerifyOnly = boolArg('verify-only');
-    final bool isConsumerOnly = boolArg('consumer-only');
-    final bool offline = boolArg('offline');
+    final bool forceUpgrade = boolArgDeprecated('force-upgrade');
+    final bool isPrintPaths = boolArgDeprecated('paths');
+    final bool isPrintTransitiveClosure = boolArgDeprecated('transitive-closure');
+    final bool isVerifyOnly = boolArgDeprecated('verify-only');
+    final bool isConsumerOnly = boolArgDeprecated('consumer-only');
+    final bool offline = boolArgDeprecated('offline');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
 
-    if (boolArg('crash')) {
+    if (boolArgDeprecated('crash')) {
       throw StateError('test crash please ignore.');
     }
 
@@ -403,7 +405,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         context: PubContext.updatePackages,
         directory: tempDir.path,
         upgrade: doUpgrade,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         flutterRootOverride: temporaryFlutterSdk?.path,
       );
       // Cleanup the temporary SDK
@@ -454,15 +456,15 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
     }
 
-    if (boolArg('transitive-closure')) {
+    if (boolArgDeprecated('transitive-closure')) {
       tree._dependencyTree.forEach((String from, Set<String> to) {
         globals.printStatus('$from -> $to');
       });
       return true;
     }
 
-    if (boolArg('paths')) {
-      showDependencyPaths(from: stringArg('from')!, to: stringArg('to')!, tree: tree);
+    if (boolArgDeprecated('paths')) {
+      showDependencyPaths(from: stringArgDeprecated('from')!, to: stringArgDeprecated('to')!, tree: tree);
       return true;
     }
 
@@ -496,7 +498,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
     try {
       // int.tryParse will not accept null, but will convert empty string to null
-      final int? maxJobs = int.tryParse(stringArg('jobs') ?? '');
+      final int? maxJobs = int.tryParse(stringArgDeprecated('jobs') ?? '');
       final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {

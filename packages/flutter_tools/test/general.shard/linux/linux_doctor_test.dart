@@ -219,6 +219,30 @@ void main() {
     ]);
   });
 
+  testWithoutContext('Missing validation when pkg-config is missing', () async {
+    final UserMessages userMessages = UserMessages();
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('1.10.0'),
+      _missingBinaryException('pkg-config'),
+      // We never check libraries because pkg-config is not present
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: userMessages,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.missing);
+    expect(result.messages, <ValidationMessage>[
+      const ValidationMessage('clang version 4.0.1-6+build1'),
+      const ValidationMessage('cmake version 3.16.3'),
+      const ValidationMessage('ninja version 1.10.0'),
+      ValidationMessage.error(userMessages.pkgConfigMissing),
+    ]);
+  });
+
   testWithoutContext('Missing validation when CMake is not available', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),

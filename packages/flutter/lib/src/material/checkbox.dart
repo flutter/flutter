@@ -171,7 +171,7 @@ class Checkbox extends StatefulWidget {
   /// Checkbox(
   ///   value: true,
   ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }

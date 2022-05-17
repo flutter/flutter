@@ -267,20 +267,20 @@ abstract class BoxBorder extends ShapeBorder {
 /// Container(
 ///   decoration: const BoxDecoration(
 ///     border: Border(
-///       top: BorderSide(width: 1.0, color: Color(0xFFFFFFFF)),
-///       left: BorderSide(width: 1.0, color: Color(0xFFFFFFFF)),
-///       right: BorderSide(width: 1.0, color: Color(0xFF000000)),
-///       bottom: BorderSide(width: 1.0, color: Color(0xFF000000)),
+///       top: BorderSide(color: Color(0xFFFFFFFF)),
+///       left: BorderSide(color: Color(0xFFFFFFFF)),
+///       right: BorderSide(),
+///       bottom: BorderSide(),
 ///     ),
 ///   ),
 ///   child: Container(
 ///     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
 ///     decoration: const BoxDecoration(
 ///       border: Border(
-///         top: BorderSide(width: 1.0, color: Color(0xFFDFDFDF)),
-///         left: BorderSide(width: 1.0, color: Color(0xFFDFDFDF)),
-///         right: BorderSide(width: 1.0, color: Color(0xFF7F7F7F)),
-///         bottom: BorderSide(width: 1.0, color: Color(0xFF7F7F7F)),
+///         top: BorderSide(color: Color(0xFFDFDFDF)),
+///         left: BorderSide(color: Color(0xFFDFDFDF)),
+///         right: BorderSide(color: Color(0xFF7F7F7F)),
+///         bottom: BorderSide(color: Color(0xFF7F7F7F)),
 ///       ),
 ///       color: Color(0xFFBFBFBF),
 ///     ),

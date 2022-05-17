@@ -44,7 +44,6 @@ enum CrossFadeState {
 /// ```dart
 /// Widget defaultLayoutBuilder(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
 ///   return Stack(
-///     fit: StackFit.loose,
 ///     children: <Widget>[
 ///       Positioned(
 ///         key: bottomChildKey,

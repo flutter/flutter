@@ -218,7 +218,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
-      enableDrag: true,
       builder: (BuildContext context) {
         numBuilderCalls++;
         return const Text('BottomSheet');
@@ -323,7 +322,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
-      isDismissible: true,
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
@@ -498,7 +496,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
-      enableDrag: true,
       builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
@@ -531,7 +528,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
-      enableDrag: true,
       builder: (BuildContext context) {
         numBuilderCalls++;
         return const Text('BottomSheet');
