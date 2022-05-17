@@ -1444,6 +1444,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _debugCheckHasValidScrollPosition() {
+    if (!mounted) {
+      return true;
+    }
     final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
     final bool tryPrimary = widget.controller == null;
     final String controllerForError = tryPrimary
