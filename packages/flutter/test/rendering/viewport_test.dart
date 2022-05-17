@@ -1708,9 +1708,8 @@ void main() {
           '   If this widget is always nested in a scrollable widget there is\n'
           '   no need to use a viewport because there will always be enough\n'
           '   horizontal space for the children. In this case, consider using a\n'
-          '   Row instead. Otherwise, consider using the "shrinkWrap" property\n'
-          '   (or a ShrinkWrappingViewport) to size the width of the viewport\n'
-          '   to the sum of the widths of its children.\n',
+          '   Row or Wrap instead. Otherwise, consider using a CustomScrollView\n'
+          '   to concatenate arbitrary slivers into a single scrollable.\n',
       );
     });
 
@@ -1743,9 +1742,9 @@ void main() {
           '   If this widget is always nested in a scrollable widget there is\n'
           '   no need to use a viewport because there will always be enough\n'
           '   vertical space for the children. In this case, consider using a\n'
-          '   Column instead. Otherwise, consider using the "shrinkWrap"\n'
-          '   property (or a ShrinkWrappingViewport) to size the height of the\n'
-          '   viewport to the sum of the heights of its children.\n',
+          '   Column or Wrap instead. Otherwise, consider using a\n'
+          '   CustomScrollView to concatenate arbitrary slivers into a single\n'
+          '   scrollable.\n',
       );
     });
   });
