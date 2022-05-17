@@ -83,6 +83,10 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/frontend_server
   http_parser:
     path: ../../third_party/dart/third_party/pkg/http_parser
+  js_ast:
+    path: ../../third_party/dart/pkg/js_ast
+  js_runtime:
+    path: ../../third_party/dart/pkg/js_runtime
   kernel:
     path: ../../third_party/dart/pkg/kernel
   litetest:
