@@ -16,6 +16,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:pub_semver/pub_semver.dart';
 
 import 'run_command.dart';
 import 'utils.dart';
@@ -86,6 +87,9 @@ Future<void> run(List<String> arguments) async {
   if (!assertsEnabled) {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
+
+  print('$clock All tool test files end in _test.dart...');
+  await verifyToolTestsEndInTestDart(flutterRoot);
 
   print('$clock No sync*/async*');
   await verifyNoSyncAsyncStar(flutterPackages);
@@ -195,6 +199,53 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+/// Verify tool test files end in `_test.dart`.
+///
+/// The test runner will only recognize files ending in `_test.dart` as tests to
+/// be run: https://github.com/dart-lang/test/tree/master/pkgs/test#running-tests
+Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
+  final String toolsTestPath = path.join(
+    workingDirectory,
+    'packages',
+    'flutter_tools',
+    'test',
+  );
+  final List<String> violations = <String>[];
+
+  // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
+  final RegExp callsTestFunctionPattern = RegExp(r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))');
+
+  await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
+    final bool isValidTestFile = file.path.endsWith('_test.dart');
+    if (isValidTestFile) {
+      continue;
+    }
+
+    final bool isTestData = file.path.contains(r'test_data');
+    if (isTestData) {
+      continue;
+    }
+
+    final bool isInTestShard = file.path.contains(r'.shard/');
+    if (!isInTestShard) {
+      continue;
+    }
+
+    final bool callsTestFunction = file.readAsStringSync().contains(callsTestFunctionPattern);
+    if (!callsTestFunction) {
+      continue;
+    }
+
+    violations.add(file.path);
+  }
+  if (violations.isNotEmpty) {
+    exitWithError(<String>[
+      '${bold}Found flutter_tools tests that do not end in `_test.dart`; these will not be run by the test runner$reset',
+      ...violations,
+    ]);
+  }
+}
 
 Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000 }) async {
   final RegExp syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
@@ -405,42 +456,62 @@ String _generateLicense(String prefix) {
 
 Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimums = true }) async {
   final int? overrideMinimumMatches = checkMinimums ? null : 0;
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, '#!/usr/bin/env bash\n${_generateLicense('# ')}');
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, '@ECHO off\n${_generateLicense('REM ')}');
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->');
+  int failed = 0;
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, _generateLicense('# '), header: r'#!/usr/bin/env bash\n',);
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, _generateLicense('REM '), header: r'@ECHO off\n');
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', trailingBlank: false, header: r'<!DOCTYPE HTML>\n');
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', header: r'(<\?xml version="1.0" encoding="utf-8"\?>\n)?');
+  if (failed > 0) {
+    exitWithError(<String>['License check failed.']);
+  }
 }
 
-Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, int minimumMatches, String license, { bool trailingBlank = true }) async {
+Future<int> _verifyNoMissingLicenseForExtension(
+  String workingDirectory,
+  String extension,
+  int minimumMatches,
+  String license, {
+  bool trailingBlank = true,
+  // The "header" is a regular expression matching the header that comes before
+  // the license in some files.
+  String header = '',
+}) async {
   assert(!license.endsWith('\n'));
-  final String licensePattern = '$license\n${trailingBlank ? '\n' : ''}';
+  final String licensePattern = RegExp.escape('$license\n${trailingBlank ? '\n' : ''}');
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
     if (contents.isEmpty)
       continue; // let's not go down the /bin/true rabbit hole
-    if (!contents.startsWith(licensePattern))
+    if (!contents.startsWith(RegExp(header + licensePattern)))
       errors.add(file.path);
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    final String s = errors.length == 1 ? ' does' : 's do';
-    exitWithError(<String>[
-      '${bold}The following ${errors.length} file$s not have the right license header:$reset',
-      ...errors,
+    final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
+    final String fileDoes = errors.length == 1 ? 'file does' : '${errors.length} files do';
+    print(<String>[
+      redLine,
+      '${bold}The following $fileDoes not have the right license header for $extension files:$reset',
+      ...errors.map<String>((String error) => '  $error'),
       'The expected license header is:',
+      if (header.isNotEmpty) 'A header matching the regular expression "$header",',
+      if (header.isNotEmpty) 'followed by the following license text:',
       license,
       if (trailingBlank) '...followed by a blank line.',
-    ]);
+      redLine,
+    ].join('\n'));
+    return 1;
   }
+  return 0;
 }
 
 class _TestSkip {
@@ -452,7 +523,7 @@ class _TestSkip {
 
 Iterable<_TestSkip> _getTestSkips(File file) {
   final ParseStringResult parseResult = parseFile(
-    featureSet: FeatureSet.latestLanguageVersion(),
+    featureSet: FeatureSet.fromEnableFlags2(sdkLanguageVersion: Version.parse('2.17.0-0'), flags: <String>['super-parameters']),
     path: file.absolute.path,
   );
   final _TestSkipLinesVisitor<CompilationUnit> visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);
@@ -1494,9 +1565,83 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _checkConsumerDependencies() async {
+<<<<<<< HEAD
   // Skipping this test for releases as it was never intended to work on release
   // branches, and would fail for the 2.10 releases. See
   // https://github.com/flutter/flutter/issues/91757.
+=======
+  const List<String> kCorePackages = <String>[
+    'flutter',
+    'flutter_test',
+    'flutter_driver',
+    'flutter_localizations',
+    'integration_test',
+    'fuchsia_remote_debug_protocol',
+  ];
+  final Set<String> dependencies = <String>{};
+
+  // Parse the output of pub deps --json to determine all of the
+  // current packages used by the core set of flutter packages.
+  for (final String package in kCorePackages) {
+    final ProcessResult result = await Process.run(flutter, <String>[
+      'pub',
+      'deps',
+      '--json',
+      '--directory=${path.join(flutterRoot, 'packages', package)}'
+    ]);
+    if (result.exitCode != 0) {
+      print(result.stdout as Object);
+      print(result.stderr as Object);
+      exit(result.exitCode);
+    }
+    final Map<String, Object?> rawJson = json.decode(result.stdout as String) as Map<String, Object?>;
+    final Map<String, Map<String, Object?>> dependencyTree = <String, Map<String, Object?>>{
+      for (final Map<String, Object?> package in (rawJson['packages']! as List<Object?>).cast<Map<String, Object?>>())
+        package['name']! as String : package,
+    };
+    final List<Map<String, Object?>> workset = <Map<String, Object?>>[];
+    workset.add(dependencyTree[package]!);
+
+    while (workset.isNotEmpty) {
+      final Map<String, Object?> currentPackage = workset.removeLast();
+      if (currentPackage['kind'] == 'dev') {
+        continue;
+      }
+      dependencies.add(currentPackage['name']! as String);
+
+      final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
+      for (final String dependency in currentDependencies) {
+        workset.add(dependencyTree[dependency]!);
+      }
+    }
+  }
+
+  final Set<String> removed = kCorePackageAllowList.difference(dependencies);
+  final Set<String> added = dependencies.difference(kCorePackageAllowList);
+
+  String plural(int n, String s, String p) => n == 1 ? s : p;
+
+  if (added.isNotEmpty) {
+    exitWithError(<String>[
+      'The transitive closure of package dependencies contains ${plural(added.length, "a non-allowlisted package", "non-allowlisted packages")}:',
+      '  ${added.join(', ')}',
+      'We strongly desire to keep the number of dependencies to a minimum and',
+      'therefore would much prefer not to add new dependencies.',
+      'See dev/bots/allowlist.dart for instructions on how to update the package',
+      'allowlist if you nonetheless believe this is a necessary addition.',
+    ]);
+  }
+
+  if (removed.isNotEmpty) {
+    exitWithError(<String>[
+      'Excellent news! ${plural(removed.length, "A package dependency has been removed!", "Multiple package dependencies have been removed!")}',
+      '  ${removed.join(', ')}',
+      'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
+      'please remove ${plural(removed.length, "this", "these")} packages from the allow-list in dev/bots/allowlist.dart.',
+      'Thanks!',
+    ]);
+  }
+>>>>>>> ee4e09cce01d6f2d7f4baebd247fde02e5008851
 }
 
 const String _kDebugOnlyAnnotation = '@_debugOnly';

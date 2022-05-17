@@ -238,7 +238,7 @@ class SystemChannels {
   /// See also:
   ///
   ///  * [RawKeyboard], which uses this channel to expose key data.
-  ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
+  ///  * [RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
   static const BasicMessageChannel<Object?> keyEvent = BasicMessageChannel<Object?>(
       'flutter/keyevent',
@@ -392,4 +392,53 @@ class SystemChannels {
     'flutter/localization',
     JSONMethodCodec(),
   );
+
+  /// A [MethodChannel] for platform menu specification and control.
+  ///
+  /// The following outgoing method is defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `Menu.setMenu`: sends the configuration of the platform menu, including
+  ///    labels, enable/disable information, and unique integer identifiers for
+  ///    each menu item. The configuration is sent as a `Map<String, Object?>`
+  ///    encoding the list of top level menu items in window "0", which each
+  ///    have a hierarchy of `Map<String, Object?>` containing the required
+  ///    data, sent via a [StandardMessageCodec]. It is typically generated from
+  ///    a list of [MenuItem]s, and ends up looking like this example:
+  ///
+  /// ```dart
+  /// List<Map<String, Object?>> menu = <String, Object?>{
+  ///   '0': <Map<String, Object?>>[
+  ///     <String, Object?>{
+  ///       'id': 1,
+  ///       'label': 'First Menu Label',
+  ///       'enabled': true,
+  ///       'children': <Map<String, Object?>>[
+  ///         <String, Object?>{
+  ///           'id': 2,
+  ///           'label': 'Sub Menu Label',
+  ///           'enabled': true,
+  ///         },
+  ///       ],
+  ///     },
+  ///   ],
+  /// };
+  /// ```
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]).
+  ///
+  ///  * `Menu.selectedCallback`: Called when a menu item is selected, along
+  ///    with the unique ID of the menu item selected.
+  ///
+  ///  * `Menu.opened`: Called when a submenu is opened, along with the unique
+  ///    ID of the submenu.
+  ///
+  ///  * `Menu.closed`: Called when a submenu is closed, along with the unique
+  ///    ID of the submenu.
+  ///
+  /// See also:
+  ///
+  ///  * [DefaultPlatformMenuDelegate], which uses this channel.
+  static const MethodChannel menu = OptionalMethodChannel('flutter/menu');
 }

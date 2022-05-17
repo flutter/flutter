@@ -44,6 +44,20 @@ const CherrypickState$json = const {
 /// Descriptor for `CherrypickState`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List cherrypickStateDescriptor = $convert.base64Decode(
     'Cg9DaGVycnlwaWNrU3RhdGUSCwoHUEVORElORxAAEhkKFVBFTkRJTkdfV0lUSF9DT05GTElDVBABEg0KCUNPTVBMRVRFRBACEg0KCUFCQU5ET05FRBAD');
+@$core.Deprecated('Use releaseTypeDescriptor instead')
+const ReleaseType$json = const {
+  '1': 'ReleaseType',
+  '2': const [
+    const {'1': 'STABLE_INITIAL', '2': 0},
+    const {'1': 'STABLE_HOTFIX', '2': 1},
+    const {'1': 'BETA_INITIAL', '2': 2},
+    const {'1': 'BETA_HOTFIX', '2': 3},
+  ],
+};
+
+/// Descriptor for `ReleaseType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List releaseTypeDescriptor = $convert.base64Decode(
+    'CgtSZWxlYXNlVHlwZRISCg5TVEFCTEVfSU5JVElBTBAAEhEKDVNUQUJMRV9IT1RGSVgQARIQCgxCRVRBX0lOSVRJQUwQAhIPCgtCRVRBX0hPVEZJWBAD');
 @$core.Deprecated('Use remoteDescriptor instead')
 const Remote$json = const {
   '1': 'Remote',
@@ -101,10 +115,10 @@ const ConductorState$json = const {
     const {'1': 'logs', '3': 8, '4': 3, '5': 9, '10': 'logs'},
     const {'1': 'currentPhase', '3': 9, '4': 1, '5': 14, '6': '.conductor_state.ReleasePhase', '10': 'currentPhase'},
     const {'1': 'conductorVersion', '3': 10, '4': 1, '5': 9, '10': 'conductorVersion'},
-    const {'1': 'incrementLevel', '3': 11, '4': 1, '5': 9, '10': 'incrementLevel'},
+    const {'1': 'releaseType', '3': 11, '4': 1, '5': 14, '6': '.conductor_state.ReleaseType', '10': 'releaseType'},
   ],
 };
 
 /// Descriptor for `ConductorState`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List conductorStateDescriptor = $convert.base64Decode(
-    'Cg5Db25kdWN0b3JTdGF0ZRImCg5yZWxlYXNlQ2hhbm5lbBgBIAEoCVIOcmVsZWFzZUNoYW5uZWwSJgoOcmVsZWFzZVZlcnNpb24YAiABKAlSDnJlbGVhc2VWZXJzaW9uEjMKBmVuZ2luZRgEIAEoCzIbLmNvbmR1Y3Rvcl9zdGF0ZS5SZXBvc2l0b3J5UgZlbmdpbmUSOQoJZnJhbWV3b3JrGAUgASgLMhsuY29uZHVjdG9yX3N0YXRlLlJlcG9zaXRvcnlSCWZyYW1ld29yaxIgCgtjcmVhdGVkRGF0ZRgGIAEoA1ILY3JlYXRlZERhdGUSKAoPbGFzdFVwZGF0ZWREYXRlGAcgASgDUg9sYXN0VXBkYXRlZERhdGUSEgoEbG9ncxgIIAMoCVIEbG9ncxJBCgxjdXJyZW50UGhhc2UYCSABKA4yHS5jb25kdWN0b3Jfc3RhdGUuUmVsZWFzZVBoYXNlUgxjdXJyZW50UGhhc2USKgoQY29uZHVjdG9yVmVyc2lvbhgKIAEoCVIQY29uZHVjdG9yVmVyc2lvbhImCg5pbmNyZW1lbnRMZXZlbBgLIAEoCVIOaW5jcmVtZW50TGV2ZWw=');
+    'Cg5Db25kdWN0b3JTdGF0ZRImCg5yZWxlYXNlQ2hhbm5lbBgBIAEoCVIOcmVsZWFzZUNoYW5uZWwSJgoOcmVsZWFzZVZlcnNpb24YAiABKAlSDnJlbGVhc2VWZXJzaW9uEjMKBmVuZ2luZRgEIAEoCzIbLmNvbmR1Y3Rvcl9zdGF0ZS5SZXBvc2l0b3J5UgZlbmdpbmUSOQoJZnJhbWV3b3JrGAUgASgLMhsuY29uZHVjdG9yX3N0YXRlLlJlcG9zaXRvcnlSCWZyYW1ld29yaxIgCgtjcmVhdGVkRGF0ZRgGIAEoA1ILY3JlYXRlZERhdGUSKAoPbGFzdFVwZGF0ZWREYXRlGAcgASgDUg9sYXN0VXBkYXRlZERhdGUSEgoEbG9ncxgIIAMoCVIEbG9ncxJBCgxjdXJyZW50UGhhc2UYCSABKA4yHS5jb25kdWN0b3Jfc3RhdGUuUmVsZWFzZVBoYXNlUgxjdXJyZW50UGhhc2USKgoQY29uZHVjdG9yVmVyc2lvbhgKIAEoCVIQY29uZHVjdG9yVmVyc2lvbhI+CgtyZWxlYXNlVHlwZRgLIAEoDjIcLmNvbmR1Y3Rvcl9zdGF0ZS5SZWxlYXNlVHlwZVILcmVsZWFzZVR5cGU=');

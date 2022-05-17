@@ -15,6 +15,7 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'restoration.dart';
@@ -198,7 +199,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// Some subtypes of [ScrollView] can infer this value automatically. For
   /// example [ListView] will use the number of widgets in the child list,
-  /// while the [new ListView.separated] constructor will use half that amount.
+  /// while the [ListView.separated] constructor will use half that amount.
   ///
   /// For [CustomScrollView] and other types which do not receive a builder
   /// or list of widgets, the child count must be explicitly provided.
@@ -399,6 +400,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
   ScrollController? _fallbackScrollController;
+  MediaQueryData? _mediaQueryData;
 
   ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 
@@ -440,7 +442,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     _persistedScrollOffset.value = offset;
     // [saveOffset] is called after a scrolling ends and it is usually not
     // followed by a frame. Therefore, manually flush restoration data.
-    ServicesBinding.instance!.restorationManager.flushData();
+    ServicesBinding.instance.restorationManager.flushData();
   }
 
   @override
@@ -452,6 +454,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void didChangeDependencies() {
+    _mediaQueryData = MediaQuery.maybeOf(context);
     _updatePosition();
     super.didChangeDependencies();
   }
@@ -565,7 +568,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
-                  ..dragStartBehavior = widget.dragStartBehavior;
+                  ..dragStartBehavior = widget.dragStartBehavior
+                  ..gestureSettings = _mediaQueryData?.gestureSettings;
               },
             ),
           };
@@ -585,7 +589,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
-                  ..dragStartBehavior = widget.dragStartBehavior;
+                  ..dragStartBehavior = widget.dragStartBehavior
+                  ..gestureSettings = _mediaQueryData?.gestureSettings;
               },
             ),
           };
@@ -704,7 +709,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
       // Only express interest in the event if it would actually result in a scroll.
       if (delta != 0.0 && targetScrollOffset != position.pixels) {
-        GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
+        GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     }
   }

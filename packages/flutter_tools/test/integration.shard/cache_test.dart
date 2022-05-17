@@ -39,6 +39,7 @@ void main() {
         outputPreferences: OutputPreferences(),
       );
       logger.fatalWarnings = true;
+      Process process;
       try {
         Cache.flutterRoot = tempDir.absolute.path;
         final Cache cache = Cache.test(
@@ -56,20 +57,48 @@ import 'dart:async';
 import 'dart:io';
 
 Future<void> main(List<String> args) async {
-File file = File(args[0]);
-RandomAccessFile lock = file.openSync(mode: FileMode.write);
-lock.lockSync();
-await Future<void>.delayed(const Duration(milliseconds: 1000));
-exit(0);
+  File file = File(args[0]);
+  final RandomAccessFile lock = file.openSync(mode: FileMode.write);
+  while (true) {
+    try {
+      lock.lockSync();
+      break;
+    } on FileSystemException {}
+  }
+  await Future<void>.delayed(const Duration(seconds: 1));
+  exit(0);
 }
 ''');
-        final Process process = await const LocalProcessManager().start(
+        // Locks are per-process, so we have to launch a separate process to
+        // test out cache locking.
+        process = await const LocalProcessManager().start(
           <String>[dart, script.absolute.path, cacheFile.absolute.path],
         );
-        await Future<void>.delayed(const Duration(milliseconds: 500));
+        // Wait for the script to lock the test cache file before checking to
+        // see that the cache is unable to.
+        bool locked = false;
+        while (!locked) {
+          // Give the script a chance to try for the lock much more often.
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          final RandomAccessFile lock = cacheFile.openSync(mode: FileMode.write);
+          try {
+            // If we can lock it, unlock immediately to give the script a
+            // chance.
+            lock.lockSync();
+            lock.unlockSync();
+          } on FileSystemException {
+            // If we can't lock it, then the child script succeeded in locking
+            // it, and we can now test.
+            locked = true;
+            break;
+          }
+        }
+        // Finally, test that the cache cannot lock a locked file. This should
+        // print a message if it can't lock the file.
         await cache.lock();
-        process.kill(io.ProcessSignal.sigkill);
       } finally {
+        // Just to keep from leaving the process hanging around.
+        process?.kill(io.ProcessSignal.sighup);
         tryToDelete(tempDir);
         Cache.flutterRoot = oldRoot;
       }
@@ -78,8 +107,8 @@ exit(0);
       expect(logger.warningText,
           equals('Waiting for another flutter command to release the startup lock...\n'));
       expect(logger.hadErrorOutput, isFalse);
-      // Should still be false, since the particular "Waiting..." message above aims to
-      // avoid triggering failure as a fatal warning.
+      // Should still be false, since the particular "Waiting..." message above
+      // aims to avoid triggering failure as a fatal warning.
       expect(logger.hadWarningOutput, isFalse);
     });
     testWithoutContext(
@@ -112,6 +141,25 @@ exit(0);
       expect(logger.hadErrorOutput, isFalse);
       expect(logger.hadWarningOutput, isTrue);
     });
+  });
+
+  testWithoutContext('Dart SDK target arch matches host arch', () async {
+    if (platform.isWindows) {
+      return;
+    }
+    final ProcessResult dartResult = await const LocalProcessManager().run(
+      <String>[dart, '--version'],
+    );
+    // Parse 'arch' out of a string like '... "os_arch"\n'.
+    final String dartTargetArch = (dartResult.stdout as String)
+      .trim().split(' ').last.replaceAll('"', '').split('_')[1];
+    final ProcessResult unameResult = await const LocalProcessManager().run(
+      <String>['uname', '-m'],
+    );
+    final String unameArch = (unameResult.stdout as String)
+      .trim().replaceAll('aarch64', 'arm64')
+             .replaceAll('x86_64', 'x64');
+    expect(dartTargetArch, equals(unameArch));
   });
 }
 

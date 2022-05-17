@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoSwitchDemo extends StatefulWidget {
-  const CupertinoSwitchDemo({Key? key}) : super(key: key);
+  const CupertinoSwitchDemo({super.key});
 
   static const String routeName = '/cupertino/switch';
 

@@ -95,14 +95,11 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
     widget.notifier?.addListener(_handleUpdate);
   }
 
-  @override
-  InheritedNotifier<T> get widget => super.widget as InheritedNotifier<T>;
-
   bool _dirty = false;
 
   @override
   void update(InheritedNotifier<T> newWidget) {
-    final T? oldNotifier = widget.notifier;
+    final T? oldNotifier = (widget as InheritedNotifier<T>).notifier;
     final T? newNotifier = newWidget.notifier;
     if (oldNotifier != newNotifier) {
       oldNotifier?.removeListener(_handleUpdate);
@@ -114,7 +111,7 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
   @override
   Widget build() {
     if (_dirty)
-      notifyClients(widget);
+      notifyClients(widget as InheritedNotifier<T>);
     return super.build();
   }
 
@@ -131,7 +128,7 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
 
   @override
   void unmount() {
-    widget.notifier?.removeListener(_handleUpdate);
+    (widget as InheritedNotifier<T>).notifier?.removeListener(_handleUpdate);
     super.unmount();
   }
 }

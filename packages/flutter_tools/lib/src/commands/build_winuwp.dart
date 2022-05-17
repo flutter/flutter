@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -40,7 +38,7 @@ class BuildWindowsUwpCommand extends BuildSubCommand {
   String get description => 'Build a Windows UWP desktop application.';
 
   @visibleForTesting
-  VisualStudio visualStudioOverride;
+  VisualStudio? visualStudioOverride;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

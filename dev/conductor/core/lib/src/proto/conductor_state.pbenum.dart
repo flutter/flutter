@@ -67,3 +67,26 @@ class CherrypickState extends $pb.ProtobufEnum {
 
   const CherrypickState._($core.int v, $core.String n) : super(v, n);
 }
+
+class ReleaseType extends $pb.ProtobufEnum {
+  static const ReleaseType STABLE_INITIAL =
+      ReleaseType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'STABLE_INITIAL');
+  static const ReleaseType STABLE_HOTFIX =
+      ReleaseType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'STABLE_HOTFIX');
+  static const ReleaseType BETA_INITIAL =
+      ReleaseType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'BETA_INITIAL');
+  static const ReleaseType BETA_HOTFIX =
+      ReleaseType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'BETA_HOTFIX');
+
+  static const $core.List<ReleaseType> values = <ReleaseType>[
+    STABLE_INITIAL,
+    STABLE_HOTFIX,
+    BETA_INITIAL,
+    BETA_HOTFIX,
+  ];
+
+  static final $core.Map<$core.int, ReleaseType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static ReleaseType? valueOf($core.int value) => _byValue[value];
+
+  const ReleaseType._($core.int v, $core.String n) : super(v, n);
+}

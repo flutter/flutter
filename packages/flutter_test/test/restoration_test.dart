@@ -72,7 +72,7 @@ void main() {
 }
 
 class _RestorableWidget extends StatefulWidget {
-  const _RestorableWidget({Key? key, this.restorationId}) : super(key: key);
+  const _RestorableWidget({this.restorationId});
 
   final String? restorationId;
 

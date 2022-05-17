@@ -25,16 +25,13 @@ class GitHubTemplateCreator {
     required FileSystem fileSystem,
     required Logger logger,
     required FlutterProjectFactory flutterProjectFactory,
-    required HttpClient client,
   }) : _fileSystem = fileSystem,
       _logger = logger,
-      _flutterProjectFactory = flutterProjectFactory,
-      _client = client;
+      _flutterProjectFactory = flutterProjectFactory;
 
   final FileSystem _fileSystem;
   final Logger _logger;
   final FlutterProjectFactory _flutterProjectFactory;
-  final HttpClient _client;
 
   static String toolCrashSimilarIssuesURL(String errorString) {
     return 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
@@ -110,13 +107,11 @@ $doctorText
 ${_projectMetadataInformation()}
 ''';
 
-    final String fullURL = 'https://github.com/flutter/flutter/issues'
+    return 'https://github.com/flutter/flutter/issues'
       '/new' // We split this here to appease our lint that looks for bad "new bug" links.
       '?title=${Uri.encodeQueryComponent(title)}'
       '&body=${Uri.encodeQueryComponent(body)}'
       '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
-
-    return _shortURL(fullURL);
   }
 
   /// Provide information about the Flutter project in the working directory, if present.
@@ -168,30 +163,5 @@ ${_projectMetadataInformation()}
     } on Exception catch (exception) {
       return exception.toString();
     }
-  }
-
-  /// Shorten GitHub URL with git.io API.
-  ///
-  /// See https://github.blog/2011-11-10-git-io-github-url-shortener.
-  Future<String> _shortURL(String fullURL) async {
-    String? url;
-    try {
-      _logger.printTrace('Attempting git.io shortener: $fullURL');
-      final List<int> bodyBytes = utf8.encode('url=${Uri.encodeQueryComponent(fullURL)}');
-      final HttpClientRequest request = await _client.postUrl(Uri.parse('https://git.io'));
-      request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());
-      request.add(bodyBytes);
-      final HttpClientResponse response = await request.close();
-
-      if (response.statusCode == 201) {
-        url = response.headers[HttpHeaders.locationHeader]?.first;
-      } else {
-        _logger.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
-      }
-    } on Exception catch (sendError) {
-      _logger.printTrace('Failed to shorten GitHub template URL: $sendError');
-    }
-
-    return url ?? fullURL;
   }
 }

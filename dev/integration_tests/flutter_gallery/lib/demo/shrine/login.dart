@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -123,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class PrimaryColorOverride extends StatelessWidget {
-  const PrimaryColorOverride({Key? key, this.color, this.child}) : super(key: key);
+  const PrimaryColorOverride({super.key, this.color, this.child});
 
   final Color? color;
   final Widget? child;

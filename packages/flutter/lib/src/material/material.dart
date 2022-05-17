@@ -111,10 +111,11 @@ abstract class MaterialInkController {
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
 /// [Material] should not change its [color], [shadowColor] or [type]).
-/// Changes to [elevation] and [shadowColor] are animated for [animationDuration].
-/// Changes to [shape] are animated if [type] is not [MaterialType.transparency]
-/// and [ShapeBorder.lerp] between the previous and next [shape] values is
-/// supported. Shape changes are also animated for [animationDuration].
+/// Changes to [elevation], [shadowColor] and [surfaceTintColor] are animated
+/// for [animationDuration]. Changes to [shape] are animated if [type] is
+/// not [MaterialType.transparency] and [ShapeBorder.lerp] between the previous
+/// and next [shape] values is supported. Shape changes are also animated
+/// for [animationDuration].
 ///
 /// ## Shape
 ///
@@ -166,7 +167,7 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type], [elevation], [shadowColor], [borderOnForeground],
+  /// The [type], [elevation], [borderOnForeground],
   /// [clipBehavior], and [animationDuration] arguments must not be null.
   /// Additionally, [elevation] must be non-negative.
   ///
@@ -181,6 +182,7 @@ class Material extends StatefulWidget {
     this.elevation = 0.0,
     this.color,
     this.shadowColor,
+    this.surfaceTintColor,
     this.textStyle,
     this.borderRadius,
     this.shape,
@@ -217,16 +219,20 @@ class Material extends StatefulWidget {
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow and the elevation
-  /// overlay to animate over [Material.animationDuration].
+  /// overlay or surface tint to animate over [Material.animationDuration].
   ///
   /// The value is non-negative.
   ///
   /// See also:
   ///
+  ///  * [ThemeData.useMaterial3] which defines whether a surface tint or
+  ///    elevation overlay is used to indicate elevation.
   ///  * [ThemeData.applyElevationOverlayColor] which controls the whether
   ///    an overlay color will be applied to indicate elevation.
   ///  * [Material.color] which may have an elevation overlay applied.
-  ///
+  ///  * [Material.shadowColor] which will be used for the color of a drop shadow.
+  ///  * [Material.surfaceTintColor] which will be used as the overlay tint to
+  ///    show elevation.
   /// {@endtemplate}
   final double elevation;
 
@@ -235,28 +241,58 @@ class Material extends StatefulWidget {
   /// Must be opaque. To create a transparent piece of material, use
   /// [MaterialType.transparency].
   ///
-  /// To support dark themes, if the surrounding
-  /// [ThemeData.applyElevationOverlayColor] is true and [ThemeData.brightness]
-  /// is [Brightness.dark] then a semi-transparent overlay color will be
-  /// composited on top of this color to indicate the elevation.
+  /// If [ThemeData.useMaterial3] is true then an optional [surfaceTintColor]
+  /// overlay may be applied on top of this color to indicate elevation.
+  ///
+  /// If [ThemeData.useMaterial3] is false and [ThemeData.applyElevationOverlayColor]
+  /// is true and [ThemeData.brightness] is [Brightness.dark] then a
+  /// semi-transparent overlay color will be composited on top of this
+  /// color to indicate the elevation. This is no longer needed for Material
+  /// Design 3, which uses [surfaceTintColor].
   ///
   /// By default, the color is derived from the [type] of material.
   final Color? color;
 
   /// The color to paint the shadow below the material.
   ///
-  /// If null, [ThemeData.shadowColor] is used, which defaults to fully opaque black.
+  /// When [ThemeData.useMaterial3] is true, and this is null, then no drop
+  /// shadow will be rendered for this material. If it is non-null, then this
+  /// color will be used to render a drop shadow below the material.
   ///
-  /// Shadows can be difficult to see in a dark theme, so the elevation of a
-  /// surface should be portrayed with an "overlay" in addition to the shadow.
-  /// As the elevation of the component increases, the overlay increases in
-  /// opacity.
+  /// When [ThemeData.useMaterial3] is false, and this is null, then
+  /// [ThemeData.shadowColor] is used, which defaults to fully opaque black.
   ///
   /// See also:
-  ///
+  ///  * [ThemeData.useMaterial3], which determines the default value for this
+  ///    property if it is null.
   ///  * [ThemeData.applyElevationOverlayColor], which turns elevation overlay
   /// on or off for dark themes.
   final Color? shadowColor;
+
+  /// The color of the surface tint overlay applied to the material color
+  /// to indicate elevation.
+  ///
+  /// Material Design 3 introduced a new way for some components to indicate
+  /// their elevation by using a surface tint color overlay on top of the
+  /// base material [color]. This overlay is painted with an opacity that is
+  /// related to the [elevation] of the material.
+  ///
+  /// If [ThemeData.useMaterial3] is false, then this property is not used.
+  ///
+  /// If [ThemeData.useMaterial3] is true and [surfaceTintColor] is not null,
+  /// then it will be used to overlay the base [color] with an opacity based
+  /// on the [elevation].
+  ///
+  /// Otherwise, no surface tint will be applied.
+  ///
+  /// See also:
+  ///
+  ///   * [ThemeData.useMaterial3], which turns this feature on.
+  ///   * [ElevationOverlay.applySurfaceTint], which is used to implement the
+  ///     tint.
+  ///   * https://m3.material.io/styles/color/the-color-system/color-roles
+  ///     which specifies how the overlay is applied.
+  final Color? surfaceTintColor;
 
   /// The typographical style to use for text within this material.
   final TextStyle? textStyle;
@@ -287,7 +323,7 @@ class Material extends StatefulWidget {
   final Clip clipBehavior;
 
   /// Defines the duration of animated changes for [shape], [elevation],
-  /// [shadowColor] and the elevation overlay if it is applied.
+  /// [shadowColor], [surfaceTintColor] and the elevation overlay if it is applied.
   ///
   /// The default value is [kThemeChangeDuration].
   final Duration animationDuration;
@@ -327,6 +363,7 @@ class Material extends StatefulWidget {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('borderOnForeground', borderOnForeground, defaultValue: true));
@@ -362,7 +399,11 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final Color? backgroundColor = _getBackgroundColor(context);
+    final Color? modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? null : theme.shadowColor);
+    // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
+    final double modelElevation = modelShadowColor != null ? widget.elevation : 0;
     assert(
       backgroundColor != null || widget.type == MaterialType.transparency,
       'If Material type is not MaterialType.transparency, a color must '
@@ -403,14 +444,18 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     // we choose not to as we want the change from the fast-path to the
     // slow-path to be noticeable in the construction site of Material.
     if (widget.type == MaterialType.canvas && widget.shape == null && widget.borderRadius == null) {
+      final Color color = Theme.of(context).useMaterial3
+        ? ElevationOverlay.applySurfaceTint(backgroundColor!, widget.surfaceTintColor, widget.elevation)
+        : ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation);
+
       return AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
         duration: widget.animationDuration,
         shape: BoxShape.rectangle,
         clipBehavior: widget.clipBehavior,
-        elevation: widget.elevation,
-        color: ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation),
-        shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
+        elevation: modelElevation,
+        color: color,
+        shadowColor: modelShadowColor ?? const Color(0x00000000),
         animateColor: false,
         child: contents,
       );
@@ -435,7 +480,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor!,
-      shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
+      shadowColor: modelShadowColor,
+      surfaceTintColor: widget.surfaceTintColor,
       child: contents,
     );
   }
@@ -450,9 +496,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       shape: shape,
       child: contents,
     );
-    if (clipBehavior == Clip.none) {
-      return child;
-    }
     return ClipPath(
       clipper: ShapeBorderClipper(
         shape: shape,
@@ -697,6 +740,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     required this.elevation,
     required this.color,
     required this.shadowColor,
+    required this.surfaceTintColor,
     Curve curve = Curves.linear,
     required Duration duration,
   }) : assert(child != null),
@@ -704,7 +748,6 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
        assert(clipBehavior != null),
        assert(elevation != null && elevation >= 0.0),
        assert(color != null),
-       assert(shadowColor != null),
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
@@ -739,7 +782,10 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   final Color color;
 
   /// The target shadow color.
-  final Color shadowColor;
+  final Color? shadowColor;
+
+  /// The target surface tint color.
+  final Color? surfaceTintColor;
 
   @override
   _MaterialInteriorState createState() => _MaterialInteriorState();
@@ -756,6 +802,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
 
 class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> {
   Tween<double>? _elevation;
+  ColorTween? _surfaceTintColor;
   ColorTween? _shadowColor;
   ShapeBorderTween? _border;
 
@@ -766,11 +813,20 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       widget.elevation,
       (dynamic value) => Tween<double>(begin: value as double),
     ) as Tween<double>?;
-    _shadowColor = visitor(
-      _shadowColor,
-      widget.shadowColor,
-      (dynamic value) => ColorTween(begin: value as Color),
-    ) as ColorTween?;
+    _shadowColor =  widget.shadowColor != null
+      ? visitor(
+          _shadowColor,
+          widget.shadowColor,
+          (dynamic value) => ColorTween(begin: value as Color),
+        ) as ColorTween?
+      : null;
+    _surfaceTintColor = widget.surfaceTintColor != null
+      ? visitor(
+          _surfaceTintColor,
+          widget.surfaceTintColor,
+              (dynamic value) => ColorTween(begin: value as Color),
+        ) as ColorTween?
+      : null;
     _border = visitor(
       _border,
       widget.shape,
@@ -782,15 +838,21 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
   Widget build(BuildContext context) {
     final ShapeBorder shape = _border!.evaluate(animation)!;
     final double elevation = _elevation!.evaluate(animation);
+    final Color color = Theme.of(context).useMaterial3
+      ? ElevationOverlay.applySurfaceTint(widget.color, _surfaceTintColor?.evaluate(animation), elevation)
+      : ElevationOverlay.applyOverlay(context, widget.color, elevation);
+    // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
+    final double modelElevation = widget.shadowColor != null ? elevation : 0;
+    final Color shadowColor = _shadowColor?.evaluate(animation) ?? const Color(0x00000000);
     return PhysicalShape(
       clipper: ShapeBorderClipper(
         shape: shape,
         textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: widget.clipBehavior,
-      elevation: elevation,
-      color: ElevationOverlay.applyOverlay(context, widget.color, elevation),
-      shadowColor: _shadowColor!.evaluate(animation)!,
+      elevation: modelElevation,
+      color: color,
+      shadowColor: shadowColor,
       child: _ShapeBorderPaint(
         shape: shape,
         borderOnForeground: widget.borderOnForeground,

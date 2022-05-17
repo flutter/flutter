@@ -19,6 +19,9 @@ const Set<PointerDeviceKind> _kTouchLikeDeviceTypes = <PointerDeviceKind>{
   PointerDeviceKind.touch,
   PointerDeviceKind.stylus,
   PointerDeviceKind.invertedStylus,
+  // The VoiceAccess sends pointer events with unknown type when scrolling
+  // scrollables.
+  PointerDeviceKind.unknown,
 };
 
 /// The default overscroll indicator applied on [TargetPlatform.android].
@@ -62,6 +65,10 @@ enum AndroidOverscrollIndicator {
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
   const ScrollBehavior({
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
     AndroidOverscrollIndicator? androidOverscrollIndicator,
   }): _androidOverscrollIndicator = androidOverscrollIndicator;
 
@@ -73,6 +80,10 @@ class ScrollBehavior {
   ///
   ///   * [MaterialScrollBehavior], which supports setting this property
   ///     using [ThemeData].
+  @Deprecated(
+    'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+    'This feature was deprecated after v2.13.0-0.0.pre.'
+  )
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? _kDefaultAndroidOverscrollIndicator;
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
@@ -90,6 +101,10 @@ class ScrollBehavior {
     Set<PointerDeviceKind>? dragDevices,
     ScrollPhysics? physics,
     TargetPlatform? platform,
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
     AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     return _WrappedScrollBehavior(

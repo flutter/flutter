@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderSliverFixedExtentList layout test - rounding error', () {
     final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),

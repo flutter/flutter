@@ -15,6 +15,8 @@ RenderBox sizedBox(double width, double height) {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('Table control test; tight', () {
     RenderTable table;
     layout(table = RenderTable(textDirection: TextDirection.ltr));

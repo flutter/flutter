@@ -26,10 +26,10 @@ import 'theme_data.dart';
 /// [ButtonStyle] of a [TextButton], [ElevatedButton] or an
 /// [OutlinedButton].
 ///
-/// FlatButton, RaisedButton, and OutlineButton have been replaced by
-/// TextButton, ElevatedButton, and OutlinedButton respectively.
-/// ButtonTheme has been replaced by TextButtonTheme,
-/// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
+/// FlatButton and RaisedButton have been replaced by
+/// TextButton and ElevatedButton respectively.
+/// ButtonTheme has been replaced by TextButtonTheme and
+/// ElevatedButtonTheme. The original classes
 /// have been deprecated, please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
@@ -127,9 +127,9 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
   ///
   /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
-  /// {@endtemplate}
   final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -381,6 +381,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
         shape: effectiveShape,
         color: widget.fillColor,
+        // For compatibility during the M3 migration the default shadow needs to be passed.
+        shadowColor: Theme.of(context).useMaterial3 ? Theme.of(context).shadowColor : null,
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: widget.animationDuration,
         clipBehavior: widget.clipBehavior,

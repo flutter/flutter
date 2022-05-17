@@ -100,7 +100,7 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     File? outputFile;
-    if (argResults?.wasParsed(_kOut) == true) {
+    if (argResults?.wasParsed(_kOut) ?? false) {
       outputFile = globals.fs.file(stringArg(_kOut));
     }
 

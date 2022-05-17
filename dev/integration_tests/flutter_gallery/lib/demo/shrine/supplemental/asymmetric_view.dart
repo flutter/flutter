@@ -8,7 +8,7 @@ import '../model/product.dart';
 import 'product_columns.dart';
 
 class AsymmetricView extends StatelessWidget {
-  const AsymmetricView({Key? key, this.products}) : super(key: key);
+  const AsymmetricView({super.key, this.products});
 
   final List<Product>? products;
 

@@ -598,13 +598,13 @@ class CupertinoColors {
 ///
 /// ```dart
 /// CupertinoButton(
-///   child: child,
 ///   // CupertinoDynamicColor works out of box in a CupertinoButton.
 ///   color: const CupertinoDynamicColor.withBrightness(
 ///     color: CupertinoColors.white,
 ///     darkColor: CupertinoColors.black,
 ///   ),
 ///   onPressed: () { },
+///   child: child,
 /// )
 /// ```
 /// {@end-tool}
@@ -1003,9 +1003,9 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
         }
     }
 
-    Element? _debugContext;
+    Element? debugContext;
     assert(() {
-      _debugContext = context as Element;
+      debugContext = context as Element;
       return true;
     }());
     return CupertinoDynamicColor._(
@@ -1018,7 +1018,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
       darkElevatedColor,
       highContrastElevatedColor,
       darkHighContrastElevatedColor,
-      _debugContext,
+      debugContext,
       _debugLabel,
     );
   }
@@ -1042,19 +1042,17 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      value,
-      color,
-      darkColor,
-      highContrastColor,
-      elevatedColor,
-      darkElevatedColor,
-      darkHighContrastColor,
-      darkHighContrastElevatedColor,
-      highContrastElevatedColor,
-    );
-  }
+  int get hashCode => Object.hash(
+    value,
+    color,
+    darkColor,
+    highContrastColor,
+    elevatedColor,
+    darkElevatedColor,
+    darkHighContrastColor,
+    darkHighContrastElevatedColor,
+    highContrastElevatedColor,
+  );
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {

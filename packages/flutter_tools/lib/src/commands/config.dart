@@ -116,7 +116,7 @@ class ConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    if (argResults?.wasParsed('analytics') == true) {
+    if (argResults?.wasParsed('analytics') ?? false) {
       final bool value = boolArg('analytics');
       // The tool sends the analytics event *before* toggling the flag
       // intentionally to be sure that opt-out events are sent correctly.
@@ -131,19 +131,19 @@ class ConfigCommand extends FlutterCommand {
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
-    if (argResults?.wasParsed('android-sdk') == true) {
+    if (argResults?.wasParsed('android-sdk') ?? false) {
       _updateConfig('android-sdk', stringArg('android-sdk')!);
     }
 
-    if (argResults?.wasParsed('android-studio-dir') == true) {
+    if (argResults?.wasParsed('android-studio-dir') ?? false) {
       _updateConfig('android-studio-dir', stringArg('android-studio-dir')!);
     }
 
-    if (argResults?.wasParsed('clear-ios-signing-cert') == true) {
+    if (argResults?.wasParsed('clear-ios-signing-cert') ?? false) {
       _updateConfig('ios-signing-cert', '');
     }
 
-    if (argResults?.wasParsed('build-dir') == true) {
+    if (argResults?.wasParsed('build-dir') ?? false) {
       final String buildDir = stringArg('build-dir')!;
       if (globals.fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
@@ -156,7 +156,7 @@ class ConfigCommand extends FlutterCommand {
       if (configSetting == null) {
         continue;
       }
-      if (argResults?.wasParsed(configSetting) == true) {
+      if (argResults?.wasParsed(configSetting) ?? false) {
         final bool keyValue = boolArg(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');

@@ -37,7 +37,7 @@ class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding 
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView() : super(
     configuration: const ViewConfiguration(size: _kTestViewSize),
-    window: WidgetsBinding.instance!.window,
+    window: WidgetsBinding.instance.window,
   );
 
   @override
@@ -170,7 +170,7 @@ void main() {
 
   testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (WidgetTester tester) async {
     expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
-    final ScheduledFrameTrackingWindow window = WidgetsBinding.instance!.window as ScheduledFrameTrackingWindow;
+    final ScheduledFrameTrackingWindow window = WidgetsBinding.instance.window as ScheduledFrameTrackingWindow;
     window.resetScheduledFrameCount();
     expect(window.scheduledFrameCount, isZero);
     final OffscreenWidgetTree tree = OffscreenWidgetTree();

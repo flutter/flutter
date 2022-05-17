@@ -227,9 +227,9 @@ late Stream<String> mockStdInStream;
 class TestTerminal extends AnsiTerminal {
   TestTerminal({
     Stdio? stdio,
-    Platform platform = const LocalPlatform(),
+    super.platform = const LocalPlatform(),
     DateTime? now,
-  }) : super(stdio: stdio ?? Stdio(), platform: platform, now: now ?? DateTime(2018));
+  }) : super(stdio: stdio ?? Stdio(), now: now ?? DateTime(2018));
 
   @override
   Stream<String> get keystrokes {

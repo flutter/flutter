@@ -21,17 +21,8 @@ final Set<String> interestingLabels = <String>{
   '$RenderCustomPaint',
 };
 
-Future<List<TimelineEvent>> fetchInterestingEvents() async {
-  return (await fetchTimelineEvents()).where((TimelineEvent event) {
-    return interestingLabels.contains(event.json!['name'])
-        && event.json!['ph'] == 'B'; // "Begin" mark of events, vs E which is for the "End" mark of events.
-  }).toList();
-}
-
-String eventToName(TimelineEvent event) => event.json!['name'] as String;
-
 class TestRoot extends StatefulWidget {
-  const TestRoot({ Key? key }) : super(key: key);
+  const TestRoot({ super.key });
 
   static late final TestRootState state;
 
@@ -66,12 +57,6 @@ class TestRootState extends State<TestRoot> {
   }
 }
 
-Future<void> runFrame(VoidCallback callback) {
-  final Future<void> result = SchedulerBinding.instance!.endOfFrame; // schedules a frame
-  callback();
-  return result;
-}
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   initTimelineTests();
@@ -79,15 +64,15 @@ void main() {
     // We don't have expectations around the first frame because there's a race around
     // the warm-up frame that we don't want to get involved in here.
     await runFrame(() { runApp(const TestRoot()); });
-    await SchedulerBinding.instance!.endOfFrame;
-    await fetchInterestingEvents();
+    await SchedulerBinding.instance.endOfFrame;
+    await fetchInterestingEvents(interestingLabels);
 
     // The next few cases build the exact same tree so should have no effect.
 
     debugProfileBuildsEnabled = true;
     await runFrame(() { TestRoot.state.rebuild(); });
     expect(
-      (await fetchInterestingEvents()).map<String>(eventToName),
+      await fetchInterestingEventNames(interestingLabels),
       <String>['BUILD', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
     debugProfileBuildsEnabled = false;
@@ -95,7 +80,7 @@ void main() {
     debugProfileLayoutsEnabled = true;
     await runFrame(() { TestRoot.state.rebuild(); });
     expect(
-      (await fetchInterestingEvents()).map<String>(eventToName),
+      await fetchInterestingEventNames(interestingLabels),
       <String>['BUILD', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
     debugProfileLayoutsEnabled = false;
@@ -103,7 +88,7 @@ void main() {
     debugProfilePaintsEnabled = true;
     await runFrame(() { TestRoot.state.rebuild(); });
     expect(
-      (await fetchInterestingEvents()).map<String>(eventToName),
+      await fetchInterestingEventNames(interestingLabels),
       <String>['BUILD', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
     debugProfilePaintsEnabled = false;
@@ -116,7 +101,7 @@ void main() {
 
     debugProfileBuildsEnabled = true;
     await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey(), color: const Color(0xFFFFFFFF))); });
-    events = await fetchInterestingEvents();
+    events = await fetchInterestingEvents(interestingLabels);
     expect(
       events.map<String>(eventToName),
       <String>['BUILD', 'Placeholder', 'CustomPaint', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
@@ -125,9 +110,20 @@ void main() {
     expect(args['color'], 'Color(0xffffffff)');
     debugProfileBuildsEnabled = false;
 
+    debugProfileBuildsEnabledUserWidgets = true;
+    await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey(), color: const Color(0xFFFFFFFF))); });
+    events = await fetchInterestingEvents(interestingLabels);
+    expect(
+      events.map<String>(eventToName),
+      <String>['BUILD', 'Placeholder', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
+    );
+    args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
+    expect(args['color'], 'Color(0xffffffff)');
+    debugProfileBuildsEnabledUserWidgets = false;
+
     debugProfileLayoutsEnabled = true;
     await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey())); });
-    events = await fetchInterestingEvents();
+    events = await fetchInterestingEvents(interestingLabels);
     expect(
       events.map<String>(eventToName),
       <String>['BUILD', 'LAYOUT', 'RenderCustomPaint', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
@@ -135,12 +131,12 @@ void main() {
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['creator'], startsWith('CustomPaint'));
     expect(args['creator'], contains('Placeholder'));
-    expect(args['foregroundPainter'], startsWith('_PlaceholderPainter#'));
+    expect(args['painter'], startsWith('_PlaceholderPainter#'));
     debugProfileLayoutsEnabled = false;
 
     debugProfilePaintsEnabled = true;
     await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey())); });
-    events = await fetchInterestingEvents();
+    events = await fetchInterestingEvents(interestingLabels);
     expect(
       events.map<String>(eventToName),
       <String>['BUILD', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'RenderCustomPaint', 'COMPOSITING', 'FINALIZE TREE'],
@@ -148,7 +144,7 @@ void main() {
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['creator'], startsWith('CustomPaint'));
     expect(args['creator'], contains('Placeholder'));
-    expect(args['foregroundPainter'], startsWith('_PlaceholderPainter#'));
+    expect(args['painter'], startsWith('_PlaceholderPainter#'));
     debugProfilePaintsEnabled = false;
 
   }, skip: isBrowser); // [intended] uses dart:isolate and io.

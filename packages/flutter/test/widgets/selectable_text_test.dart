@@ -568,7 +568,7 @@ void main() {
 
     // Move the gesture very slightly
     await gesture.moveBy(const Offset(1.0, 1.0));
-    await tester.pump(TextSelectionOverlay.fadeDuration * 0.5);
+    await tester.pump(SelectionOverlay.fadeDuration * 0.5);
     handle = tester.widget(fadeFinder.at(0));
 
     // The handle should still be fully opaque.
@@ -2319,6 +2319,99 @@ void main() {
         ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/100395.
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 200);
+    const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
+    const String offScreenText = 'off screen';
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          controller: controller,
+          child: SelectableText.rich(
+            TextSpan(
+              children: <TextSpan>[
+                const TextSpan(text: onScreenText),
+                TextSpan(
+                  text: offScreenText,
+                  recognizer: TapGestureRecognizer()..onTap = () { },
+                ),
+              ],
+              style: textStyle,
+            ),
+            textDirection: TextDirection.ltr,
+          ),
+        )
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                      actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          actions: <SemanticsAction>[SemanticsAction.longPress],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  label: 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isHidden,
+                                    SemanticsFlag.isLink
+                                  ],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                  label: 'off screen',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
+
+    // Test show on screen.
+    expect(controller.offset, 0.0);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(8, SemanticsAction.showOnScreen);
+    await tester.pumpAndSettle();
+    expect(controller.offset != 0.0, isTrue);
 
     semantics.dispose();
   });
@@ -4128,7 +4221,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final List<FadeTransition> transitions = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
       matching: find.byType(FadeTransition),
     ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
     expect(transitions.length, 2);
@@ -4416,7 +4509,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
   testWidgets('The handles show after pressing Select All', (WidgetTester tester) async {
