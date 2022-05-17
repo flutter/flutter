@@ -14,8 +14,10 @@
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/renderer/allocator.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/texture.h"
 
@@ -133,7 +135,10 @@ bool EntityPass::Render(ContentContext& renderer,
                         RenderTarget render_target) const {
   if (contains_advanced_blends_) {
     auto offscreen_target = RenderTarget::CreateOffscreen(
-        *renderer.GetContext(), render_target.GetRenderTargetSize());
+        *renderer.GetContext(), render_target.GetRenderTargetSize(),
+        "EntityPass",  //
+        StorageMode::kDevicePrivate, LoadAction::kClear, StoreAction::kStore,
+        StorageMode::kDevicePrivate, LoadAction::kClear, StoreAction::kStore);
     if (!RenderInternal(renderer, offscreen_target, Point(), 0)) {
       return false;
     }
@@ -245,8 +250,20 @@ bool EntityPass::RenderInternal(ContentContext& renderer,
         continue;
       }
 
-      auto subpass_target = RenderTarget::CreateOffscreen(
-          *context, ISize::Ceil(subpass_coverage->size));
+      RenderTarget subpass_target;
+      if (subpass->contains_advanced_blends_) {
+        subpass_target = RenderTarget::CreateOffscreen(
+            *context, ISize::Ceil(subpass_coverage->size), "EntityPass",
+            StorageMode::kDevicePrivate, LoadAction::kClear,
+            StoreAction::kStore, StorageMode::kDevicePrivate,
+            LoadAction::kClear, StoreAction::kStore);
+      } else {
+        subpass_target = RenderTarget::CreateOffscreen(
+            *context, ISize::Ceil(subpass_coverage->size), "EntityPass",
+            StorageMode::kDevicePrivate, LoadAction::kClear,
+            StoreAction::kStore, StorageMode::kDeviceTransient,
+            LoadAction::kClear, StoreAction::kDontCare);
+      }
 
       auto subpass_texture = subpass_target.GetRenderTargetTexture();
 

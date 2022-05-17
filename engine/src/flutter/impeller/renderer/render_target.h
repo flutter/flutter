@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/size.h"
+#include "impeller/renderer/allocator.h"
 #include "impeller/renderer/formats.h"
 
 namespace impeller {
@@ -18,13 +19,16 @@ class Context;
 
 class RenderTarget {
  public:
-  static RenderTarget CreateOffscreen(const Context& context,
-                                      ISize size,
-                                      std::string label = "Offscreen");
-
-  static RenderTarget CreateMSAA(const Context& context,
-                                 std::shared_ptr<Texture> resolve_texture,
-                                 std::string label = "Offscreen");
+  static RenderTarget CreateOffscreen(
+      const Context& context,
+      ISize size,
+      std::string label = "Offscreen",
+      StorageMode color_storage_mode = StorageMode::kDevicePrivate,
+      LoadAction color_load_action = LoadAction::kClear,
+      StoreAction color_store_action = StoreAction::kStore,
+      StorageMode stencil_storage_mode = StorageMode::kDeviceTransient,
+      LoadAction stencil_load_action = LoadAction::kClear,
+      StoreAction stencil_store_action = StoreAction::kDontCare);
 
   RenderTarget();
 
