@@ -498,5 +498,41 @@ TEST_F(ClipRRectLayerTest, OpacityInheritanceSaveLayerPainting) {
   EXPECT_TRUE(DisplayListsEQ_Verbose(expected_builder.Build(), display_list()));
 }
 
+TEST_F(ClipRRectLayerTest, LayerCached) {
+  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto mock1 = MockLayer::MakeOpacityCompatible(path1);
+  SkRect clip_rect = SkRect::MakeWH(500, 500);
+  SkRRect clip_r_rect = SkRRect::MakeRectXY(clip_rect, 20, 20);
+  auto layer = std::make_shared<ClipRRectLayer>(clip_r_rect,
+                                                Clip::antiAliasWithSaveLayer);
+  layer->Add(mock1);
+
+  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
+  SkMatrix cache_ctm = initial_transform;
+  SkCanvas cache_canvas;
+  cache_canvas.setMatrix(cache_ctm);
+
+  use_mock_raster_cache();
+
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
+  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
+                                    RasterCacheLayerStrategy::kLayer));
+
+  layer->Preroll(preroll_context(), initial_transform);
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
+  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
+                                    RasterCacheLayerStrategy::kLayer));
+
+  layer->Preroll(preroll_context(), initial_transform);
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
+  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
+                                    RasterCacheLayerStrategy::kLayer));
+
+  layer->Preroll(preroll_context(), initial_transform);
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
+  EXPECT_TRUE(raster_cache()->Draw(layer.get(), cache_canvas,
+                                   RasterCacheLayerStrategy::kLayer));
+}
+
 }  // namespace testing
 }  // namespace flutter
