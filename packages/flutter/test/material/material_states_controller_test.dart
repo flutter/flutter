@@ -20,17 +20,17 @@ void main() {
     final MaterialStatesController controller = MaterialStatesController();
     controller.addListener(valueChanged);
 
-    controller.add(MaterialState.selected);
+    controller.update(MaterialState.selected, true);
     expect(controller.value, <MaterialState>{MaterialState.selected});
     expect(count, 1);
-    controller.add(MaterialState.selected);
+    controller.update(MaterialState.selected, true);
     expect(controller.value, <MaterialState>{MaterialState.selected});
     expect(count, 1);
 
-    controller.remove(MaterialState.hovered);
+    controller.update(MaterialState.hovered, false);
     expect(count, 1);
     expect(controller.value, <MaterialState>{MaterialState.selected});
-    controller.remove(MaterialState.selected);
+    controller.update(MaterialState.selected, false);
     expect(count, 2);
     expect(controller.value, <MaterialState>{});
 
@@ -60,8 +60,26 @@ void main() {
     expect(count, 8);
 
     controller.removeListener(valueChanged);
-    controller.add(MaterialState.selected);
+    controller.update(MaterialState.selected, true);
     expect(controller.value, <MaterialState>{MaterialState.selected});
     expect(count, 8);
+  });
+
+
+  test('MaterialStatesController const initial value', () {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController controller = MaterialStatesController(const <MaterialState>{MaterialState.selected});
+    controller.addListener(valueChanged);
+
+    controller.update(MaterialState.selected, true);
+    expect(controller.value, <MaterialState>{MaterialState.selected});
+    expect(count, 0);
+
+    controller.update(MaterialState.selected, false);
+    expect(controller.value, <MaterialState>{});
+    expect(count, 1);
   });
 }

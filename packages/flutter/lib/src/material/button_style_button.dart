@@ -194,7 +194,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
 ///  * [TextButton], a simple button without a shadow.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
-class _ButtonStyleState extends State<ButtonStyleButton> with /*MaterialStateMixin, */TickerProviderStateMixin {
+class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStateMixin {
   AnimationController? controller;
   double? elevation;
   Color? backgroundColor;
@@ -214,9 +214,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with /*MaterialStateMix
   @override
   void initState() {
     super.initState();
-    statesController = widget.statesController ?? MaterialStatesController();
-    statesController.update(MaterialState.disabled, !widget.enabled);
-    statesController.addListener(handleStatesControllerChange);
+    initStatesController();
   }
 
   @override
@@ -237,7 +235,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with /*MaterialStateMix
       statesController.update(MaterialState.disabled, !widget.enabled);
       if (!widget.enabled) {
         // The button may have been disabled while a press gesture is currently underway.
-        statesController.remove(MaterialState.pressed);
+        statesController.update(MaterialState.pressed, false);
       }
     }
   }

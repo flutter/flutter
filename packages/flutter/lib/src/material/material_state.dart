@@ -687,7 +687,6 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
   String toString() => 'MaterialStatePropertyAll($value)';
 }
 
-
 /// Manages a set of [MaterialState]s and notifies listeners of changes.
 ///
 /// Used by widgets that expose their internal state for the sake of
@@ -696,34 +695,17 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 ///
 /// The controller's [value] is its current set of states. Listeners
 /// are notified whenever the [value] changes. The [value] should only be
-/// changed with [add] and [remove], it should not be modified directly.
+/// changed with [update]; it should not be modified directly.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
-  /// Creates a MaterialStateController.
+  /// Creates a MaterialStatesController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
 
-  /// Adds [state] to [value] and notifies listeners if the [value]
-  /// has changed.
-  void add(MaterialState state) {
-    if (!value.contains(state)) {
-      value = <MaterialState>{state, ...value};
-    }
-  }
-
-  /// Removes [state] from [value] and notifies listeners if the [value]
-  /// has changed.
-  void remove(MaterialState state) {
-    if (value.contains(state)) {
-      value = value.difference(<MaterialState>{state});
-    }
-  }
-
-  /// Applies [add] to [state] if [addState] is true,
-  /// [remove] otherwise.
-  void update(MaterialState state, bool addState) {
-    if (addState) {
-      add(state);
-    } else {
-      remove(state);
+  /// Adds [state] to [value] if [add] is true, and removes it otherwise,
+  /// and notifies listeners if [value] has changed.
+  void update(MaterialState state, bool add) {
+    final bool valueChanged = add ? value.add(state) : value.remove(state);
+    if (valueChanged) {
+      notifyListeners();
     }
   }
 }

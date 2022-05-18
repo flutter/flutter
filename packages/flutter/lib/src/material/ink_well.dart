@@ -826,7 +826,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (enabled != isWidgetEnabled(oldWidget)) {
       statesController.update(MaterialState.disabled, !enabled);
       if (!enabled) {
-        statesController.remove(MaterialState.pressed);
+        statesController.update(MaterialState.pressed, false);
       }
       // Don't call widget.onHover because many widgets, including the button
       // widgets, apply setState to an ancestor context from onHover.
@@ -1043,7 +1043,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     } else {
       globalPosition = details!.globalPosition;
     }
-    statesController.add(MaterialState.pressed); // ... before creating the splash
+    statesController.update(MaterialState.pressed, true); // ... before creating the splash
     final InteractiveInkFeature splash = _createInkFeature(globalPosition);
     _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes!.add(splash);
