@@ -26,7 +26,6 @@ import 'material_localizations.dart';
 import 'material_state.dart';
 import 'text_button.dart';
 import 'text_field.dart';
-import 'text_form_field.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -2452,10 +2451,8 @@ void _announceToAccessibility(BuildContext context, String message) {
 // TODO(rami-a): Remove this logic once https://github.com/flutter/flutter/issues/54104 is fixed.
 
 class _TimePickerTextFormField extends FormField<String> {
-  final TextEditingController controller;
 
   _TimePickerTextFormField({
-    super.key,
     required this.controller,
     super.restorationId,
     bool autofocus = false,
@@ -2493,6 +2490,7 @@ class _TimePickerTextFormField extends FormField<String> {
       );
     },
   );
+  final TextEditingController controller;
 
   @override
   FormFieldState<String> createState() => _TextFormFieldState();
