@@ -637,10 +637,12 @@ class _ActivatorIntentPair with Diagnosticable {
   }
 }
 
-/// A manager of keyboard shortcut bindings.
+/// A manager of keyboard shortcut bindings used by [Shortcuts] to handle key
+/// events.
 ///
-/// A [ShortcutManager] is obtained by calling [Shortcuts.of] on the context of
-/// the widget that you want to find a manager for.
+/// Typically, a [Shortcuts] widget supplies its own manager, but in uncommon
+/// cases where overriding the usual shortcut manager behavior is desired, a
+/// subclassed [ShortcutManager] may be supplied.
 class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// Constructs a [ShortcutManager].
   ShortcutManager({
@@ -853,6 +855,10 @@ class Shortcuts extends StatefulWidget {
   /// Returns the [ShortcutManager] that most tightly encloses the given
   /// [BuildContext].
   ///
+  /// This is deprecated, since modifying the state of a [ShortcutManager]
+  /// outside of a [Shortcuts] implementation could be overwritten by the
+  /// [Shortcuts] widget at any time, and isn't especially useful.
+  ///
   /// If no [Shortcuts] widget encloses the context given, will assert in debug
   /// mode and throw an exception in release mode.
   ///
@@ -860,6 +866,11 @@ class Shortcuts extends StatefulWidget {
   ///
   ///  * [maybeOf], which is similar to this function, but will return null if
   ///    it doesn't find a [Shortcuts] ancestor.
+  @Deprecated(
+    'Finding a ShortcutsManager in this way will no longer be supported. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
+  // When this is finally removed, _ShortcutsMarker can also be removed.
   static ShortcutManager of(BuildContext context) {
     assert(context != null);
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
@@ -883,6 +894,10 @@ class Shortcuts extends StatefulWidget {
   /// Returns the [ShortcutManager] that most tightly encloses the given
   /// [BuildContext].
   ///
+  /// This is deprecated, since modifying the state of a [ShortcutManager]
+  /// outside of a [Shortcuts] implementation could be overwritten by the
+  /// [Shortcuts] widget at any time, and isn't especially useful.
+  ///
   /// If no [Shortcuts] widget encloses the context given, will return null.
   ///
   /// See also:
@@ -890,6 +905,11 @@ class Shortcuts extends StatefulWidget {
   ///  * [of], which is similar to this function, but returns a non-nullable
   ///    result, and will throw an exception if it doesn't find a [Shortcuts]
   ///    ancestor.
+  @Deprecated(
+    'Finding a ShortcutsManager in this way will no longer be supported. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
+  // When this is finally removed, _ShortcutsMarker can also be removed.
   static ShortcutManager? maybeOf(BuildContext context) {
     assert(context != null);
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
