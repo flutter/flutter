@@ -155,7 +155,7 @@ section in the Material spec. The Material theme uses the
 ### 'generated_*_localizations.dart': all of the localizations
 
 All of the localizations are combined in a single file per library
-using the gen_localizations script. 
+using the gen_localizations script.
 
 You can see what that script would generate by running:
 ```dart
