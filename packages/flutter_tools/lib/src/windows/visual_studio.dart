@@ -33,7 +33,7 @@ class VisualStudio {
   /// Versions older than 2017 Update 2 won't be detected, so error messages to
   /// users should take into account that [false] may mean that the user may
   /// have an old version rather than no installation at all.
-  bool get isInstalled => _bestVisualStudioDetails.isNotEmpty;
+  bool get isInstalled => _bestVisualStudioDetails != null;
 
   bool get isAtLeastMinimumVersion {
     final int? installedMajorVersion = _majorVersion;
@@ -42,30 +42,25 @@ class VisualStudio {
 
   /// True if there is a version of Visual Studio with all the components
   /// necessary to build the project.
-  bool get hasNecessaryComponents => _usableVisualStudioDetails.isNotEmpty;
+  bool get hasNecessaryComponents => _usableVisualStudioDetails != null;
 
   /// The name of the Visual Studio install.
   ///
   /// For instance: "Visual Studio Community 2019".
-  String? get displayName => _bestVisualStudioDetails[_displayNameKey] as String?;
+  String? get displayName => _bestVisualStudioDetails?.displayName;
 
   /// The user-friendly version number of the Visual Studio install.
   ///
   /// For instance: "15.4.0".
-  String? get displayVersion {
-    if (_bestVisualStudioDetails[_catalogKey] == null) {
-      return null;
-    }
-    return (_bestVisualStudioDetails[_catalogKey] as Map<String, dynamic>)[_catalogDisplayVersionKey] as String?;
-  }
+  String? get displayVersion => _bestVisualStudioDetails?.catalogDisplayVersion;
 
   /// The directory where Visual Studio is installed.
-  String? get installLocation => _bestVisualStudioDetails[_installationPathKey] as String?;
+  String? get installLocation => _bestVisualStudioDetails?.installationPath;
 
   /// The full version of the Visual Studio install.
   ///
   /// For instance: "15.4.27004.2002".
-  String? get fullVersion => _bestVisualStudioDetails[_fullVersionKey] as String?;
+  String? get fullVersion => _bestVisualStudioDetails?.fullVersion;
 
   // Properties that determine the status of the installation. There might be
   // Visual Studio versions that don't include them, so default to a "valid" value to
@@ -75,27 +70,28 @@ class VisualStudio {
   ///
   /// False if installation is not found.
   bool get isComplete {
-    if (_bestVisualStudioDetails.isEmpty) {
+    if (_bestVisualStudioDetails == null) {
       return false;
     }
-    return _bestVisualStudioDetails[_isCompleteKey] as bool? ?? true;
+
+    return _bestVisualStudioDetails!.isComplete ?? true;
   }
 
   /// True if Visual Studio is launchable.
   ///
   /// False if installation is not found.
   bool get isLaunchable {
-    if (_bestVisualStudioDetails.isEmpty) {
+    if (_bestVisualStudioDetails == null) {
       return false;
     }
-    return _bestVisualStudioDetails[_isLaunchableKey] as bool? ?? true;
+    return _bestVisualStudioDetails!.isLaunchable ?? true;
   }
 
-  /// True if the Visual Studio installation is as pre-release version.
-  bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] as bool? ?? false;
+  /// True if the Visual Studio installation is a pre-release version.
+  bool get isPrerelease => _bestVisualStudioDetails?.isPrerelease ?? false;
 
   /// True if a reboot is required to complete the Visual Studio installation.
-  bool get isRebootRequired => _bestVisualStudioDetails[_isRebootRequiredKey] as bool? ?? false;
+  bool get isRebootRequired => _bestVisualStudioDetails?.isRebootRequired ?? false;
 
   /// The name of the recommended Visual Studio installer workload.
   String get workloadDescription => 'Desktop development with C++';
@@ -150,12 +146,12 @@ class VisualStudio {
   /// The path to CMake, or null if no Visual Studio installation has
   /// the components necessary to build.
   String? get cmakePath {
-    final Map<String, dynamic> details = _usableVisualStudioDetails;
-    if (details.isEmpty || _usableVisualStudioDetails[_installationPathKey] == null) {
+    final VswhereDetails? details = _usableVisualStudioDetails;
+    if (details?.installationPath == null) {
       return null;
     }
     return _fileSystem.path.joinAll(<String>[
-      _usableVisualStudioDetails[_installationPathKey] as String,
+      details!.installationPath!,
       'Common7',
       'IDE',
       'CommonExtensions',
@@ -253,33 +249,6 @@ class VisualStudio {
   /// vswhere argument to allow prerelease versions.
   static const String _vswherePrereleaseArgument = '-prerelease';
 
-  // Keys in a VS details dictionary returned from vswhere.
-
-  /// The root directory of the Visual Studio installation.
-  static const String _installationPathKey = 'installationPath';
-
-  /// The user-friendly name of the installation.
-  static const String _displayNameKey = 'displayName';
-
-  /// The complete version.
-  static const String _fullVersionKey = 'installationVersion';
-
-  /// Keys for the status of the installation.
-  static const String _isCompleteKey = 'isComplete';
-  static const String _isLaunchableKey = 'isLaunchable';
-  static const String _isRebootRequiredKey = 'isRebootRequired';
-
-  /// The 'catalog' entry containing more details.
-  static const String _catalogKey = 'catalog';
-
-  /// The key for a pre-release version.
-  static const String _isPrereleaseKey = 'isPrerelease';
-
-  /// The user-friendly version.
-  ///
-  /// This key is under the 'catalog' entry.
-  static const String _catalogDisplayVersionKey = 'productDisplayVersion';
-
   /// The registry path for Windows 10 SDK installation details.
   static const String _windows10SdkRegistryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
 
@@ -287,10 +256,10 @@ class VisualStudio {
   /// SDKs are installed.
   static const String _windows10SdkRegistryKey = 'InstallationFolder';
 
-  /// Returns the details dictionary for the newest version of Visual Studio.
+  /// Returns the details of the newest version of Visual Studio.
   /// If [validateRequirements] is set, the search will be limited to versions
   /// that have all of the required workloads and components.
-  Map<String, dynamic>? _visualStudioDetails({
+  VswhereDetails? _visualStudioDetails({
       bool validateRequirements = false,
       List<String>? additionalArguments,
       String? requiredWorkload
@@ -319,10 +288,12 @@ class VisualStudio {
       ], encoding: utf8);
       if (whereResult.exitCode == 0) {
         final List<Map<String, dynamic>> installations =
-            (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
-        if (installations.isNotEmpty) {
-          return installations[0];
+          (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
+        if (installations.isEmpty) {
+          return null;
         }
+
+        return VswhereDetails.fromJson(installations[0]);
       }
     } on ArgumentError {
       // Thrown if vswhere doesn't exist; ignore and return null below.
@@ -338,35 +309,35 @@ class VisualStudio {
   ///
   /// Returns false if the required information is missing since older versions
   /// of Visual Studio might not include them.
-  bool installationHasIssues(Map<String, dynamic>installationDetails) {
+  bool installationHasIssues(VswhereDetails installationDetails) {
     assert(installationDetails != null);
-    if (installationDetails[_isCompleteKey] != null && !(installationDetails[_isCompleteKey] as bool)) {
+    if (!(installationDetails.isComplete ?? true)) {
       return true;
     }
 
-    if (installationDetails[_isLaunchableKey] != null && !(installationDetails[_isLaunchableKey] as bool)) {
+    if (!(installationDetails.isLaunchable ?? true)) {
       return true;
     }
 
-    if (installationDetails[_isRebootRequiredKey] != null && installationDetails[_isRebootRequiredKey] as bool) {
+    if (installationDetails.isRebootRequired ?? false) {
       return true;
     }
 
     return false;
   }
 
-  /// Returns the details dictionary for the latest version of Visual Studio
-  /// that has all required components and is a supported version, or {} if
-  /// there is no such installation.
+  /// Returns the details for the latest version of Visual Studio that has all
+  /// the required components and is a support version, or null if there is no
+  /// such installation.
   ///
-  /// If no installation is found, the cached VS details are set to an empty map
-  /// to avoid repeating vswhere queries that have already not found an installation.
-  late final Map<String, dynamic> _usableVisualStudioDetails = (){
+  /// If an installation with issues is found, `_anyVisualStudioDetails` is updated
+  /// to avoid repeating vswhere queries.
+  late final VswhereDetails? _usableVisualStudioDetails = () {
     final List<String> minimumVersionArguments = <String>[
       _vswhereMinVersionArgument,
       _minimumSupportedVersion.toString(),
     ];
-    Map<String, dynamic>? visualStudioDetails;
+    VswhereDetails? visualStudioDetails;
     // Check in the order of stable VS, stable BT, pre-release VS, pre-release BT
     for (final bool checkForPrerelease in <bool>[false, true]) {
       for (final String requiredWorkload in _requiredWorkloads) {
@@ -379,44 +350,35 @@ class VisualStudio {
       }
     }
 
-    Map<String, dynamic>? usableVisualStudioDetails;
+    VswhereDetails? usableVisualStudioDetails;
     if (visualStudioDetails != null) {
       if (installationHasIssues(visualStudioDetails)) {
-        _cachedAnyVisualStudioDetails = visualStudioDetails;
+        _anyVisualStudioDetails = visualStudioDetails;
       } else {
         usableVisualStudioDetails = visualStudioDetails;
       }
     }
-    return usableVisualStudioDetails ?? <String, dynamic>{};
+    return usableVisualStudioDetails;
   }();
 
-  /// Returns the details dictionary of the latest version of Visual Studio,
-  /// regardless of components and version, or {} if no such installation is
+  /// Returns the details of the latest version of Visual Studio,
+  /// regardless of components and version, or null if no such installation is
   /// found.
   ///
-  /// If no installation is found, the cached VS details are set to an empty map
-  /// to avoid repeating vswhere queries that have already not found an
-  /// installation.
-  Map<String, dynamic>? _cachedAnyVisualStudioDetails;
-  Map<String, dynamic> get _anyVisualStudioDetails {
+  /// This may be overriden by `_usableVisualStudioDetails`'s initializer
+  /// to avoid repeating vswhere queries.
+  late VswhereDetails? _anyVisualStudioDetails = () {
     // Search for all types of installations.
-    _cachedAnyVisualStudioDetails ??= _visualStudioDetails(
+    return _visualStudioDetails(
         additionalArguments: <String>[_vswherePrereleaseArgument, '-all']);
-    // Add a sentinel empty value to avoid querying vswhere again.
-    _cachedAnyVisualStudioDetails ??= <String, dynamic>{};
-    return _cachedAnyVisualStudioDetails!;
-  }
+  }();
 
-  /// Returns the details dictionary of the best available version of Visual
-  /// Studio.
+  /// Returns the details of the best available version of Visual Studio.
   ///
   /// If there's a version that has all the required components, that
   /// will be returned, otherwise returns the latest installed version (if any).
-  Map<String, dynamic> get _bestVisualStudioDetails {
-    if (_usableVisualStudioDetails.isNotEmpty) {
-      return _usableVisualStudioDetails;
-    }
-    return _anyVisualStudioDetails;
+  VswhereDetails? get _bestVisualStudioDetails {
+    return _usableVisualStudioDetails ?? _anyVisualStudioDetails;
   }
 
   /// Returns the installation location of the Windows 10 SDKs, or null if the
@@ -469,5 +431,73 @@ class VisualStudio {
     }
     // Re-add the leading '10.' that was removed for comparison.
     return highestVersion == null ? null : '10.$highestVersion';
+  }
+}
+
+/// The details of a Visual Studio installation according to vswhere.
+class VswhereDetails {
+  const VswhereDetails({
+    required this.installationPath,
+    required this.displayName,
+    required this.fullVersion,
+    required this.isComplete,
+    required this.isLaunchable,
+    required this.isRebootRequired,
+    required this.isPrerelease,
+    required this.catalogDisplayVersion,
+  });
+
+  // Keys in a VS details dictionary returned from vswhere.
+
+  /// The root directory of the Visual Studio installation.
+  static const String _installationPathKey = 'installationPath';
+
+  /// The user-friendly name of the installation.
+  static const String _displayNameKey = 'displayName';
+
+  /// The complete version.
+  static const String _fullVersionKey = 'installationVersion';
+
+  /// Keys for the status of the installation.
+  static const String _isCompleteKey = 'isComplete';
+  static const String _isLaunchableKey = 'isLaunchable';
+  static const String _isRebootRequiredKey = 'isRebootRequired';
+
+  /// The key for a pre-release version.
+  static const String _isPrereleaseKey = 'isPrerelease';
+
+  /// The 'catalog' entry containing more details.
+  static const String _catalogKey = 'catalog';
+
+  /// The user-friendly version.
+  ///
+  /// This key is under the 'catalog' entry.
+  static const String _catalogDisplayVersionKey = 'productDisplayVersion';
+
+  final String? installationPath;
+  final String? displayName;
+  final String? fullVersion;
+  final bool? isComplete;
+  final bool? isLaunchable;
+  final bool? isRebootRequired;
+  final bool? isPrerelease;
+  final String? catalogDisplayVersion;
+
+  /// Create a `VswhereDetails` from the JSON output of vswhere.exe.
+  /// Returns null  
+  static VswhereDetails fromJson(Map<String, dynamic> details) {
+    final Map<String, dynamic>? catalog = details[_catalogKey] as Map<String, dynamic>?;
+
+    final VswhereDetails result = VswhereDetails(
+      installationPath: details[_installationPathKey] as String?,
+      displayName: details[_displayNameKey] as String?,
+      fullVersion: details[_fullVersionKey] as String?,
+      isComplete: details[_isCompleteKey] as bool?,
+      isLaunchable: details[_isLaunchableKey] as bool?,
+      isRebootRequired: details[_isRebootRequiredKey] as bool?,
+      isPrerelease: details[_isPrereleaseKey] as bool?,
+      catalogDisplayVersion: catalog == null ? null : catalog[_catalogDisplayVersionKey] as String?);
+
+    return result;
   }
 }

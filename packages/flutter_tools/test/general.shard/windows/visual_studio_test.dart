@@ -863,6 +863,60 @@ void main() {
       expect(visualStudio.getWindows10SDKVersion(), null);
     });
   });
+
+  group(VswhereDetails, () {
+      test('Accepts empty JSON', () {
+        VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{});
+
+        expect(result.installationPath, null);
+        expect(result.displayName, null);
+        expect(result.fullVersion, null);
+        expect(result.isComplete, null);
+        expect(result.isLaunchable, null);
+        expect(result.isRebootRequired, null);
+        expect(result.isPrerelease, null);
+        expect(result.catalogDisplayVersion, null);
+      });
+
+      test('Ignores unknown JSON properties', () {
+        VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{
+          'hello': 'world',
+        });
+
+        expect(result.installationPath, null);
+        expect(result.displayName, null);
+        expect(result.fullVersion, null);
+        expect(result.isComplete, null);
+        expect(result.isLaunchable, null);
+        expect(result.isRebootRequired, null);
+        expect(result.isPrerelease, null);
+        expect(result.catalogDisplayVersion, null);
+      });
+
+      test('Accepts JSON', () {
+        VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{
+          'installationPath' : r'C:\foo\bar',
+          'displayName' : 'Visual Studio Community 2019',
+          'installationVersion' : '15.4.27004.2002',
+          'isComplete' : true,
+          'isLaunchable' : true,
+          'isRebootRequired' : true,
+          'isPrerelease' : true,
+          'catalog' : <String, dynamic>{
+            'productDisplayVersion' : '15.4.0'
+          },
+        });
+
+        expect(result.installationPath, r'C:\foo\bar');
+        expect(result.displayName, 'Visual Studio Community 2019');
+        expect(result.fullVersion, '15.4.27004.2002');
+        expect(result.isComplete, true);
+        expect(result.isLaunchable, true);
+        expect(result.isRebootRequired, true);
+        expect(result.isPrerelease, true);
+        expect(result.catalogDisplayVersion, '15.4.0');
+      });
+  });
 }
 
 class VisualStudioFixture {
