@@ -296,7 +296,7 @@ class HtmlViewEmbedder {
           _svgPathDefs!.querySelector('#sk_path_defs')!;
       final List<DomElement> nodesToRemove = <DomElement>[];
       final Set<String> oldDefs = _svgClipDefs[viewId]!;
-      for (final DomElement child in clipDefs.children.cast<DomElement>()) {
+      for (final DomElement child in clipDefs.children) {
         if (oldDefs.contains(child.id)) {
           nodesToRemove.add(child);
         }
@@ -732,8 +732,7 @@ class HtmlViewEmbedder {
 
   /// Deletes SVG clip paths, useful for tests.
   void debugCleanupSvgClipPaths() {
-    _svgPathDefs?.children.cast<DomElement>().single
-        .children.cast<DomElement>().forEach(removeElement);
+    _svgPathDefs?.children.single.children.forEach(removeElement);
     _svgClipDefs.clear();
   }
 
