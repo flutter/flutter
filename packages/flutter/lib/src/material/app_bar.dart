@@ -162,6 +162,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.bottom,
     this.elevation,
     this.scrolledUnderElevation,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
     this.shadowColor,
     this.surfaceTintColor,
     this.shape,
@@ -197,6 +198,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.systemOverlayStyle,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
+       assert(notificationPredicate != null),
        assert(primary != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
@@ -420,6 +422,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [shape], which defines the shape of the app bar's [Material] and its
   ///    shadow.
   final double? scrolledUnderElevation;
+
+  /// A check that specifies which child's [ScrollNotification]s should be
+  /// listened to.
+  ///
+  /// By default, checks whether `notification.depth == 0`. Set it to something
+  /// else for more complicated layouts.
+  final ScrollNotificationPredicate notificationPredicate;
 
   /// {@template flutter.material.appbar.shadowColor}
   /// The color of the shadow below the app bar.
@@ -809,7 +818,7 @@ class _AppBarState extends State<AppBar> {
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification && notification.depth == 0) {
+    if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
       final bool oldScrolledUnder = _scrolledUnder;
       final ScrollMetrics metrics = notification.metrics;
       switch (metrics.axisDirection) {
