@@ -14,8 +14,6 @@
 #include "dart_project.h"
 #include "flutter_engine.h"
 #include "flutter_view.h"
-#include "plugin_registrar.h"
-#include "plugin_registry.h"
 
 namespace flutter {
 
