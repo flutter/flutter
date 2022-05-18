@@ -143,7 +143,7 @@ The value of `timeOfDayFormat` defines how a time picker displayed by
 [showTimePicker()](https://api.flutter.dev/flutter/material/showTimePicker.html)
 formats and lays out its time controls. The value of `timeOfDayFormat`
 must be a string that matches one of the formats defined by
-<https://api.flutter.dev/flutter/material/TimeOfDayFormat-class.html>.
+<https://api.flutter.dev/flutter/material/TimeOfDayFormat.html>.
 It is converted to an enum value because the `material_en.arb` file
 has this value labeled as `"x-flutter-type": "icuShortTimePattern"`.
 
@@ -159,22 +159,21 @@ section in the Material spec. The Material theme uses the
 
 If you look at the comment at the top of the `generated_material_localizations.dart`
 and `generated_cupertino_localizations.dart` files, you'll
-see that it was manually generated using a `dev/tools/localizations`
-app called `gen_localizations`.
+see that it was manually generated using a script called `gen_localizations`.
 
 You can see what that script would generate by running this command:
 
 ```dart
-dart dev/tools/localizations/bin/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
+dart dev/tools/localization/bin/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
 ```
 
-The gen_localizations app just combines the contents of all of the
+The gen_localizations script just combines the contents of all of the
 .arb files into a single `Map` per library that has entries for each .arb
 file's locale. The `MaterialLocalizations` and `CupertinoLocalizations`
 class implementations use these Maps to implement the methods that lookup localized resource values.
 
-The gen_localizations app must be run by hand after .arb files have
-been updated. The app's first parameter is the path to this directory,
+The gen_localizations script must be run by hand after .arb files have
+been updated. The script's first parameter is the path to this directory,
 the second is the file name prefix (the file name less the locale
 suffix) for the .arb files in this directory.
 
@@ -182,7 +181,7 @@ To in-place update the generated localizations file using the default
 values, you can just run:
 
 ```dart
-dart dev/tools/localizations/bin/gen_localizations.dart --overwrite
+dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 ```
 
 
