@@ -14,6 +14,7 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'device.dart';
+import 'globals.dart';
 import 'version.dart';
 
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
@@ -276,10 +277,34 @@ Future<vm_service.VmService> setUpVmService(
   }
   if (printStructuredErrorLogMethod != null) {
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
+
+    vmService.onGCEvent.listen((vm_service.Event event) {
+      try {
+        final String? isolate = event.json?['isolate']?['name'];
+
+        final bool newGC = event.json?.containsKey('new') == true;
+        final String? newType = event.json?['new']?['type'];
+        final String? newVMName = event.json?['new']?['vmName'];
+
+        final bool oldGC = event.json?.containsKey('old') == true;
+        final String? oldType = event.json?['old']?['type'];
+        final String? oldVMName = event.json?['old']?['vmName'];
+        
+
+        logger.printStatus('${DateTime.now()} $isolate: ${newGC ? 'new:$newType:$newVMName':'-' },${oldGC ? 'old:$oldType:$oldVMName':'-' }');
+      } catch (e, stack) {
+        logger.printStatus(e.toString());
+        logger.printStatus(stack.toString());
+      }
+    });
     // It is safe to ignore this error because we expect an error to be
     // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
+      .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
+    );
+    registrationRequests.add(vmService
+      .streamListen(vm_service.EventStreams.kGC)
       .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
     );
   }
