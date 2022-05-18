@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 
 import 'package:ui/ui.dart' as ui;
@@ -674,14 +673,14 @@ String fontWeightIndexToCss({int fontWeightIndex = 3}) {
 /// If [isSpan] is true, the text element is a span within richtext and
 /// should not assign effectiveFontFamily if fontFamily was not specified.
 void applyTextStyleToElement({
-  required html.HtmlElement element,
+  required DomHTMLElement element,
   required EngineTextStyle style,
   bool isSpan = false,
 }) {
   assert(element != null); // ignore: unnecessary_null_comparison
   assert(style != null); // ignore: unnecessary_null_comparison
   bool updateDecoration = false;
-  final html.CssStyleDeclaration cssStyle = element.style;
+  final DomCSSStyleDeclaration cssStyle = element.style;
 
   final ui.Color? color = style.foreground?.color ?? style.color;
   if (style.foreground?.style == ui.PaintingStyle.stroke) {
@@ -699,18 +698,18 @@ void applyTextStyleToElement({
         : 1.0 / ui.window.devicePixelRatio;
     cssStyle.textStroke = '${adaptedWidth}px ${colorToCssString(color)}';
   } else if (color != null) {
-    cssStyle.color = colorToCssString(color);
+    cssStyle.color = colorToCssString(color)!;
   }
   final ui.Color? background = style.background?.color;
   if (background != null) {
-    cssStyle.backgroundColor = colorToCssString(background);
+    cssStyle.backgroundColor = colorToCssString(background)!;
   }
   final double? fontSize = style.fontSize;
   if (fontSize != null) {
     cssStyle.fontSize = '${fontSize.floor()}px';
   }
   if (style.fontWeight != null) {
-    cssStyle.fontWeight = fontWeightToCss(style.fontWeight);
+    cssStyle.fontWeight = fontWeightToCss(style.fontWeight)!;
   }
   if (style.fontStyle != null) {
     cssStyle.fontStyle =
@@ -719,9 +718,9 @@ void applyTextStyleToElement({
   // For test environment use effectiveFontFamily since we need to
   // consistently use Ahem font.
   if (isSpan && !ui.debugEmulateFlutterTesterEnvironment) {
-    cssStyle.fontFamily = canonicalizeFontFamily(style.fontFamily);
+    cssStyle.fontFamily = canonicalizeFontFamily(style.fontFamily)!;
   } else {
-    cssStyle.fontFamily = canonicalizeFontFamily(style.effectiveFontFamily);
+    cssStyle.fontFamily = canonicalizeFontFamily(style.effectiveFontFamily)!;
   }
   if (style.letterSpacing != null) {
     cssStyle.letterSpacing = '${style.letterSpacing}px';
@@ -744,7 +743,7 @@ void applyTextStyleToElement({
       if (textDecoration != null) {
         if (browserEngine == BrowserEngine.webkit) {
           setElementStyle(
-              element as DomElement, '-webkit-text-decoration', textDecoration);
+              element, '-webkit-text-decoration', textDecoration);
         } else {
           cssStyle.textDecoration = textDecoration;
         }

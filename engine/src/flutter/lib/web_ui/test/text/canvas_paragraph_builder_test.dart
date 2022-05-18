@@ -495,7 +495,7 @@ TextStyle styleWithDefaults({
 }
 
 void expectOuterHtml(CanvasParagraph paragraph, String expected, {required bool ignorePositions}) {
-  String outerHtml = paragraph.toDomElement().outerHtml!;
+  String outerHtml = paragraph.toDomElement().outerHTML!;
   if (ignorePositions) {
     outerHtml = removeMeasurementInfo(outerHtml);
     expected = removeMeasurementInfo(expected);

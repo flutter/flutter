@@ -10,6 +10,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import 'dom.dart';
 import 'html/painting.dart';
 import 'html/render_vertices.dart';
 import 'text/canvas_paragraph.dart';
@@ -257,18 +258,18 @@ mixin SaveStackTracking on EngineCanvas {
   }
 }
 
-html.Element drawParagraphElement(
+DomElement drawParagraphElement(
   CanvasParagraph paragraph,
   ui.Offset offset, {
   Matrix4? transform,
 }) {
   assert(paragraph.isLaidOut);
 
-  final html.HtmlElement paragraphElement = paragraph.toDomElement();
+  final DomHTMLElement paragraphElement = paragraph.toDomElement();
 
   if (transform != null) {
     setElementTransform(
-      paragraphElement,
+      paragraphElement as html.Element,
       transformWithOffset(transform, offset).storage,
     );
   }

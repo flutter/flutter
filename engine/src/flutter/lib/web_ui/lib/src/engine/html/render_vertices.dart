@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
+import '../dom.dart';
 import '../safe_browser_api.dart';
 import '../util.dart';
 import '../vector_math.dart';
@@ -72,7 +73,7 @@ void initWebGl() {
 
 abstract class GlRenderer {
   void drawVertices(
-      html.CanvasRenderingContext2D? context,
+      DomCanvasRenderingContext2D? context,
       int canvasWidthInPixels,
       int canvasHeightInPixels,
       Matrix4 transform,
@@ -91,7 +92,7 @@ abstract class GlRenderer {
       int widthInPixels,
       int heightInPixels);
 
-  void drawHairline(html.CanvasRenderingContext2D? _ctx, Float32List positions);
+  void drawHairline(DomCanvasRenderingContext2D? _ctx, Float32List positions);
 }
 
 /// Treeshakeable backend for rendering webgl on canvas.
@@ -101,7 +102,7 @@ abstract class GlRenderer {
 class _WebGlRenderer implements GlRenderer {
   @override
   void drawVertices(
-      html.CanvasRenderingContext2D? context,
+      DomCanvasRenderingContext2D? context,
       int canvasWidthInPixels,
       int canvasHeightInPixels,
       Matrix4 transform,
@@ -299,7 +300,7 @@ class _WebGlRenderer implements GlRenderer {
 
     context!.save();
     context.resetTransform();
-    gl.drawImage(context, offsetX, offsetY);
+    gl.drawImage(context as html.CanvasRenderingContext2D, offsetX, offsetY);
     context.restore();
   }
 
@@ -446,7 +447,7 @@ class _WebGlRenderer implements GlRenderer {
 
   @override
   void drawHairline(
-      html.CanvasRenderingContext2D? _ctx, Float32List positions) {
+      DomCanvasRenderingContext2D? _ctx, Float32List positions) {
     assert(positions != null); // ignore: unnecessary_null_comparison
     final int pointCount = positions.length ~/ 2;
     _ctx!.lineWidth = 1.0;

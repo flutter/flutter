@@ -26,9 +26,9 @@ class AssetManager {
   String? get _baseUrl {
     return domWindow.document
         .querySelectorAll('meta')
-        .where((Object? domNode) => domInstanceOfString(domNode,
+        .where((DomElement domNode) => domInstanceOfString(domNode,
                 'HTMLMetaElement'))
-        .map((Object? domNode) => domNode! as DomHTMLMetaElement)
+        .map((DomElement domNode) => domNode as DomHTMLMetaElement)
         .firstWhereOrNull(
             (DomHTMLMetaElement element) => element.name == 'assetBase')
         ?.content;

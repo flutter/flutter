@@ -128,7 +128,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
     final html.Element paragraphElement = drawParagraphElement(
         paragraph as CanvasParagraph, offset,
-        transform: currentTransform);
+        transform: currentTransform) as html.Element;
     currentElement.append(paragraphElement);
   }
 
