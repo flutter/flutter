@@ -1,4 +1,4 @@
-Signature: 98cafa2481dc90d6b6454fcf9dfdc2ab
+Signature: 244a1db6a7276c8c01907f44b798ad34
 
 UNUSED LICENSES:
 
@@ -6460,6 +6460,7 @@ FILE: ../../../third_party/skia/include/sksl/DSLCase.h
 FILE: ../../../third_party/skia/include/sksl/DSLFunction.h
 FILE: ../../../third_party/skia/include/sksl/DSLLayout.h
 FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
+FILE: ../../../third_party/skia/include/sksl/DSLWrapper.h
 FILE: ../../../third_party/skia/include/sksl/SkSLDebugTrace.h
 FILE: ../../../third_party/skia/include/sksl/SkSLErrorReporter.h
 FILE: ../../../third_party/skia/include/sksl/SkSLPosition.h
