@@ -49,7 +49,7 @@ class Texture;
 ///
 enum class PixelFormat {
   kUnknown,
-  kR8UNormInt,
+  kA8UNormInt,
   kR8G8B8A8UNormInt,
   kR8G8B8A8UNormIntSRGB,
   kB8G8R8A8UNormInt,
@@ -216,7 +216,7 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
       return 0u;
-    case PixelFormat::kR8UNormInt:
+    case PixelFormat::kA8UNormInt:
     case PixelFormat::kS8UInt:
       return 1u;
     case PixelFormat::kR8G8B8A8UNormInt:
