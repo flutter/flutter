@@ -12,6 +12,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'platform_menu_bar.dart';
+import 'transitions.dart';
 
 /// A set of [KeyboardKey]s that can be used as the keys in a [Map].
 ///
@@ -1089,15 +1090,14 @@ class ShortcutRegistryToken {
   }
 }
 
-/// A specialized [ShortcutManager] used by [ShortcutRegistrar] that allows
-/// adding or removing shortcut bindings by descendants of the
-/// [ShortcutRegistrar].
+/// A class used by [ShortcutRegistrar] that allows adding or removing shortcut
+/// bindings by descendants of the [ShortcutRegistrar].
 ///
 /// You can reach the nearest [ShortcutRegistry] using [of] and [maybeOf].
 ///
 /// The registry may be listened to (with [addListener]/[removeListener]) for
 /// change notifications when the registered shortcuts change.
-class ShortcutRegistry extends ShortcutManager {
+class ShortcutRegistry with ChangeNotifier {
   /// Gets the combined shortcut bindings from all contexts that are registered
   /// with this [ShortcutRegistry], in addition to the bindings passed to
   /// [ShortcutRegistry.ShortcutRegistry].
@@ -1105,11 +1105,9 @@ class ShortcutRegistry extends ShortcutManager {
   /// Listeners will be notified when the value returned by this getter changes.
   ///
   /// Returns a copy: modifying the returned map will have no effect.
-  @override
   Map<ShortcutActivator, Intent> get shortcuts {
     assert(debugAssertNotDisposed());
     return <ShortcutActivator, Intent>{
-      ..._shortcuts,
       for (final MapEntry<ShortcutRegistryToken, Map<ShortcutActivator, Intent>> entry in _tokenShortcuts.entries)
         ...entry.value,
     };
@@ -1136,7 +1134,6 @@ class ShortcutRegistry extends ShortcutManager {
     final ShortcutRegistryToken token = ShortcutRegistryToken._(this);
     _tokenShortcuts[token] = value;
     _debugCheckForDuplicates();
-    _indexedShortcutsCache = null;
     notifyListeners();
     return token;
   }
@@ -1162,11 +1159,9 @@ class ShortcutRegistry extends ShortcutManager {
           ? 'was created by this registry, but has probably already been disposed of'
           : 'was not created by this registry, it was created by ${token.registry}'}.');
     _tokenShortcuts[token] = value;
-    _indexedShortcutsCache = null;
     _debugCheckForDuplicates();
     notifyListeners();
   }
-
 
   /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
   /// which most tightly encloses the given [BuildContext].
@@ -1235,24 +1230,19 @@ class ShortcutRegistry extends ShortcutManager {
   // registry.
   void _disposeToken(ShortcutRegistryToken token) {
     if (_tokenShortcuts.remove(token) != null) {
-      _indexedShortcutsCache = null;
       notifyListeners();
     }
   }
 
   void _debugCheckForDuplicates() {
     assert(() {
-      final Map<ShortcutActivator, ShortcutRegistryToken?> previous = <ShortcutActivator, ShortcutRegistryToken?>{
-        ..._shortcuts.map<ShortcutActivator, ShortcutRegistryToken?>((ShortcutActivator key, Intent value) {
-          return MapEntry<ShortcutActivator, ShortcutRegistryToken?>(key, null);
-        }),
-      };
+      final Map<ShortcutActivator, ShortcutRegistryToken?> previous = <ShortcutActivator, ShortcutRegistryToken?>{};
       for (final MapEntry<ShortcutRegistryToken, Map<ShortcutActivator, Intent>> tokenEntry in _tokenShortcuts.entries) {
         for (final ShortcutActivator shortcut in tokenEntry.value.keys) {
           if (previous.containsKey(shortcut)) {
             throw FlutterError(
               '$ShortcutRegistry: Received a duplicate registration for the '
-              'shortcut $shortcut in ${tokenEntry.key} and ${previous[shortcut] ?? 'constructor shortcuts'}.');
+              'shortcut $shortcut in ${describeIdentity(tokenEntry.key)} and ${previous[shortcut]}.');
           }
           previous[shortcut] = tokenEntry.key;
         }
@@ -1301,10 +1291,23 @@ class ShortcutRegistrar extends StatefulWidget {
 
 class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   final ShortcutRegistry registry = ShortcutRegistry();
-  bool updateScheduled = false;
+  final ShortcutManager manager = ShortcutManager();
+
+  @override
+  void initState() {
+    super.initState();
+    registry.addListener(_shortcutsChanged);
+  }
+
+  void _shortcutsChanged() {
+    // This shouldn't need to update the widget, and avoids calling setState
+    // during build phase.
+    manager.shortcuts = registry.shortcuts;
+  }
 
   @override
   void dispose() {
+    registry.removeListener(_shortcutsChanged);
     registry.dispose();
     super.dispose();
   }
@@ -1312,8 +1315,8 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   @override
   Widget build(BuildContext context) {
     return Shortcuts(
-      shortcuts: const <ShortcutActivator, Intent>{},
-      manager: registry,
+      shortcuts: registry.shortcuts,
+      manager: manager,
       child: _ShortcutRegistrarMarker(
         registry: registry,
         child: widget.child,
