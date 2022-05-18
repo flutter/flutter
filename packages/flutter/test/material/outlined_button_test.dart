@@ -922,11 +922,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: OutlinedButton(
-            style: ButtonStyle(
+            style: const ButtonStyle(
               // Specifying minimumSize to mimic the original minimumSize for
               // RaisedButton so that the corresponding button size matches
               // the original version of this test.
-              minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+              minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
             ),
             onPressed: () {},
             child: const Text('ABC'),
@@ -971,11 +971,11 @@ void main() {
             data: const MediaQueryData(),
             child: Center(
               child: OutlinedButton(
-                style: ButtonStyle(
+                style: const ButtonStyle(
                   // Specifying minimumSize to mimic the original minimumSize for
                   // RaisedButton so that the corresponding button size matches
                   // the original version of this test.
-                  minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+                  minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
                 ),
                 onPressed: () {},
                 child: const Text('ABC'),
@@ -1000,11 +1000,11 @@ void main() {
             data: const MediaQueryData(textScaleFactor: 1.3),
             child: Center(
               child: OutlinedButton(
-                style: ButtonStyle(
+                style: const ButtonStyle(
                   // Specifying minimumSize to mimic the original minimumSize for
                   // RaisedButton so that the corresponding button size matches
                   // the original version of this test.
-                  minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+                  minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
                 ),
                 onPressed: () {},
                 child: const Text('ABC'),

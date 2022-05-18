@@ -689,11 +689,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: ElevatedButton(
-            style: ButtonStyle(
+            style: const ButtonStyle(
               // Specifying minimumSize to mimic the original minimumSize for
               // RaisedButton so that the semantics tree's rect and transform
               // match the original version of this test.
-              minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+              minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
             ),
             onPressed: () { },
             child: const Text('ABC'),
@@ -728,11 +728,11 @@ void main() {
   });
 
   testWidgets('ElevatedButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
-    final ButtonStyle style = ButtonStyle(
+    const ButtonStyle style = ButtonStyle(
       // Specifying minimumSize to mimic the original minimumSize for
       // RaisedButton so that the corresponding button size matches
       // the original version of this test.
-      minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+      minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
     );
 
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
@@ -797,7 +797,7 @@ void main() {
                   // Specifying minimumSize to mimic the original minimumSize for
                   // RaisedButton so that the corresponding button size matches
                   // the original version of this test.
-                  minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+                  minimumSize: const MaterialStatePropertyAll<Size>(Size(88, 36)),
                 ),
                 key: key,
                 onPressed: () {},
@@ -861,8 +861,8 @@ void main() {
         child: Center(
           child: ElevatedButton.icon(
             key: buttonKey,
-            style: ButtonStyle(
-              padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.fromLTRB(16, 5, 10, 12)),
+            style: const ButtonStyle(
+              padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.fromLTRB(16, 5, 10, 12)),
             ),
             onPressed: () {},
             icon: const Icon(Icons.add),

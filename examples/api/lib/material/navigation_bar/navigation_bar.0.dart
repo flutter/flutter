@@ -143,7 +143,7 @@ class ListPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
               child: OutlinedButton(
                 style: buttonStyle.copyWith(
-                  backgroundColor: MaterialStateProperty.all<Color>(
+                  backgroundColor: MaterialStatePropertyAll<Color>(
                     Color.lerp(destination.color[100], Colors.white, index / itemCount)!
                   ),
                 ),

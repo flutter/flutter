@@ -1589,7 +1589,7 @@ void main() {
             autofocus: focused,
             value: active,
             onChanged: (_) { },
-            thumbColor: MaterialStateProperty.all(thumbColor),
+            thumbColor: const MaterialStatePropertyAll<Color>(thumbColor),
             overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
