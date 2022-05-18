@@ -1599,8 +1599,8 @@ class ThemeData with Diagnosticable {
   ///   * [GlowingOverscrollIndicator], an edge effect that paints a glow
   ///     over the contents of a scrollable when overscrolled.
   @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-          'This feature was deprecated after v2.13.0-0.0.pre.'
+    'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+    'This feature was deprecated after v2.13.0-0.0.pre.'
   )
   final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
