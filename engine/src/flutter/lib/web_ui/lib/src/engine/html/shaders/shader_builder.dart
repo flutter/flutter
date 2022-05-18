@@ -414,7 +414,7 @@ const List<String> _kReservedWords = <String>[
   'image2DArrayShadow', 'image2DShadow', 'image3D', 'imageBuffer',
   'imageCube', 'inline', 'input', 'interface', 'long',
   'namespace', 'noinline', 'output', 'packed', 'partition', 'public',
-  'row_majo', 'short', 'sizeof', 'static', 'superp', 'template', 'this',
+  'row_major', 'sampler3DRect', 'short', 'sizeof', 'static', 'superp', 'template', 'this',
   'typedef', 'uimage1D', 'uimage1DArray', 'uimage2D', 'uimage2DArray',
   'uimage3D', 'uimageBuffer', 'uimageCube', 'union', 'unsigned',
   'using', 'volatile',
