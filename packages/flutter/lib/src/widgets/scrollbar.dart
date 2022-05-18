@@ -1516,7 +1516,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                 'platforms will automatically use the '
                 'PrimaryScrollController if the user has not provided a '
                 'ScrollController. To use the PrimaryScrollController '
-                'explicitly, set ScrollView.primary  to true for the Scrollable '
+                'explicitly, set ScrollView.primary to true for the Scrollable '
                 'widget.'
               : 'When providing your own ScrollController, ensure both the '
                 'Scrollbar and the Scrollable widget use the same one.'

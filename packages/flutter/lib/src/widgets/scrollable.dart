@@ -1700,7 +1700,7 @@ class ScrollAction extends Action<ScrollIntent> {
       }());
 
       if (primaryScrollController!.position.context.notificationContext == null
-        && Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
+          && Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
         return;
       }
       state = Scrollable.of(primaryScrollController.position.context.notificationContext!);
