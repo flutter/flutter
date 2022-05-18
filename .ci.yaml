@@ -2219,7 +2219,6 @@ targets:
 
   - name: Staging_build_linux analyze
     presubmit: false
-    bringup: true
     recipe: flutter/flutter
     timeout: 60
     properties:
