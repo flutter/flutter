@@ -808,17 +808,46 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///  * [Action], a class for defining an invocation of a user action.
 ///  * [CallbackAction], a class for creating an action from a callback.
 class Shortcuts extends StatefulWidget {
-  /// Creates a const [Shortcuts] widget.
+  /// Creates a const [Shortcuts] widget that creates its own manager.
+  ///
+  /// The `manager` argument is deprecated. Use the [Shortcuts.manager]
+  /// constructor instead. Once the deprecated argument is removed, [manager]
+  /// will always be null when this constructor is used.
   ///
   /// The [child] and [shortcuts] arguments are required.
   const Shortcuts({
     super.key,
-    this.manager,
     required this.shortcuts,
     required this.child,
     this.debugLabel,
-  }) : assert(shortcuts != null),
+    @Deprecated(
+      'Use the Shortcuts.manager constructor instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
+    this.manager,
+  }) : _forceShortcutsOnManager = true,
+       assert(shortcuts != null),
        assert(child != null);
+
+  /// Constructs a [Shortcuts] widget that allows the [manager] to determine by
+  /// itself what the map of shortcuts is.
+  ///
+  /// If this constructor is used, [shortcuts] will be empty and ignored, and
+  /// the [manager] will determine which shortcuts are in effect.
+  const Shortcuts.manager({
+    super.key,
+    required ShortcutManager this.manager,
+    required this.child,
+    this.debugLabel,
+  }) : _forceShortcutsOnManager = false,
+       shortcuts = const <ShortcutActivator, Intent>{};
+
+  // Whether or not this instance should force the shortcuts property into the
+  // manager, or let it manage them itself.
+  // TODO(gspencergoog): Once the manager constructor parameter is removed, then
+  // we can use whether or not the manager property is null to determine how to
+  // treat it, and this bool can go away.
+  final bool _forceShortcutsOnManager;
 
   /// The [ShortcutManager] that will manage the mapping between key
   /// combinations and [Action]s.
@@ -827,6 +856,7 @@ class Shortcuts extends StatefulWidget {
   ///
   /// This manager will be given new [shortcuts] to manage whenever the
   /// [shortcuts] change materially.
+  // ignore: deprecated_consistency
   final ShortcutManager? manager;
 
   /// {@template flutter.widgets.shortcuts.shortcuts}
@@ -870,7 +900,8 @@ class Shortcuts extends StatefulWidget {
     'Finding a ShortcutsManager in this way will no longer be supported. '
     'This feature was deprecated after v3.1.0-0.0.pre.',
   )
-  // When this is finally removed, _ShortcutsMarker can also be removed.
+  // TODO(gspencergoog): When this is finally removed, _ShortcutsMarker can also
+  // be removed.
   static ShortcutManager of(BuildContext context) {
     assert(context != null);
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
@@ -909,7 +940,8 @@ class Shortcuts extends StatefulWidget {
     'Finding a ShortcutsManager in this way will no longer be supported. '
     'This feature was deprecated after v3.1.0-0.0.pre.',
   )
-  // When this is finally removed, _ShortcutsMarker can also be removed.
+  // TODO(gspencergoog): When this is finally removed, _ShortcutsMarker can also
+  // be removed.
   static ShortcutManager? maybeOf(BuildContext context) {
     assert(context != null);
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
@@ -943,7 +975,9 @@ class _ShortcutsState extends State<Shortcuts> {
     if (widget.manager == null) {
       _internalManager = ShortcutManager();
     }
-    manager.shortcuts = widget.shortcuts;
+    if (widget._forceShortcutsOnManager) {
+      manager.shortcuts = widget.shortcuts;
+    }
   }
 
   @override
@@ -957,7 +991,9 @@ class _ShortcutsState extends State<Shortcuts> {
         _internalManager ??= ShortcutManager();
       }
     }
-    manager.shortcuts = widget.shortcuts;
+    if (widget._forceShortcutsOnManager) {
+      manager.shortcuts = widget.shortcuts;
+    }
   }
 
   KeyEventResult _handleOnKey(FocusNode node, RawKeyEvent event) {

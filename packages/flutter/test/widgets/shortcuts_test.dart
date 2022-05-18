@@ -7,118 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
-
-class TestAction extends CallbackAction<Intent> {
-  TestAction({
-    required super.onInvoke,
-  })  : assert(onInvoke != null);
-
-  static const LocalKey key = ValueKey<Type>(TestAction);
-}
-
-class TestDispatcher extends ActionDispatcher {
-  const TestDispatcher({this.postInvoke});
-
-  final PostInvokeCallback? postInvoke;
-
-  @override
-  Object? invokeAction(Action<TestIntent> action, Intent intent, [BuildContext? context]) {
-    final Object? result = super.invokeAction(action, intent, context);
-    postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
-    return result;
-  }
-}
-
-/// An activator that accepts down events that has [key] as the logical key.
-///
-/// This class is used only to tests. It is intentionally designed poorly by
-/// returning null in [triggers], and checks [key] in [accepts].
-class DumbLogicalActivator extends ShortcutActivator {
-  const DumbLogicalActivator(this.key);
-
-  final LogicalKeyboardKey key;
-
-  @override
-  Iterable<LogicalKeyboardKey>? get triggers => null;
-
-  @override
-  bool accepts(RawKeyEvent event, RawKeyboard state) {
-    return event is RawKeyDownEvent
-        && event.logicalKey == key;
-  }
-
-  /// Returns a short and readable description of the key combination.
-  ///
-  /// Intended to be used in debug mode for logging purposes. In release mode,
-  /// [debugDescribeKeys] returns an empty string.
-  @override
-  String debugDescribeKeys() {
-    String result = '';
-    assert(() {
-      result = key.keyLabel;
-      return true;
-    }());
-    return result;
-  }
-}
-
-class TestIntent extends Intent {
-  const TestIntent();
-}
-
-class TestIntent2 extends Intent {
-  const TestIntent2();
-}
-
-class TestShortcutManager extends ShortcutManager {
-  TestShortcutManager(this.keys);
-
-  List<LogicalKeyboardKey> keys;
-
-  @override
-  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
-      keys.add(event.logicalKey);
-    }
-    return super.handleKeypress(context, event);
-  }
-}
-
-Widget activatorTester(
-  ShortcutActivator activator,
-  ValueSetter<Intent> onInvoke, [
-  ShortcutActivator? activator2,
-  ValueSetter<Intent>? onInvoke2,
-]) {
-  final bool hasSecond = activator2 != null && onInvoke2 != null;
-  return Actions(
-    key: GlobalKey(),
-    actions: <Type, Action<Intent>>{
-      TestIntent: TestAction(onInvoke: (Intent intent) {
-        onInvoke(intent);
-        return true;
-      }),
-      if (hasSecond)
-        TestIntent2: TestAction(onInvoke: (Intent intent) {
-          onInvoke2(intent);
-        return null;
-      }),
-    },
-    child: Shortcuts(
-      shortcuts: <ShortcutActivator, Intent>{
-        activator: const TestIntent(),
-        if (hasSecond)
-          activator2: const TestIntent2(),
-      },
-      child: const Focus(
-        autofocus: true,
-        child: SizedBox(width: 100, height: 100),
-      ),
-    ),
-  );
-}
-
 void main() {
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
@@ -736,7 +624,46 @@ void main() {
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
-    testWidgets('ShortcutManager ignores keypresses with no primary focus', (WidgetTester tester) async {
+    testWidgets('Shortcuts.manager lets manager handle shortcuts', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
+      bool shortcutsSet = false;
+      void onShortcutsSet() {
+        shortcutsSet = true;
+      }
+      final TestShortcutManager testManager = TestShortcutManager(pressedKeys, onShortcutsSet: onShortcutsSet);
+      testManager.shortcuts = <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
+      };
+      shortcutsSet = false;
+      bool invoked = false;
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{
+            TestIntent: TestAction(
+              onInvoke: (Intent intent) {
+                invoked = true;
+                return true;
+              },
+            ),
+          },
+          child: Shortcuts.manager(
+            manager: testManager,
+            child: Focus(
+              autofocus: true,
+              child: SizedBox(key: containerKey, width: 100, height: 100),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, isTrue);
+      expect(shortcutsSet, isFalse);
+      expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
+    });
+    testWidgets('ShortcutManager ignores key presses with no primary focus', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
       final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
@@ -1419,4 +1346,123 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
     });
   });
+}
+
+typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
+
+class TestAction extends CallbackAction<Intent> {
+  TestAction({
+    required super.onInvoke,
+  })  : assert(onInvoke != null);
+
+  static const LocalKey key = ValueKey<Type>(TestAction);
+}
+
+class TestDispatcher extends ActionDispatcher {
+  const TestDispatcher({this.postInvoke});
+
+  final PostInvokeCallback? postInvoke;
+
+  @override
+  Object? invokeAction(Action<TestIntent> action, Intent intent, [BuildContext? context]) {
+    final Object? result = super.invokeAction(action, intent, context);
+    postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
+    return result;
+  }
+}
+
+/// An activator that accepts down events that has [key] as the logical key.
+///
+/// This class is used only to tests. It is intentionally designed poorly by
+/// returning null in [triggers], and checks [key] in [accepts].
+class DumbLogicalActivator extends ShortcutActivator {
+  const DumbLogicalActivator(this.key);
+
+  final LogicalKeyboardKey key;
+
+  @override
+  Iterable<LogicalKeyboardKey>? get triggers => null;
+
+  @override
+  bool accepts(RawKeyEvent event, RawKeyboard state) {
+    return event is RawKeyDownEvent
+        && event.logicalKey == key;
+  }
+
+  /// Returns a short and readable description of the key combination.
+  ///
+  /// Intended to be used in debug mode for logging purposes. In release mode,
+  /// [debugDescribeKeys] returns an empty string.
+  @override
+  String debugDescribeKeys() {
+    String result = '';
+    assert(() {
+      result = key.keyLabel;
+      return true;
+    }());
+    return result;
+  }
+}
+
+class TestIntent extends Intent {
+  const TestIntent();
+}
+
+class TestIntent2 extends Intent {
+  const TestIntent2();
+}
+
+class TestShortcutManager extends ShortcutManager {
+  TestShortcutManager(this.keys, { this.onShortcutsSet });
+
+  @override
+  set shortcuts(Map<ShortcutActivator, Intent> shortcuts) {
+    super.shortcuts = shortcuts;
+    onShortcutsSet?.call();
+  }
+
+  List<LogicalKeyboardKey> keys;
+  VoidCallback? onShortcutsSet;
+
+  @override
+  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
+      keys.add(event.logicalKey);
+    }
+    return super.handleKeypress(context, event);
+  }
+}
+
+Widget activatorTester(
+    ShortcutActivator activator,
+    ValueSetter<Intent> onInvoke, [
+      ShortcutActivator? activator2,
+      ValueSetter<Intent>? onInvoke2,
+    ]) {
+  final bool hasSecond = activator2 != null && onInvoke2 != null;
+  return Actions(
+    key: GlobalKey(),
+    actions: <Type, Action<Intent>>{
+      TestIntent: TestAction(onInvoke: (Intent intent) {
+        onInvoke(intent);
+        return true;
+      }),
+      if (hasSecond)
+        TestIntent2: TestAction(onInvoke: (Intent intent) {
+          onInvoke2(intent);
+          return null;
+        }),
+    },
+    child: Shortcuts(
+      shortcuts: <ShortcutActivator, Intent>{
+        activator: const TestIntent(),
+        if (hasSecond)
+          activator2: const TestIntent2(),
+      },
+      child: const Focus(
+        autofocus: true,
+        child: SizedBox(width: 100, height: 100),
+      ),
+    ),
+  );
 }
