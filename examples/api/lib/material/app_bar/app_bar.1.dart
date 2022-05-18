@@ -11,7 +11,7 @@ final List<int> _items = List<int>.generate(51, (int index) => index);
 void main() => runApp(const AppBarApp());
 
 class AppBarApp extends StatelessWidget {
-  const AppBarApp({Key? key}) : super(key: key);
+  const AppBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class AppBarApp extends StatelessWidget {
 }
 
 class AppBarExample extends StatefulWidget {
-  const AppBarExample({Key? key}) : super(key: key);
+  const AppBarExample({super.key});
 
   @override
   State<AppBarExample> createState() => _AppBarExampleState();

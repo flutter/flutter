@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const AppBarApp());
 
 class AppBarApp extends StatelessWidget {
-  const AppBarApp({Key? key}) : super(key: key);
+  const AppBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class AppBarApp extends StatelessWidget {
 }
 
 class SliverAppBarExample extends StatefulWidget {
-  const SliverAppBarExample({Key? key}) : super(key: key);
+  const SliverAppBarExample({super.key});
 
   @override
   State<SliverAppBarExample> createState() => _SliverAppBarExampleState();
