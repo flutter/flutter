@@ -19,5 +19,5 @@ void main() {
   frag_color = texture(
     glyph_atlas_sampler,
     v_unit_vertex * scale_perspective + offset
-  ).rrrr * v_text_color;
+  ).aaaa * v_text_color;
 }
