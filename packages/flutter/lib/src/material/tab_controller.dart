@@ -32,7 +32,7 @@ import 'constants.dart';
 ///
 /// ```dart
 /// class MyTabbedPage extends StatefulWidget {
-///   const MyTabbedPage({ Key? key }) : super(key: key);
+///   const MyTabbedPage({ super.key });
 ///   @override
 ///   State<MyTabbedPage> createState() => _MyTabbedPageState();
 /// }

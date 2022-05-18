@@ -124,7 +124,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   ///
   /// ```dart
   /// class BuzzingText extends StatefulWidget {
-  ///   const BuzzingText({Key? key}) : super(key: key);
+  ///   const BuzzingText({super.key});
   ///
   ///   @override
   ///   State<BuzzingText> createState() => _BuzzingTextState();

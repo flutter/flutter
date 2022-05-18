@@ -70,7 +70,7 @@ class SliderTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Launch extends StatefulWidget {
-  ///   const Launch({Key? key}) : super(key: key);
+  ///   const Launch({super.key});
   ///
   ///   @override
   ///   State createState() => LaunchState();
@@ -240,7 +240,7 @@ class SliderThemeData with Diagnosticable {
   ///
   /// ```dart
   /// class Blissful extends StatefulWidget {
-  ///   const Blissful({Key? key}) : super(key: key);
+  ///   const Blissful({super.key});
   ///
   ///   @override
   ///   State createState() => BlissfulState();
