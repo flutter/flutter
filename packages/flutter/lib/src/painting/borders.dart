@@ -306,7 +306,7 @@ class BorderSide {
   @override
   String toString() {
     if (strokeAlign == StrokeAlign.inside) {
-      return '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)'; 
+      return '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
     }
     return '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $strokeAlign)';
   }
