@@ -427,10 +427,8 @@ void main() {
   });
 
   test('ColorSwatch.lerp', () {
-    const ColorSwatch<int> swatchA =
-    ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)});
-    const ColorSwatch<int> swatchB =
-    ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)});
+    const ColorSwatch<int> swatchA = ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)});
+    const ColorSwatch<int> swatchB = ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)});
     expect(
       ColorSwatch.lerp(swatchA, swatchB, 0.0),
       const ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)}),

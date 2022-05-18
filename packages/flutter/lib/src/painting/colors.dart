@@ -458,7 +458,7 @@ class ColorSwatch<T> extends Color {
   @override
   String toString() => '${objectRuntimeType(this, 'ColorSwatch')}(primary value: ${super.toString()})';
 
-  /// Linearly interpolate between two ColorSwatch.
+  /// Linearly interpolate between two [ColorSwatch]es.
   ///
   /// It delegates in [Color.lerp] to interpolate the different colors of the
   /// swatch.
@@ -478,26 +478,19 @@ class ColorSwatch<T> extends Color {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static ColorSwatch<T>? lerp<T>(
-      ColorSwatch<T>? a, ColorSwatch<T>? b, double t) {
+  static ColorSwatch<T>? lerp<T>(ColorSwatch<T>? a, ColorSwatch<T>? b, double t) {
     final Map<T, Color> swatch;
     if (b == null) {
       if (a == null) {
         return null;
       } else {
-        swatch = a._swatch.map(
-              (T k, Color c) => MapEntry<T, Color>(k, Color.lerp(c, null, t)!),
-        );
+        swatch = a._swatch.map((T k, Color c) => MapEntry<T, Color>(k, Color.lerp(c, null, t)!));
       }
     } else {
       if (a == null) {
-        swatch = b._swatch.map(
-              (T k, Color c) => MapEntry<T, Color>(k, Color.lerp(null, c, t)!),
-        );
+        swatch = b._swatch.map((T k, Color c) => MapEntry<T, Color>(k, Color.lerp(null, c, t)!));
       } else {
-        swatch = a._swatch.map(
-              (T k, Color c) => MapEntry<T, Color>(k, Color.lerp(c, b[k], t)!),
-        );
+        swatch = a._swatch.map((T k, Color c) => MapEntry<T, Color>(k, Color.lerp(c, b[k], t)!));
       }
     }
     return ColorSwatch<T>(Color.lerp(a, b, t)!.value, swatch);
