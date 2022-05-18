@@ -1214,9 +1214,12 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
               PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
                 () => PanGestureRecognizer(
                   debugOwner: this,
-                  // Selection handles can only be dragged by touch. Mouse
-                  // events on the handle will select the text behind.
-                  supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+                  // Mouse events select the text and do not drag the cursor.
+                  supportedDevices: <PointerDeviceKind>{
+                    PointerDeviceKind.touch,
+                    PointerDeviceKind.stylus,
+                    PointerDeviceKind.unknown,
+                  },
                 ),
                 (PanGestureRecognizer instance) {
                   instance
