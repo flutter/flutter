@@ -1451,13 +1451,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final ValueNotifier<bool> _ignorePointerNotifier = ValueNotifier<bool>(false);
 
   void _maybeUpdateIgnorePointer() {
-    bool _isTransitioning(Animation<double>? animation) {
+    bool isTransitioning(Animation<double>? animation) {
       return animation?.status == AnimationStatus.forward || animation?.status == AnimationStatus.reverse;
     }
     _ignorePointerNotifier.value = !isCurrent ||
         (navigator?.userGestureInProgress ?? false) ||
         (ignorePointerDuringTransitions &&
-            (_isTransitioning(animation) || _isTransitioning(secondaryAnimation)));
+            (isTransitioning(animation) || isTransitioning(secondaryAnimation)));
   }
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
