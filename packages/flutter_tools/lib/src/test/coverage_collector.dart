@@ -31,7 +31,8 @@ class CoverageCollector extends TestWatcher {
   /// Map of file path to coverage hit map for that file.
   Map<String, coverage.HitMap> _globalHitmap;
 
-  /// The names of the libraries to gather coverage for.
+  /// The names of the libraries to gather coverage for. If null, all libraries
+  /// will be accepted.
   Set<String> libraryNames;
 
   @override
@@ -263,6 +264,7 @@ Future<Map<String, dynamic>> _getAllCoverage(
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   bool libraryPredicate(String libraryName) {
+    if (libraryNames == null) return true;
     final uri = Uri.parse(libraryName);
     if (uri.scheme != 'package') return false;
     final scope = uri.path.split('/').first;
@@ -279,7 +281,7 @@ Future<Map<String, dynamic>> _getAllCoverage(
           <String>['Coverage'],
           forceCompile: true,
           reportLines: true,
-          libraryFilters: List<String>.from(
+          libraryFilters: libraryNames == null ? null : List<String>.from(
               libraryNames.map((name) => 'package:$name/')),
         );
       _buildCoverageMap({}, [sourceReport], coverage, true);

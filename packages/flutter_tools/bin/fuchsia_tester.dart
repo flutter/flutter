@@ -112,9 +112,13 @@ Future<void> run(List<String> args) async {
     Directory testDirectory;
     CoverageCollector collector;
     if (argResults['coverage'] as bool) {
+      // If we have a specified coverage directory then accept all libraries by
+      // setting libraryNames to null.
+      final libraryNames = coverageDirectory != null ? null :
+          {FlutterProject.current().manifest.appName};
       collector = CoverageCollector(
         packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
-        libraryNames: {FlutterProject.current().manifest.appName});
+        libraryNames: libraryNames);
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
       }
