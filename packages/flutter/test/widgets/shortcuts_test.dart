@@ -1626,7 +1626,7 @@ void main() {
 
     testWidgets('using a disposed token asserts', (WidgetTester tester) async {
       final ShortcutRegistry registry = ShortcutRegistry();
-      final ShortcutRegistryToken token = registry.addAll(<ShortcutActivator, Intent>{
+      final ShortcutRegistryEntry token = registry.addAll(<ShortcutActivator, Intent>{
         const SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
       });
       token.dispose();
@@ -1635,11 +1635,11 @@ void main() {
 
     testWidgets('setting duplicate bindings asserts', (WidgetTester tester) async {
       final ShortcutRegistry registry = ShortcutRegistry();
-      final ShortcutRegistryToken token = registry.addAll(<ShortcutActivator, Intent>{
+      final ShortcutRegistryEntry token = registry.addAll(<ShortcutActivator, Intent>{
         const SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
       });
       expect(() {
-        final ShortcutRegistryToken token2 = registry.addAll(const <ShortcutActivator, Intent>{
+        final ShortcutRegistryEntry token2 = registry.addAll(const <ShortcutActivator, Intent>{
           SingleActivator(LogicalKeyboardKey.keyA): ActivateIntent(),
         });
         token2.dispose();
@@ -1661,7 +1661,7 @@ class TestCallbackRegistration extends StatefulWidget {
 }
 
 class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
-  ShortcutRegistryToken? _registryToken;
+  ShortcutRegistryEntry? _registryToken;
 
   @override
   void didChangeDependencies() {
