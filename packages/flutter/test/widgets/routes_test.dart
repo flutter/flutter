@@ -1373,8 +1373,17 @@ void main() {
 
     testWidgets('does not ignore pointers when route on top of it pops', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Text('Home'),
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                // Use a transitions builder that will keep the underlying content
+                // partially visible during a transition
+                TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+              },
+            )
+          ),
+          home: const Text('Home'),
         ),
       );
 
