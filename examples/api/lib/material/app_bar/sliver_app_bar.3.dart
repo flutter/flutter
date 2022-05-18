@@ -11,12 +11,15 @@ void main() {
 }
 
 class AppBarLargeApp extends StatelessWidget {
-  const AppBarLargeApp({Key? key}) : super(key: key);
+  const AppBarLargeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750A4)),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: const Color(0xff6750A4)
+      ),
       home: Material(
         child: CustomScrollView(
           slivers: <Widget>[
@@ -34,7 +37,10 @@ class AppBarLargeApp extends StatelessWidget {
                   height: 1200,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8, 100, 8, 100),
-                    child: Text('Here be scrolling content...', style: Theme.of(context).textTheme.headlineSmall),
+                    child: Text(
+                      'Here be scrolling content...',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                   ),
                 ),
               ),

@@ -861,7 +861,9 @@ class _AppBarState extends State<AppBar> {
   }
 
   SystemUiOverlayStyle _systemOverlayStyleForBrightness(Brightness brightness, [Color? backgroundColor]) {
-    final SystemUiOverlayStyle style = brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;
+    final SystemUiOverlayStyle style = brightness == Brightness.dark
+      ? SystemUiOverlayStyle.light
+      : SystemUiOverlayStyle.dark;
     return style.copyWith(statusBarColor: backgroundColor);
   }
 
@@ -1523,16 +1525,16 @@ class SliverAppBar extends StatefulWidget {
        assert(stretchTriggerOffset > 0.0),
        assert(collapsedHeight == null || collapsedHeight >= toolbarHeight, 'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].');
 
-  /// Creates a Material Design app bar matching the 'Medium' type
-  /// that can be placed in a [CustomScrollView].
+  /// Creates a Material Design medium top app bar that can be placed
+  /// in a [CustomScrollView].
   ///
-  /// By default, it configures a [SliverAppBar] with the appropriate defaults
-  /// for the 'Medium' type Material 3 app bar. It starts fully expanded with
-  /// the title in an area underneath the main row of icons. When the
-  /// [CustomScrollView] is scrolled, this title will be scrolled under the
-  /// main row. When it is fully collapsed, a smaller version of the title
-  /// will fade in on the main row. The reverse will happen if it is expanded
-  /// again.
+  /// Returns a [SliverAppBar] configured with appropriate defaults
+  /// for a medium top app bar as defined in Material 3. It starts fully
+  /// expanded with the title in an area underneath the main row of icons.
+  /// When the [CustomScrollView] is scrolled, the title will be scrolled
+  /// under the main row. When it is fully collapsed, a smaller version of the
+  /// title will fade in on the main row. The reverse will happen if it is
+  /// expanded again.
   ///
   /// {@tool dartpad}
   /// This sample shows how to use [SliverAppBar.medium] in a [CustomScrollView].
@@ -1542,8 +1544,8 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [AppBar], for the 'Small' and 'Center-aligned' types of app bar.
-  ///   * [SliverAppBar.large], for the 'Large' type of app bar.
+  ///   * [AppBar], for a small or center-aligned top app bar.
+  ///   * [SliverAppBar.large], for a large top app bar.
   ///   * https://m3.material.io/components/top-app-bar/overview, the Material 3
   ///     app bar specification.
   factory SliverAppBar.medium({
@@ -1588,6 +1590,7 @@ class SliverAppBar extends StatefulWidget {
       actions: actions,
       flexibleSpace: flexibleSpace ?? _ScrollUnderFlexibleSpace(
         title: title,
+        variant: _ScrollUnderFlexibleVariant.medium,
         centerCollapsedTitle: centerTitle,
         primary: primary,
       ),
@@ -1621,16 +1624,16 @@ class SliverAppBar extends StatefulWidget {
     );
   }
 
-  /// Creates a Material Design app bar matching the 'Large' type
-  /// that can be placed in a [CustomScrollView].
+  /// Creates a Material Design large top app bar that can be placed
+  /// in a [CustomScrollView].
   ///
-  /// By default, it configures a [SliverAppBar] with the appropriate defaults
-  /// for the 'Large' type Material 3 app bar. It starts fully expanded with
-  /// the title in an area underneath the main row of icons. When the
-  /// [CustomScrollView] is scrolled, this title will be scrolled under the
-  /// main row. When it is fully collapsed, a smaller version of the title
-  /// will fade in on the main row. The reverse will happen if it is expanded
-  /// again.
+  /// Returns a [SliverAppBar] configured with appropriate defaults
+  /// for a large top app bar as defined in Material 3. It starts fully
+  /// expanded with the title in an area underneath the main row of icons.
+  /// When the [CustomScrollView] is scrolled, the title will be scrolled
+  /// under the main row. When it is fully collapsed, a smaller version of the
+  /// title will fade in on the main row. The reverse will happen if it is
+  /// expanded again.
   ///
   /// {@tool dartpad}
   /// This sample shows how to use [SliverAppBar.large] in a [CustomScrollView].
@@ -1640,8 +1643,8 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [AppBar], for the 'Small' and 'Center-aligned' types of app bar.
-  ///   * [SliverAppBar.medium], for the 'Medium' type of app bar.
+  ///   * [AppBar], for a small or center-aligned top app bar.
+  ///   * [SliverAppBar.medium], for a medium top app bar.
   ///   * https://m3.material.io/components/top-app-bar/overview, the Material 3
   ///     app bar specification.
   factory SliverAppBar.large({
@@ -2151,7 +2154,7 @@ enum _ScrollUnderFlexibleVariant { medium, large }
 class _ScrollUnderFlexibleSpace extends StatefulWidget {
   const _ScrollUnderFlexibleSpace({
     this.title,
-    this.variant = _ScrollUnderFlexibleVariant.medium,
+    required this.variant,
     this.centerCollapsedTitle,
     this.primary = true,
   });
