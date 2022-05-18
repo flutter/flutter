@@ -565,7 +565,7 @@ void main() {
   }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for #64245
-  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on all platforms', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse only on browsers', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final FocusNode focusNodeB = FocusNode();
     final Key key = UniqueKey();
@@ -592,7 +592,6 @@ void main() {
     );
 
     final TestGesture down1 = await tester.startGesture(tester.getCenter(find.byType(TextField).first), kind: PointerDeviceKind.mouse);
-    await tester.pump();
     await tester.pumpAndSettle();
     await down1.up();
     await down1.removePointer();
@@ -602,17 +601,15 @@ void main() {
 
     // Click on the container to not hit either text field.
     final TestGesture down2 = await tester.startGesture(tester.getCenter(find.byKey(key)), kind: PointerDeviceKind.mouse);
-    await tester.pump();
     await tester.pumpAndSettle();
     await down2.up();
     await down2.removePointer();
 
-    expect(focusNodeA.hasFocus, false);
+    expect(focusNodeA.hasFocus, !isBrowser);
     expect(focusNodeB.hasFocus, false);
 
     // Second text field can still gain focus.
     final TestGesture down3 = await tester.startGesture(tester.getCenter(find.byType(TextField).last), kind: PointerDeviceKind.mouse);
-    await tester.pump();
     await tester.pumpAndSettle();
     await down3.up();
     await down3.removePointer();
