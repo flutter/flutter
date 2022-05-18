@@ -1287,7 +1287,7 @@ class ShortcutRegistry with ChangeNotifier {
 /// shortcuts are no longer needed.
 ///
 /// To replace or update the shortcuts in the registry, call
-/// [ShortcutRegistry.replaceAll] and supply the token returned by
+/// [ShortcutRegistryToken.replaceAll] and supply the token returned by
 /// [ShortcutRegistry.addAll].
 ///
 /// To remove previously added shortcuts from the registry, call
