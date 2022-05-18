@@ -3327,7 +3327,6 @@ targets:
   - name: Mac macos_chrome_dev_mode
     bringup: true
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
