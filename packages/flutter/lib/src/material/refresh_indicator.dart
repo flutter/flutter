@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -409,7 +410,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
     if (_mode == _RefreshIndicatorMode.armed)
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
-    _positionController.value = newValue.clamp(0.0, 1.0); // this triggers various rebuilds
+    _positionController.value = clampDouble(newValue, 0.0, 1.0); // this triggers various rebuilds
     if (_mode == _RefreshIndicatorMode.drag && _valueColor.value!.alpha == 0xFF)
       _mode = _RefreshIndicatorMode.armed;
   }

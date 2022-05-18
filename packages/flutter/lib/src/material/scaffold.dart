@@ -993,7 +993,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
       if (extendBody) {
         bodyMaxHeight += bottomWidgetsHeight;
-        bodyMaxHeight = bodyMaxHeight.clamp(0.0, looseConstraints.maxHeight - contentTop);
+        bodyMaxHeight = clampDouble(bodyMaxHeight, 0.0, looseConstraints.maxHeight - contentTop);
         assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
       }
 
@@ -2366,7 +2366,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// [Scaffold.floatingActionButton].  This value must not be null.
   set _floatingActionButtonVisibilityValue(double newValue) {
     assert(newValue != null);
-    _floatingActionButtonVisibilityController.value = newValue.clamp(
+    _floatingActionButtonVisibilityController.value = clampDouble(newValue,
       _floatingActionButtonVisibilityController.lowerBound,
       _floatingActionButtonVisibilityController.upperBound,
     );

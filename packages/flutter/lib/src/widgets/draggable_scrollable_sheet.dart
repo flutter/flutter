@@ -541,7 +541,7 @@ class _DraggableSheetExtent {
   /// or a user drag.
   void updateSize(double newSize, BuildContext context) {
     assert(newSize != null);
-    _currentSize.value = newSize.clamp(minSize, maxSize);
+    _currentSize.value = clampDouble(newSize, minSize, maxSize);
     DraggableScrollableNotification(
       minExtent: minSize,
       maxExtent: maxSize,
@@ -580,7 +580,7 @@ class _DraggableSheetExtent {
       onSizeChanged: onSizeChanged,
       // Use the possibly updated initialSize if the user hasn't dragged yet.
       currentSize: ValueNotifier<double>(hasDragged
-          ? _currentSize.value.clamp(minSize, maxSize)
+          ? clampDouble(_currentSize.value, minSize, maxSize)
           : initialSize),
       hasDragged: hasDragged,
     );

@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show precisionErrorTolerance;
+import 'package:flutter/foundation.dart' show precisionErrorTolerance, clampDouble;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 
@@ -296,7 +296,7 @@ class PageMetrics extends FixedScrollMetrics {
 
   /// The current page displayed in the [PageView].
   double? get page {
-    return math.max(0.0, pixels.clamp(minScrollExtent, maxScrollExtent)) /
+    return math.max(0.0, clampDouble(pixels, minScrollExtent, maxScrollExtent)) /
            math.max(1.0, viewportDimension * viewportFraction);
   }
 
@@ -396,7 +396,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     );
     return !hasPixels || !hasContentDimensions
       ? null
-      : _cachedPage ?? getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+      : _cachedPage ?? getPageFromPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent), viewportDimension);
   }
 
   @override

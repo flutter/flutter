@@ -1079,7 +1079,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   double _discretize(double value) {
-    double result = value.clamp(0.0, 1.0);
+    double result = clampDouble(value, 0.0, 1.0);
     if (isDiscrete) {
       result = (result * divisions!).round() / divisions!;
     }
@@ -1092,7 +1092,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   void _startInteraction(Offset globalPosition) {
     _state.showValueIndicator();
-    final double tapValue = _getValueFromGlobalPosition(globalPosition).clamp(0.0, 1.0);
+    final double tapValue = clampDouble(_getValueFromGlobalPosition(globalPosition), 0.0, 1.0);
     _lastThumbSelection = sliderTheme.thumbSelector!(textDirection, values, tapValue, _thumbSize, size, 0);
 
     if (_lastThumbSelection != null) {
@@ -1613,11 +1613,11 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   double get _decreasedStartValue {
-    return (values.start - _semanticActionUnit).clamp(0.0, 1.0);
+    return clampDouble(values.start - _semanticActionUnit, 0.0, 1.0);
   }
 
   double get _increasedEndValue {
-    return (values.end + _semanticActionUnit).clamp(0.0, 1.0);
+    return clampDouble(values.end + _semanticActionUnit, 0.0, 1.0);
   }
 
   double get _decreasedEndValue {

@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -434,7 +435,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double _currentDragValue = 0.0;
 
   double get _discretizedCurrentDragValue {
-    double dragValue = _currentDragValue.clamp(0.0, 1.0);
+    double dragValue = clampDouble(_currentDragValue, 0.0, 1.0);
     if (divisions != null)
       dragValue = (dragValue * divisions!).round() / divisions!;
     return dragValue;
@@ -554,8 +555,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
       config.value = '${(value * 100).round()}%';
-      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.increasedValue = '${(clampDouble(value + _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${(clampDouble(value - _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
     }
   }
 
@@ -563,11 +564,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   void _increaseAction() {
     if (isInteractive)
-      onChanged!((value + _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged!(clampDouble(value + _semanticActionUnit, 0.0, 1.0));
   }
 
   void _decreaseAction() {
     if (isInteractive)
-      onChanged!((value - _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0));
   }
 }
