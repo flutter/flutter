@@ -3324,13 +3324,13 @@ targets:
       task_name: large_image_changer_perf_ios
     scheduler: luci
 
-  - name: Mac_ios macos_chrome_dev_mode
+  - name: Mac macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly"]
       task_name: macos_chrome_dev_mode
     scheduler: luci
 
