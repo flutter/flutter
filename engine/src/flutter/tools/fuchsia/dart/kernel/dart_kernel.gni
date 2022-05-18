@@ -32,6 +32,7 @@ _gen_kernel_path =
     get_label_info(_gen_kernel_label, "root_out_dir") + "/dart-tools/gen_kernel"
 
 flutter_platform_name = "flutter_runner"
+dart_platform_name = "dart_runner"
 
 # Converts the kernel manifest file from fini format to JSON format and
 # registers the metadata for the fuchsia_package to pick up.
@@ -211,6 +212,9 @@ template("dart_kernel") {
         "//flutter/shell/platform/fuchsia/flutter/kernel:kernel_platform_files",
       ]
       _platform_path = "$root_out_dir/flutter_runner_patched_sdk"
+    } else if (invoker.platform_name == dart_platform_name) {
+      _kernel_deps += [ "//flutter/shell/platform/fuchsia/dart_runner/kernel:kernel_platform_files" ]
+      _platform_path = "$root_out_dir/dart_runner_patched_sdk"
     } else {
       assert(false,
              "platform_name must be either dart_runner or flutter_runner")
