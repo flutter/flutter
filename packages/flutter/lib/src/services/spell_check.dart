@@ -32,7 +32,21 @@ class SpellCheckerSuggestionSpan {
         this.end = end;
         this.replacementSuggestions = replacementSuggestions;
     }
-}
+
+// TODO(camillesimon): Fix this to avoid manual equality checks
+//     @override
+//     bool operator ==(Object other) {
+//         if (identical(this, other))
+//             return true;
+//         return other is SpellCheckerSuggestionSpan
+//             && other.start == start
+//             && other.end == end
+//             && other.replacementSuggestions == replacementSuggestions;
+//     }
+
+//     @override
+//     int get hashCode => Object.hash(start, end, replacementSuggestions);
+// }
 
 /// Creates a configuration that controls how spell check is handled in a subtree of text input related widgets.
 class SpellCheckConfiguration {
@@ -194,7 +208,74 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
            text_pointer += 1;
        }
      return null;
-   }     
+   }
+
+  // Temporary way to find if two results are equivalent since != not working as expected
+   bool spansEqual(List<SpellCheckerSuggestionSpan> oldResults, List<SpellCheckerSuggestionSpan> newResults) {
+       if (oldResults.length != newResults.length) {
+           return false;
+       }
+
+       int span_pointer = 0;
+
+       while (span_pointer < oldResults.length) {
+          SpellCheckerSuggestionSpan oldSpan = oldResults[span_pointer];
+          SpellCheckerSuggestionSpan newSpan = newResults[span_pointer];
+          
+          if (oldSpan.start != newSpan.start || oldSpan.end != newSpan.end) {
+              return false;
+          }
+
+          span_pointer += 1;
+       }
+
+       return true;
+   }
+
+   // Temporary way to merge two resutls since set union is not working as expected
+   List<SpellCheckerSuggestionSpan> mergeResults(List<SpellCheckerSuggestionSpan> oldResults, List<SpellCheckerSuggestionSpan> newResults) {
+       List<SpellCheckerSuggestionSpan> mergedResults = <SpellCheckerSuggestionSpan>[];;
+       int old_span_pointer = 0;
+       int new_span_pointer = 0;
+
+       while (old_span_pointer < oldResults.length && new_span_pointer < newResults.length) {
+           SpellCheckerSuggestionSpan oldSpan = oldResults[old_span_pointer];
+           SpellCheckerSuggestionSpan newSpan = newResults[new_span_pointer];
+
+           if (oldSpan.start == newSpan.start) {
+              if (!mergedResults.contains(oldSpan)){
+                mergedResults.add(oldSpan);
+               }
+
+              old_span_pointer +=1;
+              new_span_pointer +=1;
+           } else {
+               if (oldSpan.start < newSpan.start) { // simplifying assumption that spans do not overlap for now
+                if (!mergedResults.contains(oldSpan)){
+                    mergedResults.add(oldSpan);
+                }
+                old_span_pointer +=1;
+               } else {
+                  if (!mergedResults.contains(newSpan)) {
+                        mergedResults.add(newSpan);
+                   }
+                  new_span_pointer += 1;
+               }
+           }
+       }
+
+        while (old_span_pointer < oldResults.length) {
+            mergedResults.add(oldResults[old_span_pointer]);
+            old_span_pointer +=1;
+        }
+
+        while (new_span_pointer < newResults.length) {
+            mergedResults.add(newResults[new_span_pointer]);ß
+            new_span_pointer += 1;
+        }
+
+    return mergedResults;
+   }
 
   @override
   TextSpan buildTextSpanWithSpellCheckSuggestions(
@@ -207,40 +288,13 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
       TextStyle misspelledStyle;
 
       if (spellCheckResultsText != value.text) {
-        spellCheckResults = correctSpellCheckResults(value.text, spellCheckResultsText!, rawSpellCheckResults!); /// so if the text is the same, we want to merge results. need to write custom method for this. I probably should define equals method in spellcheckersuggestionspan
-      } else if (reusableText != null && reusableText == spellCheckResultsText && reusableSpellCheckResults != null && rawSpellCheckResults != null &&  reusableSpellCheckResults! != rawSpellCheckResults!) { // this is saying true when its not true
-      print(reusableSpellCheckResults! != rawSpellCheckResults!);
-          print("CORRECTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-          Set<SpellCheckerSuggestionSpan> a = reusableSpellCheckResults!.toSet();
-          Set<SpellCheckerSuggestionSpan> b = rawSpellCheckResults.toSet();
-          Set<SpellCheckerSuggestionSpan> c = a.union(b);
-          print(a);
-          a.forEach((SpellCheckerSuggestionSpan s) {
-              print("${s.start}.${s.end}.${s.replacementSuggestions}");
-          });
-          print(b);
-                    b.forEach((SpellCheckerSuggestionSpan s) {
-              print("${s.start}.${s.end}.${s.replacementSuggestions}");
-          });
-          print(c);
-                    c.forEach((SpellCheckerSuggestionSpan s) {
-              print("${s.start}.${s.end}.${s.replacementSuggestions}");
-          });
-          print(c.toList());
-          spellCheckResults = c.toList();
+        spellCheckResults = correctSpellCheckResults(value.text, spellCheckResultsText!, rawSpellCheckResults!);
+      } else if (reusableText != null && reusableText == spellCheckResultsText && reusableSpellCheckResults != null && rawSpellCheckResults != null && !spansEqual(reusableSpellCheckResults!, rawSpellCheckResults!)) {
+          spellCheckResults = mergeResults(reusableSpellCheckResults!, rawSpellCheckResults!);
       } else {
         spellCheckResults = rawSpellCheckResults;
       }
-      if (spellCheckResults != null) {
-      print("_________________________________________________________________________________________________________________________________________________________________");
-     spellCheckResults!.forEach((SpellCheckerSuggestionSpan span) {
-         print(span.start);
-         print(span.end);
-         print(span.replacementSuggestions);
-         print("***************************************************************");
-     });
-    print("_________________________________________________________________________________________________________________________________________________________________");
-      }
+
       reusableSpellCheckResults = spellCheckResults;
       reusableText = value.text;
 

@@ -28,7 +28,7 @@ class MaterialSpellCheckService implements SpellCheckService {
     List<dynamic> spellCheckResults = <dynamic>[];
     final List<dynamic> rawResults;
 
-    //TODO: handle exception
+    //TODO(camillesimon): properly handle exception
     try {
     rawResults = await spellCheckChannel.invokeMethod(
         'SpellCheck.initiateSpellCheck',
