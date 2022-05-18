@@ -42,7 +42,7 @@ void main() {
 
     final Map<String, Object> result = await collect(
       null,
-      (String predicate) => true,
+      {'foo'},
       connector: (Uri uri) async {
         return fakeVmServiceHost.vmService;
       },
@@ -75,7 +75,8 @@ void main() {
             'isolateId': '1',
           },
           jsonResponse: ScriptList(scripts: <ScriptRef>[
-            ScriptRef(uri: 'foo.dart', id: '1'),
+            ScriptRef(uri: 'package:foo/foo.dart', id: '1'),
+            ScriptRef(uri: 'package:bar/bar.dart', id: '2'),
           ]).toJson(),
         ),
         FakeVmServiceRequest(
@@ -101,7 +102,7 @@ void main() {
             ],
             scripts: <ScriptRef>[
               ScriptRef(
-                uri: 'foo.dart',
+                uri: 'package:foo/foo.dart',
                 id: '1',
               ),
             ],
@@ -114,7 +115,7 @@ void main() {
             'objectId': '1',
           },
           jsonResponse: Script(
-            uri: 'foo.dart',
+            uri: 'package:foo/foo.dart',
             id: '1',
             library: LibraryRef(name: '', id: '1111', uri: 'foo.dart'),
             tokenPosTable: <List<int>>[],
@@ -125,7 +126,7 @@ void main() {
 
     final Map<String, Object> result = await collect(
       null,
-      (String predicate) => true,
+      {'foo'},
       connector: (Uri uri) async {
         return fakeVmServiceHost.vmService;
       },
@@ -135,12 +136,12 @@ void main() {
       'type': 'CodeCoverage',
       'coverage': <Object>[
         <String, Object>{
-          'source': 'foo.dart',
+          'source': 'package:foo/foo.dart',
           'script': <String, Object>{
             'type': '@Script',
             'fixedId': true,
-            'id': 'libraries/1/scripts/foo.dart',
-            'uri': 'foo.dart',
+            'id': 'libraries/1/scripts/package%3Afoo%2Ffoo.dart',
+            'uri': 'package:foo/foo.dart',
             '_kind': 'library',
           },
           'hits': <Object>[],
@@ -173,7 +174,8 @@ void main() {
             'isolateId': '1',
           },
           jsonResponse: ScriptList(scripts: <ScriptRef>[
-            ScriptRef(uri: 'foo.dart', id: '1'),
+            ScriptRef(uri: 'package:foo/foo.dart', id: '1'),
+            ScriptRef(uri: 'package:bar/bar.dart', id: '2'),
           ]).toJson(),
         ),
         FakeVmServiceRequest(
@@ -200,7 +202,7 @@ void main() {
             ],
             scripts: <ScriptRef>[
               ScriptRef(
-                uri: 'foo.dart',
+                uri: 'package:foo/foo.dart',
                 id: '1',
               ),
             ],
@@ -211,7 +213,7 @@ void main() {
 
     final Map<String, Object> result = await collect(
       null,
-      (String predicate) => true,
+      {'foo'},
       connector: (Uri uri) async {
         return fakeVmServiceHost.vmService;
       },
@@ -221,12 +223,89 @@ void main() {
       'type': 'CodeCoverage',
       'coverage': <Object>[
         <String, Object>{
-          'source': 'foo.dart',
+          'source': 'package:foo/foo.dart',
           'script': <String, Object>{
             'type': '@Script',
             'fixedId': true,
-            'id': 'libraries/1/scripts/foo.dart',
-            'uri': 'foo.dart',
+            'id': 'libraries/1/scripts/package%3Afoo%2Ffoo.dart',
+            'uri': 'package:foo/foo.dart',
+            '_kind': 'library',
+          },
+          'hits': <Object>[1, 1, 3, 1, 2, 0],
+        },
+      ],
+    });
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('Coverage collector with libraryFilters', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 57).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: (VM.parse(<String, Object>{})
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1',
+              }),
+            ]
+          ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getSourceReport',
+          args: <String, Object>{
+            'isolateId': '1',
+            'reports': <Object>['Coverage'],
+            'forceCompile': true,
+            'reportLines': true,
+            'libraryFilters': <Object>['package:foo/'],
+          },
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[
+              SourceReportRange(
+                scriptIndex: 0,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(
+                  hits: <int>[1, 3],
+                  misses: <int>[2],
+                ),
+              ),
+            ],
+            scripts: <ScriptRef>[
+              ScriptRef(
+                uri: 'package:foo/foo.dart',
+                id: '1',
+              ),
+            ],
+          ).toJson(),
+        ),
+      ],
+    );
+
+    final Map<String, Object> result = await collect(
+      null,
+      {'foo'},
+      connector: (Uri uri) async {
+        return fakeVmServiceHost.vmService;
+      },
+    );
+
+    expect(result, <String, Object>{
+      'type': 'CodeCoverage',
+      'coverage': <Object>[
+        <String, Object>{
+          'source': 'package:foo/foo.dart',
+          'script': <String, Object>{
+            'type': '@Script',
+            'fixedId': true,
+            'id': 'libraries/1/scripts/package%3Afoo%2Ffoo.dart',
+            'uri': 'package:foo/foo.dart',
             '_kind': 'library',
           },
           'hits': <Object>[1, 1, 3, 1, 2, 0],

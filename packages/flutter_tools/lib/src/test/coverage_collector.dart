@@ -19,7 +19,7 @@ import 'watcher.dart';
 
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryPredicate, this.verbose = true, @required this.packagesPath});
+  CoverageCollector({this.libraryNames, this.verbose = true, @required this.packagesPath});
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -31,9 +31,8 @@ class CoverageCollector extends TestWatcher {
   /// Map of file path to coverage hit map for that file.
   Map<String, coverage.HitMap> _globalHitmap;
 
-  /// Predicate function that returns true if the specified library URI should
-  /// be included in the computed coverage.
-  bool Function(String) libraryPredicate;
+  /// The names of the libraries to gather coverage for.
+  Set<String> libraryNames;
 
   @override
   Future<void> handleFinishedTest(TestDevice testDevice) async {
@@ -83,7 +82,7 @@ class CoverageCollector extends TestWatcher {
   Future<void> collectCoverageIsolate(Uri observatoryUri) async {
     assert(observatoryUri != null);
     _logMessage('collecting coverage data from $observatoryUri...');
-    final Map<String, dynamic> data = await collect(observatoryUri, libraryPredicate);
+    final Map<String, dynamic> data = await collect(observatoryUri, libraryNames);
     if (data == null) {
       throw Exception('Failed to collect coverage.');
     }
@@ -121,7 +120,7 @@ class CoverageCollector extends TestWatcher {
     final Future<void> collectionComplete = testDevice.observatoryUri
       .then((Uri observatoryUri) {
         _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
-        return collect(observatoryUri, libraryPredicate)
+        return collect(observatoryUri, libraryNames)
           .then<void>((Map<String, dynamic> result) {
             if (result == null) {
               throw Exception('Failed to collect coverage.');
@@ -237,77 +236,101 @@ Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
       serviceUri, compression: CompressionOptions.compressionOff, logger: globals.logger,);
 }
 
-Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
+Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String> libraryNames, {
   bool waitPaused = false,
   String debugName,
   Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
   @visibleForTesting bool forceSequential = false,
 }) async {
   final FlutterVmService vmService = await connector(serviceUri);
-  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate, forceSequential);
+  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryNames, forceSequential);
   await vmService.dispose();
   return result;
 }
 
+bool _versionCheck(vm_service.Version version, int minMajor, int minMinor) {
+  return version.major > minMajor || (version.major == minMajor && version.minor >= minMinor);
+}
+
 Future<Map<String, dynamic>> _getAllCoverage(
   vm_service.VmService service,
-  bool Function(String) libraryPredicate,
+  Set<String> libraryNames,
   bool forceSequential,
 ) async {
   final vm_service.Version version = await service.getVersion();
-  final bool reportLines = (version.major == 3 && version.minor >= 51) || version.major > 3;
+  final reportLines = _versionCheck(version, 3, 51);
+  final libraryFilters = _versionCheck(version, 3, 57);
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
+  bool libraryPredicate(String libraryName) {
+    final uri = Uri.parse(libraryName);
+    if (uri.scheme != 'package') return false;
+    final scope = uri.path.split('/').first;
+    return libraryNames.contains(scope);
+  };
   for (final vm_service.IsolateRef isolateRef in vm.isolates) {
     if (isolateRef.isSystemIsolate) {
       continue;
     }
-    vm_service.ScriptList scriptList;
-    try {
-      scriptList = await service.getScripts(isolateRef.id);
-    } on vm_service.SentinelException {
-      continue;
-    }
-
-    final List<Future<void>> futures = <Future<void>>[];
-    final Map<String, vm_service.Script> scripts = <String, vm_service.Script>{};
-    final Map<String, vm_service.SourceReport> sourceReports = <String, vm_service.SourceReport>{};
-    // For each ScriptRef loaded into the VM, load the corresponding Script and
-    // SourceReport object.
-
-    for (final vm_service.ScriptRef script in scriptList.scripts) {
-      final String libraryUri = script.uri;
-      if (!libraryPredicate(libraryUri)) {
+    if (libraryFilters) {
+      assert(reportLines);
+      final vm_service.SourceReport sourceReport = await service.getSourceReport(
+          isolateRef.id,
+          <String>['Coverage'],
+          forceCompile: true,
+          reportLines: true,
+          libraryFilters: List<String>.from(
+              libraryNames.map((name) => 'package:$name/')),
+        );
+      _buildCoverageMap({}, [sourceReport], coverage, true);
+    } else {
+      vm_service.ScriptList scriptList;
+      try {
+        scriptList = await service.getScripts(isolateRef.id);
+      } on vm_service.SentinelException {
         continue;
       }
-      final String scriptId = script.id;
-      final Future<void> getSourceReport = service.getSourceReport(
-        isolateRef.id,
-        <String>['Coverage'],
-        scriptId: scriptId,
-        forceCompile: true,
-        reportLines: reportLines ? true : null,
-      )
-      .then((vm_service.SourceReport report) {
-        sourceReports[scriptId] = report;
-      });
-      if (forceSequential) {
-        await null;
-      }
-      futures.add(getSourceReport);
-      if (reportLines) {
-        continue;
-      }
-      final Future<void> getObject = service
-        .getObject(isolateRef.id, scriptId)
-        .then((vm_service.Obj response) {
-          final vm_service.Script script = response as vm_service.Script;
-          scripts[scriptId] = script;
+
+      final List<Future<void>> futures = <Future<void>>[];
+      final Map<String, vm_service.Script> scripts = <String, vm_service.Script>{};
+      final List<vm_service.SourceReport> sourceReports = <vm_service.SourceReport>[];
+
+      // For each ScriptRef loaded into the VM, load the corresponding Script
+      // and SourceReport object.
+      for (final vm_service.ScriptRef script in scriptList.scripts) {
+        final String libraryUri = script.uri;
+        if (!libraryPredicate(libraryUri)) {
+          continue;
+        }
+        final String scriptId = script.id;
+        final Future<void> getSourceReport = service.getSourceReport(
+          isolateRef.id,
+          <String>['Coverage'],
+          scriptId: scriptId,
+          forceCompile: true,
+          reportLines: reportLines ? true : null,
+        )
+        .then((vm_service.SourceReport report) {
+          sourceReports.add(report);
         });
-      futures.add(getObject);
+        if (forceSequential) {
+          await null;
+        }
+        futures.add(getSourceReport);
+        if (reportLines) {
+          continue;
+        }
+        final Future<void> getObject = service
+          .getObject(isolateRef.id, scriptId)
+          .then((vm_service.Obj response) {
+            final vm_service.Script script = response as vm_service.Script;
+            scripts[scriptId] = script;
+          });
+        futures.add(getObject);
+      }
+      await Future.wait(futures);
+      _buildCoverageMap(scripts, sourceReports, coverage, reportLines);
     }
-    await Future.wait(futures);
-    _buildCoverageMap(scripts, sourceReports, coverage, reportLines);
   }
   return <String, dynamic>{'type': 'CodeCoverage', 'coverage': coverage};
 }
@@ -315,13 +338,12 @@ Future<Map<String, dynamic>> _getAllCoverage(
 // Build a hitmap of Uri -> Line -> Hit Count for each script object.
 void _buildCoverageMap(
   Map<String, vm_service.Script> scripts,
-  Map<String, vm_service.SourceReport> sourceReports,
+  List<vm_service.SourceReport> sourceReports,
   List<Map<String, dynamic>> coverage,
   bool reportLines,
 ) {
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
-  for (final String scriptId in sourceReports.keys) {
-    final vm_service.SourceReport sourceReport = sourceReports[scriptId];
+  for (final vm_service.SourceReport sourceReport  in sourceReports) {
     for (final vm_service.SourceReportRange range in sourceReport.ranges) {
       final vm_service.SourceReportCoverage coverage = range.coverage;
       // Coverage reports may sometimes be null for a Script.
