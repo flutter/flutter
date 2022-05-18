@@ -2223,6 +2223,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       tags: >
         ["framework","hostonly"]
       validation: analyze
@@ -2234,6 +2235,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       dependencies: >-
         [
           {"dependency": "goldctl"},
