@@ -3192,14 +3192,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   late int _depth;
 
   static int _sort(Element a, Element b) {
-    if (a.depth < b.depth)
-      return -1;
-    if (b.depth < a.depth)
-      return 1;
-    if (b.dirty && !a.dirty)
-      return -1;
-    if (a.dirty && !b.dirty)
-      return 1;
+    final int diff = a.depth - b.depth;
+    if (diff != 0) {
+      return diff;
+    }
+    if (a.dirty ^ b.dirty) {
+      return b.dirty ? -1 : 1;
+    }
     return 0;
   }
 
