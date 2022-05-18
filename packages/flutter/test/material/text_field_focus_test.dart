@@ -666,54 +666,6 @@ void main() {
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
   });
-
-  // Regression test for #64245
-  testWidgets('A Focused text-field will not lose focus when tapping outside of the widget on native platforms', (WidgetTester tester) async {
-    final FocusNode focusNodeA = FocusNode();
-    final FocusNode focusNodeB = FocusNode();
-    final Key key = UniqueKey();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: ListView(
-            children: <Widget>[
-              TextField(
-                focusNode: focusNodeA,
-              ),
-              Container(
-                key: key,
-                height: 200,
-              ),
-              TextField(
-                focusNode: focusNodeB,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    await tester.tapAt(tester.getCenter(find.byType(TextField).first));
-    await tester.pump();
-
-    expect(focusNodeA.hasFocus, true);
-    expect(focusNodeB.hasFocus, false);
-
-    // Tap on the container to not hit either text field.
-    await tester.tapAt(tester.getCenter(find.byKey(key)));
-    await tester.pump();
-
-    expect(focusNodeA.hasFocus, false);
-    expect(focusNodeB.hasFocus, false);
-
-    // Second text field can still gain focus.
-    await tester.tapAt(tester.getCenter(find.byType(TextField).last));
-    await tester.pump();
-
-    expect(focusNodeA.hasFocus, false);
-    expect(focusNodeB.hasFocus, true);
-  }, skip: isBrowser);  // [intended]
 }
 
 class _APage extends Page<void> {
