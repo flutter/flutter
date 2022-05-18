@@ -46,7 +46,7 @@ class SpellCheckerSuggestionSpan {
 
 //     @override
 //     int get hashCode => Object.hash(start, end, replacementSuggestions);
-// }
+}
 
 /// Creates a configuration that controls how spell check is handled in a subtree of text input related widgets.
 class SpellCheckConfiguration {
@@ -270,7 +270,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
         }
 
         while (new_span_pointer < newResults.length) {
-            mergedResults.add(newResults[new_span_pointer]);ß
+            mergedResults.add(newResults[new_span_pointer]);
             new_span_pointer += 1;
         }
 
