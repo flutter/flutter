@@ -280,18 +280,21 @@ Future<vm_service.VmService> setUpVmService(
 
     vmService.onGCEvent.listen((vm_service.Event event) {
       try {
-        final String? isolate = event.json?['isolate']?['name'];
+        final String? isolateName = event.json?['isolate']?['name'];
+        final String? isolateId = event.json?['isolate']?['id'];
 
         final bool newGC = event.json?.containsKey('new') == true;
-        final String? newType = event.json?['new']?['type'];
-        final String? newVMName = event.json?['new']?['vmName'];
-
         final bool oldGC = event.json?.containsKey('old') == true;
-        final String? oldType = event.json?['old']?['type'];
-        final String? oldVMName = event.json?['old']?['vmName'];
-        
 
-        logger.printStatus('${DateTime.now()} $isolate: ${newGC ? 'new:$newType:$newVMName':'-' },${oldGC ? 'old:$oldType:$oldVMName':'-' }');
+        if (isolateName == 'main'){
+          // Dropped async call.          
+          vmService.callServiceExtension(  
+            'ext.app-gc-event',
+            isolateId: isolateId,
+            args:  <String, dynamic>{if (oldGC) 'old': true, if (newGC) 'new': true},
+          );  
+        }
+      // ignore: avoid_catches_without_on_clauses
       } catch (e, stack) {
         logger.printStatus(e.toString());
         logger.printStatus(stack.toString());
