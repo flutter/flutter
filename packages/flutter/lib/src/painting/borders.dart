@@ -21,7 +21,7 @@ enum BorderStyle {
   // if you add more, think about how they will lerp
 }
 
-/// The relative position of the stroke on a [BorderSide] in a [Border].
+/// The relative position of the stroke on a [BorderSide] in a [Border] or [OutlinedBorder].
 /// When set to [inside], the stroke is drawn completely inside the widget.
 /// For [center] and [outside], a property such as [Container.clipBehavior]
 /// can be used in an outside widget to clip it.
