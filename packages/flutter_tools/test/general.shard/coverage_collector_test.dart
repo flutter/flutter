@@ -42,7 +42,7 @@ void main() {
 
     final Map<String, Object> result = await collect(
       null,
-      {'foo'},
+      <String>{'foo'},
       connector: (Uri uri) async {
         return fakeVmServiceHost.vmService;
       },
@@ -114,7 +114,7 @@ void main() {
 
     final Map<String, Object> result = await collect(
       null,
-      {'foo'},
+      <String>{'foo'},
       connector: (Uri uri) async {
         return fakeVmServiceHost.vmService;
       },
@@ -319,7 +319,7 @@ void main() {
 
     final Map<String, Object> result = await collect(
       null,
-      {'foo'},
+      <String>{'foo'},
       connector: (Uri uri) async {
         return fakeVmServiceHost.vmService;
       },

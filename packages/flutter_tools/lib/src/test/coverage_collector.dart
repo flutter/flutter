@@ -259,12 +259,16 @@ Future<Map<String, dynamic>> _getAllCoverage(
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   bool libraryPredicate(String libraryName) {
-    if (libraryNames == null) return true;
-    final uri = Uri.parse(libraryName);
-    if (uri.scheme != 'package') return false;
-    final scope = uri.path.split('/').first;
+    if (libraryNames == null) {
+      return true;
+    }
+    final Uri uri = Uri.parse(libraryName);
+    if (uri.scheme != 'package') {
+      return false;
+    }
+    final String scope = uri.path.split('/').first;
     return libraryNames.contains(scope);
-  };
+  }
   for (final vm_service.IsolateRef isolateRef in vm.isolates) {
     if (isolateRef.isSystemIsolate) {
       continue;
@@ -276,9 +280,13 @@ Future<Map<String, dynamic>> _getAllCoverage(
           forceCompile: true,
           reportLines: true,
           libraryFilters: libraryNames == null ? null : List<String>.from(
-              libraryNames.map((name) => 'package:$name/')),
+              libraryNames.map((String name) => 'package:$name/')),
         );
-      _buildCoverageMap({}, [sourceReport], coverage);
+      _buildCoverageMap(
+          <String, vm_service.Script>{},
+          <vm_service.SourceReport>[sourceReport],
+          coverage,
+        );
     } else {
       vm_service.ScriptList scriptList;
       try {

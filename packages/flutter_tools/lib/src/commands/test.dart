@@ -380,7 +380,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
         verbose: !machine,
-        libraryNames: {projectName},
+        libraryNames: <String>{projectName},
         packagesPath: buildInfo.packagesPath
       );
     }
