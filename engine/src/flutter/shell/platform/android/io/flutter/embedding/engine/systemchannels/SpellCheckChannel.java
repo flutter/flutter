@@ -25,13 +25,13 @@ import org.json.JSONException;
  * fetch spell check results for the specified text.
  *
  * <p>Once the spell check results are received by the {@link
- * io.flutter.plugin.editing.SpellCheckPlugin}, it will send to the framework the message {@code
- * SpellCheck.updateSpellCheckResults} with the {@code ArrayList<String>} of encoded spell check
- * results (see {@link
- * io.flutter.plugin.editing.SpellCheckPlugin#onGetSentenceSuggestions(SentenceSuggestionsInfo[])}
- * for details) with the text that these results correspond to appeneded to the front as an
- * argument. For example, the argument may look like: {@code {"Hello, wrold!",
- * "7.11.world\nword\nold"}}.
+ * io.flutter.plugin.editing.SpellCheckPlugin}, it will send back to the framework the {@code
+ * ArrayList<String>} of encoded spell check results (see {@link
+ * io.flutter.plugin.editing.SpellCheckPlugin#onGetSentenceSuggestions} for details) with the text
+ * that these results correspond to appended to the front as an argument. For example, the argument
+ * may look like: {@code {"Hello, wrold!", "7.11.world\nword\nold"}}. The {@link
+ * io.flutter.plugin.editing.SpellCheckPlugin} only handles one request to fetch spell check results
+ * at a time; see {@link io.flutter.plugin.editing.SpellCheckPlugin#initiateSpellCheck} for details.
  *
  * <p>{@link io.flutter.plugin.editing.SpellCheckPlugin} implements {@link SpellCheckMethodHandler}
  * to initiate spell check. Implement {@link SpellCheckMethodHandler} to respond to spell check
