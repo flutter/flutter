@@ -1624,18 +1624,13 @@ void main() {
       }));
     });
 
-    testWidgets('using a disposed or foreign token asserts', (WidgetTester tester) async {
+    testWidgets('using a disposed token asserts', (WidgetTester tester) async {
       final ShortcutRegistry registry = ShortcutRegistry();
       final ShortcutRegistryToken token = registry.addAll(<ShortcutActivator, Intent>{
         const SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
       });
       token.dispose();
-      final ShortcutRegistry registry2 = ShortcutRegistry();
-      final ShortcutRegistryToken token2 = registry2.addAll(<ShortcutActivator, Intent>{
-        const SingleActivator(LogicalKeyboardKey.keyB): DoNothingIntent(),
-      });
-      expect(() {registry.replaceAll(token, <ShortcutActivator, Intent>{}); }, throwsAssertionError);
-      expect(() {registry.replaceAll(token2, <ShortcutActivator, Intent>{}); }, throwsAssertionError);
+      expect(() {token.replaceAll(<ShortcutActivator, Intent>{}); }, throwsFlutterError);
     });
 
     testWidgets('setting duplicate bindings asserts', (WidgetTester tester) async {

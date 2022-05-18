@@ -12,7 +12,6 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'platform_menu_bar.dart';
-import 'transitions.dart';
 
 /// A set of [KeyboardKey]s that can be used as the keys in a [Map].
 ///
@@ -677,6 +676,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
     if (!mapEquals<ShortcutActivator, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       _indexedShortcutsCache = null;
+      notifyListeners();
     }
   }
 
@@ -1080,6 +1080,23 @@ class ShortcutRegistryToken {
   /// The [ShortcutRegistry] that this token was issued by.
   final ShortcutRegistry registry;
 
+  /// Replaces the given shortcut bindings in the [ShortcutRegistry] that this
+  /// token was created from.
+  ///
+  /// This method will assert in debug mode if another [ShortcutRegistryToken]
+  /// exists (i.e. hasn't been disposed of) that has already added a given
+  /// shortcut.
+  ///
+  /// It will also assert if this token has already been disposed.
+  ///
+  /// If two equivalent, but different, [ShortcutActivator]s are added, all of
+  /// them will be executed when triggered. For example, if both
+  /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
+  /// are added, then both will be executed when an "a" key is pressed.
+  void replaceAll(Map<ShortcutActivator, Intent> value) {
+    registry._replaceAll(this, value);
+  }
+
   /// Called when the token is no longer needed.
   ///
   /// Call this will remove all shortcuts associated with this
@@ -1100,7 +1117,7 @@ class ShortcutRegistryToken {
 class ShortcutRegistry with ChangeNotifier {
   /// Gets the combined shortcut bindings from all contexts that are registered
   /// with this [ShortcutRegistry], in addition to the bindings passed to
-  /// [ShortcutRegistry.ShortcutRegistry].
+  /// [ShortcutRegistry].
   ///
   /// Listeners will be notified when the value returned by this getter changes.
   ///
@@ -1122,45 +1139,27 @@ class ShortcutRegistry with ChangeNotifier {
   /// these shortcuts are no longer needed. This will remove them from the
   /// registry, and invalidate the token.
   ///
-  /// This method will assert in debug mode if another token exists (i.e. hasn't been
-  /// disposed of) has already added a given shortcut.
+  /// This method will assert in debug mode if another token exists (i.e. hasn't
+  /// been disposed of) that has already added a given shortcut.
   ///
   /// If two equivalent, but different, [ShortcutActivator]s are added, all of
   /// them will be executed when triggered. For example, if both
   /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
   /// are added, then both will be executed when an "a" key is pressed.
+  ///
+  /// See also:
+  ///
+  ///  * [ShortcutRegistryToken.replaceAll], a function used to replace the set of
+  ///    shortcuts associated with a particular token.
+  ///  * [ShortcutRegistryToken.dispose], a function used to remove the set of
+  ///    shortcuts associated with a particular token.
   ShortcutRegistryToken addAll(Map<ShortcutActivator, Intent> value) {
     assert(debugAssertNotDisposed());
     final ShortcutRegistryToken token = ShortcutRegistryToken._(this);
     _tokenShortcuts[token] = value;
-    _debugCheckForDuplicates();
+    assert(_debugCheckForDuplicates());
     notifyListeners();
     return token;
-  }
-
-  /// Replaces the given shortcut bindings in this [ShortcutRegistry].
-  ///
-  /// This method will assert in debug mode if another [ShortcutRegistryToken]
-  /// exists (i.e. hasn't been disposed of) that has already added a given
-  /// shortcut.
-  ///
-  /// It will also assert if the given token wasn't created by this registry, or
-  /// has already been disposed.
-  ///
-  /// If two equivalent, but different, [ShortcutActivator]s are added, all of
-  /// them will be executed when triggered. For example, if both
-  /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
-  /// are added, then both will be executed when an "a" key is pressed.
-  void replaceAll(ShortcutRegistryToken token, Map<ShortcutActivator, Intent> value) {
-    assert(debugAssertNotDisposed());
-    assert(_tokenShortcuts.containsKey(token),
-      'Token $token is not present in this ShortcutRegistry.\n'
-      'The token ${token.registry == this
-          ? 'was created by this registry, but has probably already been disposed of'
-          : 'was not created by this registry, it was created by ${token.registry}'}.');
-    _tokenShortcuts[token] = value;
-    _debugCheckForDuplicates();
-    notifyListeners();
   }
 
   /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
@@ -1169,12 +1168,9 @@ class ShortcutRegistry with ChangeNotifier {
   /// If no [ShortcutRegistrar] widget encloses the context given, `of` will
   /// throw an exception in debug mode.
   ///
-  /// The dependencies of [ShortcutRegistrar] will have their
-  /// [State.didChangeDependencies] called whenever the shortcuts have changed.
-  ///
-  /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if you
-  /// are using [WidgetsApp], [MaterialApp] or [CupertinoApp], you don't need to
-  /// create your own [ShortcutRegistrar].
+  /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if
+  /// [WidgetsApp], [MaterialApp] or [CupertinoApp] are used, an additional
+  /// [ShortcutRegistrar] isn't needed.
   ///
   /// See also:
   ///
@@ -1183,17 +1179,17 @@ class ShortcutRegistry with ChangeNotifier {
   static ShortcutRegistry of(BuildContext context) {
     assert(context != null);
     final _ShortcutRegistrarMarker? inherited =
-    context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
+      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
     assert(() {
       if (inherited == null) {
         throw FlutterError(
           'Unable to find a $ShortcutRegistrar widget in the context.\n'
-              '$ShortcutRegistrar.of() was called with a context that does not contain a '
-              '$ShortcutRegistrar widget.\n'
-              'No $ShortcutRegistrar ancestor could be found starting from the context that was '
-              'passed to $ShortcutRegistrar.of().\n'
-              'The context used was:\n'
-              '  $context',
+          '$ShortcutRegistrar.of() was called with a context that does not contain a '
+          '$ShortcutRegistrar widget.\n'
+          'No $ShortcutRegistrar ancestor could be found starting from the context that was '
+          'passed to $ShortcutRegistrar.of().\n'
+          'The context used was:\n'
+          '  $context',
         );
       }
       return true;
@@ -1210,9 +1206,9 @@ class ShortcutRegistry with ChangeNotifier {
   /// The dependencies of [ShortcutRegistrar] will have their
   /// [State.didChangeDependencies] called whenever the shortcuts have changed.
   ///
-  /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if you
-  /// are using [WidgetsApp], [MaterialApp] or [CupertinoApp], you don't need to
-  /// create your own [ShortcutRegistrar].
+  /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if
+  /// [WidgetsApp], [MaterialApp] or [CupertinoApp] are used, an additional
+  /// [ShortcutRegistrar] isn't needed.
   ///
   /// See also:
   ///
@@ -1222,33 +1218,56 @@ class ShortcutRegistry with ChangeNotifier {
   static ShortcutRegistry? maybeOf(BuildContext context) {
     assert(context != null);
     final _ShortcutRegistrarMarker? inherited =
-    context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
+      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
     return inherited?.registry;
+  }
+
+  void _replaceAll(ShortcutRegistryToken token, Map<ShortcutActivator, Intent> value) {
+    assert(debugAssertNotDisposed());
+    assert(_debugCheckTokenIsValid(token));
+    _tokenShortcuts[token] = value;
+    assert(_debugCheckForDuplicates());
+    notifyListeners();
   }
 
   // Removes all the shortcuts associated with the given token from this
   // registry.
   void _disposeToken(ShortcutRegistryToken token) {
+    assert(_debugCheckTokenIsValid(token));
     if (_tokenShortcuts.remove(token) != null) {
       notifyListeners();
     }
   }
 
-  void _debugCheckForDuplicates() {
-    assert(() {
-      final Map<ShortcutActivator, ShortcutRegistryToken?> previous = <ShortcutActivator, ShortcutRegistryToken?>{};
-      for (final MapEntry<ShortcutRegistryToken, Map<ShortcutActivator, Intent>> tokenEntry in _tokenShortcuts.entries) {
-        for (final ShortcutActivator shortcut in tokenEntry.value.keys) {
-          if (previous.containsKey(shortcut)) {
-            throw FlutterError(
-              '$ShortcutRegistry: Received a duplicate registration for the '
-              'shortcut $shortcut in ${describeIdentity(tokenEntry.key)} and ${previous[shortcut]}.');
-          }
-          previous[shortcut] = tokenEntry.key;
-        }
+  bool _debugCheckTokenIsValid(ShortcutRegistryToken token) {
+    if (!_tokenShortcuts.containsKey(token)) {
+      if (token.registry == this) {
+        throw FlutterError('Token ${describeIdentity(token)} is invalid.\n'
+          'The token has already been disposed of. Tokens are not valid after '
+          'dispose is called on them, and should no longer be used.');
+      } else {
+        throw FlutterError('Foreign token ${describeIdentity(token)} used.\n'
+          'This token was not created by this registry, it was created by '
+          '${describeIdentity(token.registry)}, and should be used with that '
+          'registry instead.');
       }
-      return true;
-    }());
+    }
+    return true;
+  }
+
+  bool _debugCheckForDuplicates() {
+    final Map<ShortcutActivator, ShortcutRegistryToken?> previous = <ShortcutActivator, ShortcutRegistryToken?>{};
+    for (final MapEntry<ShortcutRegistryToken, Map<ShortcutActivator, Intent>> tokenEntry in _tokenShortcuts.entries) {
+      for (final ShortcutActivator shortcut in tokenEntry.value.keys) {
+        if (previous.containsKey(shortcut)) {
+          throw FlutterError(
+            '$ShortcutRegistry: Received a duplicate registration for the '
+            'shortcut $shortcut in ${describeIdentity(tokenEntry.key)} and ${previous[shortcut]}.');
+        }
+        previous[shortcut] = tokenEntry.key;
+      }
+    }
+    return true;
   }
 }
 

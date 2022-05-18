@@ -119,13 +119,22 @@ class ChangeNotifier implements Listenable {
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
 
-  /// Used by subclasses to assert that the [ChangeNotifier] has not yet been disposed.
+  /// Used by subclasses to assert that the [ChangeNotifier] has not yet been
+  /// disposed.
   ///
-  /// Should only be called inside of an assert, as in:
+  /// {@tool snippet}
+  /// The `debugAssertNotDisposed` function should only be called inside of an
+  /// assert, as in this example.
   ///
   /// ```dart
-  /// assert(debugAssertNotDisposed());
+  /// class MyNotifier with ChangeNotifier {
+  ///   void doUpdate() {
+  ///     assert(debugAssertNotDisposed());
+  ///     // ...
+  ///   }
+  /// }
   /// ```
+  /// {@end-tool}
   @protected
   bool debugAssertNotDisposed() {
     assert(() {
