@@ -43,8 +43,8 @@ class _SwitchExampleState extends State<SwitchExample> {
           return Colors.amber;
         }
         // Otherwise return null to set default track color
-        // for remaining states such as when the switch
-        // hovered, focused, disabled.
+        // for remaining states such as when the switch is
+        // hovered, focused or disabled.
         return null;
       },
     );
@@ -59,8 +59,8 @@ class _SwitchExampleState extends State<SwitchExample> {
           return Colors.grey.shade400;
         }
         // Otherwise return null to set default material color
-        // for remaining states such as when the switch
-        // hovered, focused.
+        // for remaining states such as when the switch is
+        // hovered or focused.
         return null;
       },
     );
