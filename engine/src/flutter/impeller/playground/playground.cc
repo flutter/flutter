@@ -342,8 +342,7 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
   }
   texture->SetLabel(fixture_name);
 
-  auto uploaded = texture->SetContents(image->GetAllocation()->GetMapping(),
-                                       image->GetAllocation()->GetSize());
+  auto uploaded = texture->SetContents(image->GetAllocation());
   if (!uploaded) {
     VALIDATION_LOG << "Could not upload texture to device memory for fixture "
                    << fixture_name;

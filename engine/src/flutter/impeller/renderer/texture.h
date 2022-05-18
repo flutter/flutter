@@ -7,6 +7,7 @@
 #include <string_view>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/mapping.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/texture_descriptor.h"
@@ -19,12 +20,11 @@ class Texture {
 
   virtual void SetLabel(const std::string_view& label) = 0;
 
-  [[nodiscard]] virtual bool OnSetContents(const uint8_t* contents,
-                                           size_t length,
-                                           size_t slice) = 0;
-
   [[nodiscard]] bool SetContents(const uint8_t* contents,
                                  size_t length,
+                                 size_t slice = 0);
+
+  [[nodiscard]] bool SetContents(std::shared_ptr<const fml::Mapping> mapping,
                                  size_t slice = 0);
 
   virtual bool IsValid() const = 0;
@@ -36,8 +36,18 @@ class Texture {
  protected:
   Texture(TextureDescriptor desc);
 
+  [[nodiscard]] virtual bool OnSetContents(const uint8_t* contents,
+                                           size_t length,
+                                           size_t slice) = 0;
+
+  [[nodiscard]] virtual bool OnSetContents(
+      std::shared_ptr<const fml::Mapping> mapping,
+      size_t slice) = 0;
+
  private:
   const TextureDescriptor desc_;
+
+  bool IsSliceValid(size_t slice) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Texture);
 };
