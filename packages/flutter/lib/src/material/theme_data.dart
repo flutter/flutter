@@ -268,7 +268,7 @@ class ThemeData with Diagnosticable {
   ///  * [ColorScheme.fromSeed], which is used to create a [ColorScheme] from a seed color.
   factory ThemeData({
     // For the sanity of the reader, make sure these properties are in the same
-    // order everywhere that they are separated by section comments (e.g.
+    // order in every place that they are separated by section comments (e.g.
     // GENERAL CONFIGURATION). Each section except for deprecations should be
     // alphabetical by symbol name.
 
@@ -575,7 +575,7 @@ class ThemeData with Diagnosticable {
 
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
-      // order everywhere that they are separated by section comments (e.g.
+      // order in every place that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
       // alphabetical by symbol name.
 
@@ -677,7 +677,7 @@ class ThemeData with Diagnosticable {
   /// [ThemeData] constructor.
   const ThemeData.raw({
     // For the sanity of the reader, make sure these properties are in the same
-    // order everywhere that they are separated by section comments (e.g.
+    // order in every place that they are separated by section comments (e.g.
     // GENERAL CONFIGURATION). Each section except for deprecations should be
     // alphabetical by symbol name.
 
@@ -988,7 +988,7 @@ class ThemeData with Diagnosticable {
   Brightness get brightness => colorScheme.brightness;
 
   // For the sanity of the reader, make sure these properties are in the same
-  // order everywhere that they are separated by section comments (e.g.
+  // order in every place that they are separated by section comments (e.g.
   // GENERAL CONFIGURATION). Each section except for deprecations should be
   // alphabetical by symbol name.
 
@@ -1609,7 +1609,7 @@ class ThemeData with Diagnosticable {
   /// The [brightness] value is applied to the [colorScheme].
   ThemeData copyWith({
     // For the sanity of the reader, make sure these properties are in the same
-    // order everywhere that they are separated by section comments (e.g.
+    // order in every place that they are separated by section comments (e.g.
     // GENERAL CONFIGURATION). Each section except for deprecations should be
     // alphabetical by symbol name.
 
@@ -1747,7 +1747,7 @@ class ThemeData with Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
-      // order everywhere that they are separated by section comments (e.g.
+      // order in every place that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
       // alphabetical by symbol name.
 
@@ -1944,7 +1944,7 @@ class ThemeData with Diagnosticable {
     assert(t != null);
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
-      // order everywhere that they are separated by section comments (e.g.
+      // order in every place that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
       // alphabetical by symbol name.
 
@@ -2043,7 +2043,7 @@ class ThemeData with Diagnosticable {
       return false;
     return other is ThemeData &&
         // For the sanity of the reader, make sure these properties are in the same
-        // order everywhere that they are separated by section comments (e.g.
+        // order in every place that they are separated by section comments (e.g.
         // GENERAL CONFIGURATION). Each section except for deprecations should be
         // alphabetical by symbol name.
 
@@ -2139,7 +2139,7 @@ class ThemeData with Diagnosticable {
   int get hashCode {
     final List<Object?> values = <Object?>[
       // For the sanity of the reader, make sure these properties are in the same
-      // order everywhere that they are separated by section comments (e.g.
+      // order in every place that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
       // alphabetical by symbol name.
 
@@ -2239,7 +2239,7 @@ class ThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     final ThemeData defaultData = ThemeData.fallback();
     // For the sanity of the reader, make sure these properties are in the same
-    // order everywhere that they are separated by section comments (e.g.
+    // order in every place that they are separated by section comments (e.g.
     // GENERAL CONFIGURATION). Each section except for deprecations should be
     // alphabetical by symbol name.
 
