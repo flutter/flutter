@@ -586,6 +586,15 @@ class TextPainter {
     return _paragraph!.didExceedMaxLines;
   }
 
+  /// The distance from the left edge of the leftmost glyph to the right edge of
+  /// the rightmost glyph in the paragraph.
+  ///
+  /// Valid only after [layout] has been called.
+  double get longestLine {
+    assert(!_debugNeedsLayout);
+    return _paragraph!.longestLine;
+  }
+
   double? _lastMinWidth;
   double? _lastMaxWidth;
 
