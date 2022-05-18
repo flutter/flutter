@@ -18,6 +18,7 @@ platform_properties:
         ]
       os: Ubuntu
       device_type: none
+      ignore_flakiness: "true"
   linux:
     properties:
       dependencies: >-
