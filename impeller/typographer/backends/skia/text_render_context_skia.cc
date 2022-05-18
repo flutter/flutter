@@ -162,7 +162,7 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
   const auto& pixmap = bitmap.pixmap();
 
   TextureDescriptor texture_descriptor;
-  texture_descriptor.format = PixelFormat::kR8UNormInt;
+  texture_descriptor.format = PixelFormat::kA8UNormInt;
   texture_descriptor.size = ISize::MakeWH(atlas_size, atlas_size);
 
   if (pixmap.rowBytes() * pixmap.height() !=

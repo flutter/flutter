@@ -77,20 +77,24 @@ void TextureGLES::SetLabel(const std::string_view& label) {
 
 struct TexImage2DData {
   GLint internal_format = 0;
-  GLenum format = GL_NONE;
+  GLenum external_format = GL_NONE;
   GLenum type = GL_NONE;
   std::shared_ptr<const fml::Mapping> data;
 
   TexImage2DData(PixelFormat pixel_format) {
     switch (pixel_format) {
-      case PixelFormat::kR8UNormInt:
+      case PixelFormat::kA8UNormInt:
+        internal_format = GL_ALPHA;
+        external_format = GL_ALPHA;
+        type = GL_UNSIGNED_BYTE;
+        break;
       case PixelFormat::kR8G8B8A8UNormInt:
       case PixelFormat::kB8G8R8A8UNormInt:
       case PixelFormat::kR8G8B8A8UNormIntSRGB:
       case PixelFormat::kB8G8R8A8UNormIntSRGB:
         internal_format = GL_RGBA;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_SHORT_4_4_4_4;
+        external_format = GL_RGBA;
+        type = GL_UNSIGNED_BYTE;
         break;
       case PixelFormat::kUnknown:
       case PixelFormat::kS8UInt:
@@ -104,36 +108,16 @@ struct TexImage2DData {
     switch (pixel_format) {
       case PixelFormat::kUnknown:
         return;
-      case PixelFormat::kR8UNormInt: {
-        TRACE_EVENT0("impeller", "R8UNormIntCopy");
-        internal_format = GL_RGBA;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_SHORT_4_4_4_4;
-        {
-          const auto length = mapping->GetSize();
-          const uint8_t* contents = mapping->GetMapping();
-          auto allocation = std::make_shared<Allocation>();
-          if (!allocation->Truncate(length * 2u, false)) {
-            VALIDATION_LOG << "Could not allocate buffer for texture data.";
-            return;
-          }
-          auto buffer = reinterpret_cast<uint16_t*>(allocation->GetBuffer());
-          for (size_t i = 0; i < length; i++) {
-            uint8_t value = contents[i];
-            buffer[i] = (value | value << 4 | value << 8 | value << 12);
-          }
-          data = CreateMappingFromAllocation(std::move(allocation));
-          if (!data) {
-            VALIDATION_LOG << "Could not create mapping from allocation.";
-            return;
-          }
-        }
+      case PixelFormat::kA8UNormInt: {
+        internal_format = GL_ALPHA;
+        external_format = GL_ALPHA;
+        type = GL_UNSIGNED_BYTE;
+        data = std::move(mapping);
         break;
       }
-
       case PixelFormat::kR8G8B8A8UNormInt: {
         internal_format = GL_RGBA;
-        format = GL_RGBA;
+        external_format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
         data = std::move(mapping);
         break;
@@ -255,7 +239,7 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
                     size.width,             // width
                     size.height,            // height
                     0u,                     // border
-                    data->format,           // format
+                    data->external_format,  // external format
                     data->type,             // type
                     tex_data                // data
       );
@@ -282,7 +266,7 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
     case PixelFormat::kS8UInt:
       return GL_STENCIL_INDEX8;
     case PixelFormat::kUnknown:
-    case PixelFormat::kR8UNormInt:
+    case PixelFormat::kA8UNormInt:
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
     case PixelFormat::kB8G8R8A8UNormIntSRGB:
       return std::nullopt;
@@ -332,7 +316,7 @@ void TextureGLES::InitializeContentsIfNecessary() const {
                       size.width,                // width
                       size.height,               // height
                       0u,                        // border
-                      tex_data.format,           // format
+                      tex_data.external_format,  // format
                       tex_data.type,             // type
                       nullptr                    // data
         );
