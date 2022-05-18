@@ -117,7 +117,7 @@ void testMain() {
 
         // Emulate WebGL context loss.
         final DomCanvasElement canvas =
-            surface.htmlElement.children.single! as DomCanvasElement;
+            surface.htmlElement.children.single as DomCanvasElement;
         final dynamic ctx = canvas.getContext('webgl2');
         expect(ctx, isNotNull);
         final dynamic loseContextExtension =

@@ -12,6 +12,7 @@ import '../browser_detection.dart';
 import '../canvas_pool.dart';
 import '../canvaskit/color_filter.dart';
 import '../color_filter.dart';
+import '../dom.dart';
 import '../engine_canvas.dart';
 import '../frame_reference.dart';
 import '../html_image_codec.dart';
@@ -962,7 +963,7 @@ class BitmapCanvas extends EngineCanvas {
     }
 
     final html.Element paragraphElement =
-        drawParagraphElement(paragraph, offset);
+        drawParagraphElement(paragraph, offset) as html.Element;
     if (_canvasPool.isClipped) {
       final List<html.Element> clipElements = _clipContent(
           _canvasPool.clipStack!,
@@ -1011,7 +1012,8 @@ class BitmapCanvas extends EngineCanvas {
         'Linear/Radial/SweepGradient not supported yet');
     final Int32List? colors = vertices.colors;
     final ui.VertexMode mode = vertices.mode;
-    final html.CanvasRenderingContext2D ctx = _canvasPool.context;
+    final DomCanvasRenderingContext2D ctx = _canvasPool.context as
+        DomCanvasRenderingContext2D;
     if (colors == null &&
         paint.style != ui.PaintingStyle.fill &&
         paint.shader == null) {

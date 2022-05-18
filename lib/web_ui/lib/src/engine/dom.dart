@@ -25,6 +25,8 @@ class DomWindow {}
 extension DomWindowExtension on DomWindow {
   external DomConsole get console;
   external DomDocument get document;
+  external int? get innerHeight;
+  external int? get innerWidth;
   external DomNavigator get navigator;
   external DomPerformance get performance;
   Future<Object?> fetch(String url) =>
@@ -60,13 +62,16 @@ class DomDocument {}
 
 extension DomDocumentExtension on DomDocument {
   external DomElement? querySelector(String selectors);
-  external /* List<Node> */ List<Object?> querySelectorAll(String selectors);
+  List<DomElement> querySelectorAll(String selectors) =>
+      js_util.callMethod<List<Object?>>(
+          this, 'querySelectorAll', <Object>[selectors]).cast<DomElement>();
   DomElement createElement(String name, [Object? options]) =>
       js_util.callMethod(this, 'createElement',
           <Object>[name, if (options != null) options]) as DomElement;
   external DomHTMLScriptElement? get currentScript;
   external DomElement createElementNS(
       String namespaceURI, String qualifiedName);
+  external DomText createTextNode(String data);
 }
 
 @JS()
@@ -142,6 +147,7 @@ extension DomNodeExtension on DomNode {
 
   external DomNode removeChild(DomNode child);
   external bool? get isConnected;
+  external DomNode cloneNode(bool? deep);
 }
 
 @JS()
@@ -151,9 +157,11 @@ class DomElement extends DomNode {}
 DomElement createDomElement(String tag) => domDocument.createElement(tag);
 
 extension DomElementExtension on DomElement {
-  external /* List<DomElement> */ List<Object?> get children;
+  List<DomElement> get children =>
+      js_util.getProperty<List<Object?>>(this, 'children').cast<DomElement>();
   external String get id;
   external set id(String id);
+  external String? get outerHTML;
   external set spellcheck(bool? value);
   external String get tagName;
   external DomCSSStyleDeclaration get style;
@@ -161,7 +169,12 @@ extension DomElementExtension on DomElement {
   external String? getAttribute(String attributeName);
   external void prepend(DomNode node);
   external DomElement? querySelector(String selectors);
+  List<DomElement> querySelectorAll(String selectors) =>
+      js_util.callMethod<List<Object?>>(
+          this, 'querySelectorAll', <Object>[selectors]).cast<DomElement>();
+  external void remove();
   external void setAttribute(String name, Object value);
+  void appendText(String text) => append(createDomText(text));
 }
 
 @JS()
@@ -187,6 +200,24 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
       setProperty('background-color', value, '');
   set pointerEvents(String value) => setProperty('pointer-events', value, '');
   set filter(String value) => setProperty('filter', value, '');
+  set zIndex(String value) => setProperty('z-index', value, '');
+  set whiteSpace(String value) => setProperty('white-space', value, '');
+  set lineHeight(String value) => setProperty('line-height', value, '');
+  set textStroke(String value) => setProperty('-webkit-text-stroke', value, '');
+  set fontSize(String value) => setProperty('font-size', value, '');
+  set fontWeight(String value) => setProperty('font-weight', value, '');
+  set fontStyle(String value) => setProperty('font-style', value, '');
+  set fontFamily(String value) => setProperty('font-family', value, '');
+  set letterSpacing(String value) => setProperty('letter-spacing', value, '');
+  set wordSpacing(String value) => setProperty('word-spacing', value, '');
+  set textShadow(String value) => setProperty('text-shadow', value, '');
+  set textDecoration(String value) => setProperty('text-decoration', value, '');
+  set textDecorationColor(String value) =>
+      setProperty('text-decoration-color', value, '');
+  set fontFeatureSettings(String value) =>
+      setProperty('font-feature-settings', value, '');
+  set fontVariationSettings(String value) =>
+      setProperty('font-variation-settings', value, '');
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -203,6 +234,21 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get backgroundColor => getPropertyValue('background-color');
   String get pointerEvents => getPropertyValue('pointer-events');
   String get filter => getPropertyValue('filter');
+  String get zIndex => getPropertyValue('z-index');
+  String get whiteSpace => getPropertyValue('white-space');
+  String get lineHeight => getPropertyValue('line-height');
+  String get textStroke => getPropertyValue('-webkit-text-stroke');
+  String get fontSize => getPropertyValue('font-size');
+  String get fontWeight => getPropertyValue('font-weight');
+  String get fontStyle => getPropertyValue('font-style');
+  String get fontFamily => getPropertyValue('font-family');
+  String get letterSpacing => getPropertyValue('letter-spacing');
+  String get wordSpacing => getPropertyValue('word-spacing');
+  String get textShadow => getPropertyValue('text-shadow');
+  String get textDecorationColor => getPropertyValue('text-decoration-color');
+  String get fontFeatureSettings => getPropertyValue('font-feature-settings');
+  String get fontVariationSettings =>
+      getPropertyValue('font-variation-settings');
 
   external String getPropertyValue(String property);
   void setProperty(String propertyName, String value, [String? priority]) {
@@ -318,14 +364,30 @@ class DomCanvasRenderingContext2D {}
 extension DomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
   external Object? get fillStyle;
   external set fillStyle(Object? style);
-  external DomCanvasGradient createLinearGradient(num x0, num y0, num x1, num
-      y1);
+  external set font(String value);
+  external set lineWidth(num? value);
+  external set strokeStyle(Object? value);
+  external void beginPath();
+  external void closePath();
+  external DomCanvasGradient createLinearGradient(
+      num x0, num y0, num x1, num y1);
   external DomCanvasPattern? createPattern(Object image, String reptitionType);
-  external DomCanvasGradient createRadialGradient(num x0, num y0, num r0, num
-      x1, num y1, num r1);
+  external DomCanvasGradient createRadialGradient(
+      num x0, num y0, num r0, num x1, num y1, num r1);
   external void drawImage(DomCanvasImageSource source, num destX, num destY);
+  external void fill();
   external void fillRect(num x, num y, num width, num height);
+  void fillText(String text, num x, num y, [num? maxWidth]) =>
+      js_util.callMethod(this, 'fillText',
+          <Object>[text, x, y, if (maxWidth != null) maxWidth]);
   external DomImageData getImageData(int x, int y, int sw, int sh);
+  external void lineTo(num x, num y);
+  external void moveTo(num x, num y);
+  external void save();
+  external void stroke();
+  external void rect(num x, num y, num width, num height);
+  external void resetTransform();
+  external void restore();
 }
 
 @JS()
@@ -373,6 +435,16 @@ extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
 @JS()
 @staticInterop
 class DomResponse {}
+
+@JS()
+@staticInterop
+class DomCharacterData extends DomNode {}
+
+@JS()
+@staticInterop
+class DomText extends DomCharacterData {}
+
+DomText createDomText(String data) => domDocument.createTextNode(data);
 
 @JS()
 @staticInterop

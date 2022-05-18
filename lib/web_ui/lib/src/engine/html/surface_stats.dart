@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 
+import '../dom.dart';
 import '../platform_dispatcher.dart';
 import 'bitmap_canvas.dart';
 import 'dom_canvas.dart';
@@ -94,10 +94,10 @@ class DebugSurfaceStats {
   }
 }
 
-html.CanvasRenderingContext2D? _debugSurfaceStatsOverlayCtx;
+DomCanvasRenderingContext2D? _debugSurfaceStatsOverlayCtx;
 
 void debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
-  final int overlayWidth = html.window.innerWidth!;
+  final int overlayWidth = domWindow.innerWidth!;
   const int rowHeight = 30;
   const int rowCount = 4;
   const int overlayHeight = rowHeight * rowCount;
@@ -110,7 +110,7 @@ void debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
   }
 
   if (_debugSurfaceStatsOverlayCtx == null) {
-    final html.CanvasElement _debugSurfaceStatsOverlay = html.CanvasElement(
+    final DomCanvasElement _debugSurfaceStatsOverlay = createDomCanvasElement(
       width: overlayWidth,
       height: overlayHeight,
     );
@@ -121,7 +121,7 @@ void debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
       ..zIndex = '1000'
       ..opacity = '0.8';
     _debugSurfaceStatsOverlayCtx = _debugSurfaceStatsOverlay.context2D;
-    html.document.body!.append(_debugSurfaceStatsOverlay);
+    domDocument.body!.append(_debugSurfaceStatsOverlay);
   }
 
   _debugSurfaceStatsOverlayCtx!
@@ -131,9 +131,9 @@ void debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
     ..fill();
 
   final double physicalScreenWidth =
-      html.window.innerWidth! * EnginePlatformDispatcher.browserDevicePixelRatio;
+      domWindow.innerWidth! * EnginePlatformDispatcher.browserDevicePixelRatio;
   final double physicalScreenHeight =
-      html.window.innerHeight! * EnginePlatformDispatcher.browserDevicePixelRatio;
+      domWindow.innerHeight! * EnginePlatformDispatcher.browserDevicePixelRatio;
   final double physicsScreenPixelCount =
       physicalScreenWidth * physicalScreenHeight;
 
@@ -291,20 +291,19 @@ void debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
   // A microtask will fire after the DOM is flushed, letting us probe into
   // actual <canvas> tags.
   scheduleMicrotask(() {
-    final List<html.Element> canvasElements =
-        html.document.querySelectorAll('canvas');
+    final List<DomElement> canvasElements = domDocument.querySelectorAll('canvas');
     final StringBuffer canvasInfo = StringBuffer();
     final int pixelCount = canvasElements
-        .cast<html.CanvasElement>()
-        .map<int>((html.CanvasElement e) {
+        .cast<DomCanvasElement>()
+        .map<int>((DomCanvasElement e) {
       final int pixels = e.width! * e.height!;
       canvasInfo.writeln('    - ${e.width!} x ${e.height!} = $pixels pixels');
       return pixels;
     }).fold(0, (int total, int pixels) => total + pixels);
     final double physicalScreenWidth =
-        html.window.innerWidth! * EnginePlatformDispatcher.browserDevicePixelRatio;
+        domWindow.innerWidth! * EnginePlatformDispatcher.browserDevicePixelRatio;
     final double physicalScreenHeight =
-        html.window.innerHeight! * EnginePlatformDispatcher.browserDevicePixelRatio;
+        domWindow.innerHeight! * EnginePlatformDispatcher.browserDevicePixelRatio;
     final double physicsScreenPixelCount =
         physicalScreenWidth * physicalScreenHeight;
     final double screenPixelRatio = pixelCount / physicsScreenPixelCount;
