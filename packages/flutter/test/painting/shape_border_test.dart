@@ -13,49 +13,49 @@ void main() {
     final Border b2 = Border.all(color: const Color(0xFF0000FF));
     expect(
       (b1 + b2).toString(),
-      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'Border.all(BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
+      'Border.all(BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid))',
     );
     expect(
       (b1 + (b2 + b2)).toString(),
-      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'Border.all(BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside))',
+      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
+      'Border.all(BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid))',
     );
     expect(
       ((b1 + b2) + b2).toString(),
-      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'Border.all(BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside))',
+      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
+      'Border.all(BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid))',
     );
     expect((b1 + b2) + b2, b1 + (b2 + b2));
     expect(
       (b1 + b2).scale(3.0).toString(),
-      'Border.all(BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'Border.all(BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid, StrokeAlign.inside))',
+      'Border.all(BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid)) + '
+      'Border.all(BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid))',
     );
     expect(
       (b1 + b2).scale(0.0).toString(),
-      'Border.all(BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none, StrokeAlign.inside)) + '
-      'Border.all(BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none, StrokeAlign.inside))',
+      'Border.all(BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none)) + '
+      'Border.all(BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none))',
     );
     expect(
       ShapeBorder.lerp(b2 + b1, b1 + b2, 0.0).toString(),
-      'Border.all(BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'Border.all(BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid)) + '
+      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid))',
     );
     expect(
       ShapeBorder.lerp(b2 + b1, b1 + b2, 0.25).toString(),
-      'Border.all(BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'Border.all(BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'Border.all(BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid)) + '
+      'Border.all(BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid))',
     );
     expect(
       ShapeBorder.lerp(b2 + b1, b1 + b2, 0.5).toString(),
-      'Border.all(BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'Border.all(BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'Border.all(BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid)) + '
+      'Border.all(BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid))',
     );
     expect(
       ShapeBorder.lerp(b2 + b1, b1 + b2, 1.0).toString(),
-      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'Border.all(BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'Border.all(BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
+      'Border.all(BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid))',
     );
     expect((b1 + b2).dimensions, const EdgeInsets.all(2.0));
     const Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
@@ -78,49 +78,49 @@ void main() {
     const BorderDirectional b2 = BorderDirectional(top: side2, start: side2, end: side2, bottom: side2);
     expect(
       (b1 + b2).toString(),
-      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
+      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid))',
     );
     expect(
       (b1 + (b2 + b2)).toString(),
-      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside))',
+      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
+      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid), start: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid), end: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid), bottom: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid))',
     );
     expect(
       ((b1 + b2) + b2).toString(),
-      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid, StrokeAlign.inside))',
+      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
+      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid), start: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid), end: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid), bottom: BorderSide(Color(0xff0000ff), 2.0, BorderStyle.solid))',
     );
     expect((b1 + b2) + b2, b1 + (b2 + b2));
     expect(
       (b1 + b2).scale(3.0).toString(),
-      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid, StrokeAlign.inside))',
+      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid), start: BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid), end: BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00ff00), 3.0, BorderStyle.solid)) + '
+      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid), start: BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid), end: BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid), bottom: BorderSide(Color(0xff0000ff), 3.0, BorderStyle.solid))',
     );
     expect(
       (b1 + b2).scale(0.0).toString(),
-      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none, StrokeAlign.inside), start: BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none, StrokeAlign.inside), end: BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none, StrokeAlign.inside), bottom: BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none, StrokeAlign.inside)) + '
-      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none, StrokeAlign.inside), start: BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none, StrokeAlign.inside), end: BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none, StrokeAlign.inside), bottom: BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none, StrokeAlign.inside))',
+      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none), start: BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none), end: BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none), bottom: BorderSide(Color(0xff00ff00), 0.0, BorderStyle.none)) + '
+      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none), start: BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none), end: BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none), bottom: BorderSide(Color(0xff0000ff), 0.0, BorderStyle.none))',
     );
     expect(
       ShapeBorder.lerp(b2 + b1, b1 + b2, 0.0).toString(),
-      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid)) + '
+      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid))',
     );
     expect(
       ShapeBorder.lerp(b2 + b1, b1 + b2, 0.25).toString(),
-      'BorderDirectional(top: BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'BorderDirectional(top: BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'BorderDirectional(top: BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff003fbf), 1.0, BorderStyle.solid)) + '
+      'BorderDirectional(top: BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00bf3f), 1.0, BorderStyle.solid))',
     );
     expect(
       ShapeBorder.lerp(b2 + b1, b1 + b2, 0.5).toString(),
-      'BorderDirectional(top: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'BorderDirectional(top: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'BorderDirectional(top: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid)) + '
+      'BorderDirectional(top: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff007f7f), 1.0, BorderStyle.solid))',
     );
     expect(
       ShapeBorder.lerp(b2 + b1, b1 + b2, 1.0).toString(),
-      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid, StrokeAlign.inside)) + '
-      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside), start: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside), end: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside), bottom: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid, StrokeAlign.inside))',
+      'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '
+      'BorderDirectional(top: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff0000ff), 1.0, BorderStyle.solid))',
     );
     expect((b1 + b2).dimensions, const EdgeInsetsDirectional.fromSTEB(2.0, 2.0, 2.0, 2.0));
     const Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);

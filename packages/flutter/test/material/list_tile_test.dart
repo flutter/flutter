@@ -2282,7 +2282,7 @@ void main() {
     expect(description[4], 'isThreeLine: THREE_LINE');
     expect(description[5], 'dense: true');
     expect(description[6], equalsIgnoringHashCodes('visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)'));
-    expect(description[7], 'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none, StrokeAlign.inside), BorderRadius.zero)');
+    expect(description[7], 'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)');
     expect(description[8], 'style: ListTileStyle.list');
     expect(description[9], 'selectedColor: Color(0xff0000ff)');
     expect(description[10], 'iconColor: Color(0xff00ff00)');

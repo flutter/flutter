@@ -54,8 +54,8 @@ void main() {
       style: BorderStyle.solid,
     );
 
-    expect(side1.toString(), equals('BorderSide(Color(0xff000000), 1.0, BorderStyle.solid, StrokeAlign.inside)'));
-    expect(side2.toString(), equals('BorderSide(Color(0xff00ffff), 2.0, BorderStyle.solid, StrokeAlign.inside)'));
+    expect(side1.toString(), equals('BorderSide(Color(0xff000000), 1.0, BorderStyle.solid)'));
+    expect(side2.toString(), equals('BorderSide(Color(0xff00ffff), 2.0, BorderStyle.solid)'));
   });
 
   test('Border control test', () {
@@ -77,7 +77,7 @@ void main() {
     expect(
       Border.all(width: 4.0).toString(),
       equals(
-        'Border.all(BorderSide(Color(0xff000000), 4.0, BorderStyle.solid, StrokeAlign.inside))',
+        'Border.all(BorderSide(Color(0xff000000), 4.0, BorderStyle.solid))',
       ),
     );
     expect(
@@ -88,7 +88,7 @@ void main() {
         left: BorderSide(width: 3.0),
       ).toString(),
       equals(
-        'Border.all(BorderSide(Color(0xff000000), 3.0, BorderStyle.solid, StrokeAlign.inside))',
+        'Border.all(BorderSide(Color(0xff000000), 3.0, BorderStyle.solid))',
       ),
     );
   });

@@ -21,7 +21,7 @@ enum BorderStyle {
   // if you add more, think about how they will lerp
 }
 
-/// The direction of the stroke to be painted for a [BorderSide] in a [Border].
+/// The relative position of the stroke on a [BorderSide] in a [Border].
 /// When set to [inside], the stroke is drawn completely inside the widget.
 /// For [center] and [outside], a property such as [Container.clipBehavior]
 /// can be used in an outside widget to clip it.
@@ -31,14 +31,14 @@ enum BorderStyle {
 /// - [center] provides padding with half [BorderSide.width].
 /// - [outside] provides zero padding, as stroke is drawn entirely outside.
 enum StrokeAlign {
-  /// Border is drawn inside.
+  /// The border is drawn on the inside of the border path.
   inside,
 
-  /// Border is drawn to the center, half the [BorderSide.width] to the inside,
-  /// the other half to the outside.
+  /// The border is drawn on the center of the border path, with half of the
+  /// [BorderSide.width] on the inside, and the other half on the outside of the path.
   center,
 
-  /// Border is drawn outside.
+  /// The border is drawn on the outside of the border path.
   outside,
 }
 
@@ -304,7 +304,12 @@ class BorderSide {
   int get hashCode => Object.hash(color, width, style, strokeAlign);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $strokeAlign)';
+  String toString() {
+    if (strokeAlign == StrokeAlign.inside) {
+      return '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)'; 
+    }
+    return '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $strokeAlign)';
+  }
 }
 
 /// Base class for shape outlines.

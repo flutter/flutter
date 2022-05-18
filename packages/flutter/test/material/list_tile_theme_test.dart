@@ -108,7 +108,7 @@ void main() {
       .toList();
 
     expect(description[0], 'dense: true');
-    expect(description[1], 'shape: StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none, StrokeAlign.inside))');
+    expect(description[1], 'shape: StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))');
     expect(description[2], 'style: drawer');
     expect(description[3], 'selectedColor: Color(0x00000001)');
     expect(description[4], 'iconColor: Color(0x00000002)');

@@ -97,28 +97,28 @@ void main() {
 
     expect(
       ShapeBorder.lerp(r, c, 0.1).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none, StrokeAlign.inside), BorderRadius.circular(10.0), 10.0% of the way to being a CircleBorder)',
+      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 10.0% of the way to being a CircleBorder)',
     );
     expect(
       ShapeBorder.lerp(r, c, 0.2).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none, StrokeAlign.inside), BorderRadius.circular(10.0), 20.0% of the way to being a CircleBorder)',
+      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 20.0% of the way to being a CircleBorder)',
     );
     expect(
       ShapeBorder.lerp(ShapeBorder.lerp(r, c, 0.1), ShapeBorder.lerp(r, c, 0.9), 0.9).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none, StrokeAlign.inside), BorderRadius.circular(10.0), 82.0% of the way to being a CircleBorder)',
+      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 82.0% of the way to being a CircleBorder)',
     );
 
     expect(
       ShapeBorder.lerp(c, r, 0.9).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none, StrokeAlign.inside), BorderRadius.circular(10.0), 10.0% of the way to being a CircleBorder)',
+      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 10.0% of the way to being a CircleBorder)',
     );
     expect(
       ShapeBorder.lerp(c, r, 0.8).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none, StrokeAlign.inside), BorderRadius.circular(10.0), 20.0% of the way to being a CircleBorder)',
+      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 20.0% of the way to being a CircleBorder)',
     );
     expect(
       ShapeBorder.lerp(ShapeBorder.lerp(r, c, 0.9), ShapeBorder.lerp(r, c, 0.1), 0.1).toString(),
-      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none, StrokeAlign.inside), BorderRadius.circular(10.0), 82.0% of the way to being a CircleBorder)',
+      'RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(10.0), 82.0% of the way to being a CircleBorder)',
     );
 
     expect(ShapeBorder.lerp(r, c, 0.1), ShapeBorder.lerp(r, c, 0.1));
