@@ -726,7 +726,14 @@ class HotRunner extends ResidentRunner {
     if (result.isOk) {
       final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
       if (!silent) {
-        globals.printStatus('${result.message} in $elapsed.');
+        if (result.extraTimings.isNotEmpty) {
+          final String extraTimingsString = result.extraTimings
+            .map((OperationResultExtraTiming e) => '${e.description}: ${e.timeInMs} ms')
+            .join(', ');
+          globals.printStatus('${result.message} in $elapsed ($extraTimingsString).');
+        } else {
+          globals.printStatus('${result.message} in $elapsed.');
+        }
       }
     }
     return result;
@@ -898,6 +905,10 @@ class HotRunner extends ResidentRunner {
     if (!updatedDevFS.success) {
       return OperationResult(1, 'DevFS synchronization failed');
     }
+
+    final List<OperationResultExtraTiming> extraTimings = <OperationResultExtraTiming>[];
+    extraTimings.add(OperationResultExtraTiming('compile', updatedDevFS.compileDuration.inMilliseconds));
+
     String reloadMessage = 'Reloaded 0 libraries';
     final Stopwatch reloadVMTimer = _stopwatchFactory.createStopwatch('reloadSources:vm')..start();
     final Map<String, Object> firstReloadDetails = <String, Object>{};
@@ -920,6 +931,7 @@ class HotRunner extends ResidentRunner {
       _addBenchmarkData('hotReloadVMReloadMilliseconds', 0);
     }
     reloadVMTimer.stop();
+    extraTimings.add(OperationResultExtraTiming('reload', reloadVMTimer.elapsedMilliseconds));
 
     await evictDirtyAssets();
 
@@ -939,6 +951,7 @@ class HotRunner extends ResidentRunner {
     // Record time it took for Flutter to reassemble the application.
     reassembleTimer.stop();
     _addBenchmarkData('hotReloadFlutterReassembleMilliseconds', reassembleTimer.elapsed.inMilliseconds);
+    extraTimings.add(OperationResultExtraTiming('reassemble', reassembleTimer.elapsedMilliseconds));
 
     reloadTimer.stop();
     final Duration reloadDuration = reloadTimer.elapsed;
@@ -985,6 +998,7 @@ class HotRunner extends ResidentRunner {
     return OperationResult(
       reassembleResult.failedReassemble ? 1 : OperationResult.ok.code,
       reloadMessage,
+      extraTimings: extraTimings
     );
   }
 
