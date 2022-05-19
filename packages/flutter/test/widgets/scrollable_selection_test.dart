@@ -546,7 +546,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.descendant(of: find.text('Iteminner 23'), matching: find.byType(RichText)), findsNothing);
 
-      // Selected item is still kept alive
+      // Selected item is still kept alive.
       expect(find.descendant(of: find.text('Iteminner 23'), matching: find.byType(RichText), skipOffstage: false), findsNothing);
 
       // Selection stays the same after scrolling back.
@@ -595,7 +595,7 @@ void main() {
       expect(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)), findsNothing);
       expect(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)), findsNothing);
 
-      // Start copying
+      // Start copying.
       await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
@@ -639,7 +639,7 @@ void main() {
       expect(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)), findsNothing);
       expect(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)), findsNothing);
 
-      // Start copying
+      // Start copying.
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);

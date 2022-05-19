@@ -60,8 +60,8 @@ class SelectionContainer extends StatefulWidget {
 
   /// The delegate for [SelectionEvent]s sent to this selection container.
   ///
-  /// The [Selectable]s in the subtree is added or removed from this delegate
-  /// uses [SelectionRegistrar] API.
+  /// The [Selectable]s in the subtree are added or removed from this delegate
+  /// using [SelectionRegistrar] API.
   ///
   /// This delegate is responsible for updating the selections for the selectables
   /// under this widget.

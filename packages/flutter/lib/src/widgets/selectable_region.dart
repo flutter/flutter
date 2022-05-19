@@ -26,7 +26,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.invertedStylus,
 };
 
-
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. To enable selection for
@@ -774,24 +773,40 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   }
 }
 
-class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
+/// An action that does not override any [Action.overridable] in the subtree.
+///
+/// If a intent is fire at or below the context of [Action.overridable] in the
+/// subtree, this action will respect the original action and not override it.
+abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
+
+  Object? invokeAction(T intent, [BuildContext? context]);
+
+  @override
+  Object? invoke(T intent, [BuildContext? context]) {
+    if (callingAction != null)
+      return callingAction!.invoke(intent);
+    return invokeAction(intent, context);
+  }
+}
+
+class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
   _SelectAllAction(this.state);
 
   final _SelectableRegionState state;
 
   @override
-  void invoke(SelectAllTextIntent intent, [BuildContext? context]) {
+  void invokeAction(SelectAllTextIntent intent, [BuildContext? context]) {
     state.selectAll(SelectionChangedCause.keyboard);
   }
 }
 
-class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
+class _CopySelectionAction extends _NonOverrideAction<CopySelectionTextIntent> {
   _CopySelectionAction(this.state);
 
   final _SelectableRegionState state;
 
   @override
-  void invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
+  void invokeAction(CopySelectionTextIntent intent, [BuildContext? context]) {
     state._copy();
   }
 }

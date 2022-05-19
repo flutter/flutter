@@ -89,12 +89,12 @@ void main() {
       await gesture.moveTo(const Offset(200.0, 100.0));
       await gesture.up();
       expect(
-          renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
-          isTrue
+        renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
+        isTrue
       );
     });
 
-    testWidgets('mouse selection always cancel previous selection', (WidgetTester tester) async {
+    testWidgets('mouse selection always cancels previous selection', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -171,13 +171,13 @@ void main() {
     testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              focusNode: FocusNode(),
-              selectionControls: materialTextSelectionControls,
-              child: SelectionSpy(key: spy),
-            ),
-          )
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: SelectionSpy(key: spy),
+          ),
+        ),
       );
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
@@ -187,8 +187,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
       expect(
-          renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
-          isTrue
+        renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
+        isTrue,
       );
     });
   });
@@ -224,7 +224,7 @@ void main() {
       await tester.pump();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: 1));
 
-      // Start a new drag
+      // Start a new drag.
       await gesture.up();
       await gesture.down(textOffsetToPosition(paragraph, 5));
       expect(paragraph.selections.isEmpty, isTrue);
@@ -357,7 +357,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('mouse can copy content', (WidgetTester tester) async {
+    testWidgets('can copy a selection made with the mouse', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -392,6 +392,120 @@ void main() {
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
+
+    testWidgets(
+      'does not override TextField keyboard shortcuts if the TextField is focused - non apple',
+      (WidgetTester tester) async {
+        final TextEditingController controller = TextEditingController(text: 'I am fine, thank you.');
+        final FocusNode selectableRegionFocus = FocusNode();
+        final FocusNode textFieldFocus = FocusNode();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: SelectableRegion(
+                focusNode: selectableRegionFocus,
+                selectionControls: materialTextSelectionControls,
+                child: Column(
+                  children: <Widget>[
+                    const Text('How are you?'),
+                    const Text('Good, and you?'),
+                    TextField(controller: controller, focusNode: textFieldFocus),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        textFieldFocus.requestFocus();
+        await tester.pump();
+
+        // Make sure keyboard select all works on TextField.
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 21));
+
+        // Make sure no selection in SelectableRegion.
+        final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+        final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+        expect(paragraph1.selections.isEmpty, isTrue);
+        expect(paragraph2.selections.isEmpty, isTrue);
+
+        // Reset selection and focus selectable region.
+        controller.selection = const TextSelection.collapsed(offset: -1);
+        selectableRegionFocus.requestFocus();
+        await tester.pump();
+
+        // Make sure keyboard select all will be handled by selectable region now.
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        expect(controller.selection, const TextSelection.collapsed(offset: -1));
+        expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+        expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
+      skip: kIsWeb, // [intended] the web handles this on its own.
+    );
+
+    testWidgets(
+      'does not override TextField keyboard shortcuts if the TextField is focused - apple',
+      (WidgetTester tester) async {
+        final TextEditingController controller = TextEditingController(text: 'I am fine, thank you.');
+        final FocusNode selectableRegionFocus = FocusNode();
+        final FocusNode textFieldFocus = FocusNode();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: SelectableRegion(
+                focusNode: selectableRegionFocus,
+                selectionControls: materialTextSelectionControls,
+                child: Column(
+                  children: <Widget>[
+                    const Text('How are you?'),
+                    const Text('Good, and you?'),
+                    TextField(controller: controller, focusNode: textFieldFocus),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        textFieldFocus.requestFocus();
+        await tester.pump();
+
+        // Make sure keyboard select all works on TextField.
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+        expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 21));
+
+        // Make sure no selection in SelectableRegion.
+        final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+        final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+        expect(paragraph1.selections.isEmpty, isTrue);
+        expect(paragraph2.selections.isEmpty, isTrue);
+
+        // Reset selection and focus selectable region.
+        controller.selection = const TextSelection.collapsed(offset: -1);
+        selectableRegionFocus.requestFocus();
+        await tester.pump();
+
+        // Make sure keyboard select all will be handled by selectable region now.
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+        expect(controller.selection, const TextSelection.collapsed(offset: -1));
+        expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+        expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+      skip: kIsWeb, // [intended] the web handles this on its own.
+    );
 
     testWidgets('select all', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -468,44 +582,89 @@ void main() {
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
-    testWidgets('widget span is ignored if it does not contain text', (WidgetTester tester) async {
-      final UniqueKey outerText = UniqueKey();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            focusNode: FocusNode(),
-            selectionControls: materialTextSelectionControls,
-            child: Center(
-              child: Text.rich(
-                const TextSpan(
-                    children: <InlineSpan>[
-                      TextSpan(text: 'How are you?'),
-                      WidgetSpan(child: Placeholder()),
-                      TextSpan(text: 'Fine, thank you.'),
-                    ]
+    testWidgets(
+      'widget span is ignored if it does not contain text - non Apple',
+      (WidgetTester tester) async {
+        final UniqueKey outerText = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionControls,
+              child: Center(
+                child: Text.rich(
+                  const TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(text: 'How are you?'),
+                        WidgetSpan(child: Placeholder()),
+                        TextSpan(text: 'Fine, thank you.'),
+                      ]
+                  ),
+                  key: outerText,
                 ),
-                key: outerText,
               ),
             ),
           ),
-        ),
-      );
-      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
-      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
-      await tester.pump();
-      await gesture.moveTo(textOffsetToPosition(paragraph, 17)); // right after `Fine`.
-      await gesture.up();
+        );
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        await gesture.moveTo(textOffsetToPosition(paragraph, 17)); // right after `Fine`.
+        await gesture.up();
 
-      // keyboard copy.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'w are you?Fine');
-    },
+        // keyboard copy.
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+        expect(clipboardData['text'], 'w are you?Fine');
+      },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgets(
+      'widget span is ignored if it does not contain text - Apple',
+          (WidgetTester tester) async {
+        final UniqueKey outerText = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionControls,
+              child: Center(
+                child: Text.rich(
+                  const TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(text: 'How are you?'),
+                        WidgetSpan(child: Placeholder()),
+                        TextSpan(text: 'Fine, thank you.'),
+                      ]
+                  ),
+                  key: outerText,
+                ),
+              ),
+            ),
+          ),
+        );
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        await gesture.moveTo(textOffsetToPosition(paragraph, 17)); // right after `Fine`.
+        await gesture.up();
+
+        // keyboard copy.
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+        final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+        expect(clipboardData['text'], 'w are you?Fine');
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
@@ -550,7 +709,7 @@ void main() {
       await gesture.up();
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
-    testWidgets('touch selection', (WidgetTester tester) async {
+    testWidgets('long press and drag touch selection', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -915,7 +1074,6 @@ class TextTextSelectionControls extends TextSelectionControls {
     );
   }
 
-  /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight, [VoidCallback? onTap]) {
     return TestHandle(
@@ -925,9 +1083,6 @@ class TextTextSelectionControls extends TextSelectionControls {
     );
   }
 
-  /// Gets anchor for material-style text selection handles.
-  ///
-  /// See [TextSelectionControls.getHandleAnchor].
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;

@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MySelectableAdapter extends StatelessWidget {
-  const MySelectableAdapter({Key? key, required this.child}) : super(key: key);
+  const MySelectableAdapter({super.key, required this.child});
 
   final Widget child;
 

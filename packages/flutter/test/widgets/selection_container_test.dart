@@ -7,25 +7,46 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('SelectionContainer', () {
 
-    Future<void> pumpContainer(WidgetTester tester, Widget child) async {
-      await tester.pumpWidget(
-        DefaultSelectionStyle(
-          selectionColor: Colors.red,
-          child: child,
+  Future<void> pumpContainer(WidgetTester tester, Widget child) async {
+    await tester.pumpWidget(
+      DefaultSelectionStyle(
+        selectionColor: Colors.red,
+        child: child,
+      ),
+    );
+  }
+
+  testWidgets('updates its registrar and delegate based on the number of selectables', (WidgetTester tester) async {
+    final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+    final TestContainerDelegate delegate = TestContainerDelegate();
+    await pumpContainer(
+      tester,
+      SelectionContainer(
+        registrar: registrar,
+        delegate: delegate,
+        child: Column(
+          children: const <Widget>[
+            Text('column1', textDirection: TextDirection.ltr),
+            Text('column2', textDirection: TextDirection.ltr),
+            Text('column3', textDirection: TextDirection.ltr),
+          ],
         ),
-      );
-    }
+      ),
+    );
+    expect(registrar.selectables.length, 1);
+    expect(delegate.selectables.length, 3);
+  });
 
-    testWidgets('updates its registrar and delegate based on the number of selectables', (WidgetTester tester) async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final TestContainerDelegate delegate = TestContainerDelegate();
-      await pumpContainer(
-        tester,
-        SelectionContainer(
-          registrar: registrar,
-          delegate: delegate,
+  testWidgets('disabled container', (WidgetTester tester) async {
+    final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+    final TestContainerDelegate delegate = TestContainerDelegate();
+    await pumpContainer(
+      tester,
+      SelectionContainer(
+        registrar: registrar,
+        delegate: delegate,
+        child: SelectionRegistrarScope.disabled(
           child: Column(
             children: const <Widget>[
               Text('column1', textDirection: TextDirection.ltr),
@@ -34,52 +55,61 @@ void main() {
             ],
           ),
         ),
-      );
-      expect(registrar.selectables.length, 1);
-      expect(delegate.selectables.length, 3);
-    });
+      ),
+    );
+    expect(registrar.selectables.length, 0);
+    expect(delegate.selectables.length, 0);
+  });
 
-    testWidgets('disabled container', (WidgetTester tester) async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final TestContainerDelegate delegate = TestContainerDelegate();
-      await pumpContainer(
-        tester,
-        SelectionContainer(
-          registrar: registrar,
-          delegate: delegate,
-          child: SelectionRegistrarScope.disabled(
-            child: Column(
-              children: const <Widget>[
-                Text('column1', textDirection: TextDirection.ltr),
-                Text('column2', textDirection: TextDirection.ltr),
-                Text('column3', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ),
+  testWidgets('selection container registers itself if there is a selectable child', (WidgetTester tester) async {
+    final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+    final TestContainerDelegate delegate = TestContainerDelegate();
+    await pumpContainer(
+      tester,
+      SelectionContainer(
+        registrar: registrar,
+        delegate: delegate,
+        child: Column(
         ),
-      );
-      expect(registrar.selectables.length, 0);
-      expect(delegate.selectables.length, 0);
-    });
+      ),
+    );
+    expect(registrar.selectables.length, 0);
 
-    testWidgets('selection container register itself if there is a selectable child', (WidgetTester tester) async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final TestContainerDelegate delegate = TestContainerDelegate();
-      await pumpContainer(
-        tester,
-        SelectionContainer(
-          registrar: registrar,
-          delegate: delegate,
-          child: Column(
-          ),
+    await pumpContainer(
+      tester,
+      SelectionContainer(
+        registrar: registrar,
+        delegate: delegate,
+        child: Column(
+          children: const <Widget>[
+            Text('column1', textDirection: TextDirection.ltr),
+          ],
         ),
-      );
-      expect(registrar.selectables.length, 0);
+      ),
+    );
+    expect(registrar.selectables.length, 1);
 
-      await pumpContainer(
-        tester,
-        SelectionContainer(
-          registrar: registrar,
+    await pumpContainer(
+      tester,
+      SelectionContainer(
+        registrar: registrar,
+        delegate: delegate,
+        child: Column(
+        ),
+      ),
+    );
+    expect(registrar.selectables.length, 0);
+  });
+
+  testWidgets('selection container gets registrar from context if not provided', (WidgetTester tester) async {
+    final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+    final TestContainerDelegate delegate = TestContainerDelegate();
+
+    await pumpContainer(
+      tester,
+      SelectionRegistrarScope(
+        registrar: registrar,
+        child: SelectionContainer(
           delegate: delegate,
           child: Column(
             children: const <Widget>[
@@ -87,41 +117,9 @@ void main() {
             ],
           ),
         ),
-      );
-      expect(registrar.selectables.length, 1);
-
-      await pumpContainer(
-        tester,
-        SelectionContainer(
-          registrar: registrar,
-          delegate: delegate,
-          child: Column(
-          ),
-        ),
-      );
-      expect(registrar.selectables.length, 0);
-    });
-
-    testWidgets('selection container gets registrar from context if not provided', (WidgetTester tester) async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final TestContainerDelegate delegate = TestContainerDelegate();
-
-      await pumpContainer(
-        tester,
-        SelectionRegistrarScope(
-          registrar: registrar,
-          child: SelectionContainer(
-            delegate: delegate,
-            child: Column(
-              children: const <Widget>[
-                Text('column1', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ),
-        ),
-      );
-      expect(registrar.selectables.length, 1);
-    });
+      ),
+    );
+    expect(registrar.selectables.length, 1);
   });
 }
 

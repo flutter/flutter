@@ -345,7 +345,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// [TapGestureRecognizer] as the [TextSpan.recognizer] of the relevant part of
 /// the text.
 ///
-/// ## Selections
+/// ## Selection
 ///
 /// [Text] is not selectable by default. To make a [Text] selectable, one can
 /// wrap a subtree with a [SelectionArea] widget. To exclude a part of a subtree

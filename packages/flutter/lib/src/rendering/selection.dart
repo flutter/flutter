@@ -102,6 +102,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 
 /// The selected content in a [Selectable] or [SelectionHandler].
 // TODO(chunhtai): Add more support for rich content.
+// https://github.com/flutter/flutter/issues/104206.
 class SelectedContent {
   /// Creates a selected content object.
   ///
