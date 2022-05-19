@@ -386,7 +386,7 @@ class DataTable extends StatelessWidget {
     this.dataRowColor,
     @Deprecated(
       'Use dataRowHeightSettings instead. '
-      'This feature was deprecated after 2.13.0-0.4.pre.',
+      'This feature was deprecated after v2.13.0-0.4.pre.',
     )
     this.dataRowHeight,
     this.dataRowHeightSettings,
@@ -503,7 +503,7 @@ class DataTable extends StatelessWidget {
   /// specifications.
   @Deprecated(
     'Use dataRowHeightSettings instead. '
-    'This feature was deprecated after 2.13.0-0.4.pre.',
+    'This feature was deprecated after v2.13.0-0.4.pre.',
   )
   final double? dataRowHeight;
 
