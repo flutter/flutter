@@ -1,4 +1,4 @@
-Signature: e0dd020026bc49984168d5faca64f51f
+Signature: 942010ce7a505b3466b718fe4d1b4e40
 
 UNUSED LICENSES:
 
@@ -10252,8 +10252,8 @@ FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/bindings/types.dart
 FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/collections/closable_iterator.dart
 FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/database.dart
 FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/ffi/dylib_utils.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/rti.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/recipe_syntax.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/rti.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/synced/recipe_syntax.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_dynamic_library_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_type_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_patch.dart
@@ -10681,7 +10681,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/debugge
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/developer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/preambles/d8.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/preambles/jsshell.js
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/async_await_error_codes.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/async_await_error_codes.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/async_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/compact_hash.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/developer.dart
@@ -12511,7 +12511,7 @@ FILE: ../../../third_party/dart/runtime/vm/unibrow.h
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambles/d8.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambles/jsshell.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/linked_hash_map.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/embedded_names.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/embedded_names.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/convert_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/lib_prefix.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/profiler.dart
