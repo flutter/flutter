@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -341,7 +342,7 @@ abstract class SelectableChipAttributes {
   ///
   /// ```dart
   /// class Wood extends StatefulWidget {
-  ///   const Wood({Key? key}) : super(key: key);
+  ///   const Wood({super.key});
   ///
   ///   @override
   ///   State<StatefulWidget> createState() => WoodState();
@@ -478,7 +479,7 @@ abstract class TappableChipAttributes {
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
-  ///   const Blacksmith({Key? key}) : super(key: key);
+  ///   const Blacksmith({super.key});
   ///
   ///   void startHammering() {
   ///     print('bang bang bang');
@@ -1111,7 +1112,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
       const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),
-      (MediaQuery.of(context).textScaleFactor - 1.0).clamp(0.0, 1.0),
+      clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
     )!;
 
     final ThemeData theme = Theme.of(context);

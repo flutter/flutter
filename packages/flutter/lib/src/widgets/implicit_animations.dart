@@ -18,7 +18,7 @@ import 'transitions.dart';
 
 // Examples can assume:
 // class MyWidget extends ImplicitlyAnimatedWidget {
-//   const MyWidget({Key? key, this.targetColor = Colors.black}) : super(key: key, duration: const Duration(seconds: 1));
+//   const MyWidget({super.key, this.targetColor = Colors.black}) : super(duration: const Duration(seconds: 1));
 //   final Color targetColor;
 //   @override
 //   MyWidgetState createState() => MyWidgetState();
@@ -848,7 +848,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
     return Padding(
       padding: _padding!
         .evaluate(animation)
-        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity),
+        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity), // ignore_clamp_double_lint
       child: widget.child,
     );
   }
@@ -1300,7 +1300,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///
 /// ```dart
 /// class LogoScale extends StatefulWidget {
-///   const LogoScale({Key? key}) : super(key: key);
+///   const LogoScale({super.key});
 ///
 ///   @override
 ///   State<LogoScale> createState() => LogoScaleState();
@@ -1430,7 +1430,7 @@ class _AnimatedScaleState extends ImplicitlyAnimatedWidgetState<AnimatedScale> {
 ///
 /// ```dart
 /// class LogoRotate extends StatefulWidget {
-///   const LogoRotate({Key? key}) : super(key: key);
+///   const LogoRotate({super.key});
 ///
 ///   @override
 ///   State<LogoRotate> createState() => LogoRotateState();
@@ -1642,7 +1642,7 @@ class _AnimatedSlideState extends ImplicitlyAnimatedWidgetState<AnimatedSlide> {
 ///
 /// ```dart
 /// class LogoFade extends StatefulWidget {
-///   const LogoFade({Key? key}) : super(key: key);
+///   const LogoFade({super.key});
 ///
 ///   @override
 ///   State<LogoFade> createState() => LogoFadeState();

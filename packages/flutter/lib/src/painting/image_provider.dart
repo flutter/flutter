@@ -234,9 +234,9 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 /// ```dart
 /// class MyImage extends StatefulWidget {
 ///   const MyImage({
-///     Key? key,
+///     super.key,
 ///     required this.imageProvider,
-///   }) : super(key: key);
+///   });
 ///
 ///   final ImageProvider imageProvider;
 ///
@@ -515,9 +515,9 @@ abstract class ImageProvider<T extends Object> {
   /// ```dart
   /// class MyWidget extends StatelessWidget {
   ///   const MyWidget({
-  ///     Key? key,
+  ///     super.key,
   ///     this.url = ' ... ',
-  ///   }) : super(key: key);
+  ///   });
   ///
   ///   final String url;
   ///
