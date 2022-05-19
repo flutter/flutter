@@ -208,15 +208,13 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     final double topAmountInEditableRegion = startTextSelectionPoint.point.dy - widget.textLineHeight;
     final double anchorTop = math.max(topAmountInEditableRegion, 0) + widget.globalEditableRegion.top - _kToolbarContentDistance;
 
-    final double bottomAmountInEditableRegion =  endTextSelectionPoint.point.dy;
-    final double anchorBottom = math.min(bottomAmountInEditableRegion, widget.globalEditableRegion.size.height) + widget.globalEditableRegion.top + _kToolbarContentDistanceBelow;
     final Offset anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
       anchorTop,
     );
     final Offset anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
-      anchorBottom,
+      widget.globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
     );
 
     // Determine which buttons will appear so that the order and total number is
