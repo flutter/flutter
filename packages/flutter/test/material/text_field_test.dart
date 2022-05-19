@@ -11399,4 +11399,58 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
+
+  testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/103228
+    final FocusNode focusNode1 = FocusNode();
+    final FocusNode focusNode2 = FocusNode();
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              TextField(
+                key: key1,
+                focusNode: focusNode1,
+              ),
+              TextField(
+                key: key2,
+                focusNode: focusNode2,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Interact with the field to establish the input connection.
+    await tester.tapAt(
+      tester.getCenter(find.byKey(key1)),
+      buttons: kSecondaryButton,
+    );
+    await tester.pump();
+
+    expect(focusNode1.hasFocus, isTrue);
+    expect(focusNode2.hasFocus, isFalse);
+
+    await tester.tapAt(
+      tester.getCenter(find.byKey(key2)),
+      buttons: kSecondaryButton,
+    );
+    await tester.pump();
+
+    expect(focusNode1.hasFocus, isFalse);
+    expect(focusNode2.hasFocus, isTrue);
+
+    await tester.tapAt(
+      tester.getCenter(find.byKey(key1)),
+      buttons: kSecondaryButton,
+    );
+    await tester.pump();
+
+    expect(focusNode1.hasFocus, isTrue);
+    expect(focusNode2.hasFocus, isFalse);
+  });
 }
