@@ -1,4 +1,4 @@
-Signature: c7811ebeb575cfefa7e590248cb5c0b4
+Signature: 056be0c9e7c7c6c0cde9273ee9bb537e
 
 UNUSED LICENSES:
 
@@ -3004,8 +3004,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/LatticeOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/LatticeOp.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TriangulatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TriangulatingPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrDistanceFieldAdjustTable.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrDistanceFieldAdjustTable.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlob.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlob.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlobRedrawCoordinator.cpp
@@ -3072,6 +3070,8 @@ FILE: ../../../third_party/skia/src/shaders/SkImageShader.h
 FILE: ../../../third_party/skia/src/svg/SkSVGCanvas.cpp
 FILE: ../../../third_party/skia/src/svg/SkSVGDevice.cpp
 FILE: ../../../third_party/skia/src/svg/SkSVGDevice.h
+FILE: ../../../third_party/skia/src/text/gpu/DistanceFieldAdjustTable.cpp
+FILE: ../../../third_party/skia/src/text/gpu/DistanceFieldAdjustTable.h
 FILE: ../../../third_party/skia/src/text/gpu/StrikeCache.cpp
 FILE: ../../../third_party/skia/src/text/gpu/StrikeCache.h
 FILE: ../../../third_party/skia/src/utils/SkPaintFilterCanvas.cpp
@@ -3626,8 +3626,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrAtlasManager.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrSDFMaskFilter.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrSDFMaskFilter.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkAMDMemoryAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkAMDMemoryAllocator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkCommandPool.cpp
@@ -3653,6 +3651,7 @@ FILE: ../../../third_party/skia/src/pdf/SkPDFTag.h
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
+FILE: ../../../third_party/skia/src/text/gpu/SDFMaskFilter.cpp
 FILE: ../../../third_party/skia/src/utils/SkAnimCodecPlayer.cpp
 FILE: ../../../third_party/skia/src/utils/SkCallableTraits.h
 FILE: ../../../third_party/skia/src/utils/SkJSON.cpp
@@ -4305,14 +4304,14 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/SmallPathAtlasMgr.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/SmallPathAtlasMgr.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/SmallPathShapeData.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/SmallPathShapeData.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrSDFTControl.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrSDFTControl.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/MiddleOutPolygonTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/StrokeIterator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/WangsFormula.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_skx.cpp
 FILE: ../../../third_party/skia/src/ports/SkScalerContext_mac_ct.h
 FILE: ../../../third_party/skia/src/ports/SkTypeface_mac_ct.h
+FILE: ../../../third_party/skia/src/text/gpu/SDFTControl.cpp
+FILE: ../../../third_party/skia/src/text/gpu/SDFTControl.h
 FILE: ../../../third_party/skia/src/utils/mac/SkCGBase.h
 FILE: ../../../third_party/skia/src/utils/mac/SkCGGeometry.h
 FILE: ../../../third_party/skia/src/utils/mac/SkCTFont.cpp
@@ -6529,6 +6528,7 @@ FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.h
+FILE: ../../../third_party/skia/src/text/gpu/SDFMaskFilter.h
 FILE: ../../../third_party/skia/src/utils/SkBlitterTrace.h
 FILE: ../../../third_party/skia/src/utils/SkBlitterTraceCommon.h
 FILE: ../../../third_party/skia/src/utils/SkCycles.h
