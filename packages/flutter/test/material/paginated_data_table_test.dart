@@ -75,10 +75,6 @@ class ForceRefreshDataSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     return null;
-<<<<<<< HEAD
-=======
-    
->>>>>>> 7e459aadb2 (FIX - #102861)
   }
 
   @override
