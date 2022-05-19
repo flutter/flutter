@@ -142,3 +142,17 @@ task:
       only_if: "$CIRRUS_PR != ''"
       script:
         - ./dev/bots/docs.sh
+
+    - name: customer_testing-linux
+      only_if: "$CIRRUS_PR != ''"
+      environment:
+        # Empirically, this shard runs fine at 1 CPU and 4G RAM as of October 2019. We will probably
+        # want to grow this container when we invite people to add their tests in large numbers.
+        SHOULD_UPDATE_PACKAGES: "FALSE"
+      script:
+        # Cirrus doesn't give us the master branch, so we have to fetch it for ourselves,
+        # otherwise we won't be able to figure out how old or new our current branch is.
+        - git config user.email "cirrus-bot@invalid"
+        - git fetch origin master:master
+        # The actual logic is in a shell script so that it can be shared between CIs.
+        - (cd dev/customer_testing/; ./ci.sh)
