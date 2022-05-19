@@ -430,7 +430,7 @@ class VswhereDetails {
   factory VswhereDetails.fromJson(Map<String, dynamic> details) {
     final Map<String, dynamic>? catalog = details['catalog'] as Map<String, dynamic>?;
 
-    final VswhereDetails result = VswhereDetails(
+    return VswhereDetails(
       installationPath: details['installationPath'] as String?,
       displayName: details['displayName'] as String?,
       fullVersion: details['installationVersion'] as String?,
@@ -440,8 +440,6 @@ class VswhereDetails {
       isPrerelease: details['isPrerelease'] as bool?,
       catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?,
     );
-
-    return result;
   }
 
   /// The root directory of the Visual Studio installation.
