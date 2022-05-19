@@ -1786,7 +1786,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         case TargetPlatform.fuchsia:
           // Collapse the selection and hide the toolbar and handles.
           userUpdateTextEditingValueWithDeltas(
-            [
+            <TextEditingDelta>[
               TextEditingDeltaNonTextUpdate(
                 oldText: textEditingValue.text,
                 selection: TextSelection.collapsed(offset: textEditingValue.selection.end),
@@ -1850,7 +1850,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final int lastSelectionIndex = math.max(selection.baseOffset, selection.extentOffset);
 
     userUpdateTextEditingValueWithDeltas(
-      [
+      <TextEditingDelta>[
         TextEditingDeltaReplacement(
           oldText: textEditingValue.text,
           replacementText: data.text!,
@@ -1881,10 +1881,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // selecting it.
       return;
     }
-    userUpdateTextEditingValue(
-      textEditingValue.copyWith(
-        selection: TextSelection(baseOffset: 0, extentOffset: textEditingValue.text.length),
-      ),
+    userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(
+            oldText: textEditingValue.text,
+            selection: TextSelection(baseOffset: 0, extentOffset: textEditingValue.text.length,),
+            composing: textEditingValue.composing,
+        ),
+      ],
       cause,
     );
     if (cause == SelectionChangedCause.toolbar) {
@@ -3052,6 +3056,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
 
+  /// Indicates that the user has requested to apply [TextEditingDelta]s to its
+  /// current text editing state with [deltas].
   void userUpdateTextEditingValueWithDeltas(List<TextEditingDelta> deltas, SelectionChangedCause? cause) {
     TextEditingValue newValue = _value;
 
@@ -3362,7 +3368,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         composing: newValue.composing,
     );
 
-    userUpdateTextEditingValueWithDeltas([replacementDelta], intent.cause);
+    userUpdateTextEditingValueWithDeltas(<TextEditingDelta>[replacementDelta], intent.cause);
 
     // If there's no change in text and selection (e.g. when selecting and
     // pasting identical text), the widget won't be rebuilt on value update.
@@ -3386,7 +3392,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         composing: newValue.composing,
     );
 
-    userUpdateTextEditingValueWithDeltas([deletionDelta], intent.cause);
+    userUpdateTextEditingValueWithDeltas(<TextEditingDelta>[deletionDelta], intent.cause);
 
     // If there's no change in text and selection (e.g. when selecting and
     // pasting identical text), the widget won't be rebuilt on value update.
@@ -3412,7 +3418,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _updateSelection(UpdateSelectionIntent intent) {
     bringIntoView(intent.newSelection.extent);
     userUpdateTextEditingValueWithDeltas(
-      [
+      <TextEditingDelta>[
         TextEditingDeltaNonTextUpdate(
           oldText: intent.currentTextEditingValue.text,
           selection: intent.newSelection,
@@ -3453,8 +3459,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       : textBoundary.getLeadingTextBoundaryAt(position);
 
     final TextSelection newSelection = textBoundarySelection.expandTo(newExtent, textBoundarySelection.isCollapsed || extentAtIndex);
-    userUpdateTextEditingValue(
-      _value.copyWith(selection: newSelection),
+    userUpdateTextEditingValueWithDeltas(
+      <TextEditingDelta>[
+        TextEditingDeltaNonTextUpdate(oldText: _value.text, selection: newSelection, composing: _value.composing),
+      ],
       SelectionChangedCause.keyboard,
     );
     bringIntoView(newSelection.extent);
