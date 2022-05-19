@@ -103,7 +103,7 @@ public class InputConnectionAdaptorTest {
             testView, inputTargetId, textInputChannel, mockKeyboardManager, spyEditable, outAttrs);
 
     // Send an enter key and make sure the Editable received it.
-    FakeKeyEvent keyEvent = new FakeKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER);
+    FakeKeyEvent keyEvent = new FakeKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER, '\n');
     inputConnectionAdaptor.handleKeyEvent(keyEvent);
     verify(spyEditable, times(1)).insert(eq(0), anyString());
   }
@@ -1115,7 +1115,7 @@ public class InputConnectionAdaptorTest {
     ListenableEditingState editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
 
-    FakeKeyEvent keyEvent = new FakeKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
+    FakeKeyEvent keyEvent = new FakeKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK, '\b');
     boolean didConsume = adaptor.handleKeyEvent(keyEvent);
 
     assertFalse(didConsume);
