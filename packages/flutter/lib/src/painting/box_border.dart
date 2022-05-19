@@ -463,7 +463,9 @@ class Border extends BoxBorder {
 
   bool get _strokeAlignIsUniform {
     final StrokeAlign topStrokeAlign = top.strokeAlign;
-    return right.strokeAlign == topStrokeAlign && bottom.strokeAlign == topStrokeAlign && left.strokeAlign == topStrokeAlign;
+    return right.strokeAlign == topStrokeAlign
+        && bottom.strokeAlign == topStrokeAlign
+        && left.strokeAlign == topStrokeAlign;
   }
 
   @override
@@ -771,7 +773,9 @@ class BorderDirectional extends BoxBorder {
 
   bool get _strokeAlignIsUniform {
     final StrokeAlign topStrokeAlign = top.strokeAlign;
-    return start.strokeAlign == topStrokeAlign && bottom.strokeAlign == topStrokeAlign && end.strokeAlign == topStrokeAlign;
+    return start.strokeAlign == topStrokeAlign
+        && bottom.strokeAlign == topStrokeAlign
+        && end.strokeAlign == topStrokeAlign;
   }
 
   @override
