@@ -3191,17 +3191,21 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
   late int _depth;
 
+  /// Returns result < 0 when [a] < [b], result == 0 when [a] == [b], result > 0
+  /// when [a] > [b].
   static int _sort(Element a, Element b) {
-    // If depths are not equal, return the difference.
     final int diff = a.depth - b.depth;
+    // If depths are not equal, return the difference.
     if (diff != 0) {
       return diff;
     }
-    // Iff one of the elements is dirty defer to that.
-    if (a.dirty ^ b.dirty) {
-      return b.dirty ? -1 : 1;
+    // If the `dirty` values are not equal, sort with non-dirty elements being
+    // less than dirty elements.
+    final bool isBDirty = b.dirty;
+    if (a.dirty ^ isBDirty) {
+      return isBDirty ? -1 : 1;
     }
-    // Otherwise, depths and dirty are equal.
+    // Otherwise, `depth`s and `dirty`s are equal.
     return 0;
   }
 
