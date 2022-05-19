@@ -257,6 +257,7 @@ class VisualStudio {
   static const String _windows10SdkRegistryKey = 'InstallationFolder';
 
   /// Returns the details of the newest version of Visual Studio.
+  /// 
   /// If [validateRequirements] is set, the search will be limited to versions
   /// that have all of the required workloads and components.
   VswhereDetails? _visualStudioDetails({
@@ -446,6 +447,24 @@ class VswhereDetails {
     required this.catalogDisplayVersion,
   });
 
+  /// Create a `VswhereDetails` from the JSON output of vswhere.exe.
+  factory VswhereDetails.fromJson(Map<String, dynamic> details) {
+    final Map<String, dynamic>? catalog = details['catalog'] as Map<String, dynamic>?;
+
+    final VswhereDetails result = VswhereDetails(
+      installationPath: details['installationPath'] as String?,
+      displayName: details['displayName'] as String?,
+      fullVersion: details['installationVersion'] as String?,
+      isComplete: details['isComplete'] as bool?,
+      isLaunchable: details['isLaunchable'] as bool?,
+      isRebootRequired: details['isRebootRequired'] as bool?,
+      isPrerelease: details['isPrerelease'] as bool?,
+      catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?,
+    );
+
+    return result;
+  }
+
   /// The root directory of the Visual Studio installation.
   final String? installationPath;
 
@@ -465,21 +484,4 @@ class VswhereDetails {
 
   /// The user-friendly version.
   final String? catalogDisplayVersion;
-
-  /// Create a `VswhereDetails` from the JSON output of vswhere.exe.
-  static VswhereDetails fromJson(Map<String, dynamic> details) {
-    final Map<String, dynamic>? catalog = details['catalog'] as Map<String, dynamic>?;
-
-    final VswhereDetails result = VswhereDetails(
-      installationPath: details['installationPath'] as String?,
-      displayName: details['displayName'] as String?,
-      fullVersion: details['installationVersion'] as String?,
-      isComplete: details['isComplete'] as bool?,
-      isLaunchable: details['isLaunchable'] as bool?,
-      isRebootRequired: details['isRebootRequired'] as bool?,
-      isPrerelease: details['isPrerelease'] as bool?,
-      catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?);
-
-    return result;
-  }
 }
