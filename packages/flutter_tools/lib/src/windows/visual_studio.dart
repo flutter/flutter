@@ -73,7 +73,6 @@ class VisualStudio {
     if (_bestVisualStudioDetails == null) {
       return false;
     }
-
     return _bestVisualStudioDetails!.isComplete ?? true;
   }
 
@@ -288,12 +287,10 @@ class VisualStudio {
       ], encoding: utf8);
       if (whereResult.exitCode == 0) {
         final List<Map<String, dynamic>> installations =
-          (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
-        if (installations.isEmpty) {
-          return null;
+            (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
+        if (installations.isNotEmpty) {
+          return VswhereDetails.fromJson(installations[0]);
         }
-
-        return VswhereDetails.fromJson(installations[0]);
       }
     } on ArgumentError {
       // Thrown if vswhere doesn't exist; ignore and return null below.
