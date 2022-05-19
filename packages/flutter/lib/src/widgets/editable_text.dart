@@ -3411,8 +3411,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _updateSelection(UpdateSelectionIntent intent) {
     bringIntoView(intent.newSelection.extent);
-    userUpdateTextEditingValue(
-      intent.currentTextEditingValue.copyWith(selection: intent.newSelection),
+    userUpdateTextEditingValueWithDeltas(
+      [
+        TextEditingDeltaNonTextUpdate(
+          oldText: intent.currentTextEditingValue.text,
+          selection: intent.newSelection,
+          composing: currentTextEditingValue.composing,
+        ),
+      ],
       intent.cause,
     );
   }
