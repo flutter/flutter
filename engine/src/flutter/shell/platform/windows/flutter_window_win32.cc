@@ -171,9 +171,11 @@ void FlutterWindowWin32::OnPointerUp(double x,
   }
 }
 
-void FlutterWindowWin32::OnPointerLeave(FlutterPointerDeviceKind device_kind,
+void FlutterWindowWin32::OnPointerLeave(double x,
+                                        double y,
+                                        FlutterPointerDeviceKind device_kind,
                                         int32_t device_id) {
-  binding_handler_delegate_->OnPointerLeave(device_kind, device_id);
+  binding_handler_delegate_->OnPointerLeave(x, y, device_kind, device_id);
 }
 
 void FlutterWindowWin32::OnSetCursor() {

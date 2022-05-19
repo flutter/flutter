@@ -196,9 +196,11 @@ void FlutterWindowsView::OnPointerUp(
   }
 }
 
-void FlutterWindowsView::OnPointerLeave(FlutterPointerDeviceKind device_kind,
+void FlutterWindowsView::OnPointerLeave(double x,
+                                        double y,
+                                        FlutterPointerDeviceKind device_kind,
                                         int32_t device_id) {
-  SendPointerLeave(GetOrCreatePointerState(device_kind, device_id));
+  SendPointerLeave(x, y, GetOrCreatePointerState(device_kind, device_id));
 }
 
 void FlutterWindowsView::OnText(const std::u16string& text) {
@@ -369,8 +371,12 @@ void FlutterWindowsView::SendPointerUp(double x,
   }
 }
 
-void FlutterWindowsView::SendPointerLeave(PointerState* state) {
+void FlutterWindowsView::SendPointerLeave(double x,
+                                          double y,
+                                          PointerState* state) {
   FlutterPointerEvent event = {};
+  event.x = x;
+  event.y = y;
   event.phase = FlutterPointerPhase::kRemove;
   SendPointerEventWithData(event, state);
 }

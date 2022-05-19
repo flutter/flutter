@@ -332,7 +332,7 @@ WindowWin32::HandleMessage(UINT const message,
           } else if (touch.dwFlags & TOUCHEVENTF_UP) {
             OnPointerUp(x, y, kFlutterPointerDeviceKindTouch, touch_id,
                         WM_LBUTTONDOWN);
-            OnPointerLeave(kFlutterPointerDeviceKindTouch, touch_id);
+            OnPointerLeave(x, y, kFlutterPointerDeviceKindTouch, touch_id);
             touch_id_generator_.ReleaseNumber(touch.dwID);
           }
         }
@@ -347,15 +347,17 @@ WindowWin32::HandleMessage(UINT const message,
 
         xPos = GET_X_LPARAM(lparam);
         yPos = GET_Y_LPARAM(lparam);
+        mouse_x_ = static_cast<double>(xPos);
+        mouse_y_ = static_cast<double>(yPos);
 
-        OnPointerMove(static_cast<double>(xPos), static_cast<double>(yPos),
-                      device_kind, kDefaultPointerDeviceId);
+        OnPointerMove(mouse_x_, mouse_y_, device_kind, kDefaultPointerDeviceId);
       }
       break;
     case WM_MOUSELEAVE:
       device_kind = GetFlutterPointerDeviceKind();
       if (device_kind == kFlutterPointerDeviceKindMouse) {
-        OnPointerLeave(device_kind, kDefaultPointerDeviceId);
+        OnPointerLeave(mouse_x_, mouse_y_, device_kind,
+                       kDefaultPointerDeviceId);
       }
 
       // Once the tracked event is received, the TrackMouseEvent function

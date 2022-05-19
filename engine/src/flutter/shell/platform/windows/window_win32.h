@@ -118,7 +118,9 @@ class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
                            UINT button) = 0;
 
   // Called when the mouse leaves the window.
-  virtual void OnPointerLeave(FlutterPointerDeviceKind device_kind,
+  virtual void OnPointerLeave(double x,
+                              double y,
+                              FlutterPointerDeviceKind device_kind,
                               int32_t device_id) = 0;
 
   // Called when the cursor should be set for the client area.
@@ -242,6 +244,10 @@ class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
   // Keeps track of the last key code produced by a WM_KEYDOWN or WM_SYSKEYDOWN
   // message.
   int keycode_for_char_message_ = 0;
+
+  // Keeps track of the last mouse coordinates by a WM_MOUSEMOVE message.
+  double mouse_x_ = 0;
+  double mouse_y_ = 0;
 
   // Manages IME state.
   std::unique_ptr<TextInputManagerWin32> text_input_manager_;
