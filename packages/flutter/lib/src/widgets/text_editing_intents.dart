@@ -304,6 +304,22 @@ class ReplaceTextIntent extends Intent {
   final SelectionChangedCause cause;
 }
 
+/// An [Intent] that represents a user interaction that attempts to modify the
+/// current [TextEditingValue] in an input field.
+class DeleteTextIntent extends Intent {
+  /// Creates a [ReplaceTextIntent].
+  const DeleteTextIntent(this.currentTextEditingValue, this.deletedRange, this.cause);
+
+  /// The [TextEditingValue] that this [Intent]'s action should perform on.
+  final TextEditingValue currentTextEditingValue;
+
+  /// The range of text in [currentTextEditingValue] that needs to be replaced.
+  final TextRange deletedRange;
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
+  final SelectionChangedCause cause;
+}
+
 /// An [Intent] that represents a user interaction that attempts to go back to
 /// the previous editing state.
 class UndoTextIntent extends Intent {

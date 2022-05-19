@@ -1785,11 +1785,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
           // Collapse the selection and hide the toolbar and handles.
-          userUpdateTextEditingValue(
-            TextEditingValue(
-              text: textEditingValue.text,
-              selection: TextSelection.collapsed(offset: textEditingValue.selection.end),
-            ),
+          userUpdateTextEditingValueWithDeltas(
+            [
+              TextEditingDeltaNonTextUpdate(
+                oldText: textEditingValue.text,
+                selection: TextSelection.collapsed(offset: textEditingValue.selection.end),
+                composing: TextRange.empty,
+              ),
+            ],
             SelectionChangedCause.toolbar,
           );
           break;
@@ -1845,14 +1848,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // After the paste, the cursor should be collapsed and located after the
     // pasted content.
     final int lastSelectionIndex = math.max(selection.baseOffset, selection.extentOffset);
-    final TextEditingValue collapsedTextEditingValue = textEditingValue.copyWith(
-      selection: TextSelection.collapsed(offset: lastSelectionIndex),
-    );
 
-    userUpdateTextEditingValue(
-      collapsedTextEditingValue.replaced(selection, data.text!),
+    userUpdateTextEditingValueWithDeltas(
+      [
+        TextEditingDeltaReplacement(
+          oldText: textEditingValue.text,
+          replacementText: data.text!,
+          replacedRange: selection,
+          selection: TextSelection.collapsed(offset: lastSelectionIndex),
+          composing: TextRange.empty,
+        ),
+      ],
       cause,
     );
+
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -3043,6 +3052,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
 
+  void userUpdateTextEditingValueWithDeltas(List<TextEditingDelta> deltas, SelectionChangedCause? cause) {
+    TextEditingValue newValue = _value;
+
+    for (final TextEditingDelta delta in deltas) {
+      newValue = delta.apply(newValue);
+    }
+
+    userUpdateTextEditingValue(newValue, cause);
+  }
+
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
     // Compare the current TextEditingValue with the pre-format new
@@ -3334,7 +3353,40 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       intent.replacementRange,
       intent.replacementText,
     );
-    userUpdateTextEditingValue(newValue, intent.cause);
+
+    final TextEditingDeltaReplacement replacementDelta = TextEditingDeltaReplacement(
+        oldText: oldValue.text,
+        replacementText: intent.replacementText,
+        replacedRange: intent.replacementRange,
+        selection: newValue.selection,
+        composing: newValue.composing,
+    );
+
+    userUpdateTextEditingValueWithDeltas([replacementDelta], intent.cause);
+
+    // If there's no change in text and selection (e.g. when selecting and
+    // pasting identical text), the widget won't be rebuilt on value update.
+    // Handle this by calling _didChangeTextEditingValue() so caret and scroll
+    // updates can happen.
+    if (newValue == oldValue) {
+      _didChangeTextEditingValue();
+    }
+  }
+  void _deleteText(DeleteTextIntent intent) {
+    final TextEditingValue oldValue = _value;
+    final TextEditingValue newValue = intent.currentTextEditingValue.replaced(
+      intent.deletedRange,
+      '',
+    );
+
+    final TextEditingDeltaDeletion deletionDelta = TextEditingDeltaDeletion(
+        oldText: oldValue.text,
+        deletedRange: intent.deletedRange,
+        selection: newValue.selection,
+        composing: newValue.composing,
+    );
+
+    userUpdateTextEditingValueWithDeltas([deletionDelta], intent.cause);
 
     // If there's no change in text and selection (e.g. when selecting and
     // pasting identical text), the widget won't be rebuilt on value update.
@@ -3345,6 +3397,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
   late final Action<ReplaceTextIntent> _replaceTextAction = CallbackAction<ReplaceTextIntent>(onInvoke: _replaceText);
+  late final Action<DeleteTextIntent> _deleteTextAction = CallbackAction<DeleteTextIntent>(onInvoke: _deleteText);
 
   // Scrolls either to the beginning or end of the document depending on the
   // intent's `forward` parameter.
@@ -3412,6 +3465,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
+    DeleteTextIntent: _deleteTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
     DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
@@ -4218,7 +4272,7 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     if (!selection.isCollapsed) {
       return Actions.invoke(
         context!,
-        ReplaceTextIntent(state._value, '', _expandNonCollapsedRange(state._value), SelectionChangedCause.keyboard),
+        DeleteTextIntent(state._value, _expandNonCollapsedRange(state._value), SelectionChangedCause.keyboard),
       );
     }
 
@@ -4229,15 +4283,14 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     if (!textBoundary.textEditingValue.selection.isCollapsed) {
       return Actions.invoke(
         context!,
-        ReplaceTextIntent(state._value, '', _expandNonCollapsedRange(textBoundary.textEditingValue), SelectionChangedCause.keyboard),
+        DeleteTextIntent(state._value, _expandNonCollapsedRange(textBoundary.textEditingValue), SelectionChangedCause.keyboard),
       );
     }
 
     return Actions.invoke(
       context!,
-      ReplaceTextIntent(
+      DeleteTextIntent(
         textBoundary.textEditingValue,
-        '',
         textBoundary.getTextBoundaryAt(textBoundary.textEditingValue.selection.base),
         SelectionChangedCause.keyboard,
       ),
