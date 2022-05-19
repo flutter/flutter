@@ -317,37 +317,26 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     );
   }
 
-  DataRow _getProgressIndicatorRowFor(int index) {
-    bool haveProgressIndicator = false;
-    final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
-      if (!column.numeric) {
-        haveProgressIndicator = true;
-        return const DataCell(CircularProgressIndicator());
+  bool _haveProgressIndicator(int firstRowIndex, int rowsPerPage) {
+    final int nextPageFirstRowIndex = firstRowIndex + rowsPerPage;
+    for (int index = firstRowIndex; index < nextPageFirstRowIndex; index += 1) {
+      if (index < _rowCount || _rowCountApproximate) {
+        if (widget.source.getRow(index) == null) {
+          return true;
+        }
       }
-      return DataCell.empty;
-    }).toList();
-    if (!haveProgressIndicator) {
-      haveProgressIndicator = true;
-      cells[0] = const DataCell(CircularProgressIndicator());
     }
-    return DataRow.byIndex(
-      index: index,
-      cells: cells,
-    );
+    return false;
   }
 
   List<DataRow> _getRows(int firstRowIndex, int rowsPerPage) {
     final List<DataRow> result = <DataRow>[];
     final int nextPageFirstRowIndex = firstRowIndex + rowsPerPage;
-    bool haveProgressIndicator = false;
+
     for (int index = firstRowIndex; index < nextPageFirstRowIndex; index += 1) {
       DataRow? row;
       if (index < _rowCount || _rowCountApproximate) {
         row = _rows.putIfAbsent(index, () => widget.source.getRow(index));
-        if (row == null && !haveProgressIndicator) {
-          row ??= _getProgressIndicatorRowFor(index);
-          haveProgressIndicator = true;
-        }
       }
       row ??= _getBlankRowFor(index);
       result.add(row);
@@ -518,26 +507,43 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 primary: widget.primary,
                 controller: widget.controller,
                 dragStartBehavior: widget.dragStartBehavior,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: constraints.minWidth),
-                  child: DataTable(
-                    key: _tableKey,
-                    columns: widget.columns,
-                    sortColumnIndex: widget.sortColumnIndex,
-                    sortAscending: widget.sortAscending,
-                    onSelectAll: widget.onSelectAll,
-                    // Make sure no decoration is set on the DataTable
-                    // from the theme, as its already wrapped in a Card.
-                    decoration: const BoxDecoration(),
-                    dataRowHeight: widget.dataRowHeight,
-                    headingRowHeight: widget.headingRowHeight,
-                    horizontalMargin: widget.horizontalMargin,
-                    checkboxHorizontalMargin: widget.checkboxHorizontalMargin,
-                    columnSpacing: widget.columnSpacing,
-                    showCheckboxColumn: widget.showCheckboxColumn,
-                    showBottomBorder: true,
-                    rows: _getRows(_firstRowIndex, widget.rowsPerPage),
-                  ),
+                child: Stack(
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: constraints.minWidth),
+                      child: DataTable(
+                        key: _tableKey,
+                        columns: widget.columns,
+                        sortColumnIndex: widget.sortColumnIndex,
+                        sortAscending: widget.sortAscending,
+                        onSelectAll: widget.onSelectAll,
+                        // Make sure no decoration is set on the DataTable
+                        // from the theme, as its already wrapped in a Card.
+                        decoration: const BoxDecoration(),
+                        dataRowHeight: widget.dataRowHeight,
+                        headingRowHeight: widget.headingRowHeight,
+                        horizontalMargin: widget.horizontalMargin,
+                        checkboxHorizontalMargin: widget.checkboxHorizontalMargin,
+                        columnSpacing: widget.columnSpacing,
+                        showCheckboxColumn: widget.showCheckboxColumn,
+                        showBottomBorder: true,
+                        rows: _getRows(_firstRowIndex, widget.rowsPerPage),
+                      ),
+                    ),
+                    if (_haveProgressIndicator(
+                      _firstRowIndex,
+                      widget.rowsPerPage,
+                    ))
+                      Positioned(
+                        top: widget.headingRowHeight - 4,
+                        width: constraints.minWidth,
+                        child: const SizedBox(
+                          height: 4,
+                          // width: constraints.minWidth,
+                          child: LinearProgressIndicator(minHeight: 4),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               DefaultTextStyle(

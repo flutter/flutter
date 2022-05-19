@@ -69,6 +69,25 @@ class TestDataSource extends DataTableSource {
   int get selectedRowCount => _selectedRows.length;
 }
 
+class ForceRefreshDataSource extends DataTableSource {
+  ForceRefreshDataSource();
+
+  @override
+  DataRow? getRow(int index) {
+    return null;
+    
+  }
+
+  @override
+  int get rowCount =>100;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+}
+
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -1125,5 +1144,67 @@ void main() {
     // Footer does not use primaryScrollController
     final Scrollable footerScrollView = tester.widget(find.byType(Scrollable).last);
     expect(footerScrollView.controller, null);
+  });
+
+  testWidgets('LinearProgressIndicator is the same size of the DataTable',
+      (WidgetTester tester) async {
+    // Note: 800 is wide enough to ensure that all of the columns fit in the
+    // Card. The test makes sure that the DataTable is exactly as wide
+    // as the Card, minus the Card's margin.
+    const double originalWidth = 800;
+    const double expandedWidth = 1600;
+    const double height = 400;
+
+    final Size originalSize = binding.renderView.size;
+
+    Widget buildWidget() => MaterialApp(
+          home: PaginatedDataTable(
+            header: const Text('Test table'),
+            source: ForceRefreshDataSource(),
+            rowsPerPage: 2,
+            availableRowsPerPage: const <int>[
+              2,
+              4,
+              8,
+              16,
+            ],
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Calories'), numeric: true),
+              DataColumn(label: Text('Generation')),
+            ],
+          ),
+        );
+
+    await binding.setSurfaceSize(const Size(originalWidth, height));
+    await tester.pumpWidget(buildWidget());
+
+    double linearProgressWidth = tester
+        .renderObject<RenderBox>(find.byType(LinearProgressIndicator).first)
+        .size
+        .width;
+
+    // Widths should be equal before we resize...
+    expect(
+      tester.renderObject<RenderBox>(find.byType(DataTable).first).size.width,
+      moreOrLessEquals(linearProgressWidth),
+    );
+
+    await binding.setSurfaceSize(const Size(expandedWidth, height));
+    await tester.pumpWidget(buildWidget());
+
+    linearProgressWidth = tester
+        .renderObject<RenderBox>(find.byType(LinearProgressIndicator).first)
+        .size
+        .width;
+
+    // ... and should still be equal after the resize.
+    expect(
+      tester.renderObject<RenderBox>(find.byType(DataTable).first).size.width,
+      moreOrLessEquals(linearProgressWidth),
+    );
+
+    // Reset the surface size.
+    await binding.setSurfaceSize(originalSize);
   });
 }
