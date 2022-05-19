@@ -25,6 +25,7 @@ import 'framework.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ml5uefGgkaA}
 ///
+/// {@tool snippet}
 /// Widgets create a dependency on an [InheritedModel] with a static method:
 /// [InheritedModel.inheritFrom]. This method's `context` parameter
 /// defines the subtree that will be rebuilt when the model changes.
@@ -34,25 +35,25 @@ import 'framework.dart';
 /// ```dart
 /// class MyModel extends InheritedModel<String> {
 ///   // ...
-///   static MyModel of(BuildContext context, String aspect) {
+///   static MyModel? of(BuildContext context, String aspect) {
 ///     return InheritedModel.inheritFrom<MyModel>(context, aspect: aspect);
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// Calling `MyModel.of(context, 'foo')` means that `context` should only
 /// be rebuilt when the `foo` aspect of `MyModel` changes. If the aspect
 /// is null, then the model supports all aspects.
 ///
+/// {@tool snippet}
 /// When the inherited model is rebuilt the [updateShouldNotify] and
 /// [updateShouldNotifyDependent] methods are used to decide what
 /// should be rebuilt. If [updateShouldNotify] returns true, then the
 /// inherited model's [updateShouldNotifyDependent] method is tested for
 /// each dependent and the set of aspect objects it depends on.
 /// The [updateShouldNotifyDependent] method must compare the set of aspect
-/// dependencies with the changes in the model itself.
-///
-/// For example:
+/// dependencies with the changes in the model itself. For example:
 ///
 /// ```dart
 /// class ABModel extends InheritedModel<String> {
@@ -75,6 +76,7 @@ import 'framework.dart';
 ///   // ...
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// In the previous example the dependencies checked by
 /// [updateShouldNotifyDependent] are just the aspect strings passed to
@@ -83,6 +85,14 @@ import 'framework.dart';
 /// If a widget depends on the model but doesn't specify an aspect,
 /// then changes in the model will cause the widget to be rebuilt
 /// unconditionally.
+///
+/// {@tool dartpad}
+/// This example shows how to implement [InheritedModel] to rebuild a
+/// widget based on a qualified dependence. When tapped on "Resize Logo" button
+/// only the logo widget is rebuilt while background widget remains unaffected.
+///
+/// ** See code in examples/api/lib/widgets/inherited_model/inherited_model.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
