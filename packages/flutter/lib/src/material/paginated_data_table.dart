@@ -508,7 +508,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 controller: widget.controller,
                 dragStartBehavior: widget.dragStartBehavior,
                 child: Stack(
-                  children: [
+                  children: <Widget>[
                     ConstrainedBox(
                       constraints: BoxConstraints(minWidth: constraints.minWidth),
                       child: DataTable(
