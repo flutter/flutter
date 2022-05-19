@@ -107,6 +107,15 @@ class _PreferredAppBarSize extends Size {
 /// ** See code in examples/api/lib/material/app_bar/app_bar.0.dart **
 /// {@end-tool}
 ///
+/// Material Design 3 introduced new types of app bar.
+/// {@tool dartpad}
+/// This sample shows the creation of an [AppBar] widget with the [shadowColor] and
+/// [scrolledUnderElevation] properties set, as described in:
+/// https://m3.material.io/components/top-app-bar/overview
+///
+/// ** See code in examples/api/lib/material/app_bar/app_bar.1.dart **
+/// {@end-tool}
+///
 /// ## Troubleshooting
 ///
 /// ### Why don't my TextButton actions appear?
@@ -125,9 +134,10 @@ class _PreferredAppBarSize extends Size {
 /// [TextButton.style]:
 ///
 /// {@tool dartpad}
+/// This sample shows an [AppBar] with two action buttons with their primary
+/// color set to [ColorScheme.onPrimary].
 ///
-///
-/// ** See code in examples/api/lib/material/app_bar/app_bar.1.dart **
+/// ** See code in examples/api/lib/material/app_bar/app_bar.2.dart **
 /// {@end-tool}
 ///
 /// See also:
