@@ -218,7 +218,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   void copyArtifacts() {
     if(applicationBinaryPath != null) {
       copy(
-        file('$testOutputDirectory/app/outputs/flutter-apk/app-profile.apk'),
+        file('${galleryDirectory.path}/build/app/outputs/flutter-apk/app-profile.apk'),
         Directory(path.dirname(applicationBinaryPath!)),
         name: path.basename(applicationBinaryPath!),
       );
