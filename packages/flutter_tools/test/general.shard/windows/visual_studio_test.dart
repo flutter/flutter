@@ -866,7 +866,7 @@ void main() {
 
   group(VswhereDetails, () {
       test('Accepts empty JSON', () {
-        VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{});
+        final VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{});
 
         expect(result.installationPath, null);
         expect(result.displayName, null);
@@ -879,7 +879,7 @@ void main() {
       });
 
       test('Ignores unknown JSON properties', () {
-        VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{
+        final VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{
           'hello': 'world',
         });
 
@@ -894,7 +894,7 @@ void main() {
       });
 
       test('Accepts JSON', () {
-        VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{
+        final VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{
           'installationPath' : r'C:\foo\bar',
           'displayName' : 'Visual Studio Community 2019',
           'installationVersion' : '15.4.27004.2002',
