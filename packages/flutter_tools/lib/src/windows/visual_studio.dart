@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -324,7 +325,7 @@ class VisualStudio {
   }
 
   /// Returns the details for the latest version of Visual Studio that has all
-  /// the required components and is a support version, or null if there is no
+  /// the required components and is a supported version, or null if there is no
   /// such installation.
   ///
   /// If an installation with issues is found, `_anyVisualStudioDetails` is updated
@@ -432,6 +433,7 @@ class VisualStudio {
 }
 
 /// The details of a Visual Studio installation according to vswhere.
+@visibleForTesting
 class VswhereDetails {
   const VswhereDetails({
     required this.installationPath,
