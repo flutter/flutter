@@ -304,27 +304,6 @@ class VisualStudio {
     return null;
   }
 
-  /// Checks if the given installation has issues that the user must resolve.
-  ///
-  /// Returns false if the required information is missing since older versions
-  /// of Visual Studio might not include them.
-  bool installationHasIssues(VswhereDetails installationDetails) {
-    assert(installationDetails != null);
-    if (!(installationDetails.isComplete ?? true)) {
-      return true;
-    }
-
-    if (!(installationDetails.isLaunchable ?? true)) {
-      return true;
-    }
-
-    if (installationDetails.isRebootRequired ?? false) {
-      return true;
-    }
-
-    return false;
-  }
-
   /// Returns the details for the latest version of Visual Studio that has all
   /// the required components and is a supported version, or null if there is no
   /// such installation.
@@ -351,10 +330,10 @@ class VisualStudio {
 
     VswhereDetails? usableVisualStudioDetails;
     if (visualStudioDetails != null) {
-      if (installationHasIssues(visualStudioDetails)) {
-        _anyVisualStudioDetails = visualStudioDetails;
-      } else {
+      if (visualStudioDetails.isUsable) {
         usableVisualStudioDetails = visualStudioDetails;
+      } else {
+        _anyVisualStudioDetails = visualStudioDetails;
       }
     }
     return usableVisualStudioDetails;
@@ -484,4 +463,25 @@ class VswhereDetails {
 
   /// The user-friendly version.
   final String? catalogDisplayVersion;
+
+  /// Checks if the Visual Studio installation can be used by Flutter.
+  ///
+  /// Returns false if the installation has issues the user must resolve.
+  /// This may return true even if required information is missing as older
+  /// versions of Visual Studio might not include them.
+  bool get isUsable {
+    if (!(isComplete ?? true)) {
+      return false;
+    }
+
+    if (!(isLaunchable ?? true)) {
+      return false;
+    }
+
+    if (isRebootRequired ?? false) {
+      return false;
+    }
+
+    return true;
+  }
 }
