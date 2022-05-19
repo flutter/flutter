@@ -446,55 +446,39 @@ class VswhereDetails {
     required this.catalogDisplayVersion,
   });
 
-  // Keys in a VS details dictionary returned from vswhere.
-
   /// The root directory of the Visual Studio installation.
-  static const String _installationPathKey = 'installationPath';
+  final String? installationPath;
 
   /// The user-friendly name of the installation.
-  static const String _displayNameKey = 'displayName';
+  final String? displayName;
 
   /// The complete version.
-  static const String _fullVersionKey = 'installationVersion';
+  final String? fullVersion;
 
   /// Keys for the status of the installation.
-  static const String _isCompleteKey = 'isComplete';
-  static const String _isLaunchableKey = 'isLaunchable';
-  static const String _isRebootRequiredKey = 'isRebootRequired';
-
-  /// The key for a pre-release version.
-  static const String _isPrereleaseKey = 'isPrerelease';
-
-  /// The 'catalog' entry containing more details.
-  static const String _catalogKey = 'catalog';
-
-  /// The user-friendly version.
-  ///
-  /// This key is under the 'catalog' entry.
-  static const String _catalogDisplayVersionKey = 'productDisplayVersion';
-
-  final String? installationPath;
-  final String? displayName;
-  final String? fullVersion;
   final bool? isComplete;
   final bool? isLaunchable;
   final bool? isRebootRequired;
+
+  /// The key for a pre-release version.
   final bool? isPrerelease;
+
+  /// The user-friendly version.
   final String? catalogDisplayVersion;
 
   /// Create a `VswhereDetails` from the JSON output of vswhere.exe.
   static VswhereDetails fromJson(Map<String, dynamic> details) {
-    final Map<String, dynamic>? catalog = details[_catalogKey] as Map<String, dynamic>?;
+    final Map<String, dynamic>? catalog = details['catalog'] as Map<String, dynamic>?;
 
     final VswhereDetails result = VswhereDetails(
-      installationPath: details[_installationPathKey] as String?,
-      displayName: details[_displayNameKey] as String?,
-      fullVersion: details[_fullVersionKey] as String?,
-      isComplete: details[_isCompleteKey] as bool?,
-      isLaunchable: details[_isLaunchableKey] as bool?,
-      isRebootRequired: details[_isRebootRequiredKey] as bool?,
-      isPrerelease: details[_isPrereleaseKey] as bool?,
-      catalogDisplayVersion: catalog == null ? null : catalog[_catalogDisplayVersionKey] as String?);
+      installationPath: details['installationPath'] as String?,
+      displayName: details['displayName'] as String?,
+      fullVersion: details['installationVersion'] as String?,
+      isComplete: details['isComplete'] as bool?,
+      isLaunchable: details['isLaunchable'] as bool?,
+      isRebootRequired: details['isRebootRequired'] as bool?,
+      isPrerelease: details['isPrerelease'] as bool?,
+      catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?);
 
     return result;
   }
