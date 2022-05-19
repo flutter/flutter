@@ -808,11 +808,12 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///  * [Action], a class for defining an invocation of a user action.
 ///  * [CallbackAction], a class for creating an action from a callback.
 class Shortcuts extends StatefulWidget {
-  /// Creates a const [Shortcuts] widget that creates its own manager.
+  /// Creates a const [Shortcuts] widget that owns the map of shortcuts and
+  /// creates its own manager.
   ///
   /// The `manager` argument is deprecated. Use the [Shortcuts.manager]
   /// constructor instead. Once the deprecated argument is removed, [manager]
-  /// will always be null when this constructor is used.
+  /// will always return null when this constructor is used.
   ///
   /// The [child] and [shortcuts] arguments are required.
   const Shortcuts({
@@ -830,11 +831,13 @@ class Shortcuts extends StatefulWidget {
        assert(shortcuts != null),
        assert(child != null);
 
-  /// Constructs a const [Shortcuts] widget that allows the [manager] to
-  /// determine by itself what the map of shortcuts is.
+  /// Constructs a const [Shortcuts] widget that uses the [manager] to
+  /// own the map of shortcuts.
   ///
-  /// If this constructor is used, [shortcuts] will be empty and ignored, and
-  /// the [manager] will determine which shortcuts are in effect.
+  /// If this constructor is used, [shortcuts] will return the contents of
+  /// [ShortcutManager.shortcuts].
+  ///
+  /// The [child] and [manager] arguments are required.
   const Shortcuts.manager({
     super.key,
     required ShortcutManager this.manager,
