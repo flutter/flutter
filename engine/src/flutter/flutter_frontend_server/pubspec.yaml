@@ -131,5 +131,7 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/usage
   vm:
     path: ../../third_party/dart/pkg/vm
+  vm_service:
+    path: ../../third_party/dart/pkg/vm_service
   yaml:
     path: ../../third_party/dart/third_party/pkg/yaml
