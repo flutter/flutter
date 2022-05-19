@@ -61,7 +61,8 @@ class EntityPass {
   bool RenderInternal(ContentContext& renderer,
                       RenderTarget render_target,
                       Point position,
-                      uint32_t depth) const;
+                      uint32_t pass_depth,
+                      size_t stencil_depth_floor = 0) const;
 
   std::vector<Element> elements_;
 

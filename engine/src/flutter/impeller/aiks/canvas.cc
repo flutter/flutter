@@ -266,7 +266,8 @@ size_t Canvas::GetStencilDepth() const {
 void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
   Save(true, paint.blend_mode);
 
-  GetCurrentPass().SetDelegate(
+  auto& new_layer_pass = GetCurrentPass();
+  new_layer_pass.SetDelegate(
       std::make_unique<PaintPassDelegate>(paint, bounds));
 
   if (bounds.has_value()) {

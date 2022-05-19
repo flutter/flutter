@@ -805,5 +805,29 @@ TEST_P(AiksTest, SiblingSaveLayerBoundsAreRespected) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderClippedLayers) {
+  Canvas canvas;
+
+  canvas.DrawPaint({.color = Color::White()});
+
+  // Draw a green circle on the screen.
+  {
+    // Increase the clip depth for the savelayer to contend with.
+    canvas.ClipPath(PathBuilder{}.AddCircle({100, 100}, 50).TakePath());
+
+    canvas.SaveLayer({}, Rect::MakeXYWH(50, 50, 100, 100));
+
+    // Fill the layer with white.
+    canvas.DrawRect(Rect::MakeSize({400, 400}), {.color = Color::White()});
+    // Fill the layer with green, but do so with a color blend that can't be
+    // collapsed into the parent pass.
+    canvas.DrawRect(
+        Rect::MakeSize({400, 400}),
+        {.color = Color::Green(), .blend_mode = Entity::BlendMode::kColorBurn});
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
