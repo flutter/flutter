@@ -483,7 +483,6 @@ class VswhereDetails {
   final String? catalogDisplayVersion;
 
   /// Create a `VswhereDetails` from the JSON output of vswhere.exe.
-  /// Returns null  
   static VswhereDetails fromJson(Map<String, dynamic> details) {
     final Map<String, dynamic>? catalog = details[_catalogKey] as Map<String, dynamic>?;
 
