@@ -180,7 +180,8 @@ bool EntityPass::Render(ContentContext& renderer,
 bool EntityPass::RenderInternal(ContentContext& renderer,
                                 RenderTarget render_target,
                                 Point position,
-                                uint32_t depth) const {
+                                uint32_t pass_depth,
+                                size_t stencil_depth_floor) const {
   TRACE_EVENT0("impeller", "EntityPass::Render");
 
   auto context = renderer.GetContext();
@@ -233,7 +234,7 @@ bool EntityPass::RenderInternal(ContentContext& renderer,
       if (subpass->delegate_->CanCollapseIntoParentPass()) {
         // Directly render into the parent target and move on.
         if (!subpass->RenderInternal(renderer, render_target, position,
-                                     depth)) {
+                                     pass_depth, stencil_depth_floor)) {
           return false;
         }
         continue;
@@ -286,13 +287,16 @@ bool EntityPass::RenderInternal(ContentContext& renderer,
         return false;
       }
 
+      // Stencil textures aren't shared between EntityPasses (as much of the
+      // time they are transient).
       if (!subpass->RenderInternal(renderer, subpass_target,
-                                   subpass_coverage->origin, ++depth)) {
+                                   subpass_coverage->origin, ++pass_depth,
+                                   subpass->stencil_depth_)) {
         return false;
       }
 
       element_entity.SetContents(std::move(offscreen_texture_contents));
-      element_entity.SetStencilDepth(stencil_depth_);
+      element_entity.SetStencilDepth(subpass->stencil_depth_);
       element_entity.SetBlendMode(subpass->blend_mode_);
       // Once we have filters being applied for SaveLayer, some special sauce
       // may be needed here (or in PaintPassDelegate) to ensure the filter
@@ -305,7 +309,7 @@ bool EntityPass::RenderInternal(ContentContext& renderer,
     }
 
     // =========================================================================
-    // Render the element ======================================================
+    // Configure the RenderPass ================================================
     // =========================================================================
 
     if (pass && element_entity.GetBlendMode() >
@@ -350,7 +354,7 @@ bool EntityPass::RenderInternal(ContentContext& renderer,
       }
 
       command_buffer->SetLabel(
-          "EntityPass Command Buffer: Depth=" + std::to_string(depth) +
+          "EntityPass Command Buffer: Depth=" + std::to_string(pass_depth) +
           " Count=" + std::to_string(pass_count));
 
       // Never clear the texture for subsequent passes.
@@ -373,11 +377,19 @@ bool EntityPass::RenderInternal(ContentContext& renderer,
         return false;
       }
 
-      pass->SetLabel("EntityPass Render Pass: Depth=" + std::to_string(depth) +
-                     " Count=" + std::to_string(pass_count));
+      pass->SetLabel(
+          "EntityPass Render Pass: Depth=" + std::to_string(pass_depth) +
+          " Count=" + std::to_string(pass_count));
 
       ++pass_count;
     }
+
+    // =========================================================================
+    // Render the element ======================================================
+    // =========================================================================
+
+    element_entity.SetStencilDepth(element_entity.GetStencilDepth() -
+                                   stencil_depth_floor);
 
     if (!element_entity.Render(renderer, *pass)) {
       return false;
