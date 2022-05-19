@@ -22,7 +22,7 @@ String _toUpperSnake(String lowerCammel) {
   // Converts 'myTvFoo' to 'MY_TV_FOO'.
   return trueUpperCammel.replaceAllMapped(
     RegExp(r'([A-Z])'),
-    (Match match) => '_' + match.group(1)!).toUpperCase();
+    (Match match) => '_${match.group(1)!}').toUpperCase();
 }
 
 /// Generates the common/testing/key_codes.h based on the information in the key
