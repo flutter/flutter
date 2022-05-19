@@ -460,7 +460,7 @@ class ColorSwatch<T> extends Color {
 
   /// Linearly interpolate between two [ColorSwatch]es.
   ///
-  /// It delegates in [Color.lerp] to interpolate the different colors of the
+  /// It delegates to [Color.lerp] to interpolate the different colors of the
   /// swatch.
   ///
   /// If either color is null, this function linearly interpolates from a
