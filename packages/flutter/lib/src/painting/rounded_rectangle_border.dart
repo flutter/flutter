@@ -150,11 +150,11 @@ class RoundedRectangleBorder extends OutlinedBorder {
             final Rect inner;
             final Rect outer;
             if (side.strokeAlign == StrokeAlign.center) {
-                inner = rect.deflate(width / 2);
-                outer = rect.inflate(width / 2);
+              inner = rect.deflate(width / 2);
+              outer = rect.inflate(width / 2);
             } else {
-                inner = rect;
-                outer = rect.inflate(width);
+              inner = rect;
+              outer = rect.inflate(width);
             }
             final BorderRadius borderRadiusResolved = borderRadius.resolve(textDirection);
             canvas.drawDRRect(borderRadiusResolved.toRRect(outer), borderRadiusResolved.toRRect(inner), paint);

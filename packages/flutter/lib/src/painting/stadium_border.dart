@@ -470,9 +470,9 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
           } else {
             final RRect outer;
             if (side.strokeAlign == StrokeAlign.center) {
-                outer = _adjustBorderRadius(rect).toRRect(rect);
+              outer = _adjustBorderRadius(rect).toRRect(rect);
             } else {
-                outer = _adjustBorderRadius(rect.inflate(width)).toRRect(rect.inflate(width / 2));
+              outer = _adjustBorderRadius(rect.inflate(width)).toRRect(rect.inflate(width / 2));
             }
             canvas.drawRRect(outer, side.toPaint());
           }

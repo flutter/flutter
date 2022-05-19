@@ -56,21 +56,21 @@ void main() {
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
 
     expect(
-            (Canvas canvas) => center.paint(canvas, rect),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)),
-            strokeWidth: 10.0,
-          ),
+      (Canvas canvas) => center.paint(canvas, rect),
+      paints
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)),
+          strokeWidth: 10.0,
+        ),
     );
 
     expect(
-            (Canvas canvas) => outside.paint(canvas, rect),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)).inflate(5.0),
-            strokeWidth: 10.0,
-          ),
+      (Canvas canvas) => outside.paint(canvas, rect),
+      paints
+      ..rrect(
+        rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)).inflate(5.0),
+        strokeWidth: 10.0,
+      ),
     );
   });
 
