@@ -8,6 +8,7 @@
 #include <comutil.h>
 #include <oleacc.h>
 
+#include <future>
 #include <iostream>
 #include <vector>
 
@@ -544,6 +545,36 @@ TEST(FlutterWindowsViewTest, AccessibilityHitTesting) {
   ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(450, 450, &varchild)));
   EXPECT_EQ(varchild.vt, VT_DISPATCH);
   EXPECT_EQ(varchild.pdispVal, node3_delegate->GetNativeViewAccessible());
+}
+
+TEST(FlutterWindowsViewTest, WindowResizeTests) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(std::move(engine));
+
+  bool send_window_metrics_event_called = false;
+  modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
+      SendWindowMetricsEvent,
+      ([&send_window_metrics_event_called](
+           auto engine, const FlutterWindowMetricsEvent* even) {
+        send_window_metrics_event_called = true;
+        return kSuccess;
+      }));
+
+  std::promise<bool> resize_completed;
+  std::thread([&resize_completed, &view]() {
+    view.OnWindowSizeChanged(500, 500);
+    resize_completed.set_value(true);
+  }).detach();
+
+  auto result = resize_completed.get_future().wait_for(std::chrono::seconds(1));
+  EXPECT_EQ(std::future_status::ready, result);
+  EXPECT_TRUE(send_window_metrics_event_called);
 }
 
 }  // namespace testing

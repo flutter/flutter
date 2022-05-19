@@ -13,16 +13,21 @@
 
 namespace flutter {
 
+namespace {
+// The maximum duration to block the platform thread for while waiting
+// for a window resize operation to complete.
+constexpr std::chrono::milliseconds kWindowResizeTimeout{100};
+
 /// Returns true if the surface will be updated as part of the resize process.
 ///
 /// This is called on window resize to determine if the platform thread needs
 /// to be blocked until the frame with the right size has been rendered. It
 /// should be kept in-sync with how the engine deals with a new surface request
 /// as seen in `CreateOrUpdateSurface` in `GPUSurfaceGL`.
-static bool SurfaceWillUpdate(size_t cur_width,
-                              size_t cur_height,
-                              size_t target_width,
-                              size_t target_height) {
+bool SurfaceWillUpdate(size_t cur_width,
+                       size_t cur_height,
+                       size_t target_width,
+                       size_t target_height) {
   // TODO (https://github.com/flutter/flutter/issues/65061) : Avoid special
   // handling for zero dimensions.
   bool non_zero_target_dims = target_height > 0 && target_width > 0;
@@ -30,6 +35,7 @@ static bool SurfaceWillUpdate(size_t cur_width,
       (cur_height != target_height) || (cur_width != target_width);
   return non_zero_target_dims && not_same_size;
 }
+}  // namespace
 
 FlutterWindowsView::FlutterWindowsView(
     std::unique_ptr<WindowBindingHandler> window_binding) {
@@ -150,9 +156,10 @@ void FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
     // Block the platform thread until:
     //   1. GetFrameBufferId is called with the right frame size.
     //   2. Any pending SwapBuffers calls have been invoked.
-    resize_cv_.wait(lock, [&resize_status = resize_status_] {
-      return resize_status == ResizeState::kDone;
-    });
+    resize_cv_.wait_for(lock, kWindowResizeTimeout,
+                        [&resize_status = resize_status_] {
+                          return resize_status == ResizeState::kDone;
+                        });
   }
 }
 
