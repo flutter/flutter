@@ -484,13 +484,13 @@ class ColorSwatch<T> extends Color {
       if (a == null) {
         return null;
       } else {
-        swatch = a._swatch.map((T k, Color c) => MapEntry<T, Color>(k, Color.lerp(c, null, t)!));
+        swatch = a._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, null, t)!));
       }
     } else {
       if (a == null) {
-        swatch = b._swatch.map((T k, Color c) => MapEntry<T, Color>(k, Color.lerp(null, c, t)!));
+        swatch = b._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(null, color, t)!));
       } else {
-        swatch = a._swatch.map((T k, Color c) => MapEntry<T, Color>(k, Color.lerp(c, b[k], t)!));
+        swatch = a._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, b[key], t)!));
       }
     }
     return ColorSwatch<T>(Color.lerp(a, b, t)!.value, swatch);
