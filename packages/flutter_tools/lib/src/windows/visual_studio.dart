@@ -257,7 +257,7 @@ class VisualStudio {
   static const String _windows10SdkRegistryKey = 'InstallationFolder';
 
   /// Returns the details of the newest version of Visual Studio.
-  /// 
+  ///
   /// If [validateRequirements] is set, the search will be limited to versions
   /// that have all of the required workloads and components.
   VswhereDetails? _visualStudioDetails({
