@@ -452,7 +452,7 @@ void main() {
 
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
-    expect(state.showToolbarCalled, isTrue);
+    expect(state.showingToolbar, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
   });
 
@@ -564,7 +564,7 @@ void main() {
 
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
-    expect(state.showToolbarCalled, isFalse);
+    expect(state.showingToolbar, isFalse);
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
@@ -594,13 +594,13 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        expect(state.showToolbarCalled, isTrue);
+        expect(state.showingToolbar, isTrue);
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(state.showToolbarCalled, isFalse);
+        expect(state.showingToolbar, isFalse);
         break;
     }
   }, variant: TargetPlatformVariant.all());
@@ -621,7 +621,7 @@ void main() {
 
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
-    expect(state.showToolbarCalled, isTrue);
+    expect(state.showingToolbar, isTrue);
     expect(renderEditable.selectWordCalled, isTrue);
   });
 
@@ -649,7 +649,7 @@ void main() {
 
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
-    expect(state.showToolbarCalled, isTrue);
+    expect(state.showingToolbar, isTrue);
     expect(renderEditable.selectWordsInRangeCalled, isTrue);
   });
 
@@ -954,7 +954,7 @@ void main() {
 
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
-    expect(state.showToolbarCalled, isTrue);
+    expect(state.showingToolbar, isTrue);
     expect(renderEditable.selectWordsInRangeCalled, isFalse);
   });
 
@@ -993,7 +993,7 @@ void main() {
 
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
-    expect(state.showToolbarCalled, isFalse);
+    expect(state.showingToolbar, isFalse);
     expect(renderEditable.selectWordsInRangeCalled, isFalse);
   });
 
@@ -1376,20 +1376,25 @@ class FakeEditableText extends EditableText {
 
 class FakeEditableTextState extends EditableTextState {
   final GlobalKey _editableKey = GlobalKey();
-  bool showToolbarCalled = false;
+  bool showingToolbar = false;
 
   @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
   bool showToolbar() {
-    showToolbarCalled = true;
+    showingToolbar = true;
     return true;
   }
 
   @override
+  void hideToolbar([bool hideHandles = true]) {
+    showingToolbar = false;
+  }
+
+  @override
   void toggleToolbar() {
-    return;
+    showingToolbar = !showingToolbar;
   }
 
   @override
