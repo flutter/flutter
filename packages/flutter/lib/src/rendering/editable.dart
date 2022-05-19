@@ -1087,14 +1087,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   /// {@template flutter.rendering.RenderEditable.paintCursorAboveText}
-  /// If the cursor and the selection highlight should be painted on top of the text or underneath it.
+  /// If the cursor and the selection highlight should be painted on top
+  /// of the text or underneath it.
   ///
   /// By default, the cursor should be painted on top for iOS platforms and
   /// underneath for Android platforms.
-  ///
-  /// The hierarchy of the selection box follows the cursor mean that selection
-  /// box can painted above the text or under the text.
-  /// And you can use this property to change the selection box level.
   /// {@endtemplate}
   bool get paintCursorAboveText => _paintCursorOnTop;
   bool _paintCursorOnTop;
