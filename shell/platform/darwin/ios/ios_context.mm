@@ -15,13 +15,11 @@
 
 namespace flutter {
 
-IOSContext::IOSContext(MsaaSampleCount msaa_samples) : msaa_samples_(msaa_samples) {}
+IOSContext::IOSContext() = default;
 
 IOSContext::~IOSContext() = default;
 
-std::unique_ptr<IOSContext> IOSContext::Create(IOSRenderingAPI api,
-                                               IOSRenderingBackend backend,
-                                               MsaaSampleCount msaa_samples) {
+std::unique_ptr<IOSContext> IOSContext::Create(IOSRenderingAPI api, IOSRenderingBackend backend) {
   switch (api) {
     case IOSRenderingAPI::kOpenGLES:
       return std::make_unique<IOSContextGL>();
@@ -31,7 +29,7 @@ std::unique_ptr<IOSContext> IOSContext::Create(IOSRenderingAPI api,
     case IOSRenderingAPI::kMetal:
       switch (backend) {
         case IOSRenderingBackend::kSkia:
-          return std::make_unique<IOSContextMetalSkia>(msaa_samples);
+          return std::make_unique<IOSContextMetalSkia>();
         case IOSRenderingBackend::kImpeller:
           return std::make_unique<IOSContextMetalImpeller>();
       }
