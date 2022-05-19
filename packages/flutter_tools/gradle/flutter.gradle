@@ -458,7 +458,8 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Resolves SDK version to API level. 
      *
-     * Handles sdkVersion being integers and strings (codenames) (when the platform stability is not yet declared). 
+     * Handles sdkVersion being integers and strings (codenames) (when the platform stability is not yet declared).
+     * Must be updated when new android SDK level is released.
      */
     private int resolveSdkVersion(String sdkVersion) {
         int resolvedSdkVersion;
@@ -470,7 +471,6 @@ class FlutterPlugin implements Plugin<Project> {
             resolvedSdkVersion = sdkVersion.toInteger()
         } else if (sdkVersion.equals("Tiramisu")) {
             resolvedSdkVersion = 33
-            println "tiramisu"
         }
 
         return resolvedSdkVersion
@@ -478,7 +478,6 @@ class FlutterPlugin implements Plugin<Project> {
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     private void detectLowCompileSdkVersionOrNdkVersion() {
-        println "detectLowCompileSdkVersionOrNdkVersion()"
         project.afterEvaluate {
             def projectCompileSdkVersion = resolveSdkVersion(project.android.compileSdkVersion)
             int maxPluginCompileSdkVersion = projectCompileSdkVersion
