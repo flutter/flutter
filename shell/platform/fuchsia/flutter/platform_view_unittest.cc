@@ -1385,7 +1385,8 @@ TEST_F(PlatformViewTests, OnShaderWarmup) {
   EXPECT_EQ(expected_result_string, response->result_string);
 }
 
-TEST_F(PlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
+// TODO(fxbug.dev/85125): Enable when GFX converts to TouchSource.
+TEST_F(PlatformViewTests, DISABLED_TouchSourceLogicalToPhysicalConversion) {
   constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {20, 20}}};
   constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   constexpr fuchsia::ui::pointer::TouchInteractionId kIxnOne = {
