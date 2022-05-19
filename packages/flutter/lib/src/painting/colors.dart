@@ -206,10 +206,10 @@ class HSVColor {
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSVColor.fromAHSV(
-      lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0),
+      clampDouble(lerpDouble(a.alpha, b.alpha, t)!, 0.0, 1.0),
       lerpDouble(a.hue, b.hue, t)! % 360.0,
-      lerpDouble(a.saturation, b.saturation, t)!.clamp(0.0, 1.0),
-      lerpDouble(a.value, b.value, t)!.clamp(0.0, 1.0),
+      clampDouble(lerpDouble(a.saturation, b.saturation, t)!, 0.0, 1.0),
+      clampDouble(lerpDouble(a.value, b.value, t)!, 0.0, 1.0),
     );
   }
 
@@ -290,7 +290,7 @@ class HSLColor {
     // Saturation can exceed 1.0 with rounding errors, so clamp it.
     final double saturation = lightness == 1.0
       ? 0.0
-      : ((delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0));
+      : clampDouble(delta / (1.0 - (2.0 * lightness - 1.0).abs()), 0.0, 1.0);
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
@@ -390,10 +390,10 @@ class HSLColor {
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSLColor.fromAHSL(
-      lerpDouble(a.alpha, b.alpha, t)!.clamp(0.0, 1.0),
+      clampDouble(lerpDouble(a.alpha, b.alpha, t)!, 0.0, 1.0),
       lerpDouble(a.hue, b.hue, t)! % 360.0,
-      lerpDouble(a.saturation, b.saturation, t)!.clamp(0.0, 1.0),
-      lerpDouble(a.lightness, b.lightness, t)!.clamp(0.0, 1.0),
+      clampDouble(lerpDouble(a.saturation, b.saturation, t)!, 0.0, 1.0),
+      clampDouble(lerpDouble(a.lightness, b.lightness, t)!, 0.0, 1.0),
     );
   }
 
@@ -421,9 +421,9 @@ class HSLColor {
 ///
 /// See also:
 ///
-///  * [MaterialColor] and [MaterialAccentColor], which define material design
+///  * [MaterialColor] and [MaterialAccentColor], which define Material Design
 ///    primary and accent color swatches.
-///  * [material.Colors], which defines all of the standard material design
+///  * [material.Colors], which defines all of the standard Material Design
 ///    colors.
 @immutable
 class ColorSwatch<T> extends Color {

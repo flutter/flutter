@@ -561,6 +561,7 @@ void main() {
         ]);
 
         expect(processManager, hasNoRemainingExpectations);
+        expect(stdio.stdout, contains('release-candidate-branch.version containing $candidateBranch'));
         expect(stdio.stdout, contains('Updating engine revision from $oldEngineVersion to $revision1'));
         expect(stdio.stdout, contains('Are you ready to push your framework branch'));
       });
@@ -1124,7 +1125,7 @@ void main() {
         FakeCommand(
           command: const <String>['git', 'push', '', 'HEAD:refs/heads/'],
           exception: GitException(gitPushErrorMessage, <String>['git', 'push', '--force', '', 'HEAD:refs/heads/']),
-        )
+        ),
       ]);
       final NextContext nextContext = NextContext(
         autoAccept: false,

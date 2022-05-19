@@ -30,7 +30,7 @@ enum _FloatingActionButtonType {
   extended,
 }
 
-/// A material design floating action button.
+/// A Material Design floating action button.
 ///
 /// A floating action button is a circular icon button that hovers over content
 /// to promote a primary action in the application. Floating action buttons are
@@ -331,7 +331,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this is not explicitly set, then there can only be one
   /// [FloatingActionButton] per route (that is, per screen), since otherwise
   /// there would be a tag conflict (multiple heroes on one route can't have the
-  /// same tag). The material design specification recommends only using one
+  /// same tag). The Material Design specification recommends only using one
   /// floating action button per screen.
   final Object? heroTag;
 
@@ -509,7 +509,7 @@ class FloatingActionButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
     final FloatingActionButtonThemeData defaults = theme.useMaterial3
-      ? _M3Defaults(context, _floatingActionButtonType, child != null)
+      ? _TokenDefaultsM3(context, _floatingActionButtonType, child != null)
       : _M2Defaults(context, _floatingActionButtonType, child != null);
 
     final Color foregroundColor = this.foregroundColor
@@ -782,9 +782,9 @@ class _M2Defaults extends FloatingActionButtonThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
-class _M3Defaults extends FloatingActionButtonThemeData {
-  _M3Defaults(this.context, this.type, this.hasChild)
+// Generated version v0_98
+class _TokenDefaultsM3 extends FloatingActionButtonThemeData {
+  _TokenDefaultsM3(this.context, this.type, this.hasChild)
     : super(
         elevation: 6.0,
         focusElevation: 6.0,

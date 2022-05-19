@@ -66,7 +66,7 @@ import 'typography.dart';
 /// See also:
 ///
 ///  * [Typography], the class that generates [TextTheme]s appropriate for a platform.
-///  * [Theme], for other aspects of a material design application that can be
+///  * [Theme], for other aspects of a Material Design application that can be
 ///    globally adjusted, such as the color scheme.
 ///  * <https://material.io/design/typography/>
 @immutable
@@ -75,7 +75,7 @@ class TextTheme with Diagnosticable {
   ///
   /// Rather than creating a new text theme, consider using [Typography.black]
   /// or [Typography.white], which implement the typography styles in the
-  /// material design specification:
+  /// Material Design specification:
   ///
   /// <https://material.io/design/typography/#type-scale>
   ///
@@ -280,7 +280,7 @@ class TextTheme with Diagnosticable {
   /// the new values.
   ///
   /// Consider using [Typography.black] or [Typography.white], which implement
-  /// the typography styles in the material design specification, as a starting
+  /// the typography styles in the Material Design specification, as a starting
   /// point.
   ///
   /// {@tool snippet}
@@ -289,7 +289,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorThemeCopy extends StatelessWidget {
-  ///   const TitleColorThemeCopy({Key? key, required this.child, required this.titleColor}) : super(key: key);
+  ///   const TitleColorThemeCopy({super.key, required this.titleColor, required this.child});
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -399,7 +399,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorTheme extends StatelessWidget {
-  ///   const TitleColorTheme({Key? key, required this.child, required this.titleColor}) : super(key: key);
+  ///   const TitleColorTheme({super.key, required this.child, required this.titleColor});
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -455,7 +455,7 @@ class TextTheme with Diagnosticable {
   /// `bodyColor` is applied to the remaining text styles.
   ///
   /// Consider using [Typography.black] or [Typography.white], which implement
-  /// the typography styles in the material design specification, as a starting
+  /// the typography styles in the Material Design specification, as a starting
   /// point.
   TextTheme apply({
     String? fontFamily,

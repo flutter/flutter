@@ -9,7 +9,7 @@ import 'chip_theme.dart';
 import 'debug.dart';
 import 'theme_data.dart';
 
-/// A material design choice chip.
+/// A Material Design choice chip.
 ///
 /// [ChoiceChip]s represent a single choice from a set. Choice chips contain
 /// related descriptive text or categories.
@@ -21,7 +21,7 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
-///   const MyThreeOptions({Key? key}) : super(key: key);
+///   const MyThreeOptions({super.key});
 ///
 ///   @override
 ///   State<MyThreeOptions> createState() => _MyThreeOptionsState();

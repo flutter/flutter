@@ -10,7 +10,7 @@ const int _kNumIterations = 100000;
 
 void main() {
   assert(false,
-      "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+      "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
   const StandardMethodCodec codec = StandardMethodCodec();
@@ -81,7 +81,7 @@ void main() {
       'integer': 1234,
       'string': 'This is a performance test.',
       'float': 1.25,
-      'boolean': true
+      'boolean': true,
     }));
   }
   watch.stop();

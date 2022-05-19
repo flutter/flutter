@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -35,7 +36,7 @@ enum StretchMode {
   fadeTitle,
 }
 
-/// The part of a material design [AppBar] that expands, collapses, and
+/// The part of a Material Design [AppBar] that expands, collapses, and
 /// stretches.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=mSc7qFzxHDw}
@@ -231,7 +232,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // 0.0 -> Expanded
         // 1.0 -> Collapsed to toolbar
-        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
+        final double t = clampDouble(1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent, 0.0, 1.0);
 
         // background
         if (widget.background != null) {
@@ -307,7 +308,10 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           if (widget.stretchModes.contains(StretchMode.fadeTitle) &&
             constraints.maxHeight > settings.maxExtent) {
             final double stretchOpacity = 1 -
-              (((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0));
+                clampDouble(
+                    (constraints.maxHeight - settings.maxExtent) / 100,
+                    0.0,
+                    1.0);
             title = Opacity(
               opacity: stretchOpacity,
               child: title,

@@ -845,6 +845,13 @@ class RenderOpacity extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
 
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
+    return updatedLayer;
+  }
+
   int _alpha;
 
   /// The fraction to scale the child's alpha value.
@@ -890,6 +897,12 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return _alpha > 0;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       if (_alpha == 0) {
@@ -899,6 +912,10 @@ class RenderOpacity extends RenderProxyBox {
       }
       assert(needsCompositing);
       layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     }
   }
 
@@ -925,8 +942,15 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   int? _alpha;
 
   @override
-  bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing!;
-  bool? _currentlyNeedsCompositing;
+  bool get isRepaintBoundary => child != null && _currentlyIsRepaintBoundary!;
+  bool? _currentlyIsRepaintBoundary;
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
+    return updatedLayer;
+  }
 
   /// The animation that drives this render object's opacity.
   ///
@@ -986,27 +1010,28 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     final int? oldAlpha = _alpha;
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
-      final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0;
-      if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
+      final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
+      _currentlyIsRepaintBoundary = _alpha! > 0;
+      if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary)
         markNeedsCompositingBitsUpdate();
-      markNeedsPaint();
+      markNeedsCompositedLayerUpdate();
       if (oldAlpha == 0 || _alpha == 0)
         markNeedsSemanticsUpdate();
     }
   }
 
   @override
+  bool paintsChild(RenderObject child) {
+    assert(child.parent == this);
+    return opacity.value > 0;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha!, super.paint, oldLayer: layer as OpacityLayer?);
+    if (_alpha == 0) {
+      return;
     }
+    super.paint(context, offset);
   }
 
   @override
@@ -1115,6 +1140,10 @@ class RenderShaderMask extends RenderProxyBox {
         ..maskRect = offset & size
         ..blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -1181,6 +1210,10 @@ class RenderBackdropFilter extends RenderProxyBox {
       layer!.filter = _filter;
       layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -1383,8 +1416,15 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) {
-    return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
+    }
   }
 
   Paint? _debugPaint;
@@ -1816,9 +1856,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 
   @override
-  bool get alwaysNeedsCompositing => true;
-
-  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.elevation = elevation;
@@ -1832,6 +1869,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     description.add(ColorProperty('shadowColor', color));
   }
 }
+
+final Paint _transparentPaint = Paint()..color = const Color(0x00000000);
 
 /// Creates a physical model layer that clips its child to a rounded
 /// rectangle.
@@ -1860,9 +1899,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
        assert(shadowColor != null),
        _shape = shape,
        _borderRadius = borderRadius;
-
-  @override
-  PhysicalModelLayer? get layer => super.layer as PhysicalModelLayer?;
 
   /// The shape of the layer.
   ///
@@ -1921,42 +1957,79 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      _updateClip();
-      final RRect offsetRRect = _clip!.shift(offset);
-      final Rect offsetBounds = offsetRRect.outerRect;
-      final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
-      bool paintShadows = true;
-      assert(() {
-        if (debugDisableShadows) {
-          if (elevation > 0.0) {
-            context.canvas.drawRRect(
-              offsetRRect,
-              Paint()
-                ..color = shadowColor
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = elevation * 2.0,
-            );
-          }
-          paintShadows = false;
-        }
-        return true;
-      }());
-      layer ??= PhysicalModelLayer();
-      layer!
-        ..clipPath = offsetRRectAsPath
-        ..clipBehavior = clipBehavior
-        ..elevation = paintShadows ? elevation : 0.0
-        ..color = color
-        ..shadowColor = shadowColor;
-      context.pushLayer(layer!, super.paint, offset, childPaintBounds: offsetBounds);
-      assert(() {
-        layer!.debugCreator = debugCreator;
-        return true;
-      }());
-    } else {
+    if (child == null) {
       layer = null;
+      return;
     }
+
+    _updateClip();
+    final RRect offsetRRect = _clip!.shift(offset);
+    final Rect offsetBounds = offsetRRect.outerRect;
+    final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        if (elevation > 0.0) {
+          context.canvas.drawRRect(
+            offsetRRect,
+            Paint()
+              ..color = shadowColor
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = elevation * 2.0,
+          );
+        }
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    final Canvas canvas = context.canvas;
+    if (elevation != 0.0 && paintShadows) {
+      // The drawShadow call doesn't add the region of the shadow to the
+      // picture's bounds, so we draw a hardcoded amount of extra space to
+      // account for the maximum potential area of the shadow.
+      // TODO(jsimmons): remove this when Skia does it for us.
+      canvas.drawRect(
+        offsetBounds.inflate(20.0),
+        _transparentPaint,
+      );
+      canvas.drawShadow(
+        offsetRRectAsPath,
+        shadowColor,
+        elevation,
+        color.alpha != 0xFF,
+      );
+    }
+    final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
+    if (!usesSaveLayer) {
+      canvas.drawRRect(
+        offsetRRect,
+        Paint()..color = color
+      );
+    }
+    layer = context.pushClipRRect(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      _clip!,
+      (PaintingContext context, Offset offset) {
+        if (usesSaveLayer) {
+          // If we want to avoid the bleeding edge artifact
+          // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
+          // using saveLayer, we have to call drawPaint instead of drawPath as
+          // anti-aliased drawPath will always have such artifacts.
+          context.canvas.drawPaint( Paint()..color = color);
+        }
+        super.paint(context, offset);
+      },
+      oldLayer: layer as ClipRRectLayer?,
+      clipBehavior: clipBehavior,
+    );
+
+    assert(() {
+      layer?.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -1995,9 +2068,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        assert(shadowColor != null);
 
   @override
-  PhysicalModelLayer? get layer => super.layer as PhysicalModelLayer?;
-
-  @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
@@ -2013,41 +2083,78 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      _updateClip();
-      final Rect offsetBounds = offset & size;
-      final Path offsetPath = _clip!.shift(offset);
-      bool paintShadows = true;
-      assert(() {
-        if (debugDisableShadows) {
-          if (elevation > 0.0) {
-            context.canvas.drawPath(
-              offsetPath,
-              Paint()
-                ..color = shadowColor
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = elevation * 2.0,
-            );
-          }
-          paintShadows = false;
-        }
-        return true;
-      }());
-      layer ??= PhysicalModelLayer();
-      layer!
-        ..clipPath = offsetPath
-        ..clipBehavior = clipBehavior
-        ..elevation = paintShadows ? elevation : 0.0
-        ..color = color
-        ..shadowColor = shadowColor;
-      context.pushLayer(layer!, super.paint, offset, childPaintBounds: offsetBounds);
-      assert(() {
-        layer!.debugCreator = debugCreator;
-        return true;
-      }());
-    } else {
+    if (child == null) {
       layer = null;
+      return;
     }
+
+    _updateClip();
+    final Rect offsetBounds = offset & size;
+    final Path offsetPath = _clip!.shift(offset);
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        if (elevation > 0.0) {
+          context.canvas.drawPath(
+            offsetPath,
+            Paint()
+              ..color = shadowColor
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = elevation * 2.0,
+          );
+        }
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    final Canvas canvas = context.canvas;
+    if (elevation != 0.0 && paintShadows) {
+      // The drawShadow call doesn't add the region of the shadow to the
+      // picture's bounds, so we draw a hardcoded amount of extra space to
+      // account for the maximum potential area of the shadow.
+      // TODO(jsimmons): remove this when Skia does it for us.
+      canvas.drawRect(
+        offsetBounds.inflate(20.0),
+        _transparentPaint,
+      );
+      canvas.drawShadow(
+        offsetPath,
+        shadowColor,
+        elevation,
+        color.alpha != 0xFF,
+      );
+    }
+    final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
+    if (!usesSaveLayer) {
+      canvas.drawPath(
+        offsetPath,
+        Paint()..color = color
+      );
+    }
+    layer = context.pushClipPath(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      _clip!,
+      (PaintingContext context, Offset offset) {
+        if (usesSaveLayer) {
+          // If we want to avoid the bleeding edge artifact
+          // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
+          // using saveLayer, we have to call drawPaint instead of drawPath as
+          // anti-aliased drawPath will always have such artifacts.
+          context.canvas.drawPaint( Paint()..color = color);
+        }
+        super.paint(context, offset);
+      },
+      oldLayer: layer as ClipPathLayer?,
+      clipBehavior: clipBehavior,
+    );
+
+    assert(() {
+      layer?.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -2426,6 +2533,10 @@ class RenderTransform extends RenderProxyBox {
           layer = ImageFilterLayer(imageFilter: filter);
         }
         context.pushLayer(layer!, super.paint, offset);
+        assert(() {
+          layer!.debugCreator = debugCreator;
+          return true;
+        }());
       }
     }
   }
@@ -2707,8 +2818,14 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return !size.isEmpty && !child.size.isEmpty;
+  }
+
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (size.isEmpty || child.size.isEmpty) {
+    if (!paintsChild(child)) {
       transform.setZero();
     } else {
       _updatePaintData();
@@ -3178,7 +3295,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   const PngHome({Key? key}) : super(key: key);
+  ///   const PngHome({super.key});
   ///
   ///   @override
   ///   State<PngHome> createState() => _PngHomeState();
@@ -3476,7 +3593,6 @@ class RenderOffstage extends RenderProxyBox {
     return super.computeDryLayout(constraints);
   }
 
-
   @override
   void performResize() {
     assert(offstage);
@@ -3495,6 +3611,12 @@ class RenderOffstage extends RenderProxyBox {
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     return !offstage && super.hitTest(result, position: position);
+  }
+
+  @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return !offstage;
   }
 
   @override
@@ -5212,7 +5334,10 @@ class RenderLeaderLayer extends RenderProxyBox {
         ..offset = offset;
     }
     context.pushLayer(layer!, super.paint, Offset.zero);
-    assert(layer != null);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -5424,6 +5549,10 @@ class RenderFollowerLayer extends RenderProxyBox {
         double.infinity,
       ),
     );
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override

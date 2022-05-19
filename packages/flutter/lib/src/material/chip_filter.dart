@@ -8,7 +8,7 @@ import 'chip.dart';
 import 'debug.dart';
 import 'theme_data.dart';
 
-/// A material design filter chip.
+/// A Material Design filter chip.
 ///
 /// Filter chips use tags or descriptive words as a way to filter content.
 ///
@@ -28,7 +28,7 @@ import 'theme_data.dart';
 /// }
 ///
 /// class CastFilter extends StatefulWidget {
-///   const CastFilter({Key? key}) : super(key: key);
+///   const CastFilter({super.key});
 ///
 ///   @override
 ///   State createState() => CastFilterState();

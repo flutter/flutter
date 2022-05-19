@@ -44,10 +44,10 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
 
   @override
-  EnvironmentType get environmentType => boolArg('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+  EnvironmentType get environmentType => boolArgDeprecated('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
 
   @override
-  bool get configOnly => boolArg('config-only');
+  bool get configOnly => boolArgDeprecated('config-only');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
@@ -98,7 +98,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   @override
   final bool configOnly = false;
 
-  String? get exportOptionsPlist => stringArg('export-options-plist');
+  String? get exportOptionsPlist => stringArgDeprecated('export-options-plist');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
@@ -153,7 +153,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final String relativeOutputPath = app.ipaOutputPath;
     final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
     final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
-    final String exportMethod = stringArg('export-method')!;
+    final String exportMethod = stringArgDeprecated('export-method')!;
     final bool isAppStoreUpload = exportMethod  == 'app-store';
     File? generatedExportPlist;
     try {
@@ -241,7 +241,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 ''');
 
     plistContents.write('''
-        <string>${stringArg('export-method')}</string>
+        <string>${stringArgDeprecated('export-method')}</string>
     ''');
     if (xcodeBuildResult?.xcodeBuildExecution?.buildSettings['ENABLE_BITCODE'] != 'YES') {
       // Bitcode is off by default in Flutter iOS apps.
@@ -305,7 +305,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   EnvironmentType get environmentType;
   bool get configOnly;
 
-  bool get shouldCodesign => boolArg('codesign');
+  bool get shouldCodesign => boolArgDeprecated('codesign');
 
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 

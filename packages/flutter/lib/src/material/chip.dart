@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -39,7 +40,7 @@ const Duration _kDisableDuration = Duration(milliseconds: 75);
 const Color _kSelectScrimColor = Color(0x60191919);
 const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 
-/// An interface defining the base attributes for a material design chip.
+/// An interface defining the base attributes for a Material Design chip.
 ///
 /// Chips are compact elements that represent an attribute, text, entity, or
 /// action.
@@ -187,7 +188,7 @@ abstract class ChipAttributes {
   Color? get shadowColor;
 }
 
-/// An interface for material design chips that can be deleted.
+/// An interface for Material Design chips that can be deleted.
 ///
 /// The defaults mentioned in the documentation for each attribute are what
 /// the implementing classes typically use for defaults (but this class doesn't
@@ -257,7 +258,7 @@ abstract class DeletableChipAttributes {
   bool get useDeleteButtonTooltip;
 }
 
-/// An interface for material design chips that can have check marks.
+/// An interface for Material Design chips that can have check marks.
 ///
 /// The defaults mentioned in the documentation for each attribute are what
 /// the implementing classes typically use for defaults (but this class doesn't
@@ -290,7 +291,7 @@ abstract class CheckmarkableChipAttributes {
   Color? get checkmarkColor;
 }
 
-/// An interface for material design chips that can be selected.
+/// An interface for Material Design chips that can be selected.
 ///
 /// The defaults mentioned in the documentation for each attribute are what
 /// the implementing classes typically use for defaults (but this class doesn't
@@ -341,7 +342,7 @@ abstract class SelectableChipAttributes {
   ///
   /// ```dart
   /// class Wood extends StatefulWidget {
-  ///   const Wood({Key? key}) : super(key: key);
+  ///   const Wood({super.key});
   ///
   ///   @override
   ///   State<StatefulWidget> createState() => WoodState();
@@ -400,7 +401,7 @@ abstract class SelectableChipAttributes {
   ShapeBorder get avatarBorder;
 }
 
-/// An interface for material design chips that can be enabled and disabled.
+/// An interface for Material Design chips that can be enabled and disabled.
 ///
 /// The defaults mentioned in the documentation for each attribute are what
 /// the implementing classes typically use for defaults (but this class doesn't
@@ -447,7 +448,7 @@ abstract class DisabledChipAttributes {
   Color? get disabledColor;
 }
 
-/// An interface for material design chips that can be tapped.
+/// An interface for Material Design chips that can be tapped.
 ///
 /// The defaults mentioned in the documentation for each attribute are what
 /// the implementing classes typically use for defaults (but this class doesn't
@@ -478,7 +479,7 @@ abstract class TappableChipAttributes {
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
-  ///   const Blacksmith({Key? key}) : super(key: key);
+  ///   const Blacksmith({super.key});
   ///
   ///   void startHammering() {
   ///     print('bang bang bang');
@@ -509,7 +510,7 @@ abstract class TappableChipAttributes {
   String? get tooltip;
 }
 
-/// A material design chip.
+/// A Material Design chip.
 ///
 /// Chips are compact elements that represent an attribute, text, entity, or
 /// action.
@@ -549,7 +550,7 @@ abstract class TappableChipAttributes {
 ///    vertical runs.
 ///  * <https://material.io/design/components/chips.html>
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
-  /// Creates a material design chip.
+  /// Creates a Material Design chip.
   ///
   /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// The [elevation] must be null or non-negative.
@@ -658,7 +659,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   }
 }
 
-/// A raw material design chip.
+/// A raw Material Design chip.
 ///
 /// This serves as the basis for all of the chip widget types to aggregate.
 /// It is typically not created directly, one of the other chip types
@@ -1111,7 +1112,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
       const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),
-      (MediaQuery.of(context).textScaleFactor - 1.0).clamp(0.0, 1.0),
+      clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
     )!;
 
     final ThemeData theme = Theme.of(context);

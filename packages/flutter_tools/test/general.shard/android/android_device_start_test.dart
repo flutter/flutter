@@ -198,7 +198,7 @@ void main() {
         '-r',
         '--user',
         '10',
-        'app.apk'
+        'app.apk',
       ],
       stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
     ));
@@ -241,6 +241,7 @@ void main() {
         '--ez', 'dump-skp-on-shader-compilation', 'true',
         '--ez', 'cache-sksl', 'true',
         '--ez', 'purge-persistent-cache', 'true',
+        '--ez', 'enable-impeller', 'true',
         '--ez', 'enable-checked-mode', 'true',
         '--ez', 'verify-entry-points', 'true',
         '--ez', 'start-paused', 'true',
@@ -274,6 +275,7 @@ void main() {
         useTestFonts: true,
         verboseSystemLogs: true,
         nullAssertions: true,
+        enableImpeller: true,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',

@@ -93,7 +93,7 @@ void main() {
       const FakeCommand(
         command: <String>['adb', 'devices', '-l'],
         exitCode: 1,
-      )
+      ),
     ]);
     final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: FakeAndroidSdk(),
@@ -143,7 +143,7 @@ List of devices attached
 05a02bac               device usb:336592896X product:razor model:Nexus_7 device:flo
 
   ''',
-        )
+        ),
       ]),
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
@@ -172,7 +172,7 @@ localhost:36790        device
 emulator-5612          host features:shell_2
 
   ''',
-        )
+        ),
       ]),
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
@@ -200,7 +200,7 @@ List of devices attached
 ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu features:cmd,shell_v2
 
 ''',
-        )
+        ),
       ]),
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
@@ -226,7 +226,7 @@ It appears you do not have 'Android SDK Platform-tools' installed.
 Use the 'android' tool to install them:
   android update sdk --no-ui --filter 'platform-tools'
 ''',
-        )
+        ),
       ]),
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),

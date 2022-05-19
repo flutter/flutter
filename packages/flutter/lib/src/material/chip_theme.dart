@@ -64,7 +64,7 @@ class ChipTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Spaceship extends StatelessWidget {
-  ///   const Spaceship({Key? key}) : super(key: key);
+  ///   const Spaceship({super.key});
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -98,7 +98,7 @@ class ChipTheme extends InheritedTheme {
   bool updateShouldNotify(ChipTheme oldWidget) => data != oldWidget.data;
 }
 
-/// Holds the color, shape, and text styles for a material design chip theme.
+/// Holds the color, shape, and text styles for a Material Design chip theme.
 ///
 /// Use this class to configure a [ChipTheme] widget, or to set the
 /// [ThemeData.chipTheme] for a [Theme] widget.
@@ -123,7 +123,7 @@ class ChipTheme extends InheritedTheme {
 ///
 /// ```dart
 /// class CarColor extends StatefulWidget {
-///   const CarColor({Key? key}) : super(key: key);
+///   const CarColor({super.key});
 ///
 ///   @override
 ///   State createState() => _CarColorState();

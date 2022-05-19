@@ -12,7 +12,7 @@ import 'theme.dart';
 
 /// A thin horizontal line, with padding on either side.
 ///
-/// In the material design language, this represents a divider. Dividers can be
+/// In the Material Design language, this represents a divider. Dividers can be
 /// used in lists, [Drawer]s, and elsewhere to separate content.
 ///
 /// To create a divider between [ListTile] items, consider using
@@ -41,7 +41,7 @@ import 'theme.dart';
 ///  * [VerticalDivider], which is the vertical analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class Divider extends StatelessWidget {
-  /// Creates a material design divider.
+  /// Creates a Material Design divider.
   ///
   /// The [height], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
@@ -179,7 +179,7 @@ class Divider extends StatelessWidget {
 
 /// A thin vertical line, with padding on either side.
 ///
-/// In the material design language, this represents a divider. Vertical
+/// In the Material Design language, this represents a divider. Vertical
 /// dividers can be used in horizontally scrolling lists, such as a
 /// [ListView] with [ListView.scrollDirection] set to [Axis.horizontal].
 ///
@@ -201,7 +201,7 @@ class Divider extends StatelessWidget {
 ///  * [Divider], which is the horizontal analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class VerticalDivider extends StatelessWidget {
-  /// Creates a material design vertical divider.
+  /// Creates a Material Design vertical divider.
   ///
   /// The [width], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.

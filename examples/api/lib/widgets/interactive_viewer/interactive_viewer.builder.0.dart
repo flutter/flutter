@@ -10,7 +10,7 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 void main() => runApp(const IVBuilderExampleApp());
 
 class IVBuilderExampleApp extends StatelessWidget {
-  const IVBuilderExampleApp({Key? key}) : super(key: key);
+  const IVBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
     for (final Vector3 point in <Vector3>[
       quad.point1,
       quad.point2,
-      quad.point3
+      quad.point3,
     ]) {
       if (point.x < xMin) {
         xMin = point.x;

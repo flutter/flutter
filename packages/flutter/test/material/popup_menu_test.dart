@@ -869,8 +869,8 @@ void main() {
                 bounds: Rect.fromLTRB(390, 0, 410, 600),
                 type: DisplayFeatureType.cutout,
                 state: DisplayFeatureState.unknown,
-              )
-            ]
+              ),
+            ],
           ),
           child: Scaffold(
             body: Navigator(
@@ -2215,20 +2215,22 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             title: const Text('PopupMenu Test'),
-            actions: <Widget>[PopupMenuButton<int>(
-              child: SizedBox(
-                key: buttonKey,
-                height: height,
-                width: width,
-                child: const ColoredBox(
-                  color: Colors.pink,
+            actions: <Widget>[
+              PopupMenuButton<int>(
+                child: SizedBox(
+                  key: buttonKey,
+                  height: height,
+                  width: width,
+                  child: const ColoredBox(
+                    color: Colors.pink,
+                  ),
                 ),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                  const PopupMenuItem<int>(value: 1, child: Text('-1-')),
+                  const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                ],
               ),
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                const PopupMenuItem<int>(value: 1, child: Text('-1-')),
-                const PopupMenuItem<int>(value: 2, child: Text('-2-')),
-              ],
-            )],
+            ],
           ),
           body: Container(),
         ),
@@ -2269,30 +2271,32 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             title: const Text('PopupMenu Test'),
-            actions: <Widget>[PopupMenuButton<int>(
-              child: SizedBox(
-                key: buttonKey,
-                height: height,
-                width: width,
-                child: const ColoredBox(
-                  color: Colors.pink,
-                ),
-              ),
-              itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<int>>[
-                  PopupMenuItem<int>(
-                    value: 1,
-                    child: Builder(
-                      builder: (BuildContext context) {
-                        mediaQueryPadding = MediaQuery.of(context).padding;
-                        return Text('-1-' * 500); // A long long text string.
-                      },
-                    ),
+            actions: <Widget>[
+              PopupMenuButton<int>(
+                child: SizedBox(
+                  key: buttonKey,
+                  height: height,
+                  width: width,
+                  child: const ColoredBox(
+                    color: Colors.pink,
                   ),
-                  const PopupMenuItem<int>(value: 2, child: Text('-2-')),
-                ];
-              },
-            )],
+                ),
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    PopupMenuItem<int>(
+                      value: 1,
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          mediaQueryPadding = MediaQuery.of(context).padding;
+                          return Text('-1-' * 500); // A long long text string.
+                        },
+                      ),
+                    ),
+                    const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                  ];
+                },
+              ),
+            ],
           ),
           body: const SizedBox.shrink(),
         ),
@@ -2570,7 +2574,7 @@ void main() {
                 splashRadius: splashRadius,
                 child: const Text('An item'),
                 itemBuilder: (_) => <PopupMenuEntry<String>>[
-                  const PopupMenuDivider()
+                  const PopupMenuDivider(),
                 ],
               ),
             ),
@@ -2760,7 +2764,7 @@ void main() {
   });
 
   testWidgets("PopupMenuButton icon inherits IconTheme's size", (WidgetTester tester) async {
-    Widget _buildPopupMenu({double? themeIconSize, double? iconSize}) {
+    Widget buildPopupMenu({double? themeIconSize, double? iconSize}) {
       return MaterialApp(
         theme: ThemeData(
           iconTheme: IconThemeData(
@@ -2784,20 +2788,20 @@ void main() {
     }
 
     // Popup menu with default icon size.
-    await tester.pumpWidget(_buildPopupMenu());
+    await tester.pumpWidget(buildPopupMenu());
     IconButton iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // Default PopupMenuButton icon size is 24.0.
     expect(iconButton.iconSize, 24.0);
 
     // Popup menu with custom theme icon size.
-    await tester.pumpWidget(_buildPopupMenu(themeIconSize: 30.0));
+    await tester.pumpWidget(buildPopupMenu(themeIconSize: 30.0));
     await tester.pumpAndSettle();
     iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // PopupMenuButton icon inherits IconTheme's size.
     expect(iconButton.iconSize, 30.0);
 
     // Popup menu with custom icon size.
-    await tester.pumpWidget(_buildPopupMenu(themeIconSize: 30.0, iconSize: 50.0));
+    await tester.pumpWidget(buildPopupMenu(themeIconSize: 30.0, iconSize: 50.0));
     await tester.pumpAndSettle();
     iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // PopupMenuButton icon size overrides IconTheme's size.

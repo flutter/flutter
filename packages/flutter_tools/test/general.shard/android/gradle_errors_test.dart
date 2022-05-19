@@ -427,7 +427,7 @@ Execution failed for task ':app:mergeDexDebug'.
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      AnsiTerminal: () => _TestPromptTerminal('y')
+      AnsiTerminal: () => _TestPromptTerminal('y'),
     });
 
     testUsingContext('exits if multidex support skipped', () async {
@@ -493,7 +493,7 @@ Execution failed for task ':app:mergeDexDebug'.
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      AnsiTerminal: () => _TestPromptTerminal('n')
+      AnsiTerminal: () => _TestPromptTerminal('n'),
     });
 
     testUsingContext('exits if multidex support disabled', () async {

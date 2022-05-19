@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -133,7 +132,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async {
     if (!_platform.isMacOS) {
       return const <String>[
-        'Control of iOS devices or simulators only supported on macOS.'
+        'Control of iOS devices or simulators only supported on macOS.',
       ];
     }
 
@@ -395,6 +394,7 @@ class IOSDevice extends Device {
             appDeltaDirectory: package.appDeltaDirectory,
             launchArguments: launchArguments,
             interfaceType: interfaceType,
+            uninstallFirst: debuggingOptions.uninstallFirst,
           );
           if (deviceLogReader is IOSDeviceLogReader) {
             deviceLogReader.debuggerStream = iosDeployDebugger;
@@ -416,6 +416,7 @@ class IOSDevice extends Device {
           appDeltaDirectory: package.appDeltaDirectory,
           launchArguments: launchArguments,
           interfaceType: interfaceType,
+          uninstallFirst: debuggingOptions.uninstallFirst,
         );
       } else {
         installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;

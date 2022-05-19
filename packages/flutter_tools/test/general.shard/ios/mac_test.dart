@@ -388,7 +388,7 @@ Could not build the precompiled application for the device.''',
           '-d',
           'com.apple.FinderInfo',
           projectDirectory.path,
-        ])
+        ]),
       ]);
 
       await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
@@ -397,14 +397,16 @@ Could not build the precompiled application for the device.''',
 
     testWithoutContext('ignores errors', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'xattr',
-          '-r',
-          '-d',
-          'com.apple.FinderInfo',
-          projectDirectory.path,
-        ], exitCode: 1,
-        )
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            projectDirectory.path,
+          ],
+          exitCode: 1,
+        ),
       ]);
 
       await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);

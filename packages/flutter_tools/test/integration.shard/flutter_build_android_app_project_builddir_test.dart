@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
@@ -17,9 +15,9 @@ import 'test_utils.dart';
 // `flutter build` command inside the `example` directory, so we create a plugin
 // project in the test.
 void main() {
-  Directory tempDir;
-  String flutterBin;
-  Directory exampleAppDir;
+  late Directory tempDir;
+  late String flutterBin;
+  late Directory exampleAppDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_plugin_test.');
@@ -44,7 +42,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  void _checkBuildDir() {
+  void checkBuildDir() {
     // The android/app/build directory should not exists
     final Directory appBuildDir = fileSystem.directory(fileSystem.path.join(
       exampleAppDir.path,
@@ -65,7 +63,7 @@ void main() {
         'apk',
         '--target-platform=android-arm',
       ], workingDirectory: exampleAppDir.path);
-      _checkBuildDir();
+      checkBuildDir();
     },
   );
 
@@ -79,7 +77,7 @@ void main() {
         'appbundle',
         '--target-platform=android-arm',
       ], workingDirectory: exampleAppDir.path);
-      _checkBuildDir();
+      checkBuildDir();
     },
   );
 }

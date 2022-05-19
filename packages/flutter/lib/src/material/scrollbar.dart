@@ -70,7 +70,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
 class Scrollbar extends StatelessWidget {
-  /// Creates a material design scrollbar that by default will connect to the
+  /// Creates a Material Design scrollbar that by default will connect to the
   /// closest Scrollable descendant of [child].
   ///
   /// The [child] should be a source of [ScrollNotification] notifications,

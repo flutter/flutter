@@ -65,7 +65,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     final Map<String, _VersionInfo?> installedVersions = <String, _VersionInfo?>{
       // Sort the check to make the call order predictable for unit tests.
       for (String binary in _requiredBinaryVersions.keys.toList()..sort())
-          binary: await _getBinaryVersion(binary)
+        binary: await _getBinaryVersion(binary),
     };
 
     // Determine overall validation level.
@@ -127,6 +127,8 @@ class LinuxDoctorValidator extends DoctorValidator {
       final _VersionInfo? version = installedVersions[kPkgConfigBinary];
       if (version == null || version.number == null) {
         messages.add(ValidationMessage.error(_userMessages.pkgConfigMissing));
+        // Exit early because we cannot validate libraries without pkg-config.
+        return ValidationResult(validationType, messages);
       } else {
         assert(_requiredBinaryVersions.containsKey(kPkgConfigBinary));
         // The full version description is just the number, so add context.

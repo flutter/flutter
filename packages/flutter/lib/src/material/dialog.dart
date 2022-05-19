@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -24,11 +25,11 @@ import 'theme_data.dart';
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
-/// A material design dialog.
+/// A Material Design dialog.
 ///
 /// This dialog widget does not have any opinion about the contents of the
 /// dialog. Rather than using this widget directly, consider using [AlertDialog]
-/// or [SimpleDialog], which implement specific kinds of material design
+/// or [SimpleDialog], which implement specific kinds of Material Design
 /// dialogs.
 ///
 /// See also:
@@ -166,7 +167,7 @@ class Dialog extends StatelessWidget {
   }
 }
 
-/// A material design alert dialog.
+/// A Material Design alert dialog.
 ///
 /// An alert dialog informs the user about situations that require
 /// acknowledgement. An alert dialog has an optional title and an optional list
@@ -700,7 +701,7 @@ class SimpleDialogOption extends StatelessWidget {
   }
 }
 
-/// A simple material design dialog.
+/// A simple Material Design dialog.
 ///
 /// A simple dialog offers the user a choice between several options. A simple
 /// dialog has an optional title that is displayed above the choices.
@@ -1176,7 +1177,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
-  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0);
+  final double clampedTextScaleFactor = clampDouble(textScaleFactor, 1.0, 2.0);
   // The final padding scale factor is clamped between 1/3 and 1. For example,
   // a non-scaled padding of 24 will produce a padding between 24 and 8.
   return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0)!;
@@ -1214,7 +1215,7 @@ class _DefaultsM2 extends DialogTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _TokenDefaultsM3 extends DialogTheme {
   _TokenDefaultsM3(this.context)
     : super(

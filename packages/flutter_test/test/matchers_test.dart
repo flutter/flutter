@@ -105,23 +105,31 @@ void main() {
         '├─B\n'
         '│\n'), isNot(hasAGoodToStringDeep));
 
-    expect(_MockToStringDeep.fromLines(
-        <String>['Paragraph#00000\n',
-                 ' │ size: (400x200)\n',
-                 ' ╘═╦══ text ═══\n',
-                 '   ║ TextSpan:\n',
-                 '   ║   "I polished up that handle so carefullee\n',
-                 '   ║   That now I am the Ruler of the Queen\'s Navee!"\n',
-                 '   ╚═══════════\n']), hasAGoodToStringDeep);
+    expect(
+      _MockToStringDeep.fromLines(<String>[
+        'Paragraph#00000\n',
+        ' │ size: (400x200)\n',
+        ' ╘═╦══ text ═══\n',
+        '   ║ TextSpan:\n',
+        '   ║   "I polished up that handle so carefullee\n',
+        '   ║   That now I am the Ruler of the Queen\'s Navee!"\n',
+        '   ╚═══════════\n',
+      ]),
+      hasAGoodToStringDeep,
+    );
 
     // Text span
-    expect(_MockToStringDeep.fromLines(
-        <String>['Paragraph#00000\n',
-                 ' │ size: (400x200)\n',
-                 ' ╘═╦══ text ═══\n',
-                 '   ║ TextSpan:\n',
-                 '   ║   "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen\'s Navee!"\n',
-                 '   ╚═══════════\n']), isNot(hasAGoodToStringDeep));
+    expect(
+      _MockToStringDeep.fromLines(<String>[
+        'Paragraph#00000\n',
+        ' │ size: (400x200)\n',
+        ' ╘═╦══ text ═══\n',
+        '   ║ TextSpan:\n',
+        '   ║   "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen\'s Navee!"\n',
+        '   ╚═══════════\n',
+      ]),
+      isNot(hasAGoodToStringDeep),
+    );
   });
 
   test('normalizeHashCodesEquals', () {

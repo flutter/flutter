@@ -28,6 +28,7 @@ const String kSignatures = 'signatures';
 const String kRevision = 'revision';
 const String kUpstream = 'upstream';
 
+
 /// Command to codesign and verify the signatures of cached binaries.
 class CodesignCommand extends Command<void> {
   CodesignCommand({
@@ -156,11 +157,8 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64/gen_snapshot_arm64',
       'artifacts/engine/darwin-x64/gen_snapshot_x64',
       'artifacts/engine/ios-profile/gen_snapshot_arm64',
-      'artifacts/engine/ios-profile/gen_snapshot_armv7',
       'artifacts/engine/ios-release/gen_snapshot_arm64',
-      'artifacts/engine/ios-release/gen_snapshot_armv7',
       'artifacts/engine/ios/gen_snapshot_arm64',
-      'artifacts/engine/ios/gen_snapshot_armv7',
       'artifacts/libimobiledevice/idevicescreenshot',
       'artifacts/libimobiledevice/idevicesyslog',
       'artifacts/libimobiledevice/libimobiledevice-1.0.6.dylib',
@@ -189,6 +187,8 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/font-subset',
+      'artifacts/engine/darwin-x64/impellerc',
+      'artifacts/engine/darwin-x64/libtessellator.dylib',
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',

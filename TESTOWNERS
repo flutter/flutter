@@ -22,6 +22,7 @@
 /dev/devicelab/bin/tasks/backdrop_filter_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/basic_material_app_android__compile.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/codegen_integration.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/clipper_cache_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/color_filter_and_fade_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/shader_mask_cache_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/color_filter_cache_perf__e2e_summary.dart @flar @flutter/engine
@@ -78,6 +79,7 @@
 /dev/devicelab/bin/tasks/gradient_consistent_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradient_dynamic_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/animated_complex_opacity_perf__e2e_summary.dart @jonahwilliams @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
@@ -122,6 +124,7 @@
 /dev/devicelab/bin/tasks/integration_ui_textfield.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/new_gallery_impeller__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/picture_cache_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_interaction_test.dart @stuartmorgan @flutter/plugin

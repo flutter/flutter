@@ -18,7 +18,7 @@ const int _kIndeterminateCircularDuration = 1333 * 2222;
 
 enum _ActivityIndicatorType { material, adaptive }
 
-/// A base class for material design progress indicators.
+/// A base class for Material Design progress indicators.
 ///
 /// This widget cannot be instantiated directly. For a linear progress
 /// indicator, see [LinearProgressIndicator]. For a circular progress indicator,
@@ -202,7 +202,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     }
 
     if (value != null) {
-      drawBar(0.0, value!.clamp(0.0, 1.0) * size.width);
+      drawBar(0.0, clampDouble(value!, 0.0, 1.0) * size.width);
     } else {
       final double x1 = size.width * line1Tail.transform(animationValue);
       final double width1 = size.width * line1Head.transform(animationValue) - x1;
@@ -225,7 +225,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design linear progress indicator, also known as a progress bar.
+/// A Material Design linear progress indicator, also known as a progress bar.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}
 ///
@@ -385,7 +385,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
          ? _startAngle
          : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
        arcSweep = value != null
-         ? value.clamp(0.0, 1.0) * _sweep
+         ? clampDouble(value, 0.0, 1.0) * _sweep
          : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
   final Color? backgroundColor;
@@ -438,7 +438,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design circular progress indicator, which spins to indicate that
+/// A Material Design circular progress indicator, which spins to indicate that
 /// the application is busy.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}

@@ -2197,7 +2197,7 @@ void main() {
           actions: <SemanticsAction>[SemanticsAction.longPress],
           label: 'German greeting for good day',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
   });
@@ -2398,7 +2398,7 @@ void main() {
                                 TestSemantics(
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHidden,
-                                    SemanticsFlag.isLink
+                                    SemanticsFlag.isLink,
                                   ],
                                   actions: <SemanticsAction>[SemanticsAction.tap],
                                   label: 'off screen',
@@ -4279,7 +4279,7 @@ void main() {
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(

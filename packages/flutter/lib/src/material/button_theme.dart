@@ -33,7 +33,7 @@ enum ButtonBarLayoutBehavior {
   /// Button bars will be constrained to a minimum height of 52.
   ///
   /// This setting is require to create button bars which conform to the
-  /// material specification.
+  /// Material Design specification.
   constrained,
 
   /// Button bars will calculate their padding from the button theme padding.

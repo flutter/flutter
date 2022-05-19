@@ -76,7 +76,7 @@ void main() {
         FakeCommand(
           command: <String>[
             artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.android_x64, mode: BuildMode.release),
-            '--additional_arg'
+            '--additional_arg',
           ],
         ),
       );

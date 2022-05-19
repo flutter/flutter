@@ -369,7 +369,7 @@ void main() {
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         '$build/app.dill',
-      ])
+      ]),
     ]);
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
 
@@ -397,7 +397,7 @@ void main() {
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         '$build/app.dill',
-      ])
+      ]),
     ]);
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
 

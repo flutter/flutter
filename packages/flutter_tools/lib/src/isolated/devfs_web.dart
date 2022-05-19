@@ -41,8 +41,9 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
-import '../web/flutter_js.dart' as flutter_js;
+import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
+import 'sdk_web_configuration.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   @required AssetReader assetReader,
@@ -254,7 +255,7 @@ class WebAssetServer implements AssetReader {
 
     // Return a version string for all active modules. This is populated
     // along with the `moduleProvider` update logic.
-    Future<Map<String, String>> _digestProvider() async => digests;
+    Future<Map<String, String>> digestProvider() async => digests;
 
     // Ensure dwds is present and provide middleware to avoid trying to
     // load the through the isolate APIs.
@@ -267,7 +268,7 @@ class WebAssetServer implements AssetReader {
           final String result =
               await globals.fs.file(uri.toFilePath()).readAsString();
           return shelf.Response.ok(result, headers: <String, String>{
-            HttpHeaders.contentTypeHeader: 'application/javascript'
+            HttpHeaders.contentTypeHeader: 'application/javascript',
           });
         }
         return innerHandler(request);
@@ -295,10 +296,12 @@ class WebAssetServer implements AssetReader {
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
-        _digestProvider,
+        digestProvider,
+        server.basePath,
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
+      sdkConfigurationProvider: SdkWebConfigurationProvider(globals.artifacts),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -1010,16 +1013,6 @@ void log(logging.LogRecord event) {
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {
-    // TODO(elliette): Remove the following message suppressions after DWDS is
-    // >13.1.0, https://github.com/flutter/flutter/issues/101639
-    const String dartUri = 'DartUri';
-    if (event.loggerName == dartUri) {
-      const String webSqlWarning = 'Unresolved uri: dart:web_sql';
-      const String uiWarning = 'Unresolved uri: dart:ui';
-      if (event.message == webSqlWarning || event.message == uiWarning) {
-        return;
-      }
-    }
     globals.printWarning('${event.loggerName}: ${event.message}$error');
   } else  {
     globals.printTrace('${event.loggerName}: ${event.message}$error');

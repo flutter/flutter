@@ -71,7 +71,7 @@ export 'package:flutter/services.dart' show
   AssetBundle;
 
 // Examples can assume:
-// class TestWidget extends StatelessWidget { const TestWidget({Key? key}) : super(key: key); @override Widget build(BuildContext context) => const Placeholder(); }
+// class TestWidget extends StatelessWidget { const TestWidget({super.key}); @override Widget build(BuildContext context) => const Placeholder(); }
 // late WidgetTester tester;
 // late bool _visible;
 // class Sky extends CustomPainter { @override void paint(Canvas c, Size s) {} @override bool shouldRepaint(Sky s) => false; }
@@ -80,12 +80,69 @@ export 'package:flutter/services.dart' show
 
 // BIDIRECTIONAL TEXT SUPPORT
 
+/// An [InheritedElement] that has hundreds of dependencies but will
+/// infrequently change.  This provides a performance tradeoff where building
+/// the [Widget]s is faster but performing updates is slower.
+///
+/// |                     | _UbiquitiousInheritedElement | InheritedElement |
+/// |---------------------|------------------------------|------------------|
+/// | insert (best case)  | O(1)                         | O(1)             |
+/// | insert (worst case) | O(1)                         | O(n)             |
+/// | search (best case)  | O(n)                         | O(1)             |
+/// | search (worst case) | O(n)                         | O(n)             |
+///
+/// Insert happens when building the [Widget] tree, search happens when updating
+/// [Widget]s.
+class _UbiquitousInheritedElement extends InheritedElement {
+  /// Creates an element that uses the given widget as its configuration.
+  _UbiquitousInheritedElement(super.widget);
+
+  @override
+  void setDependencies(Element dependent, Object? value) {
+    // This is where the cost of [InheritedElement] is incurred during build
+    // time of the widget tree.  Omitting this bookkeeping is where the
+    // performance savings come from.
+    assert(value == null);
+  }
+
+  @override
+  Object? getDependencies(Element dependent) {
+    return null;
+  }
+
+  @override
+  void notifyClients(InheritedWidget oldWidget) {
+    _recurseChildren(this, (Element element) {
+      if (element.doesDependOnInheritedElement(this)) {
+        notifyDependent(oldWidget, element);
+      }
+    });
+  }
+
+  static void _recurseChildren(Element element, ElementVisitor visitor) {
+    element.visitChildren((Element child) {
+      _recurseChildren(child, visitor);
+    });
+    visitor(element);
+  }
+}
+
+/// See also:
+///
+///  * [_UbiquitousInheritedElement], the [Element] for [_UbiquitousInheritedWidget].
+abstract class _UbiquitousInheritedWidget extends InheritedWidget {
+  const _UbiquitousInheritedWidget({super.key, required super.child});
+
+  @override
+  InheritedElement createElement() => _UbiquitousInheritedElement(this);
+}
+
 /// A widget that determines the ambient directionality of text and
 /// text-direction-sensitive render objects.
 ///
 /// For example, [Padding] depends on the [Directionality] to resolve
 /// [EdgeInsetsDirectional] objects into absolute [EdgeInsets] objects.
-class Directionality extends InheritedWidget {
+class Directionality extends _UbiquitousInheritedWidget {
   /// Creates a widget that determines the directionality of text and
   /// text-direction-sensitive render objects.
   ///
@@ -4509,7 +4566,6 @@ class Flex extends MultiChildRenderObjectWidget {
 ///     ),
 ///     Expanded(
 ///       child: FittedBox(
-///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: FlutterLogo(),
 ///       ),
 ///     ),
@@ -4708,7 +4764,6 @@ class Row extends Flex {
 ///     Text('Craft beautiful UIs'),
 ///     Expanded(
 ///       child: FittedBox(
-///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: FlutterLogo(),
 ///       ),
 ///     ),
@@ -5262,6 +5317,8 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// A widget that sizes and positions children efficiently, according to the
 /// logic in a [FlowDelegate].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=NG6pvXpnIso}
+///
 /// Flow layouts are optimized for repositioning children using transformation
 /// matrices.
 ///
@@ -5645,9 +5702,8 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Use the "low" quality setting to scale the image, which corresponds to
-  /// bilinear interpolation, rather than the default "none" which corresponds
-  /// to nearest-neighbor.
+  /// Defaults to [FilterQuality.low] to scale the image, which corresponds to
+  /// bilinear interpolation.
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
@@ -6351,6 +6407,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that creates a separate display list for its child.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=cVAGLDuc2xE}
 ///
 /// This widget creates a separate display list for its child, which
 /// can improve performance if the subtree repaints at different times than
@@ -7350,6 +7408,8 @@ class Builder extends StatelessWidget {
 typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=syvT63CosNE}
 ///
 /// The [StateSetter] function passed to the [builder] is used to invoke a
 /// rebuild instead of a typical [State]'s [State.setState].

@@ -1019,7 +1019,6 @@ void main() {
               onPressed: () {
                 showGeneralDialog<void>(
                   context: context,
-                  barrierDismissible: false,
                   transitionDuration: Duration.zero,
                   pageBuilder: (BuildContext innerContext, _, __) {
                     return const SizedBox();
@@ -1097,7 +1096,6 @@ void main() {
                   onPressed: () {
                     showGeneralDialog<void>(
                       context: context,
-                      barrierDismissible: false,
                       transitionDuration: Duration.zero,
                       pageBuilder: (BuildContext innerContext, _, __) {
                         return const SizedBox();
@@ -1135,7 +1133,6 @@ void main() {
                     showGeneralDialog<void>(
                       useRootNavigator: false,
                       context: context,
-                      barrierDismissible: false,
                       transitionDuration: Duration.zero,
                       pageBuilder: (BuildContext innerContext, _, __) {
                         return const SizedBox();
@@ -1504,7 +1501,7 @@ void main() {
       ));
 
       final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
-      int _getExpectedBarrierTweenAlphaValue(double t) {
+      int getExpectedBarrierTweenAlphaValue(double t) {
         return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }
 
@@ -1521,21 +1518,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
@@ -1567,7 +1564,7 @@ void main() {
       ));
 
       final CurveTween customBarrierTween = CurveTween(curve: Curves.linear);
-      int _getExpectedBarrierTweenAlphaValue(double t) {
+      int getExpectedBarrierTweenAlphaValue(double t) {
         return Color.getAlphaFromOpacity(customBarrierTween.transform(t));
       }
 
@@ -1584,21 +1581,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
@@ -1630,7 +1627,7 @@ void main() {
       ));
 
       final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
-      int _getExpectedBarrierTweenAlphaValue(double t) {
+      int getExpectedBarrierTweenAlphaValue(double t) {
         return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }
 
@@ -1647,21 +1644,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value!.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
+        closeTo(getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
