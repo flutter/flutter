@@ -87,6 +87,8 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/js_ast
   js_runtime:
     path: ../../third_party/dart/pkg/js_runtime
+  js_shared:
+    path: ../../third_party/dart/pkg/js_shared
   kernel:
     path: ../../third_party/dart/pkg/kernel
   litetest:
