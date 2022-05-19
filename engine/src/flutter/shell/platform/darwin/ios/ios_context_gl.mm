@@ -13,7 +13,7 @@
 
 namespace flutter {
 
-IOSContextGL::IOSContextGL() : IOSContext(MsaaSampleCount::kNone) {
+IOSContextGL::IOSContextGL() {
   resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3]);
   if (resource_context_ != nullptr) {
     context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3

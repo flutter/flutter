@@ -12,7 +12,7 @@
 
 namespace flutter {
 
-IOSContextMetalSkia::IOSContextMetalSkia(MsaaSampleCount msaa_samples) : IOSContext(msaa_samples) {
+IOSContextMetalSkia::IOSContextMetalSkia() {
   darwin_context_metal_ = fml::scoped_nsobject<FlutterDarwinContextMetal>{
       [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice]};
 
