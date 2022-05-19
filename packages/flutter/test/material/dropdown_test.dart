@@ -3839,35 +3839,4 @@ void main() {
     expect(tester.getBottomRight(find.text(hintText)).dx, 776.0);
     expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
   });
-
-  testWidgets('BorderRadius property clips dropdown menu', (WidgetTester tester) async {
-    const double radius = 20.0;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: DropdownButtonFormField<String>(
-              borderRadius: BorderRadius.circular(radius),
-              value: 'One',
-              items: <String>['One', 'Two', 'Three', 'Four']
-                .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-              }).toList(),
-              onChanged: (_) { },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('One'));
-    await tester.pumpAndSettle();
-
-    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
-    expect(renderClip.borderRadius, BorderRadius.circular(radius));
-  });
 }
