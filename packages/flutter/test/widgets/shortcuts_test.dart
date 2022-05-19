@@ -532,13 +532,31 @@ void main() {
 
   group(Shortcuts, () {
     testWidgets('Default constructed Shortcuts has empty shortcuts', (WidgetTester tester) async {
-      final ShortcutManager manager = ShortcutManager();
-      expect(manager.shortcuts, isNotNull);
-      expect(manager.shortcuts, isEmpty);
       const Shortcuts shortcuts = Shortcuts(shortcuts: <LogicalKeySet, Intent>{}, child: SizedBox());
       await tester.pumpWidget(shortcuts);
       expect(shortcuts.shortcuts, isNotNull);
       expect(shortcuts.shortcuts, isEmpty);
+    });
+    testWidgets('Default constructed Shortcuts.manager has empty shortcuts', (WidgetTester tester) async {
+      final ShortcutManager manager = ShortcutManager();
+      expect(manager.shortcuts, isNotNull);
+      expect(manager.shortcuts, isEmpty);
+      final Shortcuts shortcuts = Shortcuts.manager(manager: manager, child: const SizedBox());
+      await tester.pumpWidget(shortcuts);
+      expect(shortcuts.shortcuts, isNotNull);
+      expect(shortcuts.shortcuts, isEmpty);
+    });
+    testWidgets('Shortcuts.manager passes on shortcuts', (WidgetTester tester) async {
+      final Map<LogicalKeySet, Intent> testShortcuts = <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
+      };
+      final ShortcutManager manager = ShortcutManager(shortcuts: testShortcuts);
+      expect(manager.shortcuts, isNotNull);
+      expect(manager.shortcuts, equals(testShortcuts));
+      final Shortcuts shortcuts = Shortcuts.manager(manager: manager, child: const SizedBox());
+      await tester.pumpWidget(shortcuts);
+      expect(shortcuts.shortcuts, isNotNull);
+      expect(shortcuts.shortcuts, equals(testShortcuts));
     });
     testWidgets('Shortcuts.of and maybeOf find shortcuts', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();

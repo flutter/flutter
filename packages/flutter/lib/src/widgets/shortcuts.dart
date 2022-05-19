@@ -817,7 +817,7 @@ class Shortcuts extends StatefulWidget {
   /// The [child] and [shortcuts] arguments are required.
   const Shortcuts({
     super.key,
-    required this.shortcuts,
+    required Map<ShortcutActivator, Intent> shortcuts,
     required this.child,
     this.debugLabel,
     @Deprecated(
@@ -826,11 +826,12 @@ class Shortcuts extends StatefulWidget {
     )
     this.manager,
   }) : _forceShortcutsOnManager = true,
+       _shortcuts = shortcuts,
        assert(shortcuts != null),
        assert(child != null);
 
-  /// Constructs a [Shortcuts] widget that allows the [manager] to determine by
-  /// itself what the map of shortcuts is.
+  /// Constructs a const [Shortcuts] widget that allows the [manager] to
+  /// determine by itself what the map of shortcuts is.
   ///
   /// If this constructor is used, [shortcuts] will be empty and ignored, and
   /// the [manager] will determine which shortcuts are in effect.
@@ -840,13 +841,16 @@ class Shortcuts extends StatefulWidget {
     required this.child,
     this.debugLabel,
   }) : _forceShortcutsOnManager = false,
-       shortcuts = const <ShortcutActivator, Intent>{};
+       _shortcuts = const <ShortcutActivator, Intent>{},
+       assert(manager != null),
+       assert(child != null);
 
   // Whether or not this instance should force the shortcuts property into the
   // manager, or let it manage them itself.
   // TODO(gspencergoog): Once the manager constructor parameter is removed, then
-  // we can use whether or not the manager property is null to determine how to
-  // treat it, and this bool can go away.
+  //                     we can use whether or not the manager property is null
+  //                     to determine how to treat it, and this bool can go
+  //                     away. https://github.com/flutter/flutter/issues/104129
   final bool _forceShortcutsOnManager;
 
   /// The [ShortcutManager] that will manage the mapping between key
@@ -866,7 +870,8 @@ class Shortcuts extends StatefulWidget {
   /// in here (e.g. a final variable from your widget class) instead of defining
   /// it inline in the build function.
   /// {@endtemplate}
-  final Map<ShortcutActivator, Intent> shortcuts;
+  Map<ShortcutActivator, Intent> get shortcuts => _forceShortcutsOnManager ? _shortcuts : manager!.shortcuts;
+  final Map<ShortcutActivator, Intent> _shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
   ///
@@ -901,7 +906,7 @@ class Shortcuts extends StatefulWidget {
     'This feature was deprecated after v3.1.0-0.0.pre.',
   )
   // TODO(gspencergoog): When this is finally removed, _ShortcutsMarker can also
-  // be removed.
+  //                     be removed. https://github.com/flutter/flutter/issues/104129
   static ShortcutManager of(BuildContext context) {
     assert(context != null);
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
@@ -941,7 +946,7 @@ class Shortcuts extends StatefulWidget {
     'This feature was deprecated after v3.1.0-0.0.pre.',
   )
   // TODO(gspencergoog): When this is finally removed, _ShortcutsMarker can also
-  // be removed.
+  //                     be removed. https://github.com/flutter/flutter/issues/104129
   static ShortcutManager? maybeOf(BuildContext context) {
     assert(context != null);
     final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
