@@ -107,15 +107,15 @@ void main() {
     final Float32List zeroes = Float32List.fromList(<double>[0]);
 
     {
-      final a = program.shader(floatUniforms: ones);
-      final b = program.shader(floatUniforms: ones);
+      final Shader a = program.shader(floatUniforms: ones);
+      final Shader b = program.shader(floatUniforms: ones);
       expect(a, b);
       expect(a.hashCode, b.hashCode);
     }
 
     {
-      final a = program.shader(floatUniforms: ones);
-      final b = program.shader(floatUniforms: zeroes);
+      final Shader a = program.shader(floatUniforms: ones);
+      final Shader b = program.shader(floatUniforms: zeroes);
       expect(a, notEquals(b));
       expect(a.hashCode, notEquals(b.hashCode));
     }
@@ -128,11 +128,26 @@ void main() {
         .readAsBytesSync().buffer;
     final FragmentProgram programA = await FragmentProgram.compile(spirv: spirvA);
     final FragmentProgram programB = await FragmentProgram.compile(spirv: spirvB);
-    final a = programA.shader();
-    final b = programB.shader();
+    final Shader a = programA.shader();
+    final Shader b = programB.shader();
 
     expect(a, notEquals(b));
     expect(a.hashCode, notEquals(b.hashCode));
+  });
+
+  test('Compilation does not create a Timer object', () async {
+    final ByteBuffer spirvA = spvFile('general_shaders', 'simple.spv')
+        .readAsBytesSync().buffer;
+    bool createdTimer = false;
+    final ZoneSpecification specification = ZoneSpecification(createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
+      createdTimer = true;
+      return parent.createTimer(zone, duration, f);
+    });
+    await runZoned(() async {
+       await FragmentProgram.compile(spirv: spirvA);
+    }, zoneSpecification: specification);
+
+    expect(createdTimer, false);
   });
 }
 
