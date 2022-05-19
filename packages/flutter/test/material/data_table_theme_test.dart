@@ -16,13 +16,12 @@ void main() {
     const DataTableThemeData themeData = DataTableThemeData();
     expect(themeData.decoration, null);
     expect(themeData.dataRowColor, null);
-    expect(themeData.dataRowHeight, null);
+    expect(themeData.dataRowHeightSettings, null);
     expect(themeData.dataTextStyle, null);
     expect(themeData.headingRowColor, null);
     expect(themeData.headingRowHeight, null);
     expect(themeData.headingTextStyle, null);
     expect(themeData.horizontalMargin, null);
-    expect(themeData.topBottomRowPadding, null);
     expect(themeData.columnSpacing, null);
     expect(themeData.dividerThickness, null);
     expect(themeData.checkboxHorizontalMargin, null);
@@ -30,16 +29,20 @@ void main() {
     const DataTableTheme theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
     expect(theme.data.decoration, null);
     expect(theme.data.dataRowColor, null);
-    expect(theme.data.dataRowHeight, null);
+    expect(theme.data.dataRowHeightSettings, null);
     expect(theme.data.dataTextStyle, null);
     expect(theme.data.headingRowColor, null);
     expect(theme.data.headingRowHeight, null);
     expect(theme.data.headingTextStyle, null);
     expect(theme.data.horizontalMargin, null);
-    expect(theme.data.topBottomRowPadding, null);
     expect(theme.data.columnSpacing, null);
     expect(theme.data.dividerThickness, null);
     expect(theme.data.checkboxHorizontalMargin, null);
+  });
+
+  test('Setting depreciated dataRowHeight can be read using dataRowHeightSettings', () {
+    const DataTableThemeData themeData = DataTableThemeData(dataRowHeight: 20.0);
+     expect(themeData.dataRowHeightSettings?.fixedHeight, 20.0); 
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
@@ -61,7 +64,7 @@ void main() {
       dataRowColor: MaterialStateProperty.resolveWith<Color>(
         (Set<MaterialState> states) => const Color(0xfffffff1),
       ),
-      dataRowHeight: 51.0,
+      dataRowHeightSettings: const DataTableRowHeight.contentBased(topBottomPadding: 3.5),
       dataTextStyle: const TextStyle(fontSize: 12.0),
       headingRowColor: MaterialStateProperty.resolveWith<Color>(
         (Set<MaterialState> states) => const Color(0xfffffff2),
@@ -69,7 +72,6 @@ void main() {
       headingRowHeight: 52.0,
       headingTextStyle:  const TextStyle(fontSize: 14.0),
       horizontalMargin: 3.0,
-      topBottomRowPadding: 3.5,
       columnSpacing: 4.0,
       dividerThickness: 5.0,
       checkboxHorizontalMargin: 6.0,
@@ -82,28 +84,26 @@ void main() {
 
     expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
     expect(description[1], "dataRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
-    expect(description[2], 'dataRowHeight: 51.0');
+    expect(description[2], 'dataRowHeightSettings: DataTableRowHeight(fixedHeight: null, topBottomPadding: 3.5)');
     expect(description[3], 'dataTextStyle: TextStyle(inherit: true, size: 12.0)');
     expect(description[4], "headingRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
     expect(description[5], 'headingRowHeight: 52.0');
     expect(description[6], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
     expect(description[7], 'horizontalMargin: 3.0');
-    expect(description[8], 'topBottomRowPadding: 3.5');
-    expect(description[9], 'columnSpacing: 4.0');
-    expect(description[10], 'dividerThickness: 5.0');
-    expect(description[11], 'checkboxHorizontalMargin: 6.0');
+    expect(description[8], 'columnSpacing: 4.0');
+    expect(description[9], 'dividerThickness: 5.0');
+    expect(description[10], 'checkboxHorizontalMargin: 6.0');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
-    const double dataRowHeight = 51.0;
+    const DataTableRowHeight dataRowHeightSettings = DataTableRowHeight.fixed(height: 51.1);
     const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
     final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
-    const double topBottomRowPadding = 3.5;
     const double columnSpacing = 4.0;
     const double dividerThickness = 5.0;
 
@@ -113,13 +113,12 @@ void main() {
           dataTableTheme: DataTableThemeData(
             decoration: decoration,
             dataRowColor: dataRowColor,
-            dataRowHeight: dataRowHeight,
+            dataRowHeightSettings: dataRowHeightSettings,
             dataTextStyle: dataTextStyle,
             headingRowColor: headingRowColor,
             headingRowHeight: headingRowHeight,
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
-            topBottomRowPadding: topBottomRowPadding,
             columnSpacing: columnSpacing,
             dividerThickness: dividerThickness,
           ),
@@ -152,7 +151,7 @@ void main() {
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
-    expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
+    expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeightSettings.fixedHeight);
 
     final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
@@ -166,25 +165,23 @@ void main() {
   testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
     const BoxDecoration themeDecoration = BoxDecoration(color: Color(0xfffffff1));
     final MaterialStateProperty<Color> themeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff0));
-    const double themeDataRowHeight = 50.0;
+    const DataTableRowHeight themeDataRowHeightSettings = DataTableRowHeight.fixed(height: 50.1);
     const TextStyle themeDataTextStyle = TextStyle(fontSize: 11.5);
     final MaterialStateProperty<Color> themeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
     const double themeHeadingRowHeight = 51.0;
     const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double themeHorizontalMargin = 2.0;
-    const double themetopBottomRowPadding = 10.0;
     const double themeColumnSpacing = 3.0;
     const double themeDividerThickness = 4.0;
 
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
-    const double dataRowHeight = 51.0;
+    const DataTableRowHeight dataRowHeightSettings = DataTableRowHeight.fixed(height: 3.5);
     const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
     final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
-    const double topBottomRowPadding = 3.5;
     const double columnSpacing = 4.0;
     const double dividerThickness = 5.0;
     await tester.pumpWidget(
@@ -193,13 +190,12 @@ void main() {
           dataTableTheme: DataTableThemeData(
             decoration: themeDecoration,
             dataRowColor: themeDataRowColor,
-            dataRowHeight: themeDataRowHeight,
+            dataRowHeightSettings: themeDataRowHeightSettings,
             dataTextStyle: themeDataTextStyle,
             headingRowColor: themeHeadingRowColor,
             headingRowHeight: themeHeadingRowHeight,
             headingTextStyle: themeHeadingTextStyle,
             horizontalMargin: themeHorizontalMargin,
-            topBottomRowPadding: themetopBottomRowPadding,
             columnSpacing: themeColumnSpacing,
             dividerThickness: themeDividerThickness,
           ),
@@ -208,13 +204,12 @@ void main() {
           body: DataTable(
             decoration: decoration,
             dataRowColor: dataRowColor,
-            dataRowHeight: dataRowHeight,
+            dataRowHeightSettings: dataRowHeightSettings,
             dataTextStyle: dataTextStyle,
             headingRowColor: headingRowColor,
             headingRowHeight: headingRowHeight,
             headingTextStyle: headingTextStyle,
             horizontalMargin: horizontalMargin,
-            topBottomRowPadding: topBottomRowPadding,
             columnSpacing: columnSpacing,
             dividerThickness: dividerThickness,
             sortColumnIndex: 0,
@@ -243,7 +238,7 @@ void main() {
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
-    expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
+    expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeightSettings.fixedHeight);
 
     final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
@@ -257,25 +252,23 @@ void main() {
   testWidgets('Local DataTableTheme can override global DataTableTheme', (WidgetTester tester) async {
     const BoxDecoration globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
     final MaterialStateProperty<Color> globalThemeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff0));
-    const double globalThemeDataRowHeight = 50.0;
+    const DataTableRowHeight globalThemeDataRowHeightSettings = DataTableRowHeight.fixed(height: 50.1);
     const TextStyle globalThemeDataTextStyle = TextStyle(fontSize: 11.5);
     final MaterialStateProperty<Color> globalThemeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
     const double globalThemeHeadingRowHeight = 51.0;
     const TextStyle globalThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double globalThemeHorizontalMargin = 2.0;
-    const double globalThemetopBottomRowPadding = 10.0;
     const double globalThemeColumnSpacing = 3.0;
     const double globalThemeDividerThickness = 4.0;
 
     const BoxDecoration localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
     final MaterialStateProperty<Color> localThemeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
-    const double localThemeDataRowHeight = 51.0;
+    const DataTableRowHeight localThemeDataRowHeightSettings = DataTableRowHeight.fixed(height: 51.1);
     const TextStyle localThemeDataTextStyle = TextStyle(fontSize: 12.5);
     final MaterialStateProperty<Color> localThemeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
     const double localThemeHeadingRowHeight = 52.0;
     const TextStyle localThemeHeadingTextStyle = TextStyle(fontSize: 14.5);
     const double localThemeHorizontalMargin = 3.0;
-    const double localThemetopBottomRowPadding = 7.0;
     const double localThemeColumnSpacing = 4.0;
     const double localThemeDividerThickness = 5.0;
 
@@ -285,13 +278,12 @@ void main() {
           dataTableTheme: DataTableThemeData(
             decoration: globalThemeDecoration,
             dataRowColor: globalThemeDataRowColor,
-            dataRowHeight: globalThemeDataRowHeight,
+            dataRowHeightSettings: globalThemeDataRowHeightSettings,
             dataTextStyle: globalThemeDataTextStyle,
             headingRowColor: globalThemeHeadingRowColor,
             headingRowHeight: globalThemeHeadingRowHeight,
             headingTextStyle: globalThemeHeadingTextStyle,
             horizontalMargin: globalThemeHorizontalMargin,
-            topBottomRowPadding: globalThemetopBottomRowPadding,
             columnSpacing: globalThemeColumnSpacing,
             dividerThickness: globalThemeDividerThickness,
           ),
@@ -301,13 +293,12 @@ void main() {
             data: DataTableThemeData(
               decoration: localThemeDecoration,
               dataRowColor: localThemeDataRowColor,
-              dataRowHeight: localThemeDataRowHeight,
+              dataRowHeightSettings: localThemeDataRowHeightSettings,
               dataTextStyle: localThemeDataTextStyle,
               headingRowColor: localThemeHeadingRowColor,
               headingRowHeight: localThemeHeadingRowHeight,
               headingTextStyle: localThemeHeadingTextStyle,
               horizontalMargin: localThemeHorizontalMargin,
-              topBottomRowPadding: localThemetopBottomRowPadding,
               columnSpacing: localThemeColumnSpacing,
               dividerThickness: localThemeDividerThickness,
             ),
@@ -339,7 +330,7 @@ void main() {
     expect(dataRowTextStyle.fontSize, localThemeDataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, localThemeDataRowColor.resolve(<MaterialState>{}));
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, localThemeDividerThickness);
-    expect(tester.getSize(_findFirstContainerFor('Data')).height, localThemeDataRowHeight);
+    expect(tester.getSize(_findFirstContainerFor('Data')).height, localThemeDataRowHeightSettings.fixedHeight);
 
     final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
     expect(headingRowTextStyle.fontSize, localThemeHeadingTextStyle.fontSize);

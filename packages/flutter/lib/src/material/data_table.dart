@@ -384,13 +384,17 @@ class DataTable extends StatelessWidget {
     this.onSelectAll,
     this.decoration,
     this.dataRowColor,
+    @Deprecated(
+      'Use dataRowHeightSettings instead. '
+      'This feature was deprecated after 2.13.0-0.4.pre.',
+    )
     this.dataRowHeight,
+    this.dataRowHeightSettings,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
     this.headingTextStyle,
     this.horizontalMargin,
-    this.topBottomRowPadding,
     this.columnSpacing,
     this.showCheckboxColumn = true,
     this.showBottomBorder = false,
@@ -492,16 +496,24 @@ class DataTable extends StatelessWidget {
 
   /// {@template flutter.material.dataTable.dataRowHeight}
   /// The height of each row (excluding the row that contains column headings).
-  /// If, for any cell in the row, the cell content plus 2 * [topBottomRowPadding] is larger than the [dataRowHeight],
-  /// then the height of that row will exceed [dataRowHeight].
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.dataRowHeight] is used. This value defaults
   /// to [kMinInteractiveDimension] to adhere to the Material Design
   /// specifications.
-  ///
-  /// Also see [DataTable.topBottomRowPadding].
+  @Deprecated(
+    'Use dataRowHeightSettings instead. '
+    'This feature was deprecated after 2.13.0-0.4.pre.',
+  )
   final double? dataRowHeight;
+  
+  /// {@template flutter.material.dataTable.dataRowHeightSettings}
+  /// The height settings for [DataRow]s.
+  /// {@endtemplate}
+  ///
+  /// If null, [DataTableThemeData.dataRowHeightSettings] is used. This value
+  /// defaults to `DataRowHeight.fixed(`[kMinInteractiveDimension]`)`.
+  final DataTableRowHeight? dataRowHeightSettings;
 
   /// {@template flutter.material.dataTable.dataTextStyle}
   /// The text style for data rows.
@@ -573,16 +585,6 @@ class DataTable extends StatelessWidget {
   /// margin between the edge of the table and the checkbox, as well as the
   /// margin between the checkbox and the content in the first data column.
   final double? horizontalMargin;
-
-  /// {@template flutter.material.dataTable.topBottomRowPadding}
-  /// The minimum padding between the content of each data cell and the top and bottom of the data row.
-  /// {@endtemplate}
-  ///
-  /// If null, [DataTableThemeData.topBottomRowPadding] is used. This value
-  /// defaults to 0.0.
-  ///
-  /// Also see [DataTable.dataRowHeight].
-  final double? topBottomRowPadding;
 
   /// {@template flutter.material.dataTable.columnSpacing}
   /// The horizontal margin between the contents of each data column.
@@ -682,8 +684,8 @@ class DataTable extends StatelessWidget {
   /// in the first and last cells of each row.
   static const double _horizontalMargin = 24.0;
 
-  /// The default minimum padding between the content of each data cell and the top and bottom of the data row.
-  static const double _topBottomRowPadding = 0.0;
+  /// The default data row height settings.
+  static const DataTableRowHeight _dataRowHeightSettings = DataTableRowHeight.fixed();
 
   /// The default horizontal margin between the contents of each data column.
   static const double _columnSpacing = 56.0;
@@ -811,6 +813,7 @@ class DataTable extends StatelessWidget {
   Widget _buildDataCell({
     required BuildContext context,
     required EdgeInsetsGeometry padding,
+    required double? height,
     required Widget label,
     required bool numeric,
     required bool placeholder,
@@ -839,14 +842,10 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.dataTextStyle
       ?? themeData.dataTableTheme.dataTextStyle
       ?? themeData.textTheme.bodyText2!;
-    final double minDataRowHeight = dataRowHeight
-      ?? dataTableTheme.dataRowHeight
-      ?? themeData.dataTableTheme.dataRowHeight
-      ?? kMinInteractiveDimension;
 
     label = Container(
       padding: padding,
-      constraints: BoxConstraints(minHeight: minDataRowHeight),
+      height: height,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
         style: effectiveDataTextStyle.copyWith(
@@ -923,9 +922,14 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.columnSpacing
       ?? theme.dataTableTheme.columnSpacing
       ?? _columnSpacing;
-    final double effectivetopBottomRowPadding = topBottomRowPadding
-      ?? theme.dataTableTheme.topBottomRowPadding
-      ?? _topBottomRowPadding;
+
+    final DataTableRowHeight effectiveDataRowHeightSettings = dataRowHeightSettings
+      ?? dataTableTheme.dataRowHeightSettings
+      ?? theme.dataTableTheme.dataRowHeightSettings
+      ?? (dataRowHeight != null ? DataTableRowHeight.fixed(height: dataRowHeight) : null)
+      ?? _dataRowHeightSettings;
+    final double? effectiveDataRowHeight = effectiveDataRowHeightSettings.fixedHeight;
+    final double effectiveDataRowTopBottomPadding = effectiveDataRowHeightSettings.topBottomPadding;
 
     final List<TableColumnWidth> tableColumns = List<TableColumnWidth>.filled(columns.length + (displayCheckboxColumn ? 1 : 0), const _NullTableColumnWidth());
     final List<TableRow> tableRows = List<TableRow>.generate(
@@ -1019,8 +1023,8 @@ class DataTable extends StatelessWidget {
       final EdgeInsetsDirectional cellPadding = EdgeInsetsDirectional.only(
         start: paddingStart,
         end: paddingEnd,
-        top: effectivetopBottomRowPadding,
-        bottom: effectivetopBottomRowPadding,
+        top: effectiveDataRowTopBottomPadding,
+        bottom: effectiveDataRowTopBottomPadding,
       );
       if (dataColumnIndex == _onlyTextColumn) {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);
@@ -1044,6 +1048,7 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children![displayColumnIndex] = _buildDataCell(
           context: context,
           padding: cellPadding,
+          height: effectiveDataRowHeight,
           label: cell.child,
           numeric: column.numeric,
           placeholder: cell.placeholder,
@@ -1074,6 +1079,52 @@ class DataTable extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Height settings for DataRows.
+/// Either a fixed row height or a row height that adjusts to its content can be specified.
+@immutable
+class DataTableRowHeight with Diagnosticable {
+  /// Creates height settings where all rows are created with the same fixed height.
+  /// [fixedHeight] defaults to kMinInteractiveDimension to adhere to the Material Design specifications.
+  const DataTableRowHeight.fixed({
+    double? height = kMinInteractiveDimension
+  }) : fixedHeight = height, topBottomPadding = 0.0;
+  
+  /// Creates height settings where the row height adjusts to the content.
+  const DataTableRowHeight.contentBased({
+    required this.topBottomPadding,
+  }) : fixedHeight = null;
+
+  /// Fixed height value.
+  /// If set then all rows will geht this fixed height, if null then content based height is used.
+  final double? fixedHeight;
+  
+  /// The minimum padding between the content of each data cell and the top and bottom of the row.
+  /// If fixed height is used then this value is set to 0.0 because the content is vertically centered which makes padding unneeded.
+  final double topBottomPadding;
+
+  @override
+  int get hashCode => Object.hash(fixedHeight, topBottomPadding);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is DataTableRowHeight
+      && other.fixedHeight == fixedHeight
+      && other.topBottomPadding == topBottomPadding;
+  }
+
+  @override
+  String toStringShort() => objectRuntimeType(this, 'DataTableRowHeight');
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('fixedHeight', fixedHeight));
+    properties.add(DoubleProperty('topBottomPadding', topBottomPadding));
   }
 }
 

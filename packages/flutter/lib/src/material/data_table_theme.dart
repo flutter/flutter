@@ -7,6 +7,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'data_table.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
@@ -37,17 +38,25 @@ class DataTableThemeData with Diagnosticable {
   const DataTableThemeData({
     this.decoration,
     this.dataRowColor,
-    this.dataRowHeight,
+    /// {@macro flutter.material.dataTable.dataRowHeight}
+    @Deprecated(
+      'Use dataRowHeightSettings instead. '
+      'This feature was deprecated after 2.13.0-0.4.pre.',
+    )
+    double? dataRowHeight,
+    /// {@macro flutter.material.dataTable.dataRowHeightSettings}
+    DataTableRowHeight? dataRowHeightSettings,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
     this.headingTextStyle,
     this.horizontalMargin,
-    this.topBottomRowPadding,
     this.columnSpacing,
     this.dividerThickness,
     this.checkboxHorizontalMargin,
-  });
+  }) : 
+    _dataRowHeight = dataRowHeight,
+    _dataRowHeightSettings = dataRowHeightSettings;
 
   /// {@macro flutter.material.dataTable.decoration}
   final Decoration? decoration;
@@ -56,8 +65,12 @@ class DataTableThemeData with Diagnosticable {
   /// {@macro flutter.material.DataTable.dataRowColor}
   final MaterialStateProperty<Color?>? dataRowColor;
 
-  /// {@macro flutter.material.dataTable.dataRowHeight}
-  final double? dataRowHeight;
+  final double? _dataRowHeight;
+  final DataTableRowHeight? _dataRowHeightSettings;
+
+  /// {@macro flutter.material.dataTable.dataRowHeightSettings}
+  DataTableRowHeight? get dataRowHeightSettings 
+    => _dataRowHeightSettings ?? (_dataRowHeight != null ? DataTableRowHeight.fixed(height: _dataRowHeight) : null);
 
   /// {@macro flutter.material.dataTable.dataTextStyle}
   final TextStyle? dataTextStyle;
@@ -75,9 +88,6 @@ class DataTableThemeData with Diagnosticable {
   /// {@macro flutter.material.dataTable.horizontalMargin}
   final double? horizontalMargin;
 
-  /// {@macro flutter.material.dataTable.topBottomRowPadding}
-  final double? topBottomRowPadding;
-
   /// {@macro flutter.material.dataTable.columnSpacing}
   final double? columnSpacing;
 
@@ -92,13 +102,17 @@ class DataTableThemeData with Diagnosticable {
   DataTableThemeData copyWith({
     Decoration? decoration,
     MaterialStateProperty<Color?>? dataRowColor,
+    @Deprecated(
+      'Use dataRowHeightSettings instead. '
+      'This feature was deprecated after 2.13.0-0.4.pre.',
+    )
     double? dataRowHeight,
+    DataTableRowHeight? dataRowHeightSettings,
     TextStyle? dataTextStyle,
     MaterialStateProperty<Color?>? headingRowColor,
     double? headingRowHeight,
     TextStyle? headingTextStyle,
     double? horizontalMargin,
-    double? topBottomRowPadding,
     double? columnSpacing,
     double? dividerThickness,
     double? checkboxHorizontalMargin,
@@ -106,13 +120,13 @@ class DataTableThemeData with Diagnosticable {
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
       dataRowColor: dataRowColor ?? this.dataRowColor,
-      dataRowHeight: dataRowHeight ?? this.dataRowHeight,
+      dataRowHeight: dataRowHeight,
+      dataRowHeightSettings: dataRowHeightSettings ?? this.dataRowHeightSettings,
       dataTextStyle: dataTextStyle ?? this.dataTextStyle,
       headingRowColor: headingRowColor ?? this.headingRowColor,
       headingRowHeight: headingRowHeight ?? this.headingRowHeight,
       headingTextStyle: headingTextStyle ?? this.headingTextStyle,
       horizontalMargin: horizontalMargin ?? this.horizontalMargin,
-      topBottomRowPadding: topBottomRowPadding ?? this.topBottomRowPadding,
       columnSpacing: columnSpacing ?? this.columnSpacing,
       dividerThickness: dividerThickness ?? this.dividerThickness,
       checkboxHorizontalMargin: checkboxHorizontalMargin ?? this.checkboxHorizontalMargin,
@@ -129,13 +143,12 @@ class DataTableThemeData with Diagnosticable {
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
       dataRowColor: _lerpProperties<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
-      dataRowHeight: lerpDouble(a.dataRowHeight, b.dataRowHeight, t),
+      dataRowHeightSettings: _lerpDataTableRowHeight(a.dataRowHeightSettings, b.dataRowHeightSettings, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
       headingRowColor: _lerpProperties<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
       headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
-      topBottomRowPadding: lerpDouble(a.topBottomRowPadding, b.topBottomRowPadding, t),
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
       dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t),
       checkboxHorizontalMargin: lerpDouble(a.checkboxHorizontalMargin, b.checkboxHorizontalMargin, t),
@@ -146,13 +159,12 @@ class DataTableThemeData with Diagnosticable {
   int get hashCode => Object.hash(
     decoration,
     dataRowColor,
-    dataRowHeight,
+    dataRowHeightSettings,
     dataTextStyle,
     headingRowColor,
     headingRowHeight,
     headingTextStyle,
     horizontalMargin,
-    topBottomRowPadding,
     columnSpacing,
     dividerThickness,
     checkboxHorizontalMargin,
@@ -167,13 +179,12 @@ class DataTableThemeData with Diagnosticable {
     return other is DataTableThemeData
       && other.decoration == decoration
       && other.dataRowColor == dataRowColor
-      && other.dataRowHeight == dataRowHeight
+      && other.dataRowHeightSettings == dataRowHeightSettings
       && other.dataTextStyle == dataTextStyle
       && other.headingRowColor == headingRowColor
       && other.headingRowHeight == headingRowHeight
       && other.headingTextStyle == headingTextStyle
       && other.horizontalMargin == horizontalMargin
-      && other.topBottomRowPadding == topBottomRowPadding
       && other.columnSpacing == columnSpacing
       && other.dividerThickness == dividerThickness
       && other.checkboxHorizontalMargin == checkboxHorizontalMargin;
@@ -184,13 +195,12 @@ class DataTableThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
-    properties.add(DoubleProperty('dataRowHeight', dataRowHeight, defaultValue: null));
+    properties.add(DiagnosticsProperty<DataTableRowHeight>('dataRowHeightSettings', dataRowHeightSettings, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
-    properties.add(DoubleProperty('topBottomRowPadding', topBottomRowPadding, defaultValue: null));
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
     properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));
@@ -201,6 +211,15 @@ class DataTableThemeData with Diagnosticable {
     if (a == null && b == null)
       return null;
     return _LerpProperties<T>(a, b, t, lerpFunction);
+  }
+
+  /// Interpolate between two [DataTableRowHeight] instances.
+  static DataTableRowHeight? _lerpDataTableRowHeight(DataTableRowHeight? a, DataTableRowHeight? b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a?.fixedHeight != null || b?.fixedHeight != null)
+      return DataTableRowHeight.fixed(height: lerpDouble(a?.fixedHeight, b?.fixedHeight, t));
+    return DataTableRowHeight.contentBased(topBottomPadding: lerpDouble(a?.topBottomPadding, b?.topBottomPadding, t) ?? 0.0);
   }
 }
 
