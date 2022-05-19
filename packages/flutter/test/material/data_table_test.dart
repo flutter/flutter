@@ -791,7 +791,7 @@ void main() {
     final double actualContainerHeightNoPadding = tester.getSize(findFirstContainerFor('Frozen yogurt')).height;
     expect(actualContainerHeightNoPadding, greaterThan(0.0));
 
-    const double topBottomPadding = 5.0; 
+    const double topBottomPadding = 5.0;
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(dataRowHeightSettings: const DataTableRowHeight.contentBased(topBottomPadding: topBottomPadding))),
     ));

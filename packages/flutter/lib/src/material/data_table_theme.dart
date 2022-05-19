@@ -54,7 +54,7 @@ class DataTableThemeData with Diagnosticable {
     this.columnSpacing,
     this.dividerThickness,
     this.checkboxHorizontalMargin,
-  }) : 
+  }) :
     _dataRowHeight = dataRowHeight,
     _dataRowHeightSettings = dataRowHeightSettings;
 
@@ -69,7 +69,7 @@ class DataTableThemeData with Diagnosticable {
   final DataTableRowHeight? _dataRowHeightSettings;
 
   /// {@macro flutter.material.dataTable.dataRowHeightSettings}
-  DataTableRowHeight? get dataRowHeightSettings 
+  DataTableRowHeight? get dataRowHeightSettings
     => _dataRowHeightSettings ?? (_dataRowHeight != null ? DataTableRowHeight.fixed(height: _dataRowHeight) : null);
 
   /// {@macro flutter.material.dataTable.dataTextStyle}

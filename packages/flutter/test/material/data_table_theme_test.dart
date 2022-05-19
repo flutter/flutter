@@ -42,7 +42,7 @@ void main() {
 
   test('Setting depreciated dataRowHeight can be read using dataRowHeightSettings', () {
     const DataTableThemeData themeData = DataTableThemeData(dataRowHeight: 20.0);
-     expect(themeData.dataRowHeightSettings?.fixedHeight, 20.0); 
+     expect(themeData.dataRowHeightSettings?.fixedHeight, 20.0);
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {

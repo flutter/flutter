@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -505,7 +506,7 @@ class DataTable extends StatelessWidget {
     'This feature was deprecated after 2.13.0-0.4.pre.',
   )
   final double? dataRowHeight;
-  
+
   /// {@template flutter.material.dataTable.dataRowHeightSettings}
   /// The height settings for [DataRow]s.
   /// {@endtemplate}
@@ -1090,7 +1091,7 @@ class DataTableRowHeight with Diagnosticable {
   const DataTableRowHeight.fixed({
     double? height = kMinInteractiveDimension
   }) : fixedHeight = height, topBottomPadding = 0.0;
-  
+
   /// Creates height settings where the row height adjusts to the content.
   const DataTableRowHeight.contentBased({
     required this.topBottomPadding,
@@ -1099,7 +1100,7 @@ class DataTableRowHeight with Diagnosticable {
   /// Fixed height value.
   /// If set then all rows will geht this fixed height, if null then content based height is used.
   final double? fixedHeight;
-  
+
   /// The minimum padding between the content of each data cell and the top and bottom of the row.
   /// If fixed height is used then this value is set to 0.0 because the content is vertically centered which makes padding unneeded.
   final double topBottomPadding;
