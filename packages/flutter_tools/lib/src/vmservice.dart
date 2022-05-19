@@ -275,10 +275,12 @@ Future<vm_service.VmService> setUpVmService(
     });
     registrationRequests.add(vmService.registerService('flutterGetSkSL', 'Flutter Tools'));
   }
-  if (printStructuredErrorLogMethod != null) {
-    vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
-
-    vmService.onGCEvent.listen((vm_service.Event event) {
+  
+  final String version = (await vmService.getVersion()).toString();
+  final bool passGcEventsToApp = version != '[Version major: 3, minor: 56]';
+  if (passGcEventsToApp) {
+    logger.printStatus('Started passing GC events to app $version.');
+    vmService.onGCEvent.listen((vm_service.Event event) async {
       try {
         final String? isolateName = event.json?['isolate']?['name'];
         final String? isolateId = event.json?['isolate']?['id'];
@@ -286,9 +288,8 @@ Future<vm_service.VmService> setUpVmService(
         final bool newGC = event.json?.containsKey('new') == true;
         final bool oldGC = event.json?.containsKey('old') == true;
 
-        if (isolateName == 'main'){
-          // Dropped async call.          
-          vmService.callServiceExtension(  
+        if (isolateName == 'main'){                   
+          await vmService.callServiceExtension(  
             'ext.app-gc-event',
             isolateId: isolateId,
             args:  <String, dynamic>{if (oldGC) 'old': true, if (newGC) 'new': true},
@@ -300,16 +301,23 @@ Future<vm_service.VmService> setUpVmService(
         logger.printStatus(stack.toString());
       }
     });
+
+    registrationRequests.add(vmService
+      .streamListen(vm_service.EventStreams.kGC)
+      .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
+    );
+  }
+
+
+  if (printStructuredErrorLogMethod != null) {
+    vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
+    
     // It is safe to ignore this error because we expect an error to be
     // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
       .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
-    );
-    registrationRequests.add(vmService
-      .streamListen(vm_service.EventStreams.kGC)
-      .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
-    );
+    );    
   }
 
   try {
