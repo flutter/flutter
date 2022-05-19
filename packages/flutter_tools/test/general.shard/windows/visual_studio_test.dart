@@ -876,6 +876,7 @@ void main() {
         expect(result.isRebootRequired, null);
         expect(result.isPrerelease, null);
         expect(result.catalogDisplayVersion, null);
+        expect(result.isUsable, isTrue);
       });
 
       test('Ignores unknown JSON properties', () {
@@ -891,30 +892,48 @@ void main() {
         expect(result.isRebootRequired, null);
         expect(result.isPrerelease, null);
         expect(result.catalogDisplayVersion, null);
+        expect(result.isUsable, isTrue);
       });
 
       test('Accepts JSON', () {
-        final VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{
-          'installationPath' : r'C:\foo\bar',
-          'displayName' : 'Visual Studio Community 2019',
-          'installationVersion' : '15.4.27004.2002',
-          'isComplete' : true,
-          'isLaunchable' : true,
-          'isRebootRequired' : true,
-          'isPrerelease' : true,
-          'catalog' : <String, dynamic>{
-            'productDisplayVersion' : '15.4.0'
-          },
-        });
+        final VswhereDetails result = VswhereDetails.fromJson(_defaultResponse);
 
-        expect(result.installationPath, r'C:\foo\bar');
+        expect(result.installationPath, visualStudioPath);
         expect(result.displayName, 'Visual Studio Community 2019');
-        expect(result.fullVersion, '15.4.27004.2002');
+        expect(result.fullVersion, '16.2.29306.81');
         expect(result.isComplete, true);
         expect(result.isLaunchable, true);
-        expect(result.isRebootRequired, true);
-        expect(result.isPrerelease, true);
-        expect(result.catalogDisplayVersion, '15.4.0');
+        expect(result.isRebootRequired, false);
+        expect(result.isPrerelease, false);
+        expect(result.catalogDisplayVersion, '16.2.5');
+        expect(result.isUsable, isTrue);
+      });
+
+      test('Incomplete installation is not usable', () {
+        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+          ..['isComplete'] = false;
+
+        final VswhereDetails result = VswhereDetails.fromJson(response);
+
+        expect(result.isUsable, isFalse);
+      });
+
+      test('Unlauchable installation is not usable', () {
+        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+          ..['isLaunchable'] = false;
+
+        final VswhereDetails result = VswhereDetails.fromJson(response);
+
+        expect(result.isUsable, isFalse);
+      });
+
+      test('Installation that requires reboot is not usable', () {
+        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+          ..['isRebootRequired'] = true;
+
+        final VswhereDetails result = VswhereDetails.fromJson(response);
+
+        expect(result.isUsable, isFalse);
       });
   });
 }
