@@ -653,6 +653,10 @@ abstract class MaterialStateProperty<T> {
   /// to a single value for all states.
   ///
   /// If you need a const value, use [MaterialStatePropertyAll] directly.
+  ///
+  // TODO(darrenaustin): Deprecate this when we have the ability to create
+  // a dart fix that will replace this with MaterialStatePropertyAll:
+  // https://github.com/dart-lang/sdk/issues/49056.
   static MaterialStateProperty<T> all<T>(T value) => MaterialStatePropertyAll<T>(value);
 }
 
