@@ -43,7 +43,8 @@ class MockWin32Window : public WindowWin32 {
                void(double, double, FlutterPointerDeviceKind, int32_t, UINT));
   MOCK_METHOD5(OnPointerUp,
                void(double, double, FlutterPointerDeviceKind, int32_t, UINT));
-  MOCK_METHOD2(OnPointerLeave, void(FlutterPointerDeviceKind, int32_t));
+  MOCK_METHOD4(OnPointerLeave,
+               void(double, double, FlutterPointerDeviceKind, int32_t));
   MOCK_METHOD0(OnSetCursor, void());
   MOCK_METHOD1(OnText, void(const std::u16string&));
   MOCK_METHOD7(OnKey,

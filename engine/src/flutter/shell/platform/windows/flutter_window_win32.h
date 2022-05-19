@@ -57,7 +57,9 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
                    UINT button) override;
 
   // |WindowWin32|
-  void OnPointerLeave(FlutterPointerDeviceKind device_kind,
+  void OnPointerLeave(double x,
+                      double y,
+                      FlutterPointerDeviceKind device_kind,
                       int32_t device_id) override;
 
   // |WindowWin32|

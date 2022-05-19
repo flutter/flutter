@@ -143,6 +143,22 @@ TEST(MockWin32Window, HorizontalScroll) {
   window.InjectWindowMessage(WM_MOUSEHWHEEL, MAKEWPARAM(0, scroll_amount), 0);
 }
 
+TEST(MockWin32Window, MouseLeave) {
+  MockWin32Window window;
+  const double mouse_x = 10.0;
+  const double mouse_y = 20.0;
+
+  EXPECT_CALL(window, OnPointerMove(mouse_x, mouse_y,
+                                    kFlutterPointerDeviceKindMouse, 0))
+      .Times(1);
+  EXPECT_CALL(window, OnPointerLeave(mouse_x, mouse_y,
+                                     kFlutterPointerDeviceKindMouse, 0))
+      .Times(1);
+
+  window.InjectWindowMessage(WM_MOUSEMOVE, 0, MAKELPARAM(mouse_x, mouse_y));
+  window.InjectWindowMessage(WM_MOUSELEAVE, 0, 0);
+}
+
 TEST(MockWin32Window, KeyDown) {
   MockWin32Window window;
   EXPECT_CALL(window, OnKey(_, _, _, _, _, _, _)).Times(1);

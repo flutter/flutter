@@ -47,7 +47,9 @@ class WindowBindingHandlerDelegate {
 
   // Notifies delegate that backing window mouse pointer has left the window.
   // Typically called by currently configured WindowBindingHandler
-  virtual void OnPointerLeave(FlutterPointerDeviceKind device_kind,
+  virtual void OnPointerLeave(double x,
+                              double y,
+                              FlutterPointerDeviceKind device_kind,
                               int32_t device_id) = 0;
 
   // Notifies delegate that backing window has received text.
