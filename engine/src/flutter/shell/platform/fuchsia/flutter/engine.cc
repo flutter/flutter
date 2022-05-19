@@ -166,8 +166,8 @@ void Engine::Initialize(
   } else {
     gfx_protocols.set_view_focuser(focuser.NewRequest());
     gfx_protocols.set_view_ref_focused(view_ref_focused.NewRequest());
-    gfx_protocols.set_touch_source(touch_source.NewRequest());
-    // GFX used only on products without a mouse.
+    // TODO(fxbug.dev/85125): Enable TouchSource for GFX.
+    // gfx_protocols.set_touch_source(touch_source.NewRequest());
   }
   scenic->CreateSessionT(std::move(gfx_protocols), [] {});
 

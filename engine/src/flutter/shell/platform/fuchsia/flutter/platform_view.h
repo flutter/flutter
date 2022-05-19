@@ -64,6 +64,7 @@ class PlatformView : public flutter::PlatformView,
                      private fuchsia::ui::input::InputMethodEditorClient {
  public:
   PlatformView(
+      bool is_flatland,
       flutter::PlatformView::Delegate& delegate,
       flutter::TaskRunners task_runners,
       fuchsia::ui::views::ViewRef view_ref,
