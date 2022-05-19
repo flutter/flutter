@@ -67,10 +67,10 @@ void main() {
     expect(
       (Canvas canvas) => outside.paint(canvas, rect),
       paints
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)).inflate(5.0),
-        strokeWidth: 10.0,
-      ),
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)).inflate(5.0),
+          strokeWidth: 10.0,
+        ),
     );
   });
 
