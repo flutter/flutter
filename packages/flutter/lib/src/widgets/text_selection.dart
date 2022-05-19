@@ -20,7 +20,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
-import 'text_selection_gestures.dart';
+import 'selection_gestures.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -2180,24 +2180,24 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 }
 
-class TextSelectionGesturesDetector extends StatefulWidget {
-  const TextSelectionGesturesDetector({Key? key, required this.child}) : super(key: key);
+class SelectionGesturesDetector extends StatefulWidget {
+  const SelectionGesturesDetector({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 
   @override
-  State<TextSelectionGesturesDetector> createState() => _TextSelectionGesturesDetectorState();
+  State<SelectionGesturesDetector> createState() => _SelectionGesturesDetectorState();
 }
 
-class _TextSelectionGesturesDetectorState extends State<TextSelectionGesturesDetector> {
-  late TextSelectionGesturesManager manager;
+class _SelectionGesturesDetectorState extends State<SelectionGesturesDetector> {
+  late SelectionGesturesManager manager;
 
   Map<Type, GestureRecognizer>? _recognizers = const <Type, GestureRecognizer>{};
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    manager = TextSelectionGestures.of(context);
+    manager = SelectionGestures.of(context);
     syncAllGestures(context, manager.gestures);
   }
 

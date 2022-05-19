@@ -340,38 +340,37 @@ class TransposeCharactersIntent extends Intent {
 }
 
 // ---------- Gesture Intents ----------
-class SelectLastTapDownPositionIntent extends Intent {
+class ExpandSelectionToPositionIntent extends Intent {
+  const ExpandSelectionToPositionIntent({required this.cause, this.fromSelection, required this.position, required this.shiftPressed});
 
-}
-
-class SelectWordsInRangeAndEnableToolbarIntent extends Intent {
-
-}
-
-class SelectWordsInRangeAndShowToolbarIntent extends Intent {
-
-}
-
-class ShowToolbarIntent extends Intent {
-
-}
-
-class SelectWordAtLastTapDownPositionAndShowToolbarIntent extends Intent {
-
-}
-
-class SetLastAndSecondaryTapDownPositionAndEnableToolbarIntent extends Intent {
-
-}
-
-class CleanUpShiftTappingStatesIntent extends Intent {
-
-}
-
-class ExtendSelectionToLastTapDownPositionIntent extends Intent {
-  const ExtendSelectionToLastTapDownPositionIntent({required this.lastTapDownPosition, required this.cause});
-
-  final Offset lastTapDownPosition;
   final SelectionChangedCause cause;
+  final TextSelection? fromSelection;
+  final Offset position;
+  final bool shiftPressed;
 }
 
+class ExtendSelectionToPositionIntent extends Intent {
+  const ExtendSelectionToPositionIntent({required this.cause, required this.position, required this.shiftPressed});
+
+  final SelectionChangedCause cause;
+  final Offset position;
+  final bool shiftPressed;
+}
+
+class SelectGlyphEdgeIntent extends Intent {
+  const SelectGlyphEdgeIntent({required this.cause, required this.position});
+
+  final SelectionChangedCause cause;
+  final Offset position;
+}
+
+class SelectRangeIntent extends Intent {
+
+}
+
+class SelectTapPositionIntent extends Intent {
+  const SelectTapPositionIntent({required this.cause, required this.position});
+
+  final SelectionChangedCause cause;
+  final Offset position;
+}

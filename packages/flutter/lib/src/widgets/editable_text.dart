@@ -3165,11 +3165,27 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
 
-  // --------------------------- Text Editing Actions ---------------------------
+  // --------------------------- Selection Actions ---------------------------
+  void expandSelection(ExpandSelectionToPositionIntent intent) {
+    final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
+    final TextSelection selection = intent.fromSelection ?? renderEditable.selection!;
+    final bool baseIsCloser = (tappedPosition.offset - selection.baseOffset).abs()
+        < (tappedPosition.offset - selection.extentOffset).abs();
+    final TextSelection nextSelection = selection.copyWith(
+      baseOffset: baseIsCloser ? selection.extentOffset : selection.baseOffset,
+      extentOffset: tappedPosition.offset,
+    );
 
-  void extendSelection(ExtendSelectionToLastTapDownPositionIntent intent) {
-    print('hello world');
-    final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.lastTapDownPosition);
+    userUpdateTextEditingValue(
+      textEditingValue.copyWith(
+        selection: nextSelection,
+      ),
+      intent.cause,
+    );
+  }
+
+  void extendSelection(ExtendSelectionToPositionIntent intent) {
+    final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
     final TextSelection selection = renderEditable.selection!;
     final TextSelection nextSelection = selection.copyWith(
       extentOffset: tappedPosition.offset,
@@ -3183,6 +3199,29 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
   }
 
+  void selectPosition(SelectTapPositionIntent intent) {
+    renderEditable.selectPositionAt(from: intent.position, cause: intent.cause);
+  }
+
+  void selectWordEdge(SelectGlyphEdgeIntent intent) {
+    final TextPosition textPosition = renderEditable.getTextPositionForOffset(intent.position);
+    final TextRange word = renderEditable.getTextBoundaryAtTextPosition(
+      textPosition,
+      boundaryType: TextBoundary.word,
+    );
+    final TextSelection newSelection = textPosition.offset - word.start <= 1
+        ? TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream)
+        : TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
+
+    userUpdateTextEditingValue(
+      textEditingValue.copyWith(
+        selection: newSelection,
+      ),
+      intent.cause,
+    );
+  }
+
+  // --------------------------- Text Editing Actions ---------------------------
   _TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
     final _TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value) : _CharacterBoundary(_value);
     return _CollapsedSelectionBoundary(atomicTextBoundary, intent.forward);

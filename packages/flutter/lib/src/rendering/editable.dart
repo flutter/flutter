@@ -34,6 +34,12 @@ const Radius _kFloatingCaretRadius = Radius.circular(1.0);
 /// Used by [RenderEditable.onCaretChanged].
 typedef CaretChangedHandler = void Function(Rect caretRect);
 
+enum TextBoundary {
+  character,
+  word,
+  line,
+}
+
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
 /// holds the selection.
@@ -2019,6 +2025,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
   }
 
+  void selectWordAt({ required Offset position, required SelectionChangedCause cause }) {
+    selectWordsInRange(from: position, cause: cause);
+  }
+
   /// Selects the set words of a paragraph in a given range of global positions.
   ///
   /// The first and last endpoints of the selection will always be at the
@@ -2060,6 +2070,53 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
     }
     _setSelection(newSelection, cause);
+  }
+
+  TextPosition getTextPositionForOffset(Offset offset) {
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    return _textPainter.getPositionForOffset(globalToLocal(offset) - _paintOffset);
+  }
+
+  TextRange getTextBoundaryAtTextPosition(TextPosition position, {required TextBoundary boundaryType,}) {
+    if (obscureText) {
+      switch (boundaryType) {
+        case TextBoundary.character:
+          return TextRange.collapsed(position.offset);
+        case TextBoundary.word:
+        case TextBoundary.line:
+          return TextRange(start: 0, end: _plainText.length);
+      }
+    }
+
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    // Character/word boundaries do not rely on the current text layout, but
+    // unforuntely word boundary is currently a byproduct of text layout so we
+    // still have to make sure the text is properly laid out.
+    assert(
+    boundaryType == TextBoundary.character
+        || (_textLayoutLastMaxWidth == constraints.maxWidth
+        && _textLayoutLastMinWidth == constraints.minWidth),
+    'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
+    );
+
+    assert(!obscureText);
+    switch (boundaryType) {
+      case TextBoundary.character:
+        int searchIndex = 0;
+        for (final String character in _plainText.characters) {
+          assert(searchIndex <= position.offset);
+          final int rangeEnd = searchIndex + character.length;
+          if (rangeEnd > position.offset) {
+            return TextRange(start: searchIndex, end: searchIndex + character.length);
+          }
+          searchIndex += character.length;
+        }
+        return const TextRange.collapsed(0);
+      case TextBoundary.word:
+        return _textPainter.getWordBoundary(position);
+      case TextBoundary.line:
+        return _textPainter.getLineBoundary(position);
+    }
   }
 
   TextSelection _getWordAtOffset(TextPosition position) {

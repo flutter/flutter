@@ -7,13 +7,13 @@ import 'dart:collection' show HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart'; //TODO: remove
 
 import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'default_text_editing_shortcuts.dart';
+import 'default_selection_gestures.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -28,7 +28,6 @@ import 'semantics_debugger.dart';
 import 'shared_app_data.dart';
 import 'shortcuts.dart';
 import 'text.dart';
-import 'text_selection_gestures.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
 
@@ -1729,18 +1728,18 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     }
 
-    final Map<Type, ContextGestureRecognizerFactory> _defaultGestures = {
-      TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-              (BuildContext context) => TapGestureRecognizer(debugOwner: context),
-              (TapGestureRecognizer instance, BuildContext context) {
-            instance
-              ..onTapDown = (TapDownDetails details) {
-                print('not default');
-                Actions.invoke(context, ActivateIntent());
-              };
-          }
-      )
-    };
+    // final Map<Type, ContextGestureRecognizerFactory> _defaultGestures = {
+    //   TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+    //           (BuildContext context) => TapGestureRecognizer(debugOwner: context),
+    //           (TapGestureRecognizer instance, BuildContext context) {
+    //         instance
+    //           ..onTapDown = (TapDownDetails details) {
+    //             print('not default');
+    //             Actions.invoke(context, ActivateIntent());
+    //           };
+    //       }
+    //   )
+    // };
 
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
@@ -1750,7 +1749,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
           // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
           // fall through to the defaultShortcuts.
-          child: TextSelectionGestures.platformDefaults(
+          child: DefaultSelectionGestures(
             // child: TextSelectionGestures(
               // manager: LoggingTextSelectionGesturesManager(),
               // gestures: _defaultGestures,

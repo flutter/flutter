@@ -1322,19 +1322,37 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
 
     late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
-      ExtendSelectionToLastTapDownPositionIntent : TextEditingCallbackAction<ExtendSelectionToLastTapDownPositionIntent>(
-          (ExtendSelectionToLastTapDownPositionIntent intent) {
+      ExpandSelectionToPositionIntent : TextEditingCallbackAction<ExpandSelectionToPositionIntent>(
+              (ExpandSelectionToPositionIntent intent) {
+            _editableText!.expandSelection(intent);
+          },
+          enabledPredicate: (ExpandSelectionToPositionIntent intent) {
+            return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
+          }
+      ),
+      ExtendSelectionToPositionIntent : TextEditingCallbackAction<ExtendSelectionToPositionIntent>(
+          (ExtendSelectionToPositionIntent intent) {
             _editableText!.extendSelection(intent);
           },
-          enabledPredicate: (ExtendSelectionToLastTapDownPositionIntent intent) {
-            return widget.selectionEnabled && _effectiveController.value.selection.isValid;
+          enabledPredicate: (ExtendSelectionToPositionIntent intent) {
+            return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
           }
-
       ),
-      ActivateIntent : CallbackAction<ActivateIntent>(
-        onInvoke: (ActivateIntent intent) {
-          print('callback action');
-        }
+      SelectGlyphEdgeIntent : TextEditingCallbackAction<SelectGlyphEdgeIntent>(
+              (SelectGlyphEdgeIntent intent) {
+            _editableText!.selectWordEdge(intent);
+          },
+          enabledPredicate: (SelectGlyphEdgeIntent intent) {
+            return widget.selectionEnabled;
+          }
+      ),
+      SelectTapPositionIntent : TextEditingCallbackAction<SelectTapPositionIntent>(
+              (SelectTapPositionIntent intent) {
+            _editableText!.selectPosition(intent);
+          },
+          enabledPredicate: (SelectTapPositionIntent intent) {
+            return widget.selectionEnabled;
+          }
       ),
     };
 
@@ -1364,7 +1382,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                   child: child,
                 );
               },
-              child: TextSelectionGesturesDetector(
+              child: SelectionGesturesDetector(
                 child: child,
               ),
               // child: _selectionGestureDetectorBuilder.buildGestureDetector(

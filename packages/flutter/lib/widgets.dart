@@ -36,6 +36,7 @@ export 'src/widgets/color_filter.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/default_selection_style.dart';
+export 'src/widgets/default_selection_gestures.dart';
 export 'src/widgets/default_text_editing_shortcuts.dart';
 export 'src/widgets/desktop_text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/dismissible.dart';
@@ -111,8 +112,12 @@ export 'src/widgets/scroll_simulation.dart';
 export 'src/widgets/scroll_view.dart';
 export 'src/widgets/scrollable.dart';
 export 'src/widgets/scrollbar.dart';
+<<<<<<< HEAD
 export 'src/widgets/selectable_region.dart';
 export 'src/widgets/selection_container.dart';
+=======
+export 'src/widgets/selection_gestures.dart';
+>>>>>>> 901fae1d90 (updates)
 export 'src/widgets/semantics_debugger.dart';
 export 'src/widgets/shared_app_data.dart';
 export 'src/widgets/shortcuts.dart';
@@ -130,7 +135,6 @@ export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/text_editing_intents.dart';
 export 'src/widgets/text_selection.dart';
-export 'src/widgets/text_selection_gestures.dart';
 export 'src/widgets/text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/texture.dart';
 export 'src/widgets/ticker_provider.dart';
