@@ -210,16 +210,15 @@ abstract class BoxBorder extends ShapeBorder {
     assert(side.style != BorderStyle.none);
     final Paint paint = Paint()
       ..color = side.color;
-    final RRect borderRect = borderRadius.toRRect(rect);
     final double width = side.width;
     if (width == 0.0) {
       paint
         ..style = PaintingStyle.stroke
         ..strokeWidth = 0.0;
-      canvas.drawRRect(borderRect, paint);
+      canvas.drawRRect(borderRadius.toRRect(rect), paint);
     } else {
       if (side.strokeAlign == StrokeAlign.inside) {
-        final RRect outer = borderRect;
+        final RRect outer = borderRadius.toRRect(rect);
         final RRect inner = outer.deflate(width);
         canvas.drawDRRect(outer, inner, paint);
       } else {
