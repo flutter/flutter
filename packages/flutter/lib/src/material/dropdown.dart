@@ -13,6 +13,7 @@ import 'button_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'dropdown_theme.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'input_decorator.dart';
@@ -1180,6 +1181,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   FocusNode? get focusNode => widget.focusNode ?? _internalNode;
   bool _hasPrimaryFocus = false;
   late Map<Type, Action<Intent>> _actionMap;
+  TextStyle? _textStyle;
 
   // Only used if needed to create _internalNode.
   FocusNode _createFocusNode() {
@@ -1262,9 +1264,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
   }
 
-  TextStyle? get _textStyle => widget.style ?? Theme.of(context).textTheme.subtitle1;
-
   void _handleTap() {
+    final DropdownThemeData dropdownTheme = DropdownTheme.of(context);
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
       ? _kAlignedMenuMargin
@@ -1306,10 +1307,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       style: _textStyle!,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
-      dropdownColor: widget.dropdownColor,
-      menuMaxHeight: widget.menuMaxHeight,
+      dropdownColor: widget.dropdownColor ?? dropdownTheme.dropdownColor,
+      menuMaxHeight: widget.menuMaxHeight ?? dropdownTheme.menuMaxHeight,
       enableFeedback: widget.enableFeedback ?? true,
-      borderRadius: widget.borderRadius,
+      borderRadius: widget.borderRadius ?? dropdownTheme.borderRadius,
     );
 
     focusNode?.requestFocus();
@@ -1334,10 +1335,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   Color get _iconColor {
+    final DropdownThemeData dropdownTheme = DropdownTheme.of(context);
     // These colors are not defined in the Material Design spec.
     if (_enabled) {
       if (widget.iconEnabledColor != null) {
         return widget.iconEnabledColor!;
+      } else if (dropdownTheme.iconColor != null) {
+        return dropdownTheme.iconColor!.resolve(<MaterialState>{ })!;
       }
 
       switch (Theme.of(context).brightness) {
@@ -1349,6 +1353,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     } else {
       if (widget.iconDisabledColor != null) {
         return widget.iconDisabledColor!;
+      } else if (dropdownTheme.iconColor != null) {
+        return dropdownTheme.iconColor!.resolve(<MaterialState>{ MaterialState.disabled })!;
       }
 
       switch (Theme.of(context).brightness) {
@@ -1377,6 +1383,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    final ThemeData theme = Theme.of(context);
+    final DropdownThemeData dropdownTheme = DropdownTheme.of(context);
+    _textStyle = widget.style ?? dropdownTheme.style ?? theme.textTheme.subtitle1;
     final Orientation newOrientation = _getOrientation(context);
     _lastOrientation ??= newOrientation;
     if (newOrientation != _lastOrientation) {
@@ -1434,7 +1443,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     const Icon defaultIcon = Icon(Icons.arrow_drop_down);
 
     Widget result = DefaultTextStyle(
-      style: _enabled ? _textStyle! : _textStyle!.copyWith(color: Theme.of(context).disabledColor),
+      style: _enabled ? _textStyle! : _textStyle!.copyWith(color: theme.disabledColor),
       child: Container(
         padding: padding.resolve(Directionality.of(context)),
         height: widget.isDense ? _denseButtonHeight : null,
@@ -1509,7 +1518,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           canRequestFocus: _enabled,
           focusNode: focusNode,
           autofocus: widget.autofocus,
-          focusColor: widget.focusColor ?? Theme.of(context).focusColor,
+          focusColor: widget.focusColor ?? dropdownTheme.focusColor ?? theme.focusColor,
           enableFeedback: false,
           child: result,
         ),
@@ -1594,10 +1603,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
          initialValue: value,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<T> field) {
+           final DropdownThemeData dropdownTheme = DropdownTheme.of(field.context);
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
            final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
-             Theme.of(field.context).inputDecorationTheme,
+             dropdownTheme.inputDecorationTheme ?? Theme.of(field.context).inputDecorationTheme,
            );
 
            final bool showSelectedItem = items != null && items.where((DropdownMenuItem<T> item) => item.value == state.value).isNotEmpty;
