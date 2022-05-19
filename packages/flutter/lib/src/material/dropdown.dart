@@ -286,30 +286,27 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           namesRoute: true,
           explicitChildNodes: true,
           label: localizations.popupMenuLabel,
-          child: ClipRRect(
-            borderRadius: widget.borderRadius ?? BorderRadius.zero,
-            child: Material(
-              type: MaterialType.transparency,
-              textStyle: route.style,
-              child: ScrollConfiguration(
-                // Dropdown menus should never overscroll or display an overscroll indicator.
-                // Scrollbars are built-in below.
-                // Platform must use Theme and ScrollPhysics must be Clamping.
-                behavior: ScrollConfiguration.of(context).copyWith(
-                  scrollbars: false,
-                  overscroll: false,
-                  physics: const ClampingScrollPhysics(),
-                  platform: Theme.of(context).platform,
-                ),
-                child: PrimaryScrollController(
-                  controller: widget.route.scrollController!,
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    child: ListView(
-                      padding: kMaterialListPadding,
-                      shrinkWrap: true,
-                      children: children,
-                    ),
+          child: Material(
+            type: MaterialType.transparency,
+            textStyle: route.style,
+            child: ScrollConfiguration(
+              // Dropdown menus should never overscroll or display an overscroll indicator.
+              // Scrollbars are built-in below.
+              // Platform must use Theme and ScrollPhysics must be Clamping.
+              behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: false,
+                overscroll: false,
+                physics: const ClampingScrollPhysics(),
+                platform: Theme.of(context).platform,
+              ),
+              child: PrimaryScrollController(
+                controller: widget.route.scrollController!,
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  child: ListView(
+                    padding: kMaterialListPadding,
+                    shrinkWrap: true,
+                    children: children,
                   ),
                 ),
               ),
