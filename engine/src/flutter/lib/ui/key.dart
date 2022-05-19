@@ -146,7 +146,7 @@ class KeyData {
 
   String? _escapeCharacter() {
     if (character == null) {
-      return character ?? '<none>';
+      return '<none>';
     }
     switch (character!) {
       case '\n':

@@ -14,6 +14,9 @@
 namespace flutter {
 
 // A byte stream representing a key event, to be sent to the framework.
+//
+// Changes to the marshalling format here must also be made to
+// io/flutter/embedding/android/KeyData.java.
 class KeyDataPacket {
  public:
   // Build the key data packet by providing information.
