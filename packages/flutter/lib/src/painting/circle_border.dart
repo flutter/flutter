@@ -60,10 +60,23 @@ class CircleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    final double radius = rect.shortestSide / 2.0;
+    final double adjustedRadius;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        adjustedRadius = radius - side.width;
+        break;
+      case StrokeAlign.center:
+        adjustedRadius = radius - side.width / 2.0;
+        break;
+      case StrokeAlign.outside:
+        adjustedRadius = radius;
+        break;
+    }
     return Path()
       ..addOval(Rect.fromCircle(
         center: rect.center,
-        radius: math.max(0.0, rect.shortestSide / 2.0 - side.width),
+        radius: math.max(0.0, adjustedRadius),
       ));
   }
 

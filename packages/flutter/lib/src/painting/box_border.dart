@@ -218,23 +218,22 @@ abstract class BoxBorder extends ShapeBorder {
         ..strokeWidth = 0.0;
       canvas.drawRRect(borderRect, paint);
     } else {
-      final RRect inner;
-      final RRect outer;
-      switch (side.strokeAlign) {
-        case StrokeAlign.inside:
-          inner = borderRect.deflate(width);
-          outer = borderRect;
-          break;
-        case StrokeAlign.center:
-          inner = borderRect.deflate(width / 2);
-          outer = borderRect.inflate(width / 2);
-          break;
-        case StrokeAlign.outside:
-          inner = borderRect;
-          outer = borderRect.inflate(width);
-          break;
+      if (side.strokeAlign == StrokeAlign.inside) {
+        final RRect outer = borderRect;
+        final RRect inner = outer.deflate(width);
+        canvas.drawDRRect(outer, inner, paint);
+      } else {
+        final Rect inner;
+        final Rect outer;
+        if (side.strokeAlign == StrokeAlign.center) {
+          inner = rect.deflate(width / 2);
+          outer = rect.inflate(width / 2);
+        } else {
+          inner = rect;
+          outer = rect.inflate(width);
+        }
+        canvas.drawDRRect(borderRadius.toRRect(outer), borderRadius.toRRect(inner), paint);
       }
-      canvas.drawDRRect(outer, inner, paint);
     }
   }
 
