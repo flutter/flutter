@@ -935,7 +935,7 @@ void main() {
         expect(result.isUsable, isFalse);
       });
 
-      test('Unlauchable installation is not usable', () {
+      test('Unlaunchable installation is not usable', () {
         const bool meetsRequirements = true;
         final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
           ..['isLaunchable'] = false;
