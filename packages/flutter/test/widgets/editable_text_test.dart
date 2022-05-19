@@ -8431,11 +8431,11 @@ void main() {
         'TextInput.setClient',
         'TextInput.setEditableSizeAndTransform',
         'TextInput.setMarkedTextRect',
+        'TextInput.setCaretRect',
         'TextInput.setStyle',
         'TextInput.setEditingState',
         'TextInput.show',
         'TextInput.requestAutofill',
-        'TextInput.setCaretRect',
       ];
       expect(
         tester.testTextInput.log.map((MethodCall m) => m.method),
