@@ -71,7 +71,7 @@ export 'package:flutter/services.dart' show
   AssetBundle;
 
 // Examples can assume:
-// class TestWidget extends StatelessWidget { const TestWidget({Key? key}) : super(key: key); @override Widget build(BuildContext context) => const Placeholder(); }
+// class TestWidget extends StatelessWidget { const TestWidget({super.key}); @override Widget build(BuildContext context) => const Placeholder(); }
 // late WidgetTester tester;
 // late bool _visible;
 // class Sky extends CustomPainter { @override void paint(Canvas c, Size s) {} @override bool shouldRepaint(Sky s) => false; }
@@ -2169,8 +2169,8 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
     final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
-      final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      final RenderObject? targetParent = renderObject.parent;
+      if (targetParent != null)
         targetParent.markNeedsLayout();
     }
   }
@@ -4132,8 +4132,8 @@ class Positioned extends ParentDataWidget<StackParentData> {
     }
 
     if (needsLayout) {
-      final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      final RenderObject? targetParent = renderObject.parent;
+      if (targetParent != null)
         targetParent.markNeedsLayout();
     }
   }
@@ -4992,8 +4992,8 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     }
 
     if (needsLayout) {
-      final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
+      final RenderObject? targetParent = renderObject.parent;
+      if (targetParent != null)
         targetParent.markNeedsLayout();
     }
   }
@@ -5702,9 +5702,8 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Use the "low" quality setting to scale the image, which corresponds to
-  /// bilinear interpolation, rather than the default "none" which corresponds
-  /// to nearest-neighbor.
+  /// Defaults to [FilterQuality.low] to scale the image, which corresponds to
+  /// bilinear interpolation.
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.

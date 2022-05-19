@@ -161,7 +161,7 @@ class _AnimatedIconPainter extends CustomPainter {
     }
     canvas.scale(scale, scale);
 
-    final double clampedProgress = progress.value.clamp(0.0, 1.0);
+    final double clampedProgress = clampDouble(progress.value, 0.0, 1.0);
     for (final _PathFrames path in paths)
       path.paint(canvas, color, uiPathFactory, clampedProgress);
   }

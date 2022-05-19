@@ -492,11 +492,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: TextButton(
-            style: ButtonStyle(
+            style: const ButtonStyle(
               // Specifying minimumSize to mimic the original minimumSize for
               // RaisedButton so that the semantics tree's rect and transform
               // match the original version of this test.
-              minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+              minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
             ),
             onPressed: () { },
             child: const Text('ABC'),

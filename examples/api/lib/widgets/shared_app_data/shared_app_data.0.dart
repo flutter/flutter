@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 
 class ShowSharedValue extends StatelessWidget {
-  const ShowSharedValue({ Key? key, required this.appDataKey }) : super(key: key);
+  const ShowSharedValue({ super.key, required this.appDataKey });
 
   final String appDataKey;
 
@@ -25,7 +25,7 @@ class ShowSharedValue extends StatelessWidget {
 // to be rebuilt. In this case that's the ShowSharedValue widget that's
 // displaying the value of a key whose value has been updated.
 class Home extends StatefulWidget {
-  const Home({ Key? key }) : super(key: key);
+  const Home({ super.key });
 
   @override
   State<Home> createState() => _HomeState();

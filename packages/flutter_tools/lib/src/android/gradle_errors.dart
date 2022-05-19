@@ -12,6 +12,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_studio.dart';
+import 'gradle_utils.dart';
 import 'multidex.dart';
 
 typedef GradleErrorTest = bool Function(String);
@@ -78,6 +79,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   incompatibleKotlinVersionHandler,
   minCompileSdkVersionHandler,
   jvm11RequiredHandler,
+  outdatedGradleHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -487,7 +489,7 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
 @visibleForTesting
 final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
-    'Module was compiled with an incompatible version of Kotlin',
+    'was compiled with an incompatible version of Kotlin',
   ]),
   handler: ({
     required String line,
@@ -507,6 +509,41 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'incompatible-kotlin-version',
+);
+
+final RegExp _outdatedGradlePattern = RegExp(r'The current Gradle version (.+) is not compatible with the Kotlin Gradle plugin');
+
+@visibleForTesting
+final GradleHandledError outdatedGradleHandler = GradleHandledError(
+  test: _outdatedGradlePattern.hasMatch,
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
+    final File gradlePropertiesFile = project.directory
+        .childDirectory('android')
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Your project needs to upgrade Gradle and the Android Gradle plugin.\n\n'
+      'To fix this issue, replace the following content:\n'
+      '${gradleFile.path}:\n'
+      '    ${globals.terminal.color("- classpath 'com.android.tools.build:gradle:<current-version>'", TerminalColor.red)}\n'
+      '    ${globals.terminal.color("+ classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'", TerminalColor.green)}\n'
+      '${gradlePropertiesFile.path}:\n'
+      '    ${globals.terminal.color('- https://services.gradle.org/distributions/gradle-<current-version>-all.zip', TerminalColor.red)}\n'
+      '    ${globals.terminal.color('+ https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip', TerminalColor.green)}',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'outdated-gradle-version',
 );
 
 final RegExp _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) specified in a');

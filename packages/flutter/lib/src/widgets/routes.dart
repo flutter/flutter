@@ -31,7 +31,7 @@ import 'transitions.dart';
 // late NavigatorState navigator;
 // late BuildContext context;
 // Future<bool> askTheUserIfTheyAreSure() async { return true; }
-// abstract class MyWidget extends StatefulWidget { const MyWidget({Key? key}) : super(key: key); }
+// abstract class MyWidget extends StatefulWidget { const MyWidget({super.key}); }
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -455,20 +455,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 /// An entry in the history of a [LocalHistoryRoute].
 class LocalHistoryEntry {
   /// Creates an entry in the history of a [LocalHistoryRoute].
-  ///
-  /// The [impliesAppBarDismissal] defaults to true if not provided.
-  LocalHistoryEntry({ this.onRemove, this.impliesAppBarDismissal = true });
+  LocalHistoryEntry({ this.onRemove });
 
   /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
   final VoidCallback? onRemove;
 
   LocalHistoryRoute<dynamic>? _owner;
-
-  /// Whether an [AppBar] in the route this entry belongs to should
-  /// automatically add a back button or close button.
-  ///
-  /// Defaults to true.
-  final bool impliesAppBarDismissal;
 
   /// Remove this entry from the history of its associated [LocalHistoryRoute].
   void remove() {
@@ -490,7 +482,7 @@ class LocalHistoryEntry {
 /// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
 mixin LocalHistoryRoute<T> on Route<T> {
   List<LocalHistoryEntry>? _localHistory;
-  int _entriesImpliesAppBarDismissal = 0;
+
   /// Adds a local history entry to this route.
   ///
   /// When asked to pop, if this route has any local history entries, this route
@@ -515,7 +507,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///
   /// ```dart
   /// class App extends StatelessWidget {
-  ///   const App({Key? key}) : super(key: key);
+  ///   const App({super.key});
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -530,7 +522,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// }
   ///
   /// class HomePage extends StatefulWidget {
-  ///   const HomePage({Key? key}) : super(key: key);
+  ///   const HomePage({super.key});
   ///
   ///   @override
   ///   State<HomePage> createState() => _HomePageState();
@@ -560,7 +552,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// }
   ///
   /// class SecondPage extends StatefulWidget {
-  ///   const SecondPage({Key? key}) : super(key: key);
+  ///   const SecondPage({super.key});
   ///
   ///   @override
   ///   State<SecondPage> createState() => _SecondPageState();
@@ -628,12 +620,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
     _localHistory ??= <LocalHistoryEntry>[];
     final bool wasEmpty = _localHistory!.isEmpty;
     _localHistory!.add(entry);
-    bool internalStateChanged = false;
-    if (entry.impliesAppBarDismissal) {
-      internalStateChanged = _entriesImpliesAppBarDismissal == 0;
-      _entriesImpliesAppBarDismissal += 1;
-    }
-    if (wasEmpty || internalStateChanged)
+    if (wasEmpty)
       changedInternalState();
   }
 
@@ -645,15 +632,10 @@ mixin LocalHistoryRoute<T> on Route<T> {
     assert(entry != null);
     assert(entry._owner == this);
     assert(_localHistory!.contains(entry));
-    bool internalStateChanged = false;
-    if (_localHistory!.remove(entry) && entry.impliesAppBarDismissal) {
-      _entriesImpliesAppBarDismissal -= 1;
-      internalStateChanged = _entriesImpliesAppBarDismissal == 0;
-    }
+    _localHistory!.remove(entry);
     entry._owner = null;
     entry._notifyRemoved();
-    if (_localHistory!.isEmpty || internalStateChanged) {
-      assert(_entriesImpliesAppBarDismissal == 0);
+    if (_localHistory!.isEmpty) {
       if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
         // The local history might be removed as a result of disposing inactive
         // elements during finalizeTree. The state is locked at this moment, and
@@ -681,12 +663,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
-      bool internalStateChanged = false;
-      if (entry.impliesAppBarDismissal) {
-        _entriesImpliesAppBarDismissal -= 1;
-        internalStateChanged = _entriesImpliesAppBarDismissal == 0;
-      }
-      if (_localHistory!.isEmpty || internalStateChanged)
+      if (_localHistory!.isEmpty)
         changedInternalState();
       return false;
     }
@@ -720,7 +697,6 @@ class _ModalScopeStatus extends InheritedWidget {
   const _ModalScopeStatus({
     required this.isCurrent,
     required this.canPop,
-    required this.impliesAppBarDismissal,
     required this.route,
     required super.child,
   }) : assert(isCurrent != null),
@@ -730,14 +706,12 @@ class _ModalScopeStatus extends InheritedWidget {
 
   final bool isCurrent;
   final bool canPop;
-  final bool impliesAppBarDismissal;
   final Route<dynamic> route;
 
   @override
   bool updateShouldNotify(_ModalScopeStatus old) {
     return isCurrent != old.isCurrent ||
            canPop != old.canPop ||
-           impliesAppBarDismissal != old.impliesAppBarDismissal ||
            route != old.route;
   }
 
@@ -746,7 +720,6 @@ class _ModalScopeStatus extends InheritedWidget {
     super.debugFillProperties(description);
     description.add(FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
     description.add(FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
-    description.add(FlagProperty('impliesAppBarDismissal', value: impliesAppBarDismissal, ifTrue: 'implies app bar dismissal'));
   }
 }
 
@@ -849,7 +822,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
         route: widget.route,
         isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
         canPop: widget.route.canPop, // _routeSetState is called if this updates
-        impliesAppBarDismissal: widget.route.impliesAppBarDismissal,
         child: Offstage(
           offstage: widget.route.offstage, // _routeSetState is called if this updates
           child: PageStorage(
@@ -1589,14 +1561,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// notified.
   bool get canPop => hasActiveRouteBelow || willHandlePopInternally;
 
-  /// Whether an [AppBar] in the route should automatically add a back button or
-  /// close button.
-  ///
-  /// This getter returns true if there is at least one active route below it,
-  /// or there is at least one [LocalHistoryEntry] with `impliesAppBarDismissal`
-  /// set to true
-  bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
-
   // Internals
 
   final GlobalKey<_ModalScopeState<T>> _scopeKey = GlobalKey<_ModalScopeState<T>>();
@@ -1734,7 +1698,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// }
 ///
 /// class RouteAwareWidget extends StatefulWidget {
-///   const RouteAwareWidget({Key? key}) : super(key: key);
+///   const RouteAwareWidget({super.key});
 ///
 ///   @override
 ///   State<RouteAwareWidget> createState() => RouteAwareWidgetState();

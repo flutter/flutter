@@ -1273,7 +1273,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   double _discretize(double value) {
-    double result = value.clamp(0.0, 1.0);
+    double result = clampDouble(value, 0.0, 1.0);
     if (isDiscrete) {
       result = (result * divisions!).round() / divisions!;
     }
@@ -1540,12 +1540,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback!(_state._lerp(value));
-      config.increasedValue = semanticFormatterCallback!(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));
-      config.decreasedValue = semanticFormatterCallback!(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)));
+      config.increasedValue = semanticFormatterCallback!(_state._lerp(clampDouble(value + _semanticActionUnit, 0.0, 1.0)));
+      config.decreasedValue = semanticFormatterCallback!(_state._lerp(clampDouble(value - _semanticActionUnit, 0.0, 1.0)));
     } else {
       config.value = '${(value * 100).round()}%';
-      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.increasedValue = '${(clampDouble(value + _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${(clampDouble(value - _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
     }
   }
 
@@ -1553,13 +1553,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void increaseAction() {
     if (isInteractive) {
-      onChanged!((value + _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged!(clampDouble(value + _semanticActionUnit, 0.0, 1.0));
     }
   }
 
   void decreaseAction() {
     if (isInteractive) {
-      onChanged!((value - _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0));
     }
   }
 }
