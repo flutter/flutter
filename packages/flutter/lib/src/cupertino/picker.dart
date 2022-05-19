@@ -281,11 +281,12 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final TextStyle textStyle = CupertinoTheme.of(context).textTheme.pickerTextStyle;
     final Color? resolvedBackgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context);
 
     assert(RenderListWheelViewport.defaultPerspective == _kDefaultPerspective);
     final Widget result = DefaultTextStyle(
-      style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
+      style: textStyle.copyWith(color: CupertinoDynamicColor.maybeResolve(textStyle.color, context)),
       child: Stack(
         children: <Widget>[
           Positioned.fill(
@@ -464,8 +465,6 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   }
 
   void _handleDecrease() {
-    if (_currentIndex == 0)
-      return;
     controller.jumpToItem(_currentIndex - 1);
   }
 

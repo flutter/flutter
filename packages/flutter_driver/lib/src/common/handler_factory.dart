@@ -308,7 +308,7 @@ mixin CommandHandlerFactory {
     SemanticsNode? node;
     while (renderObject != null && node == null) {
       node = renderObject.debugSemantics;
-      renderObject = renderObject.parent as RenderObject?;
+      renderObject = renderObject.parent;
     }
     if (node == null)
       throw StateError('No semantics data found');
@@ -413,7 +413,7 @@ mixin CommandHandlerFactory {
     }
 
     if (text == null) {
-      throw UnsupportedError('Type ${widget.runtimeType.toString()} is currently not supported by getText');
+      throw UnsupportedError('Type ${widget.runtimeType} is currently not supported by getText');
     }
 
     return GetTextResult(text);

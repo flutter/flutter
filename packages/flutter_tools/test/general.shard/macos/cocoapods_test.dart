@@ -153,13 +153,13 @@ void main() {
 
     testWithoutContext('detects below minimum version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.6.0');
+      pretendPodVersionIs('1.9.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowMinimumVersion);
     });
 
     testWithoutContext('detects below recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.9.0');
+      pretendPodVersionIs('1.10.5');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowRecommendedVersion);
     });
 
@@ -535,6 +535,10 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         expect(
           logger.errorText,
           contains('set up CocoaPods for ARM macOS'),
+        );
+        expect(
+          logger.errorText,
+          contains('enable-libffi-alloc'),
         );
         expect(usage.events, contains(const TestUsageEvent('pod-install-failure', 'arm-ffi')));
       });

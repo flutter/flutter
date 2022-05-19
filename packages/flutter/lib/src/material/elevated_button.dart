@@ -172,7 +172,7 @@ class ElevatedButton extends ButtonStyleButton {
       : _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
-      textStyle: MaterialStateProperty.all<TextStyle?>(textStyle),
+      textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       overlayColor: overlayColor,
@@ -468,7 +468,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
+      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }
@@ -496,7 +496,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _TokenDefaultsM3 extends ButtonStyle {
   _TokenDefaultsM3(this.context)
    : super(
@@ -510,7 +510,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle =>
-    MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+    MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>

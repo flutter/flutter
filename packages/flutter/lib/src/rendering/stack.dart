@@ -520,8 +520,7 @@ class RenderStack extends RenderBox
     assert(_resolvedAlignment != null);
     bool hasNonPositionedChildren = false;
     if (childCount == 0) {
-      assert(constraints.biggest.isFinite);
-      return constraints.biggest;
+      return (constraints.biggest.isFinite) ? constraints.biggest : constraints.smallest;
     }
 
     double width = constraints.minWidth;
@@ -637,7 +636,16 @@ class RenderStack extends RenderBox
   }
 
   @override
-  Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _hasVisualOverflow ? Offset.zero & size : null;
+    }
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

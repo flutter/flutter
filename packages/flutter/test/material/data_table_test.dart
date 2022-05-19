@@ -1536,9 +1536,9 @@ void main() {
     const Color checkColor = Color(0xFF0000FF);
 
     final ThemeData themeData = ThemeData(
-      checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.all(fillColor),
-        checkColor: MaterialStateProperty.all(checkColor),
+      checkboxTheme: const CheckboxThemeData(
+        fillColor: MaterialStatePropertyAll<Color?>(fillColor),
+        checkColor: MaterialStatePropertyAll<Color?>(checkColor),
       ),
     );
     Widget buildTable() {

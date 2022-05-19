@@ -19,7 +19,7 @@ enum MenuSelection {
 }
 
 class SampleApp extends StatelessWidget {
-  const SampleApp({Key? key}) : super(key: key);
+  const SampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class SampleApp extends StatelessWidget {
 }
 
 class MyMenuBarApp extends StatefulWidget {
-  const MyMenuBarApp({Key? key}) : super(key: key);
+  const MyMenuBarApp({super.key});
 
   @override
   State<MyMenuBarApp> createState() => _MyMenuBarAppState();

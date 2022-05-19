@@ -311,7 +311,7 @@ double _indexChangeProgress(TabController controller) {
   // The controller's offset is changing because the user is dragging the
   // TabBarView's PageView to the left or right.
   if (!controller.indexIsChanging)
-    return (currentIndex - controllerValue).abs().clamp(0.0, 1.0);
+    return clampDouble((currentIndex - controllerValue).abs(), 0.0, 1.0);
 
   // The TabController animation's value is changing from previousIndex to currentIndex.
   return (controllerValue - currentIndex).abs() / (currentIndex - previousIndex).abs();
@@ -403,7 +403,7 @@ class _IndicatorPainter extends CustomPainter {
     if (!(rect.size >= insets.collapsedSize)) {
       throw FlutterError(
           'indicatorPadding insets should be less than Tab Size\n'
-          'Rect Size : ${rect.size}, Insets: ${insets.toString()}',
+          'Rect Size : ${rect.size}, Insets: $insets',
       );
     }
     return insets.deflateRect(rect);
@@ -417,8 +417,8 @@ class _IndicatorPainter extends CustomPainter {
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
     final bool ltr = index > value;
-    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex);
-    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex);
+    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex); // ignore_clamp_double_lint
+    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex); // ignore_clamp_double_lint
     final Rect fromRect = indicatorRect(size, from);
     final Rect toRect = indicatorRect(size, to);
     _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
@@ -491,8 +491,8 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   double get value {
     assert(!controller.indexIsChanging);
     final double controllerMaxValue = (controller.length - 1).toDouble();
-    final double controllerValue = controller.animation!.value.clamp(0.0, controllerMaxValue);
-    return (controllerValue - index.toDouble()).abs().clamp(0.0, 1.0);
+    final double controllerValue = clampDouble(controller.animation!.value, 0.0, controllerMaxValue);
+    return clampDouble((controllerValue - index.toDouble()).abs(), 0.0, 1.0);
   }
 }
 
@@ -1048,7 +1048,7 @@ class _TabBarState extends State<TabBar> {
       case TextDirection.ltr:
         break;
     }
-    return (tabCenter - viewportWidth / 2.0).clamp(minExtent, maxExtent);
+    return clampDouble(tabCenter - viewportWidth / 2.0, minExtent, maxExtent);
   }
 
   double _tabCenteredScrollOffset(int index) {
@@ -1310,6 +1310,7 @@ class TabBarView extends StatefulWidget {
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
     this.viewportFraction = 1.0,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(children != null),
        assert(dragStartBehavior != null);
 
@@ -1341,6 +1342,11 @@ class TabBarView extends StatefulWidget {
 
   /// {@macro flutter.widgets.pageview.viewportFraction}
   final double viewportFraction;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   @override
   State<TabBarView> createState() => _TabBarViewState();
@@ -1504,12 +1510,12 @@ class _TabBarViewState extends State<TabBarView> {
         _controller!.index = _pageController.page!.round();
         _currentIndex =_controller!.index;
       }
-      _controller!.offset = (_pageController.page! - _controller!.index).clamp(-1.0, 1.0);
+      _controller!.offset = clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
     } else if (notification is ScrollEndNotification) {
       _controller!.index = _pageController.page!.round();
       _currentIndex = _controller!.index;
       if (!_controller!.indexIsChanging)
-        _controller!.offset = (_pageController.page! - _controller!.index).clamp(-1.0, 1.0);
+        _controller!.offset = clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
     }
     _warpUnderwayCount -= 1;
 
@@ -1531,6 +1537,7 @@ class _TabBarViewState extends State<TabBarView> {
       onNotification: _handleScrollNotification,
       child: PageView(
         dragStartBehavior: widget.dragStartBehavior,
+        clipBehavior: widget.clipBehavior,
         controller: _pageController,
         physics: widget.physics == null
           ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())

@@ -857,8 +857,6 @@ class RadialGradient extends Gradient {
 ///   decoration: const BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
-///       startAngle: 0.0,
-///       endAngle: math.pi * 2,
 ///       colors: <Color>[
 ///         Color(0xFF4285F4), // blue
 ///         Color(0xFF34A853), // green
@@ -883,8 +881,6 @@ class RadialGradient extends Gradient {
 ///   decoration: const BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
-///       startAngle: 0.0,
-///       endAngle: math.pi * 2,
 ///       colors: <Color>[
 ///         Color(0xFF4285F4), // blue
 ///         Color(0xFF34A853), // green

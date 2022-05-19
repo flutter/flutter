@@ -2649,7 +2649,6 @@ Future<void> main() async {
       end: const Size(100, 100),
     ).chain(CurveTween(curve: Curves.fastOutSlowIn));
 
-
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: navigator,
@@ -2925,8 +2924,8 @@ Future<void> main() async {
     final ScrollController controller = ScrollController();
 
     RenderAnimatedOpacity? findRenderAnimatedOpacity() {
-      AbstractNode? parent = tester.renderObject(find.byType(Placeholder));
-      while (parent is RenderObject && parent is! RenderAnimatedOpacity) {
+      RenderObject? parent = tester.renderObject(find.byType(Placeholder));
+      while (parent != null && parent is! RenderAnimatedOpacity) {
         parent = parent.parent;
       }
       return parent is RenderAnimatedOpacity ? parent : null;

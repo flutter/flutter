@@ -70,7 +70,7 @@ class SliderTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Launch extends StatefulWidget {
-  ///   const Launch({Key? key}) : super(key: key);
+  ///   const Launch({super.key});
   ///
   ///   @override
   ///   State createState() => LaunchState();
@@ -240,7 +240,7 @@ class SliderThemeData with Diagnosticable {
   ///
   /// ```dart
   /// class Blissful extends StatefulWidget {
-  ///   const Blissful({Key? key}) : super(key: key);
+  ///   const Blissful({super.key});
   ///
   ///   @override
   ///   State createState() => BlissfulState();
@@ -3180,7 +3180,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     // factor of the value indicator.
     final double neckStretchBaseline = math.max(0.0, rightBottomNeckCenterY - math.max(leftTopNeckCenter.dy, neckRightCenter.dy));
     final double t = math.pow(inverseTextScale, 3.0) as double;
-    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
+    final double stretch = clampDouble(neckStretchBaseline * t, 0.0, 10.0 * neckStretchBaseline);
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
     assert(!_debuggingLabelLocation || () {

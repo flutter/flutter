@@ -97,10 +97,10 @@ void main() {
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
-    final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const DataTableRowHeight dataRowHeightSettings = DataTableRowHeight.fixed(height: 51.1);
     const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
-    final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
+    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
@@ -110,7 +110,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          dataTableTheme: DataTableThemeData(
+          dataTableTheme: const DataTableThemeData(
             decoration: decoration,
             dataRowColor: dataRowColor,
             dataRowHeightSettings: dataRowHeightSettings,
@@ -164,10 +164,10 @@ void main() {
 
   testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
     const BoxDecoration themeDecoration = BoxDecoration(color: Color(0xfffffff1));
-    final MaterialStateProperty<Color> themeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff0));
+    const MaterialStateProperty<Color> themeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
     const DataTableRowHeight themeDataRowHeightSettings = DataTableRowHeight.fixed(height: 50.1);
     const TextStyle themeDataTextStyle = TextStyle(fontSize: 11.5);
-    final MaterialStateProperty<Color> themeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const MaterialStateProperty<Color> themeHeadingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const double themeHeadingRowHeight = 51.0;
     const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double themeHorizontalMargin = 2.0;
@@ -175,10 +175,10 @@ void main() {
     const double themeDividerThickness = 4.0;
 
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
-    final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const DataTableRowHeight dataRowHeightSettings = DataTableRowHeight.fixed(height: 3.5);
     const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
-    final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
+    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
@@ -187,7 +187,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          dataTableTheme: DataTableThemeData(
+          dataTableTheme: const DataTableThemeData(
             decoration: themeDecoration,
             dataRowColor: themeDataRowColor,
             dataRowHeightSettings: themeDataRowHeightSettings,
@@ -251,10 +251,10 @@ void main() {
 
   testWidgets('Local DataTableTheme can override global DataTableTheme', (WidgetTester tester) async {
     const BoxDecoration globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
-    final MaterialStateProperty<Color> globalThemeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff0));
+    const MaterialStateProperty<Color> globalThemeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
     const DataTableRowHeight globalThemeDataRowHeightSettings = DataTableRowHeight.fixed(height: 50.1);
     const TextStyle globalThemeDataTextStyle = TextStyle(fontSize: 11.5);
-    final MaterialStateProperty<Color> globalThemeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const MaterialStateProperty<Color> globalThemeHeadingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const double globalThemeHeadingRowHeight = 51.0;
     const TextStyle globalThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double globalThemeHorizontalMargin = 2.0;
@@ -262,10 +262,10 @@ void main() {
     const double globalThemeDividerThickness = 4.0;
 
     const BoxDecoration localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
-    final MaterialStateProperty<Color> localThemeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const MaterialStateProperty<Color> localThemeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const DataTableRowHeight localThemeDataRowHeightSettings = DataTableRowHeight.fixed(height: 51.1);
     const TextStyle localThemeDataTextStyle = TextStyle(fontSize: 12.5);
-    final MaterialStateProperty<Color> localThemeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
+    const MaterialStateProperty<Color> localThemeHeadingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
     const double localThemeHeadingRowHeight = 52.0;
     const TextStyle localThemeHeadingTextStyle = TextStyle(fontSize: 14.5);
     const double localThemeHorizontalMargin = 3.0;
@@ -275,7 +275,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          dataTableTheme: DataTableThemeData(
+          dataTableTheme: const DataTableThemeData(
             decoration: globalThemeDecoration,
             dataRowColor: globalThemeDataRowColor,
             dataRowHeightSettings: globalThemeDataRowHeightSettings,
@@ -290,7 +290,7 @@ void main() {
         ),
         home: Scaffold(
           body: DataTableTheme(
-            data: DataTableThemeData(
+            data: const DataTableThemeData(
               decoration: localThemeDecoration,
               dataRowColor: localThemeDataRowColor,
               dataRowHeightSettings: localThemeDataRowHeightSettings,

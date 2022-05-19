@@ -1011,6 +1011,53 @@ void main() {
     expect(getMaterial().elevation, 10);
   });
 
+  testWidgets('scrolledUnderElevation with nested scroll view', (WidgetTester tester) async {
+    Widget buildAppBar({double? scrolledUnderElevation}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Title'),
+            scrolledUnderElevation: scrolledUnderElevation,
+            notificationPredicate: (ScrollNotification notification) {
+              return notification.depth == 1;
+            },
+          ),
+          body: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 4,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 600.0,
+                width: 800.0,
+                child: ListView.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) =>
+                    ListTile(title: Text('Item $index')),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    Material getMaterial() => tester.widget<Material>(find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ));
+
+    await tester.pumpWidget(buildAppBar(scrolledUnderElevation: 10));
+    // Starts with the base elevation.
+    expect(getMaterial().elevation, 0.0);
+
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    // After scrolling it should be the scrolledUnderElevation.
+    expect(getMaterial().elevation, 10);
+  });
+
   group('SliverAppBar elevation', () {
     Widget buildSliverAppBar(bool forceElevated, {double? elevation, double? themeElevation}) {
       return MaterialApp(
@@ -2636,7 +2683,7 @@ void main() {
     }
 
     group('SliverAppBar', () {
-      Widget _buildSliverApp({
+      Widget buildSliverApp({
         required double contentHeight,
         bool reverse = false,
         bool includeFlexibleSpace = false,
@@ -2674,7 +2721,7 @@ void main() {
 
       testWidgets('backgroundColor', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(contentHeight: 1200.0)
+          buildSliverApp(contentHeight: 1200.0)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2699,7 +2746,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(contentHeight: 1200.0, includeFlexibleSpace: true)
+          buildSliverApp(contentHeight: 1200.0, includeFlexibleSpace: true)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2724,7 +2771,7 @@ void main() {
 
       testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(contentHeight: 1200.0, reverse: true)
+          buildSliverApp(contentHeight: 1200.0, reverse: true)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2749,7 +2796,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(
+          buildSliverApp(
             contentHeight: 1200.0,
             reverse: true,
             includeFlexibleSpace: true,
@@ -2778,7 +2825,7 @@ void main() {
 
       testWidgets('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(contentHeight: 200, reverse: true)
+          buildSliverApp(contentHeight: 200, reverse: true)
         );
 
         // In reverse, the content here is not long enough to scroll under the app
@@ -2797,7 +2844,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildSliverApp(
+          buildSliverApp(
             contentHeight: 200,
             reverse: true,
             includeFlexibleSpace: true,
@@ -2820,7 +2867,7 @@ void main() {
     });
 
     group('AppBar', () {
-      Widget _buildAppBar({
+      Widget buildAppBar({
         required double contentHeight,
         bool reverse = false,
         bool includeFlexibleSpace = false
@@ -2851,7 +2898,7 @@ void main() {
 
       testWidgets('backgroundColor', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(contentHeight: 1200.0)
+          buildAppBar(contentHeight: 1200.0)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2876,7 +2923,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(contentHeight: 1200.0, includeFlexibleSpace: true)
+          buildAppBar(contentHeight: 1200.0, includeFlexibleSpace: true)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2901,7 +2948,7 @@ void main() {
 
       testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(contentHeight: 1200.0, reverse: true)
+          buildAppBar(contentHeight: 1200.0, reverse: true)
         );
         await tester.pump();
 
@@ -2929,7 +2976,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(
+          buildAppBar(
             contentHeight: 1200.0,
             reverse: true,
             includeFlexibleSpace: true,
@@ -3027,7 +3074,7 @@ void main() {
 
       testWidgets('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(
+          buildAppBar(
             contentHeight: 200.0,
             reverse: true,
           )
@@ -3050,7 +3097,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
         await tester.pumpWidget(
-          _buildAppBar(
+          buildAppBar(
             contentHeight: 200.0,
             reverse: true,
             includeFlexibleSpace: true,

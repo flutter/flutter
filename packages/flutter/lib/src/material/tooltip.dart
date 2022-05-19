@@ -103,11 +103,12 @@ class Tooltip extends StatefulWidget {
     this.excludeFromSemantics,
     this.decoration,
     this.textStyle,
+    this.textAlign,
     this.waitDuration,
     this.showDuration,
-    this.child,
     this.triggerMode,
     this.enableFeedback,
+    this.child,
   }) :  assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
         assert(
           richMessage == null || textStyle == null,
@@ -133,7 +134,8 @@ class Tooltip extends StatefulWidget {
 
   /// The amount of space by which to inset the tooltip's [child].
   ///
-  /// Defaults to 16.0 logical pixels in each direction.
+  /// On mobile, defaults to 16.0 logical pixels horizontally and 4.0 vertically.
+  /// On desktop, defaults to 8.0 logical pixels horizontally and 4.0 vertically.
   final EdgeInsetsGeometry? padding;
 
   /// The empty space that surrounds the tooltip.
@@ -196,6 +198,13 @@ class Tooltip extends StatefulWidget {
   /// [Brightness.light], [TextTheme.bodyText2] of [ThemeData.textTheme] will be
   /// used with [Colors.black].
   final TextStyle? textStyle;
+
+  /// How the message of the tooltip is aligned horizontally.
+  ///
+  /// If this property is null, then [TooltipThemeData.textAlign] is used.
+  /// If [TooltipThemeData.textAlign] is also null, the default value is
+  /// [TextAlign.start].
+  final TextAlign? textAlign;
 
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
@@ -298,6 +307,7 @@ class Tooltip extends StatefulWidget {
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
     properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
+    properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
   }
 }
 
@@ -317,12 +327,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const bool _defaultExcludeFromSemantics = false;
   static const TooltipTriggerMode _defaultTriggerMode = TooltipTriggerMode.longPress;
   static const bool _defaultEnableFeedback = true;
+  static const TextAlign _defaultTextAlign = TextAlign.start;
 
   late double _height;
   late EdgeInsetsGeometry _padding;
   late EdgeInsetsGeometry _margin;
   late Decoration _decoration;
   late TextStyle _textStyle;
+  late TextAlign _textAlign;
   late double _verticalOffset;
   late bool _preferBelow;
   late bool _excludeFromSemantics;
@@ -392,11 +404,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return const EdgeInsets.symmetric(horizontal: 8.0);
+        return const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
-        return const EdgeInsets.symmetric(horizontal: 16.0);
+        return const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
     }
   }
 
@@ -406,7 +418,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return 10.0;
+        return 12.0;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -570,6 +582,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         onExit: _mouseIsConnected ? (_) => _handleMouseExit() : null,
         decoration: _decoration,
         textStyle: _textStyle,
+        textAlign: _textAlign,
         animation: CurvedAnimation(
           parent: _controller,
           curve: Curves.fastOutSlowIn,
@@ -691,6 +704,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
     _decoration = widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration;
     _textStyle = widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle;
+    _textAlign = widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign;
     _waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
     _showDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultShowDuration;
     _hoverShowDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultHoverShowDuration;
@@ -786,6 +800,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.margin,
     this.decoration,
     this.textStyle,
+    this.textAlign,
     required this.animation,
     required this.target,
     required this.verticalOffset,
@@ -800,6 +815,7 @@ class _TooltipOverlay extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final Decoration? decoration;
   final TextStyle? textStyle;
+  final TextAlign? textAlign;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -826,6 +842,7 @@ class _TooltipOverlay extends StatelessWidget {
                 child: Text.rich(
                   richMessage,
                   style: textStyle,
+                  textAlign: textAlign,
                 ),
               ),
             ),
@@ -841,6 +858,7 @@ class _TooltipOverlay extends StatelessWidget {
       );
     }
     return Positioned.fill(
+      bottom: MediaQuery.maybeOf(context)?.viewInsets.bottom ?? 0.0,
       child: CustomSingleChildLayout(
         delegate: _TooltipPositionDelegate(
           target: target,

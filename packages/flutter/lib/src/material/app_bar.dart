@@ -107,6 +107,15 @@ class _PreferredAppBarSize extends Size {
 /// ** See code in examples/api/lib/material/app_bar/app_bar.0.dart **
 /// {@end-tool}
 ///
+/// Material Design 3 introduced new types of app bar.
+/// {@tool dartpad}
+/// This sample shows the creation of an [AppBar] widget with the [shadowColor] and
+/// [scrolledUnderElevation] properties set, as described in:
+/// https://m3.material.io/components/top-app-bar/overview
+///
+/// ** See code in examples/api/lib/material/app_bar/app_bar.1.dart **
+/// {@end-tool}
+///
 /// ## Troubleshooting
 ///
 /// ### Why don't my TextButton actions appear?
@@ -125,9 +134,10 @@ class _PreferredAppBarSize extends Size {
 /// [TextButton.style]:
 ///
 /// {@tool dartpad}
+/// This sample shows an [AppBar] with two action buttons with their primary
+/// color set to [ColorScheme.onPrimary].
 ///
-///
-/// ** See code in examples/api/lib/material/app_bar/app_bar.1.dart **
+/// ** See code in examples/api/lib/material/app_bar/app_bar.2.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -162,6 +172,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.bottom,
     this.elevation,
     this.scrolledUnderElevation,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
     this.shadowColor,
     this.surfaceTintColor,
     this.shape,
@@ -197,6 +208,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.systemOverlayStyle,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
+       assert(notificationPredicate != null),
        assert(primary != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
@@ -420,6 +432,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [shape], which defines the shape of the app bar's [Material] and its
   ///    shadow.
   final double? scrolledUnderElevation;
+
+  /// A check that specifies which child's [ScrollNotification]s should be
+  /// listened to.
+  ///
+  /// By default, checks whether `notification.depth == 0`. Set it to something
+  /// else for more complicated layouts.
+  final ScrollNotificationPredicate notificationPredicate;
 
   /// {@template flutter.material.appbar.shadowColor}
   /// The color of the shadow below the app bar.
@@ -809,7 +828,7 @@ class _AppBarState extends State<AppBar> {
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification && notification.depth == 0) {
+    if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
       final bool oldScrolledUnder = _scrolledUnder;
       final ScrollMetrics metrics = notification.metrics;
       switch (metrics.axisDirection) {
@@ -1254,7 +1273,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final bool isScrolledUnder = overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
-      ? (visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight)).clamp(0.0, 1.0)
+      ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
       : 1.0;
 
     final Widget appBar = FlexibleSpaceBar.createSettings(
@@ -1291,7 +1310,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         titleSpacing: titleSpacing,
         shape: shape,
         toolbarOpacity: toolbarOpacity,
-        bottomOpacity: pinned ? 1.0 : ((visibleMainHeight / _bottomHeight).clamp(0.0, 1.0)),
+        bottomOpacity: pinned ? 1.0 : clampDouble(visibleMainHeight / _bottomHeight, 0.0, 1.0),
         toolbarHeight: toolbarHeight,
         leadingWidth: leadingWidth,
         backwardsCompatibility: backwardsCompatibility,
@@ -1959,7 +1978,7 @@ class _DefaultsM2 extends AppBarTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _TokenDefaultsM3 extends AppBarTheme {
   _TokenDefaultsM3(this.context)
     : super(

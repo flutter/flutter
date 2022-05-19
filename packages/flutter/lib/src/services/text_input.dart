@@ -881,7 +881,7 @@ class TextEditingValue {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= replacementRange.start && originalIndex < replacementRange.end ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start;
+      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start; // ignore_clamp_double_lint
       return originalIndex + replacedLength - removedLength;
     }
 
@@ -1574,6 +1574,12 @@ class TextInput {
     TextInputAction.route,
     TextInputAction.emergencyCall,
   ];
+
+  /// Ensure that a [TextInput] instance has been set up so that the platform
+  /// can handle messages on the text input method channel.
+  static void ensureInitialized() {
+    _instance; // ignore: unnecessary_statements
+  }
 
   /// Begin interacting with the text input control.
   ///

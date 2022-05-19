@@ -243,7 +243,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `--org` is not specified, returns the organization from the existing project.
   @protected
   Future<String> getOrganization() async {
-    String organization = stringArg('org');
+    String organization = stringArgDeprecated('org');
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = await project.organizationNames;
@@ -315,8 +315,8 @@ abstract class CreateBase extends FlutterCommand {
   @protected
   String get projectName {
     final String projectName =
-        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
-    if (!boolArg('skip-name-checks')) {
+        stringArgDeprecated('project-name') ?? globals.fs.path.basename(projectDirPath);
+    if (!boolArgDeprecated('skip-name-checks')) {
       final String error = _validateProjectName(projectName);
       if (error != null) {
         throwToolExit(error);
@@ -515,7 +515,7 @@ abstract class CreateBase extends FlutterCommand {
     final bool windowsPlatform = templateContext['windows'] as bool ?? false;
     final bool webPlatform = templateContext['web'] as bool ?? false;
 
-    if (boolArg('pub')) {
+    if (boolArgDeprecated('pub')) {
       final Environment environment = Environment(
         artifacts: globals.artifacts,
         logger: globals.logger,
@@ -540,7 +540,7 @@ abstract class CreateBase extends FlutterCommand {
       await pub.get(
         context: PubContext.create,
         directory: directory.path,
-        offline: boolArg('offline'),
+        offline: boolArgDeprecated('offline'),
         // For templates that use the l10n localization tooling, make sure
         // importing the generated package works right after `flutter create`.
         generateSyntheticPackage: true,
@@ -593,7 +593,7 @@ abstract class CreateBase extends FlutterCommand {
         projectDirectory: directory,
         create: true,
         update: false,
-        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+        currentRevision: stringArgDeprecated('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
         createRevision: globals.flutterVersion.frameworkRevision,
         logger: globals.logger,
       );

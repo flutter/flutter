@@ -1747,8 +1747,8 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
     final KeepAliveParentDataMixin parentData = renderObject.parentData! as KeepAliveParentDataMixin;
     if (parentData.keepAlive != keepAlive) {
       parentData.keepAlive = keepAlive;
-      final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject && !keepAlive)
+      final RenderObject? targetParent = renderObject.parent;
+      if (targetParent != null && !keepAlive)
         targetParent.markNeedsLayout(); // No need to redo layout if it became true.
     }
   }

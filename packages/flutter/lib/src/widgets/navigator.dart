@@ -26,8 +26,8 @@ import 'routes.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
-// class MyPage extends Placeholder { const MyPage({Key? key}) : super(key: key); }
-// class MyHomePage extends Placeholder { const MyHomePage({Key? key}) : super(key: key); }
+// class MyPage extends Placeholder { const MyPage({super.key}); }
+// class MyHomePage extends Placeholder { const MyHomePage({super.key}); }
 // late NavigatorState navigator;
 // late BuildContext context;
 
@@ -5268,7 +5268,7 @@ class _NamedRestorationInformation extends _RestorationInformation {
 
   @override
   Route<dynamic> createRoute(NavigatorState navigator) {
-    final Route<dynamic> route = navigator._routeNamed<dynamic>(name, arguments: arguments, allowNull: false)!;
+    final Route<dynamic> route = navigator._routeNamed<dynamic>(name, arguments: arguments)!;
     assert(route != null);
     return route;
   }

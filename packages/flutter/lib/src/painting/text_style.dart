@@ -377,7 +377,7 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// #### Supported font formats
 ///
-/// Font formats currently supported by Flutter :
+/// Font formats currently supported by Flutter:
 ///
 ///  * `.ttc`
 ///  * `.ttf`
@@ -529,8 +529,9 @@ class TextStyle with Diagnosticable {
   /// specified in one place, it will dominate [color] in another.
   final Color? backgroundColor;
 
-  /// The name of the font to use when painting the text (e.g., Roboto). If the
-  /// font is defined in a package, this will be prefixed with
+  /// The name of the font to use when painting the text (e.g., Roboto).
+  ///
+  /// If the font is defined in a package, this will be prefixed with
   /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
   /// prefixing is done by the constructor when the `package` argument is
   /// provided.
@@ -966,7 +967,7 @@ class TextStyle with Diagnosticable {
       fontFamily: fontFamily ?? _fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
-      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
+      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)], // ignore_clamp_double_lint
       fontStyle: fontStyle ?? this.fontStyle,
       letterSpacing: letterSpacing == null ? null : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing! * wordSpacingFactor + wordSpacingDelta,

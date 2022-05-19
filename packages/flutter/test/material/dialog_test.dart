@@ -639,7 +639,7 @@ void main() {
       tester.getBottomRight(_findButtonBar()).dx - 8.0,
     ); // right
 
-    // Dismiss it and test materail 3 dialog
+    // Dismiss it and test material 3 dialog
     await tester.tapAt(const Offset(10.0, 10.0));
     await tester.pumpAndSettle();
 
@@ -1648,7 +1648,6 @@ void main() {
     Future<bool?> confirmDismiss (DismissDirection dismissDirection) async {
       return showDialog<bool>(
         context: scaffoldKey.currentContext!,
-        barrierDismissible: true, // showDialog() returns null if tapped outside the dialog
         builder: (BuildContext context) {
           return AlertDialog(
             actions: <Widget>[
@@ -2266,7 +2265,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, 800 - 20);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, 800);
 
-    // All possible alginment values
+    // All possible alignment values
 
     await tester.pumpWidget(buildFrame(MainAxisAlignment.start));
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, 0);

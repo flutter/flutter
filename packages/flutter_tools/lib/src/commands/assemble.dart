@@ -215,7 +215,7 @@ class AssembleCommand extends FlutterCommand {
   /// The environmental configuration for a build invocation.
   Environment createEnvironment() {
     final FlutterProject flutterProject = FlutterProject.current();
-    String? output = stringArg('output');
+    String? output = stringArgDeprecated('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
@@ -318,7 +318,7 @@ class AssembleCommand extends FlutterCommand {
       environment,
       buildSystemConfig: BuildSystemConfig(
         resourcePoolSize: argumentResults.wasParsed('resource-pool-size')
-          ? int.tryParse(stringArg('resource-pool-size')!)
+          ? int.tryParse(stringArgDeprecated('resource-pool-size')!)
           : null,
         ),
       );
@@ -335,17 +335,17 @@ class AssembleCommand extends FlutterCommand {
     globals.printTrace('build succeeded.');
 
     if (argumentResults.wasParsed('build-inputs')) {
-      writeListIfChanged(result.inputFiles, stringArg('build-inputs')!);
+      writeListIfChanged(result.inputFiles, stringArgDeprecated('build-inputs')!);
     }
     if (argumentResults.wasParsed('build-outputs')) {
-      writeListIfChanged(result.outputFiles, stringArg('build-outputs')!);
+      writeListIfChanged(result.outputFiles, stringArgDeprecated('build-outputs')!);
     }
     if (argumentResults.wasParsed('performance-measurement-file')) {
       final File outFile = globals.fs.file(argumentResults['performance-measurement-file']);
       writePerformanceData(result.performance.values, outFile);
     }
     if (argumentResults.wasParsed('depfile')) {
-      final File depfileFile = globals.fs.file(stringArg('depfile'));
+      final File depfileFile = globals.fs.file(stringArgDeprecated('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,

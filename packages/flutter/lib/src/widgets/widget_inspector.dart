@@ -285,6 +285,11 @@ class _MulticastCanvas implements Canvas {
     _main.translate(dx, dy);
     _screenshot.translate(dx, dy);
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    super.noSuchMethod(invocation);
+  }
 }
 
 Rect _calculateSubtreeBoundsHelper(RenderObject object, Matrix4 transform) {
@@ -547,7 +552,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
   }) {
     RenderObject repaintBoundary = renderObject;
     while (repaintBoundary != null && !repaintBoundary.isRepaintBoundary) {
-      repaintBoundary = repaintBoundary.parent! as RenderObject;
+      repaintBoundary = repaintBoundary.parent!;
     }
     assert(repaintBoundary != null);
     final _ScreenshotData data = _ScreenshotData(target: renderObject);
@@ -1505,7 +1510,7 @@ mixin WidgetInspectorService {
     final List<RenderObject> chain = <RenderObject>[];
     while (renderObject != null) {
       chain.add(renderObject);
-      renderObject = renderObject.parent as RenderObject?;
+      renderObject = renderObject.parent;
     }
     return _followDiagnosticableChain(chain.reversed.toList());
   }
@@ -2560,7 +2565,7 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
-      rootRenderObject: parent is RenderObject ? parent! as RenderObject : null,
+      rootRenderObject: parent != null ? parent! : null,
     ));
   }
 }
@@ -2836,14 +2841,14 @@ class _InspectorOverlayLayer extends Layer {
   /// overlays in the same app (i.e. an storyboard), a selected or candidate
   /// render object may not belong to this tree.
   bool _isInInspectorRenderObjectTree(RenderObject child) {
-    RenderObject? current = child.parent as RenderObject?;
+    RenderObject? current = child.parent;
     while (current != null) {
       // We found the widget inspector render object.
       if (current is RenderStack
           && current.lastChild is _RenderInspectorOverlay) {
         return rootRenderObject == current;
       }
-      current = current.parent as RenderObject?;
+      current = current.parent;
     }
     return false;
   }

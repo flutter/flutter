@@ -28,6 +28,12 @@ import 'toggle_buttons_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
 ///
+/// {@tool dartpad}
+/// This example showcase [ToggleButtons] in various configurations.
+///
+/// ** See code in examples/api/lib/material/toggle_buttons/toggle_buttons.0.dart **
+/// {@end-tool}
+///
 /// ## Customizing toggle buttons
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
 /// can update the [isSelected] list however it wants to.
@@ -736,8 +742,8 @@ class ToggleButtons extends StatelessWidget {
           child: TextButton(
             focusNode: focusNodes != null ? focusNodes![index] : null,
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color?>(effectiveFillColor),
-              foregroundColor: MaterialStateProperty.all<Color?>(currentColor),
+              backgroundColor: MaterialStatePropertyAll<Color?>(effectiveFillColor),
+              foregroundColor: MaterialStatePropertyAll<Color?>(currentColor),
               overlayColor: _ToggleButtonDefaultOverlay(
                 selected:  onPressed != null && isSelected[index],
                 unselected: onPressed != null && !isSelected[index],
@@ -748,15 +754,15 @@ class ToggleButtons extends StatelessWidget {
                 hoverColor: hoverColor ?? toggleButtonsTheme.hoverColor,
                 splashColor: splashColor ?? toggleButtonsTheme.splashColor,
               ),
-              elevation: MaterialStateProperty.all<double>(0),
-              textStyle: MaterialStateProperty.all<TextStyle?>(currentTextStyle.copyWith(
+              elevation: const MaterialStatePropertyAll<double>(0),
+              textStyle: MaterialStatePropertyAll<TextStyle?>(currentTextStyle.copyWith(
                 color: currentColor,
               )),
-              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero),
-              minimumSize: MaterialStateProperty.all<Size?>(minimumSize),
-              maximumSize: MaterialStateProperty.all<Size?>(maximumSize),
-              shape: MaterialStateProperty.all<OutlinedBorder>(const RoundedRectangleBorder()),
-              mouseCursor: MaterialStateProperty.all<MouseCursor?>(mouseCursor),
+              padding: const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.zero),
+              minimumSize: MaterialStatePropertyAll<Size?>(minimumSize),
+              maximumSize: MaterialStatePropertyAll<Size?>(maximumSize),
+              shape: const MaterialStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
+              mouseCursor: MaterialStatePropertyAll<MouseCursor?>(mouseCursor),
               visualDensity: VisualDensity.standard,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               animationDuration: kThemeChangeDuration,

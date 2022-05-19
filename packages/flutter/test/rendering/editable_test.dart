@@ -128,6 +128,28 @@ void main() {
     }
   });
 
+  test('Editable respect clipBehavior in describeApproximatePaintClip', () {
+    final String longString = 'a' * 10000;
+    final RenderEditable editable = RenderEditable(
+      text: TextSpan(text: longString),
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+      clipBehavior: Clip.none,
+    );
+    layout(editable);
+
+    bool visited = false;
+    editable.visitChildren((RenderObject child) {
+      visited = true;
+      expect(editable.describeApproximatePaintClip(child), null);
+    });
+    expect(visited, true);
+  });
+
   test('editable intrinsics', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
@@ -913,7 +935,7 @@ void main() {
       editable.painter = null;
       editable.paintCount = 0;
 
-      final AbstractNode? parent = editable.parent;
+      final RenderObject? parent = editable.parent;
       if (parent is RenderConstrainedBox)
         parent.child = null;
     });

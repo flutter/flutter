@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'math.dart' show clampDouble;
 import 'object.dart';
 
 // Examples can assume:
@@ -2044,7 +2045,7 @@ class PercentProperty extends DoubleProperty {
     final double? v = value;
     if (v == null)
       return value.toString();
-    return '${(v.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%';
+    return '${(clampDouble(v, 0.0, 1.0) * 100.0).toStringAsFixed(1)}%';
   }
 }
 
@@ -3213,7 +3214,6 @@ mixin Diagnosticable {
   ///       value: isCurrent,
   ///       ifTrue: 'active',
   ///       ifFalse: 'inactive',
-  ///       showName: false,
   ///     ));
   ///
   ///     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));

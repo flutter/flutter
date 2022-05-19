@@ -437,6 +437,30 @@ class ToolbarOptions {
 ///  * When the virtual keyboard pops up.
 /// {@endtemplate}
 ///
+/// {@template flutter.widgets.editableText.accessibility}
+/// ## Troubleshooting Common Accessibility Issues
+///
+/// ### Customizing User Input Accessibility Announcements
+///
+/// To customize user input accessibility announcements triggered by text
+/// changes, use [SemanticsService.announce] to make the desired
+/// accessibility announcement.
+///
+/// On iOS, the on-screen keyboard may announce the most recent input
+/// incorrectly when a [TextInputFormatter] inserts a thousands separator to
+/// a currency value text field. The following example demonstrates how to
+/// suppress the default accessibility announcements by always announcing
+/// the content of the text field as a US currency value:
+/// ```dart
+/// onChanged: (String newText) {
+///   if (newText.isNotEmpty) {
+///     SemanticsService.announce('\$' + newText, Directionality.of(context));
+///   }
+/// }
+/// ```
+///
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [TextField], which is a full-featured, material-design text input field
@@ -2240,7 +2264,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ? editableSize.width / 2 - rect.center.dx
         // Valid additional offsets range from (rect.right - size.width)
         // to (rect.left). Pick the closest one if out of range.
-        : 0.0.clamp(rect.right - editableSize.width, rect.left);
+        : clampDouble(0.0, rect.right - editableSize.width, rect.left);
       unitOffset = const Offset(1, 0);
     } else {
       // The caret is vertically centered within the line. Expand the caret's
@@ -2254,17 +2278,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       additionalOffset = expandedRect.height >= editableSize.height
         ? editableSize.height / 2 - expandedRect.center.dy
-        : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top);
+        : clampDouble(0.0, expandedRect.bottom - editableSize.height, expandedRect.top);
       unitOffset = const Offset(0, 1);
     }
 
     // No overscrolling when encountering tall fonts/scripts that extend past
     // the ascent.
-    final double targetOffset = (additionalOffset + _scrollController.offset)
-      .clamp(
-        _scrollController.position.minScrollExtent,
-        _scrollController.position.maxScrollExtent,
-      );
+    final double targetOffset = clampDouble(
+      additionalOffset + _scrollController.offset,
+      _scrollController.position.minScrollExtent,
+      _scrollController.position.maxScrollExtent,
+    );
 
     final double offsetDelta = _scrollController.offset - targetOffset;
     return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
@@ -2417,6 +2441,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.updateForScroll();
   }
 
+  void _createSelectionOverlay() {
+    _selectionOverlay = TextSelectionOverlay(
+      clipboardStatus: _clipboardStatus,
+      context: context,
+      value: _value,
+      debugRequiredFor: widget,
+      toolbarLayerLink: _toolbarLayerLink,
+      startHandleLayerLink: _startHandleLayerLink,
+      endHandleLayerLink: _endHandleLayerLink,
+      renderObject: renderEditable,
+      selectionControls: widget.selectionControls,
+      selectionDelegate: this,
+      dragStartBehavior: widget.dragStartBehavior,
+      onSelectionHandleTapped: widget.onSelectionHandleTapped,
+    );
+  }
+
   @pragma('vm:notify-debugger-on-exception')
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
@@ -2454,20 +2495,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _selectionOverlay = null;
     } else {
       if (_selectionOverlay == null) {
-        _selectionOverlay = TextSelectionOverlay(
-          clipboardStatus: _clipboardStatus,
-          context: context,
-          value: _value,
-          debugRequiredFor: widget,
-          toolbarLayerLink: _toolbarLayerLink,
-          startHandleLayerLink: _startHandleLayerLink,
-          endHandleLayerLink: _endHandleLayerLink,
-          renderObject: renderEditable,
-          selectionControls: widget.selectionControls,
-          selectionDelegate: this,
-          dragStartBehavior: widget.dragStartBehavior,
-          onSelectionHandleTapped: widget.onSelectionHandleTapped,
-        );
+        _createSelectionOverlay();
       } else {
         _selectionOverlay!.update(_value);
       }
@@ -2514,11 +2542,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
-
-      // if cursor is inactive, e.g. while selecting text, do not jump away
-      if (!_cursorActive) {
-        return;
-      }
       if (_currentCaretRect == null || !_scrollController.hasClients) {
         return;
       }
@@ -2924,6 +2947,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (shouldShowCaret) {
       _scheduleShowCaretOnScreen(withAnimation: true);
     }
+
+    // Even if the value doesn't change, it may be necessary to focus and build
+    // the selection overlay. For example, this happens when right clicking an
+    // unfocused field that previously had a selection in the same spot.
+    if (value == textEditingValue) {
+      if (!widget.focusNode.hasFocus) {
+        widget.focusNode.requestFocus();
+        _createSelectionOverlay();
+      }
+      return;
+    }
+
     _formatAndSetValue(value, cause, userInteraction: true);
   }
 
@@ -3258,8 +3293,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(debugCheckHasMediaQuery(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
-    final Color? effectiveSelectionColor = widget.selectionColor ?? DefaultSelectionStyle.of(context).selectionColor;
-
     final TextSelectionControls? controls = widget.selectionControls;
     return MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -3321,7 +3354,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                         minLines: widget.minLines,
                         expands: widget.expands,
                         strutStyle: widget.strutStyle,
-                        selectionColor: effectiveSelectionColor,
+                        selectionColor: widget.selectionColor,
                         textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                         textAlign: widget.textAlign,
                         textDirection: _textDirection,

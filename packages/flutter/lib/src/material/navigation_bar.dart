@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -59,6 +60,7 @@ class NavigationBar extends StatelessWidget {
     required this.destinations,
     this.onDestinationSelected,
     this.backgroundColor,
+    this.surfaceTintColor,
     this.elevation,
     this.height,
     this.labelBehavior,
@@ -95,9 +97,19 @@ class NavigationBar extends StatelessWidget {
   /// The color of the [NavigationBar] itself.
   ///
   /// If null, [NavigationBarThemeData.backgroundColor] is used. If that
-  /// is also null, the default blends [ColorScheme.surface] and
-  /// [ColorScheme.onSurface] using an [ElevationOverlay].
+  /// is also null, then if [ThemeData.useMaterial3] is true, the value is
+  /// [ColorScheme.surface]. If that is false, the default blends [ColorScheme.surface]
+  /// and [ColorScheme.onSurface] using an [ElevationOverlay].
   final Color? backgroundColor;
+
+  /// The color used as an overlay on [backgroundColor] to indicate elevation.
+  ///
+  /// If null, [NavigationBarThemeData.surfaceTintColor] is used. If that
+  /// is also null, the default value is [ColorScheme.surfaceTint].
+  ///
+  /// See [Material.surfaceTintColor] for more details on how this
+  /// overlay is applied.
+  final Color? surfaceTintColor;
 
   /// The elevation of the [NavigationBar] itself.
   ///
@@ -147,41 +159,36 @@ class NavigationBar extends StatelessWidget {
     final NavigationDestinationLabelBehavior effectiveLabelBehavior = labelBehavior
       ?? navigationBarTheme.labelBehavior
       ?? defaults.labelBehavior!;
-    final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Material(
       color: backgroundColor
         ?? navigationBarTheme.backgroundColor
         ?? defaults.backgroundColor!,
+      surfaceTintColor: surfaceTintColor ?? navigationBarTheme.surfaceTintColor ?? defaults.surfaceTintColor,
       elevation: elevation ?? navigationBarTheme.elevation ?? defaults.elevation!,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: additionalBottomPadding),
-        child: MediaQuery.removePadding(
-          context: context,
-          removeBottom: true,
-          child: SizedBox(
-            height: effectiveHeight,
-            child: Row(
-              children: <Widget>[
-                for (int i = 0; i < destinations.length; i++)
-                  Expanded(
-                    child: _SelectableAnimatedBuilder(
-                      duration: animationDuration ?? const Duration(milliseconds: 500),
-                      isSelected: i == selectedIndex,
-                      builder: (BuildContext context, Animation<double> animation) {
-                        return _NavigationDestinationInfo(
-                          index: i,
-                          totalNumberOfDestinations: destinations.length,
-                          selectedAnimation: animation,
-                          labelBehavior: effectiveLabelBehavior,
-                          onTap: _handleTap(i),
-                          child: destinations[i],
-                        );
-                      },
-                    ),
+      child: SafeArea(
+        child: SizedBox(
+          height: effectiveHeight,
+          child: Row(
+            children: <Widget>[
+              for (int i = 0; i < destinations.length; i++)
+                Expanded(
+                  child: _SelectableAnimatedBuilder(
+                    duration: animationDuration ?? const Duration(milliseconds: 500),
+                    isSelected: i == selectedIndex,
+                    builder: (BuildContext context, Animation<double> animation) {
+                      return _NavigationDestinationInfo(
+                        index: i,
+                        totalNumberOfDestinations: destinations.length,
+                        selectedAnimation: animation,
+                        labelBehavior: effectiveLabelBehavior,
+                        onTap: _handleTap(i),
+                        child: destinations[i],
+                      );
+                    },
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),
@@ -211,16 +218,13 @@ enum NavigationDestinationLabelBehavior {
   onlyShowSelected,
 }
 
-/// Destination Widget for displaying Icons + labels in the Material 3
-/// Navigation Bars through [NavigationBar.destinations].
+/// A Material 3 [NavigationBar] destination.
 ///
-/// The destination this widget creates will look something like this:
-/// =======
-/// |
-/// |  ☆  <-- [icon] (or [selectedIcon])
-/// | text <-- [label]
-/// |
-/// =======
+/// Displays a label below an icon. Use with [NavigationBar.destinations].
+///
+/// See also:
+///
+///  * [NavigationBar], for an interactive code sample.
 class NavigationDestination extends StatelessWidget {
   /// Creates a navigation bar destination with an icon and a label, to be used
   /// in the [NavigationBar.destinations].
@@ -915,7 +919,7 @@ class _ClampTextScaleFactor extends StatelessWidget {
   Widget build(BuildContext context) {
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
-        textScaleFactor: MediaQuery.of(context).textScaleFactor.clamp(
+        textScaleFactor: clampDouble(MediaQuery.of(context).textScaleFactor,
           0.0,
           upperLimit,
         ),
@@ -1190,7 +1194,7 @@ class _Defaults extends NavigationBarThemeData {
   @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.all(IconThemeData(
+    return MaterialStatePropertyAll<IconThemeData>(IconThemeData(
       size: 24,
       color: _colors.onSurface,
     ));
@@ -1198,7 +1202,7 @@ class _Defaults extends NavigationBarThemeData {
 
   @override Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStateProperty.all(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
+  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES
@@ -1207,7 +1211,7 @@ class _Defaults extends NavigationBarThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _TokenDefaultsM3 extends NavigationBarThemeData {
   _TokenDefaultsM3(this.context)
       : super(
@@ -1220,11 +1224,9 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
-  // With Material 3, the NavigationBar uses an overlay blend for the
-  // default color regardless of light/dark mode. This should be handled
-  // in the Material widget based off of elevation, but for now we will do
-  // it here in the defaults.
-  @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.primary, 3.0);
+  @override Color? get backgroundColor => _colors.surface;
+
+  @override Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {

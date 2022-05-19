@@ -245,7 +245,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
     }
@@ -275,7 +275,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
       return pluginUsingJavaAndNewEmbeddingDir;
@@ -305,7 +305,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          'plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          'plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
     }
@@ -333,7 +333,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          '$pluginName:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          '$pluginName:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
     }
@@ -366,7 +366,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          'plugin4:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}',
+          'plugin4:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri}',
           mode: FileMode.append,
         );
     }
@@ -397,7 +397,7 @@ dependencies:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
+          '$name:${pluginDirectory.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
       return pluginDirectory;
@@ -435,7 +435,7 @@ dependencies:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
+          '$name:${pluginDirectory.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
       return pluginDirectory;
@@ -1076,14 +1076,15 @@ dependencies:
         flutterProject.directory
           .childFile('.packages')
           .writeAsStringSync('''
-web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toString()}
+web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri}
 ''');
 
-        await injectPlugins(flutterProject, webPlatform: true);
+        final Directory destination = flutterProject.directory.childDirectory('lib');
+        await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
 
         final File registrant = flutterProject.directory
             .childDirectory('lib')
-            .childFile('generated_plugin_registrant.dart');
+            .childFile('web_plugin_registrant.dart');
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));

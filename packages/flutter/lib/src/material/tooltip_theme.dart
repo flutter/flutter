@@ -35,6 +35,7 @@ class TooltipThemeData with Diagnosticable {
     this.excludeFromSemantics,
     this.decoration,
     this.textStyle,
+    this.textAlign,
     this.waitDuration,
     this.showDuration,
     this.triggerMode,
@@ -79,6 +80,9 @@ class TooltipThemeData with Diagnosticable {
   /// The style to use for the message of [Tooltip]s.
   final TextStyle? textStyle;
 
+  /// The [TextAlign] to use for the message of [Tooltip]s.
+  final TextAlign? textAlign;
+
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
   final Duration? waitDuration;
@@ -113,6 +117,7 @@ class TooltipThemeData with Diagnosticable {
     bool? excludeFromSemantics,
     Decoration? decoration,
     TextStyle? textStyle,
+    TextAlign? textAlign,
     Duration? waitDuration,
     Duration? showDuration,
     TooltipTriggerMode? triggerMode,
@@ -127,6 +132,7 @@ class TooltipThemeData with Diagnosticable {
       excludeFromSemantics: excludeFromSemantics ?? this.excludeFromSemantics,
       decoration: decoration ?? this.decoration,
       textStyle: textStyle ?? this.textStyle,
+      textAlign: textAlign ?? this.textAlign,
       waitDuration: waitDuration ?? this.waitDuration,
       showDuration: showDuration ?? this.showDuration,
       triggerMode: triggerMode ?? this.triggerMode,
@@ -152,6 +158,7 @@ class TooltipThemeData with Diagnosticable {
       excludeFromSemantics: t < 0.5 ? a?.excludeFromSemantics : b?.excludeFromSemantics,
       decoration: Decoration.lerp(a?.decoration, b?.decoration, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
+      textAlign: t < 0.5 ? a?.textAlign: b?.textAlign,
     );
   }
 
@@ -165,6 +172,7 @@ class TooltipThemeData with Diagnosticable {
     excludeFromSemantics,
     decoration,
     textStyle,
+    textAlign,
     waitDuration,
     showDuration,
     triggerMode,
@@ -186,6 +194,7 @@ class TooltipThemeData with Diagnosticable {
         && other.excludeFromSemantics == excludeFromSemantics
         && other.decoration == decoration
         && other.textStyle == textStyle
+        && other.textAlign == textAlign
         && other.waitDuration == waitDuration
         && other.showDuration == showDuration
         && other.triggerMode == triggerMode
@@ -203,6 +212,7 @@ class TooltipThemeData with Diagnosticable {
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));

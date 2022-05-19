@@ -91,6 +91,8 @@ class PaginatedDataTable extends StatefulWidget {
     this.arrowHeadColor,
     required this.source,
     this.checkboxHorizontalMargin,
+    this.controller,
+    this.primary,
   }) : assert(actions == null || (actions != null && header != null)),
        assert(columns != null),
        assert(dragStartBehavior != null),
@@ -109,7 +111,11 @@ class PaginatedDataTable extends StatefulWidget {
            assert(availableRowsPerPage != null && availableRowsPerPage.contains(rowsPerPage));
          return true;
        }()),
-       assert(source != null);
+       assert(source != null),
+       assert(!(controller != null && (primary ?? false)),
+          'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
+          'You cannot both set primary to true and pass an explicit controller.',
+       );
 
   /// The table card's optional header.
   ///
@@ -252,6 +258,12 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// Defines the color of the arrow heads in the footer.
   final Color? arrowHeadColor;
+
+  /// {@macro flutter.widgets.scroll_view.controller}
+  final ScrollController? controller;
+
+  /// {@macro flutter.widgets.scroll_view.primary}
+  final bool? primary;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -517,6 +529,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                primary: widget.primary,
+                controller: widget.controller,
                 dragStartBehavior: widget.dragStartBehavior,
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minWidth: constraints.minWidth),

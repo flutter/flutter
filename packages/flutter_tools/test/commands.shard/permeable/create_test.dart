@@ -222,8 +222,6 @@ void main() {
       '.android/app/',
       '.gitignore',
       '.ios/Flutter',
-      '.ios/Flutter/flutter_project.podspec',
-      '.ios/Flutter/engine/Flutter.podspec',
       '.metadata',
       'analysis_options.yaml',
       'lib/main.dart',
@@ -677,7 +675,7 @@ void main() {
       '.android/settings.gradle',
       '.gitignore',
       '.metadata',
-      '.packages',
+      '.dart_tool/package_config.json',
       'analysis_options.yaml',
       'lib/main.dart',
       'pubspec.lock',
@@ -1162,13 +1160,6 @@ void main() {
     expect(buildPhaseScript, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
     // Do not override host app build settings.
     expect(buildPhaseScript, isNot(contains('SYMROOT')));
-
-    // Generated podspec
-    final String podspecPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
-    expectExists(podspecPath);
-    final File podspecFile = globals.fs.file(globals.fs.path.join(projectDir.path, podspecPath));
-    final String podspec = podspecFile.readAsStringSync();
-    expect(podspec, contains('Flutter module - flutter_project'));
 
     // App identification
     final String xcodeProjectPath = globals.fs.path.join('.ios', 'Runner.xcodeproj', 'project.pbxproj');
