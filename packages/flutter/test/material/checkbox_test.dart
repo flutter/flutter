@@ -968,7 +968,7 @@ void main() {
             autofocus: focused,
             value: active,
             onChanged: (_) { },
-            fillColor: MaterialStateProperty.all(fillColor),
+            fillColor: const MaterialStatePropertyAll<Color>(fillColor),
             overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
