@@ -511,11 +511,12 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 dragStartBehavior: widget.dragStartBehavior,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: constraints.minWidth),
-                  child: Stack(
-                    children: <Widget>[
-                      DataTable(
+                child: Stack(
+                  children: <Widget>[
+                    ConstrainedBox(
+                      constraints:
+                          BoxConstraints(minWidth: constraints.minWidth),
+                      child: DataTable(
                         key: _tableKey,
                         columns: widget.columns,
                         sortColumnIndex: widget.sortColumnIndex,
@@ -534,20 +535,21 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                         showBottomBorder: true,
                         rows: _getRows(_firstRowIndex, widget.rowsPerPage),
                       ),
-                      if (_haveProgressIndicator(
-                        _firstRowIndex,
-                        widget.rowsPerPage,
-                      ))
-                        Positioned(
-                          top: widget.headingRowHeight - 4,
-                          child: SizedBox(
-                            height: 4,
-                            width: constraints.minWidth,
-                            child: const LinearProgressIndicator(minHeight: 4),
-                          ),
+                    ),
+                    if (_haveProgressIndicator(
+                      _firstRowIndex,
+                      widget.rowsPerPage,
+                    ))
+                      Positioned(
+                        top: widget.headingRowHeight - 4,
+                        width: constraints.minWidth,
+                        child: const SizedBox(
+                          height: 4,
+                          // width: constraints.minWidth,
+                          child: LinearProgressIndicator(minHeight: 4),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
               DefaultTextStyle(
