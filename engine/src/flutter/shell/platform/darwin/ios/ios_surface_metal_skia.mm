@@ -42,9 +42,8 @@ void IOSSurfaceMetalSkia::UpdateStorageSizeIfNecessary() {
 // |IOSSurface|
 std::unique_ptr<Surface> IOSSurfaceMetalSkia::CreateGPUSurface(GrDirectContext* context) {
   FML_DCHECK(context);
-  return std::make_unique<GPUSurfaceMetalSkia>(this,                               // delegate
-                                               sk_ref_sp(context),                 // context
-                                               GetContext()->GetMsaaSampleCount()  // sample count
+  return std::make_unique<GPUSurfaceMetalSkia>(this,               // layer
+                                               sk_ref_sp(context)  // context
   );
 }
 

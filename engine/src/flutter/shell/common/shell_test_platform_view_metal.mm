@@ -91,7 +91,7 @@ PointerDataDispatcherMaker ShellTestPlatformViewMetal::GetDispatcherMaker() {
 
 // |PlatformView|
 std::unique_ptr<Surface> ShellTestPlatformViewMetal::CreateRenderingSurface() {
-  return std::make_unique<GPUSurfaceMetalSkia>(this, [metal_context_->context() mainContext], 1);
+  return std::make_unique<GPUSurfaceMetalSkia>(this, [metal_context_->context() mainContext]);
 }
 
 // |GPUSurfaceMetalDelegate|
