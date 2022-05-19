@@ -43,7 +43,7 @@ class VisualStudio {
 
   /// True if there is a version of Visual Studio with all the components
   /// necessary to build the project.
-  bool get hasNecessaryComponents => _usableVisualStudioDetails != null;
+  bool get hasNecessaryComponents => _bestVisualStudioDetails?.isUsable ?? false;
 
   /// The name of the Visual Studio install.
   ///
@@ -146,12 +146,13 @@ class VisualStudio {
   /// The path to CMake, or null if no Visual Studio installation has
   /// the components necessary to build.
   String? get cmakePath {
-    final VswhereDetails? details = _usableVisualStudioDetails;
-    if (details?.installationPath == null) {
+    final VswhereDetails? details = _bestVisualStudioDetails;
+    if (details == null || !details.isUsable || details.installationPath == null) {
       return null;
     }
+
     return _fileSystem.path.joinAll(<String>[
-      details!.installationPath!,
+      details.installationPath!,
       'Common7',
       'IDE',
       'CommonExtensions',
@@ -291,7 +292,7 @@ class VisualStudio {
         final List<Map<String, dynamic>> installations =
             (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
         if (installations.isNotEmpty) {
-          return VswhereDetails.fromJson(installations[0]);
+          return VswhereDetails.fromJson(validateRequirements, installations[0]);
         }
       }
     } on ArgumentError {
@@ -304,60 +305,39 @@ class VisualStudio {
     return null;
   }
 
-  /// Returns the details for the latest version of Visual Studio that has all
-  /// the required components and is a supported version, or null if there is no
-  /// such installation.
+  /// Returns the details of the best available version of Visual Studio.
   ///
-  /// If an installation with issues is found, `_anyVisualStudioDetails` is updated
-  /// to avoid repeating vswhere queries.
-  late final VswhereDetails? _usableVisualStudioDetails = () {
+  /// If there's a version that has all the required components, that
+  /// will be returned, otherwise returns the latest installed version regardless
+  /// of components and version, or null if no such installation is found.
+  late final VswhereDetails?  _bestVisualStudioDetails = () {
+    // First, attempt to find the latest version of Visual Studio that satifies
+    // both the minimum supported version and the required workloads.
+    // Check in the order of stable VS, stable BT, pre-release VS, pre-release BT.
     final List<String> minimumVersionArguments = <String>[
       _vswhereMinVersionArgument,
       _minimumSupportedVersion.toString(),
     ];
-    VswhereDetails? visualStudioDetails;
-    // Check in the order of stable VS, stable BT, pre-release VS, pre-release BT
     for (final bool checkForPrerelease in <bool>[false, true]) {
       for (final String requiredWorkload in _requiredWorkloads) {
-        visualStudioDetails ??= _visualStudioDetails(
+        final VswhereDetails? result = _visualStudioDetails(
           validateRequirements: true,
           additionalArguments: checkForPrerelease
               ? <String>[...minimumVersionArguments, _vswherePrereleaseArgument]
               : minimumVersionArguments,
           requiredWorkload: requiredWorkload);
+
+          if (result != null) {
+            return result;
+          }
       }
     }
 
-    VswhereDetails? usableVisualStudioDetails;
-    if (visualStudioDetails != null) {
-      if (visualStudioDetails.isUsable) {
-        usableVisualStudioDetails = visualStudioDetails;
-      } else {
-        _anyVisualStudioDetails = visualStudioDetails;
-      }
-    }
-    return usableVisualStudioDetails;
-  }();
-
-  /// Returns the details of the latest version of Visual Studio,
-  /// regardless of components and version, or null if no such installation is
-  /// found.
-  ///
-  /// This may be overriden by `_usableVisualStudioDetails`'s initializer
-  /// to avoid repeating vswhere queries.
-  late VswhereDetails? _anyVisualStudioDetails = () {
-    // Search for all types of installations.
+    // An installation that satifies requirements could not be found.
+    // Fallback to the latest Visual Studio installation.
     return _visualStudioDetails(
         additionalArguments: <String>[_vswherePrereleaseArgument, '-all']);
   }();
-
-  /// Returns the details of the best available version of Visual Studio.
-  ///
-  /// If there's a version that has all the required components, that
-  /// will be returned, otherwise returns the latest installed version (if any).
-  VswhereDetails? get _bestVisualStudioDetails {
-    return _usableVisualStudioDetails ?? _anyVisualStudioDetails;
-  }
 
   /// Returns the installation location of the Windows 10 SDKs, or null if the
   /// registry doesn't contain that information.
@@ -416,6 +396,7 @@ class VisualStudio {
 @visibleForTesting
 class VswhereDetails {
   const VswhereDetails({
+    required this.meetsRequirements,
     required this.installationPath,
     required this.displayName,
     required this.fullVersion,
@@ -427,10 +408,14 @@ class VswhereDetails {
   });
 
   /// Create a `VswhereDetails` from the JSON output of vswhere.exe.
-  factory VswhereDetails.fromJson(Map<String, dynamic> details) {
+  factory VswhereDetails.fromJson(
+    bool meetsRequirements,
+    Map<String, dynamic> details
+  ) {
     final Map<String, dynamic>? catalog = details['catalog'] as Map<String, dynamic>?;
 
     return VswhereDetails(
+      meetsRequirements: meetsRequirements,
       installationPath: details['installationPath'] as String?,
       displayName: details['displayName'] as String?,
       fullVersion: details['installationVersion'] as String?,
@@ -441,6 +426,9 @@ class VswhereDetails {
       catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?,
     );
   }
+
+  /// Whether the installation satisfies the required workloads and minimum version.
+  final bool meetsRequirements;
 
   /// The root directory of the Visual Studio installation.
   final String? installationPath;
@@ -468,6 +456,10 @@ class VswhereDetails {
   /// This may return true even if required information is missing as older
   /// versions of Visual Studio might not include them.
   bool get isUsable {
+    if (!meetsRequirements) {
+      return false;
+    }
+
     if (!(isComplete ?? true)) {
       return false;
     }

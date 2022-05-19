@@ -866,7 +866,10 @@ void main() {
 
   group(VswhereDetails, () {
       test('Accepts empty JSON', () {
-        final VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{});
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = <String, dynamic>{};
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
 
         expect(result.installationPath, null);
         expect(result.displayName, null);
@@ -880,9 +883,12 @@ void main() {
       });
 
       test('Ignores unknown JSON properties', () {
-        final VswhereDetails result = VswhereDetails.fromJson(<String, dynamic>{
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = <String, dynamic>{
           'hello': 'world',
-        });
+        };
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
 
         expect(result.installationPath, null);
         expect(result.displayName, null);
@@ -896,7 +902,9 @@ void main() {
       });
 
       test('Accepts JSON', () {
-        final VswhereDetails result = VswhereDetails.fromJson(_defaultResponse);
+        const bool meetsRequirements = true;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse);
 
         expect(result.installationPath, visualStudioPath);
         expect(result.displayName, 'Visual Studio Community 2019');
@@ -909,29 +917,40 @@ void main() {
         expect(result.isUsable, isTrue);
       });
 
+      test('Installation that does not satisfy requirements is not usable', () {
+        const bool meetsRequirements = false;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse);
+
+        expect(result.isUsable, isFalse);
+      });
+
       test('Incomplete installation is not usable', () {
-        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
           ..['isComplete'] = false;
 
-        final VswhereDetails result = VswhereDetails.fromJson(response);
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
 
         expect(result.isUsable, isFalse);
       });
 
       test('Unlauchable installation is not usable', () {
-        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
           ..['isLaunchable'] = false;
 
-        final VswhereDetails result = VswhereDetails.fromJson(response);
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
 
         expect(result.isUsable, isFalse);
       });
 
       test('Installation that requires reboot is not usable', () {
-        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
           ..['isRebootRequired'] = true;
 
-        final VswhereDetails result = VswhereDetails.fromJson(response);
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
 
         expect(result.isUsable, isFalse);
       });
