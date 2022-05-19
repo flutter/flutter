@@ -7,14 +7,13 @@
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-// import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/migrate.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
-import '../src/common.dart';
-import '../src/context.dart';
-import '../src/test_flutter_command_runner.dart';
+import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   FileSystem fileSystem;
@@ -47,12 +46,10 @@ void main() {
       verbose: true,
       logger: logger,
       fileSystem: fileSystem,
-      // terminal: terminal,
       platform: platform,
       processManager: processManager,
     );
     final Directory workingDir = appDir.childDirectory('migrate_working_dir');
-    appDir.childFile('lib/main.dart').createSync(recursive: true);
     final File pubspecOriginal = appDir.childFile('pubspec.yaml');
     pubspecOriginal.createSync();
     pubspecOriginal.writeAsStringSync('''
@@ -103,8 +100,6 @@ added_files:
 deleted_files:
 ''');
 
-    expect(appDir.childFile('lib/main.dart').existsSync(), true);
-
     await createTestCommandRunner(command).run(
       <String>[
         'migrate',
@@ -114,7 +109,7 @@ deleted_files:
       ]
     );
     expect(logger.statusText, contains('''
-Newly addded file at added.file:
+Newly added file at added.file:
 
 new file contents'''));
     expect(logger.statusText, contains(r'''
@@ -151,7 +146,7 @@ All conflicts resolved. Review changes above and apply the migration with:
     conflictFile.createSync(recursive: true);
     conflictFile.writeAsStringSync('''
 line1
-<<<<<<< /conflcit/conflict.file
+<<<<<<< /conflict/conflict.file
 line2
 =======
 linetwo
@@ -189,7 +184,7 @@ deleted_files:
     expect(logger.statusText, contains('''
 @@ -1,3 +1,7 @@
  line1
-+<<<<<<< /conflcit/conflict.file
++<<<<<<< /conflict/conflict.file
  line2
 +=======
 +linetwo

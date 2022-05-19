@@ -38,7 +38,7 @@ class MigrateStatusCommand extends FlutterCommand {
     );
     argParser.addOption(
       'project-directory',
-      help: 'The root directory of the flutter project.',
+      help: 'The root directory of the flutter project. This defaults to the current working directory if omitted.',
       valueHelp: 'path',
     );
     argParser.addFlag(
@@ -73,6 +73,9 @@ class MigrateStatusCommand extends FlutterCommand {
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   /// Manually marks the lines in a diff that should be printed unformatted for visbility.
+  ///
+  /// This is used to ensure the initial lines that display the files being diffed and the
+  /// git revisions are printed and never skipped.
   final Set<int> _initialDiffLines = <int>{0, 1};
 
   @override
@@ -104,10 +107,11 @@ class MigrateStatusCommand extends FlutterCommand {
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
     final bool showDiff = boolArg('diff') ?? true;
+    final bool showAddedFiles = boolArg('show-added-files') ?? true;
     if (showDiff || _verbose) {
-      if (boolArg('show-added-files') || _verbose) {
+      if (showAddedFiles || _verbose) {
         for (final String localPath in manifest.addedFiles) {
-          logger.printStatus('Newly addded file at $localPath:\n');
+          logger.printStatus('Newly added file at $localPath:\n');
           try {
             logger.printStatus(workingDirectory.childFile(localPath).readAsStringSync(), color: TerminalColor.green);
           } on FileSystemException {

@@ -17,12 +17,12 @@ class MigrateCommand extends FlutterCommand {
   MigrateCommand({
     bool verbose = false,
     required this.logger,
-    // TODO(garyq): Add each of these back in as they land.
+    // TODO(garyq): Add parameter in as they are needed for subcommands.
     required FileSystem fileSystem,
     required Platform platform,
     required ProcessManager processManager,
   }) {
-    // TODO(garyq): Add each of these back in as they land.
+    // TODO(garyq): Add each subcommand back in as they land.
     addSubcommand(MigrateStatusCommand(verbose: verbose, logger: logger, fileSystem: fileSystem, platform: platform, processManager: processManager));
   }
 
