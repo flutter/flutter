@@ -22,7 +22,8 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext() {
   return context;
 }
 
-IOSContextMetalImpeller::IOSContextMetalImpeller() : context_(CreateImpellerContext()) {}
+IOSContextMetalImpeller::IOSContextMetalImpeller()
+    : IOSContext(MsaaSampleCount::kFour), context_(CreateImpellerContext()) {}
 
 IOSContextMetalImpeller::~IOSContextMetalImpeller() = default;
 
