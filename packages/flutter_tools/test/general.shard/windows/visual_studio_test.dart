@@ -867,12 +867,17 @@ void main() {
   // The output of vswhere.exe is known to contain bad UTF8.
   // See: https://github.com/flutter/flutter/issues/102451
   group('Correctly handles bad UTF-8 from vswhere.exe output', () {
+    late VisualStudioFixture fixture;
+    late VisualStudio visualStudio;
+
+    setUp(() {
+      fixture = setUpVisualStudio();
+      visualStudio = fixture.visualStudio;
+    });
+
     testWithoutContext('Ignores unicode replacement char in unused properties', () {
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['unused'] = 'Bad UTF8 \u{FFFD}';
-
-      final VisualStudioFixture fixture = setUpVisualStudio();
-      final VisualStudio visualStudio = fixture.visualStudio;
 
       setMockCompatibleVisualStudioInstallation(
         response,
@@ -891,9 +896,6 @@ void main() {
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['installationPath'] = '\u{FFFD}';
 
-      final VisualStudioFixture fixture = setUpVisualStudio();
-      final VisualStudio visualStudio = fixture.visualStudio;
-
       setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
 
       expect(() => visualStudio.isInstalled,
@@ -904,9 +906,6 @@ void main() {
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['displayName'] = '\u{FFFD}';
 
-      final VisualStudioFixture fixture = setUpVisualStudio();
-      final VisualStudio visualStudio = fixture.visualStudio;
-
       setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
 
       expect(() => visualStudio.isInstalled,
@@ -916,9 +915,6 @@ void main() {
     testWithoutContext('Throws ToolExit on bad UTF-8 in installationVersion', () {
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['installationVersion'] = '\u{FFFD}';
-
-      final VisualStudioFixture fixture = setUpVisualStudio();
-      final VisualStudio visualStudio = fixture.visualStudio;
 
       setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
 
@@ -931,9 +927,6 @@ void main() {
         ..['productDisplayVersion'] = '\u{FFFD}';
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['catalog'] = catalog;
-
-      final VisualStudioFixture fixture = setUpVisualStudio();
-      final VisualStudio visualStudio = fixture.visualStudio;
 
       setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
 
