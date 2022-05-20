@@ -414,7 +414,7 @@ class ChromiumLauncher {
   }
 
   /// Gets the first [chrome] tab.
-  /// 
+  ///
   /// Note: Retry getting tabs from Chrome for a few seconds and retry finding
   /// the tab a few times. This prevents flakes caused by Chrome not returning
   /// correct output if the call was too close to the start.
@@ -424,9 +424,9 @@ class ChromiumLauncher {
 
     for (int i = 1; i <= attempts; i++) {
       try {
-        final List<ChromeTab> tabs = 
+        final List<ChromeTab> tabs =
           await chrome.chromeConnection.getTabs(retryFor: retryFor);
-        
+
         if (tabs.isNotEmpty) {
           return tabs.first;
         }
