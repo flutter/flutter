@@ -31,7 +31,7 @@ class MigrateStatusCommand extends FlutterCommand {
        ) {
     requiresPubspecYaml();
     argParser.addOption(
-      'working-directory',
+      'staging-directory',
       help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
             'This path can be absolute or relative to the flutter project root. This defaults to `$kDefaultMigrateWorkingDirectoryName`',
       valueHelp: 'path',

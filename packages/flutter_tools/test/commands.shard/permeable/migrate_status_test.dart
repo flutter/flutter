@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/migrate.dart';
+import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -20,7 +21,6 @@ void main() {
   BufferLogger logger;
   Platform platform;
   // TODO(garyq): Add terminal back in when other subcommands land.
-  // Terminal terminal;
   ProcessManager processManager;
   Directory appDir;
 
@@ -29,7 +29,6 @@ void main() {
     appDir = fileSystem.systemTempDirectory.createTempSync('apptestdir');
     logger = BufferLogger.test();
     platform = FakePlatform();
-    // terminal = Terminal.test();
     processManager = globals.processManager;
   });
 
@@ -49,7 +48,7 @@ void main() {
       platform: platform,
       processManager: processManager,
     );
-    final Directory workingDir = appDir.childDirectory('migrate_working_dir');
+    final Directory stagingDir = appDir.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final File pubspecOriginal = appDir.childFile('pubspec.yaml');
     pubspecOriginal.createSync();
     pubspecOriginal.writeAsStringSync('''
@@ -67,7 +66,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true''', flush: true);
 
-    final File pubspecModified = workingDir.childFile('pubspec.yaml');
+    final File pubspecModified = stagingDir.childFile('pubspec.yaml');
     pubspecModified.createSync(recursive: true);
     pubspecModified.writeAsStringSync('''
 name: newname
@@ -85,11 +84,11 @@ flutter:
   uses-material-design: false
   EXTRALINE''', flush: true);
 
-    final File addedFile = workingDir.childFile('added.file');
+    final File addedFile = stagingDir.childFile('added.file');
     addedFile.createSync(recursive: true);
     addedFile.writeAsStringSync('new file contents');
 
-    final File manifestFile = workingDir.childFile('.migrate_manifest');
+    final File manifestFile = stagingDir.childFile('.migrate_manifest');
     manifestFile.createSync(recursive: true);
     manifestFile.writeAsStringSync('''
 merged_files:
@@ -104,10 +103,11 @@ deleted_files:
       <String>[
         'migrate',
         'status',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
+
     expect(logger.statusText, contains('''
 Newly added file at added.file:
 
@@ -142,11 +142,11 @@ All conflicts resolved. Review changes above and apply the migration with:
 +  EXTRALINE'''));
 
     // Add conflict file
-    final File conflictFile = workingDir.childDirectory('conflict').childFile('conflict.file');
+    final File conflictFile = stagingDir.childDirectory('conflict').childFile('conflict.file');
     conflictFile.createSync(recursive: true);
     conflictFile.writeAsStringSync('''
 line1
-<<<<<<< /conflict/conflict.file
+<<<<<<< /conflcit/conflict.file
 line2
 =======
 linetwo
@@ -176,7 +176,7 @@ deleted_files:
       <String>[
         'migrate',
         'status',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -184,7 +184,7 @@ deleted_files:
     expect(logger.statusText, contains('''
 @@ -1,3 +1,7 @@
  line1
-+<<<<<<< /conflict/conflict.file
++<<<<<<< /conflcit/conflict.file
  line2
 +=======
 +linetwo
