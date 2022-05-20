@@ -1,10 +1,13 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:io' as io;
 
 import 'git.dart';
 import 'globals.dart';
 import 'repository.dart';
-
 
 // git push https://<GITHUB_ACCESS_TOKEN>@github.com/<GITHUB_USERNAME>/<REPOSITORY_NAME>.git HEAD:$REMOTE_BRANCH_NAME
 
