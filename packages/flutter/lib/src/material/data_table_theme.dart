@@ -120,8 +120,7 @@ class DataTableThemeData with Diagnosticable {
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
       dataRowColor: dataRowColor ?? this.dataRowColor,
-      dataRowHeight: dataRowHeight,
-      dataRowHeightSettings: dataRowHeightSettings ?? this.dataRowHeightSettings,
+      dataRowHeightSettings: dataRowHeightSettings ?? (dataRowHeight != null ? DataTableRowHeight.fixed(height: dataRowHeight) : null) ?? this.dataRowHeightSettings,
       dataTextStyle: dataTextStyle ?? this.dataTextStyle,
       headingRowColor: headingRowColor ?? this.headingRowColor,
       headingRowHeight: headingRowHeight ?? this.headingRowHeight,

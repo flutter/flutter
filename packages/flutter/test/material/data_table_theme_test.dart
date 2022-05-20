@@ -42,7 +42,28 @@ void main() {
 
   test('Setting depreciated dataRowHeight can be read using dataRowHeightSettings', () {
     const DataTableThemeData themeData = DataTableThemeData(dataRowHeight: 20.0);
-     expect(themeData.dataRowHeightSettings?.fixedHeight, 20.0);
+    expect(themeData.dataRowHeightSettings?.fixedHeight, 20.0);
+  });
+
+  test('copyWith called with depreciated dataRowHeight sets dataRowHeightSettings', () {
+    const DataTableThemeData initial =DataTableThemeData(dataRowHeightSettings: DataTableRowHeight.fixed(height: 20.0));
+    final DataTableThemeData afterCopyWith = initial.copyWith(dataRowHeight: 10.0);
+
+    expect(afterCopyWith.dataRowHeightSettings?.fixedHeight, 10.0);
+  });
+
+  test('copyWith called with dataRowHeightSettings sets dataRowHeightSettings', () {
+    const DataTableThemeData initial = DataTableThemeData(dataRowHeightSettings: DataTableRowHeight.fixed(height: 20.0));
+    final DataTableThemeData afterCopyWith = initial.copyWith(dataRowHeight: 10.0);
+
+    expect(afterCopyWith.dataRowHeightSettings?.fixedHeight, 10.0);
+  });
+
+  test('copyWith preserves existing dataRowHeightSettings value', () {
+    const DataTableThemeData initial = DataTableThemeData(dataRowHeightSettings: DataTableRowHeight.fixed(height: 10.0));
+    final DataTableThemeData afterCopyWith = initial.copyWith();
+
+    expect(afterCopyWith.dataRowHeightSettings?.fixedHeight, 10.0);
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
