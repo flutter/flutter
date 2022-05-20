@@ -438,7 +438,7 @@ class ChromiumLauncher {
           rethrow;
         }
       }
-      await Future<dynamic>.delayed(const Duration(milliseconds: 25));
+      await Future<void>.delayed(const Duration(milliseconds: 25));
     }
     return null;
   }
