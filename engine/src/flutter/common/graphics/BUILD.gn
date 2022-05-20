@@ -9,6 +9,7 @@ source_set("graphics") {
   sources = [
     "gl_context_switch.cc",
     "gl_context_switch.h",
+    "msaa_sample_count.h",
     "persistent_cache.cc",
     "persistent_cache.h",
     "texture.cc",

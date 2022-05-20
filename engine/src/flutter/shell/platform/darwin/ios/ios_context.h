@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "flutter/common/graphics/gl_context_switch.h"
+#include "flutter/common/graphics/msaa_sample_count.h"
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
@@ -45,10 +46,17 @@ class IOSContext {
   ///
   /// @param[in]  api       A client rendering API supported by the
   ///                       engine/platform.
+  /// @param[in]  backend   A client rendering backend supported by the
+  ///                       engine/platform.
+  /// @param[in]  msaa_samples
+  ///                       The number of MSAA samples to use. Only supplied to
+  ///                       Skia, must be either 0, 1, 2, 4, or 8.
   ///
   /// @return     A valid context on success. `nullptr` on failure.
   ///
-  static std::unique_ptr<IOSContext> Create(IOSRenderingAPI api, IOSRenderingBackend backend);
+  static std::unique_ptr<IOSContext> Create(IOSRenderingAPI api,
+                                            IOSRenderingBackend backend,
+                                            MsaaSampleCount msaa_samples);
 
   //----------------------------------------------------------------------------
   /// @brief      Collects the context object. This must happen on the thread on
@@ -133,10 +141,13 @@ class IOSContext {
 
   virtual std::shared_ptr<impeller::Context> GetImpellerContext() const;
 
+  MsaaSampleCount GetMsaaSampleCount() const { return msaa_samples_; }
+
  protected:
-  IOSContext();
+  explicit IOSContext(MsaaSampleCount msaa_samples);
 
  private:
+  MsaaSampleCount msaa_samples_ = MsaaSampleCount::kNone;
   FML_DISALLOW_COPY_AND_ASSIGN(IOSContext);
 };
 

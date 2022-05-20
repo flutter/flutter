@@ -27,6 +27,7 @@ FILE: ../../../flutter/common/exported_symbols.sym
 FILE: ../../../flutter/common/exported_symbols_mac.sym
 FILE: ../../../flutter/common/graphics/gl_context_switch.cc
 FILE: ../../../flutter/common/graphics/gl_context_switch.h
+FILE: ../../../flutter/common/graphics/msaa_sample_count.h
 FILE: ../../../flutter/common/graphics/persistent_cache.cc
 FILE: ../../../flutter/common/graphics/persistent_cache.h
 FILE: ../../../flutter/common/graphics/texture.cc
