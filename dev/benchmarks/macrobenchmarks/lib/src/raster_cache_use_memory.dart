@@ -21,10 +21,10 @@ class _RasterCacheUseMemoryState extends State<RasterCacheUseMemory>
   void initState() {
     super.initState();
     _controller.addListener(() {
-      if (_controller.offset < 20) {
-        _controller.animateTo(150,
+      if (_controller.offset < 5) {
+        _controller.animateTo(20,
             duration: const Duration(milliseconds: 1000), curve: Curves.ease);
-      } else if (_controller.offset > 130) {
+      } else if (_controller.offset >= 19) {
         _controller.animateTo(0,
             duration: const Duration(milliseconds: 1000), curve: Curves.ease);
       }
