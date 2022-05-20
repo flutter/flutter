@@ -20,6 +20,7 @@ void main() {
     String projectRoot;
     String flutterBin;
     Directory tempDir;
+    File hiddenFile;
 
     setUpAll(() {
       flutterRoot = getFlutterRoot();
@@ -29,6 +30,20 @@ void main() {
         'bin',
         'flutter',
       );
+
+      final Directory xcframeworkArtifact = fileSystem.directory(
+        fileSystem.path.join(
+          flutterRoot,
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          'ios',
+          'Flutter.xcframework',
+        ),
+      );
+      // Pretend the SDK was on an external drive with stray "._" files in the xcframework
+      hiddenFile = xcframeworkArtifact.childFile('._Info.plist')..createSync();
 
       // Test a plugin example app to allow plugins validation.
       processManager.runSync(<String>[
@@ -47,6 +62,7 @@ void main() {
     });
 
     tearDownAll(() {
+      hiddenFile.deleteSync();
       tryToDelete(tempDir);
     });
 
@@ -60,9 +76,10 @@ void main() {
         Directory outputAppFramework;
         File outputAppFrameworkBinary;
         File outputPluginFrameworkBinary;
+        ProcessResult buildResult;
 
         setUpAll(() {
-          processManager.runSync(<String>[
+          buildResult = processManager.runSync(<String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -94,6 +111,11 @@ void main() {
         });
 
         testWithoutContext('flutter build ios builds a valid app', () {
+          printOnFailure('Output of flutter build ios:');
+          printOnFailure(buildResult.stdout.toString());
+          printOnFailure(buildResult.stderr.toString());
+          expect(buildResult.exitCode, 0);
+
           expect(outputPluginFrameworkBinary, exists);
 
           expect(outputAppFrameworkBinary, exists);
