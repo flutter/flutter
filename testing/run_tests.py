@@ -351,7 +351,7 @@ def JavaBin():
 def RunJavaTests(filter, android_variant='android_debug_unopt'):
   """Runs the Java JUnit unit tests for the Android embedding"""
   test_runner_dir = os.path.join(buildroot_dir, 'flutter', 'shell', 'platform', 'android', 'test_runner')
-  gradle_bin = os.path.join(buildroot_dir, 'gradle', 'bin', 'gradle.bat' if IsWindows() else 'gradle')
+  gradle_bin = os.path.join(buildroot_dir, 'third_party', 'gradle', 'bin', 'gradle.bat' if IsWindows() else 'gradle')
   flutter_jar = os.path.join(out_dir, android_variant, 'flutter.jar')
   android_home = os.path.join(buildroot_dir, 'third_party', 'android_tools', 'sdk')
   build_dir = os.path.join(out_dir, android_variant, 'robolectric_tests', 'build')
