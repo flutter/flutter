@@ -1,4 +1,4 @@
-Signature: 5f580fb455af2bcf53a908073eba4883
+Signature: 40936d2fdc1f98e17145ed2649914dc4
 
 UNUSED LICENSES:
 
@@ -2539,6 +2539,7 @@ FILE: ../../../third_party/skia/include/gpu/graphite/TextureInfo.h
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlTypes.h
 FILE: ../../../third_party/skia/include/private/chromium/GrSlug.h
+FILE: ../../../third_party/skia/include/private/chromium/Slug.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrDawnTypesPriv.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrMockTypesPriv.h
 FILE: ../../../third_party/skia/include/sksl/DSLSymbols.h
@@ -2587,7 +2588,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/mtl/GrMtlTypesPriv.mm
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/DrawMeshOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/DrawMeshOp.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/FillPathFlags.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrSlug.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Attribute.h
@@ -2625,7 +2625,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/GraphicsPipelineDesc.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/PipelineDataCache.h
-FILE: ../../../third_party/skia/src/gpu/graphite/ProgramCache.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Recorder.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Recording.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/RenderPassTask.cpp
@@ -2733,6 +2732,7 @@ FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadGlobalVariab
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadLocalVariables.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateUnreachableCode.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLProgramWriter.h
+FILE: ../../../third_party/skia/src/text/gpu/Slug.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SubRunAllocator.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SubRunAllocator.h
 FILE: ../../../third_party/skia/src/utils/SkVMVisualizer.cpp
