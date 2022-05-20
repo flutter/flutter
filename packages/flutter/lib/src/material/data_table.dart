@@ -924,9 +924,9 @@ class DataTable extends StatelessWidget {
       ?? _columnSpacing;
 
     final DataTableRowHeight effectiveDataRowHeightSettings = dataRowHeightSettings
+      ?? (dataRowHeight != null ? DataTableRowHeight.fixed(height: dataRowHeight) : null)
       ?? dataTableTheme.dataRowHeightSettings
       ?? theme.dataTableTheme.dataRowHeightSettings
-      ?? (dataRowHeight != null ? DataTableRowHeight.fixed(height: dataRowHeight) : null)
       ?? _dataRowHeightSettings;
     final double? effectiveDataRowHeight = effectiveDataRowHeightSettings.fixedHeight;
     final double effectiveDataRowTopBottomPadding = effectiveDataRowHeightSettings.topBottomPadding;
