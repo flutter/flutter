@@ -14,7 +14,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 
 /// The default name of the migrate working directory used to stage proposed changes.
-const String kDefaultMigrateWorkingDirectoryName = 'migrate_working_dir';
+const String kDefaultMigrateWorkingDirectoryName = 'migrate_staging_dir';
 
 /// Utility class that contains methods that wrap git and other shell commands.
 class MigrateUtils {
