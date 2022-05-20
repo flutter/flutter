@@ -570,10 +570,10 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     if (firstChild != null) {
       final int oldFirstIndex = indexOf(firstChild!);
       final int oldLastIndex = indexOf(lastChild!);
-      final int leadingGarbage = (firstIndex - oldFirstIndex).clamp(0, childCount);
+      final int leadingGarbage = (firstIndex - oldFirstIndex).clamp(0, childCount); // ignore_clamp_double_lint
       final int trailingGarbage = targetLastIndex == null
         ? 0
-        : (oldLastIndex - targetLastIndex).clamp(0, childCount);
+        : (oldLastIndex - targetLastIndex).clamp(0, childCount); // ignore_clamp_double_lint
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);

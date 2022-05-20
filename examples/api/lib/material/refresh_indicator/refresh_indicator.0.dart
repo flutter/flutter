@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'RefreshIndicator Sample';
 
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class RefreshIndicatorExample extends StatefulWidget {
-  const RefreshIndicatorExample({Key? key, required this.title}) : super(key: key);
+  const RefreshIndicatorExample({super.key, required this.title});
 
   final String title;
 

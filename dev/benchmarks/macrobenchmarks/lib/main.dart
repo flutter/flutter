@@ -11,6 +11,7 @@ import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
 import 'src/animation_with_microtasks.dart';
 import 'src/backdrop_filter.dart';
+import 'src/clipper_cache.dart';
 import 'src/color_filter_and_fade.dart';
 import 'src/color_filter_cache.dart';
 import 'src/cubic_bezier.dart';
@@ -58,6 +59,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kTextRouteName: (BuildContext context) => const TextPage(),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
+        kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
         kColorFilterCacheRouteName: (BuildContext context) => const ColorFilterCachePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
@@ -166,6 +168,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Animated Placeholder'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimatedPlaceholderRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kClipperCacheRouteName),
+            child: const Text('Clipper Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kClipperCacheRouteName);
             },
           ),
           ElevatedButton(

@@ -897,6 +897,12 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return _alpha > 0;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       if (_alpha == 0) {
@@ -1012,6 +1018,12 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
       if (oldAlpha == 0 || _alpha == 0)
         markNeedsSemanticsUpdate();
     }
+  }
+
+  @override
+  bool paintsChild(RenderObject child) {
+    assert(child.parent == this);
+    return opacity.value > 0;
   }
 
   @override
@@ -1404,8 +1416,15 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) {
-    return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
+    }
   }
 
   Paint? _debugPaint;
@@ -2799,8 +2818,14 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return !size.isEmpty && !child.size.isEmpty;
+  }
+
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (size.isEmpty || child.size.isEmpty) {
+    if (!paintsChild(child)) {
       transform.setZero();
     } else {
       _updatePaintData();
@@ -3270,7 +3295,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   const PngHome({Key? key}) : super(key: key);
+  ///   const PngHome({super.key});
   ///
   ///   @override
   ///   State<PngHome> createState() => _PngHomeState();
@@ -3568,7 +3593,6 @@ class RenderOffstage extends RenderProxyBox {
     return super.computeDryLayout(constraints);
   }
 
-
   @override
   void performResize() {
     assert(offstage);
@@ -3587,6 +3611,12 @@ class RenderOffstage extends RenderProxyBox {
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     return !offstage && super.hitTest(result, position: position);
+  }
+
+  @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return !offstage;
   }
 
   @override

@@ -311,7 +311,7 @@ double _indexChangeProgress(TabController controller) {
   // The controller's offset is changing because the user is dragging the
   // TabBarView's PageView to the left or right.
   if (!controller.indexIsChanging)
-    return (currentIndex - controllerValue).abs().clamp(0.0, 1.0);
+    return clampDouble((currentIndex - controllerValue).abs(), 0.0, 1.0);
 
   // The TabController animation's value is changing from previousIndex to currentIndex.
   return (controllerValue - currentIndex).abs() / (currentIndex - previousIndex).abs();
@@ -417,8 +417,8 @@ class _IndicatorPainter extends CustomPainter {
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
     final bool ltr = index > value;
-    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex);
-    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex);
+    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex); // ignore_clamp_double_lint
+    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex); // ignore_clamp_double_lint
     final Rect fromRect = indicatorRect(size, from);
     final Rect toRect = indicatorRect(size, to);
     _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
@@ -491,8 +491,8 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   double get value {
     assert(!controller.indexIsChanging);
     final double controllerMaxValue = (controller.length - 1).toDouble();
-    final double controllerValue = controller.animation!.value.clamp(0.0, controllerMaxValue);
-    return (controllerValue - index.toDouble()).abs().clamp(0.0, 1.0);
+    final double controllerValue = clampDouble(controller.animation!.value, 0.0, controllerMaxValue);
+    return clampDouble((controllerValue - index.toDouble()).abs(), 0.0, 1.0);
   }
 }
 
@@ -1048,7 +1048,7 @@ class _TabBarState extends State<TabBar> {
       case TextDirection.ltr:
         break;
     }
-    return (tabCenter - viewportWidth / 2.0).clamp(minExtent, maxExtent);
+    return clampDouble(tabCenter - viewportWidth / 2.0, minExtent, maxExtent);
   }
 
   double _tabCenteredScrollOffset(int index) {
@@ -1510,12 +1510,12 @@ class _TabBarViewState extends State<TabBarView> {
         _controller!.index = _pageController.page!.round();
         _currentIndex =_controller!.index;
       }
-      _controller!.offset = (_pageController.page! - _controller!.index).clamp(-1.0, 1.0);
+      _controller!.offset = clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
     } else if (notification is ScrollEndNotification) {
       _controller!.index = _pageController.page!.round();
       _currentIndex = _controller!.index;
       if (!_controller!.indexIsChanging)
-        _controller!.offset = (_pageController.page! - _controller!.index).clamp(-1.0, 1.0);
+        _controller!.offset = clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
     }
     _warpUnderwayCount -= 1;
 

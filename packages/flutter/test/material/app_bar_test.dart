@@ -1011,6 +1011,53 @@ void main() {
     expect(getMaterial().elevation, 10);
   });
 
+  testWidgets('scrolledUnderElevation with nested scroll view', (WidgetTester tester) async {
+    Widget buildAppBar({double? scrolledUnderElevation}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Title'),
+            scrolledUnderElevation: scrolledUnderElevation,
+            notificationPredicate: (ScrollNotification notification) {
+              return notification.depth == 1;
+            },
+          ),
+          body: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 4,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 600.0,
+                width: 800.0,
+                child: ListView.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) =>
+                    ListTile(title: Text('Item $index')),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    Material getMaterial() => tester.widget<Material>(find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ));
+
+    await tester.pumpWidget(buildAppBar(scrolledUnderElevation: 10));
+    // Starts with the base elevation.
+    expect(getMaterial().elevation, 0.0);
+
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    // After scrolling it should be the scrolledUnderElevation.
+    expect(getMaterial().elevation, 10);
+  });
+
   group('SliverAppBar elevation', () {
     Widget buildSliverAppBar(bool forceElevated, {double? elevation, double? themeElevation}) {
       return MaterialApp(
@@ -3072,44 +3119,6 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
     });
-  });
-
-  // Regression test for https://github.com/flutter/flutter/issues/80256
-  testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
-    final Page<void> page1 = MaterialPage<void>(
-        key: const ValueKey<String>('1'),
-        child: Scaffold(
-          key: const ValueKey<String>('1'),
-          appBar: AppBar(),
-          endDrawer: const Drawer(),
-        )
-    );
-    final Page<void> page2 = MaterialPage<void>(
-        key: const ValueKey<String>('2'),
-        child: Scaffold(
-          key: const ValueKey<String>('2'),
-          appBar: AppBar(),
-          endDrawer: const Drawer(),
-        )
-    );
-    final List<Page<void>> pages = <Page<void>>[ page1, page2 ];
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Navigator(
-          pages: pages,
-          onPopPage: (Route<Object?> route, Object? result) => false,
-        ),
-      ),
-    );
-
-    // The page2 should have a back button.
-    expect(
-        find.descendant(
-          of: find.byKey(const ValueKey<String>('2')),
-          matching: find.byType(BackButton),
-        ),
-        findsOneWidget
-    );
   });
 
   testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {

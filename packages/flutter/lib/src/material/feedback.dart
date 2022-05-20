@@ -32,7 +32,7 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithWrappedHandler extends StatelessWidget {
-///   const WidgetWithWrappedHandler({Key? key}) : super(key: key);
+///   const WidgetWithWrappedHandler({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithExplicitCall extends StatelessWidget {
-///   const WidgetWithExplicitCall({Key? key}) : super(key: key);
+///   const WidgetWithExplicitCall({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {

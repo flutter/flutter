@@ -440,7 +440,7 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
 
       await tester.pageBack();
       await tester.pump();

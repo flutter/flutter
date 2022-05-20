@@ -26,14 +26,14 @@ void main() {
 
   testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    NavigationBarThemeData(
+    const NavigationBarThemeData(
       height: 200.0,
-      backgroundColor: const Color(0x00000099),
+      backgroundColor: Color(0x00000099),
       elevation: 20.0,
-      indicatorColor: const Color(0x00000098),
-      indicatorShape: const CircleBorder(),
-      labelTextStyle: MaterialStateProperty.all(const TextStyle(fontSize: 7.0)),
-      iconTheme: MaterialStateProperty.all(const IconThemeData(color: Color(0x00000097))),
+      indicatorColor: Color(0x00000098),
+      indicatorShape: CircleBorder(),
+      labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+      iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000097))),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
     ).debugFillProperties(builder);
 
@@ -47,10 +47,10 @@ void main() {
     expect(description[2], 'elevation: 20.0');
     expect(description[3], 'indicatorColor: Color(0x00000098)');
     expect(description[4], 'indicatorShape: CircleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))');
-    expect(description[5], 'labelTextStyle: MaterialStateProperty.all(TextStyle(inherit: true, size: 7.0))');
+    expect(description[5], 'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
 
     // Ignore instance address for IconThemeData.
-    expect(description[6].contains('iconTheme: MaterialStateProperty.all(IconThemeData'), isTrue);
+    expect(description[6].contains('iconTheme: MaterialStatePropertyAll(IconThemeData'), isTrue);
     expect(description[6].contains('(color: Color(0x00000097))'), isTrue);
 
     expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
