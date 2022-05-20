@@ -35,6 +35,7 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   MOCK_METHOD0(OnResetImeComposing, void());
   MOCK_METHOD3(OnBitmapSurfaceUpdated,
                bool(const void* allocation, size_t row_bytes, size_t height));
+  MOCK_METHOD0(GetPrimaryPointerLocation, PointerLocation());
 };
 
 }  // namespace testing
