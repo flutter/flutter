@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 import 'package:flutter_tools/src/project_validator_result.dart';
@@ -14,7 +12,7 @@ import '../src/common.dart';
 class ProjectValidatorTaskImpl extends ProjectValidator {
 
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {required Logger logger, required FileSystem fileSystem}) async {
+  Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     const ProjectValidatorResult error = ProjectValidatorResult(
       name: 'result_1',
       value: 'this is an error',
@@ -90,9 +88,8 @@ void main() {
 
     testWithoutContext('error status', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
-      final Logger logger = BufferLogger.test();
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
-      final List<ProjectValidatorResult> results = await task.start(project, fileSystem: fs, logger: logger);
+      final List<ProjectValidatorResult> results = await task.start(project);
       expect(results.length, 3);
       expect(results[0].toString(), 'result_1: this is an error');
       expect(results[1].toString(), 'result_2: correct');
