@@ -1764,6 +1764,55 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
+  testWidgets('Tooltip onTriggered is called when Tooltip triggers', (WidgetTester tester) async {
+    bool onTriggeredCalled = false;
+    void onTriggered() => onTriggeredCalled = true;
+
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, onTriggered: onTriggered);
+    Finder tooltip = find.byType(Tooltip);
+    await testGestureLongPress(tester, tooltip);
+    expect(onTriggeredCalled, true);
+
+    onTriggeredCalled = false;
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, onTriggered: onTriggered);
+    tooltip = find.byType(Tooltip);
+    await testGestureTap(tester, tooltip);
+    expect(onTriggeredCalled, true);
+  });
+
+  testWidgets('Tooltip onTriggered is not called when Tooltip is hovered', (WidgetTester tester) async {
+    bool onTriggeredCalled = false;
+    void onTriggered() => onTriggeredCalled = true;
+
+    const Duration waitDuration = Duration.zero;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            onTriggered: onTriggered,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(onTriggeredCalled, false);
+  });
+
   testWidgets('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -1791,12 +1840,13 @@ void main() {
   });
 }
 
-Future<void> setWidgetForTooltipMode(WidgetTester tester, TooltipTriggerMode triggerMode) async {
+Future<void> setWidgetForTooltipMode(WidgetTester tester, TooltipTriggerMode triggerMode, {TooltipTriggeredCallback? onTriggered}) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Tooltip(
         message: tooltipText,
         triggerMode: triggerMode,
+        onTriggered: onTriggered,
         child: const SizedBox(width: 100.0, height: 100.0),
       ),
     ),
