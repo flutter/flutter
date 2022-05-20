@@ -1354,7 +1354,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pumpAndSettle();
     expect(tester.renderObject(find.text('column1')).attached, true);

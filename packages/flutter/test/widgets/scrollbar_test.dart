@@ -1326,7 +1326,6 @@ void main() {
     // the padding it not necessary.
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.down(const Offset(790.0, 45.0));
     await tester.pump();
     await gesture.moveTo(const Offset(790.0, 55.0));

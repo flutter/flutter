@@ -600,7 +600,6 @@ Future<void> main() async {
 
     final Offset tabItem = tester.getCenter(find.text('Tab 1'));
     await gesture.moveTo(tabItem);
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

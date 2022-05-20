@@ -750,7 +750,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(pointer: 1, kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(200, 200));
-    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(target(ignoring: true));
     expect(logs, isEmpty);
@@ -828,7 +827,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(pointer: 1, kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(200, 200));
-    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(target(absorbing: true));
     expect(logs, isEmpty);

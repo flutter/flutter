@@ -1358,7 +1358,6 @@ void main() {
 
     final Offset firstChild = tester.getCenter(find.text('A'));
     await gesture.moveTo(firstChild);
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

@@ -3473,7 +3473,6 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
 
     await gesture.addPointer(location: onDropdownButton);
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
