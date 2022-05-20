@@ -16,6 +16,9 @@ import 'theme.dart';
 import 'tooltip_theme.dart';
 import 'tooltip_visibility.dart';
 
+/// Signature for when a tooltip is triggered.
+typedef TooltipTriggeredCallback = void Function();
+
 /// A Material Design tooltip.
 ///
 /// Tooltips provide text labels which help explain the function of a button or
@@ -108,6 +111,7 @@ class Tooltip extends StatefulWidget {
     this.showDuration,
     this.triggerMode,
     this.enableFeedback,
+    this.onTriggered,
     this.child,
   }) :  assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
         assert(
@@ -237,6 +241,12 @@ class Tooltip extends StatefulWidget {
   ///
   ///  * [Feedback], for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
+
+  /// Called when the Tooltip is triggered.
+  ///
+  /// The tooltip is triggered after a tap when [triggerMode] is [TooltipTriggerMode.tap]
+  /// or after a long press when [triggerMode] is [TooltipTriggerMode.longPress].
+  final TooltipTriggeredCallback? onTriggered;
 
   static final List<TooltipState> _openedTooltips = <TooltipState>[];
 
@@ -661,6 +671,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       else
         Feedback.forTap(context);
     }
+    widget.onTriggered?.call();
   }
 
   @override
