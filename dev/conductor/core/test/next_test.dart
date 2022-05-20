@@ -31,7 +31,7 @@ void main() {
   const String releaseChannel = 'beta';
   const String stateFile = '/state-file.json';
   final String localPathSeparator = const LocalPlatform().pathSeparator;
-  final String localOperatingSystem = const LocalPlatform().pathSeparator;
+  final String localOperatingSystem = const LocalPlatform().operatingSystem;
 
   group('next command', () {
     late MemoryFileSystem fileSystem;

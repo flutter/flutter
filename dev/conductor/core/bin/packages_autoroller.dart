@@ -67,6 +67,7 @@ ${parser.usage}
     githubClient: results[kGithubClient] as String? ?? 'gh',
     orgName: _parseOrgName(mirrorUrl),
     token: (results[kTokenOption] as String).trim(),
+    processManager: const LocalProcessManager(),
   ).roll();
 }
 
