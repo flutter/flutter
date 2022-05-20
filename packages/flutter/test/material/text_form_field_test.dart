@@ -53,7 +53,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -279,7 +278,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -333,7 +331,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -994,7 +991,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: center);
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1067,7 +1063,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
