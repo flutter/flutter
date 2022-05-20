@@ -433,8 +433,8 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
     final TableCellParentData parentData = renderObject.parentData! as TableCellParentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent != null)
+      final AbstractNode? targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
         targetParent.markNeedsLayout();
     }
   }

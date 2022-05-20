@@ -683,7 +683,7 @@ abstract class InkFeature {
     RenderObject node = referenceBox;
     while (node != _controller) {
       final RenderObject childNode = node;
-      node = node.parent!;
+      node = node.parent! as RenderObject;
       if (!node.paintsChild(childNode)) {
         // Some node between the reference box and this would skip painting on
         // the reference box, so bail out early and avoid unnecessary painting.

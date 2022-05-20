@@ -2145,7 +2145,7 @@ abstract class RenderBox extends RenderObject {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
     assert(() {
-      final RenderObject? parent = this.parent;
+      final RenderObject? parent = this.parent as RenderObject?;
       if (owner!.debugDoingLayout)
         return (RenderObject.debugActiveLayout == parent) && parent!.debugDoingThisLayout;
       if (owner!.debugDoingPaint)
@@ -2367,7 +2367,7 @@ abstract class RenderBox extends RenderObject {
 
   @override
   void markNeedsLayout() {
-    if (_clearCachedData() && parent != null) {
+    if (_clearCachedData() && parent is RenderObject) {
       markParentNeedsLayout();
       return;
     }
