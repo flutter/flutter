@@ -1,4 +1,4 @@
-Signature: 0672752757ddc41417d4ed63e98287f7
+Signature: 94af645969d6c2c0ef7c5c0df77f9de2
 
 UNUSED LICENSES:
 
@@ -5927,6 +5927,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/render/CoverBoundsRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/CoverBoundsRenderStep.h
+FILE: ../../../third_party/skia/src/gpu/graphite/render/DynamicInstancesPatchAllocator.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/MiddleOutFanRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/MiddleOutFanRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/StencilAndCoverDSS.h
