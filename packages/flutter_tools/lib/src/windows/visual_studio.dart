@@ -282,16 +282,15 @@ class VisualStudio {
         '-utf8',
         '-latest',
       ];
-      // Ideally this would use Flutter's utf8 encoding which errors on malformed UTF-8.
-      // However, vswhere.exe is known to output unicode replacement characters.
-      // These replacement characters will be ignored unless they affect used properties.
+      // Ignore replacement characters as vswhere.exe is known to output them.
       // See: https://github.com/flutter/flutter/issues/102451
+      const Encoding encoding = Utf8Codec(reportErrors: false);
       final RunResult whereResult = _processUtils.runSync(<String>[
         _vswherePath,
         ...defaultArguments,
         ...?additionalArguments,
         ...requirementArguments,
-      ], encoding: const Utf8Codec(reportErrors: false));
+      ], encoding: encoding);
       if (whereResult.exitCode == 0) {
         final List<Map<String, dynamic>> installations =
             (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
