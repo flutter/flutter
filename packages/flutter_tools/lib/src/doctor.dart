@@ -469,34 +469,15 @@ class FlutterValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     String? versionChannel;
     String? frameworkVersion;
-    String? repositoryUrl;
-    VersionCheckError? upstreamValidationError;
 
     try {
       final FlutterVersion version = _flutterVersion();
       final String? gitUrl = _platform.environment['FLUTTER_GIT_URL'];
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
-      repositoryUrl = version.repositoryUrl;
-      upstreamValidationError = VersionUpstreamValidator(version: version, platform: _platform).run();
 
-      final String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
-      if (versionChannel == 'unknown' || frameworkVersion == '0.0.0-unknown') {
-        messages.add(ValidationMessage.hint(flutterVersionMessage));
-      } else {
-        messages.add(ValidationMessage(flutterVersionMessage));
-      }
-      if (repositoryUrl == null) {
-        messages.add(ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown')));
-      } else if (upstreamValidationError != null) {
-        if (gitUrl != null) {
-          messages.add(ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlEnvMismatch(repositoryUrl)));
-        } else {
-          messages.add(ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlNonStandard(repositoryUrl)));
-        }
-      } else {
-        messages.add(ValidationMessage(_userMessages.flutterUpstreamRepositoryUrl(repositoryUrl)));
-      }
+      messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel));
+      messages.add(_getFlutterUpstreamMessage(version, gitUrl));
       if (gitUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterGitUrl(gitUrl)));
       }
@@ -547,6 +528,31 @@ class FlutterValidator extends DoctorValidator {
         _platform.localeName,
       ),
     );
+  }
+
+  ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel) {
+    final String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
+
+    if (versionChannel == 'unknown' || frameworkVersion == '0.0.0-unknown') {
+      return ValidationMessage.hint(flutterVersionMessage);
+    }
+    return ValidationMessage(flutterVersionMessage);
+  }
+
+  ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version, String? gitUrl) {
+    final String? repositoryUrl = version.repositoryUrl;
+    final VersionCheckError? upstreamValidationError = VersionUpstreamValidator(version: version, platform: _platform).run();
+
+    if (repositoryUrl == null) {
+      return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown'));
+    }
+    if (upstreamValidationError != null) {
+      if (gitUrl != null) {
+        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlEnvMismatch(repositoryUrl));
+      }
+      return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlNonStandard(repositoryUrl));
+    }
+    return ValidationMessage(_userMessages.flutterUpstreamRepositoryUrl(repositoryUrl));
   }
 
   bool _genSnapshotRuns(String genSnapshotPath) {
