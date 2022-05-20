@@ -125,6 +125,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      os: Ubuntu
       tags: >
         ["framework","hostonly"]
       validation: analyze
@@ -367,6 +368,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -385,6 +387,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -403,6 +406,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -421,6 +425,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -439,6 +444,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -457,6 +463,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -476,6 +483,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -494,6 +502,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -513,6 +522,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -532,6 +542,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -570,6 +581,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -731,6 +743,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
@@ -744,6 +757,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      os: Ubuntu
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
