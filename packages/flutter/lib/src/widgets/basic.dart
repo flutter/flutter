@@ -6934,60 +6934,13 @@ class Semantics extends SingleChildRenderObjectWidget {
       container: container,
       explicitChildNodes: explicitChildNodes,
       excludeSemantics: excludeSemantics,
-      enabled: properties.enabled,
-      checked: properties.checked,
-      toggled: properties.toggled,
-      selected: properties.selected,
-      button: properties.button,
-      slider: properties.slider,
-      keyboardKey: properties.keyboardKey,
-      link: properties.link,
-      header: properties.header,
-      textField: properties.textField,
-      readOnly: properties.readOnly,
-      focusable: properties.focusable,
-      focused: properties.focused,
-      liveRegion: properties.liveRegion,
-      maxValueLength: properties.maxValueLength,
-      currentValueLength: properties.currentValueLength,
-      inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
-      obscured: properties.obscured,
-      multiline: properties.multiline,
-      scopesRoute: properties.scopesRoute,
-      namesRoute: properties.namesRoute,
-      hidden: properties.hidden,
-      image: properties.image,
+      properties: properties,
       attributedLabel: _effectiveAttributedLabel,
       attributedValue: _effectiveAttributedValue,
       attributedIncreasedValue: _effectiveAttributedIncreasedValue,
       attributedDecreasedValue: _effectiveAttributedDecreasedValue,
       attributedHint: _effectiveAttributedHint,
-      tooltip: properties.tooltip,
-      hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
-      sortKey: properties.sortKey,
-      tagForChildren: properties.tagForChildren,
-      onTap: properties.onTap,
-      onLongPress: properties.onLongPress,
-      onScrollLeft: properties.onScrollLeft,
-      onScrollRight: properties.onScrollRight,
-      onScrollUp: properties.onScrollUp,
-      onScrollDown: properties.onScrollDown,
-      onIncrease: properties.onIncrease,
-      onDecrease: properties.onDecrease,
-      onCopy: properties.onCopy,
-      onDismiss: properties.onDismiss,
-      onCut: properties.onCut,
-      onPaste: properties.onPaste,
-      onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
-      onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
-      onMoveCursorForwardByWord: properties.onMoveCursorForwardByWord,
-      onMoveCursorBackwardByWord: properties.onMoveCursorBackwardByWord,
-      onSetSelection: properties.onSetSelection,
-      onSetText: properties.onSetText,
-      onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
-      onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
-      customSemanticsActions: properties.customSemanticsActions,
     );
   }
 
@@ -7013,60 +6966,13 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..explicitChildNodes = explicitChildNodes
       ..excludeSemantics = excludeSemantics
-      ..scopesRoute = properties.scopesRoute
-      ..enabled = properties.enabled
-      ..checked = properties.checked
-      ..toggled = properties.toggled
-      ..selected = properties.selected
-      ..button = properties.button
-      ..slider = properties.slider
-      ..keyboardKey = properties.keyboardKey
-      ..link = properties.link
-      ..header = properties.header
-      ..textField = properties.textField
-      ..readOnly = properties.readOnly
-      ..focusable = properties.focusable
-      ..focused = properties.focused
-      ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
-      ..obscured = properties.obscured
-      ..multiline = properties.multiline
-      ..hidden = properties.hidden
-      ..image = properties.image
-      ..liveRegion = properties.liveRegion
-      ..maxValueLength = properties.maxValueLength
-      ..currentValueLength = properties.currentValueLength
+      ..updateProperties(properties)
       ..attributedLabel = _effectiveAttributedLabel
       ..attributedValue = _effectiveAttributedValue
       ..attributedIncreasedValue = _effectiveAttributedIncreasedValue
       ..attributedDecreasedValue = _effectiveAttributedDecreasedValue
       ..attributedHint = _effectiveAttributedHint
-      ..tooltip = properties.tooltip
-      ..hintOverrides = properties.hintOverrides
-      ..namesRoute = properties.namesRoute
-      ..textDirection = _getTextDirection(context)
-      ..sortKey = properties.sortKey
-      ..tagForChildren = properties.tagForChildren
-      ..onTap = properties.onTap
-      ..onLongPress = properties.onLongPress
-      ..onScrollLeft = properties.onScrollLeft
-      ..onScrollRight = properties.onScrollRight
-      ..onScrollUp = properties.onScrollUp
-      ..onScrollDown = properties.onScrollDown
-      ..onIncrease = properties.onIncrease
-      ..onDismiss = properties.onDismiss
-      ..onDecrease = properties.onDecrease
-      ..onCopy = properties.onCopy
-      ..onCut = properties.onCut
-      ..onPaste = properties.onPaste
-      ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord
-      ..onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord
-      ..onSetSelection = properties.onSetSelection
-      ..onSetText = properties.onSetText
-      ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
-      ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus
-      ..customSemanticsActions = properties.customSemanticsActions;
+      ..textDirection = _getTextDirection(context);
   }
 
   @override

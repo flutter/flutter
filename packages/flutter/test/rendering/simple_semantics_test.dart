@@ -61,6 +61,8 @@ void main() {
 }
 
 class TestRender extends RenderSemanticsAnnotations {
+  TestRender() : super(properties: const SemanticsProperties());
+
   int describeSemanticsConfigurationCallCount = 0;
 
   @override

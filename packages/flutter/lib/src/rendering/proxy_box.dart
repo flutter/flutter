@@ -3950,122 +3950,38 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If the [attributedLabel] is not null, the [textDirection] must also not be null.
   RenderSemanticsAnnotations({
     RenderBox? child,
+    required SemanticsProperties properties,
     bool container = false,
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
-    bool? enabled,
-    bool? checked,
-    bool? toggled,
-    bool? selected,
-    bool? button,
-    bool? slider,
-    bool? keyboardKey,
-    bool? link,
-    bool? header,
-    bool? textField,
-    bool? readOnly,
-    bool? focusable,
-    bool? focused,
-    bool? inMutuallyExclusiveGroup,
-    bool? obscured,
-    bool? multiline,
-    bool? scopesRoute,
-    bool? namesRoute,
-    bool? hidden,
-    bool? image,
-    bool? liveRegion,
-    int? maxValueLength,
-    int? currentValueLength,
     AttributedString? attributedLabel,
     AttributedString? attributedValue,
     AttributedString? attributedIncreasedValue,
     AttributedString? attributedDecreasedValue,
     AttributedString? attributedHint,
-    String? tooltip,
-    SemanticsHintOverrides? hintOverrides,
     TextDirection? textDirection,
-    SemanticsSortKey? sortKey,
-    SemanticsTag? tagForChildren,
-    VoidCallback? onTap,
-    VoidCallback? onDismiss,
-    VoidCallback? onLongPress,
-    VoidCallback? onScrollLeft,
-    VoidCallback? onScrollRight,
-    VoidCallback? onScrollUp,
-    VoidCallback? onScrollDown,
-    VoidCallback? onIncrease,
-    VoidCallback? onDecrease,
-    VoidCallback? onCopy,
-    VoidCallback? onCut,
-    VoidCallback? onPaste,
-    MoveCursorHandler? onMoveCursorForwardByCharacter,
-    MoveCursorHandler? onMoveCursorBackwardByCharacter,
-    MoveCursorHandler? onMoveCursorForwardByWord,
-    MoveCursorHandler? onMoveCursorBackwardByWord,
-    SetSelectionHandler? onSetSelection,
-    SetTextHandler? onSetText,
-    VoidCallback? onDidGainAccessibilityFocus,
-    VoidCallback? onDidLoseAccessibilityFocus,
-    Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
        _excludeSemantics = excludeSemantics,
-       _enabled = enabled,
-       _checked = checked,
-       _toggled = toggled,
-       _selected = selected,
-       _button = button,
-       _slider = slider,
-       _keyboardKey = keyboardKey,
-       _link = link,
-       _header = header,
-       _textField = textField,
-       _readOnly = readOnly,
-       _focusable = focusable,
-       _focused = focused,
-       _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
-       _obscured = obscured,
-       _multiline = multiline,
-       _scopesRoute = scopesRoute,
-       _namesRoute = namesRoute,
-       _liveRegion = liveRegion,
-       _maxValueLength = maxValueLength,
-       _currentValueLength = currentValueLength,
-       _hidden = hidden,
-       _image = image,
-       _onDismiss = onDismiss,
        _attributedLabel = attributedLabel,
        _attributedValue = attributedValue,
        _attributedIncreasedValue = attributedIncreasedValue,
        _attributedDecreasedValue = attributedDecreasedValue,
        _attributedHint = attributedHint,
-       _tooltip = tooltip,
-       _hintOverrides = hintOverrides,
        _textDirection = textDirection,
-       _sortKey = sortKey,
-       _tagForChildren = tagForChildren,
-       _onTap = onTap,
-       _onLongPress = onLongPress,
-       _onScrollLeft = onScrollLeft,
-       _onScrollRight = onScrollRight,
-       _onScrollUp = onScrollUp,
-       _onScrollDown = onScrollDown,
-       _onIncrease = onIncrease,
-       _onDecrease = onDecrease,
-       _onCopy = onCopy,
-       _onCut = onCut,
-       _onPaste = onPaste,
-       _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
-       _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
-       _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
-       _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
-       _onSetSelection = onSetSelection,
-       _onSetText = onSetText,
-       _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
-       _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
-       _customSemanticsActions = customSemanticsActions,
+       _properties = properties,
        super(child);
+
+  SemanticsProperties _properties;
+  /// Sets the [SemanticsProperties] en masse.
+  void updateProperties(SemanticsProperties value) {
+    assert(value != null);
+    if (_properties == value)
+      return;
+    _properties = value;
+    markNeedsSemanticsUpdate();
+  }
 
   /// If 'container' is true, this [RenderObject] will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
@@ -4125,255 +4041,95 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsFlag.hasCheckedState] semantic to true and
   /// the [SemanticsConfiguration.isChecked] semantic to the given value.
-  bool? get checked => _checked;
-  bool? _checked;
-  set checked(bool? value) {
-    if (checked == value)
-      return;
-    _checked = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get checked => _properties.checked;
 
   /// If non-null, sets the [SemanticsFlag.hasEnabledState] semantic to true and
   /// the [SemanticsConfiguration.isEnabled] semantic to the given value.
-  bool? get enabled => _enabled;
-  bool? _enabled;
-  set enabled(bool? value) {
-    if (enabled == value)
-      return;
-    _enabled = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get enabled => _properties.enabled;
 
   /// If non-null, sets the [SemanticsConfiguration.isSelected] semantic to the
   /// given value.
-  bool? get selected => _selected;
-  bool? _selected;
-  set selected(bool? value) {
-    if (selected == value)
-      return;
-    _selected = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get selected => _properties.selected;
 
   /// If non-null, sets the [SemanticsConfiguration.isButton] semantic to the
   /// given value.
-  bool? get button => _button;
-  bool? _button;
-  set button(bool? value) {
-    if (button == value)
-      return;
-    _button = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get button => _properties.button;
 
   /// If non-null, sets the [SemanticsConfiguration.isSlider] semantic to the
   /// given value.
-  bool? get slider => _slider;
-  bool? _slider;
-  set slider(bool? value) {
-    if (slider == value)
-      return;
-    _slider = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get slider => _properties.slider;
 
   /// If non-null, sets the [SemanticsConfiguration.isKeyboardKey] semantic to the
   /// given value.
-  bool? get keyboardKey => _keyboardKey;
-  bool? _keyboardKey;
-  set keyboardKey(bool? value) {
-    if (keyboardKey == value)
-      return;
-    _keyboardKey = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get keyboardKey => _properties.keyboardKey;
 
   /// If non-null, sets the [SemanticsConfiguration.isLink] semantic to the
   /// given value.
-  bool? get link => _link;
-  bool? _link;
-  set link(bool? value) {
-    if (link == value)
-      return;
-    _link = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get link => _properties.link;
 
   /// If non-null, sets the [SemanticsConfiguration.isHeader] semantic to the
   /// given value.
-  bool? get header => _header;
-  bool? _header;
-  set header(bool? value) {
-    if (header == value)
-      return;
-    _header = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get header => _properties.header;
 
   /// If non-null, sets the [SemanticsConfiguration.isTextField] semantic to the
   /// given value.
-  bool? get textField => _textField;
-  bool? _textField;
-  set textField(bool? value) {
-    if (textField == value)
-      return;
-    _textField = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get textField => _properties.textField;
 
   /// If non-null, sets the [SemanticsConfiguration.isReadOnly] semantic to the
   /// given value.
-  bool? get readOnly => _readOnly;
-  bool? _readOnly;
-  set readOnly(bool? value) {
-    if (readOnly == value)
-      return;
-    _readOnly = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get readOnly => _properties.readOnly;
 
   /// If non-null, sets the [SemanticsConfiguration.isFocusable] semantic to the
   /// given value.
-  bool? get focusable => _focusable;
-  bool? _focusable;
-  set focusable(bool? value) {
-    if (focusable == value)
-      return;
-    _focusable = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get focusable => _properties.focusable;
 
   /// If non-null, sets the [SemanticsConfiguration.isFocused] semantic to the
   /// given value.
-  bool? get focused => _focused;
-  bool? _focused;
-  set focused(bool? value) {
-    if (focused == value)
-      return;
-    _focused = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get focused => _properties.focused;
 
   /// If non-null, sets the [SemanticsConfiguration.isInMutuallyExclusiveGroup]
   /// semantic to the given value.
-  bool? get inMutuallyExclusiveGroup => _inMutuallyExclusiveGroup;
-  bool? _inMutuallyExclusiveGroup;
-  set inMutuallyExclusiveGroup(bool? value) {
-    if (inMutuallyExclusiveGroup == value)
-      return;
-    _inMutuallyExclusiveGroup = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get inMutuallyExclusiveGroup => _properties.inMutuallyExclusiveGroup;
 
   /// If non-null, sets the [SemanticsConfiguration.isObscured] semantic to the
   /// given value.
-  bool? get obscured => _obscured;
-  bool? _obscured;
-  set obscured(bool? value) {
-    if (obscured == value)
-      return;
-    _obscured = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get obscured => _properties.obscured;
 
   /// If non-null, sets the [SemanticsNode.isMultiline] semantic to the given
   /// value.
-  bool? get multiline => _multiline;
-  bool? _multiline;
-  set multiline(bool? value) {
-    if (multiline == value)
-      return;
-    _multiline = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get multiline => _properties.multiline;
 
   /// If non-null, sets the [SemanticsConfiguration.scopesRoute] semantic to the
   /// give value.
-  bool? get scopesRoute => _scopesRoute;
-  bool? _scopesRoute;
-  set scopesRoute(bool? value) {
-    if (scopesRoute == value)
-      return;
-    _scopesRoute = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get scopesRoute => _properties.scopesRoute;
 
   /// If non-null, sets the [SemanticsConfiguration.namesRoute] semantic to the
   /// give value.
-  bool? get namesRoute => _namesRoute;
-  bool? _namesRoute;
-  set namesRoute(bool? value) {
-    if (_namesRoute == value)
-      return;
-    _namesRoute = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get namesRoute => _properties.namesRoute;
 
   /// If non-null, sets the [SemanticsConfiguration.isHidden] semantic to the
   /// given value.
-  bool? get hidden => _hidden;
-  bool? _hidden;
-  set hidden(bool? value) {
-    if (hidden == value)
-      return;
-    _hidden = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get hidden => _properties.hidden;
 
   /// If non-null, sets the [SemanticsConfiguration.isImage] semantic to the
   /// given value.
-  bool? get image => _image;
-  bool? _image;
-  set image(bool? value) {
-    if (_image == value)
-      return;
-    _image = value;
-  }
+  bool? get image => _properties.image;
 
   /// If non-null, sets the [SemanticsConfiguration.liveRegion] semantic to
   /// the given value.
-  bool? get liveRegion => _liveRegion;
-  bool? _liveRegion;
-  set liveRegion(bool? value) {
-    if (_liveRegion == value)
-      return;
-    _liveRegion = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get liveRegion => _properties.liveRegion;
 
   /// If non-null, sets the [SemanticsNode.maxValueLength] semantic to the given
   /// value.
-  int? get maxValueLength => _maxValueLength;
-  int? _maxValueLength;
-  set maxValueLength(int? value) {
-    if (_maxValueLength == value)
-      return;
-    _maxValueLength = value;
-    markNeedsSemanticsUpdate();
-  }
+  int? get maxValueLength => _properties.maxValueLength;
 
   /// If non-null, sets the [SemanticsNode.currentValueLength] semantic to the
   /// given value.
-  int? get currentValueLength => _currentValueLength;
-  int? _currentValueLength;
-  set currentValueLength(int? value) {
-    if (_currentValueLength == value)
-      return;
-    _currentValueLength = value;
-    markNeedsSemanticsUpdate();
-  }
+  int? get currentValueLength => _properties.currentValueLength;
 
   /// If non-null, sets the [SemanticsConfiguration.isToggled] semantic to the given
   /// value.
-  bool? get toggled => _toggled;
-  bool? _toggled;
-  set toggled(bool? value) {
-    if (_toggled == value)
-      return;
-    _toggled = value;
-    markNeedsSemanticsUpdate();
-  }
+  bool? get toggled => _properties.toggled;
 
   /// If non-null, sets the [SemanticsNode.attributedLabel] semantic to the given value.
   ///
@@ -4438,24 +4194,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If non-null, sets the [SemanticsNode.tooltip] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
-  String? get tooltip => _tooltip;
-  String? _tooltip;
-  set tooltip(String? value) {
-    if (_tooltip == value)
-      return;
-    _tooltip = value;
-    markNeedsSemanticsUpdate();
-  }
+  String? get tooltip => _properties.tooltip;
 
   /// If non-null, sets the [SemanticsConfiguration.hintOverrides] to the given value.
-  SemanticsHintOverrides? get hintOverrides => _hintOverrides;
-  SemanticsHintOverrides? _hintOverrides;
-  set hintOverrides(SemanticsHintOverrides? value) {
-    if (_hintOverrides == value)
-      return;
-    _hintOverrides = value;
-    markNeedsSemanticsUpdate();
-  }
+  SemanticsHintOverrides? get hintOverrides => _properties.hintOverrides;
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given
   /// value.
@@ -4477,24 +4219,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// This defines how this node is sorted among the sibling semantics nodes
   /// to determine the order in which they are traversed by the accessibility
   /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
-  SemanticsSortKey? get sortKey => _sortKey;
-  SemanticsSortKey? _sortKey;
-  set sortKey(SemanticsSortKey? value) {
-    if (sortKey == value)
-      return;
-    _sortKey = value;
-    markNeedsSemanticsUpdate();
-  }
+  SemanticsSortKey? get sortKey => _properties.sortKey;
 
   /// Adds a semantics tag to the semantics subtree.
-  SemanticsTag? get tagForChildren => _tagForChildren;
-  SemanticsTag? _tagForChildren;
-  set tagForChildren(SemanticsTag? value) {
-    if (_tagForChildren == value)
-      return;
-    markNeedsSemanticsUpdate();
-    _tagForChildren = value;
-  }
+  SemanticsTag? get tagForChildren => _properties.tagForChildren;
 
   /// The handler for [SemanticsAction.tap].
   ///
@@ -4504,16 +4232,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen while an element is focused.
-  VoidCallback? get onTap => _onTap;
-  VoidCallback? _onTap;
-  set onTap(VoidCallback? handler) {
-    if (_onTap == handler)
-      return;
-    final bool hadValue = _onTap != null;
-    _onTap = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onTap => _properties.onTap;
 
   /// The handler for [SemanticsAction.dismiss].
   ///
@@ -4522,16 +4241,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// TalkBack users on Android can trigger this action in the local context
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
-  VoidCallback? get onDismiss => _onDismiss;
-  VoidCallback? _onDismiss;
-  set onDismiss(VoidCallback? handler) {
-    if (_onDismiss == handler)
-      return;
-    final bool hadValue = _onDismiss != null;
-    _onDismiss = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onDismiss => _properties.onDismiss;
 
   /// The handler for [SemanticsAction.longPress].
   ///
@@ -4541,16 +4251,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen without lifting the finger after the
   /// second tap.
-  VoidCallback? get onLongPress => _onLongPress;
-  VoidCallback? _onLongPress;
-  set onLongPress(VoidCallback? handler) {
-    if (_onLongPress == handler)
-      return;
-    final bool hadValue = _onLongPress != null;
-    _onLongPress = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onLongPress => _properties.onLongPress;
 
   /// The handler for [SemanticsAction.scrollLeft].
   ///
@@ -4563,16 +4264,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback? get onScrollLeft => _onScrollLeft;
-  VoidCallback? _onScrollLeft;
-  set onScrollLeft(VoidCallback? handler) {
-    if (_onScrollLeft == handler)
-      return;
-    final bool hadValue = _onScrollLeft != null;
-    _onScrollLeft = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onScrollLeft => _properties.onScrollLeft;
 
   /// The handler for [SemanticsAction.scrollRight].
   ///
@@ -4585,16 +4277,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback? get onScrollRight => _onScrollRight;
-  VoidCallback? _onScrollRight;
-  set onScrollRight(VoidCallback? handler) {
-    if (_onScrollRight == handler)
-      return;
-    final bool hadValue = _onScrollRight != null;
-    _onScrollRight = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onScrollRight => _properties.onScrollRight;
 
   /// The handler for [SemanticsAction.scrollUp].
   ///
@@ -4607,16 +4290,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback? get onScrollUp => _onScrollUp;
-  VoidCallback? _onScrollUp;
-  set onScrollUp(VoidCallback? handler) {
-    if (_onScrollUp == handler)
-      return;
-    final bool hadValue = _onScrollUp != null;
-    _onScrollUp = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onScrollUp => _properties.onScrollUp;
 
   /// The handler for [SemanticsAction.scrollDown].
   ///
@@ -4629,16 +4303,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback? get onScrollDown => _onScrollDown;
-  VoidCallback? _onScrollDown;
-  set onScrollDown(VoidCallback? handler) {
-    if (_onScrollDown == handler)
-      return;
-    final bool hadValue = _onScrollDown != null;
-    _onScrollDown = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onScrollDown => _properties.onScrollDown;
 
   /// The handler for [SemanticsAction.increase].
   ///
@@ -4648,16 +4313,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume up button.
-  VoidCallback? get onIncrease => _onIncrease;
-  VoidCallback? _onIncrease;
-  set onIncrease(VoidCallback? handler) {
-    if (_onIncrease == handler)
-      return;
-    final bool hadValue = _onIncrease != null;
-    _onIncrease = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onIncrease => _properties.onIncrease;
 
   /// The handler for [SemanticsAction.decrease].
   ///
@@ -4667,16 +4323,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume down button.
-  VoidCallback? get onDecrease => _onDecrease;
-  VoidCallback? _onDecrease;
-  set onDecrease(VoidCallback? handler) {
-    if (_onDecrease == handler)
-      return;
-    final bool hadValue = _onDecrease != null;
-    _onDecrease = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onDecrease => _properties.onDecrease;
 
   /// The handler for [SemanticsAction.copy].
   ///
@@ -4684,16 +4331,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback? get onCopy => _onCopy;
-  VoidCallback? _onCopy;
-  set onCopy(VoidCallback? handler) {
-    if (_onCopy == handler)
-      return;
-    final bool hadValue = _onCopy != null;
-    _onCopy = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onCopy => _properties.onCopy;
 
   /// The handler for [SemanticsAction.cut].
   ///
@@ -4702,16 +4340,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback? get onCut => _onCut;
-  VoidCallback? _onCut;
-  set onCut(VoidCallback? handler) {
-    if (_onCut == handler)
-      return;
-    final bool hadValue = _onCut != null;
-    _onCut = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onCut => _properties.onCut;
 
   /// The handler for [SemanticsAction.paste].
   ///
@@ -4719,16 +4348,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback? get onPaste => _onPaste;
-  VoidCallback? _onPaste;
-  set onPaste(VoidCallback? handler) {
-    if (_onPaste == handler)
-      return;
-    final bool hadValue = _onPaste != null;
-    _onPaste = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onPaste => _properties.onPaste;
 
   /// The handler for [SemanticsAction.moveCursorForwardByCharacter].
   ///
@@ -4737,16 +4357,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume up key while the
   /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
-  MoveCursorHandler? _onMoveCursorForwardByCharacter;
-  set onMoveCursorForwardByCharacter(MoveCursorHandler? handler) {
-    if (_onMoveCursorForwardByCharacter == handler)
-      return;
-    final bool hadValue = _onMoveCursorForwardByCharacter != null;
-    _onMoveCursorForwardByCharacter = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  MoveCursorHandler? get onMoveCursorForwardByCharacter => _properties.onMoveCursorForwardByCharacter;
 
   /// The handler for [SemanticsAction.moveCursorBackwardByCharacter].
   ///
@@ -4755,16 +4366,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
-  MoveCursorHandler? _onMoveCursorBackwardByCharacter;
-  set onMoveCursorBackwardByCharacter(MoveCursorHandler? handler) {
-    if (_onMoveCursorBackwardByCharacter == handler)
-      return;
-    final bool hadValue = _onMoveCursorBackwardByCharacter != null;
-    _onMoveCursorBackwardByCharacter = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  MoveCursorHandler? get onMoveCursorBackwardByCharacter => _properties.onMoveCursorBackwardByCharacter;
 
   /// The handler for [SemanticsAction.moveCursorForwardByWord].
   ///
@@ -4773,16 +4375,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
-  MoveCursorHandler? _onMoveCursorForwardByWord;
-  set onMoveCursorForwardByWord(MoveCursorHandler? handler) {
-    if (_onMoveCursorForwardByWord == handler)
-      return;
-    final bool hadValue = _onMoveCursorForwardByWord != null;
-    _onMoveCursorForwardByWord = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  MoveCursorHandler? get onMoveCursorForwardByWord => _properties.onMoveCursorForwardByWord;
 
   /// The handler for [SemanticsAction.moveCursorBackwardByWord].
   ///
@@ -4791,16 +4384,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
-  MoveCursorHandler? _onMoveCursorBackwardByWord;
-  set onMoveCursorBackwardByWord(MoveCursorHandler? handler) {
-    if (_onMoveCursorBackwardByWord == handler)
-      return;
-    final bool hadValue = _onMoveCursorBackwardByWord != null;
-    _onMoveCursorBackwardByWord = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  MoveCursorHandler? get onMoveCursorBackwardByWord => _properties.onMoveCursorBackwardByWord;
 
   /// The handler for [SemanticsAction.setSelection].
   ///
@@ -4809,16 +4393,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this handler by selecting "Move cursor to
   /// beginning/end" or "Select all" from the local context menu.
-  SetSelectionHandler? get onSetSelection => _onSetSelection;
-  SetSelectionHandler? _onSetSelection;
-  set onSetSelection(SetSelectionHandler? handler) {
-    if (_onSetSelection == handler)
-      return;
-    final bool hadValue = _onSetSelection != null;
-    _onSetSelection = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  SetSelectionHandler? get onSetSelection => _properties.onSetSelection;
 
   /// The handler for [SemanticsAction.setText].
   ///
@@ -4827,16 +4402,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// Voice access users can trigger this handler by speaking "type <text>" to
   /// their Android devices.
-  SetTextHandler? get onSetText => _onSetText;
-  SetTextHandler? _onSetText;
-  set onSetText(SetTextHandler? handler) {
-    if (_onSetText == handler)
-      return;
-    final bool hadValue = _onSetText != null;
-    _onSetText = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  SetTextHandler? get onSetText => _properties.onSetText;
 
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
@@ -4855,16 +4421,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback? get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
-  VoidCallback? _onDidGainAccessibilityFocus;
-  set onDidGainAccessibilityFocus(VoidCallback? handler) {
-    if (_onDidGainAccessibilityFocus == handler)
-      return;
-    final bool hadValue = _onDidGainAccessibilityFocus != null;
-    _onDidGainAccessibilityFocus = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onDidGainAccessibilityFocus => _properties.onDidGainAccessibilityFocus;
 
   /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
   ///
@@ -4883,16 +4440,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
   ///    accessibility focus.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback? get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
-  VoidCallback? _onDidLoseAccessibilityFocus;
-  set onDidLoseAccessibilityFocus(VoidCallback? handler) {
-    if (_onDidLoseAccessibilityFocus == handler)
-      return;
-    final bool hadValue = _onDidLoseAccessibilityFocus != null;
-    _onDidLoseAccessibilityFocus = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
+  VoidCallback? get onDidLoseAccessibilityFocus => _properties.onDidLoseAccessibilityFocus;
 
   /// The handlers and supported [CustomSemanticsAction]s for this node.
   ///
@@ -4903,14 +4451,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// See also:
   ///
   ///  * [CustomSemanticsAction], for an explanation of custom actions.
-  Map<CustomSemanticsAction, VoidCallback>? get customSemanticsActions => _customSemanticsActions;
-  Map<CustomSemanticsAction, VoidCallback>? _customSemanticsActions;
-  set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback>? value) {
-    if (_customSemanticsActions == value)
-      return;
-    _customSemanticsActions = value;
-    markNeedsSemanticsUpdate();
-  }
+  Map<CustomSemanticsAction, VoidCallback>? get customSemanticsActions => _properties.customSemanticsActions;
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
@@ -5045,7 +4586,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (onDidLoseAccessibilityFocus != null)
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
     if (customSemanticsActions != null)
-      config.customSemanticsActions = _customSemanticsActions!;
+      config.customSemanticsActions = customSemanticsActions!;
   }
 
   void _performTap() {
