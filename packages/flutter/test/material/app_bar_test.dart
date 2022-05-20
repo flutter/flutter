@@ -977,6 +977,12 @@ void main() {
     ));
 
     final ScrollController controller = primaryScrollController(tester);
+    // There are two widgets for the title. The first is the title on the main
+    // row with the icons. It is transparent when the app bar is expanded, and
+    // opaque when it is collapsed. The second title is a larger version that is
+    // shown at the bottom when the app bar is expanded. It scrolls under the
+    // main row until it is completely hidden and then the first title is faded
+    // in.
     final Finder collapsedTitle = find.text('AppBar Title').first;
     final Finder collapsedTitleOpacity = find.ancestor(
       of: collapsedTitle,
@@ -1044,6 +1050,12 @@ void main() {
     ));
 
     final ScrollController controller = primaryScrollController(tester);
+    // There are two widgets for the title. The first is the title on the main
+    // row with the icons. It is transparent when the app bar is expanded, and
+    // opaque when it is collapsed. The second title is a larger version that is
+    // shown at the bottom when the app bar is expanded. It scrolls under the
+    // main row until it is completely hidden and then the first title is faded
+    // in.
     final Finder collapsedTitle = find.text('AppBar Title').first;
     final Finder collapsedTitleOpacity = find.ancestor(
       of: collapsedTitle,
