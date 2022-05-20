@@ -473,7 +473,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 
   @override
   void dispose() {
-    assert(debugAssertNotDisposed()); // FYI, This uses ChangeNotifier's _debugDisposed, not _disposed.
+    assert(_debugAssertNotDisposed());
     _owner?._unregister(this);
     super.dispose();
     _disposed = true;
@@ -483,14 +483,14 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   String? _restorationId;
   RestorationMixin? _owner;
   void _register(String restorationId, RestorationMixin owner) {
-    assert(debugAssertNotDisposed());
+    assert(_debugAssertNotDisposed());
     assert(restorationId != null);
     assert(owner != null);
     _restorationId = restorationId;
     _owner = owner;
   }
   void _unregister() {
-    assert(debugAssertNotDisposed());
+    assert(_debugAssertNotDisposed());
     assert(_restorationId != null);
     assert(_owner != null);
     _restorationId = null;
@@ -503,15 +503,28 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   @protected
   State get state {
     assert(isRegistered);
-    assert(debugAssertNotDisposed());
+    assert(_debugAssertNotDisposed());
     return _owner!;
   }
 
   /// Whether this property is currently registered with a [RestorationMixin].
   @protected
   bool get isRegistered {
-    assert(debugAssertNotDisposed());
+    assert(_debugAssertNotDisposed());
     return _restorationId != null;
+  }
+
+  bool _debugAssertNotDisposed() {
+    assert(() {
+      if (_disposed) {
+        throw FlutterError(
+          'A $runtimeType was used after being disposed.\n'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
+        );
+      }
+      return true;
+    }());
+    return true;
   }
 }
 
