@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:test/fake.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
-//import '../general.shard/resident_web_runner_test.dart';
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
