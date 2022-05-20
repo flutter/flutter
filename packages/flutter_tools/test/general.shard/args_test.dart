@@ -15,19 +15,6 @@ import '../src/context.dart';
 import '../src/testbed.dart';
 import 'runner/utils.dart';
 
-class CommandDummy extends FlutterCommand{
-  @override
-  String get description => 'description';
-
-  @override
-  String get name => 'test';
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return FlutterCommandResult.success();
-  }
-}
-
 void main() {
   test('Help for command line arguments is consistently styled and complete', () => Testbed().run(() {
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
@@ -47,6 +34,9 @@ void main() {
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addFlag('key');
     command.argParser.addFlag('key-false');
+    // argResults will be null at this point, if attempt to read them is made,
+    // exception `Null check operator used on a null value` would be thrown.
+    expect(() => command.boolArg('key'), throwsA(const TypeMatcher<TypeError>()));
 
     runner.addCommand(command);
     await runner.run(<String>['dummy', '--key']);
@@ -62,11 +52,19 @@ void main() {
   });
 
   testUsingContext('String? safe argResults', () async {
-    final CommandDummy command = CommandDummy();
+    final DummyFlutterCommand command = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+    );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addOption('key');
+    // argResults will be null at this point, if attempt to read them is made,
+    // exception `Null check operator used on a null value` would be thrown
+    expect(() => command.stringArg('key'), throwsA(const TypeMatcher<TypeError>()));
+
     runner.addCommand(command);
-    await runner.run(<String>['test', '--key=value']);
+    await runner.run(<String>['dummy', '--key=value']);
 
     expect(command.stringArg('key'), 'value');
     expect(command.stringArg('empty'), null);

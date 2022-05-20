@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show precisionErrorTolerance;
+import 'package:flutter/foundation.dart' show precisionErrorTolerance, clampDouble;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show RestorationId;
@@ -47,7 +47,7 @@ import 'viewport.dart';
 ///
 /// ```dart
 /// class MyPageView extends StatefulWidget {
-///   const MyPageView({Key? key}) : super(key: key);
+///   const MyPageView({super.key});
 ///
 ///   @override
 ///   State<MyPageView> createState() => _MyPageViewState();
@@ -297,7 +297,7 @@ class PageMetrics extends FixedScrollMetrics {
 
   /// The current page displayed in the [PageView].
   double? get page {
-    return math.max(0.0, pixels.clamp(minScrollExtent, maxScrollExtent)) /
+    return math.max(0.0, clampDouble(pixels, minScrollExtent, maxScrollExtent)) /
            math.max(1.0, viewportDimension * viewportFraction);
   }
 
@@ -397,7 +397,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     );
     return !hasPixels || !hasContentDimensions
       ? null
-      : _cachedPage ?? getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+      : _cachedPage ?? getPageFromPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent), viewportDimension);
   }
 
   @override
@@ -700,7 +700,7 @@ class PageView extends StatefulWidget {
   ///
   /// ```dart
   /// class MyPageView extends StatefulWidget {
-  ///   const MyPageView({Key? key}) : super(key: key);
+  ///   const MyPageView({super.key});
   ///
   ///   @override
   ///   State<MyPageView> createState() => _MyPageViewState();
@@ -752,7 +752,7 @@ class PageView extends StatefulWidget {
   /// }
   ///
   /// class KeepAlive extends StatefulWidget {
-  ///   const KeepAlive({Key? key, required this.data}) : super(key: key);
+  ///   const KeepAlive({super.key, required this.data});
   ///
   ///   final String data;
   ///

@@ -10,7 +10,7 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 void main() => runApp(const IVBuilderExampleApp());
 
 class IVBuilderExampleApp extends StatelessWidget {
-  const IVBuilderExampleApp({Key? key}) : super(key: key);
+  const IVBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {

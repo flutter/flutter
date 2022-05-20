@@ -733,7 +733,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     double pixels, minRange, maxRange, correctionOffset;
     double extra = 0.0;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
-      pixels = _outerPosition!.pixels.clamp(
+      pixels = clampDouble(_outerPosition!.pixels,
         _outerPosition!.minScrollExtent,
         _outerPosition!.maxScrollExtent,
       ); // TODO(ianh): gracefully handle out-of-range outer positions
@@ -800,7 +800,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   double unnestOffset(double value, _NestedScrollPosition source) {
     if (source == _outerPosition)
-      return value.clamp(
+      return clampDouble(value,
         _outerPosition!.minScrollExtent,
         _outerPosition!.maxScrollExtent,
       );
@@ -811,7 +811,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   double nestOffset(double value, _NestedScrollPosition target) {
     if (target == _outerPosition)
-      return value.clamp(
+      return clampDouble(value,
         _outerPosition!.minScrollExtent,
         _outerPosition!.maxScrollExtent,
       );
@@ -1213,7 +1213,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       // 0.0, representing the end of the overscrolled portion.
       : pixels < 0.0 ? 0.0 : math.max(maxScrollExtent, pixels);
     final double oldPixels = pixels;
-    final double newPixels = (pixels - delta).clamp(min, max);
+    final double newPixels = clampDouble(pixels - delta, min, max);
     final double clampedDelta = newPixels - pixels;
     if (clampedDelta == 0.0)
       return delta;
@@ -1269,7 +1269,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     final double max = delta < 0.0
         ? double.infinity
         : math.max(maxScrollExtent, pixels);
-    final double newPixels = (pixels + delta).clamp(min, max);
+    final double newPixels = clampDouble(pixels + delta, min, max);
     final double clampedDelta = newPixels - pixels;
     if (clampedDelta == 0.0)
       return delta;
@@ -1495,7 +1495,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
         done = true;
       }
     } else {
-      value = value.clamp(metrics.minRange, metrics.maxRange);
+      value = clampDouble(value, metrics.minRange, metrics.maxRange);
       done = true;
     }
     final bool result = super.applyMoveTo(value + metrics.correctionOffset);

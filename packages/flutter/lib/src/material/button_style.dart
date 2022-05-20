@@ -53,7 +53,7 @@ import 'theme_data.dart';
 /// ```dart
 /// ElevatedButton(
 ///   style: ButtonStyle(
-///     backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
 ///   ),
 /// )
 /// ```

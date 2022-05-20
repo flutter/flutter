@@ -1828,7 +1828,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.text('AC')));
-    addTearDown(gesture.removePointer);
 
     await tester.pumpAndSettle();
 

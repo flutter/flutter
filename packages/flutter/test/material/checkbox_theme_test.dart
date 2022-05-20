@@ -49,11 +49,11 @@ void main() {
 
   testWidgets('CheckboxThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    CheckboxThemeData(
-      mouseCursor: MaterialStateProperty.all(SystemMouseCursors.click),
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
-      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
-      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+    const CheckboxThemeData(
+      mouseCursor: MaterialStatePropertyAll<MouseCursor?>(SystemMouseCursors.click),
+      fillColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
+      checkColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
+      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
       splashRadius: 1.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.standard,
@@ -64,10 +64,10 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(click))');
-    expect(description[1], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
-    expect(description[2], 'checkColor: MaterialStateProperty.all(Color(0xfffffff1))');
-    expect(description[3], 'overlayColor: MaterialStateProperty.all(Color(0xfffffff2))');
+    expect(description[0], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
+    expect(description[1], 'fillColor: MaterialStatePropertyAll(Color(0xfffffff0))');
+    expect(description[2], 'checkColor: MaterialStatePropertyAll(Color(0xfffffff1))');
+    expect(description[3], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
     expect(description[4], 'splashRadius: 1.0');
     expect(description[5], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
     expect(description[6], equalsIgnoringHashCodes('visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)'));
@@ -91,7 +91,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
-            mouseCursor: MaterialStateProperty.all(mouseCursor),
+            mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(mouseCursor),
             fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
@@ -182,14 +182,14 @@ void main() {
         return MaterialApp(
           theme: ThemeData(
             checkboxTheme: CheckboxThemeData(
-              mouseCursor: MaterialStateProperty.all(themeMouseCursor),
+              mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(themeMouseCursor),
               fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return themeSelectedFillColor;
                 }
                 return themeDefaultFillColor;
               }),
-              checkColor: MaterialStateProperty.all(themeCheckColor),
+              checkColor: const MaterialStatePropertyAll<Color?>(themeCheckColor),
               overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.focused)) {
                   return themeFocusOverlayColor;
@@ -361,16 +361,16 @@ void main() {
     Widget buildCheckbox({required bool active}) {
       return MaterialApp(
         theme: ThemeData(
-          checkboxTheme: CheckboxThemeData(
-            checkColor: MaterialStateProperty.all<Color>(globalThemeCheckColor),
-            fillColor: MaterialStateProperty.all<Color>(globalThemeFillColor),
+          checkboxTheme: const CheckboxThemeData(
+            checkColor: MaterialStatePropertyAll<Color>(globalThemeCheckColor),
+            fillColor: MaterialStatePropertyAll<Color>(globalThemeFillColor),
           ),
         ),
         home: Scaffold(
           body: CheckboxTheme(
-            data: CheckboxThemeData(
-              fillColor: MaterialStateProperty.all<Color>(localThemeFillColor),
-              checkColor: MaterialStateProperty.all<Color>(localThemeCheckColor),
+            data: const CheckboxThemeData(
+              fillColor: MaterialStatePropertyAll<Color>(localThemeFillColor),
+              checkColor: MaterialStatePropertyAll<Color>(localThemeCheckColor),
             ),
             child: Checkbox(
               value: active,

@@ -1253,7 +1253,7 @@ class ListView extends BoxScrollView {
   ///
   /// ```dart
   /// class MyListView extends StatefulWidget {
-  ///   const MyListView({Key? key}) : super(key: key);
+  ///   const MyListView({super.key});
   ///
   ///   @override
   ///   State<MyListView> createState() => _MyListViewState();

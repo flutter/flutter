@@ -68,7 +68,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// }
 ///
 /// class MyApp extends StatelessWidget {
-///   const MyApp({Key? key}) : super(key: key);
+///   const MyApp({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {

@@ -651,7 +651,13 @@ abstract class MaterialStateProperty<T> {
 
   /// Convenience method for creating a [MaterialStateProperty] that resolves
   /// to a single value for all states.
-  static MaterialStateProperty<T> all<T>(T value) => _MaterialStatePropertyAll<T>(value);
+  ///
+  /// If you need a const value, use [MaterialStatePropertyAll] directly.
+  ///
+  // TODO(darrenaustin): Deprecate this when we have the ability to create
+  // a dart fix that will replace this with MaterialStatePropertyAll:
+  // https://github.com/dart-lang/sdk/issues/49056.
+  static MaterialStateProperty<T> all<T>(T value) => MaterialStatePropertyAll<T>(value);
 }
 
 class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
@@ -663,14 +669,20 @@ class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
   T resolve(Set<MaterialState> states) => _resolve(states);
 }
 
-class _MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
-  _MaterialStatePropertyAll(this.value);
+/// Convenience class for creating a [MaterialStateProperty] that
+/// resolves to the given value for all states.
+class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 
+  /// Constructs a [MaterialStateProperty] that always resolves to the given
+  /// value.
+  const MaterialStatePropertyAll(this.value);
+
+  /// The value of the property that will be used for all states.
   final T value;
 
   @override
   T resolve(Set<MaterialState> states) => value;
 
   @override
-  String toString() => 'MaterialStateProperty.all($value)';
+  String toString() => 'MaterialStatePropertyAll($value)';
 }

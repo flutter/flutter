@@ -1248,14 +1248,13 @@ void main() {
   testWidgets('The mouse cursor is themeable', (WidgetTester tester) async {
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-        mouseCursor: MaterialStateProperty.all(SystemMouseCursors.text),
+        mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.text),
       )
     ));
 
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Slider)));
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
