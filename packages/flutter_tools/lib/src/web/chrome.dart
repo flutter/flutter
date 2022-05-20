@@ -393,6 +393,8 @@ class ChromiumLauncher {
            !directory.path.endsWith('GPUCache');
   }
 
+  /// Connect to the [chrome] instance, testing the connection if
+  /// [skipCheck] is set to false.
   @visibleForTesting
   Future<Chromium> connect(Chromium chrome, bool skipCheck) async {
     // The connection is lazy. Try a simple call to make sure the provided
