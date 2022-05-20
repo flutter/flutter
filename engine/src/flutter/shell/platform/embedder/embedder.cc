@@ -78,8 +78,6 @@ const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
 // - lib/ui/platform_dispatcher.dart, _kFlutterKeyDataChannel
 // - shell/platform/darwin/ios/framework/Source/FlutterEngine.mm,
 //   FlutterKeyDataChannel
-// - io/flutter/embedding/android/KeyData.java,
-//   CHANNEL
 //
 // Not to be confused with "flutter/keyevent", which is used to send raw
 // key event data in a platform-dependent format.

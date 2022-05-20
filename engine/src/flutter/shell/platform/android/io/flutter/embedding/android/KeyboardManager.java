@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.android;
 
-import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import io.flutter.Log;
@@ -44,69 +43,6 @@ public class KeyboardManager implements InputConnectionAdaptor.KeyboardDelegate 
   private static final String TAG = "KeyboardManager";
 
   /**
-   * Applies the given Unicode character from {@link KeyEvent#getUnicodeChar()} to a previously
-   * entered Unicode combining character and returns the combination of these characters if a
-   * combination exists.
-   *
-   * <p>This class is not used by {@link KeyboardManager}, but by its responders.
-   */
-  public static class CharacterCombiner {
-    private int combiningCharacter = 0;
-
-    public CharacterCombiner() {}
-
-    /**
-     * This method mutates {@link #combiningCharacter} over time to combine characters.
-     *
-     * <p>One of the following things happens in this method:
-     *
-     * <ul>
-     *   <li>If no previous {@link #combiningCharacter} exists and the {@code newCharacterCodePoint}
-     *       is not a combining character, then {@code newCharacterCodePoint} is returned.
-     *   <li>If no previous {@link #combiningCharacter} exists and the {@code newCharacterCodePoint}
-     *       is a combining character, then {@code newCharacterCodePoint} is saved as the {@link
-     *       #combiningCharacter} and null is returned.
-     *   <li>If a previous {@link #combiningCharacter} exists and the {@code newCharacterCodePoint}
-     *       is also a combining character, then the {@code newCharacterCodePoint} is combined with
-     *       the existing {@link #combiningCharacter} and null is returned.
-     *   <li>If a previous {@link #combiningCharacter} exists and the {@code newCharacterCodePoint}
-     *       is not a combining character, then the {@link #combiningCharacter} is applied to the
-     *       regular {@code newCharacterCodePoint} and the resulting complex character is returned.
-     *       The {@link #combiningCharacter} is cleared.
-     * </ul>
-     *
-     * <p>The following reference explains the concept of a "combining character":
-     * https://en.wikipedia.org/wiki/Combining_character
-     */
-    Character applyCombiningCharacterToBaseCharacter(int newCharacterCodePoint) {
-      char complexCharacter = (char) newCharacterCodePoint;
-      boolean isNewCodePointACombiningCharacter =
-          (newCharacterCodePoint & KeyCharacterMap.COMBINING_ACCENT) != 0;
-      if (isNewCodePointACombiningCharacter) {
-        // If a combining character was entered before, combine this one with that one.
-        int plainCodePoint = newCharacterCodePoint & KeyCharacterMap.COMBINING_ACCENT_MASK;
-        if (combiningCharacter != 0) {
-          combiningCharacter = KeyCharacterMap.getDeadChar(combiningCharacter, plainCodePoint);
-        } else {
-          combiningCharacter = plainCodePoint;
-        }
-      } else {
-        // The new character is a regular character. Apply combiningCharacter to it, if
-        // it exists.
-        if (combiningCharacter != 0) {
-          int combinedChar = KeyCharacterMap.getDeadChar(combiningCharacter, newCharacterCodePoint);
-          if (combinedChar > 0) {
-            complexCharacter = (char) combinedChar;
-          }
-          combiningCharacter = 0;
-        }
-      }
-
-      return complexCharacter;
-    }
-  }
-
-  /**
    * Construct a {@link KeyboardManager}.
    *
    * @param viewDelegate provides a set of interfaces that the keyboard manager needs to interact
@@ -115,8 +51,7 @@ public class KeyboardManager implements InputConnectionAdaptor.KeyboardDelegate 
   public KeyboardManager(@NonNull ViewDelegate viewDelegate) {
     this.viewDelegate = viewDelegate;
     this.responders =
-        new Responder[] {
-          new KeyEmbedderResponder(viewDelegate.getBinaryMessenger()),
+        new KeyChannelResponder[] {
           new KeyChannelResponder(new KeyEventChannel(viewDelegate.getBinaryMessenger())),
         };
   }
