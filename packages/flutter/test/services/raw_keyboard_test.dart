@@ -1936,6 +1936,10 @@ void main() {
       const  String platform = 'windows';
       bool lastHandled = true;
       final List<RawKeyEvent> events = <RawKeyEvent>[];
+      // Dispatch an event for the correct transit mode.
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
+      await simulateKeyUpEvent(LogicalKeyboardKey.keyA);
+
       // Simulate raw events because VK_PROCESSKEY does not exist in the key mapping.
       Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
         return ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -1962,7 +1966,7 @@ void main() {
       expect(events, isEmpty);
       expect(lastHandled, true);
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-    });
+    }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
     test('data.toString', () {
       expect(RawKeyEvent.fromMessage(const <String, Object?>{
