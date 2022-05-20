@@ -126,6 +126,19 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
                       int32_t device_id = 0) override;
 
   // |WindowBindingHandlerDelegate|
+  virtual void OnPointerPanZoomStart(int32_t device_id) override;
+
+  // |WindowBindingHandlerDelegate|
+  virtual void OnPointerPanZoomUpdate(int32_t device_id,
+                                      double pan_x,
+                                      double pan_y,
+                                      double scale,
+                                      double rotation) override;
+
+  // |WindowBindingHandlerDelegate|
+  virtual void OnPointerPanZoomEnd(int32_t device_id) override;
+
+  // |WindowBindingHandlerDelegate|
   void OnText(const std::u16string&) override;
 
   // |WindowBindingHandlerDelegate|
@@ -207,6 +220,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
 
     // The currently pressed buttons, as represented in FlutterPointerEvent.
     uint64_t buttons = 0;
+
+    // The x position where the last pan/zoom started.
+    double pan_zoom_start_x = 0;
+
+    // The y position where the last pan/zoom started.
+    double pan_zoom_start_y = 0;
   };
 
   // States a resize event can be in.
@@ -246,6 +265,16 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // SendPointerEnter method. A mouse enter event is tracked then the "move"
   // event is called.
   void SendPointerLeave(double x, double y, PointerState* state);
+
+  void SendPointerPanZoomStart(int32_t device_id, double x, double y);
+
+  void SendPointerPanZoomUpdate(int32_t device_id,
+                                double pan_x,
+                                double pan_y,
+                                double scale,
+                                double rotation);
+
+  void SendPointerPanZoomEnd(int32_t device_id);
 
   // Reports a keyboard character to Flutter engine.
   void SendText(const std::u16string&);
