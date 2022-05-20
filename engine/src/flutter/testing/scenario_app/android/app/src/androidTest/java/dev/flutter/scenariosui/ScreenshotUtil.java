@@ -5,227 +5,121 @@
 package dev.flutter.scenariosui;
 
 import android.graphics.Bitmap;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Xml;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnitRunner;
-import com.facebook.testing.screenshot.ScreenshotRunner;
-import com.facebook.testing.screenshot.internal.AlbumImpl;
-import com.facebook.testing.screenshot.internal.Registry;
-import com.facebook.testing.screenshot.internal.TestNameDetector;
 import dev.flutter.scenarios.TestableFlutterActivity;
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import org.xmlpull.v1.XmlSerializer;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
- * Adapter for {@code com.facebook.testing.screenshot.Screenshot} that supports Flutter apps.
- *
- * <p>{@code com.facebook.testing.screenshot.Screenshot} relies on {@code View#draw(canvas)}, which
- * doesn't draw Flutter's Surface or SurfaceTexture.
- *
- * <p>The workaround takes a full screenshot of the device and removes the status and action bars.
+ * Allows to capture screenshots, and transfers the screenshots to the host where they can be
+ * further proccessed. On a LUCI environment, the screenshots are sent to Skia Gold.
  */
 public class ScreenshotUtil {
-  private XmlSerializer serializer;
-  private AlbumImpl album;
-  private OutputStream streamOutput;
+  private static final String HOST = "localhost";
+  private static final int PORT = 3000;
 
-  private static ScreenshotUtil instance;
-  private static int BUFFER_SIZE = 1 << 16; // 64K
+  private static Connection conn;
+  private static Executor executor;
 
-  @NonNull
-  protected static ScreenshotUtil getInstance() {
-    synchronized (ScreenshotUtil.class) {
-      if (instance == null) {
-        instance = new ScreenshotUtil();
-      }
-      return instance;
+  private static class Connection {
+    final Socket clientSocket;
+    final OutputStream out;
+
+    Connection(Socket socket) throws IOException {
+      clientSocket = socket;
+      out = socket.getOutputStream();
+    }
+
+    synchronized void writeFile(String name, byte[] fileContent) throws IOException {
+      final ByteBuffer buffer = ByteBuffer.allocate(name.length() + fileContent.length + 4);
+      buffer.putInt(name.length());
+      buffer.put(name.getBytes());
+      buffer.put(fileContent);
+      final byte[] bytes = buffer.array();
+      out.write(bytes, 0, bytes.length);
+      out.flush();
+    }
+
+    synchronized void close() throws IOException {
+      clientSocket.close();
     }
   }
 
-  /** Starts the album, which contains the screenshots in a zip file, and a metadata.xml file. */
-  void init() {
-    if (serializer != null) {
-      return;
+  /** Starts the connection with the host. */
+  public static synchronized void onCreate() {
+    if (executor == null) {
+      executor = Executors.newSingleThreadExecutor();
     }
-    album = AlbumImpl.create(Registry.getRegistry().instrumentation.getContext(), "default");
-    // Delete all screenshots in the device associated with this album.
-    album.cleanup();
-
-    serializer = Xml.newSerializer();
-    try {
-      streamOutput =
-          new BufferedOutputStream(new FileOutputStream(album.getMetadataFile()), BUFFER_SIZE);
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
-    }
-    try {
-      serializer.setOutput(streamOutput, "utf-8");
-      serializer.startDocument("utf-8", null);
-      // Start tag <screenshots>.
-      serializer.startTag(null, "screenshots");
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  void writeText(String tagName, String value) throws IOException {
-    if (serializer == null) {
-      throw new RuntimeException("ScreenshotUtil must be initialized. Call init().");
-    }
-    serializer.startTag(null, tagName);
-    serializer.text(value);
-    serializer.endTag(null, tagName);
-  }
-
-  void writeBitmap(Bitmap bitmap, String name, String testClass, String testName)
-      throws IOException {
-    if (serializer == null) {
-      throw new RuntimeException("ScreenshotUtil must be initialized. Call init().");
-    }
-    album.writeBitmap(name, 0, 0, bitmap);
-
-    serializer.startTag(null, "screenshot");
-    writeText("name", name);
-    writeText("test_class", testClass);
-    writeText("test_name", testName);
-    writeText("tile_width", "1");
-    writeText("tile_height", "1");
-    serializer.endTag(null, "screenshot");
-  }
-
-  /** Finishes metadata.xml. */
-  void flush() {
-    if (serializer == null) {
-      throw new RuntimeException("ScreenshotUtil must be initialized. Call init().");
-    }
-    try {
-      // End tag </screenshots>
-      serializer.endTag(null, "screenshots");
-      serializer.endDocument();
-      serializer.flush();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    try {
-      streamOutput.close();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    album.flush();
-
-    serializer = null;
-    streamOutput = null;
-    album = null;
-  }
-
-  /**
-   * Captures a screenshot of {@code TestableFlutterActivity}.
-   *
-   * <p>The activity must be already launched.
-   */
-  public static void capture(@NonNull TestableFlutterActivity activity)
-      throws InterruptedException, ExecutionException, IOException {
-    // Yield and wait for the engine to render the first Flutter frame.
-    activity.waitUntilFlutterRendered();
-
-    // This method is called from the runner thread,
-    // so block the UI thread while taking the screenshot.
-
-    // Screenshot.capture(view or activity) does not capture the Flutter UI.
-    // Unfortunately, it doesn't work with Android's `Surface` or `TextureSurface`.
-    //
-    // As a result, capture a screenshot of the entire device and then clip
-    // the status and action bars.
-    //
-    // Under the hood, this call is similar to `adb screencap`, which is used
-    // to capture screenshots.
-    final String testClass = TestNameDetector.getTestClass();
-    final String testName = TestNameDetector.getTestName();
-
-    runCallableOnUiThread(
-        new Callable<Void>() {
-          @Override
-          public Void call() {
-            Bitmap bitmap =
-                InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-            // Remove the status and action bars from the screenshot capture.
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-            final String screenshotName = String.format("%s__%s", testClass, testName);
-            // Write bitmap to the album.
+    if (conn == null) {
+      executor.execute(
+          () -> {
             try {
-              ScreenshotUtil.getInstance().writeBitmap(bitmap, screenshotName, testClass, testName);
+              final Socket socket = new Socket(HOST, PORT);
+              conn = new Connection(socket);
             } catch (IOException e) {
               throw new RuntimeException(e);
             }
-            return null;
-          }
-        });
-  }
-
-  /**
-   * Initializes the {@code com.facebook.testing.screenshot.internal.Album}.
-   *
-   * <p>Call this method from {@code AndroidJUnitRunner#onCreate}.
-   */
-  public static void onCreate(@NonNull AndroidJUnitRunner runner, @Nullable Bundle arguments) {
-    ScreenshotRunner.onCreate(runner, arguments);
-    ScreenshotUtil.getInstance().init();
-  }
-
-  /**
-   * Flushes the {@code com.facebook.testing.screenshot.internal.Album}.
-   *
-   * <p>Call this method from {@code AndroidJUnitRunner#onDestroy}.
-   */
-  public static void onDestroy() {
-    ScreenshotRunner.onDestroy();
-    ScreenshotUtil.getInstance().flush();
-  }
-
-  private static void runCallableOnUiThread(final Callable<Void> callable) {
-    if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-      try {
-        callable.call();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      return;
+          });
     }
-    Handler handler = new Handler(Looper.getMainLooper());
-    final Object lock = new Object();
-    synchronized (lock) {
-      handler.post(
-          new Runnable() {
-            @Override
-            public void run() {
-              try {
-                callable.call();
-              } catch (Exception e) {
-                e.printStackTrace();
-              }
-              synchronized (lock) {
-                lock.notifyAll();
-              }
+  }
+
+  /** Closes the connection with the host. */
+  public static synchronized void finish() {
+    if (executor != null && conn != null) {
+      executor.execute(
+          () -> {
+            try {
+              conn.close();
+              conn = null;
+            } catch (IOException e) {
+              throw new RuntimeException(e);
             }
           });
-      try {
-        lock.wait();
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
     }
+  }
+
+  /**
+   * Sends the file to the host.
+   *
+   * @param filename The file name.
+   * @param fileContent The file content.
+   */
+  public static synchronized void writeFile(@NonNull String filename, @NonNull byte[] fileContent) {
+    if (executor != null && conn != null) {
+      executor.execute(
+          () -> {
+            try {
+              conn.writeFile(filename, fileContent);
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
+          });
+    }
+  }
+
+  /**
+   * Captures a screenshot of the activity, and sends the screenshot bytes to the host where it is
+   * further processed.
+   *
+   * <p>The activity must be already launched.
+   *
+   * @param activity The target activity.
+   * @param fileName The name of the file.
+   */
+  public static void capture(@NonNull TestableFlutterActivity activity, @NonNull String captureName)
+      throws Exception {
+    activity.waitUntilFlutterRendered();
+
+    final Bitmap bitmap =
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+    ScreenshotUtil.writeFile(captureName, out.toByteArray());
   }
 }

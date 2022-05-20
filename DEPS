@@ -518,7 +518,7 @@ deps = {
   'src/third_party/imgui':
   Var('github_git') + '/ocornut/imgui.git' + '@' + '29d462ebce0275345a6ce4621d8fff0ded57c9e5',
 
-  'src/gradle': {
+  'src/third_party/gradle': {
     'packages': [
       {
         'version': 'version:7.0.2',

@@ -17,7 +17,7 @@ SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 BAT = '.bat' if sys.platform.startswith(('cygwin', 'win')) else ''
 GRADLE_BIN = os.path.normpath(os.path.join(SCRIPT_PATH, '..', '..', '..',
-    'gradle', 'bin', 'gradle%s' % BAT))
+    'third_party', 'gradle', 'bin', 'gradle%s' % BAT))
 
 ANDROID_HOME = os.path.normpath(os.path.join(SCRIPT_PATH, '..', '..', '..',
     'third_party', 'android_tools', 'sdk'))
