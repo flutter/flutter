@@ -52,7 +52,7 @@ void main() {
 
   group('RestorationScope', () {
     testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
-      const String id = 'hello world 1234';
+      const RestorationId id = 'hello world 1234';
       final MockRestorationManager manager = MockRestorationManager();
       final Map<String, dynamic> rawData = <String, dynamic>{};
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
