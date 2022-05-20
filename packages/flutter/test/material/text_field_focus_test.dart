@@ -466,7 +466,7 @@ void main() {
 
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
-  }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
