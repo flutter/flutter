@@ -54,5 +54,65 @@ class _TokenDefaultsM3 extends AppBarTheme {
 
   @override
   TextStyle? get titleTextStyle => ${textStyle('md.comp.top-app-bar.small.headline')};
-}''';
+}
+
+// Variant configuration
+class _MediumScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
+  _MediumScrollUnderFlexibleConfig(this.context);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+  late final TextTheme _textTheme = _theme.textTheme;
+
+  static const double collapsedHeight = ${tokens['md.comp.top-app-bar.small.container.height']};
+  static const double expandedHeight = ${tokens['md.comp.top-app-bar.medium.container.height']};
+
+  @override
+  TextStyle? get collapsedTextStyle =>
+    ${textStyle('md.comp.top-app-bar.small.headline')}?.apply(color: ${color('md.comp.top-app-bar.small.headline.color')});
+
+  @override
+  TextStyle? get expandedTextStyle =>
+    ${textStyle('md.comp.top-app-bar.medium.headline')}?.apply(color: ${color('md.comp.top-app-bar.medium.headline.color')});
+
+  @override
+  EdgeInsetsGeometry? get collapsedTitlePadding => const EdgeInsetsDirectional.fromSTEB(48, 0, 16, 0);
+
+  @override
+  EdgeInsetsGeometry? get collapsedCenteredTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 0);
+
+  @override
+  EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 20);
+}
+
+class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
+  _LargeScrollUnderFlexibleConfig(this.context);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+  late final TextTheme _textTheme = _theme.textTheme;
+
+  static const double collapsedHeight = ${tokens['md.comp.top-app-bar.small.container.height']};
+  static const double expandedHeight = ${tokens['md.comp.top-app-bar.large.container.height']};
+
+  @override
+  TextStyle? get collapsedTextStyle =>
+    ${textStyle('md.comp.top-app-bar.small.headline')}?.apply(color: ${color('md.comp.top-app-bar.small.headline.color')});
+
+  @override
+  TextStyle? get expandedTextStyle =>
+    ${textStyle('md.comp.top-app-bar.large.headline')}?.apply(color: ${color('md.comp.top-app-bar.large.headline.color')});
+
+  @override
+  EdgeInsetsGeometry? get collapsedTitlePadding => const EdgeInsetsDirectional.fromSTEB(48, 0, 16, 0);
+
+  @override
+  EdgeInsetsGeometry? get collapsedCenteredTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 0);
+
+  @override
+  EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
+}
+''';
 }
