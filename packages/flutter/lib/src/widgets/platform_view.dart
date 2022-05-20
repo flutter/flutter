@@ -562,7 +562,7 @@ class _UiKitViewState extends State<UiKitView> {
   UiKitViewController? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
-  FocusNode? _focusNode;
+  late FocusNode _focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
@@ -645,7 +645,7 @@ class _UiKitViewState extends State<UiKitView> {
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {
-        _focusNode!.requestFocus();
+        _focusNode.requestFocus();
       }
     );
     if (!mounted) {
@@ -660,21 +660,7 @@ class _UiKitViewState extends State<UiKitView> {
   }
 
   void _onFocusChange(bool isFocused) {
-    if (!isFocused) {
-      // Unlike Android, we do not need to send "clearFocus" channel message
-      // to the engine, because focusing on another view will automatically
-      // cancel the focus on the previously focused platform view.
-    } else {
-      SystemChannels.textInput.invokeMethod<void>(
-        'TextInput.setPlatformViewClient',
-        <String, dynamic>{'platformViewId': _controller!.id},
-      ).catchError((dynamic e) {
-        // TODO(huan): remove this once "TextInput.setPlatformViewClient" is implemented on engine.
-        if (e is MissingPluginException) {
-          return;
-        }
-      });
-    }
+    // TODO(hellohuanlin): send 'TextInput.setPlatformViewClient' channel message to engine after the engine is updated to handle this message.
   }
 }
 
