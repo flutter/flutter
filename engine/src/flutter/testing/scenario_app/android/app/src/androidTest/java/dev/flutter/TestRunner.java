@@ -12,13 +12,13 @@ import dev.flutter.scenariosui.ScreenshotUtil;
 public class TestRunner extends AndroidJUnitRunner {
   @Override
   public void onCreate(@Nullable Bundle arguments) {
-    ScreenshotUtil.onCreate(this, arguments);
+    ScreenshotUtil.onCreate();
     super.onCreate(arguments);
   }
 
   @Override
   public void finish(int resultCode, @Nullable Bundle results) {
-    ScreenshotUtil.onDestroy();
+    ScreenshotUtil.finish();
     super.finish(resultCode, results);
   }
 }

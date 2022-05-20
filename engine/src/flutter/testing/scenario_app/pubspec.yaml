@@ -15,10 +15,25 @@ environment:
 # check the .packages and .package_config to make sure all the paths are
 # relative to this directory into //third_party/dart, or //third_party/pkg
 dependencies:
+  args: any
+  path: any
+  process: any
   sky_engine: any
   vector_math: any
 
 dependency_overrides:
+  args:
+    path: ../../../third_party/dart/third_party/pkg/args
+  file:
+    path: ../../../third_party/pkg/file/packages/file
+  meta:
+    path: ../../../third_party/dart/pkg/meta
+  path:
+    path: ../../../third_party/dart/third_party/pkg/path
+  platform:
+    path: ../../../third_party/pkg/platform
+  process:
+    path: ../../../third_party/pkg/process
   sky_engine:
     path: ../../sky/packages/sky_engine
   vector_math:

@@ -33,6 +33,7 @@ public class SpawnEngineTests {
   @Test
   public void testSpawnedEngine() throws Exception {
     intent.putExtra("scenario_name", "spawn_engine_works");
-    ScreenshotUtil.capture(activityRule.launchActivity(intent));
+    ScreenshotUtil.capture(
+        activityRule.launchActivity(intent), "SpawnEngineTests_testSpawnedEngine");
   }
 }

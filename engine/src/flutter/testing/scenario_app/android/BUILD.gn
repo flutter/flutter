@@ -9,6 +9,7 @@ _android_sources = [
   "app/src/androidTest/java/dev/flutter/TestRunner.java",
   "app/src/androidTest/java/dev/flutter/scenarios/EngineLaunchE2ETest.java",
   "app/src/androidTest/java/dev/flutter/scenarios/ExampleInstrumentedTest.java",
+  "app/src/androidTest/java/dev/flutter/scenariosui/ExternalTextureTests.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/MemoryLeakTests.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/PlatformTextureUiTests.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/PlatformViewUiTests.java",
@@ -47,8 +48,29 @@ gradle_task("build_apk") {
   ]
 }
 
-copy("android") {
+gradle_task("build_test_apk") {
+  app_name = "scenario_app"
+  task = ":app:packageDebugAndroidTest"
+  gradle_project_dir = rebase_path(".")
+  sources = _android_sources
+  outputs = [ "$root_out_dir/scenario_app/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk" ]
+
+  deps = [
+    ":android_lint",
+    "//flutter/testing/scenario_app:scenario_app_snapshot",
+  ]
+}
+
+copy("firebase_apk") {
   sources = get_target_outputs(":build_apk")
   outputs = [ "$root_out_dir/firebase_apks/scenario_app.apk" ]
   deps = [ ":build_apk" ]
+}
+
+group("android") {
+  deps = [
+    ":build_apk",
+    ":build_test_apk",
+    ":firebase_apk",
+  ]
 }
