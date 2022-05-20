@@ -1,5 +1,6 @@
 import 'package:flutter/src/painting/text_span.dart';
 import 'package:flutter/src/painting/text_style.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -33,19 +34,18 @@ class SpellCheckerSuggestionSpan {
         this.replacementSuggestions = replacementSuggestions;
     }
 
-// TODO(camillesimon): Fix this to avoid manual equality checks
-//     @override
-//     bool operator ==(Object other) {
-//         if (identical(this, other))
-//             return true;
-//         return other is SpellCheckerSuggestionSpan
-//             && other.start == start
-//             && other.end == end
-//             && other.replacementSuggestions == replacementSuggestions;
-//     }
+    @override
+    bool operator ==(Object other) {
+        if (identical(this, other))
+            return true;
+        return other is SpellCheckerSuggestionSpan
+            && other.start == start
+            && other.end == end
+            && listEquals<String>(other.replacementSuggestions, replacementSuggestions);
+    }
 
-//     @override
-//     int get hashCode => Object.hash(start, end, replacementSuggestions);
+    @override
+    int get hashCode => Object.hash(start, end, hashList(replacementSuggestions));
 }
 
 /// Creates a configuration that controls how spell check is handled in a subtree of text input related widgets.
@@ -210,28 +210,6 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
      return null;
    }
 
-  // Temporary way to find if two results are equivalent since != not working as expected
-   bool spansEqual(List<SpellCheckerSuggestionSpan> oldResults, List<SpellCheckerSuggestionSpan> newResults) {
-       if (oldResults.length != newResults.length) {
-           return false;
-       }
-
-       int span_pointer = 0;
-
-       while (span_pointer < oldResults.length) {
-          SpellCheckerSuggestionSpan oldSpan = oldResults[span_pointer];
-          SpellCheckerSuggestionSpan newSpan = newResults[span_pointer];
-          
-          if (oldSpan.start != newSpan.start || oldSpan.end != newSpan.end) {
-              return false;
-          }
-
-          span_pointer += 1;
-       }
-
-       return true;
-   }
-
    // Temporary way to merge two resutls since set union is not working as expected
    List<SpellCheckerSuggestionSpan> mergeResults(List<SpellCheckerSuggestionSpan> oldResults, List<SpellCheckerSuggestionSpan> newResults) {
        List<SpellCheckerSuggestionSpan> mergedResults = <SpellCheckerSuggestionSpan>[];;
@@ -289,7 +267,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
 
       if (spellCheckResultsText != value.text) {
         spellCheckResults = correctSpellCheckResults(value.text, spellCheckResultsText!, rawSpellCheckResults!);
-      } else if (reusableText != null && reusableText == spellCheckResultsText && reusableSpellCheckResults != null && rawSpellCheckResults != null && !spansEqual(reusableSpellCheckResults!, rawSpellCheckResults!)) {
+      } else if (reusableText != null && reusableText == spellCheckResultsText && reusableSpellCheckResults != null && rawSpellCheckResults != null && !listEquals(reusableSpellCheckResults!, rawSpellCheckResults!)) {
           spellCheckResults = mergeResults(reusableSpellCheckResults!, rawSpellCheckResults!);
       } else {
         spellCheckResults = rawSpellCheckResults;
