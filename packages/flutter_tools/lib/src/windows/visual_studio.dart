@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -12,7 +14,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
-import '../convert.dart';
 
 /// Encapsulates information about the installed copy of Visual Studio, if any.
 class VisualStudio {
@@ -282,6 +283,10 @@ class VisualStudio {
         '-utf8',
         '-latest',
       ];
+      // Ideally this would use Flutter's utf8 encoding which errors on malformed UTF-8.
+      // However, vswhere.exe is known to output unicode replacement characters.
+      // These replacement characters will be ignored unless they affect used properties.
+      // See: https://github.com/flutter/flutter/issues/102451
       final RunResult whereResult = _processUtils.runSync(<String>[
         _vswherePath,
         ...defaultArguments,
@@ -416,15 +421,31 @@ class VswhereDetails {
 
     return VswhereDetails(
       meetsRequirements: meetsRequirements,
-      installationPath: details['installationPath'] as String?,
-      displayName: details['displayName'] as String?,
-      fullVersion: details['installationVersion'] as String?,
+      installationPath: _readString(details['installationPath']),
+      displayName: _readString(details['displayName']),
+      fullVersion: _readString(details['installationVersion']),
       isComplete: details['isComplete'] as bool?,
       isLaunchable: details['isLaunchable'] as bool?,
       isRebootRequired: details['isRebootRequired'] as bool?,
       isPrerelease: details['isPrerelease'] as bool?,
-      catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?,
+      catalogDisplayVersion: catalog == null ? null : _readString(catalog['productDisplayVersion']),
     );
+  }
+
+  static String? _readString(dynamic value) {
+    // The output of vswhere.exe is known to output replacement characters.
+    // Ensure this does not affect values used by Flutter.
+    // See: https://github.com/flutter/flutter/issues/102451
+    final String? stringValue = value as String?;
+    if (value != null && value.contains('\u{FFFD}')) {
+      throwToolExit(
+        'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string: $value. '
+        'The Flutter team would greatly appreciate if you could file a bug explaining '
+        'exactly what you were doing when this happened:\n'
+        'https://github.com/flutter/flutter/issues/new/choose\n');
+    }
+
+    return stringValue;
   }
 
   /// Whether the installation satisfies the required workloads and minimum version.

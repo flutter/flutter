@@ -862,6 +862,55 @@ void main() {
 
       expect(visualStudio.getWindows10SDKVersion(), null);
     });
+
+    testWithoutContext('Reports unicode replacement char in used properties', () {
+      const String badUtf8 = 'Bad UTF8 \u{FFFD}';
+      final List<void Function(Map<String, dynamic>)> propertyOverrides = <void Function(Map<String, dynamic>)> [
+        (Map<String, dynamic> response) => response['installationPath'] = badUtf8,
+        (Map<String, dynamic> response) => response['displayName'] = badUtf8,
+        (Map<String, dynamic> response) => response['installationVersion'] = badUtf8,
+        (Map<String, dynamic> response) {
+          final Map<String, dynamic> catalog = Map<String, dynamic>.of(response['catalog'] as Map<String, dynamic>);
+          response['catalog'] = catalog;
+          catalog['productDisplayVersion'] = badUtf8;
+        }
+      ];
+
+      for (final void Function(Map<String, dynamic>) propertyOverride in propertyOverrides) {
+        final VisualStudioFixture fixture = setUpVisualStudio();
+        final VisualStudio visualStudio = fixture.visualStudio;
+        final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse);
+        propertyOverride(response);
+
+        setMockCompatibleVisualStudioInstallation(
+          response,
+          fixture.fileSystem,
+          fixture.processManager,
+        );
+
+        expect(() => visualStudio.isInstalled,
+             throwsToolExit(message: 'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string'));
+      }
+    });
+
+    testWithoutContext('Ignores unicode replacement char in unused properties', () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['unused'] = 'Bad UTF8 \u{FFFD}';
+
+      setMockCompatibleVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
+    });
   });
 
   group(VswhereDetails, () {
