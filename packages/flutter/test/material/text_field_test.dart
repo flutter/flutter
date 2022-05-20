@@ -237,7 +237,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -251,7 +250,7 @@ void main() {
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2');
-    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 5));
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
     expect(find.byType(CupertinoButton), findsNothing);
 
     // Paste it at the end.
@@ -360,7 +359,7 @@ void main() {
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2');
-    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 5));
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
     expect(find.byType(CupertinoButton), findsNothing);
 
     // Paste it at the end.
@@ -1627,7 +1626,6 @@ void main() {
     final int eIndex = testValue.indexOf('e');
     final Offset ePos = textOffsetToPosition(tester, eIndex);
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
@@ -1925,7 +1923,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -1963,7 +1960,6 @@ void main() {
 
     // Drag from 'c' to 'g'.
     final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
@@ -2011,7 +2007,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(gPos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(ePos);
     await tester.pump();
@@ -2044,7 +2039,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -7096,7 +7090,6 @@ void main() {
         pointer: 1,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await gesture.up();
 
       // Cursor at tap position, not at word edge.
@@ -7970,7 +7963,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(textOffsetToPosition(tester, 56));
     // To the edge of the screen basically.
@@ -8114,7 +8106,6 @@ void main() {
     final TestGesture gesture =
         await tester.startGesture(textOffsetToPosition(tester, 19));
     // TODO(justinmc): Make sure you've got all things torn down.
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 500));
     expect(
       controller.selection,
@@ -8268,7 +8259,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
 
     // Still hasn't scrolled.
     expect(
@@ -8431,7 +8421,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
@@ -8561,8 +8550,7 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
-      await tester.pump();
+        await tester.pump();
       await gesture.up();
       await tester.pump(const Duration(milliseconds: 50));
       expect(
@@ -8772,7 +8760,6 @@ void main() {
       pointer: 7,
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     expect(controller.value.selection, isNotNull);
@@ -9595,7 +9582,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
       await tester.pump();
@@ -9628,7 +9614,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(seconds: 2));
       await gesture.up();
       await tester.pump();
@@ -9661,7 +9646,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -9695,7 +9679,6 @@ void main() {
       topLeft + const Offset(0.0, 5.0),
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 50));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -10198,7 +10181,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: center);
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -10272,7 +10254,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -10372,7 +10353,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -10954,7 +10934,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
@@ -11051,7 +11030,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
@@ -11148,7 +11126,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 8);
@@ -11245,7 +11222,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 8);
@@ -11343,7 +11319,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();

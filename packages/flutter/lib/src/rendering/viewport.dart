@@ -43,7 +43,7 @@ abstract class RenderAbstractViewport extends RenderObject {
     while (object != null) {
       if (object is RenderAbstractViewport)
         return object;
-      object = object.parent as RenderObject?;
+      object = object.parent;
     }
     return null;
   }
@@ -764,7 +764,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     RenderBox? pivot;
     bool onlySlivers = target is RenderSliver; // ... between viewport and `target` (`target` included).
     while (child.parent != this) {
-      final RenderObject parent = child.parent! as RenderObject;
+      final RenderObject parent = child.parent!;
       assert(parent != null, '$target must be a descendant of $this');
       if (child is RenderBox) {
         pivot = child;
@@ -1214,7 +1214,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     } else {
       // `descendant` is between leading and trailing edge and hence already
       //  fully shown on screen. No action necessary.
-      final Matrix4 transform = descendant.getTransformTo(viewport.parent! as RenderObject);
+      final Matrix4 transform = descendant.getTransformTo(viewport.parent);
       return MatrixUtils.transformRect(transform, rect ?? descendant.paintBounds);
     }
 

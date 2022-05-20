@@ -1553,6 +1553,82 @@ void main() {
     expect(find.text('Paste'), findsNothing);
   });
 
+  testWidgets('Copy selection does not collapse selection on desktop and iOS', (WidgetTester tester) async {
+    final TextEditingController localController = TextEditingController(text: 'Hello world');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: localController,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Show the toolbar.
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+
+    final TextSelection copySelectionRange = localController.selection;
+
+    state.showToolbar();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Copy'), findsOneWidget);
+
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+    expect(copySelectionRange, localController.selection);
+    expect(find.text('Copy'), findsNothing);
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows })); // [intended]
+
+  testWidgets('Copy selection collapses selection and hides the toolbar on Android and Fuchsia', (WidgetTester tester) async {
+    final TextEditingController localController = TextEditingController(text: 'Hello world');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: localController,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Show the toolbar.
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+
+    final TextSelection copySelectionRange = localController.selection;
+
+    state.showToolbar();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Copy'), findsOneWidget);
+
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+    expect(localController.selection, TextSelection.collapsed(offset: copySelectionRange.extentOffset));
+    expect(find.text('Copy'), findsNothing);
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia })); // [intended]
+
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35998.
     await tester.pumpWidget(
@@ -9308,7 +9384,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(EditableText)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
