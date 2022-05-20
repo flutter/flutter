@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -465,7 +466,7 @@ void main() {
 
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
-  }, variant: TargetPlatformVariant.desktop());
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
@@ -565,7 +566,7 @@ void main() {
   }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for #64245
-  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse only on browsers', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on all platforms except for native iOS & Android', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final FocusNode focusNodeB = FocusNode();
     final Key key = UniqueKey();
@@ -605,7 +606,22 @@ void main() {
     await down2.up();
     await down2.removePointer();
 
-    expect(focusNodeA.hasFocus, !isBrowser);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        if (kIsWeb) {
+          expect(focusNodeA.hasFocus, false);
+        } else {
+          expect(focusNodeA.hasFocus, true);
+        }
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(focusNodeA.hasFocus, false);
+        break;
+    }
     expect(focusNodeB.hasFocus, false);
 
     // Second text field can still gain focus.
@@ -616,10 +632,10 @@ void main() {
 
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
-  });
+  }, variant: TargetPlatformVariant.all());
 
   // Regression test for #64245
-  testWidgets('A Focused text-field will lose focus when tapping outside of the widget only on browsers', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will lose focus when tapping blank space on all platform browsers', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final FocusNode focusNodeB = FocusNode();
     final Key key = UniqueKey();
@@ -655,8 +671,11 @@ void main() {
     await tester.tapAt(tester.getCenter(find.byKey(key)));
     await tester.pump();
 
-    // First text field can still gain focus on native platforms.
-    expect(focusNodeA.hasFocus, !isBrowser);
+    if (isBrowser) {
+      expect(focusNodeA.hasFocus, false);
+    } else {
+      expect(focusNodeA.hasFocus, true);
+    }
     expect(focusNodeB.hasFocus, false);
 
     // Second text field can still gain focus.
@@ -665,7 +684,7 @@ void main() {
 
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
-  });
+  }, variant: TargetPlatformVariant.all());
 }
 
 class _APage extends Page<void> {

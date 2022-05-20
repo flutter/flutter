@@ -2233,8 +2233,8 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
-  /// The mouse focus dropping behavior is only present on desktop platforms
-  /// and mobile browsers.
+  /// The mouse focus dropping behavior is only present on desktop platforms,
+  /// Fuchsia, and browsers on both Android and iOS.
   bool get _shouldIgnoreMouseEvents {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
