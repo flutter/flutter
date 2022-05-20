@@ -31,7 +31,7 @@ platform_properties:
           {"dependency": "gradle_cache"}
         ]
       device_type: none
-      os: Linux
+      os: Ubuntu
       cores: "8"
   mac:
     properties:
