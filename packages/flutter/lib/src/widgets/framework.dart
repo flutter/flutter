@@ -3202,7 +3202,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // If the `dirty` values are not equal, sort with non-dirty elements being
     // less than dirty elements.
     final bool isBDirty = b.dirty;
-    if (a.dirty ^ isBDirty) {
+    if (a.dirty != isBDirty) {
       return isBDirty ? -1 : 1;
     }
     // Otherwise, `depth`s and `dirty`s are equal.
