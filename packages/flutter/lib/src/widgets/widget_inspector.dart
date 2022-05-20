@@ -552,7 +552,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
   }) {
     RenderObject repaintBoundary = renderObject;
     while (repaintBoundary != null && !repaintBoundary.isRepaintBoundary) {
-      repaintBoundary = repaintBoundary.parent!;
+      repaintBoundary = repaintBoundary.parent! as RenderObject;
     }
     assert(repaintBoundary != null);
     final _ScreenshotData data = _ScreenshotData(target: renderObject);
@@ -1510,7 +1510,7 @@ mixin WidgetInspectorService {
     final List<RenderObject> chain = <RenderObject>[];
     while (renderObject != null) {
       chain.add(renderObject);
-      renderObject = renderObject.parent;
+      renderObject = renderObject.parent as RenderObject?;
     }
     return _followDiagnosticableChain(chain.reversed.toList());
   }
@@ -2565,7 +2565,7 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
-      rootRenderObject: parent != null ? parent! : null,
+      rootRenderObject: parent is RenderObject ? parent! as RenderObject : null,
     ));
   }
 }
@@ -2841,14 +2841,14 @@ class _InspectorOverlayLayer extends Layer {
   /// overlays in the same app (i.e. an storyboard), a selected or candidate
   /// render object may not belong to this tree.
   bool _isInInspectorRenderObjectTree(RenderObject child) {
-    RenderObject? current = child.parent;
+    RenderObject? current = child.parent as RenderObject?;
     while (current != null) {
       // We found the widget inspector render object.
       if (current is RenderStack
           && current.lastChild is _RenderInspectorOverlay) {
         return rootRenderObject == current;
       }
-      current = current.parent;
+      current = current.parent as RenderObject?;
     }
     return false;
   }
