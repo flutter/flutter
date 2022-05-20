@@ -16,7 +16,7 @@ import 'package:platform/platform.dart' show Platform, LocalPlatform;
 import 'package:process/process.dart';
 
 const String gobMirror =
-'https://flutter.googlesource.com/mirrors/flutter';
+    'https://flutter.googlesource.com/mirrors/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
