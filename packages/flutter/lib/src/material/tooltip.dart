@@ -216,11 +216,13 @@ class Tooltip extends StatefulWidget {
   /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
   final Duration? waitDuration;
 
-  /// The length of time that the tooltip will be shown after a long press
-  /// is released or mouse pointer exits the widget.
+  /// The length of time that the tooltip will be shown after a long press is
+  /// released (if triggerMode is [TooltipTriggerMode.longPress]) or a tap is
+  /// released (if triggerMode is [TooltipTriggerMode.tap]) or mouse pointer
+  /// exits the widget.
   ///
-  /// Defaults to 1.5 seconds for long press released or 0.1 seconds for mouse
-  /// pointer exits the widget.
+  /// Defaults to 1.5 seconds for long press and tap released or 0.1 seconds
+  /// for mouse pointer exits the widget.
   final Duration? showDuration;
 
   /// The [TooltipTriggerMode] that will show the tooltip.
@@ -495,7 +497,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _dismissTimer = null;
     _showTimer?.cancel();
     _showTimer = null;
-    if (_entry!= null) {
+    if (_entry != null) {
       _entry!.remove();
     }
     _controller.reverse();
@@ -674,6 +676,18 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     widget.onTriggered?.call();
   }
 
+  void _handleTap() {
+    _handlePress();
+    // When triggerMode is not [TooltipTriggerMode.tap] the tooltip is dismissed
+    // by _handlePointerEvent, which listens to the global pointer events.
+    // When triggerMode is [TooltipTriggerMode.tap] and the Tooltip GestureDetector
+    // competes with other GestureDetectors, the disambiguation process will complete
+    // after the global pointer event is received. As we can't rely on the global
+    // pointer events to dismiss the Tooltip, we have to call _handleMouseExit
+    // to dismiss the tooltip after _showDuration expired.
+    _handleMouseExit();
+  }
+
   @override
   Widget build(BuildContext context) {
     // If message is empty then no need to create a tooltip overlay to show
@@ -733,9 +747,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (_visible) {
       result = GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ?
-        _handlePress : null,
-        onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
+        onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
+        onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
         excludeFromSemantics: true,
         child: result,
       );
