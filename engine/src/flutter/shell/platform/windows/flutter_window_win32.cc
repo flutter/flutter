@@ -75,6 +75,7 @@ FlutterWindowWin32::~FlutterWindowWin32() {}
 
 void FlutterWindowWin32::SetView(WindowBindingHandlerDelegate* window) {
   binding_handler_delegate_ = window;
+  direct_manipulation_owner_->SetBindingHandlerDelegate(window);
 }
 
 WindowsRenderTarget FlutterWindowWin32::GetRenderTarget() {
@@ -263,6 +264,13 @@ bool FlutterWindowWin32::OnBitmapSurfaceUpdated(const void* allocation,
 
 gfx::NativeViewAccessible FlutterWindowWin32::GetNativeViewAccessible() {
   return binding_handler_delegate_->GetNativeViewAccessible();
+}
+
+PointerLocation FlutterWindowWin32::GetPrimaryPointerLocation() {
+  POINT point;
+  GetCursorPos(&point);
+  ScreenToClient(GetWindowHandle(), &point);
+  return {(size_t)point.x, (size_t)point.y};
 }
 
 }  // namespace flutter

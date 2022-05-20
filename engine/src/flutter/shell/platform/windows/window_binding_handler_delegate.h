@@ -52,6 +52,22 @@ class WindowBindingHandlerDelegate {
                               FlutterPointerDeviceKind device_kind,
                               int32_t device_id) = 0;
 
+  // Notifies delegate that a pan/zoom gesture has started.
+  // Typically called by DirectManipulationEventHandler
+  virtual void OnPointerPanZoomStart(int32_t device_id) = 0;
+
+  // Notifies delegate that a pan/zoom gesture has updated.
+  // Typically called by DirectManipulationEventHandler
+  virtual void OnPointerPanZoomUpdate(int32_t device_id,
+                                      double pan_x,
+                                      double pan_y,
+                                      double scale,
+                                      double rotation) = 0;
+
+  // Notifies delegate that a pan/zoom gesture has ended.
+  // Typically called by DirectManipulationEventHandler
+  virtual void OnPointerPanZoomEnd(int32_t device_id) = 0;
+
   // Notifies delegate that backing window has received text.
   // Typically called by currently configured WindowBindingHandler
   virtual void OnText(const std::u16string&) = 0;

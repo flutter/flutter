@@ -203,6 +203,23 @@ void FlutterWindowsView::OnPointerLeave(double x,
   SendPointerLeave(x, y, GetOrCreatePointerState(device_kind, device_id));
 }
 
+void FlutterWindowsView::OnPointerPanZoomStart(int32_t device_id) {
+  PointerLocation point = binding_handler_->GetPrimaryPointerLocation();
+  SendPointerPanZoomStart(device_id, point.x, point.y);
+}
+
+void FlutterWindowsView::OnPointerPanZoomUpdate(int32_t device_id,
+                                                double pan_x,
+                                                double pan_y,
+                                                double scale,
+                                                double rotation) {
+  SendPointerPanZoomUpdate(device_id, pan_x, pan_y, scale, rotation);
+}
+
+void FlutterWindowsView::OnPointerPanZoomEnd(int32_t device_id) {
+  SendPointerPanZoomEnd(device_id);
+}
+
 void FlutterWindowsView::OnText(const std::u16string& text) {
   SendText(text);
 }
@@ -378,6 +395,48 @@ void FlutterWindowsView::SendPointerLeave(double x,
   event.x = x;
   event.y = y;
   event.phase = FlutterPointerPhase::kRemove;
+  SendPointerEventWithData(event, state);
+}
+
+void FlutterWindowsView::SendPointerPanZoomStart(int32_t device_id,
+                                                 double x,
+                                                 double y) {
+  auto state =
+      GetOrCreatePointerState(kFlutterPointerDeviceKindTrackpad, device_id);
+  state->pan_zoom_start_x = x;
+  state->pan_zoom_start_y = y;
+  FlutterPointerEvent event = {};
+  event.x = x;
+  event.y = y;
+  event.phase = FlutterPointerPhase::kPanZoomStart;
+  SendPointerEventWithData(event, state);
+}
+
+void FlutterWindowsView::SendPointerPanZoomUpdate(int32_t device_id,
+                                                  double pan_x,
+                                                  double pan_y,
+                                                  double scale,
+                                                  double rotation) {
+  auto state =
+      GetOrCreatePointerState(kFlutterPointerDeviceKindTrackpad, device_id);
+  FlutterPointerEvent event = {};
+  event.x = state->pan_zoom_start_x;
+  event.y = state->pan_zoom_start_y;
+  event.pan_x = pan_x;
+  event.pan_y = pan_y;
+  event.scale = scale;
+  event.rotation = rotation;
+  event.phase = FlutterPointerPhase::kPanZoomUpdate;
+  SendPointerEventWithData(event, state);
+}
+
+void FlutterWindowsView::SendPointerPanZoomEnd(int32_t device_id) {
+  auto state =
+      GetOrCreatePointerState(kFlutterPointerDeviceKindTrackpad, device_id);
+  FlutterPointerEvent event = {};
+  event.x = state->pan_zoom_start_x;
+  event.y = state->pan_zoom_start_y;
+  event.phase = FlutterPointerPhase::kPanZoomEnd;
   SendPointerEventWithData(event, state);
 }
 
