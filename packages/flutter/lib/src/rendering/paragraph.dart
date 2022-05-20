@@ -1397,6 +1397,9 @@ class _SelectableFragment with Selectable, ChangeNotifier {
 
   SelectionResult _handleSelectWord(Offset globalPosition) {
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
+    if (_positionIsWithinCurrentSelection(position)) {
+      return SelectionResult.end;
+    }
     final TextRange word = paragraph.getWordBoundary(position);
     assert(word.isNormalized);
     // Fragments are separated by placeholder span, the word boundary shouldn't
@@ -1410,19 +1413,16 @@ class _SelectableFragment with Selectable, ChangeNotifier {
       start = TextPosition(offset: word.start);
       end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
     }
-    if (!_newSelectionIsWithinCurrent(start, end)) {
-      _textSelectionStart = start;
-      _textSelectionEnd = end;
-    }
+    _textSelectionStart = start;
+    _textSelectionEnd = end;
     return SelectionResult.end;
   }
 
-  /// Whether the given selection text range is contained in current selection
+  /// Whether the given text position is contained in current selection
   /// range.
   ///
   /// The parameter `start` must be smaller than `end`.
-  bool _newSelectionIsWithinCurrent(TextPosition start, TextPosition end) {
-    assert(_compareTextPositions(start, end) >= 0);
+  bool _positionIsWithinCurrentSelection(TextPosition position) {
     if (_textSelectionStart == null || _textSelectionEnd == null)
       return false;
     // Normalize current selection.
@@ -1435,7 +1435,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
       currentStart = _textSelectionEnd!;
       currentEnd = _textSelectionStart!;
     }
-    return _compareTextPositions(currentStart, start) >= 0 && _compareTextPositions(currentEnd, end) <= 0;
+    return _compareTextPositions(currentStart, position) >= 0 && _compareTextPositions(currentEnd, position) <= 0;
   }
 
   /// Compares two text positions.

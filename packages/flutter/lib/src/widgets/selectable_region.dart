@@ -541,6 +541,13 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null)
       return false;
 
+    // Web is using native dom elements to enable clipboard functionality of the
+    // toolbar: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this
+    // we should not show a Flutter toolbar for the editable text elements.
+    if (kIsWeb)
+      return false;
+
     if (_selectionOverlay == null)
       _createSelectionOverlay();
 
@@ -775,10 +782,10 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
 /// An action that does not override any [Action.overridable] in the subtree.
 ///
-/// If a intent is fire at or below the context of [Action.overridable] in the
-/// subtree, this action will respect the original action and not override it.
+/// If this action is invoked by an [Action.overridable], it will immediately
+/// invoke the [Action.overridable] and do nothing else. Otherwise, it will call
+/// [invokeAction].
 abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
-
   Object? invokeAction(T intent, [BuildContext? context]);
 
   @override
