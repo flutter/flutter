@@ -1170,7 +1170,7 @@ class ThemeData with Diagnosticable {
   ///   * [ElevatedButton]
   ///   * [FloatingActionButton]
   ///   * [Material]
-  ///   * [NavigationBar]
+  ///   * [NavigationBar] (new, replacing [BottomNavigationBar])
   ///   * [NavigationRail]
   ///   * [OutlinedButton]
   ///   * [StretchingOverscrollIndicator], replacing the
