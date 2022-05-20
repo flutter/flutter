@@ -37,10 +37,10 @@ class RefreshIndicatorExample extends StatelessWidget {
           return Future<void>.delayed(const Duration(seconds: 3));
         },
         // This check is used to customize listening to scroll notifications
-        // from widget's children.
+        // from the widget's children.
         //
         // By default this is set to `notification.depth == 0`, which ensures
-        // only the scroll notifications from the first child are listened to.
+        // the only the scroll notifications from the first child are listened to.
         //
         // Here setting `notification.depth == 1` triggers the refresh indicator
         // when overscrolling the nested scroll view.

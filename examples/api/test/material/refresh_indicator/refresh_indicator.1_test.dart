@@ -12,13 +12,13 @@ void main() {
       const example.MyApp(),
     );
 
-    // Pull from upper scroll view.
+    // Pull from the upper scroll view.
     await tester.fling(find.text('Pull down here').first, const Offset(0.0, 300.0), 1000.0);
     await tester.pump();
     expect(find.byType(RefreshProgressIndicator), findsNothing);
     await tester.pumpAndSettle(); // Advance pending time
 
-    // Pull from nested scroll view.
+    // Pull from the nested scroll view.
     await tester.fling(find.text('Pull down here').at(3), const Offset(0.0, 300.0), 1000.0);
     await tester.pump();
     expect(find.byType(RefreshProgressIndicator), findsOneWidget);
