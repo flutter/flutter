@@ -73,7 +73,8 @@ class RenderParagraph extends RenderBox
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  RenderParagraph(InlineSpan text, {
+  RenderParagraph(
+    InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
     required TextDirection textDirection,
     bool softWrap = true,
@@ -88,30 +89,32 @@ class RenderParagraph extends RenderBox
     List<RenderBox>? children,
     Color? selectionColor,
     SelectionRegistrar? registrar,
-  }) : assert(text != null),
-       assert(text.debugAssertIsValid()),
-       assert(textAlign != null),
-       assert(textDirection != null),
-       assert(softWrap != null),
-       assert(overflow != null),
-       assert(textScaleFactor != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null),
-       _softWrap = softWrap,
-       _overflow = overflow,
+  })  : assert(text != null),
+        assert(text.debugAssertIsValid()),
+        assert(textAlign != null),
+        assert(textDirection != null),
+        assert(softWrap != null),
+        assert(overflow != null),
+        assert(textScaleFactor != null),
+        assert(maxLines == null || maxLines > 0),
+        assert(textWidthBasis != null),
+        _softWrap = softWrap,
+        _overflow = overflow,
        _selectionColor = selectionColor,
-       _textPainter = TextPainter(
-         text: text,
-         textAlign: textAlign,
-         textDirection: textDirection,
-         textScaleFactor: textScaleFactor,
-         maxLines: maxLines,
-         ellipsis: ellipsis ?? _kEllipsis,
-         locale: locale,
-         strutStyle: strutStyle,
-         textWidthBasis: textWidthBasis,
-         textHeightBehavior: textHeightBehavior,
-       ) {
+        _textPainter = TextPainter(
+          text: text,
+          textAlign: textAlign,
+          textDirection: textDirection,
+          textScaleFactor: textScaleFactor,
+          maxLines: maxLines,
+          ellipsis: overflow == TextOverflow.ellipsis
+              ? (ellipsis ?? _kEllipsis)
+              : null,
+          locale: locale,
+          strutStyle: strutStyle,
+          textWidthBasis: textWidthBasis,
+          textHeightBehavior: textHeightBehavior,
+        ) {
     addAll(children);
     _extractPlaceholderSpans(text);
     this.registrar = registrar;
@@ -342,7 +345,8 @@ class RenderParagraph extends RenderBox
     assert(value == null || value.isNotEmpty);
     if (_textPainter.ellipsis == value)
       return;
-    _textPainter.ellipsis = value;
+    _textPainter.ellipsis =
+        overflow == TextOverflow.ellipsis ? (ellipsis ?? _kEllipsis) : null;
     markNeedsLayout();
   }
 
