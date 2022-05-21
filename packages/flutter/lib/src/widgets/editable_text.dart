@@ -298,6 +298,7 @@ class ToolbarOptions {
 
 class _KeyFrame {
   const _KeyFrame(this.index, this.time, this.value);
+  // Values extracted from iOS 15.4 UIKit.
   static const List<_KeyFrame> iOSBlinkingCaretKeyFrames = <_KeyFrame>[
     _KeyFrame(0, 0,       1),
     _KeyFrame(1, 0.5,     1),
@@ -311,24 +312,18 @@ class _KeyFrame {
     _KeyFrame(9, 0.9625,  0.75),
   ];
 
-  static const List<_KeyFrame> defaultBlinkingCaretKeyFrames = <_KeyFrame>[
-    _KeyFrame(0, 0,   1),
-    _KeyFrame(1, 0.5, 0),
-  ];
-
   final int index;
   final double time;
   final double value;
 }
 
-class _DiscreteSimulation extends Simulation {
-  _DiscreteSimulation() : this._(_KeyFrame.defaultBlinkingCaretKeyFrames);
-  _DiscreteSimulation.iOS() : this._(_KeyFrame.iOSBlinkingCaretKeyFrames);
-  _DiscreteSimulation._(this._keyFrames)
+class _DiscreteKeyFrameSimulation extends Simulation {
+  _DiscreteKeyFrameSimulation.iOSBlinkingCaret() : this._(_KeyFrame.iOSBlinkingCaretKeyFrames);
+  _DiscreteKeyFrameSimulation._(this._keyFrames)
     : assert(_keyFrames.isNotEmpty),
-      assert(_keyFrames.last.time < max);
+      assert(_keyFrames.last.time < maxDuration);
 
-  static const int max = 1;
+  static const int maxDuration = 1;
 
   final List<_KeyFrame> _keyFrames;
 
@@ -336,21 +331,21 @@ class _DiscreteSimulation extends Simulation {
   double dx(double time) => 0;
 
   @override
-  bool isDone(double time) => time >= max;
+  bool isDone(double time) => time >= maxDuration;
 
-  // We start searching for the closest key frame from the last key frame, hoping
-  // to find the new key frame nearby.
   int _lastKeyFrameIndex = 0;
 
   @override
   double x(double time) {
-    time = time % max;
+    time = time % maxDuration;
     final int length = _keyFrames.length;
 
+    // Perform a linear search in the sorted key frame list, starting from the
+    // last key frame found, since the input `time` usually slightly increments.
     int offset;
     final int endIndex;
     if (_keyFrames[_lastKeyFrameIndex].time > time) {
-      // Time overflowed max, start the search from index [0, _lastKeyFrameIndex)
+      // `time` has wrapped aroud, start the search from index [0, _lastKeyFrameIndex).
       offset = -_lastKeyFrameIndex;
       endIndex = _lastKeyFrameIndex;
     } else {
@@ -359,7 +354,7 @@ class _DiscreteSimulation extends Simulation {
       endIndex = length;
     }
 
-    // Don't have to check (endIndex - 1): if (endIndex - 2) doesn't work we'll
+    // Don't have to check (endIndex - 1). If (endIndex - 2) doesn't work we'll
     // have to pick (endIndex - 1) anyways.
     while (_lastKeyFrameIndex + offset < endIndex - 1) {
       assert(_keyFrames[(_lastKeyFrameIndex + offset)].time <= time);
@@ -1674,11 +1669,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AnimationController get _cursorBlinkOpacityController {
     return _backingCursorBlinkOpacityController ??= AnimationController(
       vsync: this,
-      duration: _fadeDuration,
     )..addListener(_onCursorColorTick);
   }
   AnimationController? _backingCursorBlinkOpacityController;
-  late final Simulation _iosBlinkCursorSimulation = _DiscreteSimulation.iOS();
+  late final Simulation _iosBlinkCursorSimulation = _DiscreteKeyFrameSimulation.iOSBlinkingCaret();
 
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
@@ -1716,10 +1710,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// - cmd/ctrl+a to select all.
   /// - Changing the selection using a physical keyboard.
   bool get _shouldCreateInputConnection => kIsWeb || !widget.readOnly;
-
-  // This value is an eyeball estimation of the time it takes for the iOS cursor
-  // to ease in and out.
-  static const Duration _fadeDuration = Duration(milliseconds: 250);
 
   // The time it takes for the floating cursor to snap to the text aligned
   // cursor position after the user has finished placing it.
@@ -1920,7 +1910,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_tickersEnabled != newTickerEnabled) {
       _tickersEnabled = newTickerEnabled;
       if (_tickersEnabled && _cursorActive) {
-        _startCursorBlinking();
+        _startCursorBlink();
       } else if (!_tickersEnabled && _cursorTimer != null) {
         // Cannot use _stopCursorTimer because it would reset _cursorActive.
         _cursorTimer!.cancel();
@@ -2079,8 +2069,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       // To keep the cursor from blinking while typing, we want to restart the
       // cursor timer every time a new character is typed.
-      _stopCursorBlinking(resetCharTicks: false);
-      _startCursorBlinking();
+      _stopCursorBlink(resetCharTicks: false);
+      _startCursorBlink();
     }
   }
 
@@ -2595,8 +2585,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // To keep the cursor from blinking while it moves, restart the timer here.
     if (_cursorTimer != null) {
-      _stopCursorBlinking(resetCharTicks: false);
-      _startCursorBlinking();
+      _stopCursorBlink(resetCharTicks: false);
+      _startCursorBlink();
     }
   }
 
@@ -2776,7 +2766,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // actually not blink because it's disabled via TickerMode.of(context)).
   bool _cursorActive = false;
 
-  void _startCursorBlinking() {
+  void _startCursorBlink() {
     assert(!(_cursorTimer?.isActive ?? false) || !(_backingCursorBlinkOpacityController?.isAnimating ?? false));
     _cursorActive = true;
     if (!_tickersEnabled) {
@@ -2810,11 +2800,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // indefinitely.
       _cursorTimer = Timer(Duration.zero, () => _cursorBlinkOpacityController.animateWith(_iosBlinkCursorSimulation).whenComplete(_onCursorTick));
     } else {
+      if (!(_cursorTimer?.isActive ?? false) && _tickersEnabled) {
+        _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, (Timer timer) { _onCursorTick(); });
+      }
       _cursorBlinkOpacityController.value = _cursorBlinkOpacityController.value == 0 ? 1 : 0;
     }
   }
 
-  void _stopCursorBlinking({ bool resetCharTicks = true }) {
+  void _stopCursorBlink({ bool resetCharTicks = true }) {
     _cursorActive = false;
     _cursorBlinkOpacityController.value = 0.0;
     if (EditableText.debugDeterministicCursor)
@@ -2826,9 +2819,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _startOrStopCursorTimerIfNeeded() {
     if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed)
-      _startCursorBlinking();
+      _startCursorBlink();
     else if (_cursorActive && (!_hasFocus || !_value.selection.isCollapsed))
-      _stopCursorBlinking();
+      _stopCursorBlink();
   }
 
   void _didChangeTextEditingValue() {

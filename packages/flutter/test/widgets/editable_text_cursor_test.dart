@@ -187,13 +187,15 @@ void main() {
       const int delta = 1;
       assert(at - delta > walltimeMicrosecond);
       await tester.pump(Duration(microseconds: at - delta - walltimeMicrosecond));
+
+      // Instead of verifying the opacity at each key frame, this function
+      // verifies the opacity immediately *before* each key frame to avoid
+      // fp precision issues.
       expect(
         renderEditable.cursorColor!.opacity,
         closeTo(lastVerifiedOpacity, 0.01),
         reason: 'opacity at ${at-delta} microseconds',
       );
-      //await tester.pump(const Duration(microseconds: delta));
-      //expect(renderEditable.cursorColor!.opacity, opacity, reason: 'opacity at ${at} microseconds');
 
       walltimeMicrosecond = at - delta;
       lastVerifiedOpacity = opacity;
