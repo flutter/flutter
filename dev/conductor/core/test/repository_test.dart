@@ -13,6 +13,7 @@ void main() {
   group('repository', () {
     late FakePlatform platform;
     const String rootDir = '/';
+    const String revision = 'deadbeef';
     late MemoryFileSystem fileSystem;
     late FakeProcessManager processManager;
     late TestStdio stdio;
@@ -31,8 +32,6 @@ void main() {
     });
 
     test('canCherryPick returns true if git cherry-pick returns 0', () async {
-      const String commit = 'abc123';
-
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
           'git',
@@ -53,7 +52,7 @@ void main() {
           'git',
           'rev-parse',
           'HEAD',
-        ], stdout: commit),
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'status',
@@ -63,7 +62,7 @@ void main() {
           'git',
           'cherry-pick',
           '--no-commit',
-          commit,
+          revision,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -80,7 +79,7 @@ void main() {
         stdio: stdio,
       );
       final Repository repository = FrameworkRepository(checkouts);
-      expect(await repository.canCherryPick(commit), true);
+      expect(await repository.canCherryPick(revision), true);
     });
 
     test('canCherryPick returns false if git cherry-pick returns non-zero', () async {
@@ -518,6 +517,25 @@ bbbcae73699263764ad4421a4b2ca3952a6f96cb        refs/heads/stable
 Extraneous debug information that should be ignored.
 ''';
       processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          EngineRepository.defaultUpstream,
+          '${rootDir}flutter_conductor_checkouts/engine',
+        ]),
+        FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'main',
+        ]),
+        FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
         FakeCommand(
           command: <String>['git', 'ls-remote', '--heads', remoteName],
           stdout: lsRemoteOutput,

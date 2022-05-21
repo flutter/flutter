@@ -68,13 +68,6 @@ void main() {
     final StreamController<List<int>> controller =
         StreamController<List<int>>();
     processManager.addCommands(<FakeCommand>[
-      const FakeCommand(command: <String>[
-        'gh',
-        'auth',
-        'logout',
-        '--hostname',
-        'github.com',
-      ]),
       FakeCommand(command: const <String>[
         'gh',
         'auth',
