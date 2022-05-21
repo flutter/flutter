@@ -162,61 +162,54 @@ void main() {
     );
   });
 
-  testWidgets('Cursor animates', (WidgetTester tester) async {
-    const Widget widget = MaterialApp(
-      home: Material(
-        child: TextField(
-          maxLines: 3,
+  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(),
         ),
       ),
     );
-    await tester.pumpWidget(widget);
 
-    await tester.tap(find.byType(TextField));
+    final Finder textFinder = find.byType(TextField);
+    await tester.tap(textFinder);
     await tester.pump();
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable.cursorColor!.opacity, 1.0);
 
-    // Trigger initial timer. When focusing the first time, the cursor shows
-    // for slightly longer than the average on time.
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    // Start timing standard cursor show period.
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
+    int walltimeMicrosecond = 0;
+    double lastVerifiedOpacity = 1.0;
 
-    await tester.pump(const Duration(milliseconds: 500));
-    // Start to animate the cursor away.
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
+    Future<void> verifyKeyFrame({ required double opacity, required int at }) async {
+      const int delta = 1;
+      assert(at - delta > walltimeMicrosecond);
+      await tester.pump(Duration(microseconds: at - delta - walltimeMicrosecond));
+      expect(
+        renderEditable.cursorColor!.opacity,
+        closeTo(lastVerifiedOpacity, 0.01),
+        reason: 'opacity at ${at-delta} microseconds',
+      );
+      //await tester.pump(const Duration(microseconds: delta));
+      //expect(renderEditable.cursorColor!.opacity, opacity, reason: 'opacity at ${at} microseconds');
 
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor!.alpha, 110);
-    expect(renderEditable, paints..rrect(color: const Color(0x6e2196f3)));
+      walltimeMicrosecond = at - delta;
+      lastVerifiedOpacity = opacity;
+    }
 
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor!.alpha, 16);
-    expect(renderEditable, paints..rrect(color: const Color(0x102196f3)));
-
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor!.alpha, 0);
-    // Don't try to draw the cursor.
-    expect(renderEditable, paintsExactlyCountTimes(#drawRRect, 0));
-
-    // Wait some more while the cursor is gone. It'll trigger the cursor to
-    // start animating in again.
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(renderEditable.cursorColor!.alpha, 0);
-    expect(renderEditable, paintsExactlyCountTimes(#drawRRect, 0));
-
-    await tester.pump(const Duration(milliseconds: 50));
-    // Cursor starts coming back.
-    expect(renderEditable.cursorColor!.alpha, 79);
-    expect(renderEditable, paints..rrect(color: const Color(0x4f2196f3)));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    await verifyKeyFrame(opacity: 1.0,  at: 500000);
+    await verifyKeyFrame(opacity: 0.75, at: 537500);
+    await verifyKeyFrame(opacity: 0.5,  at: 575000);
+    await verifyKeyFrame(opacity: 0.25, at: 612500);
+    await verifyKeyFrame(opacity: 0.0,  at: 650000);
+    await verifyKeyFrame(opacity: 0.0,  at: 850000);
+    await verifyKeyFrame(opacity: 0.25, at: 887500);
+    await verifyKeyFrame(opacity: 0.5,  at: 925000);
+    await verifyKeyFrame(opacity: 0.75, at: 962500);
+    await verifyKeyFrame(opacity: 1.0,  at: 1000000);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
