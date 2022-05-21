@@ -3461,7 +3461,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
       const Set<TargetPlatform> mobilePlatforms = <TargetPlatform> {
-        TargetPlatform.android, TargetPlatform.iOS, TargetPlatform.fuchsia,
+        TargetPlatform.android, TargetPlatform.fuchsia,
       };
       final bool breiflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);

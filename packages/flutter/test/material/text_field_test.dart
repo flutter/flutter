@@ -19,7 +19,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1293,7 +1292,7 @@ void main() {
 
     editText = (findRenderEditable(tester).text! as TextSpan).text!;
     expect(editText.substring(editText.length - 1), '\u2022');
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets('desktop obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
