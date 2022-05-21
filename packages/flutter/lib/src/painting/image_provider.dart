@@ -158,7 +158,7 @@ class ImageConfiguration {
 
 /// Performs the decode process for use in [ImageProvider.load].
 ///
-/// This typedef is deprecated. Use DecoderBufferCallback with
+/// This typedef is deprecated. Use [DecoderBufferCallback] with
 /// [ImageProvider.loadBuffer] instead.
 ///
 /// This callback allows decoupling of the `cacheWidth`, `cacheHeight`, and
