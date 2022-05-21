@@ -426,6 +426,31 @@ void main() {
     expect(greens1.value, 0xFF027223);
   });
 
+  test('ColorSwatch.lerp', () {
+    const ColorSwatch<int> swatchA = ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)});
+    const ColorSwatch<int> swatchB = ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)});
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, 0.0),
+      const ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)}),
+    );
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, 0.5),
+      const ColorSwatch<int>(0x7F7F7F7F, <int, Color>{1: Color(0x7F7F7F7F)}),
+    );
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, 1.0),
+      const ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)}),
+    );
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, -0.1),
+      const ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)}),
+    );
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, 1.1),
+      const ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)}),
+    );
+  });
+
   test('ColorDiagnosticsProperty includes valueProperties in JSON', () {
     ColorProperty property = ColorProperty('foo', const Color.fromARGB(10, 20, 30, 40));
     final Map<String, Object> valueProperties = property.toJsonMap(const DiagnosticsSerializationDelegate())['valueProperties']! as Map<String, Object>;

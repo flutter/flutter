@@ -24,7 +24,7 @@ import 'material_state.dart';
 ///
 /// ```dart
 /// class MyWidget extends StatefulWidget {
-///   const MyWidget({required this.color, required this.child, Key? key}) : super(key: key);
+///   const MyWidget({super.key, required this.color, required this.child});
 ///
 ///   final MaterialStateColor color;
 ///   final Widget child;
@@ -76,7 +76,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   ///
   /// ```dart
   /// class MyWidget extends StatefulWidget {
-  ///   const MyWidget({this.onPressed, Key? key}) : super(key: key);
+  ///   const MyWidget({super.key, this.onPressed});
   ///
   ///   /// Something important this widget must do when pressed.
   ///   final VoidCallback? onPressed;

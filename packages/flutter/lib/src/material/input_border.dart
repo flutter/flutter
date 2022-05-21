@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 /// Defines the appearance of an [InputDecorator]'s border.
@@ -418,7 +419,7 @@ class OutlineInputBorder extends InputBorder {
     // Currently, BorderRadius only supports circular radii.
     const double cornerArcSweep = math.pi / 2.0;
     final double tlCornerArcSweep = math.acos(
-      (1 - start / scaledRRect.tlRadiusX).clamp(0.0, 1.0),
+      clampDouble(1 - start / scaledRRect.tlRadiusX, 0.0, 1.0),
     );
 
     final Path path = Path()
@@ -436,7 +437,7 @@ class OutlineInputBorder extends InputBorder {
     } else if (start + extent < scaledRRect.width) {
       final double dx = scaledRRect.width - (start + extent);
       final double sweep = math.asin(
-        (1 - dx / scaledRRect.trRadiusX).clamp(0.0, 1.0),
+        clampDouble(1 - dx / scaledRRect.trRadiusX, 0.0, 1.0),
       );
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }

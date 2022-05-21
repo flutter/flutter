@@ -360,7 +360,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
-  ///   const SegmentedControlExample({Key? key}) : super(key: key);
+  ///   const SegmentedControlExample({super.key});
   ///
   ///   @override
   ///   State createState() => SegmentedControlExampleState();
@@ -494,7 +494,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     final int numOfChildren = widget.children.length;
     assert(renderBox.hasSize);
     assert(numOfChildren >= 2);
-    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1);
+    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1); // ignore_clamp_double_lint
 
     switch (Directionality.of(context)) {
       case TextDirection.ltr:

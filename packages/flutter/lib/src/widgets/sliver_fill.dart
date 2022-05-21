@@ -60,7 +60,7 @@ class SliverFillViewport extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SliverFractionalPadding(
-      viewportFraction: padEnds ? (1 - viewportFraction).clamp(0, 1) / 2 : 0,
+      viewportFraction: padEnds ? clampDouble(1 - viewportFraction, 0, 1) / 2 : 0,
       sliver: _SliverFillViewportRenderObjectWidget(
         viewportFraction: viewportFraction,
         delegate: delegate,
