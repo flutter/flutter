@@ -39,6 +39,25 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
+  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
+
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key as NetworkImage, chunkEvents, null, decode),
+      chunkEvents: chunkEvents.stream,
+      scale: key.scale,
+      debugLabel: key.url,
+      informationCollector: () => <DiagnosticsNode>[
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+        DiagnosticsProperty<image_provider.NetworkImage>('Image key', key),
+      ],
+    );
+  }
+
+  @override
   ImageStreamCompleter loadBuffer(image_provider.NetworkImage key, image_provider.DecoderBufferCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
@@ -46,7 +65,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as NetworkImage, chunkEvents, decode),
+      codec: _loadAsync(key as NetworkImage, chunkEvents, decode, null),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -76,7 +95,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
-    image_provider.DecoderBufferCallback decode,
+    image_provider.DecoderBufferCallback? decode,
+    image_provider.DecoderCallback? decodeDepreacted,
   ) async {
     try {
       assert(key == this);
@@ -109,8 +129,13 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       if (bytes.lengthInBytes == 0)
         throw Exception('NetworkImage is an empty file: $resolved');
 
-      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-      return decode(buffer);
+      if (decode != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        return decode(buffer);
+      } else {
+        assert(decodeDepreacted != null);
+        return decodeDepreacted!(bytes);
+      }
     } catch (e) {
       // Depending on where the exception was thrown, the image cache may not
       // have had a chance to track the key in the cache at all.
