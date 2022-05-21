@@ -115,7 +115,10 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
           key: repaintKey,
           child: ElevatedButton(
             key: buttonKey,
-            style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
+            style: ButtonStyle(
+              splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
+              overlayColor: MaterialStateProperty.all<Color>(const Color(0xffccaa88)),
+            ),
             child: const Text('Sparkle!'),
             onPressed: () { },
           ),
