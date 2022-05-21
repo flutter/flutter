@@ -459,9 +459,7 @@ class TextPainter {
   /// After this is set, you must call [layout] before the next call to [paint].
   ///
   /// The higher layers of the system, such as the [Text] widget, represent
-  /// overflow effects using the [TextOverflow] enum. The
-  /// [TextOverflow.ellipsis] value corresponds to setting this property to
-  /// U+2026 HORIZONTAL ELLIPSIS (…).
+  /// overflow effects using the [TextOverflow] enum.
   String? get ellipsis => _ellipsis;
   String? _ellipsis;
   set ellipsis(String? value) {

@@ -78,6 +78,7 @@ class RenderParagraph extends RenderBox
     required TextDirection textDirection,
     bool softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
+    String? ellipsis,
     double textScaleFactor = 1.0,
     int? maxLines,
     Locale? locale,
@@ -105,7 +106,7 @@ class RenderParagraph extends RenderBox
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
-         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         ellipsis: ellipsis ?? _kEllipsis,
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
@@ -332,7 +333,16 @@ class RenderParagraph extends RenderBox
       return;
     }
     _overflow = value;
-    _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
+    markNeedsLayout();
+  }
+
+  /// The ellipsis text when [overflow] is set to ellipsis.
+  String? get ellipsis => _textPainter.ellipsis;
+  set ellipsis(String? value) {
+    assert(value == null || value.isNotEmpty);
+    if (_textPainter.ellipsis == value)
+      return;
+    _textPainter.ellipsis = value;
     markNeedsLayout();
   }
 

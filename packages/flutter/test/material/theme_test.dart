@@ -802,6 +802,8 @@ class _TextStyleProxy implements TextStyle {
   List<ui.FontVariation>? get fontVariations => _delegate.fontVariations;
   @override
   TextOverflow? get overflow => _delegate.overflow;
+  @override
+  String? get ellipsis => _delegate.ellipsis;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
@@ -845,6 +847,7 @@ class _TextStyleProxy implements TextStyle {
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
     TextOverflow? overflow,
+    String? ellipsis,
     String? package,
   }) {
     throw UnimplementedError();
@@ -882,6 +885,7 @@ class _TextStyleProxy implements TextStyle {
     double? decorationThickness,
     String? debugLabel,
     TextOverflow? overflow,
+    String? ellipsis,
     String? package,
   }) {
     throw UnimplementedError();

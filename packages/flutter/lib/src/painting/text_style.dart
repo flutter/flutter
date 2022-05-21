@@ -499,6 +499,7 @@ class TextStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     String? package,
     this.overflow,
+    this.ellipsis,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
@@ -813,6 +814,10 @@ class TextStyle with Diagnosticable {
   /// How visual text overflow should be handled.
   final TextOverflow? overflow;
 
+  /// The string used to ellipsize text when
+  /// [overflow] is set to [TextOverflow.ellipsis].
+  final String? ellipsis;
+
   // Return the original value of fontFamily, without the additional
   // "packages/$_package/" prefix.
   String? get _fontFamily {
@@ -860,6 +865,7 @@ class TextStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     String? package,
     TextOverflow? overflow,
+    String? ellipsis,
   }) {
     assert(color == null || foreground == null, _kColorForegroundWarning);
     assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
@@ -898,6 +904,7 @@ class TextStyle with Diagnosticable {
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       package: package ?? _package,
       overflow: overflow ?? this.overflow,
+      ellipsis: ellipsis ?? this.ellipsis,
     );
   }
 
@@ -958,6 +965,7 @@ class TextStyle with Diagnosticable {
     List<ui.FontVariation>? fontVariations,
     String? package,
     TextOverflow? overflow,
+    String? ellipsis,
   }) {
     assert(fontSizeFactor != null);
     assert(fontSizeDelta != null);
@@ -1009,6 +1017,7 @@ class TextStyle with Diagnosticable {
       decorationStyle: decorationStyle ?? this.decorationStyle,
       decorationThickness: decorationThickness == null ? null : decorationThickness! * decorationThicknessFactor + decorationThicknessDelta,
       overflow: overflow ?? this.overflow,
+      ellipsis: ellipsis ?? this.ellipsis,
       package: package ?? _package,
       debugLabel: modifiedDebugLabel,
     );
@@ -1077,6 +1086,7 @@ class TextStyle with Diagnosticable {
       fontFamilyFallback: other._fontFamilyFallback,
       package: other._package,
       overflow: other.overflow,
+      ellipsis: other.ellipsis,
     );
   }
 
@@ -1143,6 +1153,7 @@ class TextStyle with Diagnosticable {
         fontFamilyFallback: t < 0.5 ? null : b._fontFamilyFallback,
         package: t < 0.5 ? null : b._package,
         overflow: t < 0.5 ? null : b.overflow,
+        ellipsis: t < 0.5 ? null : b.ellipsis,
       );
     }
 
@@ -1174,6 +1185,7 @@ class TextStyle with Diagnosticable {
         fontFamilyFallback: t < 0.5 ? a._fontFamilyFallback : null,
         package: t < 0.5 ? a._package : null,
         overflow: t < 0.5 ? a.overflow : null,
+        ellipsis: t < 0.5 ? a.ellipsis : null,
       );
     }
 
@@ -1274,6 +1286,7 @@ class TextStyle with Diagnosticable {
       fontFamilyFallback: t < 0.5 ? a._fontFamilyFallback : b._fontFamilyFallback,
       package: t < 0.5 ? a._package : b._package,
       overflow: t < 0.5 ? a.overflow : b.overflow,
+      ellipsis: t < 0.5 ? a.ellipsis : b.ellipsis,
     );
   }
 
@@ -1436,7 +1449,8 @@ class TextStyle with Diagnosticable {
         && other.fontFamily == fontFamily
         && listEquals(other.fontFamilyFallback, fontFamilyFallback)
         && other._package == _package
-        && other.overflow == overflow;
+        && other.overflow == overflow
+        && other.ellipsis == ellipsis;
   }
 
   @override
@@ -1475,6 +1489,7 @@ class TextStyle with Diagnosticable {
       decoration,
       decorationColor,
       fontHash,
+      ellipsis,
     );
   }
 
@@ -1552,5 +1567,6 @@ class TextStyle with Diagnosticable {
     }
 
     styles.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
+    styles.add(StringProperty('${prefix}ellipsis', ellipsis, defaultValue: null));
   }
 }

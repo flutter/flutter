@@ -45,6 +45,7 @@ class DefaultTextStyle extends InheritedTheme {
     this.textAlign,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    this.ellipsis,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
@@ -68,6 +69,7 @@ class DefaultTextStyle extends InheritedTheme {
       softWrap = true,
       maxLines = null,
       overflow = TextOverflow.clip,
+      ellipsis = null,
       textWidthBasis = TextWidthBasis.parent,
       textHeightBehavior = null,
       super(child: const _NullWidget());
@@ -94,6 +96,7 @@ class DefaultTextStyle extends InheritedTheme {
     TextAlign? textAlign,
     bool? softWrap,
     TextOverflow? overflow,
+    String? ellipsis,
     int? maxLines,
     TextWidthBasis? textWidthBasis,
     required Widget child,
@@ -108,6 +111,7 @@ class DefaultTextStyle extends InheritedTheme {
           textAlign: textAlign ?? parent.textAlign,
           softWrap: softWrap ?? parent.softWrap,
           overflow: overflow ?? parent.overflow,
+          ellipsis: ellipsis ?? parent.ellipsis,
           maxLines: maxLines ?? parent.maxLines,
           textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
           child: child,
@@ -135,6 +139,10 @@ class DefaultTextStyle extends InheritedTheme {
   /// If [softWrap] is true or null, the glyph causing overflow, and those that follow,
   /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   final TextOverflow overflow;
+
+  /// The string used to ellipsize text when
+  /// [overflow] is set to [TextOverflow.ellipsis].
+  final String? ellipsis;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
@@ -175,6 +183,7 @@ class DefaultTextStyle extends InheritedTheme {
         textAlign != oldWidget.textAlign ||
         softWrap != oldWidget.softWrap ||
         overflow != oldWidget.overflow ||
+        ellipsis != oldWidget.ellipsis ||
         maxLines != oldWidget.maxLines ||
         textWidthBasis != oldWidget.textWidthBasis ||
         textHeightBehavior != oldWidget.textHeightBehavior;
@@ -187,6 +196,7 @@ class DefaultTextStyle extends InheritedTheme {
       textAlign: textAlign,
       softWrap: softWrap,
       overflow: overflow,
+      ellipsis: ellipsis,
       maxLines: maxLines,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
@@ -201,6 +211,7 @@ class DefaultTextStyle extends InheritedTheme {
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(StringProperty('ellipsis', ellipsis, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
@@ -386,6 +397,7 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
+    this.ellipsis,
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
@@ -418,6 +430,7 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
+    this.ellipsis,
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
@@ -487,6 +500,12 @@ class Text extends StatelessWidget {
   /// If this is null [TextStyle.overflow] will be used, otherwise the value
   /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
+
+  /// The string used to ellipsize text when
+  /// [overflow] is set to [TextOverflow.ellipsis].
+  /// Defaults to U+2026 HORIZONTAL ELLIPSIS (…).
+  /// Cannot be empty String.
+  final String? ellipsis;
 
   /// The number of font pixels for each logical pixel.
   ///
@@ -560,6 +579,7 @@ class Text extends StatelessWidget {
       locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+      ellipsis: ellipsis ?? effectiveTextStyle?.ellipsis,
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
@@ -604,6 +624,7 @@ class Text extends StatelessWidget {
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(StringProperty('ellipsis', ellipsis, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null));
