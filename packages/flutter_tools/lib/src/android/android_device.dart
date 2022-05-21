@@ -625,7 +625,8 @@ class AndroidDevice extends Device {
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
     final List<String> cmd = <String>[
       'shell', 'am', 'start',
-      '-a', 'android.intent.action.RUN',
+      '-a', 'android.intent.action.MAIN',
+      '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-dart-profiling', 'true',
       if (traceStartup)
