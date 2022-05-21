@@ -21,18 +21,19 @@ Future<void> main(List<String> args) async {
   final ArgParser parser = ArgParser();
   parser.addOption(
     kTokenOption,
-    help: 'GitHub access token.',
-    mandatory: true,
+    help: 'GitHub access token env variable name.',
+    defaultsTo: 'GITHUB_TOKEN',
   );
   parser.addOption(
     kGithubClient,
     help: 'Path to GitHub CLI client. If not provided, it is assumed `gh` is '
-      'present on the PATH.',
+        'present on the PATH.',
   );
   parser.addOption(
     kMirrorRemote,
-    help: 'The mirror git remote that the feature branch will be pushed to.',
-    defaultsTo: 'https://github.com/christopherfujino/flutter.git', // TODO remove default, make mandatory
+    help: 'The mirror git remote that the feature branch will be pushed to. '
+        'Required',
+    mandatory: true,
   );
   parser.addOption(
     kUpstreamRemote,
@@ -41,11 +42,11 @@ Future<void> main(List<String> args) async {
     defaultsTo: 'https://github.com/flutter/flutter.git',
   );
 
-  late final ArgResults results;
+  final ArgResults results;
   try {
     results = parser.parse(args);
   } on FormatException {
-    print('''
+    io.stdout.writeln('''
 Usage:
 
 ${parser.usage}
@@ -55,6 +56,14 @@ ${parser.usage}
 
   final String mirrorUrl = results[kMirrorRemote]! as String;
   final String upstreamUrl = results[kUpstreamRemote]! as String;
+  const Platform platform = LocalPlatform();
+  final String tokenName = results[kTokenOption]! as String;
+  final String? token = platform.environment[tokenName];
+  if (token == null || token.isEmpty) {
+    throw FormatException(
+      'Tried to read a GitHub access token from env variable \$$tokenName but it was undefined or empty',
+    );
+  }
 
   final FrameworkRepository framework = FrameworkRepository(
     _localCheckouts,
@@ -66,7 +75,7 @@ ${parser.usage}
     framework: framework,
     githubClient: results[kGithubClient] as String? ?? 'gh',
     orgName: _parseOrgName(mirrorUrl),
-    token: (results[kTokenOption] as String).trim(),
+    token: token,
     processManager: const LocalProcessManager(),
   ).roll();
 }

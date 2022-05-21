@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:conductor_core/src/repository.dart';
-import 'package:conductor_core/src/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
@@ -263,7 +262,8 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'commit',
-          "--message='$message'",
+          '--message',
+          message,
         ]),
         const FakeCommand(command: <String>[
           'git',
