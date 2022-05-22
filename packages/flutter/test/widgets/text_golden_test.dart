@@ -1362,4 +1362,36 @@ void main() {
       matchesGoldenFile('text_golden.TextHeightBehavior.1.png'),
     );
   });
+
+  testWidgets('Custom ellipsis string', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 50.0,
+            height: 200.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: const Text(
+              'Long long long text that should be most definitely clipped as it is overflowing on max 2 lines.',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(
+                fontSize: 10,
+                color: Color(0xffff0000),
+                overflow: TextOverflow.ellipsis,
+                ellipsis: '~~~>',
+              ),
+              maxLines: 2,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Custom_ellipsis.1.png'),
+    );
+  });
 }

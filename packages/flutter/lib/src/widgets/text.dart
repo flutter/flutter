@@ -501,8 +501,8 @@ class Text extends StatelessWidget {
   /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
 
-  /// The string used to ellipsize text when
-  /// [overflow] is set to [TextOverflow.ellipsis].
+  /// The string used to ellipsize text when [overflow] is set to
+  /// [TextOverflow.ellipsis]. Otherwise it's ignored.
   /// Defaults to U+2026 HORIZONTAL ELLIPSIS (…).
   /// Cannot be empty String.
   final String? ellipsis;
