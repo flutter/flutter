@@ -39,9 +39,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     super.settings,
     this.maintainState = true,
     super.fullscreenDialog,
-  }) : assert(builder != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null) {
+  }) {
     assert(opaque);
   }
 
@@ -74,22 +72,31 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 ///
 /// See also:
 ///
-///  * [PageTransitionsTheme], which defines the default page transitions used
-///    by the [MaterialRouteTransitionMixin.buildTransitions].
-///  * [ZoomPageTransitionsBuilder], which is the default page transition used
+///  * [PageTransitionsTheme], which specifies the [PageTransitionsBuilder] to use
+///    on different platforms to define the transition durations, barrier colors,
+///    ignore pointer behavior for the route.
+///  * [NoAnimationPageTransitionsBuilder], which is the default page transition used
 ///    by the [PageTransitionsTheme].
-///  * [CupertinoPageTransitionsBuilder], which is the default page transition
-///    for iOS and macOS.
+///  * [ZoomPageTransitionsBuilder], which defines the default page transition used
+///    by the [PageTransitionsTheme] for [TargetPlatform.android] and [TargetPlatform.fuchsia].
+///  * [CupertinoPageTransitionsBuilder], which defines the default page transition
+///    used by the [PageTransitionsTheme] for [TargetPlatform.iOS].
 mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   /// Builds the primary contents of the route.
   @protected
   Widget buildContent(BuildContext context);
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
+  Duration get transitionDuration => _pageTransitionsBuilder.transitionDuration;
 
   @override
-  Color? get barrierColor => null;
+  Duration get reverseTransitionDuration => _pageTransitionsBuilder.reverseTransitionDuration;
+
+  @override
+  bool get ignorePointerDuringTransitions => _pageTransitionsBuilder.ignorePointerDuringTransitions;
+
+  @override
+  Color? get barrierColor => _pageTransitionsBuilder.getBarrierColor(this);
 
   @override
   String? get barrierLabel => null;
@@ -126,8 +133,11 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-    return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
+    return _pageTransitionsBuilder.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
+  }
+
+  PageTransitionsBuilder get _pageTransitionsBuilder {
+    return Theme.of(navigator!.context).pageTransitionsTheme.getBuilder(this);
   }
 }
 
@@ -161,9 +171,7 @@ class MaterialPage<T> extends Page<T> {
     super.name,
     super.arguments,
     super.restorationId,
-  }) : assert(child != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null);
+  });
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
@@ -187,8 +195,7 @@ class MaterialPage<T> extends Page<T> {
 class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   _PageBasedMaterialPageRoute({
     required MaterialPage<T> page,
-  }) : assert(page != null),
-       super(settings: page) {
+  }) : super(settings: page) {
     assert(opaque);
   }
 

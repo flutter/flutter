@@ -4,9 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-
-import 'colors.dart';
-import 'theme.dart';
+import 'package:flutter/material.dart';
 
 // Slides the page upwards and fades it in, starting from 1/4 screen
 // below the top. The transition is intended to match the default for
@@ -369,7 +367,7 @@ class _ZoomExitTransition extends StatelessWidget {
 }
 
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
-/// transition animation.
+/// transition animation for different platforms.
 ///
 /// Apps can configure the map of builders for [ThemeData.pageTransitionsTheme]
 /// to customize the default [MaterialPageRoute] page transition animation
@@ -377,6 +375,9 @@ class _ZoomExitTransition extends StatelessWidget {
 ///
 /// See also:
 ///
+///  * [MaterialRouteTransitionMixin], which uses [PageTransitionsTheme] to find
+///    the right [PageTransitionsBuilder] to use to define details for the
+///    route's transition.
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android O.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
@@ -385,6 +386,9 @@ class _ZoomExitTransition extends StatelessWidget {
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [NoAnimationPageTransitionsBuilder], which defines the default page
+///    transition with no visible animation, that's used for all platforms on
+///    web and platforms without a builder specified in the [PageTransitionsTheme].
 abstract class PageTransitionsBuilder {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -393,10 +397,8 @@ abstract class PageTransitionsBuilder {
   /// Wraps the child with one or more transition widgets which define how [route]
   /// arrives on and leaves the screen.
   ///
-  /// The [MaterialPageRoute.buildTransitions] method looks up the current
-  /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
-  /// and delegates to this method with a [PageTransitionsBuilder] based
-  /// on the theme's [ThemeData.platform].
+  /// Used by [MaterialRouteTransitionMixin.buildTransitions] to build transitions
+  /// for route.
   Widget buildTransitions<T>(
     PageRoute<T> route,
     BuildContext context,
@@ -404,6 +406,32 @@ abstract class PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   );
+
+  /// The modal barrier color for the route.
+  ///
+  /// Used by [MaterialRouteTransitionMixin.barrierColor] to define the barrier
+  /// color for the [MaterialPageRoute]s. It is `null` by default.
+  Color? getBarrierColor(PageRoute<dynamic> route) => null;
+
+  /// Whether pointers will be ignored during the route's transitions.
+  ///
+  /// Used by [MaterialRouteTransitionMixin.ignorePointerDuringTransitions] to
+  /// define the ignore pointer behavior for [MaterialPageRoute]s. It is `false`
+  /// by default.
+  bool get ignorePointerDuringTransitions => false;
+
+  /// The duration of the route's transition.
+  ///
+  /// Used by [MaterialRouteTransitionMixin.transitionDuration] to define the
+  /// transition duration for [MaterialPageRoute]s.
+  Duration get transitionDuration;
+
+  /// The duration of the route's reverse transition.
+  ///
+  /// Used by [MaterialRouteTransitionMixin.reverseTransitionDuration] to define
+  /// the reverse transition duration for [MaterialPageRoute]s. It uses the
+  /// [transitionDuration] by default.
+  Duration get reverseTransitionDuration => transitionDuration;
 }
 
 /// Used by [PageTransitionsTheme] to define a vertically fading
@@ -421,9 +449,15 @@ abstract class PageTransitionsBuilder {
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [NoAnimationPageTransitionsBuilder], which defines the default page
+///    transition with no visible animation, that's used for all platforms on
+///    web and platforms without a builder specified in the [PageTransitionsTheme].
 class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that slides the page up.
   const FadeUpwardsPageTransitionsBuilder();
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
   Widget buildTransitions<T>(
@@ -449,10 +483,16 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [NoAnimationPageTransitionsBuilder], which defines the default page
+///    transition with no visible animation, that's used for all platforms on
+///    web and platforms without a builder specified in the [PageTransitionsTheme].
 class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android P.
   const OpenUpwardsPageTransitionsBuilder();
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
   Widget buildTransitions<T>(
@@ -476,16 +516,25 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///
 /// See also:
 ///
+///  * [MaterialRouteTransitionMixin], which uses [PageTransitionsTheme] to find
+///    the right [PageTransitionsBuilder] to use to define details for the
+///    route's transition.
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android O.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [NoAnimationPageTransitionsBuilder], which defines the default page
+///    transition with no visible animation, that's used for all platforms on
+///    web and platforms without a builder specified in the [PageTransitionsTheme].
 class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
   const ZoomPageTransitionsBuilder();
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
   Widget buildTransitions<T>(
@@ -506,17 +555,37 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 /// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
 /// page transition animation that matches native iOS page transitions.
 ///
+/// This delegates to methods defined on [CupertinoRouteTransitionMixin] to define
+/// the transitions, transition duration, and barrier color.
+///
 /// See also:
 ///
+///  * [MaterialRouteTransitionMixin], which uses [PageTransitionsTheme] to find
+///    the right [PageTransitionsBuilder] to use to define details for the
+///    route's transition.
+///  * [CupertinoRouteTransitionMixin], which defines the transition duration,
+///    barrier color, and transitions for this builder.
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android O.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
-///  * [ZoomPageTransitionsBuilder], which defines the default page transition
-///    that's similar to the one provided in Android Q.
+///  * [ZoomPageTransitionsBuilder], which defines a page transition that's
+///    similar to the one provided in Android Q.
+///  * [NoAnimationPageTransitionsBuilder], which defines the default page
+///    transition with no visible animation, that's used for all platforms on
+///    web and platforms without a builder specified in the [PageTransitionsTheme].
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the iOS transition.
   const CupertinoPageTransitionsBuilder();
+
+  @override
+  Duration get transitionDuration => CupertinoRouteTransitionMixin.getTransitionDuration();
+
+  @override
+  Color? getBarrierColor(PageRoute<dynamic> route) => CupertinoRouteTransitionMixin.getBarrierColor(route);
+
+  @override
+  bool get ignorePointerDuringTransitions => true;
 
   @override
   Widget buildTransitions<T>(
@@ -530,15 +599,55 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-/// Defines the page transition animations used by [MaterialPageRoute]
-/// for different [TargetPlatform]s.
+/// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
+/// page transition animation that matches native iOS page transitions.
 ///
-/// The [MaterialPageRoute.buildTransitions] method looks up the current
-/// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
-/// and delegates to [buildTransitions].
+/// This delegates to methods defined on [CupertinoRouteTransitionMixin] to define
+/// the transitions, transition duration, and barrier color.
 ///
-/// If a builder with a matching platform is not found, then the
-/// [FadeUpwardsPageTransitionsBuilder] is used.
+/// See also:
+///
+///  * [MaterialRouteTransitionMixin], which uses [PageTransitionsTheme] to find
+///    the right [PageTransitionsBuilder] to use to define details for the
+///    route's transition.
+///  * [CupertinoRouteTransitionMixin], which defines the transition duration,
+///    barrier color, and transitions for this builder.
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android O.
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android P.
+///  * [ZoomPageTransitionsBuilder], which defines a page transition that's
+///    similar to the one provided in Android Q.
+///  * [NoAnimationPageTransitionsBuilder], which defines the default page
+///    transition with no visible animation, that's used for all platforms on
+///    web and platforms without a builder specified in the [PageTransitionsTheme].
+class NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Creates a [NoAnimationPageTransitionsBuilder].
+  const NoAnimationPageTransitionsBuilder();
+
+  @override
+  Duration get transitionDuration => Duration.zero;
+
+  @override
+  bool get ignorePointerDuringTransitions => false;
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
+  }
+}
+
+/// Defines the [PageTransitionsBuilder] used by [MaterialRouteTransitionMixin]
+/// to define transition details for different [TargetPlatform]s.
+///
+/// If no builder is specified for the [TargetPlatform], then the
+/// [NoAnimationPageTransitionsBuilder] is used.
 ///
 /// See also:
 ///
@@ -556,40 +665,35 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 class PageTransitionsTheme with Diagnosticable {
   /// Constructs an object that selects a transition based on the platform.
   ///
-  /// By default the list of builders is: [ZoomPageTransitionsBuilder]
-  /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
-  /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders }) : _builders = builders;
+  /// By default the list of builders is: [ZoomPageTransitionsBuilder] for
+  /// [TargetPlatform.android] and [TargetPlatform.fuchsia],
+  /// [CupertinoPageTransitionsBuilder] for [TargetPlatform.iOS], and
+  /// [NoAnimationPageTransitionsBuilder] for other platforms or if the app is
+  /// running on the web.
+  const PageTransitionsTheme({
+    Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders
+  }) : _builders = builders;
 
-  static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
-    TargetPlatform.android: ZoomPageTransitionsBuilder(),
-    TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-    TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-  };
+  static const PageTransitionsBuilder _defaultBuilder = NoAnimationPageTransitionsBuilder();
+  static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = kIsWeb
+      ? <TargetPlatform, PageTransitionsBuilder>{}
+      : <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        };
 
   /// The [PageTransitionsBuilder]s supported by this theme.
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
   final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
-  /// Delegates to the builder for the current [ThemeData.platform]
-  /// or [ZoomPageTransitionsBuilder].
-  ///
-  /// [MaterialPageRoute.buildTransitions] delegates to this method.
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    TargetPlatform platform = Theme.of(context).platform;
-
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route))
-      platform = TargetPlatform.iOS;
-
-    final PageTransitionsBuilder matchingBuilder =
-      builders[platform] ?? const ZoomPageTransitionsBuilder();
-    return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
+  /// Returns the builder that should be used to build transition animations and
+  /// define other details for route transitions.
+  PageTransitionsBuilder getBuilder(PageRoute<dynamic> route) {
+    final TargetPlatform platform = CupertinoRouteTransitionMixin.isPopGestureInProgress(route)
+        ? TargetPlatform.iOS
+        : Theme.of(route.navigator!.context).platform;
+    return builders[platform] ?? _defaultBuilder;
   }
 
   // Just used to the builders Map to a list with one PageTransitionsBuilder per platform

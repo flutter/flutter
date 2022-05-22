@@ -434,13 +434,6 @@ void main() {
       labelStyle: const TextStyle(color: Colors.black),
     );
 
-    const PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
-      builders: <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-      },
-    );
-
     final ThemeData theme = ThemeData.light().copyWith(
       visualDensity: VisualDensity.standard,
       primaryColor: Colors.black,
@@ -483,7 +476,7 @@ void main() {
       platform: TargetPlatform.iOS,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       applyElevationOverlayColor: false,
-      pageTransitionsTheme: pageTransitionTheme,
+      pageTransitionsTheme: const PageTransitionsTheme(),
       appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
       scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10.0)),
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),

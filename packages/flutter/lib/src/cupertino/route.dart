@@ -135,11 +135,10 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  // A relatively rigorous eyeball estimation.
-  Duration get transitionDuration => const Duration(milliseconds: 400);
+  Duration get transitionDuration => getTransitionDuration();
 
   @override
-  Color? get barrierColor => fullscreenDialog ? null : _kCupertinoPageTransitionBarrierColor;
+  Color? get barrierColor => getBarrierColor(this);
 
   @override
   String? get barrierLabel => null;
@@ -250,6 +249,27 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     );
   }
 
+  /// Defines the duration of cupertino page transitions.
+  ///
+  /// Used by [CupertinoPageRoute.transitionDuration] to define the transitionDuration
+  /// for [CupertinoPageRoute]s, and by [CupertinoPageTransitionsBuilder] to
+  /// define the default duration for [MaterialPageRoute] transitions on
+  /// [TargetPlatform.iOS].
+  static Duration getTransitionDuration() {
+    // A relatively rigorous eyeball estimation.
+    return const Duration(milliseconds: 400);
+  }
+
+  /// Defines the barrier color to use during cupertino page transitions.
+  ///
+  /// Used by [CupertinoPageRoute.barrierColor] to define the barrier color
+  /// for [CupertinoPageRoute]s, and by [CupertinoPageTransitionsBuilder] to
+  /// define the default barrier color for [MaterialPageRoute] transitions on
+  /// [TargetPlatform.iOS].
+  static Color? getBarrierColor(PageRoute<dynamic> route) {
+    return route.fullscreenDialog ? null : _kCupertinoPageTransitionBarrierColor;
+  }
+
   /// Returns a [CupertinoFullscreenDialogTransition] if [route] is a full
   /// screen dialog, otherwise a [CupertinoPageTransition] is returned.
   ///
@@ -338,9 +358,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     super.settings,
     this.maintainState = true,
     super.fullscreenDialog,
-  }) : assert(builder != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null) {
+  }) {
     assert(opaque);
   }
 
@@ -367,8 +385,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
   _PageBasedCupertinoPageRoute({
     required CupertinoPage<T> page,
-  }) : assert(page != null),
-       super(settings: page) {
+  }) : super(settings: page) {
     assert(opaque);
   }
 
@@ -417,9 +434,7 @@ class CupertinoPage<T> extends Page<T> {
     super.name,
     super.arguments,
     super.restorationId,
-  }) : assert(child != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null);
+  });
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
@@ -458,8 +473,7 @@ class CupertinoPageTransition extends StatelessWidget {
     required Animation<double> secondaryRouteAnimation,
     required this.child,
     required bool linearTransition,
-  }) : assert(linearTransition != null),
-       _primaryPositionAnimation =
+  }) : _primaryPositionAnimation =
            (linearTransition
              ? primaryRouteAnimation
              : CurvedAnimation(
@@ -597,9 +611,7 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
-  }) : assert(enabledCallback != null),
-       assert(onStartPopGesture != null),
-       assert(child != null);
+  });
 
   final Widget child;
 
@@ -720,8 +732,7 @@ class _CupertinoBackGestureController<T> {
   _CupertinoBackGestureController({
     required this.navigator,
     required this.controller,
-  }) : assert(navigator != null),
-       assert(controller != null) {
+  }) {
     navigator.didStartUserGesture();
   }
 
@@ -842,7 +853,6 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     _CupertinoEdgeShadowDecoration? b,
     double t,
   ) {
-    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -903,8 +913,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   _CupertinoEdgeShadowPainter(
     this._decoration,
     VoidCallback? onChange,
-  ) : assert(_decoration != null),
-      assert(_decoration._colors == null || _decoration._colors!.length > 1),
+  ) : assert(_decoration._colors == null || _decoration._colors!.length > 1),
       super(onChange);
 
   final _CupertinoEdgeShadowDecoration _decoration;
@@ -1178,7 +1187,6 @@ Future<T?> showCupertinoModalPopup<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
 }) {
-  assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
     CupertinoModalPopupRoute<T>(
       builder: builder,
@@ -1283,9 +1291,6 @@ Future<T?> showCupertinoDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
 }) {
-  assert(builder != null);
-  assert(useRootNavigator != null);
-
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(CupertinoDialogRoute<T>(
     builder: builder,
     context: context,
@@ -1347,8 +1352,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     super.transitionBuilder = _buildCupertinoDialogTransitions,
     super.settings,
     super.anchorPoint,
-  }) : assert(barrierDismissible != null),
-      super(
+  }) : super(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return builder(context);
         },
