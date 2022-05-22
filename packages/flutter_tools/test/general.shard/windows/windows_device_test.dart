@@ -23,7 +23,8 @@ import '../../src/fakes.dart';
 void main() {
   testWithoutContext('WindowsDevice defaults', () async {
     final WindowsDevice windowsDevice = setUpWindowsDevice();
-    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
+    final File dummyFile = MemoryFileSystem.test().file('dummy');
+    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo', applicationPackage: dummyFile);
 
     expect(await windowsDevice.targetPlatform, TargetPlatform.windows_x64);
     expect(windowsDevice.name, 'Windows');

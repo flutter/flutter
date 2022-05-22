@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const DropdownButtonApp());
 
 class DropdownButtonApp extends StatelessWidget {
-  const DropdownButtonApp({Key? key}) : super(key: key);
+  const DropdownButtonApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class DropdownButtonApp extends StatelessWidget {
 }
 
 class DropdownButtonExample extends StatefulWidget {
-  const DropdownButtonExample({Key? key}) : super(key: key);
+  const DropdownButtonExample({super.key});
 
   @override
   State<DropdownButtonExample> createState() => _DropdownButtonExampleState();

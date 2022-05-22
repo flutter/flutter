@@ -1208,12 +1208,28 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
           alignment: Alignment.topLeft,
           width: interactiveRect.width,
           height: interactiveRect.height,
-          child: GestureDetector(
+          child: RawGestureDetector(
             behavior: HitTestBehavior.translucent,
-            dragStartBehavior: widget.dragStartBehavior,
-            onPanStart: widget.onSelectionHandleDragStart,
-            onPanUpdate: widget.onSelectionHandleDragUpdate,
-            onPanEnd: widget.onSelectionHandleDragEnd,
+            gestures: <Type, GestureRecognizerFactory>{
+              PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                () => PanGestureRecognizer(
+                  debugOwner: this,
+                  // Mouse events select the text and do not drag the cursor.
+                  supportedDevices: <PointerDeviceKind>{
+                    PointerDeviceKind.touch,
+                    PointerDeviceKind.stylus,
+                    PointerDeviceKind.unknown,
+                  },
+                ),
+                (PanGestureRecognizer instance) {
+                  instance
+                    ..dragStartBehavior = widget.dragStartBehavior
+                    ..onStart = widget.onSelectionHandleDragStart
+                    ..onUpdate = widget.onSelectionHandleDragUpdate
+                    ..onEnd = widget.onSelectionHandleDragEnd;
+                },
+              ),
+            },
             child: Padding(
               padding: EdgeInsets.only(
                 left: padding.left,

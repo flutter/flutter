@@ -1553,6 +1553,82 @@ void main() {
     expect(find.text('Paste'), findsNothing);
   });
 
+  testWidgets('Copy selection does not collapse selection on desktop and iOS', (WidgetTester tester) async {
+    final TextEditingController localController = TextEditingController(text: 'Hello world');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: localController,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Show the toolbar.
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+
+    final TextSelection copySelectionRange = localController.selection;
+
+    state.showToolbar();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Copy'), findsOneWidget);
+
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+    expect(copySelectionRange, localController.selection);
+    expect(find.text('Copy'), findsNothing);
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows })); // [intended]
+
+  testWidgets('Copy selection collapses selection and hides the toolbar on Android and Fuchsia', (WidgetTester tester) async {
+    final TextEditingController localController = TextEditingController(text: 'Hello world');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: localController,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Show the toolbar.
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+
+    final TextSelection copySelectionRange = localController.selection;
+
+    state.showToolbar();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Copy'), findsOneWidget);
+
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+    expect(localController.selection, TextSelection.collapsed(offset: copySelectionRange.extentOffset));
+    expect(find.text('Copy'), findsNothing);
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia })); // [intended]
+
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35998.
     await tester.pumpWidget(
@@ -7825,7 +7901,7 @@ void main() {
       // On web, we don't show the Flutter toolbar and instead rely on the browser
       // toolbar. Until we change that, this test should remain skipped.
       skip: kIsWeb, // [intended]
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS })
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS })
   );
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
@@ -9308,7 +9384,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(EditableText)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -11982,6 +12057,221 @@ void main() {
     expect(tester.takeException(), null);
   // On web, the text selection toolbar cut button is handled by the browser.
   }, skip: kIsWeb); // [intended]
+
+  group('Mac document shortcuts', () {
+    testWidgets('ctrl-A/E', (WidgetTester tester) async {
+      final String targetPlatformString = defaultTargetPlatform.toString();
+      final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+      final TextEditingController controller = TextEditingController(text: testText);
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 0,
+        affinity: TextAffinity.upstream,
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: EditableText(
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: FocusNode(),
+              style: Typography.material2018().black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      ));
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 0);
+
+      await tester.sendKeyDownEvent(
+        LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyE, platform: platform);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+      await tester.pump();
+
+      expect(
+        controller.selection,
+        equals(
+          const TextSelection.collapsed(
+            offset: 19,
+            affinity: TextAffinity.upstream,
+          ),
+        ),
+        reason: 'on $platform',
+      );
+
+      await tester.sendKeyDownEvent(
+        LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyA, platform: platform);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+      await tester.pump();
+
+      expect(
+        controller.selection,
+        equals(
+          const TextSelection.collapsed(
+            offset: 0,
+          ),
+        ),
+        reason: 'on $platform',
+      );
+    },
+      skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    );
+
+    testWidgets('ctrl-F/B', (WidgetTester tester) async {
+      final String targetPlatformString = defaultTargetPlatform.toString();
+      final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+      final TextEditingController controller = TextEditingController(text: testText);
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 0,
+        affinity: TextAffinity.upstream,
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: EditableText(
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: FocusNode(),
+              style: Typography.material2018().black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      ));
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 0);
+
+      await tester.sendKeyDownEvent(
+        LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyF, platform: platform);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 1);
+
+      await tester.sendKeyDownEvent(
+        LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyB, platform: platform);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 0);
+    },
+      skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    );
+
+    testWidgets('ctrl-N/P', (WidgetTester tester) async {
+      final String targetPlatformString = defaultTargetPlatform.toString();
+      final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+      final TextEditingController controller = TextEditingController(text: testText);
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 0,
+        affinity: TextAffinity.upstream,
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: EditableText(
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: FocusNode(),
+              style: Typography.material2018().black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      ));
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 0);
+
+      await tester.sendKeyDownEvent(
+        LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyN, platform: platform);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 20);
+
+      await tester.sendKeyDownEvent(
+        LogicalKeyboardKey.controlLeft,
+        platform: platform,
+      );
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyP, platform: platform);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 0);
+    },
+      skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    );
+  });
 }
 
 class UnsettableController extends TextEditingController {

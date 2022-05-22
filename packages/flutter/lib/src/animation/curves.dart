@@ -182,7 +182,7 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
+    t = clampDouble((t - begin) / (end - begin), 0.0, 1.0);
     if (t == 0.0 || t == 1.0)
       return t;
     return curve.transform(t);

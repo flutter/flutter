@@ -31,7 +31,7 @@ import 'transitions.dart';
 // late NavigatorState navigator;
 // late BuildContext context;
 // Future<bool> askTheUserIfTheyAreSure() async { return true; }
-// abstract class MyWidget extends StatefulWidget { const MyWidget({Key? key}) : super(key: key); }
+// abstract class MyWidget extends StatefulWidget { const MyWidget({super.key}); }
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -293,73 +293,85 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     final VoidCallback? previousTrainHoppingListenerRemover = _trainHoppingListenerRemover;
     _trainHoppingListenerRemover = null;
 
-    if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
-      final Animation<double>? current = _secondaryAnimation.parent;
-      if (current != null) {
-        final Animation<double> currentTrain = (current is TrainHoppingAnimation ? current.currentTrain : current)!;
-        final Animation<double> nextTrain = nextRoute._animation!;
-        if (
-          currentTrain.value == nextTrain.value ||
-          nextTrain.status == AnimationStatus.completed ||
-          nextTrain.status == AnimationStatus.dismissed
-        ) {
-          _setSecondaryAnimation(nextTrain, nextRoute.completed);
-        } else {
-          // Two trains animate at different values. We have to do train hopping.
-          // There are three possibilities of train hopping:
-          //  1. We hop on the nextTrain when two trains meet in the middle using
-          //     TrainHoppingAnimation.
-          //  2. There is no chance to hop on nextTrain because two trains never
-          //     cross each other. We have to directly set the animation to
-          //     nextTrain once the nextTrain stops animating.
-          //  3. A new _updateSecondaryAnimation is called before train hopping
-          //     finishes. We leave a listener remover for the next call to
-          //     properly clean up the existing train hopping.
-          TrainHoppingAnimation? newAnimation;
-          void jumpOnAnimationEnd(AnimationStatus status) {
-            switch (status) {
-              case AnimationStatus.completed:
-              case AnimationStatus.dismissed:
-                // The nextTrain has stopped animating without train hopping.
-                // Directly sets the secondary animation and disposes the
-                // TrainHoppingAnimation.
-                _setSecondaryAnimation(nextTrain, nextRoute.completed);
+    if (nextRoute is TransitionRoute<dynamic>) {
+      if (canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
+        final Animation<double>? current = _secondaryAnimation.parent;
+        if (current != null) {
+          final Animation<double> currentTrain = (current is TrainHoppingAnimation ? current.currentTrain : current)!;
+          final Animation<double> nextTrain = nextRoute._animation!;
+          if (
+            currentTrain.value == nextTrain.value ||
+                nextTrain.status == AnimationStatus.completed ||
+                nextTrain.status == AnimationStatus.dismissed
+          ) {
+            _setSecondaryAnimation(nextTrain, nextRoute.completed);
+          } else {
+            // Two trains animate at different values. We have to do train hopping.
+            // There are three possibilities of train hopping:
+            //  1. We hop on the nextTrain when two trains meet in the middle using
+            //     TrainHoppingAnimation.
+            //  2. There is no chance to hop on nextTrain because two trains never
+            //     cross each other. We have to directly set the animation to
+            //     nextTrain once the nextTrain stops animating.
+            //  3. A new _updateSecondaryAnimation is called before train hopping
+            //     finishes. We leave a listener remover for the next call to
+            //     properly clean up the existing train hopping.
+            TrainHoppingAnimation? newAnimation;
+            void jumpOnAnimationEnd(AnimationStatus status) {
+              switch (status) {
+                case AnimationStatus.completed:
+                case AnimationStatus.dismissed:
+                  // The nextTrain has stopped animating without train hopping.
+                  // Directly sets the secondary animation and disposes the
+                  // TrainHoppingAnimation.
+                  _setSecondaryAnimation(nextTrain, nextRoute.completed);
+                  if (_trainHoppingListenerRemover != null) {
+                    _trainHoppingListenerRemover!();
+                    _trainHoppingListenerRemover = null;
+                  }
+                  break;
+                case AnimationStatus.forward:
+                case AnimationStatus.reverse:
+                  break;
+              }
+            }
+            _trainHoppingListenerRemover = () {
+              nextTrain.removeStatusListener(jumpOnAnimationEnd);
+              newAnimation?.dispose();
+            };
+            nextTrain.addStatusListener(jumpOnAnimationEnd);
+            newAnimation = TrainHoppingAnimation(
+              currentTrain,
+              nextTrain,
+              onSwitchedTrain: () {
+                assert(_secondaryAnimation.parent == newAnimation);
+                assert(newAnimation!.currentTrain == nextRoute._animation);
+                // We can hop on the nextTrain, so we don't need to listen to
+                // whether the nextTrain has stopped.
+                _setSecondaryAnimation(newAnimation!.currentTrain, nextRoute.completed);
                 if (_trainHoppingListenerRemover != null) {
                   _trainHoppingListenerRemover!();
                   _trainHoppingListenerRemover = null;
                 }
-                break;
-              case AnimationStatus.forward:
-              case AnimationStatus.reverse:
-                break;
-            }
+              },
+            );
+            _setSecondaryAnimation(newAnimation, nextRoute.completed);
           }
-          _trainHoppingListenerRemover = () {
-            nextTrain.removeStatusListener(jumpOnAnimationEnd);
-            newAnimation?.dispose();
-          };
-          nextTrain.addStatusListener(jumpOnAnimationEnd);
-          newAnimation = TrainHoppingAnimation(
-            currentTrain,
-            nextTrain,
-            onSwitchedTrain: () {
-              assert(_secondaryAnimation.parent == newAnimation);
-              assert(newAnimation!.currentTrain == nextRoute._animation);
-              // We can hop on the nextTrain, so we don't need to listen to
-              // whether the nextTrain has stopped.
-              _setSecondaryAnimation(newAnimation!.currentTrain, nextRoute.completed);
-              if (_trainHoppingListenerRemover != null) {
-                _trainHoppingListenerRemover!();
-                _trainHoppingListenerRemover = null;
-              }
-            },
-          );
-          _setSecondaryAnimation(newAnimation, nextRoute.completed);
+        } else { // This route has no secondary animation.
+          _setSecondaryAnimation(nextRoute._animation, nextRoute.completed);
         }
       } else {
-        _setSecondaryAnimation(nextRoute._animation, nextRoute.completed);
+        // This route cannot coordinate transitions with nextRoute, so it should
+        // have no visible secondary animation. By using an AnimationMin, the
+        // animation's value will always be zero, but it will have nextRoute.animation's
+        // status until it finishes, allowing this route to wait until all visible
+        // transitions are complete to stop ignoring pointers.
+        _setSecondaryAnimation(
+          AnimationMin<double>(kAlwaysDismissedAnimation, nextRoute._animation!),
+          nextRoute.completed,
+        );
       }
-    } else {
+    } else { // The next route is not a TransitionRoute.
       _setSecondaryAnimation(kAlwaysDismissedAnimation);
     }
     // Finally, we dispose any previous train hopping animation because it
@@ -396,9 +408,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// the [nextRoute] is popped off of this route, the
   /// `secondaryAnimation` will run from 1.0 - 0.0.
   ///
-  /// If false, this route's [ModalRoute.buildTransitions] `secondaryAnimation` parameter
-  /// value will be [kAlwaysDismissedAnimation]. In other words, this route
-  /// will not animate when [nextRoute] is pushed on top of it or when
+  /// If false, this route's [ModalRoute.buildTransitions] `secondaryAnimation`
+  /// will proxy an animation with a constant value of 0. In other words, this
+  /// route will not animate when [nextRoute] is pushed on top of it or when
   /// [nextRoute] is popped off of it.
   ///
   /// Returns true by default.
@@ -455,20 +467,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 /// An entry in the history of a [LocalHistoryRoute].
 class LocalHistoryEntry {
   /// Creates an entry in the history of a [LocalHistoryRoute].
-  ///
-  /// The [impliesAppBarDismissal] defaults to true if not provided.
-  LocalHistoryEntry({ this.onRemove, this.impliesAppBarDismissal = true });
+  LocalHistoryEntry({ this.onRemove });
 
   /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
   final VoidCallback? onRemove;
 
   LocalHistoryRoute<dynamic>? _owner;
-
-  /// Whether an [AppBar] in the route this entry belongs to should
-  /// automatically add a back button or close button.
-  ///
-  /// Defaults to true.
-  final bool impliesAppBarDismissal;
 
   /// Remove this entry from the history of its associated [LocalHistoryRoute].
   void remove() {
@@ -490,7 +494,7 @@ class LocalHistoryEntry {
 /// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
 mixin LocalHistoryRoute<T> on Route<T> {
   List<LocalHistoryEntry>? _localHistory;
-  int _entriesImpliesAppBarDismissal = 0;
+
   /// Adds a local history entry to this route.
   ///
   /// When asked to pop, if this route has any local history entries, this route
@@ -515,7 +519,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///
   /// ```dart
   /// class App extends StatelessWidget {
-  ///   const App({Key? key}) : super(key: key);
+  ///   const App({super.key});
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -530,7 +534,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// }
   ///
   /// class HomePage extends StatefulWidget {
-  ///   const HomePage({Key? key}) : super(key: key);
+  ///   const HomePage({super.key});
   ///
   ///   @override
   ///   State<HomePage> createState() => _HomePageState();
@@ -560,7 +564,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// }
   ///
   /// class SecondPage extends StatefulWidget {
-  ///   const SecondPage({Key? key}) : super(key: key);
+  ///   const SecondPage({super.key});
   ///
   ///   @override
   ///   State<SecondPage> createState() => _SecondPageState();
@@ -628,12 +632,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
     _localHistory ??= <LocalHistoryEntry>[];
     final bool wasEmpty = _localHistory!.isEmpty;
     _localHistory!.add(entry);
-    bool internalStateChanged = false;
-    if (entry.impliesAppBarDismissal) {
-      internalStateChanged = _entriesImpliesAppBarDismissal == 0;
-      _entriesImpliesAppBarDismissal += 1;
-    }
-    if (wasEmpty || internalStateChanged)
+    if (wasEmpty)
       changedInternalState();
   }
 
@@ -645,15 +644,10 @@ mixin LocalHistoryRoute<T> on Route<T> {
     assert(entry != null);
     assert(entry._owner == this);
     assert(_localHistory!.contains(entry));
-    bool internalStateChanged = false;
-    if (_localHistory!.remove(entry) && entry.impliesAppBarDismissal) {
-      _entriesImpliesAppBarDismissal -= 1;
-      internalStateChanged = _entriesImpliesAppBarDismissal == 0;
-    }
+    _localHistory!.remove(entry);
     entry._owner = null;
     entry._notifyRemoved();
-    if (_localHistory!.isEmpty || internalStateChanged) {
-      assert(_entriesImpliesAppBarDismissal == 0);
+    if (_localHistory!.isEmpty) {
       if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
         // The local history might be removed as a result of disposing inactive
         // elements during finalizeTree. The state is locked at this moment, and
@@ -681,12 +675,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
-      bool internalStateChanged = false;
-      if (entry.impliesAppBarDismissal) {
-        _entriesImpliesAppBarDismissal -= 1;
-        internalStateChanged = _entriesImpliesAppBarDismissal == 0;
-      }
-      if (_localHistory!.isEmpty || internalStateChanged)
+      if (_localHistory!.isEmpty)
         changedInternalState();
       return false;
     }
@@ -720,7 +709,6 @@ class _ModalScopeStatus extends InheritedWidget {
   const _ModalScopeStatus({
     required this.isCurrent,
     required this.canPop,
-    required this.impliesAppBarDismissal,
     required this.route,
     required super.child,
   }) : assert(isCurrent != null),
@@ -730,14 +718,12 @@ class _ModalScopeStatus extends InheritedWidget {
 
   final bool isCurrent;
   final bool canPop;
-  final bool impliesAppBarDismissal;
   final Route<dynamic> route;
 
   @override
   bool updateShouldNotify(_ModalScopeStatus old) {
     return isCurrent != old.isCurrent ||
            canPop != old.canPop ||
-           impliesAppBarDismissal != old.impliesAppBarDismissal ||
            route != old.route;
   }
 
@@ -746,7 +732,6 @@ class _ModalScopeStatus extends InheritedWidget {
     super.debugFillProperties(description);
     description.add(FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
     description.add(FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
-    description.add(FlagProperty('impliesAppBarDismissal', value: impliesAppBarDismissal, ifTrue: 'implies app bar dismissal'));
   }
 }
 
@@ -849,7 +834,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
         route: widget.route,
         isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
         canPop: widget.route.canPop, // _routeSetState is called if this updates
-        impliesAppBarDismissal: widget.route.impliesAppBarDismissal,
         child: Offstage(
           offstage: widget.route.offstage, // _routeSetState is called if this updates
           child: PageStorage(
@@ -874,17 +858,19 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                                 context,
                                 widget.route.animation!,
                                 widget.route.secondaryAnimation!,
-                                // This additional AnimatedBuilder is include because if the
-                                // value of the userGestureInProgressNotifier changes, it's
-                                // only necessary to rebuild the IgnorePointer widget and set
-                                // the focus node's ability to focus.
+                                // _listenable updates when this route's animations change
+                                // values, but the _ignorePointerNotifier can also update
+                                // when the status of animations on popping routes change,
+                                // even when this route's animations' values don't. Also,
+                                // when the value of the _ignorePointerNotifier changes,
+                                // it's only necessary to rebuild the IgnorePointer
+                                // widget and set the focus node's ability to focus.
                                 AnimatedBuilder(
-                                  animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                                  animation: widget.route._ignorePointerNotifier,
                                   builder: (BuildContext context, Widget? child) {
-                                    final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                                    focusScopeNode.canRequestFocus = !ignoreEvents;
+                                    focusScopeNode.canRequestFocus = !_shouldIgnoreFocusRequest;
                                     return IgnorePointer(
-                                      ignoring: ignoreEvents,
+                                      ignoring: widget.route._ignorePointer,
                                       child: child,
                                     );
                                   },
@@ -1168,11 +1154,36 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return child;
   }
 
+  /// Whether this route should ignore pointers when transitions are in progress.
+  ///
+  /// Pointers always are ignored when [isCurrent] is false (e.g., when a route
+  /// has a new route pushed on top of it, or during a route's exit transition
+  /// after popping). Override this value to also ignore pointers on pages during
+  /// transitions where this route is the current route (e.g., after the route
+  /// above this route pops, or during this route's entrance transition).
+  ///
+  /// Returns false by default.
+  ///
+  /// See also:
+  ///
+  ///  * [CupertinoRouteTransitionMixin], [CupertinoModalPopupRoute], and
+  ///    [CupertinoDialogRoute], which use this property to specify that
+  ///    Cupertino routes ignore pointers during transitions.
+  @protected
+  bool get ignorePointerDuringTransitions => false;
+
   @override
   void install() {
     super.install();
-    _animationProxy = ProxyAnimation(super.animation);
-    _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation);
+    _animationProxy = ProxyAnimation(super.animation)
+      ..addStatusListener(_handleAnimationStatusChanged);
+    _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation)
+      ..addStatusListener(_handleAnimationStatusChanged);
+    navigator!.userGestureInProgressNotifier.addListener(_maybeUpdateIgnorePointer);
+  }
+
+  void _handleAnimationStatusChanged(AnimationStatus status) {
+    _maybeUpdateIgnorePointer();
   }
 
   @override
@@ -1408,6 +1419,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Animation<double>? get secondaryAnimation => _secondaryAnimationProxy;
   ProxyAnimation? _secondaryAnimationProxy;
 
+  bool get _ignorePointer => _ignorePointerNotifier.value;
+  final ValueNotifier<bool> _ignorePointerNotifier = ValueNotifier<bool>(false);
+
+  void _maybeUpdateIgnorePointer() {
+    bool isTransitioning(Animation<double>? animation) {
+      return animation?.status == AnimationStatus.forward || animation?.status == AnimationStatus.reverse;
+    }
+    _ignorePointerNotifier.value = !isCurrent ||
+        (navigator?.userGestureInProgress ?? false) ||
+        (ignorePointerDuringTransitions &&
+            (isTransitioning(animation) || isTransitioning(secondaryAnimation)));
+  }
+
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
@@ -1589,14 +1613,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// notified.
   bool get canPop => hasActiveRouteBelow || willHandlePopInternally;
 
-  /// Whether an [AppBar] in the route should automatically add a back button or
-  /// close button.
-  ///
-  /// This getter returns true if there is at least one active route below it,
-  /// or there is at least one [LocalHistoryEntry] with `impliesAppBarDismissal`
-  /// set to true
-  bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
-
   // Internals
 
   final GlobalKey<_ModalScopeState<T>> _scopeKey = GlobalKey<_ModalScopeState<T>>();
@@ -1634,9 +1650,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         child: barrier,
       );
     }
-    barrier = IgnorePointer(
-      ignoring: animation!.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
-                animation!.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
+    barrier = AnimatedBuilder(
+      animation: _ignorePointerNotifier,
+      builder: (BuildContext context, Widget? child) {
+        return IgnorePointer(
+          ignoring: _ignorePointer,
+          child: child,
+        );
+      },
       child: barrier,
     );
     if (semanticsDismissible && barrierDismissible) {
@@ -1734,7 +1755,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// }
 ///
 /// class RouteAwareWidget extends StatefulWidget {
-///   const RouteAwareWidget({Key? key}) : super(key: key);
+///   const RouteAwareWidget({super.key});
 ///
 ///   @override
 ///   State<RouteAwareWidget> createState() => RouteAwareWidgetState();

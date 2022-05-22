@@ -289,7 +289,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorThemeCopy extends StatelessWidget {
-  ///   const TitleColorThemeCopy({Key? key, required this.child, required this.titleColor}) : super(key: key);
+  ///   const TitleColorThemeCopy({super.key, required this.titleColor, required this.child});
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -399,7 +399,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorTheme extends StatelessWidget {
-  ///   const TitleColorTheme({Key? key, required this.child, required this.titleColor}) : super(key: key);
+  ///   const TitleColorTheme({super.key, required this.child, required this.titleColor});
   ///
   ///   final Color titleColor;
   ///   final Widget child;

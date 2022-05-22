@@ -6,7 +6,3 @@ linter:
   rules:
     # Samples want to print things pretty often.
     avoid_print: false
-    # TODO(goderbauer): enable when super params are more established and
-    #   seeing them in the API samples is no longer surprising,
-    #   https://github.com/flutter/flutter/issues/101068
-    use_super_parameters: false

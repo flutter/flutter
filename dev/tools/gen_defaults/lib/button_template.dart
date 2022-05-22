@@ -64,7 +64,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle =>
-    MaterialStateProperty.all<TextStyle?>(${textStyle("$tokenGroup.label-text")});
+    MaterialStatePropertyAll<TextStyle?>(${textStyle("$tokenGroup.label-text")});
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};

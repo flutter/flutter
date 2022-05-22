@@ -863,6 +863,98 @@ void main() {
       expect(visualStudio.getWindows10SDKVersion(), null);
     });
   });
+
+  group(VswhereDetails, () {
+      test('Accepts empty JSON', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = <String, dynamic>{};
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.installationPath, null);
+        expect(result.displayName, null);
+        expect(result.fullVersion, null);
+        expect(result.isComplete, null);
+        expect(result.isLaunchable, null);
+        expect(result.isRebootRequired, null);
+        expect(result.isPrerelease, null);
+        expect(result.catalogDisplayVersion, null);
+        expect(result.isUsable, isTrue);
+      });
+
+      test('Ignores unknown JSON properties', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = <String, dynamic>{
+          'hello': 'world',
+        };
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.installationPath, null);
+        expect(result.displayName, null);
+        expect(result.fullVersion, null);
+        expect(result.isComplete, null);
+        expect(result.isLaunchable, null);
+        expect(result.isRebootRequired, null);
+        expect(result.isPrerelease, null);
+        expect(result.catalogDisplayVersion, null);
+        expect(result.isUsable, isTrue);
+      });
+
+      test('Accepts JSON', () {
+        const bool meetsRequirements = true;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse);
+
+        expect(result.installationPath, visualStudioPath);
+        expect(result.displayName, 'Visual Studio Community 2019');
+        expect(result.fullVersion, '16.2.29306.81');
+        expect(result.isComplete, true);
+        expect(result.isLaunchable, true);
+        expect(result.isRebootRequired, false);
+        expect(result.isPrerelease, false);
+        expect(result.catalogDisplayVersion, '16.2.5');
+        expect(result.isUsable, isTrue);
+      });
+
+      test('Installation that does not satisfy requirements is not usable', () {
+        const bool meetsRequirements = false;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse);
+
+        expect(result.isUsable, isFalse);
+      });
+
+      test('Incomplete installation is not usable', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
+          ..['isComplete'] = false;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.isUsable, isFalse);
+      });
+
+      test('Unlaunchable installation is not usable', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
+          ..['isLaunchable'] = false;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.isUsable, isFalse);
+      });
+
+      test('Installation that requires reboot is not usable', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
+          ..['isRebootRequired'] = true;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.isUsable, isFalse);
+      });
+  });
 }
 
 class VisualStudioFixture {

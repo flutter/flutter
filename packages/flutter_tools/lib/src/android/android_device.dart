@@ -625,7 +625,8 @@ class AndroidDevice extends Device {
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
     final List<String> cmd = <String>[
       'shell', 'am', 'start',
-      '-a', 'android.intent.action.RUN',
+      '-a', 'android.intent.action.MAIN',
+      '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-dart-profiling', 'true',
       if (traceStartup)
@@ -652,6 +653,8 @@ class AndroidDevice extends Device {
       ...<String>['--ez', 'cache-sksl', 'true'],
       if (debuggingOptions.purgePersistentCache)
         ...<String>['--ez', 'purge-persistent-cache', 'true'],
+      if (debuggingOptions.enableImpeller)
+        ...<String>['--ez', 'enable-impeller', 'true'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],
