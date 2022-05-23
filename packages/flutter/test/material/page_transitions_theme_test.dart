@@ -60,7 +60,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb); // Transitions disabled on web
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb); // [intended] Transitions disabled on web
 
   testWidgets('Default PageTransitionsTheme builds a _ZoomPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -93,7 +93,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findZoomPageTransition(), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // Transitions disabled on web
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] Transitions disabled on web
 
   testWidgets('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -133,7 +133,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // Transitions disabled on web
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] Transitions disabled on web
 
   testWidgets('PageTransitionsTheme override builds a _FadeUpwardsTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -173,7 +173,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findFadeUpwardsPageTransition(), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // Transitions disabled on web
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] Transitions disabled on web
 
   testWidgets('_ZoomPageTransition only cause child widget built once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/58345
@@ -219,5 +219,5 @@ void main() {
     await tester.tap(find.text('pop'));
     await tester.pumpAndSettle();
     expect(builtCount, 1);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // Transitions disabled on web
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] Transitions disabled on web
 }
