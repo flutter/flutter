@@ -22,22 +22,8 @@ environment:
 
 dependencies:
   args: any
-  async: any
-  charcode: any
-  collection: any
-  convert: any
-  crypto: any
-  front_end: any
   frontend_server: any
-  kernel: any
-  logging: any
-  meta: any
-  package_config: any
   path: any
-  source_span: any
-  typed_data: any
-  usage: any
-  vm: any
 
 dev_dependencies:
   litetest: any
@@ -59,14 +45,10 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/build_integration
   charcode:
     path: ../../third_party/dart/third_party/pkg/charcode
-  cli_util:
-    path: ../../third_party/dart/third_party/pkg/cli_util
   collection:
     path: ../../third_party/dart/third_party/pkg/collection
   compiler:
     path: ../../third_party/dart/pkg/compiler
-  convert:
-    path: ../../third_party/dart/third_party/pkg/convert
   crypto:
     path: ../../third_party/dart/third_party/pkg/crypto
   dart2js_info:
@@ -93,14 +75,8 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/kernel
   litetest:
     path: ../testing/litetest
-  logging:
-    path: ../../third_party/dart/third_party/pkg/logging
-  matcher:
-    path: ../../third_party/dart/third_party/pkg/matcher
   meta:
     path: ../../third_party/dart/pkg/meta
-  mime:
-    path: ../../third_party/dart/third_party/pkg/mime
   package_config:
     path: ../../third_party/dart/third_party/pkg_tested/package_config
   path:
@@ -109,8 +85,6 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/protobuf/protobuf
   shelf:
     path: ../../third_party/dart/third_party/pkg/shelf/pkgs/shelf
-  shelf_static:
-    path: ../../third_party/dart/third_party/pkg/shelf/pkgs/shelf_static
   smith:
     path: ../../third_party/dart/pkg/smith
   source_maps:
