@@ -13,18 +13,18 @@ import 'text_input.dart' show TextInputConnection;
 ///                            START OF PR #1.1                              ///
 ////////////////////////////////////////////////////////////////////////////////
 
-/// A data structure representing the spell check results for a misspelled range
-/// of text. For example, one [SpellCheckSuggestionSpan] of the spell check
-/// results for "Hello, wrold!" may be
+/// A data structure representing a range of misspelled text and the suggested
+/// replacements for this range. For example, one [SuggestionSpan] of the
+/// [List<SuggestionSpan> suggestions] of the [SpellCheckResults] corresponding
+/// to "Hello, wrold!" may be:
 /// ```dart
-/// SpellCheckSuggestionSpan(7, 11, List<String>.from["word, world, old"])
+/// SuggestionSpan(7, 11, List<String>.from["word, world, old"])
 /// ```
-class SpellCheckSuggestionSpan {
-  SpellCheckSuggestionSpan(
-      this.startIndex, this.endIndex, this.replacementSuggestions) {
+class SuggestionSpan {
+  SuggestionSpan(this.startIndex, this.endIndex, this.suggestions) {
     assert(startIndex != null);
     assert(endIndex != null);
-    assert(replacementSuggestions != null);
+    assert(suggestions != null);
   }
 
   late final int startIndex;
@@ -36,27 +36,51 @@ class SpellCheckSuggestionSpan {
   /// The maximum length of this list depends on the spell checker used. If
   /// [DefaultSpellCheckService] is used, the maximum length of this list will be
   /// 5 on Android platforms and there will be no maximum length on iOS platforms.
-  late final List<String> replacementSuggestions;
+  late final List<String> suggestions;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is SpellCheckSuggestionSpan &&
+    return other is SuggestionSpan &&
         other.startIndex == startIndex &&
         other.endIndex == endIndex &&
-        listEquals<String>(
-            other.replacementSuggestions, replacementSuggestions);
+        listEquals<String>(other.suggestions, suggestions);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(startIndex, endIndex, hashList(replacementSuggestions));
+  int get hashCode => Object.hash(startIndex, endIndex, hashList(suggestions));
+}
+
+/// A data structure grouping the [SuggestionSpan]s and related text of a
+/// result returned by the active spell checker.
+///
+/// See also:
+///
+///  * [SuggestionSpan], the ranges of mispelled text and corresponding replacement
+///    suggestions.
+class SpellCheckResults {
+  SpellCheckResults(this.spellCheckedText, this.suggestionSpans);
+
+  late final String spellCheckedText;
+
+  late final List<SuggestionSpan> suggestionSpans;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SpellCheckResults &&
+        other.spellCheckedText == spellCheckedText &&
+        listEquals<SuggestionSpan>(other.suggestionSpans, suggestionSpans);
+  }
+
+  @override
+  int get hashCode => Object.hash(spellCheckedText, hashList(suggestionSpans));
 }
 
 /// Controls how spell check is performed for text input.
 ///
 /// The spell check configuration determines the [SpellCheckService] used to
-/// fetch spell check results of type [List<SpellCheckSuggestionSpan>] and the
+/// fetch spell check results of type [List<SuggestionSpan>] and the
 /// [SpellCheckSuggestionsHandler] used to mark and display replacement
 /// suggestions for mispelled words within text input.
 class SpellCheckConfiguration {
@@ -69,14 +93,11 @@ class SpellCheckConfiguration {
 
   /// The most up-to-date spell check results for text input.
   ///
-  /// These [SpellCheckSuggestionSpan]s will be updated by the
-  /// [spellCheckService] and used by the [spellCheckSuggestionsHandler] to
+  /// These results will be updated by the
+  /// [SpellCheckService] and used by the [SpellCheckSuggestionsHandler] to
   /// build the [TextSpan] tree for text input and menus for replacement
   /// suggestions of mispelled words.
-  List<SpellCheckSuggestionSpan>? spellCheckResults;
-
-  /// The text that corresponds to the [spellCheckResults].
-  String? spellCheckResultsText;
+  SpellCheckResults? spellCheckResults;
 
   /// Configuration that indicates that spell check should not be run on text
   /// input and/or spell check is not implemented on the respective platform.
@@ -92,7 +113,8 @@ class SpellCheckConfiguration {
 ///    but no [SpellCheckService] implementation is provided.
 abstract class SpellCheckService {
   /// Initiates and receives results for a spell check request.
-  Future<List<dynamic>> fetchSpellCheckSuggestions(Locale locale, String text);
+  Future<SpellCheckResults?> fetchSpellCheckSuggestions(
+      Locale locale, String text);
 }
 
 /// Determines how mispelled words are indicated in text input and how
@@ -115,17 +137,16 @@ abstract class SpellCheckSuggestionsHandler {
       TextEditingValue value,
       bool composingWithinCurrentTextRange,
       TextStyle? style,
-      List<SpellCheckSuggestionSpan>? spellCheckResults,
-      String? spellCheckResultsText);
+      SpellCheckResults spellCheckResults);
 
   /// NOTE: NOT INCLUDED IN PR 1.1:
   Widget buildSpellCheckSuggestionsToolbar(
-      List<SpellCheckSuggestionSpan>? spellCheckResults,
       TextSelectionDelegate delegate,
       List<TextSelectionPoint> endpoints,
       Rect globalEditableRegion,
       Offset selectionMidpoint,
-      double textLineHeight);
+      double textLineHeight,
+      SpellCheckResults? spellCheckResults);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,42 +161,35 @@ class DefaultSpellCheckService implements SpellCheckService {
   }
 
   @override
-  Future<List<dynamic>> fetchSpellCheckSuggestions(
+  Future<SpellCheckResults?> fetchSpellCheckSuggestions(
       Locale locale, String text) async {
     assert(locale != null);
     assert(text != null);
 
-    List<dynamic> spellCheckResults = <dynamic>[];
     final List<dynamic> rawResults;
 
-    //TODO(camillesimon): properly handle exception
     try {
       rawResults = await spellCheckChannel.invokeMethod(
         'SpellCheck.initiateSpellCheck',
         <String>[locale.toLanguageTag(), text],
       );
     } catch (e) {
-      return spellCheckResults;
+      // Spell check request canceled due to ongoing request.
+      return null;
     }
 
     List<String> results = rawResults.cast<String>();
 
     String resultsText = results.removeAt(0);
-    List<SpellCheckSuggestionSpan> spellCheckSuggestionSpans =
-        <SpellCheckSuggestionSpan>[];
+    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
 
     results.forEach((String result) {
       List<String> resultParsed = result.split(".");
-      spellCheckSuggestionSpans.add(SpellCheckSuggestionSpan(
-          int.parse(resultParsed[0]),
-          int.parse(resultParsed[1]),
-          resultParsed[2].split("\n")));
+      suggestionSpans.add(SuggestionSpan(int.parse(resultParsed[0]),
+          int.parse(resultParsed[1]), resultParsed[2].split("\n")));
     });
 
-    spellCheckResults.add(resultsText);
-    spellCheckResults.add(spellCheckSuggestionSpans);
-
-    return spellCheckResults;
+    return SpellCheckResults(resultsText, suggestionSpans);
   }
 }
 
@@ -184,7 +198,7 @@ class DefaultSpellCheckSuggestionsHandler
   int scssSpans_consumed_index = 0;
   int text_consumed_index = 0;
 
-  List<SpellCheckSuggestionSpan>? reusableSpellCheckResults;
+  List<SuggestionSpan>? reusableSpellCheckResults;
   String? reusableText;
 
   final TargetPlatform platform;
@@ -193,12 +207,12 @@ class DefaultSpellCheckSuggestionsHandler
 
   @override
   Widget buildSpellCheckSuggestionsToolbar(
-      List<SpellCheckSuggestionSpan>? spellCheckResults,
       TextSelectionDelegate delegate,
       List<TextSelectionPoint> endpoints,
       Rect globalEditableRegion,
       Offset selectionMidpoint,
-      double textLineHeight) {
+      double textLineHeight,
+      SpellCheckResults? spellCheckResults) {
     return _SpellCheckSuggestionsToolbar(
       platform: platform,
       delegate: delegate,
@@ -206,21 +220,20 @@ class DefaultSpellCheckSuggestionsHandler
       globalEditableRegion: globalEditableRegion,
       selectionMidpoint: selectionMidpoint,
       textLineHeight: textLineHeight,
-      spellCheckSuggestionSpans: spellCheckResults,
+      suggestionSpans: spellCheckResults!.suggestionSpans,
     );
   }
 
   // Provides a generous guesss of the spell check results for the current text if the spell check results for this text has not been received by the framework yet.
   // Assumes order of results matches that of the text
-  List<SpellCheckSuggestionSpan> correctSpellCheckResults(String newText,
-      String resultsText, List<SpellCheckSuggestionSpan> results) {
-    List<SpellCheckSuggestionSpan> correctedSpellCheckResults =
-        <SpellCheckSuggestionSpan>[];
+  List<SuggestionSpan> correctSpellCheckResults(
+      String newText, String resultsText, List<SuggestionSpan> results) {
+    List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
 
     int span_pointer = 0;
     bool foundBadSpan = false;
 
-    SpellCheckSuggestionSpan currentSpan;
+    SuggestionSpan currentSpan;
     String oldSpanText;
     String newSpanText;
     int spanLength = 0;
@@ -262,8 +275,8 @@ class DefaultSpellCheckSuggestionsHandler
           newStart = substring + searchStart;
 
           if (substring >= 0) {
-            correctedSpellCheckResults.add(SpellCheckSuggestionSpan(newStart,
-                newStart + spanLength, currentSpan.replacementSuggestions));
+            correctedSpellCheckResults.add(SuggestionSpan(
+                newStart, newStart + spanLength, currentSpan.suggestions));
             searchStart = newStart + spanLength;
           }
         }
@@ -293,18 +306,17 @@ class DefaultSpellCheckSuggestionsHandler
   }
 
   // Temporary way to merge two resutls since set union is not working as expected
-  List<SpellCheckSuggestionSpan> mergeResults(
-      List<SpellCheckSuggestionSpan> oldResults,
-      List<SpellCheckSuggestionSpan> newResults) {
-    List<SpellCheckSuggestionSpan> mergedResults = <SpellCheckSuggestionSpan>[];
+  List<SuggestionSpan> mergeResults(
+      List<SuggestionSpan> oldResults, List<SuggestionSpan> newResults) {
+    List<SuggestionSpan> mergedResults = <SuggestionSpan>[];
     ;
     int old_span_pointer = 0;
     int new_span_pointer = 0;
 
     while (old_span_pointer < oldResults.length &&
         new_span_pointer < newResults.length) {
-      SpellCheckSuggestionSpan oldSpan = oldResults[old_span_pointer];
-      SpellCheckSuggestionSpan newSpan = newResults[new_span_pointer];
+      SuggestionSpan oldSpan = oldResults[old_span_pointer];
+      SuggestionSpan newSpan = newResults[new_span_pointer];
 
       if (oldSpan.startIndex == newSpan.startIndex) {
         if (!mergedResults.contains(oldSpan)) {
@@ -347,29 +359,32 @@ class DefaultSpellCheckSuggestionsHandler
       TextEditingValue value,
       bool composingWithinCurrentTextRange,
       TextStyle? style,
-      List<SpellCheckSuggestionSpan>? rawSpellCheckResults,
-      String? spellCheckResultsText) {
+      SpellCheckResults spellCheckResults) {
     scssSpans_consumed_index = 0;
     text_consumed_index = 0;
 
-    List<SpellCheckSuggestionSpan>? spellCheckResults;
+    List<SuggestionSpan>? correctedSpellCheckResults;
     TextStyle misspelledStyle;
 
+    List<SuggestionSpan> rawSpellCheckResults =
+        spellCheckResults.suggestionSpans;
+    String spellCheckResultsText = spellCheckResults.spellCheckedText;
+
     if (spellCheckResultsText != value.text) {
-      spellCheckResults = correctSpellCheckResults(
-          value.text, spellCheckResultsText!, rawSpellCheckResults!);
+      correctedSpellCheckResults = correctSpellCheckResults(
+          value.text, spellCheckResultsText, rawSpellCheckResults);
     } else if (reusableText != null &&
         reusableText == spellCheckResultsText &&
         reusableSpellCheckResults != null &&
         rawSpellCheckResults != null &&
         !listEquals(reusableSpellCheckResults, rawSpellCheckResults)) {
-      spellCheckResults =
+      correctedSpellCheckResults =
           mergeResults(reusableSpellCheckResults!, rawSpellCheckResults);
     } else {
-      spellCheckResults = rawSpellCheckResults;
+      correctedSpellCheckResults = rawSpellCheckResults;
     }
 
-    reusableSpellCheckResults = spellCheckResults;
+    reusableSpellCheckResults = correctedSpellCheckResults;
     reusableText = value.text;
 
     switch (platform) {
@@ -386,7 +401,7 @@ class DefaultSpellCheckSuggestionsHandler
       return TextSpan(
           style: style,
           children: buildSubtreesWithMisspelledWordsIndicated(
-              spellCheckResults ?? <SpellCheckSuggestionSpan>[],
+              correctedSpellCheckResults,
               value.text,
               style,
               misspelledStyle,
@@ -397,21 +412,21 @@ class DefaultSpellCheckSuggestionsHandler
         children: <TextSpan>[
           TextSpan(
               children: buildSubtreesWithMisspelledWordsIndicated(
-                  spellCheckResults ?? <SpellCheckSuggestionSpan>[],
+                  correctedSpellCheckResults,
                   value.composing.textBefore(value.text),
                   style,
                   misspelledStyle,
                   false)),
           TextSpan(
               children: buildSubtreesWithMisspelledWordsIndicated(
-                  spellCheckResults ?? <SpellCheckSuggestionSpan>[],
+                  correctedSpellCheckResults,
                   value.composing.textInside(value.text),
                   style,
                   misspelledStyle,
                   true)),
           TextSpan(
               children: buildSubtreesWithMisspelledWordsIndicated(
-                  spellCheckResults ?? <SpellCheckSuggestionSpan>[],
+                  correctedSpellCheckResults,
                   value.composing.textAfter(value.text),
                   style,
                   misspelledStyle,
@@ -424,7 +439,7 @@ class DefaultSpellCheckSuggestionsHandler
 //TODO(camillesimon): Replace method of building TextSpan tree in three parts with method of building in one part. Attempt started below.
 //   @override
 //   TextSpan buildTextSpanWithSpellCheckSuggestions(
-//       List<SpellCheckSuggestionSpan>? spellCheckResults,
+//       List<SuggestionSpan>? spellCheckResults,
 //       TextEditingValue value, TextStyle? style, bool composingWithinCurrentTextRange) {
 
 //       TextStyle misspelledStyle;
@@ -440,11 +455,11 @@ class DefaultSpellCheckSuggestionsHandler
 
 //     return TextSpan(
 //         style: style,
-//         children: buildSubtreesWithMisspelledWordsIndicated(spellCheckResults ?? <SpellCheckSuggestionSpan>[], value, style, misspelledStyle, composingWithinCurrentTextRange));
+//         children: buildSubtreesWithMisspelledWordsIndicated(spellCheckResults ?? <SuggestionSpan>[], value, style, misspelledStyle, composingWithinCurrentTextRange));
 //     }
 
 //     /// Helper method for building TextSpan trees.
-//     List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(List<SpellCheckSuggestionSpan> spellCheckSuggestions, TextEditingValue value, TextStyle? style, TextStyle misspelledStyle, bool whatever) {
+//     List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(List<SuggestionSpan> spellCheckSuggestions, TextEditingValue value, TextStyle? style, TextStyle misspelledStyle, bool whatever) {
 //       List<TextSpan> tsTreeChildren = <TextSpan>[];
 //       String text = value.text;
 //       int textLength= text.length;
@@ -458,7 +473,7 @@ class DefaultSpellCheckSuggestionsHandler
 //       TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline)) ?? TextStyle(decoration: TextDecoration.underline);
 //       TextStyle misspelledJointStyle = overrideTextSpanStyle(style, misspelledStyle);
 
-//       SpellCheckSuggestionSpan currScssSpan = spellCheckSuggestions[scss_pointer];
+//       SuggestionSpan currScssSpan = spellCheckSuggestions[scss_pointer];
 
 //         // while (i) the text is not totally consumed or (ii) the suggestsion are not totally consumed
 //         while (text_pointer < textLength || remainingResults) {
@@ -536,7 +551,7 @@ class DefaultSpellCheckSuggestionsHandler
 
   /// Helper method for building TextSpan trees.
   List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(
-      List<SpellCheckSuggestionSpan> spellCheckSuggestions,
+      List<SuggestionSpan> spellCheckSuggestions,
       String text,
       TextStyle? style,
       TextStyle misspelledStyle,
@@ -552,8 +567,7 @@ class DefaultSpellCheckSuggestionsHandler
 
     if (scssSpans_consumed_index < spellCheckSuggestions.length) {
       int scss_pointer = scssSpans_consumed_index;
-      SpellCheckSuggestionSpan currScssSpan =
-          spellCheckSuggestions[scss_pointer];
+      SuggestionSpan currScssSpan = spellCheckSuggestions[scss_pointer];
       int span_pointer = currScssSpan.startIndex;
 
       // while (i) the text is not totally consumed, (ii) the suggestsion are not totally consumed, (iii) there is a suggestion within the range of the text
@@ -652,7 +666,7 @@ class _SpellCheckSuggestionsToolbar extends StatefulWidget {
     required this.globalEditableRegion,
     required this.selectionMidpoint,
     required this.textLineHeight,
-    required this.spellCheckSuggestionSpans,
+    required this.suggestionSpans,
   }) : super(key: key);
 
   final TargetPlatform platform;
@@ -661,7 +675,7 @@ class _SpellCheckSuggestionsToolbar extends StatefulWidget {
   final Rect globalEditableRegion;
   final Offset selectionMidpoint;
   final double textLineHeight;
-  final List<SpellCheckSuggestionSpan>? spellCheckSuggestionSpans;
+  final List<SuggestionSpan>? suggestionSpans;
 
   @override
   _SpellCheckSuggestionsToolbarState createState() =>
@@ -670,21 +684,21 @@ class _SpellCheckSuggestionsToolbar extends StatefulWidget {
 
 class _SpellCheckSuggestionsToolbarState
     extends State<_SpellCheckSuggestionsToolbar> with TickerProviderStateMixin {
-  SpellCheckSuggestionSpan? findSuggestions(int curr_index,
-      List<SpellCheckSuggestionSpan> spellCheckSuggestionSpans) {
+  SuggestionSpan? findSuggestions(
+      int curr_index, List<SuggestionSpan> suggestionSpans) {
     int left_index = 0;
-    int right_index = spellCheckSuggestionSpans.length - 1;
+    int right_index = suggestionSpans.length - 1;
     int mid_index = 0;
 
     while (left_index <= right_index) {
       mid_index = (left_index + (right_index - left_index) / 2).floor();
 
-      if (spellCheckSuggestionSpans[mid_index].startIndex <= curr_index &&
-          spellCheckSuggestionSpans[mid_index].endIndex + 1 >= curr_index) {
-        return spellCheckSuggestionSpans[mid_index];
+      if (suggestionSpans[mid_index].startIndex <= curr_index &&
+          suggestionSpans[mid_index].endIndex + 1 >= curr_index) {
+        return suggestionSpans[mid_index];
       }
 
-      if (spellCheckSuggestionSpans[mid_index].startIndex <= curr_index) {
+      if (suggestionSpans[mid_index].startIndex <= curr_index) {
         left_index = left_index + 1;
       } else {
         right_index = right_index - 1;
@@ -695,8 +709,7 @@ class _SpellCheckSuggestionsToolbarState
 
   @override
   Widget build(BuildContext context) {
-    if (widget.spellCheckSuggestionSpans == null ||
-        widget.spellCheckSuggestionSpans!.length == 0) {
+    if (widget.suggestionSpans == null || widget.suggestionSpans!.length == 0) {
       return const SizedBox.shrink();
     }
 
@@ -730,8 +743,8 @@ class _SpellCheckSuggestionsToolbarState
     TextEditingValue value = widget.delegate.textEditingValue;
     int cursorIndex = value.selection.baseOffset;
 
-    SpellCheckSuggestionSpan? relevantSpan =
-        findSuggestions(cursorIndex, widget.spellCheckSuggestionSpans!);
+    SuggestionSpan? relevantSpan =
+        findSuggestions(cursorIndex, widget.suggestionSpans!);
 
     if (relevantSpan == null) {
       return const SizedBox.shrink();
@@ -739,7 +752,7 @@ class _SpellCheckSuggestionsToolbarState
     final List<_SpellCheckSuggestionsToolbarItemData> itemDatas =
         <_SpellCheckSuggestionsToolbarItemData>[];
 
-    relevantSpan.replacementSuggestions.forEach((String suggestion) {
+    relevantSpan.suggestions.forEach((String suggestion) {
       itemDatas.add(_SpellCheckSuggestionsToolbarItemData(
         label: suggestion,
         onPressed: () {

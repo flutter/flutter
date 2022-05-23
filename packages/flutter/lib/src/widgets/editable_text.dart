@@ -175,7 +175,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing; // this is poorly named -- this is if composing range is out of range for current text
 
     if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null) {
-        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingWithinCurrentTextRange, style, spellCheckConfiguration.spellCheckResults, spellCheckConfiguration.spellCheckResultsText);
+        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingWithinCurrentTextRange, style, spellCheckConfiguration.spellCheckResults!);
 
     }
     else {
@@ -2573,15 +2573,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (_spellCheckEnabled! && _value.text.length > 0 && cause! == SelectionChangedCause.tap) {
       Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-      Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value.text);
+      Future<SpellCheckResults?> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value.text);
 
-      spellCheckResultsFuture.then((results) {
-        if (results.length > 1) {
-          _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results[1];
-          _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResultsText = results[0];
-
-          renderEditable.text = buildTextSpan();
-        }
+      spellCheckResultsFuture.then((SpellCheckResults? results) {
+        _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results ?? _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults;
+        renderEditable.text = buildTextSpan();
       });
     }
   }
@@ -2697,15 +2693,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
         if (_spellCheckEnabled! && value.text.length > 0 && _value.text != value.text) {
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
+          Future<SpellCheckResults?> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
 
-          spellCheckResultsFuture.then((results) {
-            if (results.length > 1) {
-            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results[1];
-            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResultsText = results[0];
-
+          spellCheckResultsFuture.then((SpellCheckResults? results) {
+            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results ?? _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults;
             renderEditable.text = buildTextSpan();
-            }
       });
         }
       } catch (exception, stack) {
