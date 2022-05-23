@@ -922,7 +922,7 @@ void main() {
           throwsToolExit(message: 'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string'));
     });
 
-    testWithoutContext("Throws ToolExit on bad UTF-8 in catalog's productDisplayVersion", () {
+    testWithoutContext("Ignores bad UTF-8 in catalog's productDisplayVersion", () {
       final Map<String, dynamic> catalog = Map<String, dynamic>.of(_defaultResponse['catalog'] as Map<String, dynamic>)
         ..['productDisplayVersion'] = '\u{FFFD}';
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
@@ -930,8 +930,12 @@ void main() {
 
       setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
 
-      expect(() => visualStudio.isInstalled,
-          throwsToolExit(message: 'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string'));
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
+      expect(visualStudio.displayVersion, '\u{FFFD}');
     });
   });
 

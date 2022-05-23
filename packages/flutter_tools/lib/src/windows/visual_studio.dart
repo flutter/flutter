@@ -52,7 +52,8 @@ class VisualStudio {
 
   /// The user-friendly version number of the Visual Studio install.
   ///
-  /// For instance: "15.4.0".
+  /// For instance: "15.4.0". This should only be used for display purposes.
+  /// Logic based off the installation's version should use the `fullVersion`.
   String? get displayVersion => _bestVisualStudioDetails?.catalogDisplayVersion;
 
   /// The directory where Visual Studio is installed.
@@ -419,21 +420,29 @@ class VswhereDetails {
 
     return VswhereDetails(
       meetsRequirements: meetsRequirements,
-      installationPath: _validateString(details['installationPath'] as String?),
-      displayName: _validateString(details['displayName'] as String?),
-      fullVersion: _validateString(details['installationVersion'] as String?),
       isComplete: details['isComplete'] as bool?,
       isLaunchable: details['isLaunchable'] as bool?,
       isRebootRequired: details['isRebootRequired'] as bool?,
       isPrerelease: details['isPrerelease'] as bool?,
-      catalogDisplayVersion: catalog == null ? null : _validateString(catalog['productDisplayVersion'] as String?),
+
+      // Below are strings that must be well-formed without replacement characters.
+      installationPath: _validateString(details['installationPath'] as String?),
+      displayName: _validateString(details['displayName'] as String?),
+      fullVersion: _validateString(details['installationVersion'] as String?),
+
+      // Below are strings that are used only for display purposes and are allowed to
+      // contain replacement characters.
+      catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?,
     );
   }
 
+  /// Verify JSON strings from vswhere.exe output are valid.
+  ///
+  /// The output of vswhere.exe is known to output replacement characters.
+  /// Use this to ensure values that must be well-formed are valid. Strings that
+  /// are only used for display purposes should skip this check.
+  /// See: https://github.com/flutter/flutter/issues/102451
   static String? _validateString(String? value) {
-    // The output of vswhere.exe is known to output replacement characters.
-    // Ensure this does not affect values used by Flutter.
-    // See: https://github.com/flutter/flutter/issues/102451
     if (value != null && value.contains('\u{FFFD}')) {
       throwToolExit(
         'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string: $value. '
