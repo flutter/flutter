@@ -112,6 +112,9 @@ if (flutter_prebuilt_dart_sdk) {
 
   _target_prebuilt_dart_sdk_config = "$_target_os_name-$target_cpu"
   _host_prebuilt_dart_sdk_config = "$_host_os_name-$host_cpu"
+  _target_prebuilt_dart_sdk_archive = "//flutter/prebuilts/dartsdk-$_target_prebuilt_dart_sdk_config-release.zip"
+  _host_prebuilt_dart_sdk_archive =
+      "//flutter/prebuilts/dartsdk-$_host_prebuilt_dart_sdk_config-release.zip"
 
   target_prebuilt_dart_sdk =
       "//flutter/prebuilts/$_target_prebuilt_dart_sdk_config/dart-sdk"
@@ -124,9 +127,11 @@ if (flutter_prebuilt_dart_sdk) {
   if (current_toolchain == host_toolchain || is_fuchsia) {
     prebuilt_dart_sdk = host_prebuilt_dart_sdk
     prebuilt_dart_sdk_config = _host_prebuilt_dart_sdk_config
+    prebuilt_dart_sdk_archive = _host_prebuilt_dart_sdk_archive
   } else {
     prebuilt_dart_sdk = target_prebuilt_dart_sdk
     prebuilt_dart_sdk_config = _target_prebuilt_dart_sdk_config
+    prebuilt_dart_sdk_archive = _target_prebuilt_dart_sdk_archive
   }
 }
 
