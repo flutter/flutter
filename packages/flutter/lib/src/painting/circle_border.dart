@@ -18,9 +18,9 @@ import 'edge_insets.dart';
 /// When applied to a rectangular space, the border paints in the center of the
 /// rectangle.
 ///
-/// The [ovalness] parameter allows the circle to be painted touching all
+/// The [circularity] parameter allows the circle to be painted touching all
 /// the edges of a rectangle, becoming an oval. When applied to a
-/// squared space, [ovalness] is ignored.
+/// squared space, [circularity] is ignored.
 ///
 /// See also:
 ///
@@ -31,14 +31,14 @@ class CircleBorder extends OutlinedBorder {
   /// Create a circle border.
   ///
   /// The [side] argument must not be null.
-  const CircleBorder({ super.side, this.ovalness = 0.0 })
-      : assert(side != null && ovalness != null && ovalness >= 0.0 && ovalness <= 1.0);
+  const CircleBorder({ super.side, this.circularity = 1.0 })
+      : assert(side != null && circularity != null && circularity >= 0.0 && circularity <= 1.0);
 
   /// Defines the ratio (0.0-1.0) from which the border will be drawn
   /// to the longest side of a rectangular box, touching all the sides.
-  /// When 0.0, it draws a circle. When 1.0, it draws an oval.
+  /// When 1.0, it draws a circle. When 0.0, it draws an oval.
   /// This property is ignored when applied to a squared box.
-  final double ovalness;
+  final double circularity;
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -53,14 +53,14 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder scale(double t) => CircleBorder(side: side.scale(t), ovalness: ovalness);
+  ShapeBorder scale(double t) => CircleBorder(side: side.scale(t), circularity: circularity);
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     if (a is CircleBorder) {
       return CircleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        ovalness: ui.lerpDouble(a.ovalness, ovalness, t)!,
+        circularity: ui.lerpDouble(a.circularity, circularity, t)!,
       );
     }
     return super.lerpFrom(a, t);
@@ -71,7 +71,7 @@ class CircleBorder extends OutlinedBorder {
     if (b is CircleBorder) {
       return CircleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        ovalness: ui.lerpDouble(ovalness, b.ovalness, t)!,
+        circularity: ui.lerpDouble(circularity, b.circularity, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -101,8 +101,8 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  CircleBorder copyWith({ BorderSide? side, double? ovalness }) {
-    return CircleBorder(side: side ?? this.side, ovalness: ovalness ?? this.ovalness);
+  CircleBorder copyWith({ BorderSide? side, double? circularity }) {
+    return CircleBorder(side: side ?? this.side, circularity: circularity ?? this.circularity);
   }
 
   @override
@@ -111,7 +111,7 @@ class CircleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        if (ovalness != 0.0) {
+        if (circularity != 1.0) {
           final Rect borderRect = _adjustRect(rect);
           final Rect adjustedRect;
           switch (side.strokeAlign) {
@@ -145,10 +145,10 @@ class CircleBorder extends OutlinedBorder {
   }
 
   Rect _adjustRect(Rect rect) {
-    if (ovalness == 0.0 || rect.width == rect.height)
+    if (circularity == 1.0 || rect.width == rect.height)
       return Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0);
     if (rect.width < rect.height) {
-      final double delta = (1 - ovalness) * (rect.height - rect.width) / 2.0;
+      final double delta = circularity * (rect.height - rect.width) / 2.0;
       return Rect.fromLTRB(
         rect.left,
         rect.top + delta,
@@ -156,7 +156,7 @@ class CircleBorder extends OutlinedBorder {
         rect.bottom - delta,
       );
     } else {
-      final double delta = (1 - ovalness) * (rect.width - rect.height) / 2.0;
+      final double delta = circularity * (rect.width - rect.height) / 2.0;
       return Rect.fromLTRB(
         rect.left + delta,
         rect.top,
@@ -173,16 +173,16 @@ class CircleBorder extends OutlinedBorder {
     }
     return other is CircleBorder
         && other.side == side
-        && other.ovalness == ovalness;
+        && other.circularity == circularity;
   }
 
   @override
-  int get hashCode => Object.hash(side, ovalness);
+  int get hashCode => Object.hash(side, circularity);
 
   @override
   String toString() {
-    if (ovalness != 0.0) {
-      return '${objectRuntimeType(this, 'CircleBorder')}($side, ovalness: $ovalness)';
+    if (circularity != 1.0) {
+      return '${objectRuntimeType(this, 'CircleBorder')}($side, circularity: $circularity)';
     }
     return '${objectRuntimeType(this, 'CircleBorder')}($side)';
   }
