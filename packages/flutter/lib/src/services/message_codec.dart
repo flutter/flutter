@@ -153,10 +153,10 @@ class PlatformException implements Exception {
   /// import io.flutter.embedding.android.FlutterActivity
   /// import io.flutter.embedding.engine.FlutterEngine
   /// import io.flutter.plugin.common.MethodChannel
-  /// 
+  ///
   /// class MainActivity: FlutterActivity() {
   ///   private val CHANNEL = "channel_name"
-  /// 
+  ///
   ///   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
   ///     super.configureFlutterEngine(flutterEngine)
   ///     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
@@ -165,8 +165,8 @@ class PlatformException implements Exception {
   ///   }
   /// }
   /// ```
-  /// 
-  /// It is also populated on Android if the method channel result is not serializable. 
+  ///
+  /// It is also populated on Android if the method channel result is not serializable.
   /// If the result is not serializable, an exception gets thrown during the serialization process.
   /// This can be seen in the following example:
   /// ```kotlin
@@ -174,10 +174,10 @@ class PlatformException implements Exception {
   /// import io.flutter.embedding.android.FlutterActivity
   /// import io.flutter.embedding.engine.FlutterEngine
   /// import io.flutter.plugin.common.MethodChannel
-  /// 
+  ///
   /// class MainActivity: FlutterActivity() {
   ///   private val CHANNEL = "channel_name"
-  /// 
+  ///
   ///   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
   ///     super.configureFlutterEngine(flutterEngine)
   ///     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
