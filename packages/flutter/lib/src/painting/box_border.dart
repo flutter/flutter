@@ -38,8 +38,10 @@ enum BoxShape {
   ///  * [CircleBorder], the equivalent [ShapeBorder].
   circle,
 
-  /// An elliptical shape that behaves as a non-rectangular circle when width and height
-  /// are different. It has elliptical round corners with width and height representing its x/y values.
+  /// An oval centered in the middle of the box into which the [Border] or
+  /// [BoxDecoration] is painted. The oval is drawn such that it touches
+  /// the edges of the box.
+  ///
   /// See also:
   ///
   ///  * [OvalBorder], the equivalent [ShapeBorder].
@@ -267,8 +269,19 @@ abstract class BoxBorder extends ShapeBorder {
 
   static void _paintUniformBorderWithOval(Canvas canvas, Rect rect, BorderSide side) {
     assert(side.style != BorderStyle.none);
-    final Paint paint = side.toPaint();
-    canvas.drawOval(rect.deflate(side.width / 2.0), paint);
+    final Rect rectToBeDrawn;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        rectToBeDrawn = rect.deflate(side.width / 2.0);
+        break;
+      case StrokeAlign.center:
+        rectToBeDrawn = rect;
+        break;
+      case StrokeAlign.outside:
+        rectToBeDrawn = rect.inflate(side.width / 2.0);
+        break;
+    }
+    canvas.drawOval(rectToBeDrawn, side.toPaint());
   }
 
   static void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect, BorderSide side) {
@@ -287,7 +300,6 @@ abstract class BoxBorder extends ShapeBorder {
         rectToBeDrawn = rect.inflate(width / 2.0);
         break;
     }
-
     canvas.drawRect(rectToBeDrawn, paint);
   }
 }
@@ -613,8 +625,9 @@ class Border extends BoxBorder {
     }());
     assert(() {
       if (shape != BoxShape.rectangle) {
+        final String errorShape = (shape == BoxShape.circle) ? 'a circle' : 'an oval';
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A Border can only be drawn as a circle if it is uniform.'),
+          ErrorSummary('A Border can only be drawn as $errorShape if it is uniform.'),
           ErrorDescription('The following is not uniform:'),
           if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
           if (!_widthIsUniform) ErrorDescription('BorderSide.width'),

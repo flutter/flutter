@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -55,6 +56,7 @@ class StadiumBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
         circleness: 1.0 - t,
+        ovalness: a.ovalness,
       );
     }
     if (a is RoundedRectangleBorder) {
@@ -77,6 +79,7 @@ class StadiumBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
         circleness: t,
+        ovalness: b.ovalness,
       );
     }
     if (b is RoundedRectangleBorder) {
@@ -171,14 +174,23 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   const _StadiumToCircleBorder({
     super.side,
     this.circleness = 0.0,
+    required this.ovalness,
   }) : assert(side != null),
        assert(circleness != null);
 
   final double circleness;
+  final double ovalness;
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.width);
+     switch (side.strokeAlign) {
+       case StrokeAlign.inside:
+         return EdgeInsets.all(side.width);
+       case StrokeAlign.center:
+         return EdgeInsets.all(side.width / 2);
+       case StrokeAlign.outside:
+         return EdgeInsets.zero;
+     }
   }
 
   @override
@@ -186,6 +198,7 @@ class _StadiumToCircleBorder extends OutlinedBorder {
     return _StadiumToCircleBorder(
       side: side.scale(t),
       circleness: t,
+      ovalness: ovalness,
     );
   }
 
@@ -196,18 +209,21 @@ class _StadiumToCircleBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
         circleness: circleness * t,
+        ovalness: ovalness,
       );
     }
     if (a is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
         circleness: circleness + (1.0 - circleness) * (1.0 - t),
+        ovalness: a.ovalness,
       );
     }
     if (a is _StadiumToCircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
         circleness: ui.lerpDouble(a.circleness, circleness, t)!,
+        ovalness: ui.lerpDouble(a.ovalness, ovalness, t)!,
       );
     }
     return super.lerpFrom(a, t);
@@ -220,18 +236,21 @@ class _StadiumToCircleBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
         circleness: circleness * (1.0 - t),
+        ovalness: ovalness,
       );
     }
     if (b is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
         circleness: circleness + (1.0 - circleness) * t,
+        ovalness: b.ovalness,
       );
     }
     if (b is _StadiumToCircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
         circleness: ui.lerpDouble(circleness, b.circleness, t)!,
+        ovalness: ui.lerpDouble(ovalness, b.ovalness, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -242,7 +261,13 @@ class _StadiumToCircleBorder extends OutlinedBorder {
       return rect;
     }
     if (rect.width < rect.height) {
-      final double delta = circleness * (rect.height - rect.width) / 2.0;
+      final double partialDelta = (rect.height - rect.width) / 2.0;
+      final double delta;
+      if (ovalness > 0.0) {
+        delta = math.min(circleness * partialDelta, (1 - ovalness) * partialDelta);
+      } else {
+        delta = circleness * partialDelta;
+      }
       return Rect.fromLTRB(
         rect.left,
         rect.top + delta,
@@ -250,7 +275,13 @@ class _StadiumToCircleBorder extends OutlinedBorder {
         rect.bottom - delta,
       );
     } else {
-      final double delta = circleness * (rect.width - rect.height) / 2.0;
+      final double partialDelta = (rect.width - rect.height) / 2.0;
+      final double delta;
+      if (ovalness > 0.0) {
+        delta = math.min(circleness * partialDelta, (1 - ovalness) * partialDelta);
+      } else {
+        delta = circleness * partialDelta;
+      }
       return Rect.fromLTRB(
         rect.left + delta,
         rect.top,
@@ -261,7 +292,23 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   BorderRadius _adjustBorderRadius(Rect rect) {
-    return BorderRadius.circular(rect.shortestSide / 2.0);
+    final BorderRadius circleRadius = BorderRadius.circular(rect.shortestSide / 2.0);
+    if (ovalness != 0.0) {
+      if (rect.width < rect.height) {
+        return BorderRadius.lerp(
+          circleRadius,
+          BorderRadius.all(Radius.elliptical(rect.width / 2, (0.5 + ovalness / 2) * rect.height / 2)),
+          circleness,
+        )!;
+      } else {
+        return BorderRadius.lerp(
+            circleRadius,
+            BorderRadius.all(Radius.elliptical((0.5 + ovalness / 2) * rect.width / 2, rect.height / 2)),
+            circleness,
+        )!;
+      }
+    }
+    return circleRadius;
   }
 
   @override
@@ -277,10 +324,11 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  _StadiumToCircleBorder copyWith({ BorderSide? side, double? circleness }) {
+  _StadiumToCircleBorder copyWith({ BorderSide? side, double? circleness, double? ovalness }) {
     return _StadiumToCircleBorder(
       side: side ?? this.side,
       circleness: circleness ?? this.circleness,
+      ovalness: ovalness ?? this.ovalness,
     );
   }
 

@@ -31,18 +31,18 @@ void main() {
     expect(ShapeBorder.lerp(c10, c20, 0.5), c15);
     expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
     expect(
-        c10.getInnerPath(const Rect.fromLTWH(0, 0, 100, 40)),
-        isPathThat(
-          includes: const <Offset>[ Offset(12, 19), Offset(50, 10), Offset(88, 19), Offset(50, 29) ],
-          excludes: const <Offset>[ Offset(17, 26), Offset(15, 15), Offset(74, 10), Offset(76, 28) ],
-        ),
+      c10.getInnerPath(const Rect.fromLTWH(0, 0, 100, 40)),
+      isPathThat(
+        includes: const <Offset>[ Offset(12, 19), Offset(50, 10), Offset(88, 19), Offset(50, 29) ],
+        excludes: const <Offset>[ Offset(17, 26), Offset(15, 15), Offset(74, 10), Offset(76, 28) ],
+      ),
     );
     expect(
-        c10.getOuterPath(const Rect.fromLTWH(0, 0, 100, 20)),
-        isPathThat(
-          includes: const <Offset>[ Offset(2, 9), Offset(50, 0), Offset(98, 9), Offset(50, 19) ],
-          excludes: const <Offset>[ Offset(7, 16), Offset(10, 2), Offset(84, 1), Offset(86, 18) ],
-        ),
+      c10.getOuterPath(const Rect.fromLTWH(0, 0, 100, 20)),
+      isPathThat(
+        includes: const <Offset>[ Offset(2, 9), Offset(50, 0), Offset(98, 9), Offset(50, 19) ],
+        excludes: const <Offset>[ Offset(7, 16), Offset(10, 2), Offset(84, 1), Offset(86, 18) ],
+      ),
     );
   });
 }
