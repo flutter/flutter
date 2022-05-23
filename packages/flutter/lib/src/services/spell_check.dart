@@ -28,7 +28,8 @@ class SuggestionSpan {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other))
+      return true;
     return other is SuggestionSpan &&
         other.startIndex == startIndex &&
         other.endIndex == endIndex &&
@@ -56,7 +57,8 @@ class SpellCheckResults {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other))
+      return true;
     return other is SpellCheckResults &&
         other.spellCheckedText == spellCheckedText &&
         listEquals<SuggestionSpan>(other.suggestionSpans, suggestionSpans);
