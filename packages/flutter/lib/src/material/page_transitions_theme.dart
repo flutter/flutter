@@ -423,8 +423,9 @@ abstract class PageTransitionsBuilder {
   /// The duration of the route's transition.
   ///
   /// Used by [MaterialRouteTransitionMixin.transitionDuration] to define the
-  /// transition duration for [MaterialPageRoute]s.
-  Duration get transitionDuration;
+  /// transition duration for [MaterialPageRoute]s. It is 300 milliseconds by
+  /// default.
+  Duration get transitionDuration => const Duration(milliseconds: 300);
 
   /// The duration of the route's reverse transition.
   ///
@@ -457,9 +458,6 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   const FadeUpwardsPageTransitionsBuilder();
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
   Widget buildTransitions<T>(
     PageRoute<T>? route,
     BuildContext? context,
@@ -490,9 +488,6 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android P.
   const OpenUpwardsPageTransitionsBuilder();
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
   Widget buildTransitions<T>(
@@ -532,9 +527,6 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
   const ZoomPageTransitionsBuilder();
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
   Widget buildTransitions<T>(
