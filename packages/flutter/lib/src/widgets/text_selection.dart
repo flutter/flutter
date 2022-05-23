@@ -1645,7 +1645,7 @@ class TextSelectionGestureDetectorBuilder {
           renderEditable.selectWord(cause: SelectionChangedCause.tap);
         }
         if (shouldShowSelectionToolbar) {
-        editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
+        editableText.hideToolbar(ToolbarType.spellCheckSuggestionsControls);
         editableText.hideToolbar(ToolbarType.copyPasteControls);
         editableText.showToolbar(ToolbarType.copyPasteControls);
         }
@@ -1689,7 +1689,7 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar) {
-        editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
+        editableText.hideToolbar(ToolbarType.spellCheckSuggestionsControls);
         editableText.showToolbar(ToolbarType.copyPasteControls);
     }
     }
@@ -2279,5 +2279,5 @@ enum ToolbarType {
 
   /// The toolbar that will provide suggestions for misspelled words and a click
   /// and replace option for Android.
-  spellCheckerSuggestionsControls,
+  spellCheckSuggestionsControls,
 }

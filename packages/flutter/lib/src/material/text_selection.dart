@@ -57,7 +57,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
             handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
           );
-      case ToolbarType.spellCheckerSuggestionsControls:
+      case ToolbarType.spellCheckSuggestionsControls:
           return spellCheckConfiguration!.spellCheckSuggestionsHandler!.buildSpellCheckSuggestionsToolbar(spellCheckConfiguration.spellCheckResults, delegate, endpoints, globalEditableRegion, selectionMidpoint, textLineHeight);
     }
     }

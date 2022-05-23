@@ -175,7 +175,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing; // this is poorly named -- this is if composing range is out of range for current text
 
     if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null) {
-        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(spellCheckConfiguration.spellCheckResults, spellCheckConfiguration.spellCheckResultsText, value, style, composingWithinCurrentTextRange);
+        return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingWithinCurrentTextRange, style, spellCheckConfiguration.spellCheckResults, spellCheckConfiguration.spellCheckResultsText);
 
     }
     else {
@@ -1819,7 +1819,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _replaceText(ReplaceTextIntent(textEditingValue, replacementSuggestion, selection, cause));
 
     bringIntoView(textEditingValue.selection.extent);
-    hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
+    hideToolbar(ToolbarType.spellCheckSuggestionsControls);
   }
 
   /// Select the entire text value.
@@ -1882,7 +1882,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (_spellCheckEnabled!) {
-      SpellCheckService? spellCheckService = widget.spellCheckService ?? SpellCheckConfiguration.getDefaultSpellCheckService(defaultTargetPlatform);
+      SpellCheckService? spellCheckService = widget.spellCheckService ?? DefaultSpellCheckService();
       SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler = widget.spellCheckSuggestionsHandler ?? DefaultSpellCheckSuggestionsHandler(defaultTargetPlatform);
       _spellCheckConfiguration = SpellCheckConfiguration(
           spellCheckService: spellCheckService,
@@ -2573,7 +2573,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (_spellCheckEnabled! && _value.text.length > 0 && cause! == SelectionChangedCause.tap) {
       Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-      Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value);
+      Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value.text);
 
       spellCheckResultsFuture.then((results) {
         if (results.length > 1) {
@@ -2697,7 +2697,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
         if (_spellCheckEnabled! && value.text.length > 0 && _value.text != value.text) {
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value);
+          Future<List<dynamic>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
 
           spellCheckResultsFuture.then((results) {
             if (results.length > 1) {
@@ -3054,7 +3054,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     //TODO(camillesimon): Clean up messy logic.
-    if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
+    if (toolbarType == ToolbarType.spellCheckSuggestionsControls) {
       if (!_spellCheckEnabled!) {
         return false;
       }
