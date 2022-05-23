@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
 
-import 'package:characters/characters.dart' show CharacterRange, StringCharacters;
+import 'package:characters/characters.dart' show Characters, CharacterRange, StringCharacters;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
@@ -3272,7 +3272,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     DeleteToLineBreakIntent: _makeOverridable(_DeleteTextAction<DeleteToLineBreakIntent>(this, _linebreak)),
 
     // Extend/Move Selection
-    ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary,)),
+    ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, true, _nextWordBoundary)),
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _linebreak)),
     ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
@@ -3286,6 +3286,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
     PasteTextIntent: _makeOverridable(CallbackAction<PasteTextIntent>(onInvoke: (PasteTextIntent intent) => pasteText(intent.cause))),
+
+    SwapCharactersIntent: _makeOverridable(_SwapCharactersAction(this)),
   };
 
   @override
@@ -4087,6 +4089,57 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
 
   @override
   bool get isActionEnabled => !state.widget.readOnly && state._value.selection.isValid;
+}
+
+class _SwapCharactersAction extends ContextAction<SwapCharactersIntent> {
+  _SwapCharactersAction(this.state);
+
+  final EditableTextState state;
+
+  @override
+  Object? invoke(SwapCharactersIntent intent, [BuildContext? context]) {
+    // Can't swap 1 or 0 characters.
+    if (state.textEditingValue.text.length <= 1) {
+      return null;
+    // Do nothing when there is no selection.
+    } else if (state.textEditingValue.selection == null) {
+      return null;
+    // Do nothing when the selection isn't collapsed.
+    } else if (!state.textEditingValue.selection.isCollapsed) {
+      return null;
+    // Do nothing when the selection is at the beginning of the text.
+    } else if (state.textEditingValue.selection.baseOffset == 0) {
+      return null;
+    }
+
+    final String text = state.textEditingValue.text;
+    final TextSelection selection = state.textEditingValue.selection;
+    final bool atEnd = selection.baseOffset == text.length;
+    final Characters before = selection.textBefore(text).characters;
+    final Characters after = selection.textAfter(text).characters;
+
+    final String replacement = atEnd
+        ? (before.takeLast(1) + before.characterAt(before.length - 2)).string
+        : after.first + before.last;
+
+    return Actions.invoke(
+      context!,
+      ReplaceTextIntent(
+        state.textEditingValue,
+        replacement,
+        TextRange(
+          start: atEnd
+              ? before.take(before.length - 2).string.length
+              : before.take(before.length - 1).string.length,
+          end: atEnd ? text.length : selection.baseOffset + after.first.length,
+        ),
+        SelectionChangedCause.keyboard,
+      ),
+    );
+  }
+
+  @override
+  bool get isActionEnabled => state.widget.selectionEnabled;
 }
 
 class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {

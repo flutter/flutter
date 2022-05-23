@@ -329,3 +329,10 @@ class UpdateSelectionIntent extends Intent {
   /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
 }
+
+/// An [Intent] that represents a user interaction that attempts to swap the two
+/// characters before and after the cursor.
+class SwapCharactersIntent extends Intent {
+  /// Creates a [SwapCharactersIntent].
+  const SwapCharactersIntent();
+}
