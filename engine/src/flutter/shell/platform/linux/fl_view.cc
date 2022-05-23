@@ -17,6 +17,8 @@
 #include "flutter/shell/platform/linux/fl_platform_plugin.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_renderer_gl.h"
+#include "flutter/shell/platform/linux/fl_scrolling_manager.h"
+#include "flutter/shell/platform/linux/fl_scrolling_view_delegate.h"
 #include "flutter/shell/platform/linux/fl_text_input_plugin.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
@@ -42,6 +44,7 @@ struct _FlView {
   // Flutter system channel handlers.
   FlAccessibilityPlugin* accessibility_plugin;
   FlKeyboardManager* keyboard_manager;
+  FlScrollingManager* scrolling_manager;
   FlTextInputPlugin* text_input_plugin;
   FlMouseCursorPlugin* mouse_cursor_plugin;
   FlPlatformPlugin* platform_plugin;
@@ -75,6 +78,9 @@ static void fl_view_plugin_registry_iface_init(
 static void fl_view_keyboard_delegate_iface_init(
     FlKeyboardViewDelegateInterface* iface);
 
+static void fl_view_scrolling_delegate_iface_init(
+    FlScrollingViewDelegateInterface* iface);
+
 G_DEFINE_TYPE_WITH_CODE(
     FlView,
     fl_view,
@@ -82,7 +88,9 @@ G_DEFINE_TYPE_WITH_CODE(
     G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                           fl_view_plugin_registry_iface_init)
         G_IMPLEMENT_INTERFACE(fl_keyboard_view_delegate_get_type(),
-                              fl_view_keyboard_delegate_iface_init))
+                              fl_view_keyboard_delegate_iface_init)
+            G_IMPLEMENT_INTERFACE(fl_scrolling_view_delegate_get_type(),
+                                  fl_view_scrolling_delegate_iface_init))
 
 static gboolean text_input_im_filter_by_gtk(GtkIMContext* im_context,
                                             gpointer gdk_event) {
@@ -99,6 +107,11 @@ static void init_keyboard(FlView* self) {
       fl_text_input_plugin_new(messenger, self, text_input_im_filter_by_gtk);
   self->keyboard_manager =
       fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(self));
+}
+
+static void init_scrolling(FlView* self) {
+  self->scrolling_manager =
+      fl_scrolling_manager_new(FL_SCROLLING_VIEW_DELEGATE(self));
 }
 
 // Converts a GDK button event into a Flutter event and sends it to the engine.
@@ -142,6 +155,9 @@ static gboolean send_pointer_button_event(FlView* self, GdkEventButton* event) {
   }
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_scrolling_manager_set_last_mouse_position(self->scrolling_manager,
+                                               event->x * scale_factor,
+                                               event->y * scale_factor);
   fl_engine_send_mouse_pointer_event(
       self->engine, phase, event->time * kMicrosecondsPerMillisecond,
       event->x * scale_factor, event->y * scale_factor, 0, 0,
@@ -225,7 +241,9 @@ static void on_pre_engine_restart_cb(FlEngine* engine, gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
 
   g_clear_object(&self->keyboard_manager);
+  g_clear_object(&self->scrolling_manager);
   init_keyboard(self);
+  init_scrolling(self);
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -289,6 +307,32 @@ static void fl_view_keyboard_delegate_iface_init(
   };
 }
 
+static void fl_view_scrolling_delegate_iface_init(
+    FlScrollingViewDelegateInterface* iface) {
+  iface->send_mouse_pointer_event =
+      [](FlScrollingViewDelegate* view_delegate, FlutterPointerPhase phase,
+         size_t timestamp, double x, double y, double scroll_delta_x,
+         double scroll_delta_y, int64_t buttons) {
+        FlView* self = FL_VIEW(view_delegate);
+        if (self->engine != nullptr) {
+          fl_engine_send_mouse_pointer_event(self->engine, phase, timestamp, x,
+                                             y, scroll_delta_x, scroll_delta_y,
+                                             buttons);
+        }
+      };
+  iface->send_pointer_pan_zoom_event =
+      [](FlScrollingViewDelegate* view_delegate, size_t timestamp, double x,
+         double y, FlutterPointerPhase phase, double pan_x, double pan_y,
+         double scale, double rotation) {
+        FlView* self = FL_VIEW(view_delegate);
+        if (self->engine != nullptr) {
+          fl_engine_send_pointer_pan_zoom_event(self->engine, timestamp, x, y,
+                                                phase, pan_x, pan_y, scale,
+                                                rotation);
+        };
+      };
+}
+
 // Signal handler for GtkWidget::button-press-event
 static gboolean button_press_event_cb(GtkWidget* widget,
                                       GdkEventButton* event,
@@ -320,33 +364,9 @@ static gboolean scroll_event_cb(GtkWidget* widget,
   // TODO(robert-ancell): Update to use GtkEventControllerScroll when we can
   // depend on GTK 3.24.
 
-  gdouble scroll_delta_x = 0.0, scroll_delta_y = 0.0;
-  if (event->direction == GDK_SCROLL_SMOOTH) {
-    scroll_delta_x = event->delta_x;
-    scroll_delta_y = event->delta_y;
-  } else if (event->direction == GDK_SCROLL_UP) {
-    scroll_delta_y = -1;
-  } else if (event->direction == GDK_SCROLL_DOWN) {
-    scroll_delta_y = 1;
-  } else if (event->direction == GDK_SCROLL_LEFT) {
-    scroll_delta_x = -1;
-  } else if (event->direction == GDK_SCROLL_RIGHT) {
-    scroll_delta_x = 1;
-  }
-
-  // The multiplier is taken from the Chromium source
-  // (ui/events/x/events_x_utils.cc).
-  const int kScrollOffsetMultiplier = 53;
-  scroll_delta_x *= kScrollOffsetMultiplier;
-  scroll_delta_y *= kScrollOffsetMultiplier;
-
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
-  fl_engine_send_mouse_pointer_event(
-      view->engine, view->button_state != 0 ? kMove : kHover,
-      event->time * kMicrosecondsPerMillisecond, event->x * scale_factor,
-      event->y * scale_factor, scroll_delta_x, scroll_delta_y,
-      view->button_state);
-
+  fl_scrolling_manager_handle_scroll_event(
+      view->scrolling_manager, event,
+      gtk_widget_get_scale_factor(GTK_WIDGET(view)));
   return TRUE;
 }
 
@@ -413,6 +433,44 @@ static void keymap_keys_changed_cb(GdkKeymap* self, FlView* view) {
   view->keyboard_layout_notifier();
 }
 
+static void gesture_rotation_begin_cb(GtkGestureRotate* gesture,
+                                      GdkEventSequence* sequence,
+                                      FlView* view) {
+  fl_scrolling_manager_handle_rotation_begin(view->scrolling_manager);
+}
+
+static void gesture_rotation_update_cb(GtkGestureRotate* widget,
+                                       gdouble rotation,
+                                       gdouble delta,
+                                       FlView* view) {
+  fl_scrolling_manager_handle_rotation_update(view->scrolling_manager,
+                                              rotation);
+}
+
+static void gesture_rotation_end_cb(GtkGestureRotate* gesture,
+                                    GdkEventSequence* sequence,
+                                    FlView* view) {
+  fl_scrolling_manager_handle_rotation_end(view->scrolling_manager);
+}
+
+static void gesture_zoom_begin_cb(GtkGestureZoom* gesture,
+                                  GdkEventSequence* sequence,
+                                  FlView* view) {
+  fl_scrolling_manager_handle_zoom_begin(view->scrolling_manager);
+}
+
+static void gesture_zoom_update_cb(GtkGestureZoom* widget,
+                                   gdouble scale,
+                                   FlView* view) {
+  fl_scrolling_manager_handle_zoom_update(view->scrolling_manager, scale);
+}
+
+static void gesture_zoom_end_cb(GtkGestureZoom* gesture,
+                                GdkEventSequence* sequence,
+                                FlView* view) {
+  fl_scrolling_manager_handle_zoom_end(view->scrolling_manager);
+}
+
 static void fl_view_constructed(GObject* object) {
   FlView* self = FL_VIEW(object);
 
@@ -430,6 +488,7 @@ static void fl_view_constructed(GObject* object) {
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
   self->accessibility_plugin = fl_accessibility_plugin_new(self);
   init_keyboard(self);
+  init_scrolling(self);
   self->mouse_cursor_plugin = fl_mouse_cursor_plugin_new(messenger, self);
   self->platform_plugin = fl_platform_plugin_new(messenger);
 
@@ -455,6 +514,17 @@ static void fl_view_constructed(GObject* object) {
                    G_CALLBACK(leave_notify_event_cb), self);
   g_signal_connect(self->keymap, "keys-changed",
                    G_CALLBACK(keymap_keys_changed_cb), self);
+  GtkGesture* zoom = gtk_gesture_zoom_new(self->event_box);
+  g_signal_connect(zoom, "begin", G_CALLBACK(gesture_zoom_begin_cb), self);
+  g_signal_connect(zoom, "scale-changed", G_CALLBACK(gesture_zoom_update_cb),
+                   self);
+  g_signal_connect(zoom, "end", G_CALLBACK(gesture_zoom_end_cb), self);
+  GtkGesture* rotate = gtk_gesture_rotate_new(self->event_box);
+  g_signal_connect(rotate, "begin", G_CALLBACK(gesture_rotation_begin_cb),
+                   self);
+  g_signal_connect(rotate, "angle-changed",
+                   G_CALLBACK(gesture_rotation_update_cb), self);
+  g_signal_connect(rotate, "end", G_CALLBACK(gesture_rotation_end_cb), self);
 }
 
 static void fl_view_set_property(GObject* object,
