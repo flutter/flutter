@@ -24,6 +24,7 @@ class DomWindow {}
 
 extension DomWindowExtension on DomWindow {
   external DomConsole get console;
+  external num get devicePixelRatio;
   external DomDocument get document;
   external int? get innerHeight;
   external int? get innerWidth;
@@ -134,8 +135,12 @@ extension DomProgressEventExtension on DomProgressEvent {
 class DomNode extends DomEventTarget {}
 
 extension DomNodeExtension on DomNode {
+  external DomNode? get firstChild;
+  external String get innerText;
+  external DomNode? get lastChild;
   external DomNode appendChild(DomNode node);
-  external DomElement? get parentElement;
+  DomElement? get parent => js_util.getProperty(this, 'parentElement');
+  String? get text => js_util.getProperty(this, 'textContent');
   external DomNode? get parentNode;
   external DomNode insertBefore(DomNode newNode, DomNode? referenceNode);
   void remove() {
@@ -218,6 +223,19 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
       setProperty('font-feature-settings', value, '');
   set fontVariationSettings(String value) =>
       setProperty('font-variation-settings', value, '');
+  set visibility(String value) => setProperty('visibility', value, '');
+  set overflow(String value) => setProperty('overflow', value, '');
+  set boxShadow(String value) => setProperty('box-shadow', value, '');
+  set borderTopLeftRadius(String value) =>
+      setProperty('border-top-left-radius', value, '');
+  set borderTopRightRadius(String value) =>
+      setProperty('border-top-right-radius', value, '');
+  set borderBottomLeftRadius(String value) =>
+      setProperty('border-bottom-left-radius', value, '');
+  set borderBottomRightRadius(String value) =>
+      setProperty('border-bottom-right-radius', value, '');
+  set borderRadius(String value) => setProperty('border-radius', value, '');
+  set perspective(String value) => setProperty('perspective', value, '');
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -249,6 +267,18 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get fontFeatureSettings => getPropertyValue('font-feature-settings');
   String get fontVariationSettings =>
       getPropertyValue('font-variation-settings');
+  String get visibility => getPropertyValue('visibility');
+  String get overflow => getPropertyValue('overflow');
+  String get boxShadow => getPropertyValue('box-shadow');
+  String get borderTopLeftRadius => getPropertyValue('border-top-left-radius');
+  String get borderTopRightRadius =>
+      getPropertyValue('border-top-right-radius');
+  String get borderBottomLeftRadius =>
+      getPropertyValue('border-bottom-left-radius');
+  String get borderBottomRightRadius =>
+      getPropertyValue('border-bottom-right-radius');
+  String get borderRadius => getPropertyValue('border-radius');
+  String get perspective => getPropertyValue('perspective');
 
   external String getPropertyValue(String property);
   void setProperty(String propertyName, String value, [String? priority]) {

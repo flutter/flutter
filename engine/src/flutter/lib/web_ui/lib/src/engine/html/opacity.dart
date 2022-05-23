@@ -50,7 +50,7 @@ class PersistedOpacity extends PersistedContainerSurface
 
   @override
   void apply() {
-    final DomElement element = rootElement! as DomElement;
+    final DomElement element = rootElement!;
     setElementStyle(element, 'opacity', '${alpha / 255}');
     element.style.transform = 'translate(${offset.dx}px, ${offset.dy}px)';
   }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
@@ -33,7 +32,7 @@ Future<void> testMain() async {
 
     paintSideBySideRects(canvas);
 
-    html.document.body!.append(canvas.rootElement);
+    domDocument.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_stroke_rects.png', region: region);
   });
 

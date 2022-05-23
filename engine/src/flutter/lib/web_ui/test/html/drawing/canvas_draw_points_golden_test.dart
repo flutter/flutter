@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -55,7 +54,7 @@ Future<void> testMain() async {
     ]);
     canvas.drawPoints(PointMode.polygon, points3, paint);
 
-    html.document.body!.append(canvas.rootElement);
+    domDocument.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_draw_points.png', region: region);
   });
 
@@ -76,7 +75,7 @@ Future<void> testMain() async {
       30.0, 40.0, 200.0, 40.0]), strokePaint3);
     canvas.drawPoints(PointMode.points, Float32List.fromList(<double>[
       30.0, 50.0, 40.0, 50.0, 50.0, 50.0]), strokePaint3);
-    html.document.body!.append(canvas.rootElement);
+    domDocument.body!.append(canvas.rootElement);
     await matchGoldenFile('canvas_draw_points_stroke.png', region: region);
   });
 }
