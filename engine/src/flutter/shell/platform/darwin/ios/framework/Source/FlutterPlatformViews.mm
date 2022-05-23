@@ -129,7 +129,8 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
   NSDictionary<NSString*, id>* args = [call arguments];
 
   long viewId = [args[@"id"] longValue];
-  std::string viewType([args[@"viewType"] UTF8String]);
+  NSString* viewTypeString = args[@"viewType"];
+  std::string viewType(viewTypeString.UTF8String);
 
   if (views_.count(viewId) != 0) {
     result([FlutterError errorWithCode:@"recreating_view"
@@ -139,10 +140,18 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
 
   NSObject<FlutterPlatformViewFactory>* factory = factories_[viewType].get();
   if (factory == nil) {
-    result([FlutterError errorWithCode:@"unregistered_view_type"
-                               message:@"trying to create a view with an unregistered type"
-                               details:[NSString stringWithFormat:@"unregistered view type: '%@'",
-                                                                  args[@"viewType"]]]);
+    result([FlutterError
+        errorWithCode:@"unregistered_view_type"
+              message:[NSString stringWithFormat:@"A UIKitView widget is trying to create a "
+                                                 @"PlatformView with an unregistered type: < %@ >",
+                                                 viewTypeString]
+              details:@"If you are the author of the PlatformView, make sure `registerViewFactory` "
+                      @"is invoked.\n"
+                      @"See: "
+                      @"https://docs.flutter.dev/development/platform-integration/"
+                      @"platform-views#on-the-platform-side-1 for more details.\n"
+                      @"If you are not the author of the PlatformView, make sure to call "
+                      @"`GeneratedPluginRegistrant.register`."]);
     return;
   }
 
