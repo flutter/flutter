@@ -400,7 +400,7 @@ abstract class PageTransitionsBuilder {
   /// arrives on and leaves the screen.
   ///
   /// Used by [MaterialRouteTransitionMixin.buildTransitions] to build transitions
-  /// for route.
+  /// for the route.
   Widget buildTransitions<T>(
     PageRoute<T> route,
     BuildContext context,
