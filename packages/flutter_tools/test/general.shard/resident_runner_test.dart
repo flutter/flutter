@@ -926,7 +926,7 @@ void main() {
     expect(
         testLogger.statusText,
         contains(RegExp(r'Reloaded 1 of 42 libraries in \d+ms '
-            r'\(compile: \d+ ms. reload: \d+ ms, reassemble: \d ms\)\.')));
+            r'\(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.')));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     Platform: () => FakePlatform(),
