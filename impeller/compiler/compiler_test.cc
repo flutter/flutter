@@ -146,14 +146,14 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name) const {
 
     if (!fml::WriteAtomically(intermediates_directory_,
                               ReflectionCCName(fixture_name).c_str(),
-                              *reflection_header)) {
+                              *reflection_source)) {
       VALIDATION_LOG << "Could not write reflection CC intermediates.";
       return false;
     }
 
     if (!fml::WriteAtomically(intermediates_directory_,
                               ReflectionJSONName(fixture_name).c_str(),
-                              *reflection_header)) {
+                              *reflection_json)) {
       VALIDATION_LOG << "Could not write reflection json intermediates.";
       return false;
     }
