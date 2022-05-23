@@ -876,8 +876,9 @@ class TextEditingValue {
     if (replacementRange.end - replacementRange.start == replacementString.length) {
       return copyWith(
         text: newText,
-        selection: TextSelection.collapsed(
-          offset: replacementRange.end,
+        selection: selection.copyWith(
+          baseOffset: replacementRange.end,
+          extentOffset: replacementRange.end,
         ),
       );
     }
