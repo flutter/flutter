@@ -18,18 +18,17 @@ void main() {
     } else {
       // There should only be builders for the mobile platforms.
       for (final TargetPlatform platform in TargetPlatform.values) {
+        final PageTransitionsBuilder? builder = theme.builders[platform];
         switch (platform) {
           case TargetPlatform.android:
           case TargetPlatform.iOS:
           case TargetPlatform.fuchsia:
-            expect(theme.builders[platform], isNotNull,
-                reason: 'theme builder for $platform is null');
+            expect(builder, isNotNull, reason: 'theme builder for $platform is null');
             break;
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
-            expect(theme.builders[platform], isNull,
-                reason: 'theme builder for $platform is not null');
+            expect(builder, isNull, reason: 'theme builder for $platform is not null');
             break;
         }
       }

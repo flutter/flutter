@@ -137,7 +137,8 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   PageTransitionsBuilder get _pageTransitionsBuilder {
-    return Theme.of(navigator!.context).pageTransitionsTheme.getBuilder(this);
+    final BuildContext context = navigator!.context;
+    return Theme.of(context).pageTransitionsTheme.getBuilder(this, context);
   }
 }
 

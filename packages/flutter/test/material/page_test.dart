@@ -466,7 +466,6 @@ void main() {
       ),
     );
 
-
     final TargetPlatform platform = ThemeData().platform;
 
     await tester.pumpWidget(

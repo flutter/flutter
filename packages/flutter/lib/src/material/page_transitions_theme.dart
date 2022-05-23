@@ -683,10 +683,10 @@ class PageTransitionsTheme with Diagnosticable {
 
   /// Returns the builder that should be used to build transition animations and
   /// define other details for route transitions.
-  PageTransitionsBuilder getBuilder(PageRoute<dynamic> route) {
+  PageTransitionsBuilder getBuilder(PageRoute<dynamic> route, BuildContext context) {
     final TargetPlatform platform = CupertinoRouteTransitionMixin.isPopGestureInProgress(route)
         ? TargetPlatform.iOS
-        : Theme.of(route.navigator!.context).platform;
+        : Theme.of(context).platform;
     return builders[platform] ?? _defaultBuilder;
   }
 

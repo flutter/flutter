@@ -1378,17 +1378,16 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
             child: ValueListenableBuilder<Object?>(
               valueListenable: _detailArguments,
               builder: (BuildContext context, Object? value, Widget? child) {
-                const FadeUpwardsPageTransitionsBuilder transitionBuilder = FadeUpwardsPageTransitionsBuilder();
                 return AnimatedSwitcher(
                   transitionBuilder: (Widget child, Animation<double> animation) =>
-                    transitionBuilder.buildTransitions<void>(
+                    const FadeUpwardsPageTransitionsBuilder().buildTransitions<void>(
                       null,
                       null,
                       animation,
                       null,
                       child,
                     ),
-                  duration: transitionBuilder.transitionDuration,
+                  duration: const Duration(milliseconds: 500),
                   child: Container(
                     key: ValueKey<Object?>(value ?? widget.initialArguments),
                     constraints: const BoxConstraints.expand(),
