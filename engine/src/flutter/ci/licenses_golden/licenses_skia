@@ -1,4 +1,4 @@
-Signature: 5ae1d6dc76903566909ab8e19d035afb
+Signature: 56f360ab03f26f38309e502b483250e3
 
 UNUSED LICENSES:
 
@@ -3031,8 +3031,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/LatticeOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/LatticeOp.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TriangulatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TriangulatingPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlob.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlob.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlobRedrawCoordinator.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlobRedrawCoordinator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/v1/Device_drawTexture.cpp
@@ -3062,9 +3060,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkUtil.h
 FILE: ../../../third_party/skia/src/image/SkImage_Gpu.h
 FILE: ../../../third_party/skia/src/image/SkImage_Lazy.cpp
-FILE: ../../../third_party/skia/src/opts/Sk4px_NEON.h
-FILE: ../../../third_party/skia/src/opts/Sk4px_SSE2.h
-FILE: ../../../third_party/skia/src/opts/Sk4px_none.h
 FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts.h
 FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_sse41.cpp
@@ -3101,6 +3096,8 @@ FILE: ../../../third_party/skia/src/text/gpu/DistanceFieldAdjustTable.cpp
 FILE: ../../../third_party/skia/src/text/gpu/DistanceFieldAdjustTable.h
 FILE: ../../../third_party/skia/src/text/gpu/StrikeCache.cpp
 FILE: ../../../third_party/skia/src/text/gpu/StrikeCache.h
+FILE: ../../../third_party/skia/src/text/gpu/TextBlob.cpp
+FILE: ../../../third_party/skia/src/text/gpu/TextBlob.h
 FILE: ../../../third_party/skia/src/utils/SkPaintFilterCanvas.cpp
 FILE: ../../../third_party/skia/src/xps/SkXPSDocument.cpp
 ----------------------------------------------------------------------------------------------------
