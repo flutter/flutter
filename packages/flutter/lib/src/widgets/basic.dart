@@ -6902,91 +6902,14 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// an [ExcludeSemantics] widget and then another [Semantics] widget.
   final bool excludeSemantics;
 
-  AttributedString? get _effectiveAttributedLabel {
-    return properties.attributedLabel ??
-          (properties.label == null ? null : AttributedString(properties.label!));
-  }
-
-  AttributedString? get _effectiveAttributedValue {
-    return properties.attributedValue ??
-        (properties.value == null ? null : AttributedString(properties.value!));
-  }
-
-  AttributedString? get _effectiveAttributedIncreasedValue {
-    return properties.attributedIncreasedValue ??
-        (properties.increasedValue == null ? null : AttributedString(properties.increasedValue!));
-  }
-
-  AttributedString? get _effectiveAttributedDecreasedValue {
-    return properties.attributedDecreasedValue ??
-        (properties.decreasedValue == null ? null : AttributedString(properties.decreasedValue!));
-  }
-
-  AttributedString? get _effectiveAttributedHint {
-    return properties.attributedHint ??
-        (properties.hint == null ? null : AttributedString(properties.hint!));
-  }
-
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
       excludeSemantics: excludeSemantics,
-      enabled: properties.enabled,
-      checked: properties.checked,
-      toggled: properties.toggled,
-      selected: properties.selected,
-      button: properties.button,
-      slider: properties.slider,
-      keyboardKey: properties.keyboardKey,
-      link: properties.link,
-      header: properties.header,
-      textField: properties.textField,
-      readOnly: properties.readOnly,
-      focusable: properties.focusable,
-      focused: properties.focused,
-      liveRegion: properties.liveRegion,
-      maxValueLength: properties.maxValueLength,
-      currentValueLength: properties.currentValueLength,
-      inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
-      obscured: properties.obscured,
-      multiline: properties.multiline,
-      scopesRoute: properties.scopesRoute,
-      namesRoute: properties.namesRoute,
-      hidden: properties.hidden,
-      image: properties.image,
-      attributedLabel: _effectiveAttributedLabel,
-      attributedValue: _effectiveAttributedValue,
-      attributedIncreasedValue: _effectiveAttributedIncreasedValue,
-      attributedDecreasedValue: _effectiveAttributedDecreasedValue,
-      attributedHint: _effectiveAttributedHint,
-      tooltip: properties.tooltip,
-      hintOverrides: properties.hintOverrides,
+      properties: properties,
       textDirection: _getTextDirection(context),
-      sortKey: properties.sortKey,
-      tagForChildren: properties.tagForChildren,
-      onTap: properties.onTap,
-      onLongPress: properties.onLongPress,
-      onScrollLeft: properties.onScrollLeft,
-      onScrollRight: properties.onScrollRight,
-      onScrollUp: properties.onScrollUp,
-      onScrollDown: properties.onScrollDown,
-      onIncrease: properties.onIncrease,
-      onDecrease: properties.onDecrease,
-      onCopy: properties.onCopy,
-      onDismiss: properties.onDismiss,
-      onCut: properties.onCut,
-      onPaste: properties.onPaste,
-      onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
-      onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
-      onMoveCursorForwardByWord: properties.onMoveCursorForwardByWord,
-      onMoveCursorBackwardByWord: properties.onMoveCursorBackwardByWord,
-      onSetSelection: properties.onSetSelection,
-      onSetText: properties.onSetText,
-      onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
-      onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
-      customSemanticsActions: properties.customSemanticsActions,
     );
   }
 
@@ -7012,60 +6935,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..explicitChildNodes = explicitChildNodes
       ..excludeSemantics = excludeSemantics
-      ..scopesRoute = properties.scopesRoute
-      ..enabled = properties.enabled
-      ..checked = properties.checked
-      ..toggled = properties.toggled
-      ..selected = properties.selected
-      ..button = properties.button
-      ..slider = properties.slider
-      ..keyboardKey = properties.keyboardKey
-      ..link = properties.link
-      ..header = properties.header
-      ..textField = properties.textField
-      ..readOnly = properties.readOnly
-      ..focusable = properties.focusable
-      ..focused = properties.focused
-      ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
-      ..obscured = properties.obscured
-      ..multiline = properties.multiline
-      ..hidden = properties.hidden
-      ..image = properties.image
-      ..liveRegion = properties.liveRegion
-      ..maxValueLength = properties.maxValueLength
-      ..currentValueLength = properties.currentValueLength
-      ..attributedLabel = _effectiveAttributedLabel
-      ..attributedValue = _effectiveAttributedValue
-      ..attributedIncreasedValue = _effectiveAttributedIncreasedValue
-      ..attributedDecreasedValue = _effectiveAttributedDecreasedValue
-      ..attributedHint = _effectiveAttributedHint
-      ..tooltip = properties.tooltip
-      ..hintOverrides = properties.hintOverrides
-      ..namesRoute = properties.namesRoute
-      ..textDirection = _getTextDirection(context)
-      ..sortKey = properties.sortKey
-      ..tagForChildren = properties.tagForChildren
-      ..onTap = properties.onTap
-      ..onLongPress = properties.onLongPress
-      ..onScrollLeft = properties.onScrollLeft
-      ..onScrollRight = properties.onScrollRight
-      ..onScrollUp = properties.onScrollUp
-      ..onScrollDown = properties.onScrollDown
-      ..onIncrease = properties.onIncrease
-      ..onDismiss = properties.onDismiss
-      ..onDecrease = properties.onDecrease
-      ..onCopy = properties.onCopy
-      ..onCut = properties.onCut
-      ..onPaste = properties.onPaste
-      ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord
-      ..onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord
-      ..onSetSelection = properties.onSetSelection
-      ..onSetText = properties.onSetText
-      ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
-      ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus
-      ..customSemanticsActions = properties.customSemanticsActions;
+      ..properties = properties
+      ..textDirection = _getTextDirection(context);
   }
 
   @override
