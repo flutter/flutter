@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
@@ -51,7 +49,7 @@ Future<void> takeScreenshot(
   bool write = false,
   double? maxDiffRatePercent,
 }) async {
-  final html.Element sceneElement = html.Element.tag('flt-scene');
+  final DomElement sceneElement = createDomElement('flt-scene');
   if (isIosSafari) {
     // Shrink to fit on the iPhone screen.
     sceneElement.style.position = 'absolute';
@@ -60,7 +58,7 @@ Future<void> takeScreenshot(
   }
   try {
     sceneElement.append(canvas.rootElement);
-    html.document.body!.append(sceneElement);
+    domDocument.body!.append(sceneElement);
     await matchGoldenFile(
       '$fileName.png',
       region: region,

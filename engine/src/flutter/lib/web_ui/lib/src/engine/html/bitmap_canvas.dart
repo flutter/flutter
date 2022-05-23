@@ -58,7 +58,7 @@ class BitmapCanvas extends EngineCanvas {
   static const int kPaddingPixels = 1;
 
   @override
-  final html.Element rootElement = html.Element.tag('flt-canvas');
+  final DomElement rootElement = createDomElement('flt-canvas');
 
   final CanvasPool _canvasPool;
 
@@ -239,7 +239,7 @@ class BitmapCanvas extends EngineCanvas {
     for (int i = 0; i < len; i++) {
       final html.Element child = _children[i];
       // Don't remove children that have been reused by CrossFrameCache.
-      if (child.parent == rootElement) {
+      if (child.parent == rootElement as html.Element) {
         child.remove();
       }
     }
@@ -458,11 +458,11 @@ class BitmapCanvas extends EngineCanvas {
           ui.Offset.zero,
           transformWithOffset(_canvasPool.currentTransform, offset));
       for (final html.Element clipElement in clipElements) {
-        rootElement.append(clipElement);
+        rootElement.append(clipElement as DomElement);
         _children.add(clipElement);
       }
     } else {
-      rootElement.append(element);
+      rootElement.append(element as DomElement);
       _children.add(element);
     }
     final ui.BlendMode? blendMode = paint.blendMode;
@@ -675,7 +675,7 @@ class BitmapCanvas extends EngineCanvas {
       final List<html.Element> clipElements = _clipContent(
           _canvasPool.clipStack!, imgElement, p, _canvasPool.currentTransform);
       for (final html.Element clipElement in clipElements) {
-        rootElement.append(clipElement);
+        rootElement.append(clipElement as DomElement);
         _children.add(clipElement);
       }
     } else {
@@ -687,7 +687,7 @@ class BitmapCanvas extends EngineCanvas {
         // Reset width/height since they may have been previously set.
         ..removeProperty('width')
         ..removeProperty('height');
-      rootElement.append(imgElement);
+      rootElement.append(imgElement as DomElement);
       _children.add(imgElement);
     }
     return imgElement;
@@ -851,7 +851,7 @@ class BitmapCanvas extends EngineCanvas {
       SurfacePaintData paint) {
     // For srcIn blendMode, we use an svg filter to apply to image element.
     final SvgFilter svgFilter = svgFilterFromBlendMode(filterColor, colorFilterBlendMode);
-    rootElement.append(svgFilter.element);
+    rootElement.append(svgFilter.element as DomElement);
     _children.add(svgFilter.element);
     final html.HtmlElement imgElement = _reuseOrCreateImage(image);
     imgElement.style.filter = 'url(#${svgFilter.id})';
@@ -866,7 +866,7 @@ class BitmapCanvas extends EngineCanvas {
       HtmlImage image, List<double> matrix, SurfacePaintData paint) {
     // For srcIn blendMode, we use an svg filter to apply to image element.
     final SvgFilter svgFilter = svgFilterFromColorMatrix(matrix);
-    rootElement.append(svgFilter.element);
+    rootElement.append(svgFilter.element as DomElement);
     _children.add(svgFilter.element);
     final html.HtmlElement imgElement = _reuseOrCreateImage(image);
     imgElement.style.filter = 'url(#${svgFilter.id})';
@@ -971,7 +971,7 @@ class BitmapCanvas extends EngineCanvas {
           offset,
           _canvasPool.currentTransform);
       for (final html.Element clipElement in clipElements) {
-        rootElement.append(clipElement);
+        rootElement.append(clipElement as DomElement);
         _children.add(clipElement);
       }
     } else {
@@ -979,7 +979,7 @@ class BitmapCanvas extends EngineCanvas {
         paragraphElement,
         transformWithOffset(_canvasPool.currentTransform, offset).storage,
       );
-      rootElement.append(paragraphElement);
+      rootElement.append(paragraphElement as DomElement);
     }
     _children.add(paragraphElement);
     // If there is a prior sibling such as img prevent left/top shift.
@@ -1068,21 +1068,25 @@ class BitmapCanvas extends EngineCanvas {
   void endOfPaint() {
     _canvasPool.endOfPaint();
     _elementCache?.commitFrame();
-    // Wrap all elements in translate3d (workaround for webkit paint order bug).
     if (_contains3dTransform && browserEngine == BrowserEngine.webkit) {
-      for (final html.Element element in rootElement.children) {
-        final html.DivElement paintOrderElement = html.DivElement()
+      // Copy the children list to avoid concurrent modification.
+      final List<DomElement> children = rootElement.children.toList();
+      for (final DomElement element in children) {
+        final DomHTMLDivElement paintOrderElement = createDomHTMLDivElement()
           ..style.transform = 'translate3d(0,0,0)';
         paintOrderElement.append(element);
         rootElement.append(paintOrderElement);
-        _children.add(paintOrderElement);
+        _children.add(paintOrderElement as html.Element);
       }
     }
-    final html.Node? firstChild = rootElement.firstChild;
-    if (firstChild != null && firstChild is html.HtmlElement &&
-        firstChild.tagName.toLowerCase() ==
-            'canvas') {
-      firstChild.style.zIndex = '-1';
+    final DomNode? firstChild = rootElement.firstChild;
+    if (firstChild != null) {
+      if (domInstanceOfString(firstChild, 'HTMLElement')) {
+        final DomHTMLElement maybeCanvas = firstChild as DomHTMLElement;
+        if (maybeCanvas.tagName.toLowerCase() == 'canvas') {
+          maybeCanvas.style.zIndex = '-1';
+        }
+      }
     }
   }
 
@@ -1368,7 +1372,7 @@ List<html.Element> _clipContent(List<SaveClipEntry> clipStack,
     final SaveClipEntry entry = clipStack[clipIndex];
     final html.HtmlElement newElement = html.DivElement();
     newElement.style.position = 'absolute';
-    applyWebkitClipFix(newElement);
+    applyWebkitClipFix(newElement as DomElement);
     if (root == null) {
       root = newElement;
     } else {
@@ -1428,7 +1432,8 @@ List<html.Element> _clipContent(List<SaveClipEntry> clipStack,
           ..transform = matrix4ToCssTransform(newClipTransform)
           ..transformOrigin = '0 0 0';
         final html.Element clipElement =
-            createSvgClipDef(curElement as html.HtmlElement, entry.path!);
+            createSvgClipDef(curElement as DomElement, entry.path!) as
+            html.Element;
         clipDefs.add(clipElement);
       }
     }

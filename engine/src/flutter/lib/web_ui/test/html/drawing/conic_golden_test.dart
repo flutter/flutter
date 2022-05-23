@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -38,7 +36,7 @@ Future<void> testMain() async {
     canvas.drawPath(path, paint);
     canvas.endRecording();
 
-    html.document.body!.append(bitmapCanvas.rootElement);
+    domDocument.body!.append(bitmapCanvas.rootElement);
     canvas.apply(bitmapCanvas, canvasBounds);
     await matchGoldenFile('$scubaFileName.png', region: region);
     bitmapCanvas.rootElement.remove();

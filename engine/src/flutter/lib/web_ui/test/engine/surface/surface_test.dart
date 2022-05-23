@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -86,7 +84,7 @@ void testMain() {
       builder1.pop();
       builder1.build();
       expect(opacityLayer1.isActive, isTrue);
-      final html.Element element = opacityLayer1.rootElement!;
+      final DomElement element = opacityLayer1.rootElement!;
 
       final SceneBuilder builder2 = SceneBuilder();
       final PersistedOpacity opacityLayer2 =
@@ -112,7 +110,7 @@ void testMain() {
       builder1.pop();
       builder1.build();
       expect(opacityLayer1.isActive, isTrue);
-      final html.Element element = opacityLayer1.rootElement!;
+      final DomElement element = opacityLayer1.rootElement!;
 
       // Release it
       SceneBuilder().build();
@@ -158,7 +156,7 @@ void testMain() {
       final SurfaceSceneBuilder builder1 = SurfaceSceneBuilder();
       final PersistedTransform a1 =
           builder1.pushTransform(
-              (Matrix4.identity()..scale(html.window.devicePixelRatio as double)).toFloat64()) as PersistedTransform;
+              (Matrix4.identity()..scale(domWindow.devicePixelRatio as double)).toFloat64()) as PersistedTransform;
       final PersistedOpacity b1 = builder1.pushOpacity(100) as PersistedOpacity;
       final PersistedTransform c1 =
           builder1.pushTransform(Matrix4.identity().toFloat64()) as PersistedTransform;
@@ -169,9 +167,9 @@ void testMain() {
       builder1.build();
       expect(logger.log, <String>['build', 'createElement', 'apply']);
 
-      final html.Element elementA = a1.rootElement!;
-      final html.Element elementB = b1.rootElement!;
-      final html.Element elementC = c1.rootElement!;
+      final DomElement elementA = a1.rootElement!;
+      final DomElement elementB = b1.rootElement!;
+      final DomElement elementC = c1.rootElement!;
 
       expect(elementC.parent, elementB);
       expect(elementB.parent, elementA);
@@ -179,7 +177,7 @@ void testMain() {
       final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
       final PersistedTransform a2 =
           builder2.pushTransform(
-              (Matrix4.identity()..scale(html.window.devicePixelRatio as double)).toFloat64(),
+              (Matrix4.identity()..scale(domWindow.devicePixelRatio as double)).toFloat64(),
               oldLayer: a1) as PersistedTransform;
       final PersistedTransform c2 =
           builder2.pushTransform(Matrix4.identity().toFloat64(), oldLayer: c1) as PersistedTransform;
@@ -212,7 +210,7 @@ void testMain() {
       builder1.pop();
       builder1.build();
       expect(opacityLayer.isActive, isTrue);
-      final html.Element element = opacityLayer.rootElement!;
+      final DomElement element = opacityLayer.rootElement!;
 
       final SceneBuilder builder2 = SceneBuilder();
 
@@ -234,7 +232,7 @@ void testMain() {
       builder1.build();
       expect(opacityLayer.isActive, isTrue);
       expect(logger.log, <String>['build', 'createElement', 'apply']);
-      final html.Element element = opacityLayer.rootElement!;
+      final DomElement element = opacityLayer.rootElement!;
 
       SceneBuilder().build();
       expect(opacityLayer.isReleased, isTrue);
@@ -261,8 +259,8 @@ void testMain() {
       builder1.build();
       expect(opacityLayer.isActive, isTrue);
       expect(transformLayer.isActive, isTrue);
-      final html.Element opacityElement = opacityLayer.rootElement!;
-      final html.Element transformElement = transformLayer.rootElement!;
+      final DomElement opacityElement = opacityLayer.rootElement!;
+      final DomElement transformElement = transformLayer.rootElement!;
 
       SceneBuilder().build();
 
@@ -307,10 +305,10 @@ void testMain() {
       builder1.pop();
       builder1.build();
 
-      final html.Element elementA = a1.rootElement!;
-      final html.Element elementB = b1.rootElement!;
-      final html.Element elementC = c1.rootElement!;
-      final html.Element elementD = d1.rootElement!;
+      final DomElement elementA = a1.rootElement!;
+      final DomElement elementB = b1.rootElement!;
+      final DomElement elementC = c1.rootElement!;
+      final DomElement elementD = d1.rootElement!;
 
       expect(elementB.parent, elementA);
       expect(elementC.parent, elementA);
@@ -330,12 +328,12 @@ void testMain() {
       expect(d1.rootElement, elementD);
 
       expect(
-        <html.Element>[
+        <DomElement>[
           elementD.parent!,
           elementC.parent!,
           elementB.parent!,
         ],
-        <html.Element>[elementC, elementB, elementA],
+        <DomElement>[elementC, elementB, elementA],
       );
     });
 
@@ -345,7 +343,7 @@ void testMain() {
       builder1.pop();
       builder1.build();
       expect(opacityLayer1.isActive, isTrue);
-      final html.Element element = opacityLayer1.rootElement!;
+      final DomElement element = opacityLayer1.rootElement!;
 
       final SceneBuilder builder2 = SceneBuilder();
       final PersistedOpacity opacityLayer2 = builder2.pushOpacity(200) as PersistedOpacity;

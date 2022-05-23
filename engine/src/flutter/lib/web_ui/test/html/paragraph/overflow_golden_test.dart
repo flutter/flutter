@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -116,7 +115,7 @@ Future<void> testMain() async {
 
   test('ellipsis (dom)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 300, 300);
-    final EngineCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
+    final EngineCanvas canvas = DomCanvas(domDocument.createElement('flt-picture'));
     testEllipsis(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_ellipsis_dom');
   });

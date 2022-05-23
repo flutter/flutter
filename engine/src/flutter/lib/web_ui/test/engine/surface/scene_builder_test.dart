@@ -36,7 +36,7 @@ void testMain() {
     test('pushTransform implements surface lifecycle', () {
       testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
         return sceneBuilder.pushTransform(
-            (Matrix4.identity()..scale(html.window.devicePixelRatio as double)).toFloat64());
+            (Matrix4.identity()..scale(domWindow.devicePixelRatio as double)).toFloat64());
       }, () {
         return '''<s><flt-transform></flt-transform></s>''';
       });
@@ -505,7 +505,8 @@ void testMain() {
           actualAdditions.addAll(record.addedNodes!);
         }
       });
-      observer.observe(SurfaceSceneBuilder.debugLastFrameScene!.rootElement!, childList: true);
+      observer.observe(
+          SurfaceSceneBuilder.debugLastFrameScene!.rootElement! as html.Node, childList: true);
 
       final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
       for (int i = 0; i < string.length; i++) {
@@ -708,7 +709,7 @@ void testLayerLifeCycle(
   }
 
   final PersistedSurface surface1 = findSurface();
-  final html.Element surfaceElement1 = surface1.rootElement!;
+  final DomElement surfaceElement1 = surface1.rootElement!;
 
   // Retain: reuses a layer as is along with its DOM elements.
   sceneBuilder = SurfaceSceneBuilder();
@@ -718,7 +719,7 @@ void testLayerLifeCycle(
   tester.expectSceneHtml(expectedHtmlGetter());
 
   final PersistedSurface surface2 = findSurface();
-  final html.Element surfaceElement2 = surface2.rootElement!;
+  final DomElement surfaceElement2 = surface2.rootElement!;
 
   expect(surface2, same(surface1));
   expect(surfaceElement2, same(surfaceElement1));
@@ -733,7 +734,7 @@ void testLayerLifeCycle(
 
   final PersistedSurface surface3 = findSurface();
   expect(surface3, same(layer3));
-  final html.Element surfaceElement3 = surface3.rootElement!;
+  final DomElement surfaceElement3 = surface3.rootElement!;
   expect(surface3, isNot(same(surface2)));
   expect(surfaceElement3, isNotNull);
   expect(surfaceElement3, same(surfaceElement2));

@@ -23,7 +23,7 @@ import 'vector_math.dart';
 /// This can be used either as an interface or super-class.
 abstract class EngineCanvas {
   /// The element that is attached to the DOM.
-  html.Element get rootElement;
+  DomElement get rootElement;
 
   void dispose() {
     clear();
@@ -296,7 +296,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// The element at the top of the element stack, or [rootElement] if the stack
   /// is empty.
   html.Element get currentElement =>
-      _elementStack.isEmpty ? rootElement : _elementStack.last;
+      _elementStack.isEmpty ? rootElement as html.Element : _elementStack.last;
 
   /// The stack that maintains the DOM elements used to express certain paint
   /// operations, such as clips.

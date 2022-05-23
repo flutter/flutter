@@ -16,6 +16,10 @@ class SVGGraphicsElement extends SVGElement {}
 
 @JS()
 @staticInterop
+class SVGSVGElement extends SVGGraphicsElement {}
+
+@JS()
+@staticInterop
 class SVGClipPathElement extends SVGGraphicsElement {}
 
 SVGClipPathElement createSVGClipPathElement() =>

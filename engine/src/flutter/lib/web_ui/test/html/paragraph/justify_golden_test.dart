@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -58,7 +57,7 @@ Future<void> testMain() async {
 
   test('TextAlign.justify with multiple spans (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 400);
-    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domDocument.createElement('flt-picture'));
     testJustifyWithMultipleSpans(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_justify_dom');
   });
@@ -98,7 +97,7 @@ Future<void> testMain() async {
 
   test('TextAlign.justify with single space and empty line (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 400);
-    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domDocument.createElement('flt-picture'));
     testJustifyWithEmptyLine(canvas);
     return takeScreenshot(
         canvas, bounds, 'canvas_paragraph_justify_empty_line_dom');
@@ -144,7 +143,7 @@ Future<void> testMain() async {
 
   test('TextAlign.justify with ellipsis (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 300);
-    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domDocument.createElement('flt-picture'));
     testJustifyWithEllipsis(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_justify_ellipsis_dom');
   });
@@ -191,7 +190,7 @@ Future<void> testMain() async {
 
   test('TextAlign.justify with background (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 400);
-    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domDocument.createElement('flt-picture'));
     testJustifyWithBackground(canvas);
     return takeScreenshot(
         canvas, bounds, 'canvas_paragraph_justify_background_dom');
@@ -233,7 +232,7 @@ Future<void> testMain() async {
 
   test('TextAlign.justify with placeholder (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 400);
-    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domDocument.createElement('flt-picture'));
     testJustifyWithPlaceholder(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_justify_placeholder_dom');
   });
@@ -277,7 +276,7 @@ Future<void> testMain() async {
 
   test('TextAlign.justify with selection (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 400);
-    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domDocument.createElement('flt-picture'));
     testJustifyWithSelection(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_justify_selection_dom');
   });
@@ -322,7 +321,7 @@ Future<void> testMain() async {
 
   test('TextAlign.justify rtl (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 400);
-    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(domDocument.createElement('flt-picture'));
     testJustifyRtl(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_justify_rtl_dom');
   });

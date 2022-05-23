@@ -41,7 +41,7 @@ Future<void> testMain() async {
     }
 
     try {
-      sceneElement.append(engineCanvas.rootElement);
+      sceneElement.append(engineCanvas.rootElement as html.Element);
       html.document.body!.append(sceneElement);
       // TODO(yjbanov): 10% diff rate is excessive. Update goldens.
       await matchGoldenFile('$fileName.png', region: region);

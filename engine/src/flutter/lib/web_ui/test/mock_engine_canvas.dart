@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -34,8 +33,8 @@ class MockEngineCanvas implements EngineCanvas {
   final List<MockCanvasCall> methodCallLog = <MockCanvasCall>[];
 
   @override
-  html.Element get rootElement => _rootElement;
-  html.Element _rootElement = html.DivElement();
+  DomElement get rootElement => _rootElement;
+  DomElement _rootElement = createDomHTMLDivElement();
 
   void _called(String methodName, {dynamic arguments}) {
     methodCallLog.add(MockCanvasCall._(

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
@@ -26,7 +24,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   /// [rootElement] is used to host child in front of [filterElement] that
   /// is transformed to cover background.
   @override
-  html.Element? get childContainer => _childContainer as html.Element?;
+  DomElement? get childContainer => _childContainer;
   DomElement? _childContainer;
   DomElement? _filterElement;
   ui.Rect? _activeClipBounds;
