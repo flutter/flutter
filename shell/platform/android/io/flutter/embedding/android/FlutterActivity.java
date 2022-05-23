@@ -1133,7 +1133,7 @@ public class FlutterActivity extends Activity
    * {@link io.flutter.embedding.engine.FlutterEngine} to outlive this {@code FlutterActivity} so
    * that it can be used later in a different {@code Activity}. To accomplish this, the {@link
    * io.flutter.embedding.engine.FlutterEngine} may need to be disconnected from this {@code
-   * FluttterActivity} at an unusual time, preventing this {@code FlutterActivity} from correctly
+   * FlutterActivity} at an unusual time, preventing this {@code FlutterActivity} from correctly
    * managing the relationship between the {@link io.flutter.embedding.engine.FlutterEngine} and
    * itself.
    */
