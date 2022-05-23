@@ -182,6 +182,31 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
+  testWidgets('does not paginate if children fit with zero margin', (WidgetTester tester) async {
+    late StateSetter setState;
+    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final double width = 7 * (TestBox.itemWidth + tester.binding.window.devicePixelRatio);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: width,
+            child: CupertinoTextSelectionToolbar(
+              anchorAbove: const Offset(50.0, 100.0),
+              anchorBelow: const Offset(50.0, 200.0),
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // All children fit on the screen, so they are all rendered.
+    expect(find.byType(TestBox), findsNWidgets(children.length));
+    expect(findOverflowNextButton(), findsNothing);
+    expect(findOverflowBackButton(), findsNothing);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
     const double height = _kToolbarHeight;
