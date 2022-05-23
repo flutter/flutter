@@ -3287,7 +3287,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
     PasteTextIntent: _makeOverridable(CallbackAction<PasteTextIntent>(onInvoke: (PasteTextIntent intent) => pasteText(intent.cause))),
 
-    SwapCharactersIntent: _makeOverridable(_SwapCharactersAction(this)),
+    TransposeCharactersIntent: _makeOverridable(_TransposeCharactersAction(this)),
   };
 
   @override
@@ -4091,13 +4091,20 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
   bool get isActionEnabled => !state.widget.readOnly && state._value.selection.isValid;
 }
 
-class _SwapCharactersAction extends ContextAction<SwapCharactersIntent> {
-  _SwapCharactersAction(this.state);
+/// An [Action] that transposes the characters immediately before and after the
+/// current collapsed selection.
+///
+/// When the cursor is at the end of the text, transposes the last two
+/// characters, if they exist.
+///
+/// When the cursor is at the start of the text, does nothing.
+class _TransposeCharactersAction extends ContextAction<TransposeCharactersIntent> {
+  _TransposeCharactersAction(this.state);
 
   final EditableTextState state;
 
   @override
-  Object? invoke(SwapCharactersIntent intent, [BuildContext? context]) {
+  Object? invoke(TransposeCharactersIntent intent, [BuildContext? context]) {
     // Can't swap 1 or 0 characters.
     if (state.textEditingValue.text.length <= 1) {
       return null;

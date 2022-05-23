@@ -330,9 +330,9 @@ class UpdateSelectionIntent extends Intent {
   final SelectionChangedCause cause;
 }
 
-/// An [Intent] that represents a user interaction that attempts to swap the two
-/// characters before and after the cursor.
-class SwapCharactersIntent extends Intent {
-  /// Creates a [SwapCharactersIntent].
-  const SwapCharactersIntent();
+/// An [Intent] that represents a user interaction that attempts to swap the
+/// characters immediately around the cursor.
+class TransposeCharactersIntent extends Intent {
+  /// Creates a [TransposeCharactersIntent].
+  const TransposeCharactersIntent();
 }
