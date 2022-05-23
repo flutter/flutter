@@ -34,6 +34,8 @@ class TestPointer {
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.touch:
       case PointerDeviceKind.unknown:
+      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         _device = device ?? 0;
         break;
     }

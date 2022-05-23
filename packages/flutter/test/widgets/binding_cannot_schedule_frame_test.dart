@@ -10,22 +10,22 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('Can only schedule frames after widget binding attaches the root widget', () async {
     final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-    expect(SchedulerBinding.instance!.framesEnabled, isFalse);
-    expect(SchedulerBinding.instance!.hasScheduledFrame, isFalse);
+    expect(SchedulerBinding.instance.framesEnabled, isFalse);
+    expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
     // Sends a message to notify that the engine is ready to accept frames.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
 
     // Enables the semantics should not schedule any frames if the root widget
     // has not been attached.
     binding.setSemanticsEnabled(true);
-    expect(SchedulerBinding.instance!.framesEnabled, isFalse);
-    expect(SchedulerBinding.instance!.hasScheduledFrame, isFalse);
+    expect(SchedulerBinding.instance.framesEnabled, isFalse);
+    expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
 
     // The widget binding should be ready to produce frames after it attaches
     // the root widget.
     binding.attachRootWidget(const Placeholder());
-    expect(SchedulerBinding.instance!.framesEnabled, isTrue);
-    expect(SchedulerBinding.instance!.hasScheduledFrame, isTrue);
+    expect(SchedulerBinding.instance.framesEnabled, isTrue);
+    expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
   });
 }

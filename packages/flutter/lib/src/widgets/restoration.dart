@@ -275,18 +275,18 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   void _loadRootBucketIfNecessary() {
     if (_isWaitingForRootBucket && !_isLoadingRootBucket) {
       _isLoadingRootBucket = true;
-      RendererBinding.instance!.deferFirstFrame();
-      ServicesBinding.instance!.restorationManager.rootBucket.then((RestorationBucket? bucket) {
+      RendererBinding.instance.deferFirstFrame();
+      ServicesBinding.instance.restorationManager.rootBucket.then((RestorationBucket? bucket) {
         _isLoadingRootBucket = false;
         if (mounted) {
-          ServicesBinding.instance!.restorationManager.addListener(_replaceRootBucket);
+          ServicesBinding.instance.restorationManager.addListener(_replaceRootBucket);
           setState(() {
             _rootBucket = bucket;
             _rootBucketValid = true;
             _okToRenderBlankContainer = false;
           });
         }
-        RendererBinding.instance!.allowFirstFrame();
+        RendererBinding.instance.allowFirstFrame();
       });
     }
   }
@@ -294,7 +294,7 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   void _replaceRootBucket() {
     _rootBucketValid = false;
     _rootBucket = null;
-    ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+    ServicesBinding.instance.restorationManager.removeListener(_replaceRootBucket);
     _loadRootBucketIfNecessary();
     assert(!_isWaitingForRootBucket); // Ensure that load finished synchronously.
   }
@@ -302,7 +302,7 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   @override
   void dispose() {
     if (_rootBucketValid) {
-      ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+      ServicesBinding.instance.restorationManager.removeListener(_replaceRootBucket);
     }
     super.dispose();
   }
@@ -747,7 +747,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
            '"$restorationId" is already registered to another property.',
     );
-    final bool hasSerializedValue = bucket?.contains(restorationId) == true;
+    final bool hasSerializedValue = bucket?.contains(restorationId) ?? false;
     final Object? initialValue = hasSerializedValue
         ? property.fromPrimitives(bucket!.read<Object>(restorationId))
         : property.createDefaultValue();
@@ -850,7 +850,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
       return false;
     }
     final RestorationBucket? potentialNewParent = RestorationScope.of(context);
-    return potentialNewParent != _currentParent && potentialNewParent?.isReplacing == true;
+    return potentialNewParent != _currentParent && (potentialNewParent?.isReplacing ?? false);
   }
 
   List<RestorableProperty<Object?>>? _debugPropertiesWaitingForReregistration;

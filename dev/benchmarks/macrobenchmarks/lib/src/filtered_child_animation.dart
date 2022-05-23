@@ -13,10 +13,10 @@ enum FilterType {
 
 class FilteredChildAnimationPage extends StatefulWidget {
   const FilteredChildAnimationPage(this.initialFilterType, {
-    Key? key,
+    super.key,
     this.initialComplexChild = true,
     this.initialUseRepaintBoundary = true,
-  }) : super(key: key);
+  });
 
   final FilterType initialFilterType;
   final bool initialComplexChild;
@@ -41,7 +41,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     _filterType = widget.initialFilterType;
     _complexChild = widget.initialComplexChild;
     _useRepaintBoundary = widget.initialUseRepaintBoundary;
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox childBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
       _childCenter = childBox.paintBounds.center;
     });

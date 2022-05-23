@@ -588,6 +588,28 @@ void main() {
       ProcessManager: () => processManager,
     });
 
+    testUsingContext('includes assumeInitializeFromDillUpToDate in BuildInfo', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+      final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+      await runner.run(<String>['dummy', '--assume-initialize-from-dill-up-to-date']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.assumeInitializeFromDillUpToDate, isTrue);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('unsets assumeInitializeFromDillUpToDate in BuildInfo when disabled', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+      final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+      await runner.run(<String>['dummy', '--no-assume-initialize-from-dill-up-to-date']);
+      final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.assumeInitializeFromDillUpToDate, isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
     testUsingContext('dds options', () async {
       final FakeDdsCommand ddsCommand = FakeDdsCommand();
       final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);

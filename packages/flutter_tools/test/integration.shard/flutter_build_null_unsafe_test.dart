@@ -76,7 +76,10 @@ String unsafeString = null;
         '--no-sound-null-safety',
         if (targetPlatform == 'ios') '--no-codesign',
       ], workingDirectory: projectRoot.path);
-      expect(result.exitCode, 0);
+
+      if (result.exitCode != 0) {
+        fail('build --no-sound-null-safety failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+      }
     });
   }
 }

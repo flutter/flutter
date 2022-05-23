@@ -212,7 +212,11 @@ abstract class Logger {
 
   /// A [SilentStatus] or an [AnonymousSpinnerStatus] (depending on whether the
   /// terminal is fancy enough), already started.
-  Status startSpinner({ VoidCallback? onFinish });
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+  });
 
   /// Send an event to be emitted.
   ///
@@ -368,8 +372,16 @@ class DelegatingLogger implements Logger {
   }
 
   @override
-  Status startSpinner({VoidCallback? onFinish}) {
-    return _delegate.startSpinner(onFinish: onFinish);
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+  }) {
+    return _delegate.startSpinner(
+      onFinish: onFinish,
+      timeout: timeout,
+      slowWarningCallback: slowWarningCallback,
+    );
   }
 
   @override
@@ -447,7 +459,7 @@ class StdoutLogger extends Logger {
       shouldWrap: wrap ?? _outputPreferences.wrapText,
       columnWidth: _outputPreferences.wrapColumn,
     );
-    if (emphasis == true) {
+    if (emphasis ?? false) {
       message = terminal.bolden(message);
     }
     message = terminal.color(message, color ?? TerminalColor.red);
@@ -475,7 +487,7 @@ class StdoutLogger extends Logger {
       shouldWrap: wrap ?? _outputPreferences.wrapText,
       columnWidth: _outputPreferences.wrapColumn,
     );
-    if (emphasis == true) {
+    if (emphasis ?? false) {
       message = terminal.bolden(message);
     }
     message = terminal.color(message, color ?? TerminalColor.cyan);
@@ -500,13 +512,13 @@ class StdoutLogger extends Logger {
       shouldWrap: wrap ?? _outputPreferences.wrapText,
       columnWidth: _outputPreferences.wrapColumn,
     );
-    if (emphasis == true) {
+    if (emphasis ?? false) {
       message = terminal.bolden(message);
     }
     if (color != null) {
       message = terminal.color(message, color);
     }
-    if (newline != false) {
+    if (newline ?? true) {
       message = '$message\n';
     }
     writeToStdOut(message);
@@ -571,7 +583,11 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  Status startSpinner({ VoidCallback? onFinish }) {
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+  }) {
     if (_status != null || !supportsColor) {
       return SilentStatus(
         onFinish: onFinish,
@@ -588,6 +604,8 @@ class StdoutLogger extends Logger {
       stdio: _stdio,
       stopwatch: _stopwatchFactory.createStopwatch(),
       terminal: terminal,
+      timeout: timeout,
+      slowWarningCallback: slowWarningCallback,
     )..start();
     return _status!;
   }
@@ -688,16 +706,11 @@ int _getColumnSize(String line) {
 /// they will show up as the unrepresentable character symbol '�'.
 class WindowsStdoutLogger extends StdoutLogger {
   WindowsStdoutLogger({
-    required Terminal terminal,
-    required Stdio stdio,
-    required OutputPreferences outputPreferences,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  }) : super(
-      terminal: terminal,
-      stdio: stdio,
-      outputPreferences: outputPreferences,
-      stopwatchFactory: stopwatchFactory,
-    );
+    required super.terminal,
+    required super.stdio,
+    required super.outputPreferences,
+    super.stopwatchFactory,
+  });
 
   @override
   void writeToStdOut(String message) {
@@ -812,7 +825,7 @@ class BufferLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    if (newline != false) {
+    if (newline ?? true) {
       _status.writeln(wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
@@ -859,7 +872,11 @@ class BufferLogger extends Logger {
   }
 
   @override
-  Status startSpinner({VoidCallback? onFinish}) {
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+  }) {
     return SilentStatus(
       stopwatch: _stopwatchFactory.createStopwatch(),
       onFinish: onFinish,
@@ -884,11 +901,10 @@ class BufferLogger extends Logger {
 }
 
 class VerboseLogger extends DelegatingLogger {
-  VerboseLogger(Logger parent, {
+  VerboseLogger(super.parent, {
     StopwatchFactory stopwatchFactory = const StopwatchFactory()
   }) : _stopwatch = stopwatchFactory.createStopwatch(),
-       _stopwatchFactory = stopwatchFactory,
-       super(parent) {
+       _stopwatchFactory = stopwatchFactory {
     _stopwatch.start();
   }
 
@@ -1059,7 +1075,7 @@ class VerboseLogger extends DelegatingLogger {
 }
 
 class PrefixedErrorLogger extends DelegatingLogger {
-  PrefixedErrorLogger(Logger parent) : super(parent);
+  PrefixedErrorLogger(super.parent);
 
   @override
   void printError(
@@ -1111,9 +1127,11 @@ abstract class Status {
   Status({
     this.onFinish,
     required Stopwatch stopwatch,
+    this.timeout,
   }) : _stopwatch = stopwatch;
 
   final VoidCallback? onFinish;
+  final Duration? timeout;
 
   @protected
   final Stopwatch _stopwatch;
@@ -1125,6 +1143,9 @@ abstract class Status {
     }
     return getElapsedAsMilliseconds(_stopwatch.elapsed);
   }
+
+  @visibleForTesting
+  bool get seemsSlow => timeout != null && _stopwatch.elapsed > timeout!;
 
   /// Call to start spinning.
   void start() {
@@ -1159,12 +1180,9 @@ abstract class Status {
 /// A [Status] that shows nothing.
 class SilentStatus extends Status {
   SilentStatus({
-    required Stopwatch stopwatch,
-    VoidCallback? onFinish,
-  }) : super(
-    onFinish: onFinish,
-    stopwatch: stopwatch,
-  );
+    required super.stopwatch,
+    super.onFinish,
+  });
 
   @override
   void finish() {
@@ -1179,15 +1197,11 @@ const int _kTimePadding = 8; // should fit "99,999ms"
 class SummaryStatus extends Status {
   SummaryStatus({
     this.message = '',
-    required Stopwatch stopwatch,
+    required super.stopwatch,
     this.padding = kDefaultStatusPadding,
-    VoidCallback? onFinish,
+    super.onFinish,
     required Stdio stdio,
-  }) : _stdio = stdio,
-       super(
-         onFinish: onFinish,
-         stopwatch: stopwatch,
-        );
+  }) : _stdio = stdio;
 
   final String message;
   final int padding;
@@ -1243,20 +1257,20 @@ class SummaryStatus extends Status {
 /// Call [pause] before outputting any text while this is running.
 class AnonymousSpinnerStatus extends Status {
   AnonymousSpinnerStatus({
-    VoidCallback? onFinish,
-    required Stopwatch stopwatch,
+    super.onFinish,
+    required super.stopwatch,
     required Stdio stdio,
     required Terminal terminal,
+    this.slowWarningCallback,
+    super.timeout,
   }) : _stdio = stdio,
        _terminal = terminal,
-       _animation = _selectAnimation(terminal),
-       super(
-         onFinish: onFinish,
-         stopwatch: stopwatch,
-        );
+       _animation = _selectAnimation(terminal);
 
   final Stdio _stdio;
   final Terminal _terminal;
+  String _slowWarning = '';
+  final SlowWarningCallback? slowWarningCallback;
 
   static const String _backspaceChar = '\b';
   static const String _clearChar = ' ';
@@ -1300,9 +1314,10 @@ class AnonymousSpinnerStatus extends Status {
   Timer? timer;
   int ticks = 0;
   int _lastAnimationFrameLength = 0;
+  bool timedOut = false;
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];
-  int get _currentLineLength => _lastAnimationFrameLength;
+  int get _currentLineLength => _lastAnimationFrameLength + _slowWarning.length;
 
   void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
 
@@ -1332,6 +1347,16 @@ class AnonymousSpinnerStatus extends Status {
     assert(timer.isActive);
     _writeToStdOut(_backspaceChar * _lastAnimationFrameLength);
     ticks += 1;
+    if (seemsSlow) {
+      if (!timedOut) {
+        timedOut = true;
+        _clear(_currentLineLength);
+      }
+      if (_slowWarning == '' && slowWarningCallback != null) {
+        _slowWarning = slowWarningCallback!();
+        _writeToStdOut(_slowWarning);
+      }
+    }
     final String newFrame = _currentAnimationFrame;
     _lastAnimationFrameLength = newFrame.runes.length;
     _writeToStdOut(newFrame);
@@ -1382,16 +1407,11 @@ class SpinnerStatus extends AnonymousSpinnerStatus {
   SpinnerStatus({
     required this.message,
     this.padding = kDefaultStatusPadding,
-    VoidCallback? onFinish,
-    required Stopwatch stopwatch,
-    required Stdio stdio,
-    required Terminal terminal,
-  }) : super(
-         onFinish: onFinish,
-         stopwatch: stopwatch,
-         stdio: stdio,
-         terminal: terminal,
-        );
+    super.onFinish,
+    required super.stopwatch,
+    required super.stdio,
+    required super.terminal,
+  });
 
   final String message;
   final int padding;

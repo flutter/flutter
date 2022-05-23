@@ -495,7 +495,7 @@ void main() {
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', 'system.log'],
             stdout: '''
-Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/
+Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: The Dart VM service is listening on http://127.0.0.1:64213/1Uoeu523990=/
 Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           ))
           ..addCommand(const FakeCommand(
@@ -514,7 +514,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, <String>[
-          'flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/',
+          'flutter: The Dart VM service is listening on http://127.0.0.1:64213/1Uoeu523990=/',
         ]);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
@@ -529,7 +529,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', 'system.log'],
             stdout: '''
-2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) ))))))))))
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
           ))
@@ -549,7 +549,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, <String>[
-          'Observatory listening on http://127.0.0.1:57701/',
+          'The Dart VM service is listening on http://127.0.0.1:57701/',
           '))))))))))',
           '#0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)',
         ]);
@@ -917,7 +917,12 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
-      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'incorrect',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
@@ -940,7 +945,12 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       );
 
       final Directory mockDir = globals.fs.currentDirectory;
-      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'incorrect',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
@@ -967,13 +977,47 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
-      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'correct', bundleName: 'name', bundleDir: mockDir);
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'correct',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
       final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
       expect(simControl.requests.single.launchArgs, contains('--enable-software-rendering'));
+    }, overrides: <Type, Generator>{
+      PlistParser: () => testPlistParser,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Xcode: () => xcode,
+    });
+
+    testUsingContext('startApp using route', () async {
+      final IOSSimulator device = IOSSimulator(
+        'x',
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+      );
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+
+      final Directory mockDir = globals.fs.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'correct',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
+
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
+      final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions, route: '/animation');
+
+      expect(simControl.requests.single.launchArgs, contains('--route=/animation'));
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,

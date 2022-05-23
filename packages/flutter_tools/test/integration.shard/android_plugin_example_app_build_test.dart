@@ -4,38 +4,52 @@
 
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  late Directory tempDir;
+  late Directory tempDirPluginMethodChannels;
+  late Directory tempDirPluginFfi;
 
   setUp(() async {
-    tempDir = createResolvedTempDirectorySync('flutter_plugin_test.');
+    tempDirPluginMethodChannels = createResolvedTempDirectorySync('flutter_plugin_test.');
+    tempDirPluginFfi =
+        createResolvedTempDirectorySync('flutter_ffi_plugin_test.');
   });
 
   tearDown(() async {
-    tryToDelete(tempDir);
+    tryToDelete(tempDirPluginMethodChannels);
+    tryToDelete(tempDirPluginFfi);
   });
 
-  test('plugin example can be built using current Flutter Gradle plugin', () async {
+  Future<void> testPlugin({
+    required String template,
+    required Directory tempDir,
+  }) async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
       'flutter',
     );
 
-    processManager.runSync(<String>[
+    final String testName = '${template}_test';
+
+    ProcessResult result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'create',
-      '--template=plugin',
+      '--template=$template',
       '--platforms=android',
-      'plugin_test',
+      testName,
     ], workingDirectory: tempDir.path);
+    if (result.exitCode != 0) {
+      throw Exception('flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+    }
 
-    final Directory exampleAppDir = tempDir.childDirectory('plugin_test').childDirectory('example');
+    final Directory exampleAppDir =
+        tempDir.childDirectory(testName).childDirectory('example');
 
     final File buildGradleFile = exampleAppDir.childDirectory('android').childFile('build.gradle');
     expect(buildGradleFile, exists);
@@ -50,13 +64,16 @@ void main() {
     buildGradleFile.writeAsStringSync(newBuildGradle);
 
     // Run flutter build apk using AGP 4.1.0
-    processManager.runSync(<String>[
+    result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--target-platform=android-arm',
     ], workingDirectory: exampleAppDir.path);
+    if (result.exitCode != 0) {
+      throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+    }
 
     final File exampleApk = fileSystem.file(fileSystem.path.join(
       exampleAppDir.path,
@@ -67,6 +84,11 @@ void main() {
       'app-release.apk',
     ));
     expect(exampleApk, exists);
+
+    if (template == 'plugin_ffi') {
+      // Does not support AGP 3.3.0.
+      return;
+    }
 
     // Clean
     processManager.runSync(<String>[
@@ -101,5 +123,21 @@ android.enableR8=true''');
       '--target-platform=android-arm',
     ], workingDirectory: exampleAppDir.path);
     expect(exampleApk, exists);
+  }
+
+  test('plugin example can be built using current Flutter Gradle plugin',
+      () async {
+    await testPlugin(
+      template: 'plugin',
+      tempDir: tempDirPluginMethodChannels,
+    );
+  });
+
+  test('FFI plugin example can be built using current Flutter Gradle plugin',
+      () async {
+    await testPlugin(
+      template: 'plugin_ffi',
+      tempDir: tempDirPluginFfi,
+    );
   });
 }

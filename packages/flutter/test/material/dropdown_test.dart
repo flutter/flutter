@@ -13,7 +13,6 @@
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
 
 import 'dart:math' as math;
-import 'dart:ui' show window;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -218,7 +217,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(window).copyWith(size: widget.mediaSize),
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(
@@ -2395,13 +2394,13 @@ void main() {
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
-    await tester.pump(); // Pump a frame for autofocus to take effect.
+    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
-    final Finder buttonFinder = find.byKey(buttonKey);
-    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0x1f000000)));
+    expect(find.byType(Material), paints..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f000000)));
 
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
-    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0xff00ff00)));
+    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
+    expect(find.byType(Material), paints..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f00ff00)));
   });
 
   testWidgets('DropdownButtonFormField can be focused, and has focusColor', (WidgetTester tester) async {
@@ -2409,13 +2408,13 @@ void main() {
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
-    await tester.pump(); // Pump a frame for autofocus to take effect.
+    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
-    final Finder buttonFinder = find.descendant(of: find.byKey(buttonKey), matching: find.byType(InputDecorator));
-    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 12.0, 800.0, 60.0, 4.0, 4.0), color: const Color(0x1f000000)));
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 264.0, 800.0, 336.0), color: const Color(0x1f000000)));
 
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
-    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 12.0, 800.0, 60.0, 4.0, 4.0), color: const Color(0xff00ff00)));
+    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 264.0, 800.0, 336.0), color: const Color(0x1f00ff00)));
   });
 
   testWidgets("DropdownButton won't be focused if not enabled", (WidgetTester tester) async {
@@ -3413,7 +3412,7 @@ void main() {
 
       await tester.tap(find.text('One'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(InkWell, 'One'));
+      await tester.tap(find.widgetWithText(InkWell, 'One').last);
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
@@ -3426,7 +3425,7 @@ void main() {
 
       await tester.tap(find.text('One'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(InkWell, 'One'));
+      await tester.tap(find.widgetWithText(InkWell, 'One').last);
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 0);
       expect(feedback.hapticCount, 0);
@@ -3437,7 +3436,7 @@ void main() {
 
       await tester.tap(find.text('One'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(InkWell, 'Two'));
+      await tester.tap(find.widgetWithText(InkWell, 'Two').last);
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
@@ -3474,9 +3473,9 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
     await gesture.moveTo(offDropdownButton);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test that mouse cursor doesn't change when button is disabled
     await tester.pumpWidget(
@@ -3498,9 +3497,9 @@ void main() {
     );
 
     await gesture.moveTo(onDropdownButton);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
     await gesture.moveTo(offDropdownButton);
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to Dropdown', (WidgetTester tester) async {
@@ -3564,43 +3563,6 @@ void main() {
         ..rrect()
         ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 144.0, 208.0, radius, radius)),
     );
-
-    final InkWell firstItem = tester.widget(find.widgetWithText(InkWell, 'One'));
-    final InkWell lastItem = tester.widget(find.widgetWithText(InkWell, 'Four'));
-
-    expect(firstItem.borderRadius, const BorderRadius.vertical(top: Radius.circular(radius)));
-    expect(lastItem.borderRadius, const BorderRadius.vertical(bottom: Radius.circular(radius)));
-  });
-
-  testWidgets('borderRadius is properly applied to InkWell when there is only one item', (WidgetTester tester) async {
-    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(5.0));
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: DropdownButton<String>(
-              borderRadius: borderRadius,
-              value: 'One',
-              items: const <DropdownMenuItem<String>>[
-                DropdownMenuItem<String>(
-                  value: 'One',
-                  child: Text('One')
-                ),
-              ],
-              onChanged: (_) { },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('One'));
-    await tester.pumpAndSettle();
-
-    final InkWell menuItem = tester.widget(find.widgetWithText(InkWell, 'One'));
-
-    expect(menuItem.borderRadius, borderRadius);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/88574
@@ -3677,5 +3639,46 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), null);
+  });
+
+  testWidgets('BorderRadius property works properly for DropdownButtonFormField', (WidgetTester tester) async {
+    const double radius = 20.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              borderRadius: BorderRadius.circular(radius),
+              value: 'One',
+              items: <String>['One', 'Two', 'Three', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.ancestor(
+        of: find.text('One').last,
+        matching: find.byType(CustomPaint),
+      ).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 800.0, 208.0, radius, radius)),
+    );
   });
 }

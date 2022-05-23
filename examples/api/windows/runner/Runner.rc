@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "dev.flutter" "\0"
-            VALUE "FileDescription", "A temporary code sample for Curve2D" "\0"
+            VALUE "CompanyName", "The Flutter Authors" "\0"
+            VALUE "FileDescription", "A sample application demonstrating Flutter APIs." "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "flutter_api_samples" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2021 dev.flutter. All rights reserved." "\0"
+            VALUE "InternalName", "Flutter API Sample" "\0"
+            VALUE "LegalCopyright", "Copyright 2014 The Flutter Authors. All rights reserved." "\0"
             VALUE "OriginalFilename", "flutter_api_samples.exe" "\0"
-            VALUE "ProductName", "flutter_api_samples" "\0"
+            VALUE "ProductName", "Flutter API Sample" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

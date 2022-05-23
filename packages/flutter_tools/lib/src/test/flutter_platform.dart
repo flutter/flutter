@@ -388,7 +388,7 @@ class FlutterPlatform extends PlatformPlugin {
     bool isStatic,
   ) async {
     if (compiler == null || compiler.compiler == null) {
-      throw 'Compiler is not set up properly to compile $expression';
+      throw Exception('Compiler is not set up properly to compile $expression');
     }
     final CompilerOutput compilerOutput =
       await compiler.compiler.compileExpression(expression, definitions,
@@ -396,7 +396,7 @@ class FlutterPlatform extends PlatformPlugin {
     if (compilerOutput != null && compilerOutput.expressionData != null) {
       return base64.encode(compilerOutput.expressionData);
     }
-    throw 'Failed to compile $expression';
+    throw Exception('Failed to compile $expression');
   }
 
   TestDevice _createTestDevice(int ourTestCount) {

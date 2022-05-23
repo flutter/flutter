@@ -266,7 +266,7 @@ class MultidexProject extends Project {
     <!-- Theme applied to the Android Window while the process is starting -->
     <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <!-- Show a splash screen on the activity. Automatically removed when
-             Flutter draws its first frame -->
+             the Flutter engine draws its first frame -->
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.
@@ -298,18 +298,23 @@ class MultidexProject extends Project {
 
   String get appMultidexApplication => r'''
   // Generated file.
+  //
   // If you wish to remove Flutter's multidex support, delete this entire file.
+  //
+  // Modifications to this file should be done in a copy under a different name
+  // as this file may be regenerated.
 
   package io.flutter.app;
 
+  import android.app.Application;
   import android.content.Context;
   import androidx.annotation.CallSuper;
   import androidx.multidex.MultiDex;
 
   /**
-   * Extension of {@link io.flutter.app.FlutterApplication}, adding multidex support.
+   * Extension of {@link android.app.Application}, adding multidex support.
    */
-  public class FlutterMultiDexApplication extends FlutterApplication {
+  public class FlutterMultiDexApplication extends Application {
     @Override
     @CallSuper
     protected void attachBaseContext(Context base) {

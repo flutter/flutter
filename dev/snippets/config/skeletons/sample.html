@@ -8,35 +8,18 @@
     <i class="material-icons copy-image">link</i>
   </a>
 </div>
-<div class="snippet-buttons">
-  <script>var visibleSnippet{{serial}} = "shortSnippet{{serial}}";</script>
-  <button id="shortSnippet{{serial}}Button"
-          onclick="visibleSnippet{{serial}} = showSnippet('shortSnippet{{serial}}', visibleSnippet{{serial}});"
-          selected>Sample</button>
-  <button id="longSnippet{{serial}}Button"
-          onclick="visibleSnippet{{serial}} = showSnippet('longSnippet{{serial}}', visibleSnippet{{serial}});">Sample in an App</button>
-</div>
 <div class="snippet-container">
-  <div class="snippet" id="shortSnippet{{serial}}">
+  <div class="snippet">
     {{description}}
-    <div class="copyable-container">
-      <button class="copy-button-overlay copy-button" title="Copy to clipboard"
-              onclick="copyTextToClipboard(visibleSnippet{{serial}});">
-        <i class="material-icons copy-image">assignment</i>
-      </button>
-      <pre class="language-{{language}}"><code class="language-{{language}}">{{code}}</code></pre>
-    </div>
-  </div>
-  <div class="snippet" id="longSnippet{{serial}}" hidden>
     <div class="snippet-description">To create a local project with this code sample, run:<br/>
       <span class="snippet-create-command">flutter create --sample={{id}} mysample</span>
     </div>
     <div class="copyable-container">
       <button class="copy-button-overlay copy-button" title="Copy to clipboard"
-              onclick="copyTextToClipboard(visibleSnippet{{serial}});">
+              onclick="copyTextToClipboard(longSnippet{{serial}});">
         <i class="material-icons copy-image">assignment</i>
       </button>
-      <pre class="language-{{language}}"><code class="language-{{language}}">{{app}}</code></pre>
+      <pre id="longSnippet{{serial}}" class="language-{{language}}"><code class="language-{{language}}">{{app}}</code></pre>
     </div>
   </div>
 </div>

@@ -120,7 +120,7 @@ class TimeOfDay {
   }
 
   @override
-  int get hashCode => hashValues(hour, minute);
+  int get hashCode => Object.hash(hour, minute);
 
   @override
   String toString() {

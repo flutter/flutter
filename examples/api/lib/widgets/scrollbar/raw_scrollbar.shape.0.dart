@@ -33,7 +33,7 @@ class MyStatelessWidget extends StatelessWidget {
             side: BorderSide(color: Colors.brown, width: 3.0)),
         thickness: 15.0,
         thumbColor: Colors.blue,
-        isAlwaysShown: true,
+        thumbVisibility: true,
         child: ListView(
           physics: const BouncingScrollPhysics(),
           children: List<Text>.generate(

@@ -63,6 +63,31 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
+  testWidgets('NavigationBar can update elevation', (WidgetTester tester) async {
+    const double elevation = 42.0;
+
+    await tester.pumpWidget(
+      _buildWidget(
+        NavigationBar(
+          elevation: elevation,
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.ac_unit),
+              label: 'AC',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+      ),
+    );
+
+    expect(_getMaterial(tester).elevation, equals(elevation));
+  });
+
   testWidgets('NavigationBar adds bottom padding to height', (WidgetTester tester) async {
     const double bottomPadding = 40.0;
 
@@ -110,6 +135,61 @@ void main() {
 
     final double expectedHeight = defaultSize + bottomPadding;
     expect(tester.getSize(find.byType(NavigationBar)).height, expectedHeight);
+  });
+
+  testWidgets('NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
+    // Pre-M3 settings that were hand coded.
+    await tester.pumpWidget(
+      _buildWidget(
+        NavigationBar(
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.ac_unit),
+              label: 'AC',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+      ),
+    );
+
+    expect(_getMaterial(tester).color, const Color(0xffeaeaea));
+    expect(_getMaterial(tester).elevation, 0);
+    expect(tester.getSize(find.byType(NavigationBar)).height, 80);
+    expect(_indicator(tester)?.color, const Color(0x3d2196f3));
+    expect(_indicator(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
+
+    // M3 settings from the token database.
+    await tester.pumpWidget(
+      _buildWidget(
+        Theme(
+          data: ThemeData.light().copyWith(useMaterial3: true),
+          child: NavigationBar(
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+            onDestinationSelected: (int i) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(_getMaterial(tester).color, const Color(0xffecf6fe));
+    expect(_getMaterial(tester).elevation, 3);
+    expect(tester.getSize(find.byType(NavigationBar)).height, 80);
+    expect(_indicator(tester)?.color, const Color(0xff2196f3));
+    expect(_indicator(tester)?.shape, const StadiumBorder());
   });
 
   testWidgets('NavigationBar shows tooltips with text scaling ', (WidgetTester tester) async {
@@ -341,14 +421,14 @@ void main() {
   });
 
   testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
-    const int _animationMilliseconds = 800;
+    const int animationMilliseconds = 800;
 
     Widget _widget({double textScaleFactor = 1}) {
       return _buildWidget(
         MediaQuery(
           data: MediaQueryData(textScaleFactor: textScaleFactor),
           child: NavigationBar(
-            animationDuration: const Duration(milliseconds: _animationMilliseconds),
+            animationDuration: const Duration(milliseconds: animationMilliseconds),
             destinations: const <NavigationDestination>[
               NavigationDestination(
                 icon: Icon(Icons.ac_unit),
@@ -389,4 +469,13 @@ Material _getMaterial(WidgetTester tester) {
   return tester.firstWidget<Material>(
     find.descendant(of: find.byType(NavigationBar), matching: find.byType(Material)),
   );
+}
+
+ShapeDecoration? _indicator(WidgetTester tester) {
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ),
+  ).decoration as ShapeDecoration?;
 }

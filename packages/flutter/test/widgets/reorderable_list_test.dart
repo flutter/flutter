@@ -7,6 +7,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('SliverReorderableList.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverReorderableList(
+                  itemCount: itemCount,
+                  itemBuilder: (BuildContext _, int index) => Container(
+                    key: Key('$index'),
+                    height: 2000.0,
+                  ),
+                  findChildIndexCallback: (Key key) {
+                    finderCalled = true;
+                    return null;
+                  },
+                  onReorder: (int oldIndex, int newIndex) { },
+                ),
+              ],
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/88191
   testWidgets('Do not crash when dragging with two fingers simultaneously', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(3, (int index) => index);
@@ -467,6 +507,130 @@ void main() {
     expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 500));
   });
 
+  testWidgets('SliverReorderableList calls onReorderStart and onReorderEnd correctly', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(8, (int index) => index);
+    int? startIndex, endIndex;
+    final Finder item0 = find.textContaining('item 0');
+
+    await tester.pumpWidget(TestList(
+      items: items,
+      onReorderStart: (int index) {
+        startIndex = index;
+      },
+      onReorderEnd: (int index) {
+        endIndex = index;
+      },
+    ));
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(0));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 0 to index 3
+    await drag.moveBy(const Offset(0, 300));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(3));
+
+    startIndex = null;
+    endIndex = null;
+
+    drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(2));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 2 to index 0
+    await drag.moveBy(const Offset(0, -200));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(0));
+  });
+
+  testWidgets('ReorderableList calls onReorderStart and onReorderEnd correctly', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(8, (int index) => index);
+    int? startIndex, endIndex;
+    final Finder item0 = find.textContaining('item 0');
+
+    void handleReorder(int fromIndex, int toIndex) {
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: ReorderableList(
+        itemCount: items.length,
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            key: ValueKey<int>(items[index]),
+            height: 100,
+            child: ReorderableDelayedDragStartListener(
+              index: index,
+              child: Text('item ${items[index]}'),
+            ),
+          );
+        },
+        onReorder: handleReorder,
+        onReorderStart: (int index) {
+          startIndex = index;
+        },
+        onReorderEnd: (int index) {
+          endIndex = index;
+        },
+      ),
+    ));
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kLongPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(0));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 0 to index 3
+    await drag.moveBy(const Offset(0, 300));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(3));
+
+    startIndex = null;
+    endIndex = null;
+
+    drag = await tester.startGesture(tester.getCenter(item0));
+    await tester.pump(kLongPressTimeout);
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 20));
+
+    expect(startIndex, equals(2));
+    expect(endIndex, isNull);
+
+    // Move item0 from index 2 to index 0
+    await drag.moveBy(const Offset(0, -200));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(endIndex, equals(0));
+  });
+
+
+
   testWidgets('ReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
     expect(() => ReorderableList(
@@ -794,6 +958,8 @@ class TestList extends StatefulWidget {
     this.proxyDecorator,
     required this.items,
     this.reverse = false,
+    this.onReorderStart,
+    this.onReorderEnd,
   }) : super(key: key);
 
   final List<int> items;
@@ -801,6 +967,7 @@ class TestList extends StatefulWidget {
   final Color? iconColor;
   final ReorderItemProxyDecorator? proxyDecorator;
   final bool reverse;
+  final void Function(int)? onReorderStart, onReorderEnd;
 
   @override
   State<TestList> createState() => _TestListState();
@@ -849,6 +1016,8 @@ class _TestListState extends State<TestList> {
                         });
                       },
                       proxyDecorator: widget.proxyDecorator,
+                      onReorderStart: widget.onReorderStart,
+                      onReorderEnd: widget.onReorderEnd,
                     ),
                   ],
                 );
