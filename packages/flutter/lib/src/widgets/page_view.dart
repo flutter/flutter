@@ -463,6 +463,20 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    assert(_cachedPage == null);
+
+    if (other is! _PagePosition) {
+      return;
+    }
+
+    if (other._cachedPage != null) {
+      _cachedPage = other._cachedPage;
+    }
+  }
+
+  @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     final double newMinScrollExtent = minScrollExtent + _initialPageOffset;
     return super.applyContentDimensions(
