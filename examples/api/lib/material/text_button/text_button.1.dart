@@ -4,6 +4,10 @@
 
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(const MaterialApp(home: Home()));
+}
+
 class SelectableButton extends StatefulWidget {
   const SelectableButton({
     super.key,
@@ -95,8 +99,4 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(const MaterialApp(home: Home()));
 }

@@ -766,7 +766,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: simulateTap),
     ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: simulateTap),
   };
-  late final MaterialStatesController statesController;
+  MaterialStatesController? internalStatesController;
 
   bool get highlightsExist => _highlights.values.where((InkHighlight? highlight) => highlight != null).isNotEmpty;
 
@@ -803,8 +803,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     setState(() { });
   }
 
+  MaterialStatesController get statesController => widget.statesController ?? internalStatesController!;
+
   void initStatesController() {
-    statesController = widget.statesController ?? MaterialStatesController();
+    if (widget.statesController == null) {
+      internalStatesController = MaterialStatesController();
+    }
     statesController.update(MaterialState.disabled, !enabled);
     statesController.addListener(handleStatesControllerChange);
   }
@@ -821,6 +825,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     super.didUpdateWidget(oldWidget);
     if (widget.statesController != oldWidget.statesController) {
       oldWidget.statesController?.removeListener(handleStatesControllerChange);
+      if (widget.statesController != null) {
+        internalStatesController?.dispose();
+        internalStatesController = null;
+      }
       initStatesController();
     }
     if (enabled != isWidgetEnabled(oldWidget)) {

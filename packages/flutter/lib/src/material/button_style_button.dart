@@ -198,15 +198,19 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   AnimationController? controller;
   double? elevation;
   Color? backgroundColor;
-  late final MaterialStatesController statesController;
+  MaterialStatesController? internalStatesController;
 
   void handleStatesControllerChange() {
     // Force a rebuild to resolve MaterialStateProperty properties
     setState(() { });
   }
 
+  MaterialStatesController get statesController => widget.statesController ?? internalStatesController!;
+
   void initStatesController() {
-    statesController = widget.statesController ?? MaterialStatesController();
+    if (widget.statesController == null) {
+      internalStatesController = MaterialStatesController();
+    }
     statesController.update(MaterialState.disabled, !widget.enabled);
     statesController.addListener(handleStatesControllerChange);
   }
@@ -218,17 +222,14 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   }
 
   @override
-  void dispose() {
-    statesController.removeListener(handleStatesControllerChange);
-    controller?.dispose();
-    super.dispose();
-  }
-
-  @override
   void didUpdateWidget(ButtonStyleButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.statesController != oldWidget.statesController) {
       oldWidget.statesController?.removeListener(handleStatesControllerChange);
+      if (widget.statesController != null) {
+        internalStatesController?.dispose();
+        internalStatesController = null;
+      }
       initStatesController();
     }
     if (widget.enabled != oldWidget.enabled) {
@@ -238,6 +239,14 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         statesController.update(MaterialState.pressed, false);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    statesController.removeListener(handleStatesControllerChange);
+    internalStatesController?.dispose();
+    controller?.dispose();
+    super.dispose();
   }
 
   @override
