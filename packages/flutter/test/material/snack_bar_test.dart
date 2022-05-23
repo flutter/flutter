@@ -8,6 +8,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1786,7 +1787,7 @@ void main() {
     expect(find.text(snackBarText), findsOneWidget);
     expect(find.text(firstHeader), findsNothing);
     expect(find.text(secondHeader), findsOneWidget);
-  });
+  }, variant: TargetPlatformVariant.mobile(), skip: kIsWeb); // [intended] Transitions are disabled on web
 
   testWidgets('SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
