@@ -189,6 +189,16 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
                                         double scroll_delta_y,
                                         int64_t buttons);
 
+void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
+                                           size_t timestamp,
+                                           double x,
+                                           double y,
+                                           FlutterPointerPhase phase,
+                                           double pan_x,
+                                           double pan_y,
+                                           double scale,
+                                           double rotation);
+
 /**
  * fl_engine_send_key_event:
  */

@@ -2210,6 +2210,11 @@ FILE: ../../../flutter/shell/platform/linux/fl_renderer_gl.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer_gl.h
 FILE: ../../../flutter/shell/platform/linux/fl_renderer_headless.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer_headless.h
+FILE: ../../../flutter/shell/platform/linux/fl_scrolling_manager.cc
+FILE: ../../../flutter/shell/platform/linux/fl_scrolling_manager.h
+FILE: ../../../flutter/shell/platform/linux/fl_scrolling_manager_test.cc
+FILE: ../../../flutter/shell/platform/linux/fl_scrolling_view_delegate.cc
+FILE: ../../../flutter/shell/platform/linux/fl_scrolling_view_delegate.h
 FILE: ../../../flutter/shell/platform/linux/fl_settings.cc
 FILE: ../../../flutter/shell/platform/linux/fl_settings.h
 FILE: ../../../flutter/shell/platform/linux/fl_settings_plugin.cc
