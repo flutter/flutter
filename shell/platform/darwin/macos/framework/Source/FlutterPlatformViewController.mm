@@ -39,8 +39,16 @@
   if (!factory) {
     result([FlutterError
         errorWithCode:@"unregistered_view_type"
-              message:@"trying to create a view with an unregistered type"
-              details:[NSString stringWithFormat:@"unregistered view type: '%@'", viewType]]);
+              message:[NSString stringWithFormat:@"A UIKitView widget is trying to create a "
+                                                 @"PlatformView with an unregistered type: < %@ >",
+                                                 viewType]
+              details:@"If you are the author of the PlatformView, make sure `registerViewFactory` "
+                      @"is invoked.\n"
+                      @"See: "
+                      @"https://docs.flutter.dev/development/platform-integration/"
+                      @"platform-views#on-the-platform-side-1 for more details.\n"
+                      @"If you are not the author of the PlatformView, make sure to call "
+                      @"`GeneratedPluginRegistrant.register`."]);
     return;
   }
 

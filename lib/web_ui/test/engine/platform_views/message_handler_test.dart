@@ -46,7 +46,8 @@ void testMain() {
             codec.decodeEnvelope(response!);
           } on PlatformException catch (e) {
             expect(e.code, 'unregistered_view_type');
-            expect(e.details, contains(viewType));
+            expect(e.message, contains(viewType));
+            expect(e.details, contains('registerViewFactory'));
           }
         });
 

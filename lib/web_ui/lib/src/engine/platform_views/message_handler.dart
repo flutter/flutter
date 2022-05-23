@@ -73,8 +73,10 @@ class PlatformViewMessageHandler {
     if (!_contentManager.knowsViewType(viewType)) {
       callback(_codec.encodeErrorEnvelope(
         code: 'unregistered_view_type',
-        message: 'trying to create a view with an unregistered type',
-        details: 'unregistered view type: $viewType',
+        message: 'A HtmlElementView widget is trying to create a platform view '
+            'with an unregistered type: <$viewType>.',
+        details: 'If you are the author of the PlatformView, make sure '
+            '`registerViewFactory` is invoked.',
       ));
       return;
     }
