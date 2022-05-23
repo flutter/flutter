@@ -159,7 +159,7 @@ deps = {
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '1fd0dbea04448c3f73fe5cb7599f9472f0f107f1',
 
   'src/third_party/khronos':
-   Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' + '7122230e90547962e0f0c627f62eeed3c701f275',
+   Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' + '676d544d2b8f48903b7da9fceffaa534a5613978',
 
   'src/third_party/benchmark':
    Var('github_git') + '/google/benchmark' + '@' + '431abd149fd76a072f821913c0340137cc755f36',
