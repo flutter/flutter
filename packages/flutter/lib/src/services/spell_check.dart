@@ -1,46 +1,75 @@
-/// A data structure representing the spell check results for a misspelled range
-/// of text. For example, one [SpellCheckSuggestionSpan] of the spell check
-/// results for "Hello, wrold!" may be
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+/// A data structure representing a range of misspelled text and the suggested
+/// replacements for this range. For example, one [SuggestionSpan] of the
+/// [List<SuggestionSpan> suggestions] of the [SpellCheckResults] corresponding
+/// to "Hello, wrold!" may be:
 /// ```dart
-/// SpellCheckSuggestionSpan(7, 11, List<String>.from["word, world, old"])
+/// SuggestionSpan(7, 11, List<String>.from["word, world, old"])
 /// ```
-class SpellCheckSuggestionSpan {
-  SpellCheckSuggestionSpan(
-      this.startIndex, this.endIndex, this.replacementSuggestions) {
-    assert(startIndex != null);
-    assert(endIndex != null);
-    assert(replacementSuggestions != null);
-  }
+@immutable
+class SuggestionSpan {
+  const SuggestionSpan(this.startIndex, this.endIndex, this.suggestions)
+      : assert(startIndex != null),
+        assert(endIndex != null),
+        assert(suggestions != null);
 
-  late final int startIndex;
+  final int startIndex;
 
-  late final int endIndex;
+  final int endIndex;
 
   /// The alternate suggestions for mispelled range of text.
   ///
   /// The maximum length of this list depends on the spell checker used. If
   /// [DefaultSpellCheckService] is used, the maximum length of this list will be
   /// 5 on Android platforms and there will be no maximum length on iOS platforms.
-  late final List<String> replacementSuggestions;
+  final List<String> suggestions;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is SpellCheckSuggestionSpan &&
-        other.start == start &&
-        other.end == end &&
-        listEquals<String>(
-            other.replacementSuggestions, replacementSuggestions);
+    return other is SuggestionSpan &&
+        other.startIndex == startIndex &&
+        other.endIndex == endIndex &&
+        listEquals<String>(other.suggestions, suggestions);
   }
 
   @override
-  int get hashCode => Object.hash(start, end, hashList(replacementSuggestions));
+  int get hashCode => Object.hash(startIndex, endIndex, hashList(suggestions));
+}
+
+/// A data structure grouping the [SuggestionSpan]s and related text of a
+/// result returned by the active spell checker.
+///
+/// See also:
+///
+///  * [SuggestionSpan], the ranges of mispelled text and corresponding replacement
+///    suggestions.
+@immutable
+class SpellCheckResults {
+  const SpellCheckResults(this.spellCheckedText, this.suggestionSpans);
+
+  final String spellCheckedText;
+
+  final List<SuggestionSpan> suggestionSpans;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SpellCheckResults &&
+        other.spellCheckedText == spellCheckedText &&
+        listEquals<SuggestionSpan>(other.suggestionSpans, suggestionSpans);
+  }
+
+  @override
+  int get hashCode => Object.hash(spellCheckedText, hashList(suggestionSpans));
 }
 
 /// Controls how spell check is performed for text input.
 ///
 /// The spell check configuration determines the [SpellCheckService] used to
-/// fetch spell check results of type [List<SpellCheckSuggestionSpan>] and the
+/// fetch spell check results of type [List<SuggestionSpan>] and the
 /// [SpellCheckSuggestionsHandler] used to mark and display replacement
 /// suggestions for mispelled words within text input.
 class SpellCheckConfiguration {
@@ -53,14 +82,11 @@ class SpellCheckConfiguration {
 
   /// The most up-to-date spell check results for text input.
   ///
-  /// These [SpellCheckSuggestionSpan]s will be updated by the
-  /// [spellCheckService] and used by the [spellCheckSuggestionsHandler] to
+  /// These results will be updated by the
+  /// [SpellCheckService] and used by the [SpellCheckSuggestionsHandler] to
   /// build the [TextSpan] tree for text input and menus for replacement
   /// suggestions of mispelled words.
-  List<SpellCheckSuggestionSpan>? spellCheckResults;
-
-  /// The text that corresponds to the [spellCheckResults].
-  String? spellCheckResultsText;
+  SpellCheckResults? spellCheckResults;
 
   /// Configuration that indicates that spell check should not be run on text
   /// input and/or spell check is not implemented on the respective platform.
@@ -76,7 +102,8 @@ class SpellCheckConfiguration {
 ///    but no [SpellCheckService] implementation is provided.
 abstract class SpellCheckService {
   /// Initiates and receives results for a spell check request.
-  Future<List<dynamic>> fetchSpellCheckSuggestions(Locale locale, String text);
+  Future<SpellCheckResults?> fetchSpellCheckSuggestions(
+      Locale locale, String text);
 }
 
 /// Determines how mispelled words are indicated in text input and how
@@ -99,6 +126,5 @@ abstract class SpellCheckSuggestionsHandler {
       TextEditingValue value,
       bool composingWithinCurrentTextRange,
       TextStyle? style,
-      List<SpellCheckSuggestionSpan>? spellCheckResults,
-      String? spellCheckResultsText);
+      SpellCheckResults spellCheckResults);
 }
