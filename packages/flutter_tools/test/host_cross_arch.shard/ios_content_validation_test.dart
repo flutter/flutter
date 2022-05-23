@@ -43,6 +43,17 @@ void main() {
         ),
       );
 
+      // Pre-cache iOS engine Flutter.xcframework artifacts.
+      processManager.runSync(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'precache',
+        '--ios',
+      ], workingDirectory: tempDir.path);
+
+      // Pretend the SDK was on an external drive with stray "._" files in the xcframework
+      hiddenFile = xcframeworkArtifact.childFile('._Info.plist')..createSync();
+
       // Test a plugin example app to allow plugins validation.
       processManager.runSync(<String>[
         flutterBin,
@@ -57,9 +68,6 @@ void main() {
 
       pluginRoot = tempDir.childDirectory('hello');
       projectRoot = pluginRoot.childDirectory('example').path;
-
-      // Pretend the SDK was on an external drive with stray "._" files in the xcframework
-      hiddenFile = xcframeworkArtifact.childFile('._Info.plist')..createSync();
     });
 
     tearDownAll(() {
