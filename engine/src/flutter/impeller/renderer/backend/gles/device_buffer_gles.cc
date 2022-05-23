@@ -4,6 +4,9 @@
 
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 
+#include <cstring>
+#include <memory>
+
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation.h"
 #include "impeller/base/config.h"
@@ -12,12 +15,14 @@
 namespace impeller {
 
 DeviceBufferGLES::DeviceBufferGLES(ReactorGLES::Ref reactor,
+                                   std::shared_ptr<Allocation> backing_store,
                                    size_t size,
                                    StorageMode mode)
     : DeviceBuffer(size, mode),
       reactor_(std::move(reactor)),
       handle_(reactor_ ? reactor_->CreateHandle(HandleType::kBuffer)
-                       : HandleGLES::DeadHandle()) {}
+                       : HandleGLES::DeadHandle()),
+      backing_store_(std::move(backing_store)) {}
 
 // |DeviceBuffer|
 DeviceBufferGLES::~DeviceBufferGLES() {
@@ -35,21 +40,23 @@ bool DeviceBufferGLES::CopyHostBuffer(const uint8_t* source,
     return false;
   }
 
+  if (!reactor_) {
+    return false;
+  }
+
   if (offset + source_range.length > size_) {
     // Out of bounds of this buffer.
     return false;
   }
 
-  if (!reactor_) {
+  if (offset + source_range.length > backing_store_->GetLength()) {
     return false;
   }
 
-  auto mapping =
-      CreateMappingWithCopy(source + source_range.offset, source_range.length);
-  if (!mapping) {
-    return false;
-  }
-  data_ = std::move(mapping);
+  std::memmove(backing_store_->GetBuffer() + offset,
+               source + source_range.offset, source_range.length);
+  ++generation_;
+
   return true;
 }
 
@@ -78,11 +85,12 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
 
   gl.BindBuffer(target_type, buffer.value());
 
-  if (!uploaded_) {
+  if (upload_generation_ != generation_) {
     TRACE_EVENT0("impeller", "BufferData");
-    gl.BufferData(target_type, data_->GetSize(), data_->GetMapping(),
-                  GL_STATIC_DRAW);
-    uploaded_ = true;
+    gl.BufferData(target_type, backing_store_->GetLength(),
+                  backing_store_->GetBuffer(), GL_STATIC_DRAW);
+    upload_generation_ = generation_;
+
     reactor_->SetDebugLabel(handle_, label_);
   }
 
@@ -92,7 +100,7 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
 // |DeviceBuffer|
 bool DeviceBufferGLES::SetLabel(const std::string& label) {
   label_ = label;
-  if (uploaded_) {
+  if (upload_generation_ > 0) {
     reactor_->SetDebugLabel(handle_, label_);
   }
   return true;
@@ -105,7 +113,7 @@ bool DeviceBufferGLES::SetLabel(const std::string& label, Range range) {
   return SetLabel(label);
 }
 
-std::shared_ptr<fml::Mapping> DeviceBufferGLES::GetBufferData() const {
-  return data_;
+const uint8_t* DeviceBufferGLES::GetBufferData() const {
+  return backing_store_->GetBuffer();
 }
 }  // namespace impeller
