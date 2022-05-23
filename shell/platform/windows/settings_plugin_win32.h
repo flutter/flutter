@@ -39,11 +39,13 @@ class SettingsPluginWin32 : public SettingsPlugin {
 
  private:
   void WatchPreferredBrightnessChanged();
+  void WatchTextScaleFactorChanged();
 
-  HKEY preferred_brightness_reg_hkey_ = NULL;
+  HKEY preferred_brightness_reg_hkey_ = nullptr;
+  HKEY text_scale_factor_reg_hkey_ = nullptr;
 
-  std::unique_ptr<EventWatcherWin32> preferred_brightness_changed_watcher_{
-      nullptr};
+  std::unique_ptr<EventWatcherWin32> preferred_brightness_changed_watcher_;
+  std::unique_ptr<EventWatcherWin32> text_scale_factor_changed_watcher_;
 
   SettingsPluginWin32(const SettingsPluginWin32&) = delete;
   SettingsPluginWin32& operator=(const SettingsPluginWin32&) = delete;
