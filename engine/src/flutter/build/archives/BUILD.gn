@@ -104,15 +104,10 @@ zip_bundle("flutter_patched_sdk") {
 # Flutter consumes the dart sdk as a prebuilt. Rather than regenerating
 # the zip file we are just copying the original file to the artifacts location.
 if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
-  zip_bundle("dart_sdk_archive") {
-    deps = []
-    output = "dart-sdk-$full_target_platform_name.zip"
-    files = [
-      {
-        source = prebuilt_dart_sdk
-        destination = "dart-sdk"
-      },
-    ]
+  copy("dart_sdk_archive") {
+    sources = [ prebuilt_dart_sdk_archive ]
+    outputs =
+        [ "$root_out_dir/zip_archives/dart-sdk-$full_target_platform_name.zip" ]
   }
 }
 
