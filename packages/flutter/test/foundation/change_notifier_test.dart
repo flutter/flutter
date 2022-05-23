@@ -48,6 +48,54 @@ class Counter with ChangeNotifier {
   }
 }
 
+/// Minimal implementation of the [ChangeNotifier] interface
+class _CustomChangeNotifier implements ChangeNotifier {
+  final List<VoidCallback> listeners = <VoidCallback>[];
+
+  @override
+  void addListener(VoidCallback listener) {
+    listeners.add(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    listeners.remove(listener);
+  }
+
+  @override
+  void dispose() {
+    listeners.clear();
+  }
+
+  @override
+  bool get hasListeners => listeners.isNotEmpty;
+
+  @override
+  void notifyListeners() {
+    final List<void Function()> copy = listeners.reversed.toList();
+    for (final void Function() listener in copy) {
+      listener();
+    }
+  }
+}
+
+/// Counter example but only using the ChangeNotifier interface not the actual
+/// implementation
+class _CustomCounter with _CustomChangeNotifier {
+  int get value => _value;
+  int _value = 0;
+  set value(int value) {
+    if (_value != value) {
+      _value = value;
+      notifyListeners();
+    }
+  }
+
+  void notify() {
+    notifyListeners();
+  }
+}
+
 void main() {
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -450,6 +498,20 @@ void main() {
     expect(notifications, 0);
     b.test();
     expect(b.result, isTrue);
+    expect(notifications, 1);
+  });
+
+  test('implementing ChangeNotifier', () {
+    // We document that this is a valid way to use this class.
+    final _CustomCounter counter = _CustomCounter();
+    int notifications = 0;
+    counter.addListener(() {
+      notifications += 1;
+    });
+    expect(counter.value, 0);
+
+    counter.value = 4;
+    expect(counter.value, 4);
     expect(notifications, 1);
   });
 
