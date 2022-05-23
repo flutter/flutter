@@ -4,7 +4,10 @@
 
 #pragma once
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
+#include "impeller/base/allocation.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/device_buffer.h"
@@ -15,12 +18,15 @@ class DeviceBufferGLES final
     : public DeviceBuffer,
       public BackendCast<DeviceBufferGLES, DeviceBuffer> {
  public:
-  DeviceBufferGLES(ReactorGLES::Ref reactor, size_t size, StorageMode mode);
+  DeviceBufferGLES(ReactorGLES::Ref reactor,
+                   std::shared_ptr<Allocation> buffer,
+                   size_t size,
+                   StorageMode mode);
 
   // |DeviceBuffer|
   ~DeviceBufferGLES() override;
 
-  std::shared_ptr<fml::Mapping> GetBufferData() const;
+  const uint8_t* GetBufferData() const;
 
   enum class BindingType {
     kArrayBuffer,
@@ -33,8 +39,9 @@ class DeviceBufferGLES final
   ReactorGLES::Ref reactor_;
   HandleGLES handle_;
   std::string label_;
-  mutable std::shared_ptr<fml::Mapping> data_;
-  mutable bool uploaded_ = false;
+  mutable std::shared_ptr<Allocation> backing_store_;
+  mutable uint32_t generation_ = 0;
+  mutable uint32_t upload_generation_ = 0;
 
   // |DeviceBuffer|
   bool CopyHostBuffer(const uint8_t* source,
