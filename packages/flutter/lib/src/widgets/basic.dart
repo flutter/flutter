@@ -6936,7 +6936,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..explicitChildNodes = explicitChildNodes
       ..excludeSemantics = excludeSemantics
-      ..updateProperties(properties)
+      ..properties = properties
       ..textDirection = _getTextDirection(context);
   }
 

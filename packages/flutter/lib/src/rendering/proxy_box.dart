@@ -3947,7 +3947,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// The [container] argument must not be null.
   ///
-  /// If the [attributedLabel] is not null, the [textDirection] must also not be null.
+  /// If the [properties.attributedLabel] is not null, the [textDirection] must also not be null.
   RenderSemanticsAnnotations({
     RenderBox? child,
     required SemanticsProperties properties,
@@ -3965,9 +3965,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     _updateAttributedFields(_properties);
   }
 
+  /// All of the [SemanticsProperties] for this [RenderSemanticsAnnotations].
+  SemanticsProperties get properties => _properties;
   SemanticsProperties _properties;
-  /// Sets the [SemanticsProperties] en masse.
-  void updateProperties(SemanticsProperties value) {
+  set properties(SemanticsProperties value) {
     assert(value != null);
     if (_properties == value)
       return;
@@ -4032,43 +4033,43 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  void _updateAttributedFields(SemanticsProperties properties) {
-    _attributedLabel = _effectiveAttributedLabel(properties);
-    _attributedValue = _effectiveAttributedValue(properties);
-    _attributedIncreasedValue = _effectiveAttributedIncreasedValue(properties);
-    _attributedDecreasedValue = _effectiveAttributedDecreasedValue(properties);
-    _attributedHint = _effectiveAttributedHint(properties);
+  void _updateAttributedFields(SemanticsProperties value) {
+    _attributedLabel = _effectiveAttributedLabel(value);
+    _attributedValue = _effectiveAttributedValue(value);
+    _attributedIncreasedValue = _effectiveAttributedIncreasedValue(value);
+    _attributedDecreasedValue = _effectiveAttributedDecreasedValue(value);
+    _attributedHint = _effectiveAttributedHint(value);
   }
 
-  AttributedString? _effectiveAttributedLabel(SemanticsProperties properties) {
-    return properties.attributedLabel ??
-        (properties.label == null ? null : AttributedString(properties.label!));
+  AttributedString? _effectiveAttributedLabel(SemanticsProperties value) {
+    return value.attributedLabel ??
+        (value.label == null ? null : AttributedString(value.label!));
   }
 
-  AttributedString? _effectiveAttributedValue(SemanticsProperties properties) {
-    return properties.attributedValue ??
-        (properties.value == null ? null : AttributedString(properties.value!));
+  AttributedString? _effectiveAttributedValue(SemanticsProperties value) {
+    return value.attributedValue ??
+        (value.value == null ? null : AttributedString(value.value!));
   }
 
   AttributedString? _effectiveAttributedIncreasedValue(
-      SemanticsProperties properties) {
-    return properties.attributedIncreasedValue ??
-        (properties.increasedValue == null
+      SemanticsProperties value) {
+    return value.attributedIncreasedValue ??
+        (value.increasedValue == null
             ? null
-            : AttributedString(properties.increasedValue!));
+            : AttributedString(value.increasedValue!));
   }
 
   AttributedString? _effectiveAttributedDecreasedValue(
-      SemanticsProperties properties) {
+      SemanticsProperties value) {
     return properties.attributedDecreasedValue ??
-        (properties.decreasedValue == null
+        (value.decreasedValue == null
             ? null
-            : AttributedString(properties.decreasedValue!));
+            : AttributedString(value.decreasedValue!));
   }
 
-  AttributedString? _effectiveAttributedHint(SemanticsProperties properties) {
-    return properties.attributedHint ??
-        (properties.hint == null ? null : AttributedString(properties.hint!));
+  AttributedString? _effectiveAttributedHint(SemanticsProperties value) {
+    return value.attributedHint ??
+        (value.hint == null ? null : AttributedString(value.hint!));
   }
 
   AttributedString? _attributedLabel;
@@ -4080,9 +4081,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given
   /// value.
   ///
-  /// This must not be null if [attributedLabel], [attributedHint],
-  /// [attributedValue], [attributedIncreasedValue], or
-  /// [attributedDecreasedValue] are not null.
+  /// This must not be null if [properties.attributedLabel],
+  /// [properties.attributedHint], [properties.attributedValue],
+  /// [properties.attributedIncreasedValue], or
+  /// [properties.attributedDecreasedValue] are not null.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
   set textDirection(TextDirection? value) {
