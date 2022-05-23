@@ -4,7 +4,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
+import 'colors.dart';
+import 'theme.dart';
 
 // Slides the page upwards and fades it in, starting from 1/4 screen
 // below the top. The transition is intended to match the default for
