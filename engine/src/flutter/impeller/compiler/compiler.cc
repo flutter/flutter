@@ -204,7 +204,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
-  // MSL Generation.
+  // SL Generation.
   spirv_cross::Parser parser(spv_result_->cbegin(),
                              spv_result_->cend() - spv_result_->cbegin());
   // The parser and compiler must be run separately because the parser contains
@@ -225,7 +225,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
       std::make_shared<std::string>(sl_compiler.GetCompiler()->compile());
 
   if (!sl_string_) {
-    COMPILER_ERROR << "Could not generate MSL from SPIRV";
+    COMPILER_ERROR << "Could not generate SL from SPIRV";
     return;
   }
 

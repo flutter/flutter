@@ -20,6 +20,9 @@ enum class SourceType {
   kUnknown,
   kVertexShader,
   kFragmentShader,
+  kTessellationControlShader,
+  kTessellationEvaluationShader,
+  kComputeShader,
 };
 
 enum class TargetPlatform {
@@ -30,6 +33,10 @@ enum class TargetPlatform {
   kOpenGLES,
   kOpenGLDesktop,
 };
+
+bool TargetPlatformIsMetal(TargetPlatform platform);
+
+bool TargetPlatformIsOpenGL(TargetPlatform platform);
 
 SourceType SourceTypeFromFileName(const std::string& file_name);
 

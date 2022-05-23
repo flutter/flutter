@@ -565,6 +565,9 @@ FILE: ../../../flutter/impeller/fixtures/impeller.vert
 FILE: ../../../flutter/impeller/fixtures/instanced_draw.frag
 FILE: ../../../flutter/impeller/fixtures/instanced_draw.vert
 FILE: ../../../flutter/impeller/fixtures/kalimba.jpg
+FILE: ../../../flutter/impeller/fixtures/sample.comp
+FILE: ../../../flutter/impeller/fixtures/sample.tesc
+FILE: ../../../flutter/impeller/fixtures/sample.tese
 FILE: ../../../flutter/impeller/fixtures/sample.vert
 FILE: ../../../flutter/impeller/fixtures/struct_def_bug.vert
 FILE: ../../../flutter/impeller/fixtures/table_mountain_nx.png

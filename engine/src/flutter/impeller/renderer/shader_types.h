@@ -17,6 +17,9 @@ enum class ShaderStage {
   kUnknown,
   kVertex,
   kFragment,
+  kTessellationControl,
+  kTessellationEvaluation,
+  kCompute,
 };
 
 enum class ShaderType {
