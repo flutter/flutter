@@ -359,8 +359,8 @@ class InkSparkle extends InteractiveInkFeature {
   Vector4 _colorToVector4(Color color) {
     return Vector4(
         color.red / 255.0,
-        color.blue / 255.0,
         color.green / 255.0,
+        color.blue / 255.0,
         color.alpha / 255.0,
       );
   }

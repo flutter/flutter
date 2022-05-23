@@ -108,9 +108,27 @@ void main() {
   },
     skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
   );
+
+  testWidgets('InkSparkle renders with correct colors', (WidgetTester tester) async {
+    await _runTest(tester, 'colored_sparkle', 0.6, color: const Color(0xffccaa88));
+  },
+    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
+  );
+
+  testWidgets('InkSparkle renders with correct colors', (WidgetTester tester) async {
+    await _runTest(tester, 'green_sparkle', 0.2, color: const Color(0xff44cc44));
+  },
+    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
+  );
+
+  testWidgets('InkSparkle renders with correct colors', (WidgetTester tester) async {
+    await _runTest(tester, 'purple_sparkle', 0.8, color: const Color(0xffcc88ff));
+  },
+    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
+  );
 }
 
-Future<void> _runTest(WidgetTester tester, String positionName, double distanceFromTopLeft) async {
+Future<void> _runTest(WidgetTester tester, String positionName, double distanceFromTopLeft, {Color? color}) async {
   final Key repaintKey = UniqueKey();
   final Key buttonKey = UniqueKey();
 
@@ -121,7 +139,12 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
           key: repaintKey,
           child: ElevatedButton(
             key: buttonKey,
-            style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
+            style: color == null ?
+              ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory) :
+              ButtonStyle(
+                splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
+                overlayColor: MaterialStateProperty.all<Color>(color),
+              ),
             child: const Text('Sparkle!'),
             onPressed: () { },
           ),
