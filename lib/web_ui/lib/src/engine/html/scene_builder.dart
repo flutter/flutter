@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart' show kProfileApplyFrame, kProfilePrerollFrame;
+import '../dom.dart';
 import '../picture.dart';
 import '../profiler.dart';
 import '../util.dart';
@@ -563,7 +565,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
       }
       commitScene(_persistedScene);
       _lastFrameScene = _persistedScene;
-      return SurfaceScene(_persistedScene.rootElement);
+      return SurfaceScene(_persistedScene.rootElement as html.Element?);
     });
   }
 

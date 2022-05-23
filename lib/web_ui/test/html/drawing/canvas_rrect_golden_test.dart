@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -24,7 +22,7 @@ Future<void> testMain() async {
         ..transformOrigin = '0 0 0'
         ..transform = 'scale(0.3)';
     }
-    html.document.body!.append(canvas.rootElement);
+    domDocument.body!.append(canvas.rootElement);
     await matchGoldenFile(goldenFileName, region: region);
   }
 

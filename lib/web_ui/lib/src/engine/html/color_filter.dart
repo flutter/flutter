@@ -24,7 +24,7 @@ class PersistedColorFilter extends PersistedContainerSurface
       : super(oldLayer);
 
   @override
-  html.Element? get childContainer => _childContainer as html.Element?;
+  DomElement? get childContainer => _childContainer;
 
   /// The dedicated child container element that's separate from the
   /// [rootElement] is used to compensate for the coordinate system shift
@@ -93,7 +93,7 @@ class PersistedColorFilter extends PersistedContainerSurface
   void _applyBlendModeFilter(CkBlendModeColorFilter colorFilter) {
     final ui.Color filterColor = colorFilter.color;
     ui.BlendMode colorFilterBlendMode = colorFilter.blendMode;
-    final html.CssStyleDeclaration style = childContainer!.style;
+    final DomCSSStyleDeclaration style = childContainer!.style;
     switch (colorFilterBlendMode) {
       case ui.BlendMode.clear:
       case ui.BlendMode.dstOut:
@@ -144,7 +144,7 @@ class PersistedColorFilter extends PersistedContainerSurface
     if (colorFilterBlendMode == ui.BlendMode.saturation ||
         colorFilterBlendMode == ui.BlendMode.multiply ||
         colorFilterBlendMode == ui.BlendMode.modulate) {
-      style.backgroundColor = colorToCssString(filterColor);
+      style.backgroundColor = colorToCssString(filterColor)!;
     }
   }
 

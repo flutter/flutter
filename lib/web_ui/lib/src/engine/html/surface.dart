@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -315,7 +313,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   ///
   /// This element can be reused across frames. See also, [childContainer],
   /// which is the element used to manage child nodes.
-  html.Element? rootElement;
+  DomElement? rootElement;
 
   /// Whether this surface can update an existing [oldSurface].
   @mustCallSuper
@@ -328,7 +326,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// By default this is the same as the [rootElement]. However, specialized
   /// surface implementations may choose to override this and provide a
   /// different element for nesting children.
-  html.Element? get childContainer => rootElement;
+  DomElement? get childContainer => rootElement;
 
   /// This surface's immediate parent.
   PersistedContainerSurface? parent;
@@ -360,7 +358,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   @mustCallSuper
   void build() {
     if (assertionsEnabled) {
-      final html.Element? existingElement = rootElement;
+      final DomElement? existingElement = rootElement;
       if (existingElement != null) {
         throw PersistedSurfaceException(
           this,
@@ -370,7 +368,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
       }
     }
     assert(debugAssertSurfaceState(this, PersistedSurfaceState.created));
-    rootElement = createElement() as html.Element;
+    rootElement = createElement();
     assert(rootElement != null);
     applyWebkitClipFix(rootElement);
     if (debugExplainSurfaceStats) {
@@ -669,7 +667,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
     // Memoize length for efficiency.
     final int len = _children.length;
     // Memoize container element for efficiency. [childContainer] is polymorphic
-    final html.Element? containerElement = childContainer;
+    final DomElement? containerElement = childContainer;
     for (int i = 0; i < len; i++) {
       final PersistedSurface child = _children[i];
       if (child.isPendingRetention) {
@@ -774,7 +772,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
     assert(oldSurface._children.isEmpty);
 
     // Memoizing variables for efficiency.
-    final html.Element? containerElement = childContainer;
+    final DomElement? containerElement = childContainer;
     final int length = _children.length;
 
     for (int i = 0; i < length; i++) {
@@ -915,7 +913,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
     assert(_children.isNotEmpty && oldSurface._children.isNotEmpty);
 
     // Memoize container element for efficiency. [childContainer] is polymorphic
-    final html.Element? containerElement = childContainer;
+    final DomElement? containerElement = childContainer;
     final Map<PersistedSurface?, PersistedSurface> matches =
         _matchChildren(oldSurface);
 
@@ -1042,15 +1040,15 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       stationaryIndices[i] = indexMapNew![stationaryIndices[i]!];
     }
 
-    html.HtmlElement? refNode;
-    final html.Element? containerElement = childContainer;
+    DomHTMLElement? refNode;
+    final DomElement? containerElement = childContainer;
     for (int i = _children.length - 1; i >= 0; i -= 1) {
       final int indexInNew = indexMapNew!.indexOf(i);
       final bool isStationary =
           indexInNew != -1 && stationaryIndices.contains(i);
       final PersistedSurface child = _children[i];
-      final html.HtmlElement childElement =
-          child.rootElement! as html.HtmlElement;
+      final DomHTMLElement childElement =
+          child.rootElement! as DomHTMLElement;
       assert(childElement != null); // ignore: unnecessary_null_comparison
       if (!isStationary) {
         if (refNode == null) {
