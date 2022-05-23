@@ -192,8 +192,8 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
     return false;
   }
   const auto& device_buffer_gles = DeviceBufferGLES::Cast(*device_buffer);
-  const uint8_t* buffer_ptr = device_buffer_gles.GetBufferData()->GetMapping() +
-                              buffer.resource.range.offset;
+  const uint8_t* buffer_ptr =
+      device_buffer_gles.GetBufferData() + buffer.resource.range.offset;
 
   if (metadata->members.empty()) {
     VALIDATION_LOG << "Uniform buffer had no members. This is currently "
