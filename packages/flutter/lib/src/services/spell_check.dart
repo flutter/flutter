@@ -1,13 +1,9 @@
-import 'package:flutter/src/painting/text_span.dart';
-import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/src/services/platform_channel.dart';
 import 'package:flutter/src/services/system_channels.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-
-import 'text_input.dart' show TextInputConnection;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///                            START OF PR #1.1                              ///
@@ -20,23 +16,23 @@ import 'text_input.dart' show TextInputConnection;
 /// ```dart
 /// SuggestionSpan(7, 11, List<String>.from["word, world, old"])
 /// ```
+@immutable
 class SuggestionSpan {
-  SuggestionSpan(this.startIndex, this.endIndex, this.suggestions) {
-    assert(startIndex != null);
-    assert(endIndex != null);
-    assert(suggestions != null);
-  }
+  const SuggestionSpan(this.startIndex, this.endIndex, this.suggestions)
+      : assert(startIndex != null),
+        assert(endIndex != null),
+        assert(suggestions != null);
 
-  late final int startIndex;
+  final int startIndex;
 
-  late final int endIndex;
+  final int endIndex;
 
   /// The alternate suggestions for mispelled range of text.
   ///
   /// The maximum length of this list depends on the spell checker used. If
   /// [DefaultSpellCheckService] is used, the maximum length of this list will be
   /// 5 on Android platforms and there will be no maximum length on iOS platforms.
-  late final List<String> suggestions;
+  final List<String> suggestions;
 
   @override
   bool operator ==(Object other) {
@@ -58,12 +54,13 @@ class SuggestionSpan {
 ///
 ///  * [SuggestionSpan], the ranges of mispelled text and corresponding replacement
 ///    suggestions.
+@immutable
 class SpellCheckResults {
-  SpellCheckResults(this.spellCheckedText, this.suggestionSpans);
+  const SpellCheckResults(this.spellCheckedText, this.suggestionSpans);
 
-  late final String spellCheckedText;
+  final String spellCheckedText;
 
-  late final List<SuggestionSpan> suggestionSpans;
+  final List<SuggestionSpan> suggestionSpans;
 
   @override
   bool operator ==(Object other) {

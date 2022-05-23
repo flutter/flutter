@@ -18,7 +18,6 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
-import 'spell_check.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
