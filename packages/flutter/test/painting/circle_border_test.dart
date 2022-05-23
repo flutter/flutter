@@ -12,11 +12,29 @@ void main() {
   test('CircleBorder defaults', () {
     const CircleBorder border = CircleBorder();
     expect(border.side, BorderSide.none);
+    expect(border.ovalness, 0.0);
+  });
+
+  test('CircleBorder getInnerPath and getOuterPath', () {
+    const Rect circleRect = Rect.fromLTWH(50, 0, 100, 100);
+    const Rect rect = Rect.fromLTWH(0, 0, 200, 100);
+
+    expect(const CircleBorder().getInnerPath(rect).getBounds(), circleRect);
+    expect(const CircleBorder().getOuterPath(rect).getBounds(), circleRect);
+
+    const CircleBorder oval = CircleBorder(ovalness: 1);
+    expect(oval.getOuterPath(rect).getBounds(), rect);
+    expect(oval.getInnerPath(rect).getBounds(), rect);
+
+    const CircleBorder o10 = CircleBorder(side: BorderSide(width: 10.0), ovalness: 1);
+    expect(o10.getOuterPath(rect).getBounds(), Offset.zero & const Size(200, 100));
+    expect(o10.getInnerPath(rect).getBounds(), const Offset(10, 10) & const Size(180, 80));
   });
 
   test('CircleBorder copyWith, ==, hashCode', () {
     expect(const CircleBorder(), const CircleBorder().copyWith());
     expect(const CircleBorder().hashCode, const CircleBorder().copyWith().hashCode);
+    expect(const CircleBorder(ovalness: 0.5).hashCode, const CircleBorder().copyWith(ovalness: 0.5).hashCode);
     const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
     expect(const CircleBorder().copyWith(side: side), const CircleBorder(side: side));
   });

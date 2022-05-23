@@ -382,7 +382,7 @@ class BoxDecoration extends Decoration {
         final double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
       case BoxShape.oval:
-        final RRect bounds = BorderRadius.all(Radius.elliptical(size.width, size.height)).toRRect(Offset.zero & size);
+        final RRect bounds = RRect.fromRectAndRadius(Offset.zero & size,Radius.elliptical(size.width, size.height));
         return bounds.contains(position);
     }
   }

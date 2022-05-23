@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -80,37 +79,25 @@ class CircleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    final double radius = rect.shortestSide / 2.0;
-    final double adjustedRadius;
+    final double delta;
     switch (side.strokeAlign) {
       case StrokeAlign.inside:
-        adjustedRadius = radius - side.width;
+        delta = side.width;
         break;
       case StrokeAlign.center:
-        adjustedRadius = radius - side.width / 2.0;
+        delta = side.width / 2.0;
         break;
       case StrokeAlign.outside:
-        adjustedRadius = radius;
+        delta = 0;
         break;
     }
-    return Path()
-      ..addOval(Rect.fromCircle(
-        center: rect.center,
-        radius: math.max(0.0, adjustedRadius),
-      ));
+    final Rect adjustedRect = _adjustRect(rect).deflate(delta);
+    return Path()..addOval(adjustedRect);
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
-    if (ovalness != 0) {
       return Path()..addOval(_adjustRect(rect));
-    }
-
-    return Path()
-      ..addOval(Rect.fromCircle(
-        center: rect.center,
-        radius: rect.shortestSide / 2.0,
-      ));
   }
 
   @override
@@ -129,13 +116,13 @@ class CircleBorder extends OutlinedBorder {
           final Rect adjustedRect;
           switch (side.strokeAlign) {
             case StrokeAlign.inside:
-              adjustedRect = borderRect.deflate(side.width / 2);
+              adjustedRect = borderRect.deflate(side.width / 2.0);
               break;
             case StrokeAlign.center:
               adjustedRect = borderRect;
               break;
             case StrokeAlign.outside:
-              adjustedRect = borderRect.inflate(side.width / 2);
+              adjustedRect = borderRect.inflate(side.width / 2.0);
               break;
           }
           canvas.drawOval(adjustedRect, side.toPaint());
@@ -159,7 +146,7 @@ class CircleBorder extends OutlinedBorder {
 
   Rect _adjustRect(Rect rect) {
     if (ovalness == 0.0 || rect.width == rect.height)
-      return rect;
+      return Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0);
     if (rect.width < rect.height) {
       final double delta = (1 - ovalness) * (rect.height - rect.width) / 2.0;
       return Rect.fromLTRB(
@@ -190,7 +177,7 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  int get hashCode => side.hashCode;
+  int get hashCode => Object.hash(side, ovalness);
 
   @override
   String toString() {
