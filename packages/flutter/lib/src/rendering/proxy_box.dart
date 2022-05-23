@@ -3947,7 +3947,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// The [container] argument must not be null.
   ///
-  /// If the [properties.attributedLabel] is not null, the [textDirection] must also not be null.
+  /// If the [SemanticsProperties.attributedLabel] is not null, the [textDirection] must also not be null.
   RenderSemanticsAnnotations({
     RenderBox? child,
     required SemanticsProperties properties,
@@ -4081,10 +4081,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given
   /// value.
   ///
-  /// This must not be null if [properties.attributedLabel],
-  /// [properties.attributedHint], [properties.attributedValue],
-  /// [properties.attributedIncreasedValue], or
-  /// [properties.attributedDecreasedValue] are not null.
+  /// This must not be null if [SemanticsProperties.attributedLabel],
+  /// [SemanticsProperties.attributedHint],
+  /// [SemanticsProperties.attributedValue],
+  /// [SemanticsProperties.attributedIncreasedValue], or
+  /// [SemanticsProperties.attributedDecreasedValue] are not null.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
   set textDirection(TextDirection? value) {
