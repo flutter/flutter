@@ -4039,98 +4039,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsFlag.hasCheckedState] semantic to true and
-  /// the [SemanticsConfiguration.isChecked] semantic to the given value.
-  bool? get checked => _properties.checked;
-
-  /// If non-null, sets the [SemanticsFlag.hasEnabledState] semantic to true and
-  /// the [SemanticsConfiguration.isEnabled] semantic to the given value.
-  bool? get enabled => _properties.enabled;
-
-  /// If non-null, sets the [SemanticsConfiguration.isSelected] semantic to the
-  /// given value.
-  bool? get selected => _properties.selected;
-
-  /// If non-null, sets the [SemanticsConfiguration.isButton] semantic to the
-  /// given value.
-  bool? get button => _properties.button;
-
-  /// If non-null, sets the [SemanticsConfiguration.isSlider] semantic to the
-  /// given value.
-  bool? get slider => _properties.slider;
-
-  /// If non-null, sets the [SemanticsConfiguration.isKeyboardKey] semantic to the
-  /// given value.
-  bool? get keyboardKey => _properties.keyboardKey;
-
-  /// If non-null, sets the [SemanticsConfiguration.isLink] semantic to the
-  /// given value.
-  bool? get link => _properties.link;
-
-  /// If non-null, sets the [SemanticsConfiguration.isHeader] semantic to the
-  /// given value.
-  bool? get header => _properties.header;
-
-  /// If non-null, sets the [SemanticsConfiguration.isTextField] semantic to the
-  /// given value.
-  bool? get textField => _properties.textField;
-
-  /// If non-null, sets the [SemanticsConfiguration.isReadOnly] semantic to the
-  /// given value.
-  bool? get readOnly => _properties.readOnly;
-
-  /// If non-null, sets the [SemanticsConfiguration.isFocusable] semantic to the
-  /// given value.
-  bool? get focusable => _properties.focusable;
-
-  /// If non-null, sets the [SemanticsConfiguration.isFocused] semantic to the
-  /// given value.
-  bool? get focused => _properties.focused;
-
-  /// If non-null, sets the [SemanticsConfiguration.isInMutuallyExclusiveGroup]
-  /// semantic to the given value.
-  bool? get inMutuallyExclusiveGroup => _properties.inMutuallyExclusiveGroup;
-
-  /// If non-null, sets the [SemanticsConfiguration.isObscured] semantic to the
-  /// given value.
-  bool? get obscured => _properties.obscured;
-
-  /// If non-null, sets the [SemanticsNode.isMultiline] semantic to the given
-  /// value.
-  bool? get multiline => _properties.multiline;
-
-  /// If non-null, sets the [SemanticsConfiguration.scopesRoute] semantic to the
-  /// give value.
-  bool? get scopesRoute => _properties.scopesRoute;
-
-  /// If non-null, sets the [SemanticsConfiguration.namesRoute] semantic to the
-  /// give value.
-  bool? get namesRoute => _properties.namesRoute;
-
-  /// If non-null, sets the [SemanticsConfiguration.isHidden] semantic to the
-  /// given value.
-  bool? get hidden => _properties.hidden;
-
-  /// If non-null, sets the [SemanticsConfiguration.isImage] semantic to the
-  /// given value.
-  bool? get image => _properties.image;
-
-  /// If non-null, sets the [SemanticsConfiguration.liveRegion] semantic to
-  /// the given value.
-  bool? get liveRegion => _properties.liveRegion;
-
-  /// If non-null, sets the [SemanticsNode.maxValueLength] semantic to the given
-  /// value.
-  int? get maxValueLength => _properties.maxValueLength;
-
-  /// If non-null, sets the [SemanticsNode.currentValueLength] semantic to the
-  /// given value.
-  int? get currentValueLength => _properties.currentValueLength;
-
-  /// If non-null, sets the [SemanticsConfiguration.isToggled] semantic to the given
-  /// value.
-  bool? get toggled => _properties.toggled;
-
   /// If non-null, sets the [SemanticsNode.attributedLabel] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
@@ -4191,14 +4099,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.tooltip] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  String? get tooltip => _properties.tooltip;
-
-  /// If non-null, sets the [SemanticsConfiguration.hintOverrides] to the given value.
-  SemanticsHintOverrides? get hintOverrides => _properties.hintOverrides;
-
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given
   /// value.
   ///
@@ -4214,245 +4114,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Sets the [SemanticsNode.sortKey] to the given value.
-  ///
-  /// This defines how this node is sorted among the sibling semantics nodes
-  /// to determine the order in which they are traversed by the accessibility
-  /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
-  SemanticsSortKey? get sortKey => _properties.sortKey;
-
-  /// Adds a semantics tag to the semantics subtree.
-  SemanticsTag? get tagForChildren => _properties.tagForChildren;
-
-  /// The handler for [SemanticsAction.tap].
-  ///
-  /// This is the semantic equivalent of a user briefly tapping the screen with
-  /// the finger without moving it. For example, a button should implement this
-  /// action.
-  ///
-  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
-  /// action by double-tapping the screen while an element is focused.
-  VoidCallback? get onTap => _properties.onTap;
-
-  /// The handler for [SemanticsAction.dismiss].
-  ///
-  /// This is a request to dismiss the currently focused node.
-  ///
-  /// TalkBack users on Android can trigger this action in the local context
-  /// menu, and VoiceOver users on iOS can trigger this action with a standard
-  /// gesture or menu option.
-  VoidCallback? get onDismiss => _properties.onDismiss;
-
-  /// The handler for [SemanticsAction.longPress].
-  ///
-  /// This is the semantic equivalent of a user pressing and holding the screen
-  /// with the finger for a few seconds without moving it.
-  ///
-  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
-  /// action by double-tapping the screen without lifting the finger after the
-  /// second tap.
-  VoidCallback? get onLongPress => _properties.onLongPress;
-
-  /// The handler for [SemanticsAction.scrollLeft].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from right to left. It should be recognized by controls that are
-  /// horizontally scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping left with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path. On Android, [onScrollUp] and
-  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  VoidCallback? get onScrollLeft => _properties.onScrollLeft;
-
-  /// The handler for [SemanticsAction.scrollRight].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from left to right. It should be recognized by controls that are
-  /// horizontally scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping right with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path. On Android, [onScrollDown] and
-  /// [onScrollRight] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  VoidCallback? get onScrollRight => _properties.onScrollRight;
-
-  /// The handler for [SemanticsAction.scrollUp].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from bottom to top. It should be recognized by controls that are
-  /// vertically scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping up with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path. On Android, [onScrollUp] and
-  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  VoidCallback? get onScrollUp => _properties.onScrollUp;
-
-  /// The handler for [SemanticsAction.scrollDown].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from top to bottom. It should be recognized by controls that are
-  /// vertically scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping down with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path. On Android, [onScrollDown] and
-  /// [onScrollRight] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  VoidCallback? get onScrollDown => _properties.onScrollDown;
-
-  /// The handler for [SemanticsAction.increase].
-  ///
-  /// This is a request to increase the value represented by the widget. For
-  /// example, this action might be recognized by a slider control.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping up with one
-  /// finger. TalkBack users on Android can trigger this action by pressing the
-  /// volume up button.
-  VoidCallback? get onIncrease => _properties.onIncrease;
-
-  /// The handler for [SemanticsAction.decrease].
-  ///
-  /// This is a request to decrease the value represented by the widget. For
-  /// example, this action might be recognized by a slider control.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping down with one
-  /// finger. TalkBack users on Android can trigger this action by pressing the
-  /// volume down button.
-  VoidCallback? get onDecrease => _properties.onDecrease;
-
-  /// The handler for [SemanticsAction.copy].
-  ///
-  /// This is a request to copy the current selection to the clipboard.
-  ///
-  /// TalkBack users on Android can trigger this action from the local context
-  /// menu of a text field, for example.
-  VoidCallback? get onCopy => _properties.onCopy;
-
-  /// The handler for [SemanticsAction.cut].
-  ///
-  /// This is a request to cut the current selection and place it in the
-  /// clipboard.
-  ///
-  /// TalkBack users on Android can trigger this action from the local context
-  /// menu of a text field, for example.
-  VoidCallback? get onCut => _properties.onCut;
-
-  /// The handler for [SemanticsAction.paste].
-  ///
-  /// This is a request to paste the current content of the clipboard.
-  ///
-  /// TalkBack users on Android can trigger this action from the local context
-  /// menu of a text field, for example.
-  VoidCallback? get onPaste => _properties.onPaste;
-
-  /// The handler for [SemanticsAction.moveCursorForwardByCharacter].
-  ///
-  /// This handler is invoked when the user wants to move the cursor in a
-  /// text field forward by one character.
-  ///
-  /// TalkBack users can trigger this by pressing the volume up key while the
-  /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorForwardByCharacter => _properties.onMoveCursorForwardByCharacter;
-
-  /// The handler for [SemanticsAction.moveCursorBackwardByCharacter].
-  ///
-  /// This handler is invoked when the user wants to move the cursor in a
-  /// text field backward by one character.
-  ///
-  /// TalkBack users can trigger this by pressing the volume down key while the
-  /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorBackwardByCharacter => _properties.onMoveCursorBackwardByCharacter;
-
-  /// The handler for [SemanticsAction.moveCursorForwardByWord].
-  ///
-  /// This handler is invoked when the user wants to move the cursor in a
-  /// text field backward by one character.
-  ///
-  /// TalkBack users can trigger this by pressing the volume down key while the
-  /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorForwardByWord => _properties.onMoveCursorForwardByWord;
-
-  /// The handler for [SemanticsAction.moveCursorBackwardByWord].
-  ///
-  /// This handler is invoked when the user wants to move the cursor in a
-  /// text field backward by one character.
-  ///
-  /// TalkBack users can trigger this by pressing the volume down key while the
-  /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorBackwardByWord => _properties.onMoveCursorBackwardByWord;
-
-  /// The handler for [SemanticsAction.setSelection].
-  ///
-  /// This handler is invoked when the user either wants to change the currently
-  /// selected text in a text field or change the position of the cursor.
-  ///
-  /// TalkBack users can trigger this handler by selecting "Move cursor to
-  /// beginning/end" or "Select all" from the local context menu.
-  SetSelectionHandler? get onSetSelection => _properties.onSetSelection;
-
-  /// The handler for [SemanticsAction.setText].
-  ///
-  /// This handler is invoked when the user wants to replace the current text in
-  /// the text field with a new text.
-  ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
-  /// their Android devices.
-  SetTextHandler? get onSetText => _properties.onSetText;
-
-  /// The handler for [SemanticsAction.didGainAccessibilityFocus].
-  ///
-  /// This handler is invoked when the node annotated with this handler gains
-  /// the accessibility focus. The accessibility focus is the
-  /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
-  /// rectangle shown on screen to indicate what element an accessibility
-  /// user is currently interacting with.
-  ///
-  /// The accessibility focus is different from the input focus. The input focus
-  /// is usually held by the element that currently responds to keyboard inputs.
-  /// Accessibility focus and input focus can be held by two different nodes!
-  ///
-  /// See also:
-  ///
-  ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
-  ///    focus is removed from the node.
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback? get onDidGainAccessibilityFocus => _properties.onDidGainAccessibilityFocus;
-
-  /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
-  ///
-  /// This handler is invoked when the node annotated with this handler
-  /// loses the accessibility focus. The accessibility focus is
-  /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
-  /// rectangle shown on screen to indicate what element an accessibility
-  /// user is currently interacting with.
-  ///
-  /// The accessibility focus is different from the input focus. The input focus
-  /// is usually held by the element that currently responds to keyboard inputs.
-  /// Accessibility focus and input focus can be held by two different nodes!
-  ///
-  /// See also:
-  ///
-  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
-  ///    accessibility focus.
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback? get onDidLoseAccessibilityFocus => _properties.onDidLoseAccessibilityFocus;
-
-  /// The handlers and supported [CustomSemanticsAction]s for this node.
-  ///
-  /// These handlers are called whenever the user performs the associated
-  /// custom accessibility action from a special platform menu. Providing any
-  /// custom actions here also adds [SemanticsAction.customAction] to the node.
-  ///
-  /// See also:
-  ///
-  ///  * [CustomSemanticsAction], for an explanation of custom actions.
-  Map<CustomSemanticsAction, VoidCallback>? get customSemanticsActions => _properties.customSemanticsActions;
-
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     if (excludeSemantics)
@@ -4466,50 +4127,50 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     assert(
-      ((scopesRoute ?? false) && explicitChildNodes) || !(scopesRoute ?? false),
+      ((_properties.scopesRoute ?? false) && explicitChildNodes) || !(_properties.scopesRoute ?? false),
       'explicitChildNodes must be set to true if scopes route is true',
     );
     assert(
-      !((toggled ?? false) && (checked ?? false)),
+      !((_properties.toggled ?? false) && (_properties.checked ?? false)),
       'A semantics node cannot be toggled and checked at the same time',
     );
 
-    if (enabled != null)
-      config.isEnabled = enabled;
-    if (checked != null)
-      config.isChecked = checked;
-    if (toggled != null)
-      config.isToggled = toggled;
-    if (selected != null)
-      config.isSelected = selected!;
-    if (button != null)
-      config.isButton = button!;
-    if (link != null)
-      config.isLink = link!;
-    if (slider != null)
-      config.isSlider = slider!;
-    if (keyboardKey != null)
-      config.isKeyboardKey = keyboardKey!;
-    if (header != null)
-      config.isHeader = header!;
-    if (textField != null)
-      config.isTextField = textField!;
-    if (readOnly != null)
-      config.isReadOnly = readOnly!;
-    if (focusable != null)
-      config.isFocusable = focusable!;
-    if (focused != null)
-      config.isFocused = focused!;
-    if (inMutuallyExclusiveGroup != null)
-      config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup!;
-    if (obscured != null)
-      config.isObscured = obscured!;
-    if (multiline != null)
-      config.isMultiline = multiline!;
-    if (hidden != null)
-      config.isHidden = hidden!;
-    if (image != null)
-      config.isImage = image!;
+    if (_properties.enabled != null)
+      config.isEnabled = _properties.enabled;
+    if (_properties.checked != null)
+      config.isChecked = _properties.checked;
+    if (_properties.toggled != null)
+      config.isToggled = _properties.toggled;
+    if (_properties.selected != null)
+      config.isSelected = _properties.selected!;
+    if (_properties.button != null)
+      config.isButton = _properties.button!;
+    if (_properties.link != null)
+      config.isLink = _properties.link!;
+    if (_properties.slider != null)
+      config.isSlider = _properties.slider!;
+    if (_properties.keyboardKey != null)
+      config.isKeyboardKey = _properties.keyboardKey!;
+    if (_properties.header != null)
+      config.isHeader = _properties.header!;
+    if (_properties.textField != null)
+      config.isTextField = _properties.textField!;
+    if (_properties.readOnly != null)
+      config.isReadOnly = _properties.readOnly!;
+    if (_properties.focusable != null)
+      config.isFocusable = _properties.focusable!;
+    if (_properties.focused != null)
+      config.isFocused = _properties.focused!;
+    if (_properties.inMutuallyExclusiveGroup != null)
+      config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
+    if (_properties.obscured != null)
+      config.isObscured = _properties.obscured!;
+    if (_properties.multiline != null)
+      config.isMultiline = _properties.multiline!;
+    if (_properties.hidden != null)
+      config.isHidden = _properties.hidden!;
+    if (_properties.image != null)
+      config.isImage = _properties.image!;
     if (attributedLabel != null)
       config.attributedLabel = attributedLabel!;
     if (attributedValue != null)
@@ -4520,153 +4181,153 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.attributedDecreasedValue = attributedDecreasedValue!;
     if (attributedHint != null)
       config.attributedHint = attributedHint!;
-    if (tooltip != null)
-      config.tooltip = tooltip!;
-    if (hintOverrides != null && hintOverrides!.isNotEmpty)
-      config.hintOverrides = hintOverrides;
-    if (scopesRoute != null)
-      config.scopesRoute = scopesRoute!;
-    if (namesRoute != null)
-      config.namesRoute = namesRoute!;
-    if (liveRegion != null)
-      config.liveRegion = liveRegion!;
-    if (maxValueLength != null) {
-      config.maxValueLength = maxValueLength;
+    if (_properties.tooltip != null)
+      config.tooltip = _properties.tooltip!;
+    if (_properties.hintOverrides != null && _properties.hintOverrides!.isNotEmpty)
+      config.hintOverrides = _properties.hintOverrides;
+    if (_properties.scopesRoute != null)
+      config.scopesRoute = _properties.scopesRoute!;
+    if (_properties.namesRoute != null)
+      config.namesRoute = _properties.namesRoute!;
+    if (_properties.liveRegion != null)
+      config.liveRegion = _properties.liveRegion!;
+    if (_properties.maxValueLength != null) {
+      config.maxValueLength = _properties.maxValueLength;
     }
-    if (currentValueLength != null) {
-      config.currentValueLength = currentValueLength;
+    if (_properties.currentValueLength != null) {
+      config.currentValueLength = _properties.currentValueLength;
     }
     if (textDirection != null)
       config.textDirection = textDirection;
-    if (sortKey != null)
-      config.sortKey = sortKey;
-    if (tagForChildren != null)
-      config.addTagForChildren(tagForChildren!);
+    if (_properties.sortKey != null)
+      config.sortKey = _properties.sortKey;
+    if (_properties.tagForChildren != null)
+      config.addTagForChildren(_properties.tagForChildren!);
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
-    if (onTap != null)
+    if (_properties.onTap != null)
       config.onTap = _performTap;
-    if (onLongPress != null)
+    if (_properties.onLongPress != null)
       config.onLongPress = _performLongPress;
-    if (onDismiss != null)
+    if (_properties.onDismiss != null)
       config.onDismiss = _performDismiss;
-    if (onScrollLeft != null)
+    if (_properties.onScrollLeft != null)
       config.onScrollLeft = _performScrollLeft;
-    if (onScrollRight != null)
+    if (_properties.onScrollRight != null)
       config.onScrollRight = _performScrollRight;
-    if (onScrollUp != null)
+    if (_properties.onScrollUp != null)
       config.onScrollUp = _performScrollUp;
-    if (onScrollDown != null)
+    if (_properties.onScrollDown != null)
       config.onScrollDown = _performScrollDown;
-    if (onIncrease != null)
+    if (_properties.onIncrease != null)
       config.onIncrease = _performIncrease;
-    if (onDecrease != null)
+    if (_properties.onDecrease != null)
       config.onDecrease = _performDecrease;
-    if (onCopy != null)
+    if (_properties.onCopy != null)
       config.onCopy = _performCopy;
-    if (onCut != null)
+    if (_properties.onCut != null)
       config.onCut = _performCut;
-    if (onPaste != null)
+    if (_properties.onPaste != null)
       config.onPaste = _performPaste;
-    if (onMoveCursorForwardByCharacter != null)
+    if (_properties.onMoveCursorForwardByCharacter != null)
       config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
-    if (onMoveCursorBackwardByCharacter != null)
+    if (_properties.onMoveCursorBackwardByCharacter != null)
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
-    if (onMoveCursorForwardByWord != null)
+    if (_properties.onMoveCursorForwardByWord != null)
       config.onMoveCursorForwardByWord = _performMoveCursorForwardByWord;
-    if (onMoveCursorBackwardByWord != null)
+    if (_properties.onMoveCursorBackwardByWord != null)
       config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
-    if (onSetSelection != null)
+    if (_properties.onSetSelection != null)
       config.onSetSelection = _performSetSelection;
-    if (onSetText != null)
+    if (_properties.onSetText != null)
       config.onSetText = _performSetText;
-    if (onDidGainAccessibilityFocus != null)
+    if (_properties.onDidGainAccessibilityFocus != null)
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
-    if (onDidLoseAccessibilityFocus != null)
+    if (_properties.onDidLoseAccessibilityFocus != null)
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
-    if (customSemanticsActions != null)
-      config.customSemanticsActions = customSemanticsActions!;
+    if (_properties.customSemanticsActions != null)
+      config.customSemanticsActions = _properties.customSemanticsActions!;
   }
 
   void _performTap() {
-    onTap?.call();
+    _properties.onTap?.call();
   }
 
   void _performLongPress() {
-    onLongPress?.call();
+    _properties.onLongPress?.call();
   }
 
   void _performDismiss() {
-    onDismiss?.call();
+    _properties.onDismiss?.call();
   }
 
   void _performScrollLeft() {
-    onScrollLeft?.call();
+    _properties.onScrollLeft?.call();
   }
 
   void _performScrollRight() {
-    onScrollRight?.call();
+    _properties.onScrollRight?.call();
   }
 
   void _performScrollUp() {
-    onScrollUp?.call();
+    _properties.onScrollUp?.call();
   }
 
   void _performScrollDown() {
-    onScrollDown?.call();
+    _properties.onScrollDown?.call();
   }
 
   void _performIncrease() {
-    onIncrease?.call();
+    _properties.onIncrease?.call();
   }
 
   void _performDecrease() {
-    onDecrease?.call();
+    _properties.onDecrease?.call();
   }
 
   void _performCopy() {
-    onCopy?.call();
+    _properties.onCopy?.call();
   }
 
   void _performCut() {
-    onCut?.call();
+    _properties.onCut?.call();
   }
 
   void _performPaste() {
-    onPaste?.call();
+    _properties.onPaste?.call();
   }
 
   void _performMoveCursorForwardByCharacter(bool extendSelection) {
-    onMoveCursorForwardByCharacter?.call(extendSelection);
+    _properties.onMoveCursorForwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByCharacter(bool extendSelection) {
-    onMoveCursorBackwardByCharacter?.call(extendSelection);
+    _properties.onMoveCursorBackwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorForwardByWord(bool extendSelection) {
-    onMoveCursorForwardByWord?.call(extendSelection);
+    _properties.onMoveCursorForwardByWord?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByWord(bool extendSelection) {
-    onMoveCursorBackwardByWord?.call(extendSelection);
+    _properties.onMoveCursorBackwardByWord?.call(extendSelection);
   }
 
   void _performSetSelection(TextSelection selection) {
-    onSetSelection?.call(selection);
+    _properties.onSetSelection?.call(selection);
   }
 
   void _performSetText(String text) {
-    onSetText?.call(text);
+    _properties.onSetText?.call(text);
   }
 
   void _performDidGainAccessibilityFocus() {
-    onDidGainAccessibilityFocus?.call();
+    _properties.onDidGainAccessibilityFocus?.call();
   }
 
   void _performDidLoseAccessibilityFocus() {
-    onDidLoseAccessibilityFocus?.call();
+    _properties.onDidLoseAccessibilityFocus?.call();
   }
 }
 
