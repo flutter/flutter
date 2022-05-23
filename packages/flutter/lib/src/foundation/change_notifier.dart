@@ -119,36 +119,6 @@ class ChangeNotifier implements Listenable {
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
 
-  /// Used by subclasses to assert that the [ChangeNotifier] has not yet been
-  /// disposed.
-  ///
-  /// {@tool snippet}
-  /// The `debugAssertNotDisposed` function should only be called inside of an
-  /// assert, as in this example.
-  ///
-  /// ```dart
-  /// class MyNotifier with ChangeNotifier {
-  ///   void doUpdate() {
-  ///     assert(debugAssertNotDisposed());
-  ///     // ...
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  @protected
-  bool debugAssertNotDisposed() {
-    assert(() {
-      if (_debugDisposed) {
-        throw FlutterError(
-          'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
-        );
-      }
-      return true;
-    }());
-    return true;
-  }
-
   /// Whether any listeners are currently registered.
   ///
   /// Clients should not depend on this value for their behavior, because having
@@ -393,6 +363,42 @@ class ChangeNotifier implements Listenable {
       _reentrantlyRemovedListeners = 0;
       _count = newLength;
     }
+  }
+}
+
+/// Used by subclasses to call assertions on the internal state of
+/// [ChangeNotifier]
+///
+/// This is a extension rather than a direct method, minimize the API footprint
+/// of subclasses implementing [ChangeNotifier].
+extension ChangeNotifierDisposeAssertion on ChangeNotifier {
+  /// Used by subclasses to assert that the [ChangeNotifier] has not yet been
+  /// disposed.
+  ///
+  /// {@tool snippet}
+  /// The `debugAssertNotDisposed` function should only be called inside of an
+  /// assert, as in this example.
+  ///
+  /// ```dart
+  /// class MyNotifier with ChangeNotifier {
+  ///   void doUpdate() {
+  ///     assert(debugAssertNotDisposed());
+  ///     // ...
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  bool debugAssertNotDisposed() {
+    assert(() {
+      if (_debugDisposed) {
+        throw FlutterError(
+          'A $runtimeType was used after being disposed.\n'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
+        );
+      }
+      return true;
+    }());
+    return true;
   }
 }
 
