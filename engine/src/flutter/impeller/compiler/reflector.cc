@@ -71,6 +71,12 @@ static std::string ExecutionModelToString(spv::ExecutionModel model) {
       return "vertex";
     case spv::ExecutionModel::ExecutionModelFragment:
       return "fragment";
+    case spv::ExecutionModel::ExecutionModelTessellationControl:
+      return "tessellation_control";
+    case spv::ExecutionModel::ExecutionModelTessellationEvaluation:
+      return "tessellation_evaluation";
+    case spv::ExecutionModel::ExecutionModelGLCompute:
+      return "compute";
     default:
       return "unsupported";
   }
@@ -83,6 +89,18 @@ static std::string StringToShaderStage(std::string str) {
 
   if (str == "fragment") {
     return "ShaderStage::kFragment";
+  }
+
+  if (str == "tessellation_control") {
+    return "ShaderStage::kTessellationControl";
+  }
+
+  if (str == "tessellation_evaluation") {
+    return "ShaderStage::kTessellationEvaluation";
+  }
+
+  if (str == "compute") {
+    return "ShaderStage::kCompute";
   }
 
   return "ShaderStage::kUnknown";

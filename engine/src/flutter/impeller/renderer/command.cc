@@ -48,6 +48,9 @@ bool Command::BindResource(ShaderStage stage,
     case ShaderStage::kFragment:
       fragment_bindings.buffers[slot.binding] = {&metadata, view};
       return true;
+    case ShaderStage::kTessellationControl:
+    case ShaderStage::kTessellationEvaluation:
+    case ShaderStage::kCompute:
     case ShaderStage::kUnknown:
       return false;
   }
@@ -74,6 +77,9 @@ bool Command::BindResource(ShaderStage stage,
     case ShaderStage::kFragment:
       fragment_bindings.textures[slot.texture_index] = {&metadata, texture};
       return true;
+    case ShaderStage::kTessellationControl:
+    case ShaderStage::kTessellationEvaluation:
+    case ShaderStage::kCompute:
     case ShaderStage::kUnknown:
       return false;
   }
@@ -101,6 +107,9 @@ bool Command::BindResource(ShaderStage stage,
       fragment_bindings.samplers[slot.sampler_index] = {&metadata, sampler};
       return true;
     case ShaderStage::kUnknown:
+    case ShaderStage::kTessellationControl:
+    case ShaderStage::kTessellationEvaluation:
+    case ShaderStage::kCompute:
       return false;
   }
 
