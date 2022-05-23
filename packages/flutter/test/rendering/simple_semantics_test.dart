@@ -13,7 +13,7 @@ void main() {
 
   test('only send semantics update if semantics have changed', () {
     final TestRender testRender = TestRender()
-      ..attributedLabel = AttributedString('hello')
+      ..updateProperties(const SemanticsProperties(label: 'hello'))
       ..textDirection = TextDirection.ltr;
 
     final RenderConstrainedBox tree = RenderConstrainedBox(
@@ -48,7 +48,7 @@ void main() {
     semanticsUpdateCount = 0;
 
     // Change semantics and request update.
-    testRender.attributedLabel = AttributedString('bye');
+    testRender.updateProperties(const SemanticsProperties(label: 'bye'));
     testRender.markNeedsSemanticsUpdate();
     pumpFrame(phase: EnginePhase.flushSemantics);
 

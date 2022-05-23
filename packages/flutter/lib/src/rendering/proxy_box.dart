@@ -3954,24 +3954,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool container = false,
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
-    AttributedString? attributedLabel,
-    AttributedString? attributedValue,
-    AttributedString? attributedIncreasedValue,
-    AttributedString? attributedDecreasedValue,
-    AttributedString? attributedHint,
     TextDirection? textDirection,
-  }) : assert(container != null),
-       _container = container,
-       _explicitChildNodes = explicitChildNodes,
-       _excludeSemantics = excludeSemantics,
-       _attributedLabel = attributedLabel,
-       _attributedValue = attributedValue,
-       _attributedIncreasedValue = attributedIncreasedValue,
-       _attributedDecreasedValue = attributedDecreasedValue,
-       _attributedHint = attributedHint,
-       _textDirection = textDirection,
-       _properties = properties,
-       super(child);
+  })  : assert(container != null),
+        _container = container,
+        _explicitChildNodes = explicitChildNodes,
+        _excludeSemantics = excludeSemantics,
+        _textDirection = textDirection,
+        _properties = properties,
+        super(child) {
+    _updateAttributedFields(_properties);
+  }
 
   SemanticsProperties _properties;
   /// Sets the [SemanticsProperties] en masse.
@@ -3980,6 +3972,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties == value)
       return;
     _properties = value;
+    _updateAttributedFields(_properties);
     markNeedsSemanticsUpdate();
   }
 
@@ -4039,65 +4032,50 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.attributedLabel] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedLabel => _attributedLabel;
+  void _updateAttributedFields(SemanticsProperties properties) {
+    _attributedLabel = _effectiveAttributedLabel(properties);
+    _attributedValue = _effectiveAttributedValue(properties);
+    _attributedIncreasedValue = _effectiveAttributedIncreasedValue(properties);
+    _attributedDecreasedValue = _effectiveAttributedDecreasedValue(properties);
+    _attributedHint = _effectiveAttributedHint(properties);
+  }
+
+  AttributedString? _effectiveAttributedLabel(SemanticsProperties properties) {
+    return properties.attributedLabel ??
+        (properties.label == null ? null : AttributedString(properties.label!));
+  }
+
+  AttributedString? _effectiveAttributedValue(SemanticsProperties properties) {
+    return properties.attributedValue ??
+        (properties.value == null ? null : AttributedString(properties.value!));
+  }
+
+  AttributedString? _effectiveAttributedIncreasedValue(
+      SemanticsProperties properties) {
+    return properties.attributedIncreasedValue ??
+        (properties.increasedValue == null
+            ? null
+            : AttributedString(properties.increasedValue!));
+  }
+
+  AttributedString? _effectiveAttributedDecreasedValue(
+      SemanticsProperties properties) {
+    return properties.attributedDecreasedValue ??
+        (properties.decreasedValue == null
+            ? null
+            : AttributedString(properties.decreasedValue!));
+  }
+
+  AttributedString? _effectiveAttributedHint(SemanticsProperties properties) {
+    return properties.attributedHint ??
+        (properties.hint == null ? null : AttributedString(properties.hint!));
+  }
+
   AttributedString? _attributedLabel;
-  set attributedLabel(AttributedString? value) {
-    if (_attributedLabel == value)
-      return;
-    _attributedLabel = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.attributedValue] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedValue => _attributedValue;
   AttributedString? _attributedValue;
-  set attributedValue(AttributedString? value) {
-    if (_attributedValue == value)
-      return;
-    _attributedValue = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.attributedIncreasedValue] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedIncreasedValue => _attributedIncreasedValue;
   AttributedString? _attributedIncreasedValue;
-  set attributedIncreasedValue(AttributedString? value) {
-    if (_attributedIncreasedValue == value)
-      return;
-    _attributedIncreasedValue = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.attributedDecreasedValue] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedDecreasedValue => _attributedDecreasedValue;
   AttributedString? _attributedDecreasedValue;
-  set attributedDecreasedValue(AttributedString? value) {
-    if (_attributedDecreasedValue == value)
-      return;
-    _attributedDecreasedValue = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.attributedHint] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedHint => _attributedHint;
   AttributedString? _attributedHint;
-  set attributedHint(AttributedString? value) {
-    if (_attributedHint == value)
-      return;
-    _attributedHint = value;
-    markNeedsSemanticsUpdate();
-  }
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given
   /// value.
@@ -4171,16 +4149,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isHidden = _properties.hidden!;
     if (_properties.image != null)
       config.isImage = _properties.image!;
-    if (attributedLabel != null)
-      config.attributedLabel = attributedLabel!;
-    if (attributedValue != null)
-      config.attributedValue = attributedValue!;
-    if (attributedIncreasedValue != null)
-      config.attributedIncreasedValue = attributedIncreasedValue!;
-    if (attributedDecreasedValue != null)
-      config.attributedDecreasedValue = attributedDecreasedValue!;
-    if (attributedHint != null)
-      config.attributedHint = attributedHint!;
+    if (_attributedLabel != null)
+      config.attributedLabel = _attributedLabel!;
+    if (_attributedValue != null)
+      config.attributedValue = _attributedValue!;
+    if (_attributedIncreasedValue != null)
+      config.attributedIncreasedValue = _attributedIncreasedValue!;
+    if (_attributedDecreasedValue != null)
+      config.attributedDecreasedValue = _attributedDecreasedValue!;
+    if (_attributedHint != null)
+      config.attributedHint = _attributedHint!;
     if (_properties.tooltip != null)
       config.tooltip = _properties.tooltip!;
     if (_properties.hintOverrides != null && _properties.hintOverrides!.isNotEmpty)
