@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:path/path.dart';
+
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
@@ -21,9 +23,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   }) {
     requiresPubspecYaml();
     argParser.addOption(
-      'working-directory',
-      help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
-            'This path can be absolute or relative to the flutter project root.',
+      'staging-directory',
+      help: 'Specifies the custom migration staging directory used to stage and edit proposed changes. '
+            'This path can be absolute or relative to the flutter project root. This defaults to `$kDefaultMigrateWorkingDirectoryName`',
       valueHelp: 'path',
     );
     argParser.addOption(
@@ -74,10 +76,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
 
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    final String? customWorkingDirectoryPath = stringArg('working-directory');
+    final String? customWorkingDirectoryPath = stringArg('staging-directory');
     if (customWorkingDirectoryPath != null) {
-      if (customWorkingDirectoryPath.startsWith(fileSystem.path.separator) || customWorkingDirectoryPath.startsWith('/')) {
-        // Is an absolute path
+      if (Context().isAbsolute(customWorkingDirectoryPath)) {
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
       } else {
         workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
@@ -113,7 +114,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       // Prompt developer
       await promptDeveloperSelectAction(conflicts, lines, localPath);
 
-      bool result = await verifyAndCommit(conflicts, lines, file, localPath);
+      final bool result = await verifyAndCommit(conflicts, lines, file, localPath);
       if (!result) {
         i--;
       }
