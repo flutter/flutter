@@ -148,66 +148,14 @@ abstract class SingletonFlutterWindow extends FlutterWindow {
   void setIsolateDebugName(String name) => PlatformDispatcher.instance.setIsolateDebugName(name);
 }
 
-class AccessibilityFeatures {
-  const AccessibilityFeatures._(this._index);
-
-  static const int _kAccessibleNavigation = 1 << 0;
-  static const int _kInvertColorsIndex = 1 << 1;
-  static const int _kDisableAnimationsIndex = 1 << 2;
-  static const int _kBoldTextIndex = 1 << 3;
-  static const int _kReduceMotionIndex = 1 << 4;
-  static const int _kHighContrastIndex = 1 << 5;
-  static const int _kOnOffSwitchLabelsIndex = 1 << 6;
-
-  // A bitfield which represents each enabled feature.
-  final int _index;
-
-  bool get accessibleNavigation => _kAccessibleNavigation & _index != 0;
-  bool get invertColors => _kInvertColorsIndex & _index != 0;
-  bool get disableAnimations => _kDisableAnimationsIndex & _index != 0;
-  bool get boldText => _kBoldTextIndex & _index != 0;
-  bool get reduceMotion => _kReduceMotionIndex & _index != 0;
-  bool get highContrast => _kHighContrastIndex & _index != 0;
-  bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
-
-  @override
-  String toString() {
-    final List<String> features = <String>[];
-    if (accessibleNavigation) {
-      features.add('accessibleNavigation');
-    }
-    if (invertColors) {
-      features.add('invertColors');
-    }
-    if (disableAnimations) {
-      features.add('disableAnimations');
-    }
-    if (boldText) {
-      features.add('boldText');
-    }
-    if (reduceMotion) {
-      features.add('reduceMotion');
-    }
-    if (highContrast) {
-      features.add('highContrast');
-    }
-    if (onOffSwitchLabels) {
-      features.add('onOffSwitchLabels');
-    }
-    return 'AccessibilityFeatures$features';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is AccessibilityFeatures
-        && other._index == _index;
-  }
-
-  @override
-  int get hashCode => _index.hashCode;
+abstract class AccessibilityFeatures {
+  bool get accessibleNavigation;
+  bool get invertColors;
+  bool get disableAnimations;
+  bool get boldText;
+  bool get reduceMotion;
+  bool get highContrast;
+  bool get onOffSwitchLabels;
 }
 
 enum Brightness {

@@ -118,9 +118,79 @@ void _testEngineSemanticsOwner() {
     expect(placeholder.isConnected, isFalse);
   });
 
+  test('accessibilityFeatures copyWith function works', () {
+    const EngineAccessibilityFeatures original = EngineAccessibilityFeatures(0);
+    EngineAccessibilityFeatures copy = original.copyWith(accessibleNavigation: true);
+    expect(copy.accessibleNavigation, true);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.reduceMotion, false);
+
+    copy = original.copyWith(boldText: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, true);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.reduceMotion, false);
+
+    copy = original.copyWith(disableAnimations: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, true);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.reduceMotion, false);
+
+    copy = original.copyWith(highContrast: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, true);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.reduceMotion, false);
+
+    copy = original.copyWith(invertColors: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, true);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.reduceMotion, false);
+
+    copy = original.copyWith(onOffSwitchLabels: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, true);
+    expect(copy.reduceMotion, false);
+
+    copy = original.copyWith(reduceMotion: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.reduceMotion, true);
+  });
+
   test('auto-enables semantics', () async {
     flutterViewEmbedder.reset(); // triggers `autoEnableOnTap` to be called
     expect(semantics().semanticsEnabled, isFalse);
+    expect(
+        EnginePlatformDispatcher
+            .instance.configuration.accessibilityFeatures.accessibleNavigation,
+        isFalse);
 
     final html.Element placeholder =
         appHostNode.querySelector('flt-semantics-placeholder')!;
@@ -133,6 +203,10 @@ void _testEngineSemanticsOwner() {
     semantics().updateSemantics(builder.build());
 
     expect(semantics().semanticsEnabled, isTrue);
+    expect(
+        EnginePlatformDispatcher
+            .instance.configuration.accessibilityFeatures.accessibleNavigation,
+        isTrue);
 
     // The placeholder should be removed
     expect(placeholder.isConnected, isFalse);
@@ -1753,6 +1827,7 @@ void _testPlatformView() {
       rect: const ui.Rect.fromLTRB(0, 0, 20, 60),
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      transform: Float64List.fromList(Matrix4.diagonal3Values(ui.window.devicePixelRatio, ui.window.devicePixelRatio, 1).storage)
     );
     updateNode(
       builder,

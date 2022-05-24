@@ -26,6 +26,108 @@ import 'semantics_helper.dart';
 import 'tappable.dart';
 import 'text_field.dart';
 
+class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
+  const EngineAccessibilityFeatures(this._index);
+
+  static const int _kAccessibleNavigation = 1 << 0;
+  static const int _kInvertColorsIndex = 1 << 1;
+  static const int _kDisableAnimationsIndex = 1 << 2;
+  static const int _kBoldTextIndex = 1 << 3;
+  static const int _kReduceMotionIndex = 1 << 4;
+  static const int _kHighContrastIndex = 1 << 5;
+  static const int _kOnOffSwitchLabelsIndex = 1 << 6;
+
+  // A bitfield which represents each enabled feature.
+  final int _index;
+
+  @override
+  bool get accessibleNavigation => _kAccessibleNavigation & _index != 0;
+  @override
+  bool get invertColors => _kInvertColorsIndex & _index != 0;
+  @override
+  bool get disableAnimations => _kDisableAnimationsIndex & _index != 0;
+  @override
+  bool get boldText => _kBoldTextIndex & _index != 0;
+  @override
+  bool get reduceMotion => _kReduceMotionIndex & _index != 0;
+  @override
+  bool get highContrast => _kHighContrastIndex & _index != 0;
+  @override
+  bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
+
+  @override
+  String toString() {
+    final List<String> features = <String>[];
+    if (accessibleNavigation) {
+      features.add('accessibleNavigation');
+    }
+    if (invertColors) {
+      features.add('invertColors');
+    }
+    if (disableAnimations) {
+      features.add('disableAnimations');
+    }
+    if (boldText) {
+      features.add('boldText');
+    }
+    if (reduceMotion) {
+      features.add('reduceMotion');
+    }
+    if (highContrast) {
+      features.add('highContrast');
+    }
+    if (onOffSwitchLabels) {
+      features.add('onOffSwitchLabels');
+    }
+    return 'AccessibilityFeatures$features';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is EngineAccessibilityFeatures && other._index == _index;
+  }
+
+  @override
+  int get hashCode => _index.hashCode;
+
+  EngineAccessibilityFeatures copyWith({
+      bool? accessibleNavigation,
+      bool? invertColors,
+      bool? disableAnimations,
+      bool? boldText,
+      bool? reduceMotion,
+      bool? highContrast,
+      bool? onOffSwitchLabels})
+  {
+    int value = 0;
+    if (accessibleNavigation ?? this.accessibleNavigation) {
+      value = value | _kAccessibleNavigation;
+    }
+    if (invertColors ?? this.invertColors) {
+      value = value | _kInvertColorsIndex;
+    }
+    if (disableAnimations ?? this.disableAnimations) {
+      value = value | _kDisableAnimationsIndex;
+    }
+    if (boldText ?? this.boldText) {
+      value = value | _kBoldTextIndex;
+    }
+    if (reduceMotion ?? this.reduceMotion) {
+      value = value | _kReduceMotionIndex;
+    }
+    if (highContrast ?? this.highContrast) {
+      value = value | _kHighContrastIndex;
+    }
+    if (onOffSwitchLabels ?? this.onOffSwitchLabels) {
+      value = value | _kOnOffSwitchLabelsIndex;
+    }
+    return EngineAccessibilityFeatures(value);
+  }
+}
+
 /// Contains updates for the semantics tree.
 ///
 /// This class provides private engine-side API that's not available in the
@@ -1433,6 +1535,15 @@ class EngineSemanticsOwner {
     if (value == _semanticsEnabled) {
       return;
     }
+    final EngineAccessibilityFeatures original =
+        EnginePlatformDispatcher.instance.configuration.accessibilityFeatures
+        as EngineAccessibilityFeatures;
+    final ui.PlatformConfiguration newConfiguration =
+        EnginePlatformDispatcher.instance.configuration.copyWith(
+            accessibilityFeatures:
+                original.copyWith(accessibleNavigation: value));
+    EnginePlatformDispatcher.instance.configuration = newConfiguration;
+
     _semanticsEnabled = value;
 
     if (!_semanticsEnabled) {
