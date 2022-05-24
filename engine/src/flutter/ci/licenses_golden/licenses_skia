@@ -1,4 +1,4 @@
-Signature: 0a18c491529b09b6ceb9aac7fc0c26e9
+Signature: 754524b0a9ec7f2c027905a58c757873
 
 UNUSED LICENSES:
 
@@ -2873,9 +2873,6 @@ FILE: ../../../third_party/skia/include/ports/SkFontMgr_directory.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_empty.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_fontconfig.h
 FILE: ../../../third_party/skia/include/private/SkMutex.h
-FILE: ../../../third_party/skia/include/private/SkNx.h
-FILE: ../../../third_party/skia/include/private/SkNx_neon.h
-FILE: ../../../third_party/skia/include/private/SkNx_sse.h
 FILE: ../../../third_party/skia/include/private/SkSemaphore.h
 FILE: ../../../third_party/skia/include/private/SkSpinlock.h
 FILE: ../../../third_party/skia/include/private/SkTHash.h
@@ -3031,8 +3028,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/LatticeOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/LatticeOp.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TriangulatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/TriangulatingPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlobRedrawCoordinator.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrTextBlobRedrawCoordinator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/v1/Device_drawTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/v1/SurfaceDrawContext.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/v1/SurfaceDrawContext_v1.h
@@ -3098,6 +3093,8 @@ FILE: ../../../third_party/skia/src/text/gpu/StrikeCache.cpp
 FILE: ../../../third_party/skia/src/text/gpu/StrikeCache.h
 FILE: ../../../third_party/skia/src/text/gpu/TextBlob.cpp
 FILE: ../../../third_party/skia/src/text/gpu/TextBlob.h
+FILE: ../../../third_party/skia/src/text/gpu/TextBlobRedrawCoordinator.cpp
+FILE: ../../../third_party/skia/src/text/gpu/TextBlobRedrawCoordinator.h
 FILE: ../../../third_party/skia/src/utils/SkPaintFilterCanvas.cpp
 FILE: ../../../third_party/skia/src/xps/SkXPSDocument.cpp
 ----------------------------------------------------------------------------------------------------
