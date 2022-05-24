@@ -1515,13 +1515,14 @@ void main() {
   });
 
   testWidgets('InkWell dispose statesController', (WidgetTester tester) async {
+    int tapCount = 0;
     Widget buildFrame(MaterialStatesController? statesController) {
       return MaterialApp(
         home: Scaffold(
           body: Center(
             child: InkWell(
               statesController: statesController,
-              onTap: () { },
+              onTap: () { tapCount += 1; },
               child: const Text('inkwell'),
             ),
           ),
@@ -1530,15 +1531,29 @@ void main() {
     }
 
     final MaterialStatesController controller = MaterialStatesController();
+    int pressedCount = 0;
+    controller.addListener(() {
+      if (controller.value.contains(MaterialState.pressed)) {
+        pressedCount += 1;
+      }
+    });
 
-    // hasListeners will assert if controller was disposed
     await tester.pumpWidget(buildFrame(controller));
-    expect(controller.hasListeners, true);
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 1);
+    expect(pressedCount, 1);
 
     await tester.pumpWidget(buildFrame(null));
-    expect(controller.hasListeners, false);
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 2);
+    expect(pressedCount, 1);
 
     await tester.pumpWidget(buildFrame(controller));
-    expect(controller.hasListeners, true);
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 3);
+    expect(pressedCount, 2);
   });
 }
