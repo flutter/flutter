@@ -27,9 +27,11 @@ struct AutoErrorCheck {
   ~AutoErrorCheck() {
     if (error_fn) {
       auto error = error_fn();
-      FML_CHECK(error == GL_NO_ERROR)
-          << "GL Error " << GLErrorToString(error) << "(" << error << ")"
-          << " encountered on call to " << name;
+      if (error != GL_NO_ERROR) {
+        FML_LOG(ERROR) << "GL Error " << GLErrorToString(error) << "(" << error
+                       << ")"
+                       << " encountered on call to " << name;
+      }
     }
   }
 };

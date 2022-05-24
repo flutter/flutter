@@ -49,6 +49,9 @@ class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
   // |AndroidSurface|
   std::unique_ptr<Surface> CreateSnapshotSurface() override;
 
+  // |AndroidSurface|
+  std::shared_ptr<impeller::Context> GetImpellerContext() override;
+
   // |GPUSurfaceGLDelegate|
   std::unique_ptr<GLContextResult> GLContextMakeCurrent() override;
 
@@ -72,6 +75,9 @@ class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
   sk_sp<const GrGLInterface> GetGLInterface() const override;
 
  private:
+  class ReactorWorker;
+
+  std::shared_ptr<ReactorWorker> reactor_worker_;
   std::unique_ptr<impeller::egl::Display> display_;
   std::unique_ptr<impeller::egl::Config> onscreen_config_;
   std::unique_ptr<impeller::egl::Config> offscreen_config_;

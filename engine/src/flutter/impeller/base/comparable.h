@@ -103,4 +103,12 @@ struct hash<impeller::UniqueID> {
   }
 };
 
+template <>
+struct less<impeller::UniqueID> {
+  constexpr bool operator()(const impeller::UniqueID& lhs,
+                            const impeller::UniqueID& rhs) const {
+    return lhs.id < rhs.id;
+  }
+};
+
 }  // namespace std

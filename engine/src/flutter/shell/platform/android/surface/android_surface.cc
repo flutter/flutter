@@ -19,4 +19,8 @@ std::unique_ptr<Surface> AndroidSurface::CreateSnapshotSurface() {
   return nullptr;
 }
 
+std::shared_ptr<impeller::Context> AndroidSurface::GetImpellerContext() {
+  return nullptr;
+}
+
 }  // namespace flutter

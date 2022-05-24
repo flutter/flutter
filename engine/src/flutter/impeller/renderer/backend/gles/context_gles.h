@@ -19,14 +19,19 @@ namespace impeller {
 class ContextGLES final : public Context,
                           public BackendCast<ContextGLES, Context> {
  public:
-  static std::shared_ptr<Context> Create(
+  static std::shared_ptr<ContextGLES> Create(
       std::unique_ptr<ProcTableGLES> gl,
       std::vector<std::shared_ptr<fml::Mapping>> shader_libraries);
 
   // |Context|
   ~ContextGLES() override;
 
-  const ReactorGLES::Ref GetReactor() const;
+  const ReactorGLES::Ref& GetReactor() const;
+
+  std::optional<ReactorGLES::WorkerID> AddReactorWorker(
+      std::shared_ptr<ReactorGLES::Worker> worker);
+
+  bool RemoveReactorWorker(ReactorGLES::WorkerID id);
 
  private:
   ReactorGLES::Ref reactor_;

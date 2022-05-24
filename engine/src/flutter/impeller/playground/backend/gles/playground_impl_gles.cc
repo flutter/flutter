@@ -16,6 +16,33 @@
 
 namespace impeller {
 
+class PlaygroundImplGLES::ReactorWorker final : public ReactorGLES::Worker {
+ public:
+  ReactorWorker() = default;
+
+  // |ReactorGLES::Worker|
+  bool CanReactorReactOnCurrentThreadNow(
+      const ReactorGLES& reactor) const override {
+    ReaderLock lock(mutex_);
+    auto found = reactions_allowed_.find(std::this_thread::get_id());
+    if (found == reactions_allowed_.end()) {
+      return false;
+    }
+    return found->second;
+  }
+
+  void SetReactionsAllowedOnCurrentThread(bool allowed) {
+    WriterLock lock(mutex_);
+    reactions_allowed_[std::this_thread::get_id()] = allowed;
+  }
+
+ private:
+  mutable RWMutex mutex_;
+  std::map<std::thread::id, bool> reactions_allowed_ IPLR_GUARDED_BY(mutex_);
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ReactorWorker);
+};
+
 void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
   if (!handle) {
     return;
@@ -24,7 +51,8 @@ void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
 }
 
 PlaygroundImplGLES::PlaygroundImplGLES()
-    : handle_(nullptr, &DestroyWindowHandle) {
+    : handle_(nullptr, &DestroyWindowHandle),
+      worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())) {
   ::glfwDefaultWindowHints();
 
 #if FML_OS_MACOSX
@@ -48,6 +76,7 @@ PlaygroundImplGLES::PlaygroundImplGLES()
   auto window = ::glfwCreateWindow(1, 1, "Test", nullptr, nullptr);
 
   ::glfwMakeContextCurrent(window);
+  worker_->SetReactionsAllowedOnCurrentThread(true);
 
   handle_.reset(window);
 }
@@ -79,8 +108,19 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
     return nullptr;
   }
 
-  return ContextGLES::Create(std::move(gl),
-                             ShaderLibraryMappingsForPlayground());
+  auto context =
+      ContextGLES::Create(std::move(gl), ShaderLibraryMappingsForPlayground());
+  if (!context) {
+    FML_LOG(ERROR) << "Could not create context.";
+    return nullptr;
+  }
+
+  auto worker_id = context->AddReactorWorker(worker_);
+  if (!worker_id.has_value()) {
+    FML_LOG(ERROR) << "Could not add reactor worker.";
+    return nullptr;
+  }
+  return context;
 }
 
 // |PlaygroundImpl|
