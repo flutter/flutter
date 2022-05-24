@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/services/platform_channel.dart';
-import 'package:flutter/src/services/system_channels.dart';
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/painting/text_span.dart';
+import 'package:flutter/src/painting/text_style.dart';
+import 'package:flutter/src/services/platform_channel.dart';
+import 'package:flutter/src/services/system_channels.dart';
 
+import 'text_input.dart';
 ////////////////////////////////////////////////////////////////////////////////
 ///                            START OF PR #1.1                              ///
 ////////////////////////////////////////////////////////////////////////////////
