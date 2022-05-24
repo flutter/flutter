@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../android/android_builder.dart';
-import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
@@ -24,6 +22,7 @@ import '../project.dart';
 import '../protocol_discovery.dart';
 
 import 'android.dart';
+import 'android_builder.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
