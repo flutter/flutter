@@ -333,6 +333,15 @@ void PlatformViewAndroid::ReleaseResourceContext() const {
 }
 
 // |PlatformView|
+std::shared_ptr<impeller::Context> PlatformViewAndroid::GetImpellerContext()
+    const {
+  if (android_surface_) {
+    return android_surface_->GetImpellerContext();
+  }
+  return nullptr;
+}
+
+// |PlatformView|
 std::unique_ptr<std::vector<std::string>>
 PlatformViewAndroid::ComputePlatformResolvedLocales(
     const std::vector<std::string>& supported_locale_data) {

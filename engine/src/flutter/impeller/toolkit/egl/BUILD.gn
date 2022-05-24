@@ -18,7 +18,10 @@ impeller_component("egl") {
     "surface.h",
   ]
 
-  deps = [ "//flutter/fml" ]
+  deps = [
+    "../../base",
+    "//flutter/fml",
+  ]
 
   libs = []
   if (is_android) {
