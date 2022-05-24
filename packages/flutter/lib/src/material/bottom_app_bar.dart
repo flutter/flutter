@@ -128,8 +128,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
   @override
   Widget build(BuildContext context) {
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
+    final bool hasFab = Scaffold.of(context).hasFloatingActionButton;
     final NotchedShape? notchedShape = widget.shape ?? babTheme.shape;
-    final CustomClipper<Path> clipper = notchedShape != null
+    final CustomClipper<Path> clipper = notchedShape != null && hasFab
       ? _BottomAppBarClipper(
           geometry: geometryListenable,
           shape: notchedShape,
