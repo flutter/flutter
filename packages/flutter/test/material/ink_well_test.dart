@@ -1513,4 +1513,32 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
   });
+
+  testWidgets('InkWell dispose statesController', (WidgetTester tester) async {
+    Widget buildFrame(MaterialStatesController? statesController) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: InkWell(
+              statesController: statesController,
+              onTap: () { },
+              child: const Text('inkwell'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final MaterialStatesController controller = MaterialStatesController();
+
+    // hasListeners will assert if controller was disposed
+    await tester.pumpWidget(buildFrame(controller));
+    expect(controller.hasListeners, true);
+
+    await tester.pumpWidget(buildFrame(null));
+    expect(controller.hasListeners, false);
+
+    await tester.pumpWidget(buildFrame(controller));
+    expect(controller.hasListeners, true);
+  });
 }
