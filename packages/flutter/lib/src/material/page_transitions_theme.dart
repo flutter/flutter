@@ -415,13 +415,6 @@ abstract class PageTransitionsBuilder {
   /// color for the [MaterialPageRoute]s. It is `null` by default.
   Color? getBarrierColor(PageRoute<dynamic> route) => null;
 
-  /// Whether pointers will be ignored during the route's transitions.
-  ///
-  /// Used by [MaterialRouteTransitionMixin.ignorePointerDuringTransitions] to
-  /// define the ignore pointer behavior for [MaterialPageRoute]s. It is `false`
-  /// by default.
-  bool get ignorePointerDuringTransitions => false;
-
   /// The duration of the route's transition.
   ///
   /// Used by [MaterialRouteTransitionMixin.transitionDuration] to define the
@@ -579,9 +572,6 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   Color? getBarrierColor(PageRoute<dynamic> route) => CupertinoRouteTransitionMixin.getBarrierColor(route);
 
   @override
-  bool get ignorePointerDuringTransitions => true;
-
-  @override
   Widget buildTransitions<T>(
     PageRoute<T> route,
     BuildContext context,
@@ -621,9 +611,6 @@ class NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Duration get transitionDuration => Duration.zero;
-
-  @override
-  bool get ignorePointerDuringTransitions => false;
 
   @override
   Widget buildTransitions<T>(

@@ -93,9 +93,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   Duration get reverseTransitionDuration => _pageTransitionsBuilder.reverseTransitionDuration;
 
   @override
-  bool get ignorePointerDuringTransitions => _pageTransitionsBuilder.ignorePointerDuringTransitions;
-
-  @override
   Color? get barrierColor => _pageTransitionsBuilder.getBarrierColor(this);
 
   @override

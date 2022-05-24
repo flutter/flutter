@@ -1428,7 +1428,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
     _ignorePointerNotifier.value = !isCurrent ||
         (navigator?.userGestureInProgress ?? false) ||
-        ((isTransitioning(animation) || isTransitioning(secondaryAnimation)) && ignorePointerDuringTransitions);
+        (ignorePointerDuringTransitions &&
+            (isTransitioning(animation) || isTransitioning(secondaryAnimation)));
   }
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
