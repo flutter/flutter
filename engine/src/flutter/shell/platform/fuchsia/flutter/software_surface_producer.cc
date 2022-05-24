@@ -55,13 +55,13 @@ SoftwareSurfaceProducer::SoftwareSurfaceProducer(
       sysmem_allocator_.NewRequest().TakeChannel().release());
   sysmem_allocator_->SetDebugClientInfo(GetCurrentProcessName(),
                                         GetCurrentProcessId());
-  FML_DCHECK(status != ZX_OK);
+  FML_DCHECK(status == ZX_OK);
 
   if (!scenic_session_) {
     status = fdio_service_connect(
         "/svc/fuchsia.ui.composition.Allocator",
         flatland_allocator_.NewRequest().TakeChannel().release());
-    FML_DCHECK(status != ZX_OK);
+    FML_DCHECK(status == ZX_OK);
   }
 
   valid_ = true;
