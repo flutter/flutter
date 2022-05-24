@@ -24,7 +24,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSpellCheckPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUndoManagerDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUndoManagerPlugin.h"
@@ -112,7 +111,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   fml::scoped_nsobject<FlutterPlatformPlugin> _platformPlugin;
   fml::scoped_nsobject<FlutterTextInputPlugin> _textInputPlugin;
   fml::scoped_nsobject<FlutterUndoManagerPlugin> _undoManagerPlugin;
-  fml::scoped_nsobject<FlutterSpellCheckPlugin> _spellCheckPlugin;
   fml::scoped_nsobject<FlutterRestorationPlugin> _restorationPlugin;
   fml::scoped_nsobject<FlutterMethodChannel> _localizationChannel;
   fml::scoped_nsobject<FlutterMethodChannel> _navigationChannel;
@@ -121,7 +119,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   fml::scoped_nsobject<FlutterMethodChannel> _platformViewsChannel;
   fml::scoped_nsobject<FlutterMethodChannel> _textInputChannel;
   fml::scoped_nsobject<FlutterMethodChannel> _undoManagerChannel;
-  fml::scoped_nsobject<FlutterMethodChannel> _spellCheckChannel;
   fml::scoped_nsobject<FlutterBasicMessageChannel> _lifecycleChannel;
   fml::scoped_nsobject<FlutterBasicMessageChannel> _systemChannel;
   fml::scoped_nsobject<FlutterBasicMessageChannel> _settingsChannel;
@@ -467,9 +464,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (FlutterMethodChannel*)undoManagerChannel {
   return _undoManagerChannel.get();
 }
-- (FlutterMethodChannel*)spellCheckChannel {
-  return _spellCheckChannel.get();
-}
 - (FlutterBasicMessageChannel*)lifecycleChannel {
   return _lifecycleChannel.get();
 }
@@ -499,7 +493,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _systemChannel.reset();
   _settingsChannel.reset();
   _keyEventChannel.reset();
-  _spellCheckChannel.reset();
 }
 
 - (void)startProfiler {
@@ -568,11 +561,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       binaryMessenger:self.binaryMessenger
                 codec:[FlutterJSONMethodCodec sharedInstance]]);
 
-  _spellCheckChannel.reset([[FlutterMethodChannel alloc]
-         initWithName:@"flutter/spellcheck"
-      binaryMessenger:self.binaryMessenger
-                codec:[FlutterJSONMethodCodec sharedInstance]]);
-
   _lifecycleChannel.reset([[FlutterBasicMessageChannel alloc]
          initWithName:@"flutter/lifecycle"
       binaryMessenger:self.binaryMessenger
@@ -607,8 +595,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _restorationPlugin.reset([[FlutterRestorationPlugin alloc]
          initWithChannel:_restorationChannel.get()
       restorationEnabled:_restorationEnabled]);
-  _spellCheckPlugin.reset(
-      [[FlutterSpellCheckPlugin alloc] initWithMethodChannel:_spellCheckChannel.get()]);
 }
 
 - (void)maybeSetupPlatformViewChannels {
