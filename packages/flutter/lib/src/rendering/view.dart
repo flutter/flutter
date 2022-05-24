@@ -169,11 +169,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       child!.layout(BoxConstraints.tight(_size));
   }
 
-  @override
-  void rotate({ int? oldAngle, int? newAngle, Duration? time }) {
-    assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
-  }
-
   /// Determines the set of render objects located at the given position.
   ///
   /// Returns true if the given point is contained in this render object or one
