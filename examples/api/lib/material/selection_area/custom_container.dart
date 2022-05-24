@@ -92,9 +92,9 @@ class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainer
 
   @override
   SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
-    final RenderBox box = selectionContainerContext.findRenderObject()! as RenderBox;
-    final Rect containerRect = Rect.fromLTWH(0, 0, box.size.width, box.size.height);
-    final Offset localOffset = box.globalToLocal(event.globalPosition);
+    final Rect containerRect = Rect.fromLTWH(0, 0, containerSize.width, containerSize.height);
+    final Matrix4 globalToLocal = getTransformTo(null)..invert();
+    final Offset localOffset = MatrixUtils.transformPoint(globalToLocal, event.globalPosition);
     final Offset adjustOffset = SelectionUtils.adjustDragOffset(containerRect, localOffset);
     if (event.type == SelectionEventType.startEdgeUpdate) {
       _adjustedStartEdge = adjustOffset;

@@ -269,6 +269,26 @@ abstract class SelectionContainerDelegate implements SelectionHandler, Selection
     return child.getTransformTo(_selectionContainerContext!.findRenderObject()! as RenderBox);
   }
 
+  /// Gets the paint transform from the [SelectionContainer] of this delegate to
+  /// the `ancestor`.
+  ///
+  /// Returns a matrix that maps the [SelectionContainer] paint coordinate
+  /// system to the coordinate system of `ancestor`.
+  ///
+  /// If `ancestor` is null, this method returns a matrix that maps from the
+  /// local paint coordinate system to the coordinate system of the
+  /// [PipelineOwner.rootNode].
+  ///
+  /// Can only be called after [SelectionContainer] is laid out.
+  Matrix4 getTransformTo(RenderObject? ancestor) {
+    assert(
+      _selectionContainerContext?.findRenderObject() != null,
+      'getTransformTo cannot be called before SelectionContainer is laid out.',
+    );
+    final RenderBox box = _selectionContainerContext!.findRenderObject()! as RenderBox;
+    return box.getTransformTo(ancestor);
+  }
+
   /// Gets the size of the [SelectionContainer] of this delegate.
   ///
   /// Can only be called after [SelectionContainer] is laid out.

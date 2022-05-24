@@ -66,7 +66,7 @@ enum SelectionResult {
 /// of receiving selection events.
 /// {@endtemplate}
 abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
-  /// Marks this handler to be responsible for pushing [Leaderlayer]s for the
+  /// Marks this handler to be responsible for pushing [LeaderLayer]s for the
   /// selection handles.
   ///
   /// This handler is responsible for pushing the leader layers with the
