@@ -27,6 +27,12 @@ class DefaultSelectionGestures extends StatelessWidget {
           (BuildContext context) => TapGestureRecognizer(debugOwner: context),
           (TapGestureRecognizer instance, BuildContext context) {
         instance
+          ..onSecondaryTapUp = (TapUpDetails details) {
+            print('onSecondaryTapUp');
+            Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+            Actions.invoke(context, SelectionToolbarControlIntent.hide);
+            Actions.invoke(context, SelectionToolbarControlIntent.show);
+          }
           ..onSecondaryTap = () {
             print('onSecondaryTap');
           }
@@ -44,7 +50,7 @@ class DefaultSelectionGestures extends StatelessWidget {
               case PointerDeviceKind.stylus:
               case PointerDeviceKind.invertedStylus:
               // Precise devices should place the cursor at a precise position.
-                Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
                 break;
               case PointerDeviceKind.touch:
               case PointerDeviceKind.unknown:
@@ -52,7 +58,7 @@ class DefaultSelectionGestures extends StatelessWidget {
               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
               // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
               // of the word.
-                Actions.invoke(context, SelectGlyphEdgeIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                Actions.invoke(context, SelectWordEdgeIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
                 break;
             }
           }
@@ -60,6 +66,25 @@ class DefaultSelectionGestures extends StatelessWidget {
             print('onTapCancel');
           };
       }
+  );
+
+  static final ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer> _iOSMacPanGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+          (BuildContext context) => PanGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+          (PanGestureRecognizer instance, BuildContext context) {
+            instance
+              ..dragStartBehavior = DragStartBehavior.down
+              ..onStart = (DragStartDetails details) {
+                print('onDragStart');
+                Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: true));
+              }
+              ..onUpdate = (DragUpdateDetails details) {
+                print('onDragUpdate');
+                Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: true));
+              }
+              ..onEnd = (DragEndDetails details) {
+                print('onDragEnd');
+              };
+          }
   );
 
   static final Map<Type, ContextGestureRecognizerFactory> _commonGestures = {
@@ -120,6 +145,7 @@ class DefaultSelectionGestures extends StatelessWidget {
   static final Map<Type, ContextGestureRecognizerFactory> _fuchsiaGestures = _commonGestures;
   static final Map<Type, ContextGestureRecognizerFactory> _iOSGestures = <Type, ContextGestureRecognizerFactory>{
     TapGestureRecognizer : _iOSMacTapGestureRecognizer,
+    PanGestureRecognizer : _iOSMacPanGestureRecognizer,
   };
   static final Map<Type, ContextGestureRecognizerFactory> _linuxGestures = _commonGestures;
   static final Map<Type, ContextGestureRecognizerFactory> _macGestures = _commonGestures;

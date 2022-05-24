@@ -34,12 +34,6 @@ const Radius _kFloatingCaretRadius = Radius.circular(1.0);
 /// Used by [RenderEditable.onCaretChanged].
 typedef CaretChangedHandler = void Function(Rect caretRect);
 
-enum TextBoundary {
-  character,
-  word,
-  line,
-}
-
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
 /// holds the selection.
@@ -2072,53 +2066,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
-  TextPosition getTextPositionForOffset(Offset offset) {
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    return _textPainter.getPositionForOffset(globalToLocal(offset) - _paintOffset);
-  }
-
-  TextRange getTextBoundaryAtTextPosition(TextPosition position, {required TextBoundary boundaryType,}) {
-    if (obscureText) {
-      switch (boundaryType) {
-        case TextBoundary.character:
-          return TextRange.collapsed(position.offset);
-        case TextBoundary.word:
-        case TextBoundary.line:
-          return TextRange(start: 0, end: _plainText.length);
-      }
-    }
-
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    // Character/word boundaries do not rely on the current text layout, but
-    // unforuntely word boundary is currently a byproduct of text layout so we
-    // still have to make sure the text is properly laid out.
-    assert(
-    boundaryType == TextBoundary.character
-        || (_textLayoutLastMaxWidth == constraints.maxWidth
-        && _textLayoutLastMinWidth == constraints.minWidth),
-    'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
-    );
-
-    assert(!obscureText);
-    switch (boundaryType) {
-      case TextBoundary.character:
-        int searchIndex = 0;
-        for (final String character in _plainText.characters) {
-          assert(searchIndex <= position.offset);
-          final int rangeEnd = searchIndex + character.length;
-          if (rangeEnd > position.offset) {
-            return TextRange(start: searchIndex, end: searchIndex + character.length);
-          }
-          searchIndex += character.length;
-        }
-        return const TextRange.collapsed(0);
-      case TextBoundary.word:
-        return _textPainter.getWordBoundary(position);
-      case TextBoundary.line:
-        return _textPainter.getLineBoundary(position);
-    }
-  }
-
   TextSelection _getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     final TextRange word = _textPainter.getWordBoundary(position);
@@ -2136,6 +2083,67 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
+    } else if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(position.offset))
+        && position.offset > 0) {
+      assert(defaultTargetPlatform != null);
+      final TextRange? previousWord = _getPreviousWord(word.start);
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          if (previousWord == null) {
+            final TextRange? nextWord = _getNextWord(word.start);
+            if (nextWord == null) {
+              return TextSelection.collapsed(offset: position.offset);
+            }
+            return TextSelection(
+              baseOffset: position.offset,
+              extentOffset: nextWord.end,
+            );
+          }
+          return TextSelection(
+            baseOffset: previousWord.start,
+            extentOffset: position.offset,
+          );
+        case TargetPlatform.android:
+          if (readOnly) {
+            if (previousWord == null) {
+              return TextSelection(
+                baseOffset: position.offset,
+                extentOffset: position.offset + 1,
+              );
+            }
+            return TextSelection(
+              baseOffset: previousWord.start,
+              extentOffset: position.offset,
+            );
+          }
+          break;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    }
+
+    return TextSelection(baseOffset: word.start, extentOffset: word.end);
+  }
+
+  TextSelection getWordAtOffset(TextPosition position) {
+    debugAssertLayoutUpToDate();
+    final TextRange word = _textPainter.getWordBoundary(position);
+    // When long-pressing past the end of the text, we want a collapsed cursor.
+    if (position.offset >= word.end)
+      return TextSelection.fromPosition(position);
+    // If text is obscured, the entire sentence should be treated as one word.
+    if (obscureText) {
+      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+      // On iOS, select the previous word if there is a previous word, or select
+      // to the end of the next word if there is a next word. Select nothing if
+      // there is neither a previous word nor a next word.
+      //
+      // If the platform is Android and the text is read only, try to select the
+      // previous word if there is one; otherwise, select the single whitespace at
+      // the position.
     } else if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(position.offset))
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);

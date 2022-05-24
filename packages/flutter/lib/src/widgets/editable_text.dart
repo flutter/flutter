@@ -3168,7 +3168,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // --------------------------- Selection Actions ---------------------------
   void expandSelection(ExpandSelectionToPositionIntent intent) {
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
-    final TextSelection selection = intent.fromSelection ?? renderEditable.selection!;
+    final TextSelection selection = intent.fromSelection ?? textEditingValue.selection!;
     final bool baseIsCloser = (tappedPosition.offset - selection.baseOffset).abs()
         < (tappedPosition.offset - selection.extentOffset).abs();
     final TextSelection nextSelection = selection.copyWith(
@@ -3186,7 +3186,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void extendSelection(ExtendSelectionToPositionIntent intent) {
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
-    final TextSelection selection = renderEditable.selection!;
+    final TextSelection selection = textEditingValue.selection!;
     final TextSelection nextSelection = selection.copyWith(
       extentOffset: tappedPosition.offset,
     );
@@ -3200,18 +3200,81 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void selectPosition(SelectTapPositionIntent intent) {
-    renderEditable.selectPositionAt(from: intent.position, cause: intent.cause);
+    final TextPosition fromPosition = renderEditable.getPositionForPoint(intent.from);
+    final TextPosition? toPosition = intent.to == null
+      ? null
+      : renderEditable.getPositionForPoint(intent.to!);
+
+    final int baseOffset = fromPosition.offset;
+    final int extentOffset = toPosition?.offset ?? fromPosition.offset;
+
+    TextSelection newSelection = TextSelection(
+      baseOffset: baseOffset,
+      extentOffset: extentOffset,
+      affinity: fromPosition.affinity,
+    );
+
+    if (newSelection.isValid) {
+      final int textLength = textEditingValue.text.length;
+      newSelection = newSelection.copyWith(
+        baseOffset: math.min(newSelection.baseOffset, textLength),
+        extentOffset: math.min(newSelection.extentOffset, textLength),
+      );
+    }
+
+    userUpdateTextEditingValue(
+      textEditingValue.copyWith(
+        selection: newSelection,
+      ),
+      intent.cause,
+    );
   }
 
-  void selectWordEdge(SelectGlyphEdgeIntent intent) {
-    final TextPosition textPosition = renderEditable.getTextPositionForOffset(intent.position);
-    final TextRange word = renderEditable.getTextBoundaryAtTextPosition(
-      textPosition,
-      boundaryType: TextBoundary.word,
+  void selectWordEdge(SelectWordEdgeIntent intent) {
+    final TextPosition textPosition = renderEditable.getPositionForPoint(intent.position);
+    final TextRange word = renderEditable.getWordBoundary(textPosition);
+    late TextSelection newSelection;
+    if (textPosition.offset - word.start <= 1) {
+      newSelection = TextSelection.collapsed(offset: word.start);
+    } else {
+      newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
+    }
+
+    if (newSelection.isValid) {
+      final int textLength = textEditingValue.text.length;
+      newSelection = newSelection.copyWith(
+        baseOffset: math.min(newSelection.baseOffset, textLength),
+        extentOffset: math.min(newSelection.extentOffset, textLength),
+      );
+    }
+
+    userUpdateTextEditingValue(
+      textEditingValue.copyWith(
+        selection: newSelection,
+      ),
+      intent.cause,
     );
-    final TextSelection newSelection = textPosition.offset - word.start <= 1
-        ? TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream)
-        : TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
+  }
+
+  void selectRange(SelectRangeIntent intent) {
+    final TextPosition firstPosition = renderEditable.getPositionForPoint(intent.from);
+    final TextSelection firstWord = renderEditable.getWordAtOffset(firstPosition);
+    final TextSelection lastWord = intent.to == null ?
+        firstWord : renderEditable.getWordAtOffset(renderEditable.getPositionForPoint(intent.to!));
+
+    TextSelection newSelection = TextSelection(
+      baseOffset: firstWord.base.offset,
+      extentOffset: lastWord.extent.offset,
+      affinity: firstWord.affinity,
+    );
+
+    if (newSelection.isValid) {
+      final int textLength = textEditingValue.text.length;
+      newSelection = newSelection.copyWith(
+        baseOffset: math.min(newSelection.baseOffset, textLength),
+        extentOffset: math.min(newSelection.extentOffset, textLength),
+      );
+    }
 
     userUpdateTextEditingValue(
       textEditingValue.copyWith(

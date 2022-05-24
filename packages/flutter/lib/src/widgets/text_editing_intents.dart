@@ -357,20 +357,40 @@ class ExtendSelectionToPositionIntent extends Intent {
   final bool shiftPressed;
 }
 
-class SelectGlyphEdgeIntent extends Intent {
-  const SelectGlyphEdgeIntent({required this.cause, required this.position});
+class KeyboardRequestIntent extends Intent {
+  const KeyboardRequestIntent();
+}
+
+class SelectWordEdgeIntent extends Intent {
+  const SelectWordEdgeIntent({required this.cause, required this.position});
 
   final SelectionChangedCause cause;
   final Offset position;
 }
 
 class SelectRangeIntent extends Intent {
+  const SelectRangeIntent({required this.cause, required this.from, this.to});
 
+  final SelectionChangedCause cause;
+  final Offset from;
+  final Offset? to;
 }
 
 class SelectTapPositionIntent extends Intent {
-  const SelectTapPositionIntent({required this.cause, required this.position});
+  const SelectTapPositionIntent({required this.cause, required this.from, this.to});
 
   final SelectionChangedCause cause;
-  final Offset position;
+  final Offset from;
+  final Offset? to;
+}
+
+class SelectionToolbarControlIntent extends Intent {
+  const SelectionToolbarControlIntent._({this.showSelectionToolbar, this.toggleSelectionToolbar});
+
+  static const SelectionToolbarControlIntent show = SelectionToolbarControlIntent._(showSelectionToolbar: true, toggleSelectionToolbar: null);
+  static const SelectionToolbarControlIntent hide = SelectionToolbarControlIntent._(showSelectionToolbar: false, toggleSelectionToolbar: null);
+  static const SelectionToolbarControlIntent toggle = SelectionToolbarControlIntent._(showSelectionToolbar: null, toggleSelectionToolbar: true);
+
+  final bool? showSelectionToolbar;
+  final bool? toggleSelectionToolbar;
 }
