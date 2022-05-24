@@ -302,8 +302,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   }
 
   /// Prints the line of a file with a prefix that indicates the line count.
-  void printConflictLine(String text, int lineNumber, {TerminalColor? color}) {
-    final String padding = ' ' * (5 - lineNumber.toString().length); // This pads line numbers up to 99,999
+  void printConflictLine(String text, int lineNumber, {TerminalColor? color, int paddingLength = 5}) {
+    // Default padding of 5 pads line numbers up to 99,999
+    final String padding = ' ' * (paddingLength - lineNumber.toString().length);
     logger.printStatus('$lineNumber$padding', color: TerminalColor.grey, newline: false, indent: 2);
     logger.printStatus(text, color: color);
   }
