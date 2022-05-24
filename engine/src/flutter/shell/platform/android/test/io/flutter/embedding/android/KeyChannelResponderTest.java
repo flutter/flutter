@@ -5,7 +5,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 
 import android.annotation.TargetApi;
-import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
@@ -22,8 +21,6 @@ import org.robolectric.annotation.Config;
 @RunWith(AndroidJUnit4.class)
 @TargetApi(28)
 public class KeyChannelResponderTest {
-
-  private static final int DEAD_KEY = '`' | KeyCharacterMap.COMBINING_ACCENT;
 
   @Mock KeyEventChannel keyEventChannel;
   KeyChannelResponder channelResponder;
@@ -54,28 +51,5 @@ public class KeyChannelResponderTest {
           completionCallbackInvocationCounter[0]++;
         });
     assertEquals(completionCallbackInvocationCounter[0], 1);
-  }
-
-  @Test
-  public void basicCombingCharactersTest() {
-    assertEquals(0, (int) channelResponder.applyCombiningCharacterToBaseCharacter(0));
-    assertEquals('A', (int) channelResponder.applyCombiningCharacterToBaseCharacter('A'));
-    assertEquals('B', (int) channelResponder.applyCombiningCharacterToBaseCharacter('B'));
-    assertEquals('B', (int) channelResponder.applyCombiningCharacterToBaseCharacter('B'));
-    assertEquals(0, (int) channelResponder.applyCombiningCharacterToBaseCharacter(0));
-    assertEquals(0, (int) channelResponder.applyCombiningCharacterToBaseCharacter(0));
-
-    assertEquals('`', (int) channelResponder.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
-    assertEquals('`', (int) channelResponder.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
-    assertEquals('À', (int) channelResponder.applyCombiningCharacterToBaseCharacter('A'));
-
-    assertEquals('`', (int) channelResponder.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
-    assertEquals(0, (int) channelResponder.applyCombiningCharacterToBaseCharacter(0));
-    // The 0 input should remove the combining state.
-    assertEquals('A', (int) channelResponder.applyCombiningCharacterToBaseCharacter('A'));
-
-    assertEquals(0, (int) channelResponder.applyCombiningCharacterToBaseCharacter(0));
-    assertEquals('`', (int) channelResponder.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
-    assertEquals('À', (int) channelResponder.applyCombiningCharacterToBaseCharacter('A'));
   }
 }

@@ -1313,7 +1313,10 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/Flutt
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterTextureView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyChannelResponder.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyData.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyEmbedderResponder.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyboardManager.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyboardMap.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/MotionEventTracker.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/RenderMode.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/SplashScreen.java
