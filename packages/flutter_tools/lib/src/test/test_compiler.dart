@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -22,7 +20,7 @@ class CompilationRequest {
   CompilationRequest(this.mainUri, this.result);
 
   Uri mainUri;
-  Completer<String> result;
+  Completer<String?> result;
 }
 
 /// A frontend_server wrapper for the flutter test runner.
@@ -43,7 +41,7 @@ class TestCompiler {
   TestCompiler(
     this.buildInfo,
     this.flutterProject,
-    { String precompiledDillPath }
+    { String? precompiledDillPath }
   ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject.directory.path,
         getBuildDirectory(),
@@ -57,13 +55,11 @@ class TestCompiler {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
-    outputDill = outputDillDirectory.childFile('output.dill');
     globals.printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
     globals.printTrace('Listening to compiler controller...');
     compilerController.stream.listen(_onCompilationRequest, onDone: () {
-      globals.printTrace('Deleting ${outputDillDirectory.path}...');
-      outputDillDirectory.deleteSync(recursive: true);
+      globals.printTrace('Deleting ${_outputDillDirectory.path}...');
+      _outputDillDirectory.deleteSync(recursive: true);
     });
   }
 
@@ -74,26 +70,24 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
 
+  ResidentCompiler? compiler;
+  late final File outputDill = _outputDillDirectory.childFile('output.dill');
+  late final Directory _outputDillDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
 
-  ResidentCompiler compiler;
-  File outputDill;
-
-  Future<String> compile(Uri mainDart) {
+  Future<String?> compile(Uri mainDart) {
     final Completer<String> completer = Completer<String>();
     if (compilerController.isClosed) {
-      return Future<String>.value();
+      return Future<String?>.value();
     }
     compilerController.add(CompilationRequest(mainDart, completer));
     return completer.future;
   }
 
   Future<void> _shutdown() async {
-    // Check for null in case this instance is shut down before the
+    // This instance may have been shut down before the
     // lazily-created compiler has been created.
-    if (compiler != null) {
-      await compiler.shutdown();
-      compiler = null;
-    }
+    await compiler?.shutdown();
+    compiler = null;
   }
 
   Future<void> dispose() async {
@@ -105,8 +99,8 @@ class TestCompiler {
   @visibleForTesting
   Future<ResidentCompiler> createCompiler() async {
     final ResidentCompiler residentCompiler = ResidentCompiler(
-      globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      artifacts: globals.artifacts,
+      globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      artifacts: globals.artifacts!,
       logger: globals.logger,
       processManager: globals.processManager,
       buildMode: buildInfo.mode,
@@ -155,27 +149,26 @@ class TestCompiler {
           buildInfo.packageConfig,
           mainUriString,
           globals.fs.file(request.mainUri),
-          throwOnPluginPubspecError: false,
         );
         invalidatedRegistrantFiles.add(flutterProject.dartPluginRegistrant.absolute.uri);
       }
 
-      final CompilerOutput compilerOutput = await compiler.recompile(
+      final CompilerOutput? compilerOutput = await compiler?.recompile(
         request.mainUri,
         <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
         outputPath: outputDill.path,
         packageConfig: buildInfo.packageConfig,
-        projectRootPath: flutterProject?.directory?.absolute?.path,
+        projectRootPath: flutterProject.directory.absolute.path,
         checkDartPluginRegistry: true,
         fs: globals.fs,
       );
-      final String outputPath = compilerOutput?.outputFilename;
+      final String? outputPath = compilerOutput?.outputFilename;
 
       // In case compiler didn't produce output or reported compilation
       // errors, pass [null] upwards to the consumer and shutdown the
       // compiler to avoid reusing compiler that might have gotten into
       // a weird state.
-      if (outputPath == null || compilerOutput.errorCount > 0) {
+      if (outputPath == null || (compilerOutput != null && compilerOutput.errorCount > 0)) {
         request.result.complete(null);
         await _shutdown();
       } else {
@@ -197,8 +190,8 @@ class TestCompiler {
         } else {
           request.result.complete(outputPath);
         }
-        compiler.accept();
-        compiler.reset();
+        compiler?.accept();
+        compiler?.reset();
       }
       globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       // Only remove now when we finished processing the element
