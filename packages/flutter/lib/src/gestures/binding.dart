@@ -373,12 +373,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
         debugPrint('$event');
       return true;
     }());
-    if (hitTestResult != null ||
-        event is PointerAddedEvent ||
-        event is PointerRemovedEvent) {
-      assert(event.position != null);
-      dispatchEvent(event, hitTestResult);
-    }
+    assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
+    assert(event.position != null);
+    dispatchEvent(event, hitTestResult);
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
@@ -399,9 +396,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   @pragma('vm:notify-debugger-on-exception')
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
-    // No hit test information implies that this is a [PointerHoverEvent],
-    // [PointerAddedEvent], or [PointerRemovedEvent]. These events are specially
-    // routed here; other events will be routed through the `handleEvent` below.
+    // No hit test information implies that this is a [PointerAddedEvent] or
+    // [PointerRemovedEvent]. These events are specially routed here; other
+    // events will be routed through the `handleEvent` below.
     if (hitTestResult == null) {
       assert(event is PointerAddedEvent || event is PointerRemovedEvent);
       try {
