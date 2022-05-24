@@ -54,8 +54,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// The current platform configuration.
   @override
-  ui.PlatformConfiguration get configuration => _configuration;
-  ui.PlatformConfiguration _configuration = ui.PlatformConfiguration(
+  ui.PlatformConfiguration configuration = ui.PlatformConfiguration(
     locales: parseBrowserLanguages(),
     textScaleFactor: findBrowserTextScaleFactor(),
   );
@@ -725,12 +724,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// The empty list is not a valid value for locales. This is only used for
   /// testing locale update logic.
   void debugResetLocales() {
-    _configuration = _configuration.copyWith(locales: const <ui.Locale>[]);
+    configuration = configuration.copyWith(locales: const <ui.Locale>[]);
   }
 
   // Called by FlutterViewEmbedder when browser languages change.
   void updateLocales() {
-    _configuration = _configuration.copyWith(locales: parseBrowserLanguages());
+    configuration = configuration.copyWith(locales: parseBrowserLanguages());
   }
 
   static List<ui.Locale> parseBrowserLanguages() {
@@ -788,7 +787,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// [onPlatformConfigurationChanged] callbacks if [textScaleFactor] changed.
   void _updateTextScaleFactor(double value) {
     if (configuration.textScaleFactor != value) {
-      _configuration = configuration.copyWith(textScaleFactor: value);
+      configuration = configuration.copyWith(textScaleFactor: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnTextScaleFactorChanged();
     }
@@ -859,7 +858,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   void updateSemanticsEnabled(bool semanticsEnabled) {
     if (semanticsEnabled != this.semanticsEnabled) {
-      _configuration = _configuration.copyWith(semanticsEnabled: semanticsEnabled);
+      configuration = configuration.copyWith(semanticsEnabled: semanticsEnabled);
       if (_onSemanticsEnabledChanged != null) {
         invokeOnSemanticsEnabledChanged();
       }
@@ -875,7 +874,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// callback if [_platformBrightness] changed.
   void _updatePlatformBrightness(ui.Brightness value) {
     if (configuration.platformBrightness != value) {
-      _configuration = configuration.copyWith(platformBrightness: value);
+      configuration = configuration.copyWith(platformBrightness: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnPlatformBrightnessChanged();
     }
