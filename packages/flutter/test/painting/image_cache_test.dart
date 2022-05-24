@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
@@ -133,6 +134,28 @@ void main() {
     expect(imageCache.currentSize, 0);
     expect(imageCache.currentSizeBytes, 0);
     expect(imageCache.maximumSizeBytes, 1);
+  });
+
+  test('evicted image will keep its completer alive until next microtask', () async {
+    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+
+    FakeAsync().run((FakeAsync async) {
+      final TestImageStreamCompleter completer = TestImageStreamCompleter();
+      imageCache.putIfAbsent(testImage, () => completer);
+
+      expect(imageCache.evict(testImage), true);
+
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      completer.debugFillProperties(builder);
+      expect(builder.properties.last.name, 'disposed');
+      expect(builder.properties.last.value, false);
+
+      async.flushMicrotasks();
+
+      completer.debugFillProperties(builder);
+      expect(builder.properties.last.name, 'disposed');
+      expect(builder.properties.last.value, true);
+    });
   });
 
   test('Returns null if an error is caught resolving an image', () {
