@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/src/painting/text_span.dart' show TextSpan;
 import 'package:flutter/src/painting/text_style.dart' show TextStyle;
 
-import 'text_input.dart';
+import 'text_input.dart' show TextEditingValue;
 
 /// A data structure representing a range of misspelled text and the suggested
 /// replacements for this range. For example, one [SuggestionSpan] of the
