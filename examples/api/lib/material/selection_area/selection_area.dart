@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This example makes the entire app selectable.
+// This example shows how to make a screen selectable..
 
 import 'package:flutter/material.dart';
 

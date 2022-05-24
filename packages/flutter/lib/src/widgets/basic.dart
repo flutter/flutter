@@ -5459,7 +5459,7 @@ class Flow extends MultiChildRenderObjectWidget {
 /// subtree of a [SelectionArea] or [SelectableRegion] and a
 /// [SelectionRegistrar] needs to be assigned to the
 /// [RichText.selectionRegistrar]. One can use
-/// [SelectionRegistrarScope.maybeOf] to get the [SelectionRegistrar] from a
+/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a
 /// context. This enables users to select the text in [RichText]s with mice or
 /// touch events.
 ///
@@ -5476,7 +5476,7 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ```dart
 /// RichText(
 ///   text: const TextSpan(text: 'Hello'),
-///   selectionRegistrar: SelectionRegistrarScope.maybeOf(context),
+///   selectionRegistrar: SelectionContainer.maybeOf(context),
 ///   selectionColor: const Color(0xAF6694e8),
 /// )
 /// ```

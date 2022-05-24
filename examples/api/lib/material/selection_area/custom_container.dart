@@ -53,7 +53,7 @@ class SelectionAllOrNoneContainer extends StatefulWidget {
 }
 
 class _SelectionAllOrNoneContainerState extends State<SelectionAllOrNoneContainer> {
-  final MySelectAllOrNoneContainerDelegate delegate = MySelectAllOrNoneContainerDelegate();
+  final SelectAllOrNoneContainerDelegate delegate = SelectAllOrNoneContainerDelegate();
 
   @override
   void dispose() {
@@ -63,19 +63,14 @@ class _SelectionAllOrNoneContainerState extends State<SelectionAllOrNoneContaine
 
   @override
   Widget build(BuildContext context) {
-    final SelectionRegistrar? registrar = SelectionRegistrarScope.maybeOf(context);
-    if (registrar == null) {
-      return widget.child;
-    }
     return SelectionContainer(
-      registrar: registrar,
       delegate: delegate,
       child: widget.child,
     );
   }
 }
 
-class MySelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   Offset? _adjustedStartEdge;
   Offset? _adjustedEndEdge;
   bool _isSelected = false;

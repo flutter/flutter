@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: const <Widget>[
                 Text('Selectable text'),
-                SelectionRegistrarScope.disabled(child: Text('Non-selectable text')),
+                SelectionContainer.disabled(child: Text('Non-selectable text')),
                 Text('Selectable text'),
               ],
             ),

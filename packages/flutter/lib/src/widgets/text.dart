@@ -350,7 +350,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// [Text] is not selectable by default. To make a [Text] selectable, one can
 /// wrap a subtree with a [SelectionArea] widget. To exclude a part of a subtree
 /// under [SelectionArea] from selection, once can also wrap that part of the
-/// subtree with [SelectionRegistrarScope.disabled].
+/// subtree with [SelectionContainer.disabled].
 ///
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text under a
@@ -543,7 +543,7 @@ class Text extends StatelessWidget {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     if (MediaQuery.boldTextOverride(context))
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
-    final SelectionRegistrar? registrar = SelectionRegistrarScope.maybeOf(context);
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     Widget result = RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.

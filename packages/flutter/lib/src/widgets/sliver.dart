@@ -817,7 +817,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive> with Automatic
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final SelectionRegistrar? newRegistrar = SelectionRegistrarScope.maybeOf(context);
+    final SelectionRegistrar? newRegistrar = SelectionContainer.maybeOf(context);
     if (_registrar != newRegistrar) {
       if (_registrar != null) {
         _selectableAttachments?.keys.forEach(_registrar!.remove);

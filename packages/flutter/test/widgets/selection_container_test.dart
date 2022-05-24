@@ -46,7 +46,7 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: SelectionRegistrarScope.disabled(
+        child: SelectionContainer.disabled(
           child: Column(
             children: const <Widget>[
               Text('column1', textDirection: TextDirection.ltr),

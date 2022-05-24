@@ -45,7 +45,7 @@ class MySelectableAdapter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SelectionRegistrar? registrar = SelectionRegistrarScope.maybeOf(context);
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     if (registrar == null) {
       return child;
     }

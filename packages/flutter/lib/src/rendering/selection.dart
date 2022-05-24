@@ -66,7 +66,7 @@ enum SelectionResult {
 /// of receiving selection events.
 /// {@endtemplate}
 abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
-  /// Marks this handler to be responsible for pushing leader layers for the
+  /// Marks this handler to be responsible for pushing [Leaderlayer]s for the
   /// selection handles.
   ///
   /// This handler is responsible for pushing the leader layers with the
@@ -123,7 +123,7 @@ class SelectedContent {
 ///
 /// In order to receive the selection event, the mixer needs to register
 /// itself to [SelectionRegistrar]s. Use
-/// [SelectionRegistrarScope.maybeOf] to get the selection registrar, and
+/// [SelectionContainer.maybeOf] to get the selection registrar, and
 /// mix the [SelectionRegistrant] to subscribe to the [SelectionRegistrar]
 /// automatically.
 ///
@@ -379,7 +379,7 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
 /// it will receive [SelectionEvent]s in
 /// [SelectionHandler.dispatchSelectionEvent].
 ///
-/// Use [SelectionRegistrarScope.maybeOf] to get the immediate [SelectionRegistrar]
+/// Use [SelectionContainer.maybeOf] to get the immediate [SelectionRegistrar]
 /// in the ancestor chain above the build context.
 ///
 /// See also:

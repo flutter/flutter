@@ -16,6 +16,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'overlay.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -60,7 +61,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 ///
 /// Both [SelectionContainer]s and the leaf [Selectable]s need to register
 /// themselves to the [SelectionRegistrar] from the
-/// [SelectionRegistrarScope.maybeOf] if they want to participate in the
+/// [SelectionContainer.maybeOf] if they want to participate in the
 /// selection.
 ///
 /// An example selection tree will look like:
@@ -118,7 +119,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 ///
 /// The render object also needs to register itself to a [SelectionRegistrar].
 /// For the most cases, one can use [SelectionRegistrant] to auto-register
-/// itself with the register returned from [SelectionRegistrarScope.maybeOf] as
+/// itself with the register returned from [SelectionContainer.maybeOf] as
 /// seen in the example below.
 ///
 /// {@tool dartpad}
@@ -143,7 +144,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 ///
 /// In the case where a group of widgets should be excluded from selection under
 /// a [SelectableRegion], consider wrapping that group of widgets using
-/// [SelectionRegistrarScope.disabled].
+/// [SelectionContainer.disabled].
 ///
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text in a Column.
@@ -758,6 +759,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   @override
   Widget build(BuildContext context) {
+    assert(Overlay.of(context, debugRequiredFor: widget) != null);
     return CompositedTransformTarget(
       link: _toolbarLayerLink,
       child: RawGestureDetector(
@@ -996,8 +998,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   bool _selectionInProgress = false;
   Set<Selectable> _additions = <Selectable>{};
 
-  RenderBox get _box => selectionContainerContext.findRenderObject()! as RenderBox;
-
   @override
   void add(Selectable selectable) {
     assert(!selectables.contains(selectable));
@@ -1221,7 +1221,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
     SelectionPoint? startPoint;
     if (startGeometry.startSelectionPoint != null) {
-      final Matrix4 startTransform =  selectables[startIndexWalker].getTransformTo(_box);
+      final Matrix4 startTransform =  getTransformFrom(selectables[startIndexWalker]);
       final Offset start = MatrixUtils.transformPoint(startTransform, startGeometry.startSelectionPoint!.localPosition);
       // It can be NaN if it is detached or off-screen.
       if (start.isFinite) {
@@ -1242,7 +1242,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     SelectionPoint? endPoint;
     if (endGeometry.endSelectionPoint != null) {
-      final Matrix4 endTransform =  selectables[endIndexWalker].getTransformTo(_box);
+      final Matrix4 endTransform =  getTransformFrom(selectables[endIndexWalker]);
       final Offset end = MatrixUtils.transformPoint(endTransform, endGeometry.endSelectionPoint!.localPosition);
       // It can be NaN if it is detached or off-screen.
       if (end.isFinite) {
@@ -1301,7 +1301,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     LayerLink? effectiveStartHandle = _startHandleLayer;
     LayerLink? effectiveEndHandle = _endHandleLayer;
     if (effectiveStartHandle != null || effectiveEndHandle != null) {
-      final Rect boxRect = Rect.fromLTWH(0, 0, _box.size.width, _box.size.height);
+      final Rect boxRect = Rect.fromLTWH(0, 0, containerSize.width, containerSize.height);
       final bool hideStartHandle = value.startSelectionPoint == null || !boxRect.contains(value.startSelectionPoint!.localPosition);
       final bool hideEndHandle = value.endSelectionPoint == null || !boxRect.contains(value.endSelectionPoint!.localPosition);
       effectiveStartHandle = hideStartHandle ? null : _startHandleLayer;

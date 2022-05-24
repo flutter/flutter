@@ -796,7 +796,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     );
 
     // Selection is only enabled when there is a parent registrar.
-    final SelectionRegistrar? registrar = SelectionRegistrarScope.maybeOf(context);
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     if (registrar != null) {
       result = _ScrollableSelectionHandler(
         state: this,

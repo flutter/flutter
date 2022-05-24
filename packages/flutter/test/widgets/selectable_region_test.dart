@@ -286,7 +286,7 @@ void main() {
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
-                SelectionRegistrarScope.disabled(child: Text('Good, and you?')),
+                SelectionContainer.disabled(child: Text('Good, and you?')),
                 Text('Fine, thank you.'),
               ],
             ),
@@ -926,7 +926,7 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 16));
       expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
-    });
+    }, skip: kIsWeb); // [Intended] Web uses its native context menu.
 
     testWidgets('can copy from toolbar', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -965,7 +965,7 @@ void main() {
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'thank');
-    });
+    }, skip: kIsWeb); // [Intended] Web uses its native context menu.
   });
 }
 
@@ -977,7 +977,7 @@ class SelectionSpy extends LeafRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderSelectionSpy(
-      SelectionRegistrarScope.maybeOf(context),
+      SelectionContainer.maybeOf(context),
     );
   }
 
