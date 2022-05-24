@@ -78,6 +78,13 @@ enum RefreshIndicatorTriggerMode {
 /// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to trigger [RefreshIndicator] in a nested scroll view using
+/// the [notificationPredicate] property.
+///
+/// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.1.dart **
+/// {@end-tool}
+///
 /// ## Troubleshooting
 ///
 /// ### Refresh indicator does not show up
