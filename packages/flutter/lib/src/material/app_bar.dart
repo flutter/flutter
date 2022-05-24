@@ -974,10 +974,11 @@ class _AppBarState extends State<AppBar> {
           onPressed: _handleDrawerButton,
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
-      } else {
-        if (!hasEndDrawer && canPop) {
-          leading = useCloseButton ? const CloseButton() : const BackButton();
-        }
+        // TODO(chunhtai): remove (!hasEndDrawer && canPop) once internal tests
+        // are migrated.
+        // https://github.com/flutter/flutter/issues/80256.
+      } else if ((!hasEndDrawer && canPop) || (parentRoute?.impliesAppBarDismissal ?? false)) {
+        leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
     if (leading != null) {

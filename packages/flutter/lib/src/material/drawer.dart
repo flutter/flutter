@@ -402,7 +402,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (_historyEntry == null) {
       final ModalRoute<dynamic>? route = ModalRoute.of(context);
       if (route != null) {
-        _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
+        _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved, impliesAppBarDismissal: false);
         route.addLocalHistoryEntry(_historyEntry!);
         FocusScope.of(context).setFirstFocus(_focusScopeNode);
       }

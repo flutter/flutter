@@ -837,7 +837,7 @@ class ColorScheme with Diagnosticable {
       inversePrimary : inversePrimary ?? this.inversePrimary,
       primaryVariant: primaryVariant ?? this.primaryVariant,
       secondaryVariant: secondaryVariant ?? this.secondaryVariant,
-      surfaceTint: _surfaceTint ?? this.surfaceTint,
+      surfaceTint: surfaceTint ?? this.surfaceTint,
     );
   }
 
