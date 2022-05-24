@@ -487,6 +487,7 @@ class TextPainter {
     return builder.build()
       ..layout(const ui.ParagraphConstraints(width: double.infinity));
   }
+
   /// The height of a space in [text] in logical pixels.
   ///
   /// Not every line of text in [text] will have this height, but this height

@@ -42,6 +42,8 @@ class AutomaticKeepAlive extends StatefulWidget {
 
 class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   Map<Listenable, VoidCallback>? _handles;
+  // In order to apply parent data out of turn, the child of the KeepAlive
+  // widget must be the same across frames.
   late Widget _child;
   bool _keepingAlive = false;
 
