@@ -384,7 +384,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     // Padding calculations difficult. Rather than be reliant on the internal implementation
     // of the activity indicator, the Positioned widget allows us to be explicit where the
     // widget gets placed. Also note that the indicator should appear over the top of the
-    // dragged widget, hence the use of Overflow.visible.
+    
     return Center(
       child: Stack(
         clipBehavior: Clip.none,
