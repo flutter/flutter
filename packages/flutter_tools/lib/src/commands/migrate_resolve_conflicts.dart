@@ -122,6 +122,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     return const FlutterCommandResult(ExitStatus.success);
   }
 
+  /// Parses the lines of a file and extracts a list of Conflicts.
   List<Conflict> findConflicts(List<String> lines) {
     // Find all conflicts
     final List<Conflict> conflicts = <Conflict>[];
@@ -145,6 +146,8 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     return conflicts;
   }
 
+  /// Display a detected conflict and prompt the developer on whether to accept the original lines, new lines,
+  /// or skip handling the conflict.
   Future<void> promptDeveloperSelectAction(List<Conflict> conflicts, List<String> lines, String localPath) async {
     final int contextLineCount = int.parse(stringArg('context-lines')!);
     for (final Conflict conflict in conflicts) {
@@ -210,7 +213,10 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     }
   }
 
-  // Returns true if changes were accepted or rejected. Returns false if user indicated to retry.
+  /// Prints a summary of the changes selected and prompts the developer to commit, abandon, or retry
+  /// the changes.
+  ///
+  /// Returns true if changes were accepted or rejected. Returns false if user indicated to retry.
   Future<bool> verifyAndCommit(List<Conflict> conflicts, List<String> lines, File file, String localPath) async {
     int originalCount = 0;
     int newCount = 0;
@@ -295,6 +301,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     return true;
   }
 
+  /// Prints the line of a file with a prefix that indicates the line count.
   void printConflictLine(String text, int lineNumber, {TerminalColor? color}) {
     final String padding = ' ' * (5 - lineNumber.toString().length); // This pads line numbers up to 99,999
     logger.printStatus('$lineNumber$padding', color: TerminalColor.grey, newline: false, indent: 2);
@@ -302,7 +309,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   }
 }
 
-/// Represents a conflict in a file and tracks what the developer chose to do with it.
+/// Simple data class that represents a conflict in a file and tracks what the developer chose to do with it.
 class Conflict {
   Conflict(this.startLine, this.dividerLine, this.endLine);
 
