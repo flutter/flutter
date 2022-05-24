@@ -119,10 +119,12 @@ class SwitchThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SwitchThemeData
       && other.thumbColor == thumbColor
       && other.trackColor == trackColor
@@ -150,8 +152,9 @@ class SwitchThemeData with Diagnosticable {
     T Function(T?, T?, double) lerpFunction,
   ) {
     // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 }
