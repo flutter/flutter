@@ -101,6 +101,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
     if (multidexEnabled) {
       globals.printStatus(
         'Multidex support is required for your android app to build since the number of methods has exceeded 64k. '
+        'See https://docs.flutter.dev/deployment/android#enabling-multidex-support for more information. '
         "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.\n",
         indent: 4,
       );
