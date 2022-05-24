@@ -29,13 +29,13 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    expect(find.byType(CupertinoActionSheet), findsOneWidget);
+    expect(find.text('Action Sheet'), findsOneWidget);
 
-    await tester.tap(find.byType(ModalBarrier).last);
-    await tester.pumpAndSettle();
-    expect(find.byType(CupertinoActionSheet), findsNothing);
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pump();
+    expect(find.text('Action Sheet'), findsNothing);
   });
 
   testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet', (WidgetTester tester) async {
@@ -867,7 +867,7 @@ void main() {
     expect(find.byType(CupertinoActionSheet), findsNothing);
   });
 
-  testWidgets('Modal barrier cannot be dismissed during transition', (WidgetTester tester) async {
+  testWidgets('Modal barrier is pressed during transition', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -906,20 +906,21 @@ void main() {
     await tester.pump(const Duration(milliseconds: 60));
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(337.1, epsilon: 0.1));
 
-    // Attempt to dismiss
+    // Exit animation
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump(const Duration(milliseconds: 60));
 
-    // Enter animation is continuing
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(325.4, epsilon: 0.1));
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(374.3, epsilon: 0.1));
 
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, moreOrLessEquals(470.0, epsilon: 0.1));
 
-    // Attempt to dismiss again
-    await tester.tapAt(const Offset(20.0, 20.0));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
 
     // Action sheet has disappeared
+    await tester.pump(const Duration(milliseconds: 60));
     expect(find.byType(CupertinoActionSheet), findsNothing);
   });
 
@@ -951,7 +952,7 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(
       semantics,

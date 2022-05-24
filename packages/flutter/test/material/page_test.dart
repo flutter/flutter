@@ -432,7 +432,6 @@ void main() {
         routes: routes,
       ),
     );
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     await tester.tap(find.text('PUSH'));
     expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     expect(find.text('PUSH'), findsNothing);
@@ -791,8 +790,8 @@ void main() {
 
     // Tapping the "page" route's back button doesn't do anything either.
     await tester.tap(find.byTooltip('Back'), warnIfMissed: false);
-    await tester.pump();
-    expect(tester.getTopLeft(find.byKey(pageScaffoldKey, skipOffstage: false)), const Offset(400, 0));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
