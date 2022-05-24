@@ -47,7 +47,8 @@ class VisualStudio {
 
   /// The name of the Visual Studio install.
   ///
-  /// For instance: "Visual Studio Community 2019".
+  /// For instance: "Visual Studio Community 2019". This should only be used for
+  /// display purposes.
   String? get displayName => _bestVisualStudioDetails?.displayName;
 
   /// The user-friendly version number of the Visual Studio install.
@@ -427,11 +428,11 @@ class VswhereDetails {
 
       // Below are strings that must be well-formed without replacement characters.
       installationPath: _validateString(details['installationPath'] as String?),
-      displayName: _validateString(details['displayName'] as String?),
       fullVersion: _validateString(details['installationVersion'] as String?),
 
       // Below are strings that are used only for display purposes and are allowed to
       // contain replacement characters.
+      displayName: details['displayName'] as String?,
       catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?,
     );
   }

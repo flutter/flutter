@@ -902,16 +902,6 @@ void main() {
           throwsToolExit(message: 'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string'));
     });
 
-    testWithoutContext('Throws ToolExit on bad UTF-8 in displayName', () {
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['displayName'] = '\u{FFFD}';
-
-      setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
-
-      expect(() => visualStudio.isInstalled,
-          throwsToolExit(message: 'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string'));
-    });
-
     testWithoutContext('Throws ToolExit on bad UTF-8 in installationVersion', () {
       final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['installationVersion'] = '\u{FFFD}';
@@ -920,6 +910,20 @@ void main() {
 
       expect(() => visualStudio.isInstalled,
           throwsToolExit(message: 'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string'));
+    });
+
+    testWithoutContext('Ignores bad UTF-8 in displayName', () {
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['displayName'] = '\u{FFFD}';
+
+      setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
+
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
+      expect(visualStudio.displayName, equals('\u{FFFD}'));
     });
 
     testWithoutContext("Ignores bad UTF-8 in catalog's productDisplayVersion", () {
@@ -935,7 +939,7 @@ void main() {
       expect(visualStudio.hasNecessaryComponents, true);
       expect(visualStudio.cmakePath, equals(cmakePath));
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
-      expect(visualStudio.displayVersion, '\u{FFFD}');
+      expect(visualStudio.displayVersion, equals('\u{FFFD}'));
     });
   });
 
