@@ -71,7 +71,7 @@ void main() {
     });
 
     tearDownAll(() {
-      hiddenFile.deleteSync();
+      tryToDelete(hiddenFile);
       tryToDelete(tempDir);
     });
 
