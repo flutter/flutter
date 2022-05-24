@@ -2119,24 +2119,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
-  /// Rotate this render object (not yet implemented).
-  void rotate({
-    int? oldAngle, // 0..3
-    int? newAngle, // 0..3
-    Duration? time,
-  }) { }
-
-  // when the parent has rotated (e.g. when the screen has been turned
-  // 90 degrees), immediately prior to layout() being called for the
-  // new dimensions, rotate() is called with the old and new angles.
-  // The next time paint() is called, the coordinate space will have
-  // been rotated N quarter-turns clockwise, where:
-  //    N = newAngle-oldAngle
-  // ...but the rendering is expected to remain the same, pixel for
-  // pixel, on the output device. Then, the layout() method or
-  // equivalent will be called.
-
-
   // PAINTING
 
   /// Whether [paint] for this render object is currently running.
