@@ -69,7 +69,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String? projectDirectory = stringArg('project-directory');
     final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
-    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
+    final FlutterProject project = projectDirectory == null
+      ? FlutterProject.current()
+      : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
 
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
