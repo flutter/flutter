@@ -7,8 +7,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/painting/text_span.dart';
-import 'package:flutter/src/painting/text_style.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/src/services/platform_channel.dart';
 import 'package:flutter/src/services/system_channels.dart';
 
