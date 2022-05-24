@@ -668,7 +668,7 @@ class PageTransitionsTheme with Diagnosticable {
     Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders
   }) : _builders = builders;
 
-  static const PageTransitionsBuilder _defaultBuilder = NoAnimationPageTransitionsBuilder();
+  static const PageTransitionsBuilder _defaultBuilder = ZoomPageTransitionsBuilder();
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = kIsWeb
       ? <TargetPlatform, PageTransitionsBuilder>{}
       : <TargetPlatform, PageTransitionsBuilder>{
