@@ -47,12 +47,14 @@ class VisualStudio {
 
   /// The name of the Visual Studio install.
   ///
-  /// For instance: "Visual Studio Community 2019".
+  /// For instance: "Visual Studio Community 2019". This should only be used for
+  /// display purposes.
   String? get displayName => _bestVisualStudioDetails?.displayName;
 
   /// The user-friendly version number of the Visual Studio install.
   ///
-  /// For instance: "15.4.0".
+  /// For instance: "15.4.0". This should only be used for display purposes.
+  /// Logic based off the installation's version should use the `fullVersion`.
   String? get displayVersion => _bestVisualStudioDetails?.catalogDisplayVersion;
 
   /// The directory where Visual Studio is installed.
@@ -282,12 +284,15 @@ class VisualStudio {
         '-utf8',
         '-latest',
       ];
+      // Ignore replacement characters as vswhere.exe is known to output them.
+      // See: https://github.com/flutter/flutter/issues/102451
+      const Encoding encoding = Utf8Codec(reportErrors: false);
       final RunResult whereResult = _processUtils.runSync(<String>[
         _vswherePath,
         ...defaultArguments,
         ...?additionalArguments,
         ...requirementArguments,
-      ], encoding: utf8);
+      ], encoding: encoding);
       if (whereResult.exitCode == 0) {
         final List<Map<String, dynamic>> installations =
             (json.decode(whereResult.stdout) as List<dynamic>).cast<Map<String, dynamic>>();
@@ -416,15 +421,38 @@ class VswhereDetails {
 
     return VswhereDetails(
       meetsRequirements: meetsRequirements,
-      installationPath: details['installationPath'] as String?,
-      displayName: details['displayName'] as String?,
-      fullVersion: details['installationVersion'] as String?,
       isComplete: details['isComplete'] as bool?,
       isLaunchable: details['isLaunchable'] as bool?,
       isRebootRequired: details['isRebootRequired'] as bool?,
       isPrerelease: details['isPrerelease'] as bool?,
+
+      // Below are strings that must be well-formed without replacement characters.
+      installationPath: _validateString(details['installationPath'] as String?),
+      fullVersion: _validateString(details['installationVersion'] as String?),
+
+      // Below are strings that are used only for display purposes and are allowed to
+      // contain replacement characters.
+      displayName: details['displayName'] as String?,
       catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?,
     );
+  }
+
+  /// Verify JSON strings from vswhere.exe output are valid.
+  ///
+  /// The output of vswhere.exe is known to output replacement characters.
+  /// Use this to ensure values that must be well-formed are valid. Strings that
+  /// are only used for display purposes should skip this check.
+  /// See: https://github.com/flutter/flutter/issues/102451
+  static String? _validateString(String? value) {
+    if (value != null && value.contains('\u{FFFD}')) {
+      throwToolExit(
+        'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string: $value. '
+        'The Flutter team would greatly appreciate if you could file a bug explaining '
+        'exactly what you were doing when this happened:\n'
+        'https://github.com/flutter/flutter/issues/new/choose\n');
+    }
+
+    return value;
   }
 
   /// Whether the installation satisfies the required workloads and minimum version.
