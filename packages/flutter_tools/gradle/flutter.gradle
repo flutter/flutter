@@ -426,7 +426,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     /**
      * Compares semantic versions ignoring labels.
-     * 
+     *
      * If the versions are equal (ignoring labels), returns one of the two strings arbitrarily.
      *
      * If minor or patch are omitted (non-conformant to semantic versioning), they are considered zero.
@@ -455,31 +455,10 @@ class FlutterPlugin implements Plugin<Project> {
         return version2
     }
 
-    /**
-     * Resolves SDK version to API level. 
-     *
-     * Handles sdkVersion being integers and strings (codenames) (when the platform stability is not yet declared).
-     * Must be updated when new android SDK level is released.
-     */
-    private int resolveSdkVersion(String sdkVersion) {
-        int resolvedSdkVersion;
-        if (sdkVersion.startsWith("android-")) {
-            sdkVersion = sdkVersion.substring(8)
-        }
-
-        if (sdkVersion.isInteger()) {
-            resolvedSdkVersion = sdkVersion.toInteger()
-        } else if (sdkVersion.equals("Tiramisu")) {
-            resolvedSdkVersion = 33
-        }
-
-        return resolvedSdkVersion
-    }
-
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     private void detectLowCompileSdkVersionOrNdkVersion() {
         project.afterEvaluate {
-            def projectCompileSdkVersion = resolveSdkVersion(project.android.compileSdkVersion)
+            int projectCompileSdkVersion = project.android.compileSdkVersion.substring(8) as int
             int maxPluginCompileSdkVersion = projectCompileSdkVersion
             String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
             String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
@@ -505,7 +484,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-        }  
+        }
     }
 
     /**
