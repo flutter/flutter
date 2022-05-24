@@ -14,7 +14,6 @@
 
 @TestOn('!chrome')
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -159,8 +158,6 @@ class _CreationLocation {
   final int column;
   String? name;
 }
-
-typedef InspectorServiceExtensionCallback = FutureOr<Map<String, Object>> Function(Map<String, String> parameters);
 
 class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
   @override
