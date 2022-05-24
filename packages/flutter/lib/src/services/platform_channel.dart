@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer';
+import 'dart:ui' show PlatformMessageResponseCallback;
 
 import 'package:flutter/foundation.dart';
 
@@ -10,6 +12,117 @@ import 'binary_messenger.dart';
 import 'binding.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
+
+/// When this is is true statistics about the usage of Platform Channels will
+/// be printed out periodically and Timeline events will show the time between
+/// sending and receiving a message (encoding and decoding time excluded).
+bool debugProfilePlatformChannels = false;
+bool _debugProfilePlatformChannelsIsRunning = false;
+const Duration _debugProfilePlatformChannelsRate = Duration(seconds: 1);
+final Expando<BinaryMessenger> _debugBinaryMessengers = Expando<BinaryMessenger>();
+
+class _ProfiledBinaryMessenger implements BinaryMessenger {
+  const _ProfiledBinaryMessenger(this.proxy, this.channel, this.name, this.codec);
+  final BinaryMessenger proxy;
+  final Object channel;
+  final String name;
+  final String codec;
+
+  @override
+  Future<void> handlePlatformMessage(String channel, ByteData? data, PlatformMessageResponseCallback? callback) {
+    return proxy.handlePlatformMessage(channel, data, callback);
+  }
+
+  Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
+    final TimelineTask task = TimelineTask();
+    _debugRecordUpStream(channel, '$name$postfix', codec, message);
+    task.start('Platform Channel send $name$postfix');
+    final ByteData? result = await proxy.send(channel, message);
+    task.finish();
+    _debugRecordDownStream(channel, '$name$postfix', codec, result);
+    return result;
+  }
+
+  @override
+  Future<ByteData?>? send(String channel, ByteData? message) =>
+    sendWithPostfix(channel, '', message);
+
+  @override
+  void setMessageHandler(String channel, MessageHandler? handler) {
+    proxy.setMessageHandler(channel, handler);
+  }
+}
+
+class _PlatformChannelStats {
+  _PlatformChannelStats(this.channel, this.codec, this.type);
+
+  final String channel;
+  final String codec;
+  final String type;
+
+  int _upCount = 0;
+  int _upBytes = 0;
+  int get upBytes => _upBytes;
+  void addUpStream(int bytes) {
+    _upCount += 1;
+    _upBytes += bytes;
+  }
+
+  int _downCount = 0;
+  int _downBytes = 0;
+  int get downBytes => _downBytes;
+  void addDownStream(int bytes) {
+    _downCount += 1;
+    _downBytes += bytes;
+  }
+
+  double get averageUpPayload => _upBytes / _upCount;
+  double get averageDownPayload => _downBytes / _downCount;
+}
+
+final Map<String, _PlatformChannelStats> _debugProfilePlatformChannelsStats = <String, _PlatformChannelStats>{};
+
+Future<void> _debugLaunchProfilePlatformChannels() async {
+  if (!_debugProfilePlatformChannelsIsRunning) {
+    _debugProfilePlatformChannelsIsRunning = true;
+    await Future<dynamic>.delayed(_debugProfilePlatformChannelsRate);
+    _debugProfilePlatformChannelsIsRunning = false;
+    final StringBuffer log = StringBuffer();
+    log.writeln('Platform Channel Stats:');
+    final List<_PlatformChannelStats> allStats =
+        _debugProfilePlatformChannelsStats.values.toList();
+    // Sort highest combined bandwidth first.
+    allStats.sort((_PlatformChannelStats x, _PlatformChannelStats y) =>
+        (y.upBytes + y.downBytes) - (x.upBytes + x.downBytes));
+    for (final _PlatformChannelStats stats in allStats) {
+      log.writeln(
+          '  (name:${stats.channel} type:${stats.type} codec:${stats.codec} up:${stats.upBytes} up_avg:${stats.averageUpPayload} down:${stats.downBytes} down_avg:${stats.averageDownPayload})');
+    }
+    // ignore: avoid_print
+    print(log.toString());
+    _debugProfilePlatformChannelsStats.clear();
+  }
+}
+
+void _debugRecordUpStream(
+    Object channel, String name, Object codec, ByteData? bytes) {
+  final _PlatformChannelStats stats =
+      _debugProfilePlatformChannelsStats[name] ??=
+          _PlatformChannelStats(
+              name, codec.toString(), channel.runtimeType.toString());
+  stats.addUpStream(bytes?.lengthInBytes ?? 0);
+  _debugLaunchProfilePlatformChannels();
+}
+
+void _debugRecordDownStream(
+    Object channel, String name, Object codec, ByteData? bytes) {
+  final _PlatformChannelStats stats =
+      _debugProfilePlatformChannelsStats[name] ??=
+          _PlatformChannelStats(
+              name, codec.toString(), channel.runtimeType.toString());
+  stats.addDownStream(bytes?.lengthInBytes ?? 0);
+  _debugLaunchProfilePlatformChannels();
+}
 
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
@@ -49,7 +162,13 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger {
+    final BinaryMessenger result =
+        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+    return !kReleaseMode && debugProfilePlatformChannels
+        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(result, this, name, codec.toString())
+        : result;
+  }
   final BinaryMessenger? _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
@@ -129,7 +248,13 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger {
+    final BinaryMessenger result =
+        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+    return !kReleaseMode && debugProfilePlatformChannels
+        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(result, this, name, codec.toString())
+        : result;
+  }
   final BinaryMessenger? _binaryMessenger;
 
   /// Backend implementation of [invokeMethod].
@@ -154,10 +279,11 @@ class MethodChannel {
   @optionalTypeArgs
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
     assert(method != null);
-    final ByteData? result = await binaryMessenger.send(
-      name,
-      codec.encodeMethodCall(MethodCall(method, arguments)),
-    );
+    final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
+    final ByteData? result =
+      !kReleaseMode && debugProfilePlatformChannels ?
+        await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(name, '#$method', input) :
+        await binaryMessenger.send(name, input);
     if (result == null) {
       if (missingOk) {
         return null;
