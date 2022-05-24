@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/src/painting/text_span.dart';
+import 'package:flutter/src/painting/text_style.dart';
+
+import 'text_input.dart';
 
 /// A data structure representing a range of misspelled text and the suggested
 /// replacements for this range. For example, one [SuggestionSpan] of the
