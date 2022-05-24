@@ -14,7 +14,39 @@
 
 namespace flutter {
 
-static std::shared_ptr<impeller::Context> CreateImpellerContext() {
+class AndroidSurfaceGLImpeller::ReactorWorker final
+    : public impeller::ReactorGLES::Worker {
+ public:
+  ReactorWorker() = default;
+
+  // |impeller::ReactorGLES::Worker|
+  ~ReactorWorker() override = default;
+
+  // |impeller::ReactorGLES::Worker|
+  bool CanReactorReactOnCurrentThreadNow(
+      const impeller::ReactorGLES& reactor) const override {
+    impeller::ReaderLock lock(mutex_);
+    auto found = reactions_allowed_.find(std::this_thread::get_id());
+    if (found == reactions_allowed_.end()) {
+      return false;
+    }
+    return found->second;
+  }
+
+  void SetReactionsAllowedOnCurrentThread(bool allowed) {
+    impeller::WriterLock lock(mutex_);
+    reactions_allowed_[std::this_thread::get_id()] = allowed;
+  }
+
+ private:
+  mutable impeller::RWMutex mutex_;
+  std::map<std::thread::id, bool> reactions_allowed_ IPLR_GUARDED_BY(mutex_);
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ReactorWorker);
+};
+
+static std::shared_ptr<impeller::Context> CreateImpellerContext(
+    std::shared_ptr<impeller::ReactorGLES::Worker> worker) {
   auto proc_table = std::make_unique<impeller::ProcTableGLES>(
       impeller::egl::CreateProcAddressResolver());
 
@@ -35,13 +67,20 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext() {
     FML_LOG(ERROR) << "Could not create OpenGLES Impeller Context.";
     return nullptr;
   }
+
+  if (!context->AddReactorWorker(std::move(worker)).has_value()) {
+    FML_LOG(ERROR) << "Could not add reactor worker.";
+    return nullptr;
+  }
+
   return context;
 }
 
 AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
     const std::shared_ptr<AndroidContext>& android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-    : AndroidSurface(android_context) {
+    : AndroidSurface(android_context),
+      reactor_worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())) {
   auto display = std::make_unique<impeller::egl::Display>();
   if (!display->IsValid()) {
     FML_DLOG(ERROR) << "Could not create EGL display.";
@@ -94,7 +133,7 @@ AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
     return;
   }
 
-  auto impeller_context = CreateImpellerContext();
+  auto impeller_context = CreateImpellerContext(reactor_worker_);
 
   if (!impeller_context) {
     FML_DLOG(ERROR) << "Could not create Impeller context.";
@@ -104,6 +143,24 @@ AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
   if (!offscreen_context->ClearCurrent()) {
     FML_DLOG(ERROR) << "Could not clear offscreen context.";
     return;
+  }
+
+  // Setup context listeners.
+  impeller::egl::Context::LifecycleListener listener =
+      [worker =
+           reactor_worker_](impeller::egl ::Context::LifecycleEvent event) {
+        switch (event) {
+          case impeller::egl::Context::LifecycleEvent::kDidMakeCurrent:
+            worker->SetReactionsAllowedOnCurrentThread(true);
+            break;
+          case impeller::egl::Context::LifecycleEvent::kWillClearCurrent:
+            worker->SetReactionsAllowedOnCurrentThread(false);
+            break;
+        }
+      };
+  if (!onscreen_context->AddLifecycleListener(listener).has_value() ||
+      !offscreen_context->AddLifecycleListener(listener).has_value()) {
+    FML_DLOG(ERROR) << "Could not add lifecycle listeners";
   }
 
   display_ = std::move(display);
@@ -180,6 +237,12 @@ bool AndroidSurfaceGLImpeller::SetNativeWindow(
 // |AndroidSurface|
 std::unique_ptr<Surface> AndroidSurfaceGLImpeller::CreateSnapshotSurface() {
   FML_UNREACHABLE();
+}
+
+// |AndroidSurface|
+std::shared_ptr<impeller::Context>
+AndroidSurfaceGLImpeller::GetImpellerContext() {
+  return impeller_context_;
 }
 
 // |GPUSurfaceGLDelegate|

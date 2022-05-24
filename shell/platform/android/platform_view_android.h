@@ -159,6 +159,9 @@ class PlatformViewAndroid final : public PlatformView {
   void ReleaseResourceContext() const override;
 
   // |PlatformView|
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
+
+  // |PlatformView|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocales(
       const std::vector<std::string>& supported_locale_data) override;
 

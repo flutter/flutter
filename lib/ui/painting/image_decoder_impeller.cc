@@ -61,6 +61,7 @@ static sk_sp<DlImage> DecompressAndUploadTexture(
   TRACE_EVENT0("flutter", __FUNCTION__);
 
   if (!context || !descriptor) {
+    FML_DLOG(ERROR) << "Invalid context or descriptor.";
     return nullptr;
   }
 

@@ -27,7 +27,20 @@ bool ReactorGLES::IsValid() const {
   return is_valid_;
 }
 
+ReactorGLES::WorkerID ReactorGLES::AddWorker(std::weak_ptr<Worker> worker) {
+  Lock lock(workers_mutex_);
+  auto id = WorkerID{};
+  workers_[id] = std::move(worker);
+  return id;
+}
+
+bool ReactorGLES::RemoveWorker(WorkerID worker) {
+  Lock lock(workers_mutex_);
+  return workers_.erase(worker) == 1;
+}
+
 bool ReactorGLES::HasPendingOperations() const {
+  Lock ops_lock(ops_mutex_);
   return !pending_operations_.empty() || !gl_handles_to_collect_.empty();
 }
 
@@ -37,6 +50,7 @@ const ProcTableGLES& ReactorGLES::GetProcTable() const {
 }
 
 std::optional<GLuint> ReactorGLES::GetGLHandle(const HandleGLES& handle) const {
+  ReaderLock handles_lock(handles_mutex_);
   auto found = live_gl_handles_.find(handle);
   if (found != live_gl_handles_.end()) {
     return found->second;
@@ -48,8 +62,13 @@ bool ReactorGLES::AddOperation(Operation operation) {
   if (!operation) {
     return false;
   }
-  pending_operations_.emplace_back(std::move(operation));
-  return React();
+  {
+    Lock ops_lock(ops_mutex_);
+    pending_operations_.emplace_back(std::move(operation));
+  }
+  // Attempt a reaction if able but it is not an error if this isn't possible.
+  [[maybe_unused]] auto result = React();
+  return true;
 }
 
 static std::optional<GLuint> CreateGLHandle(const ProcTableGLES& gl,
@@ -109,17 +128,20 @@ HandleGLES ReactorGLES::CreateHandle(HandleType type) {
   if (new_handle.IsDead()) {
     return HandleGLES::DeadHandle();
   }
+  WriterLock handles_lock(handles_mutex_);
   live_gl_handles_[new_handle] =
       in_reaction_ ? CreateGLHandle(GetProcTable(), type) : std::nullopt;
   return new_handle;
 }
 
 void ReactorGLES::CollectHandle(HandleGLES handle) {
+  WriterLock handles_lock(handles_mutex_);
   auto live_handle = live_gl_handles_.find(handle);
   if (live_handle == live_gl_handles_.end()) {
     return;
   }
   if (live_handle->second.has_value()) {
+    Lock ops_lock(ops_mutex_);
     gl_handles_to_collect_[live_handle->first] = live_handle->second.value();
   }
   live_gl_handles_.erase(live_handle);
@@ -127,6 +149,9 @@ void ReactorGLES::CollectHandle(HandleGLES handle) {
 
 bool ReactorGLES::React() {
   TRACE_EVENT0("impeller", "ReactorGLES::React");
+  if (!CanReactOnCurrentThread()) {
+    return false;
+  }
   in_reaction_ = true;
   fml::ScopedCleanupClosure reset_in_reaction([&]() { in_reaction_ = false; });
   while (HasPendingOperations()) {
@@ -165,7 +190,13 @@ bool ReactorGLES::ReactOnce() {
   //----------------------------------------------------------------------------
   /// Collect all the handles for whom there is a GL handle sibling.
   ///
-  for (const auto& handle_to_collect : gl_handles_to_collect_) {
+  decltype(gl_handles_to_collect_) gl_handles_to_collect;
+  {
+    Lock ops_lock(ops_mutex_);
+    std::swap(gl_handles_to_collect_, gl_handles_to_collect);
+    FML_DCHECK(gl_handles_to_collect_.empty());
+  }
+  for (const auto& handle_to_collect : gl_handles_to_collect) {
     if (!CollectGLHandle(gl,                            // proc table
                          handle_to_collect.first.type,  // handle type
                          handle_to_collect.second       // GL handle name
@@ -174,26 +205,52 @@ bool ReactorGLES::ReactOnce() {
       return false;
     }
   }
-  gl_handles_to_collect_.clear();
 
   //----------------------------------------------------------------------------
   /// Make sure all pending handles have a GL handle sibling.
   ///
-  for (auto& live_handle : live_gl_handles_) {
-    if (live_handle.second.has_value()) {
-      // Already a realized GL handle.
-      continue;
+  {
+    WriterLock handles_lock(handles_mutex_);
+    for (auto& live_handle : live_gl_handles_) {
+      if (live_handle.second.has_value()) {
+        // Already a realized GL handle.
+        continue;
+      }
+      auto gl_handle = CreateGLHandle(gl, live_handle.first.type);
+      if (!gl_handle.has_value()) {
+        VALIDATION_LOG << "Could not create GL handle.";
+        return false;
+      }
+      live_handle.second = gl_handle;
     }
-    auto gl_handle = CreateGLHandle(gl, live_handle.first.type);
-    if (!gl_handle.has_value()) {
-      VALIDATION_LOG << "Could not create GL handle.";
-      return false;
-    }
-    live_handle.second = gl_handle;
   }
 
-  if (can_set_debug_labels_) {
-    for (const auto& label : pending_debug_labels_) {
+  //----------------------------------------------------------------------------
+  /// Flush all pending operations in order.
+  ///
+  decltype(pending_operations_) pending_operations;
+  {
+    Lock ops_lock(ops_mutex_);
+    std::swap(pending_operations_, pending_operations);
+    FML_DCHECK(pending_operations_.empty());
+  }
+  for (const auto& operation : pending_operations) {
+    TRACE_EVENT0("impeller", "ReactorGLES::Operation");
+    operation(*this);
+  }
+
+  //----------------------------------------------------------------------------
+  /// Make sure all pending debug labels have been flushed.
+  ///
+  decltype(pending_debug_labels_) pending_debug_labels;
+  {
+    WriterLock handles_lock(handles_mutex_);
+    std::swap(pending_debug_labels_, pending_debug_labels);
+    FML_DCHECK(pending_debug_labels_.empty());
+  }
+  if (!pending_debug_labels.empty()) {
+    ReaderLock handles_lock(handles_mutex_);
+    for (const auto& label : pending_debug_labels) {
       auto live_handle = live_gl_handles_.find(label.first);
       if (live_handle == live_gl_handles_.end() ||
           !live_handle->second.has_value()) {
@@ -205,16 +262,6 @@ bool ReactorGLES::ReactOnce() {
       );
     }
   }
-  pending_debug_labels_.clear();
-
-  //----------------------------------------------------------------------------
-  /// Flush all pending operations in order.
-  ///
-  auto operations = std::move(pending_operations_);
-  for (const auto& operation : operations) {
-    operation(*this);
-  }
-  pending_operations_.clear();
 
   return true;
 }
@@ -229,18 +276,27 @@ void ReactorGLES::SetDebugLabel(const HandleGLES& handle, std::string label) {
   if (handle.IsDead()) {
     return;
   }
-  if (in_reaction_) {
-    if (auto found = live_gl_handles_.find(handle);
-        found != live_gl_handles_.end() && found->second.has_value()) {
-      GetProcTable().SetDebugLabel(
-          ToDebugResourceType(found->first.type),  // type
-          found->second.value(),                   // name
-          label                                    // label
-      );
-      return;
+  WriterLock handles_lock(handles_mutex_);
+  pending_debug_labels_[handle] = std::move(label);
+}
+
+bool ReactorGLES::CanReactOnCurrentThread() const {
+  std::vector<WorkerID> dead_workers;
+  Lock lock(workers_mutex_);
+  for (const auto& worker : workers_) {
+    auto worker_ptr = worker.second.lock();
+    if (!worker_ptr) {
+      dead_workers.push_back(worker.first);
+      continue;
+    }
+    if (worker_ptr->CanReactorReactOnCurrentThreadNow(*this)) {
+      return true;
     }
   }
-  pending_debug_labels_[handle] = std::move(label);
+  for (const auto& worker_id : dead_workers) {
+    workers_.erase(worker_id);
+  }
+  return false;
 }
 
 }  // namespace impeller
