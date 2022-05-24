@@ -51,6 +51,7 @@ void main() {
         MaterialApp(
           home: Material(
             child: PlatformMenuBar(
+              body: const Center(child: Text('Body')),
               menus: createTestMenus(
                 onActivate: onActivate,
                 onOpen: onOpen,
@@ -62,7 +63,6 @@ void main() {
                   subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
                 },
               ),
-              child: const Center(child: Text('Body')),
             ),
           ),
         ),
@@ -163,11 +163,11 @@ void main() {
         const MaterialApp(
           home: Material(
             child: PlatformMenuBar(
-              menus: <MenuItem>[],
-              child: PlatformMenuBar(
+              body: PlatformMenuBar(
+                body: SizedBox(),
                 menus: <MenuItem>[],
-                child: SizedBox(),
               ),
+              menus: <MenuItem>[],
             ),
           ),
         ),
@@ -180,8 +180,8 @@ void main() {
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
       );
       const PlatformMenuBar menuBar = PlatformMenuBar(
+        body: SizedBox(),
         menus: <MenuItem>[item],
-        child: SizedBox(),
       );
 
       await tester.pumpWidget(

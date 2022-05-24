@@ -2929,9 +2929,6 @@ String shortHash(Object? object) {
 
 /// Returns a summary of the runtime type and hash code of `object`.
 ///
-/// If `optimizedType` is specified, then that string will be used in non-debug
-/// builds. Defaults to '<optimized out>'.
-///
 /// See also:
 ///
 ///  * [Object.hashCode], a value used when placing an object in a [Map] or
@@ -2939,7 +2936,7 @@ String shortHash(Object? object) {
 ///    distinguish instances of the same class (hash collisions are
 ///    possible, but rare enough that its use in debug output is useful).
 ///  * [Object.runtimeType], the [Type] of an object.
-String describeIdentity(Object? object, [String optimizedType = '<optimized out>']) => '${objectRuntimeType(object, optimizedType)}#${shortHash(object)}';
+String describeIdentity(Object? object) => '${objectRuntimeType(object, '<optimized out>')}#${shortHash(object)}';
 
 /// Returns a short description of an enum value.
 ///

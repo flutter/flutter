@@ -7,10 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'actions.dart';
-import 'basic.dart';
 import 'binding.dart';
-import 'focus_manager.dart';
 import 'framework.dart';
 import 'shortcuts.dart';
 
@@ -47,7 +44,6 @@ class ShortcutSerialization {
   /// This is used by a [CharacterActivator] to serialize itself.
   ShortcutSerialization.character(String character)
       : _internal = <String, Object?>{_kShortcutCharacter: character},
-        _character = character,
         assert(character.length == 1);
 
   /// Creates a [ShortcutSerialization] representing a specific
@@ -74,11 +70,6 @@ class ShortcutSerialization {
                trigger != LogicalKeyboardKey.metaRight,
                'Specifying a modifier key as a trigger is not allowed. '
                'Use provided boolean parameters instead.'),
-        _trigger = trigger,
-        _control = control,
-        _shift = shift,
-        _alt = alt,
-        _meta = meta,
         _internal = <String, Object?>{
           _kShortcutTrigger: trigger.keyId,
           _kShortcutModifiers: (control ? _shortcutModifierControl : 0) |
@@ -88,35 +79,6 @@ class ShortcutSerialization {
         };
 
   final Map<String, Object?> _internal;
-
-  /// The keyboard key that triggers this shortcut, if any.
-  LogicalKeyboardKey? get trigger => _trigger;
-  LogicalKeyboardKey? _trigger;
-
-  /// The character that triggers this shortcut, if any.
-  String? get character => _character;
-  String? _character;
-
-  /// If this shortcut has a [trigger], this indicates whether or not the
-  /// control modifier needs to be down or not.
-  bool? get control => _control;
-  bool? _control;
-
-  /// If this shortcut has a [trigger], this indicates whether or not the
-  /// shift modifier needs to be down or not.
-  bool? get shift => _shift;
-  bool? _shift;
-
-  /// If this shortcut has a [trigger], this indicates whether or not the
-  /// alt modifier needs to be down or not.
-  bool? get alt => _alt;
-  bool? _alt;
-
-  /// If this shortcut has a [trigger], this indicates whether or not the meta
-  /// (also known as the Windows or Command key) modifier needs to be down or
-  /// not.
-  bool? get meta => _meta;
-  bool? _meta;
 
   /// The bit mask for the [LogicalKeyboardKey.meta] key (or it's left/right
   /// equivalents) being down.
@@ -160,24 +122,16 @@ mixin MenuSerializableShortcut {
 }
 
 /// An abstract class for describing cascading menu hierarchies that are part of
-/// a [MenuBar] or [PlatformMenuBar].
+/// a [PlatformMenuBar].
 ///
-/// This type is also used by [PlatformMenuDelegate.setMenus] to accept the menu
+/// This type is used by [PlatformMenuDelegate.setMenus] to accept the menu
 /// hierarchy to be sent to the platform, and by [PlatformMenuBar] to define the
 /// menu hierarchy.
 ///
-/// This class is abstract, and so can't be used directly. Typically subclasses
-/// like [MenuBarItem] and [PlatformMenuItem] are used in practice.
-///
 /// See also:
 ///
-///  * [MenuBar], a widget that renders menus in Flutter with a Material design
-///    style.
 ///  * [PlatformMenuBar], a widget that renders menu items using platform APIs
 ///    instead of Flutter.
-///  * [MenuBar.adaptive], a factory constructor for [MenuBar] that renders the
-///    given menu hierarchy using [PlatformMenuBar] on platforms that support
-///    it, and [MenuBar] everywhere else.
 abstract class MenuItem with Diagnosticable {
   /// Allows subclasses to have const constructors.
   const MenuItem();
@@ -187,8 +141,8 @@ abstract class MenuItem with Diagnosticable {
   ///
   /// The `delegate` is the [PlatformMenuDelegate] that is requesting the
   /// serialization. The `index` is the position of this menu item in the list
-  /// of [menus] of the [PlatformMenu] it belongs to, and `count` is the number
-  /// of [menus] in the [PlatformMenu] it belongs to.
+  /// of children of the [PlatformMenu] it belongs to, and `count` is the number
+  /// of children in the [PlatformMenu] it belongs to.
   ///
   /// The `getId` parameter is a [MenuItemSerializableIdGenerator] function that
   /// generates a unique ID for each menu item, which is to be returned in the
@@ -197,17 +151,6 @@ abstract class MenuItem with Diagnosticable {
     PlatformMenuDelegate delegate, {
     required MenuItemSerializableIdGenerator getId,
   });
-
-  /// The optional shortcut that selects this [MenuItem].
-  ///
-  /// This shortcut is only enabled when [onSelected] is set.
-  MenuSerializableShortcut? get shortcut => null;
-
-  /// Returns any child [MenuItem]s of this item.
-  ///
-  /// Returns an empty list if this type of menu item doesn't have
-  /// children.
-  List<MenuItem> get menus => const <MenuItem>[];
 
   /// Returns all descendant [MenuItem]s of this item.
   ///
@@ -220,26 +163,8 @@ abstract class MenuItem with Diagnosticable {
   ///
   /// Only items that do not have submenus will have this callback invoked.
   ///
-  /// Only one of [onSelected] or [onSelectedIntent] may be specified.
-  ///
-  /// If neither [onSelected] nor [onSelectedIntent] are specified, then this
-  /// menu item is considered to be disabled.
-  ///
   /// The default implementation returns null.
   VoidCallback? get onSelected => null;
-  
-  /// Returns an intent, if any, to be invoked if the platform receives a
-  /// "Menu.selectedCallback" method call from the platform for this item.
-  ///
-  /// Only items that do not have submenus will have this intent invoked.
-  ///
-  /// Only one of [onSelected] or [onSelectedIntent] may be specified.
-  ///
-  /// If neither [onSelected] nor [onSelectedIntent] are specified, then this
-  /// menu item is considered to be disabled.
-  ///
-  /// The default implementation returns null.
-  Intent? get onSelectedIntent => null;
 
   /// Returns a callback, if any, to be invoked if the platform menu receives a
   /// "Menu.opened" method call from the platform for this item.
@@ -256,12 +181,6 @@ abstract class MenuItem with Diagnosticable {
   ///
   /// The default implementation returns null.
   VoidCallback? get onClose => null;
-
-  /// Returns the list of group members if this menu item is a "grouping" menu
-  /// item, such as [PlatformMenuItemGroup].
-  ///
-  /// Defaults to an empty list.
-  List<MenuItem> get members => const <MenuItem>[];
 }
 
 /// An abstract delegate class that can be used to set
@@ -464,12 +383,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     }
     final MenuItem item = _idMap[id]!;
     if (call.method == _kMenuSelectedCallbackMethod) {
-      assert(item.onSelected == null || item.onSelectedIntent == null,
-        'Only one of MenuItem.onSelected or MenuItem.onSelectedIntent may be specified');
       item.onSelected?.call();
-      if (item.onSelectedIntent != null) {
-        Actions.maybeInvoke(FocusManager.instance.primaryFocus!.context!, item.onSelectedIntent!);
-      }
     } else if (call.method == _kMenuItemOpenedMethod) {
       item.onOpen?.call();
     } else if (call.method == _kMenuItemClosedMethod) {
@@ -493,7 +407,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
 /// the platform menu bar.
 ///
 /// As far as Flutter is concerned, this widget has no visual representation,
-/// and intercepts no events: it just returns the [child] from its build
+/// and intercepts no events: it just returns the [body] from its build
 /// function. This is because all of the rendering, shortcuts, and event
 /// handling for the menu is handled by the plugin on the host platform.
 ///
@@ -515,32 +429,18 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
 class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// Creates a const [PlatformMenuBar].
   ///
-  /// The [child] and [menus] attributes are required.
+  /// The [body] and [menus] attributes are required.
   const PlatformMenuBar({
     super.key,
+    required this.body,
     required this.menus,
-    this.child,
-    @Deprecated(
-      'Use the child attribute instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.'
-    )
-    this.body,
-  }) : assert(body == null || child == null,
-              'The body argument is deprecated, and only one of body or child may be used.');
+  });
 
-  /// The widget below this widget in the tree.
+  /// The widget to be rendered in the Flutter window that these platform menus
+  /// are associated with.
   ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
-
-  /// The widget below this widget in the tree.
-  ///
-  /// This attribute is deprecated, use [child] instead.
-  @Deprecated(
-    'Use the child attribute instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.'
-  )
-  final Widget? body;
+  /// This is typically the body of the application's UI.
+  final Widget body;
 
   /// The list of menu items that are the top level children of the
   /// [PlatformMenuBar].
@@ -612,7 +512,7 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
   Widget build(BuildContext context) {
     // PlatformMenuBar is really about managing the platform menu bar, and
     // doesn't do any rendering or event handling in Flutter.
-    return widget.child ?? widget.body ?? const SizedBox();
+    return widget.body;
   }
 }
 
@@ -647,7 +547,6 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
   /// The menu items in the submenu opened by this menu item.
   ///
   /// If this is an empty list, this [PlatformMenu] will be disabled.
-  @override
   final List<MenuItem> menus;
 
   /// Returns all descendant [MenuItem]s of this item.
@@ -747,7 +646,6 @@ class PlatformMenuItemGroup extends MenuItem {
   /// The [MenuItem]s that are members of this menu item group.
   ///
   /// An assertion will be thrown if there isn't at least one member of the group.
-  @override
   final List<MenuItem> members;
 
   @override
@@ -756,32 +654,19 @@ class PlatformMenuItemGroup extends MenuItem {
     required MenuItemSerializableIdGenerator getId,
   }) {
     assert(members.isNotEmpty, 'There must be at least one member in a PlatformMenuItemGroup');
-    return serialize(this, delegate, getId: getId);
-  }
-
-  /// Converts the supplied object to the correct channel representation for the
-  /// 'flutter/menu' channel.
-  ///
-  /// This API is supplied so that implementers of [PlatformMenuItemGroup] can share
-  /// this implementation.
-  static Iterable<Map<String, Object?>> serialize(
-    MenuItem group,
-    PlatformMenuDelegate delegate, {
-    required MenuItemSerializableIdGenerator getId,
-  }) {
     final List<Map<String, Object?>> result = <Map<String, Object?>>[];
     result.add(<String, Object?>{
-      _kIdKey: getId(group),
+      _kIdKey: getId(this),
       _kIsDividerKey: true,
     });
-    for (final MenuItem item in group.members) {
+    for (final MenuItem item in members) {
       result.addAll(item.toChannelRepresentation(
         delegate,
         getId: getId,
       ));
     }
     result.add(<String, Object?>{
-      _kIdKey: getId(group),
+      _kIdKey: getId(this),
       _kIsDividerKey: true,
     });
     return result;
@@ -812,8 +697,7 @@ class PlatformMenuItem extends MenuItem {
     required this.label,
     this.shortcut,
     this.onSelected,
-    this.onSelectedIntent,
-  }) : assert(onSelected == null || onSelectedIntent == null, 'Only one of onSelected or onSelectedIntent may be specified');
+  });
 
   /// The required label used for rendering the menu item.
   final String label;
@@ -821,7 +705,6 @@ class PlatformMenuItem extends MenuItem {
   /// The optional shortcut that selects this [PlatformMenuItem].
   ///
   /// This shortcut is only enabled when [onSelected] is set.
-  @override
   final MenuSerializableShortcut? shortcut;
 
   /// An optional callback that is called when this [PlatformMenuItem] is
@@ -830,13 +713,6 @@ class PlatformMenuItem extends MenuItem {
   /// If unset, this menu item will be disabled.
   @override
   final VoidCallback? onSelected;
-
-  /// An optional intent that is invoked when this [PlatformMenuItem] is
-  /// selected.
-  ///
-  /// If unset, this menu item will be disabled.
-  @override
-  final Intent? onSelectedIntent;
 
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
@@ -864,9 +740,6 @@ class PlatformMenuItem extends MenuItem {
       if (shortcut != null)...shortcut.serializeForMenu().toChannelRepresentation(),
     };
   }
-
-  @override
-  String toStringShort() => label;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -906,7 +779,9 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
   const PlatformProvidedMenuItem({
     required this.type,
     this.enabled = true,
-  }) : super(label: ''); // The label is ignored for platform provided menus.
+  }) : super(
+          label: '', // The label is ignored for standard menus.
+        );
 
   /// The type of default menu this is.
   ///
@@ -957,7 +832,7 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
     assert(() {
       if (!hasMenu(type)) {
         throw ArgumentError(
-          'Platform ${defaultTargetPlatform.name} has no platform provided menu for '
+          'Platform ${defaultTargetPlatform.name} has no standard menu for '
           '$type. Call PlatformProvidedMenuItem.hasMenu to determine this before '
           'instantiating one.',
         );
@@ -981,8 +856,7 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
   }
 }
 
-/// The list of possible platform provided, prebuilt menus for use in a
-/// [PlatformMenuBar].
+/// The list of possible standard, prebuilt menus for use in a [PlatformMenuBar].
 ///
 /// These are menus that the platform typically provides that cannot be
 /// reproduced in Flutter without calling platform functions, but are standard
@@ -996,7 +870,7 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
 /// Add these to your [PlatformMenuBar] using the [PlatformProvidedMenuItem]
 /// class.
 ///
-/// You can tell if the platform provides the given menu using the
+/// You can tell if the platform supports the given standard menu using the
 /// [PlatformProvidedMenuItem.hasMenu] method.
 // Must be kept in sync with the plugin code's enum of the same name.
 enum PlatformProvidedMenuItemType {
