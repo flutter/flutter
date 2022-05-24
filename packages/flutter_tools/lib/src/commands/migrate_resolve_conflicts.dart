@@ -90,8 +90,6 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
-    final int contextLineCount = int.parse(stringArg('context-lines')!);
-
     checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
 
     final List<String> conflictFiles = manifest.remainingConflictFiles(workingDirectory);
@@ -108,170 +106,190 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       }
 
       // Find all conflicts
-      final List<Conflict> conflicts = <Conflict>[];
-      Conflict currentConflict = Conflict.empty();
-      for (int lineNumber = 0; lineNumber < lines.length; lineNumber++) {
-        final String line = lines[lineNumber];
-        if (line.contains(_conflictStartMarker)) {
-          currentConflict.startLine = lineNumber;
-        } else if (line.contains(_conflictDividerMarker)) {
-          currentConflict.dividerLine = lineNumber;
-        } else if (line.contains(_conflictEndMarker)) {
-          currentConflict.endLine = lineNumber;
-          assert(
-            (currentConflict.startLine == null || currentConflict.dividerLine == null || currentConflict.startLine! < currentConflict.dividerLine!) &&
-            (currentConflict.dividerLine == null || currentConflict.endLine == null || currentConflict.dividerLine! < currentConflict.endLine!)
-          );
-          conflicts.add(currentConflict);
-          currentConflict = Conflict.empty();
-        }
-      }
+      final List<Conflict> conflicts = findConflicts(lines);
 
       // Prompt developer
-      int originalCount = 0;
-      int newCount = 0;
-      int skipCount = 0;
-      for (final Conflict conflict in conflicts) {
-        if (!conflict.isValid) {
-          conflict.keepOriginal = null;
-          continue;
-        }
-        // Print the conflict for reference
-        logger.printStatus(terminal.clearScreen(), newline: false);
-        logger.printStatus('Cyan', color: TerminalColor.cyan, newline: false);
-        logger.printStatus(' = Original lines.  ', newline: false);
-        logger.printStatus('Green', color: TerminalColor.green, newline: false);
-        logger.printStatus(' = New lines.\n', newline: true);
+      await promptDeveloperSelectAction(conflicts, lines, localPath);
 
-        // Print the conflict for reference
-        for (int lineNumber = (conflict.startLine! - contextLineCount).abs(); lineNumber < conflict.startLine!; lineNumber++) {
-          printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.grey);
-        }
-        printConflictLine(lines[conflict.startLine!], conflict.startLine!);
-        for (int lineNumber = conflict.startLine! + 1; lineNumber < conflict.dividerLine!; lineNumber++) {
-          printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.cyan);
-        }
-        printConflictLine(lines[conflict.dividerLine!], conflict.dividerLine!);
-        for (int lineNumber = conflict.dividerLine! + 1; lineNumber < conflict.endLine!; lineNumber++) {
-          printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.green);
-        }
-        printConflictLine(lines[conflict.endLine!], conflict.endLine!);
-        for (int lineNumber = conflict.endLine! + 1; lineNumber <= (conflict.endLine! + contextLineCount).clamp(0, lines.length - 1); lineNumber++) {
-          printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.grey);
-        }
-
-        logger.printStatus('\nConflict in $localPath.');
-        // Select action
-        String selection = 's';
-        try {
-          selection = await terminal.promptForCharInput(
-            <String>['o', 'n', 's'],
-            logger: logger,
-            prompt: 'Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually?',
-            defaultChoiceIndex: 2,
-          );
-        } on StateError catch(e) {
-          logger.printError(
-            e.message,
-            indent: 0,
-          );
-        }
-
-        switch(selection) {
-          case 'o': {
-            conflict.chooseOriginal();
-            break;
-          }
-          case 'n': {
-            conflict.chooseNew();
-            break;
-          }
-          case 's': {
-            conflict.skip();
-            break;
-          }
-        }
-      }
-
-      int lastPrintedLine = 0;
-      String result = '';
-      bool hasChanges = false;
-      for (final Conflict conflict in conflicts) {
-        if (!conflict.isValid) {
-          continue;
-        }
-        if (conflict.keepOriginal != null) {
-          hasChanges = true; // don't unecessarily write file if no changes were made.
-        }
-        for (int lineNumber = lastPrintedLine; lineNumber < conflict.startLine!; lineNumber++) {
-          result += '${lines[lineNumber]}\n';
-        }
-        if (conflict.keepOriginal == null) {
-          // Skipped this conflict. Add all lines.
-          for (int lineNumber = conflict.startLine!; lineNumber <= conflict.endLine!; lineNumber++) {
-            result += '${lines[lineNumber]}\n';
-          }
-          skipCount++;
-        } else if (conflict.keepOriginal!) {
-          // Keeping original lines
-          for (int lineNumber = conflict.startLine! + 1; lineNumber < conflict.dividerLine!; lineNumber++) {
-            result += '${lines[lineNumber]}\n';
-          }
-          originalCount++;
-        } else {
-          // Keeping new lines
-          for (int lineNumber = conflict.dividerLine! + 1; lineNumber < conflict.endLine!; lineNumber++) {
-            result += '${lines[lineNumber]}\n';
-          }
-          newCount++;
-        }
-        lastPrintedLine = (conflict.endLine! + 1).clamp(0, lines.length);
-      }
-      for (int lineNumber = lastPrintedLine; lineNumber < lines.length; lineNumber++) {
-        result += '${lines[lineNumber]}\n';
-      }
-      result.trim();
-
-      // Display conflict summary for this file and confirm with user if the changes should be commited.
-      final bool confirm = boolArg('confirm-commit') ?? true;
-      if (confirm && skipCount != conflicts.length) {
-        logger.printStatus(terminal.clearScreen(), newline: false);
-        logger.printStatus('Conflicts in $localPath complete.\n');
-        logger.printStatus('You chose to:\n  Skip $skipCount conflicts\n  Acccept the original lines for $originalCount conflicts\n  Accept the new lines for $newCount conflicts\n');
-        String selection = 'n';
-        try {
-          selection = await terminal.promptForCharInput(
-            <String>['y', 'n', 'r'],
-            logger: logger,
-            prompt: 'Commit the changes to the working directory? (y)es, (n)o, (r)etry this file',
-            defaultChoiceIndex: 1,
-          );
-        } on StateError catch(e) {
-          logger.printError(
-            e.message,
-            indent: 0,
-          );
-        }
-        switch(selection) {
-          case 'y': {
-            if (hasChanges) {
-              file.writeAsStringSync(result, flush: true);
-            }
-            break;
-          }
-          case 'n': {
-            break;
-          }
-          case 'r': {
-            i--;
-            break;
-          }
-        }
-      } else {
-        file.writeAsStringSync(result, flush: true);
+      bool result = await verifyAndCommit(conflicts, lines, file, localPath);
+      if (!result) {
+        i--;
       }
     }
     return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  List<Conflict> findConflicts(List<String> lines) {
+    // Find all conflicts
+    final List<Conflict> conflicts = <Conflict>[];
+    Conflict currentConflict = Conflict.empty();
+    for (int lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+      final String line = lines[lineNumber];
+      if (line.contains(_conflictStartMarker)) {
+        currentConflict.startLine = lineNumber;
+      } else if (line.contains(_conflictDividerMarker)) {
+        currentConflict.dividerLine = lineNumber;
+      } else if (line.contains(_conflictEndMarker)) {
+        currentConflict.endLine = lineNumber;
+        assert(
+          (currentConflict.startLine == null || currentConflict.dividerLine == null || currentConflict.startLine! < currentConflict.dividerLine!) &&
+          (currentConflict.dividerLine == null || currentConflict.endLine == null || currentConflict.dividerLine! < currentConflict.endLine!)
+        );
+        conflicts.add(currentConflict);
+        currentConflict = Conflict.empty();
+      }
+    }
+    return conflicts;
+  }
+
+  Future<void> promptDeveloperSelectAction(List<Conflict> conflicts, List<String> lines, String localPath) async {
+    final int contextLineCount = int.parse(stringArg('context-lines')!);
+    for (final Conflict conflict in conflicts) {
+      if (!conflict.isValid) {
+        conflict.keepOriginal = null;
+        continue;
+      }
+      // Print the conflict for reference
+      logger.printStatus(terminal.clearScreen(), newline: false);
+      logger.printStatus('Cyan', color: TerminalColor.cyan, newline: false);
+      logger.printStatus(' = Original lines.  ', newline: false);
+      logger.printStatus('Green', color: TerminalColor.green, newline: false);
+      logger.printStatus(' = New lines.\n', newline: true);
+
+      // Print the conflict for reference
+      for (int lineNumber = (conflict.startLine! - contextLineCount).abs(); lineNumber < conflict.startLine!; lineNumber++) {
+        printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.grey);
+      }
+      printConflictLine(lines[conflict.startLine!], conflict.startLine!);
+      for (int lineNumber = conflict.startLine! + 1; lineNumber < conflict.dividerLine!; lineNumber++) {
+        printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.cyan);
+      }
+      printConflictLine(lines[conflict.dividerLine!], conflict.dividerLine!);
+      for (int lineNumber = conflict.dividerLine! + 1; lineNumber < conflict.endLine!; lineNumber++) {
+        printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.green);
+      }
+      printConflictLine(lines[conflict.endLine!], conflict.endLine!);
+      for (int lineNumber = conflict.endLine! + 1; lineNumber <= (conflict.endLine! + contextLineCount).clamp(0, lines.length - 1); lineNumber++) {
+        printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.grey);
+      }
+
+      logger.printStatus('\nConflict in $localPath.');
+      // Select action
+      String selection = 's';
+      try {
+        selection = await terminal.promptForCharInput(
+          <String>['o', 'n', 's'],
+          logger: logger,
+          prompt: 'Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually?',
+          defaultChoiceIndex: 2,
+        );
+      } on StateError catch(e) {
+        logger.printError(
+          e.message,
+          indent: 0,
+        );
+      }
+
+      switch(selection) {
+        case 'o': {
+          conflict.chooseOriginal();
+          break;
+        }
+        case 'n': {
+          conflict.chooseNew();
+          break;
+        }
+        case 's': {
+          conflict.skip();
+          break;
+        }
+      }
+    }
+  }
+
+  // Returns true if changes were accepted or rejected. Returns false if user indicated to retry.
+  Future<bool> verifyAndCommit(List<Conflict> conflicts, List<String> lines, File file, String localPath) async {
+    int originalCount = 0;
+    int newCount = 0;
+    int skipCount = 0;
+
+    String result = '';
+    int lastPrintedLine = 0;
+    bool hasChanges = false;
+    for (final Conflict conflict in conflicts) {
+      if (!conflict.isValid) {
+        continue;
+      }
+      if (conflict.keepOriginal != null) {
+        hasChanges = true; // don't unecessarily write file if no changes were made.
+      }
+      for (int lineNumber = lastPrintedLine; lineNumber < conflict.startLine!; lineNumber++) {
+        result += '${lines[lineNumber]}\n';
+      }
+      if (conflict.keepOriginal == null) {
+        // Skipped this conflict. Add all lines.
+        for (int lineNumber = conflict.startLine!; lineNumber <= conflict.endLine!; lineNumber++) {
+          result += '${lines[lineNumber]}\n';
+        }
+        skipCount++;
+      } else if (conflict.keepOriginal!) {
+        // Keeping original lines
+        for (int lineNumber = conflict.startLine! + 1; lineNumber < conflict.dividerLine!; lineNumber++) {
+          result += '${lines[lineNumber]}\n';
+        }
+        originalCount++;
+      } else {
+        // Keeping new lines
+        for (int lineNumber = conflict.dividerLine! + 1; lineNumber < conflict.endLine!; lineNumber++) {
+          result += '${lines[lineNumber]}\n';
+        }
+        newCount++;
+      }
+      lastPrintedLine = (conflict.endLine! + 1).clamp(0, lines.length);
+    }
+    for (int lineNumber = lastPrintedLine; lineNumber < lines.length; lineNumber++) {
+      result += '${lines[lineNumber]}\n';
+    }
+    result.trim();
+
+    // Display conflict summary for this file and confirm with user if the changes should be commited.
+    final bool confirm = boolArg('confirm-commit') ?? true;
+    if (confirm && skipCount != conflicts.length) {
+      logger.printStatus(terminal.clearScreen(), newline: false);
+      logger.printStatus('Conflicts in $localPath complete.\n');
+      logger.printStatus('You chose to:\n  Skip $skipCount conflicts\n  Acccept the original lines for $originalCount conflicts\n  Accept the new lines for $newCount conflicts\n');
+      String selection = 'n';
+      try {
+        selection = await terminal.promptForCharInput(
+          <String>['y', 'n', 'r'],
+          logger: logger,
+          prompt: 'Commit the changes to the working directory? (y)es, (n)o, (r)etry this file',
+          defaultChoiceIndex: 1,
+        );
+      } on StateError catch(e) {
+        logger.printError(
+          e.message,
+          indent: 0,
+        );
+      }
+      switch(selection) {
+        case 'y': {
+          if (hasChanges) {
+            file.writeAsStringSync(result, flush: true);
+          }
+          break;
+        }
+        case 'n': {
+          break;
+        }
+        case 'r': {
+          return false;
+        }
+      }
+    } else {
+      file.writeAsStringSync(result, flush: true);
+    }
+    return true;
   }
 
   void printConflictLine(String text, int lineNumber, {TerminalColor? color}) {
