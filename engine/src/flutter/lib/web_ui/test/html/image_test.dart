@@ -72,6 +72,32 @@ Future<Image> _encodeToHtmlThenDecode(
   return (await (await descriptor.instantiateCodec()).getNextFrame()).image;
 }
 
+// This utility function detects how the current Web engine decodes pixel data.
+//
+// The HTML renderer uses the BMP format to display pixel data, but it used to
+// use a wrong implementation. The bug has been fixed, but the fix breaks apps
+// that had to provide incorrect data to work around this issue. This function
+// is used in the migration guide to assist libraries that would like to run on
+// both pre- and post-patch engines by testing the current behavior on a single
+// pixel, making use the fact that the patch fixes the pixel order.
+//
+// The `format` argument is used for testing. In the actual code it should be
+// replaced by `PixelFormat.rgba8888`.
+//
+// See also:
+//
+//  * Patch: https://github.com/flutter/engine/pull/29448
+//  * Migration guide: https://docs.flutter.dev/release/breaking-changes/raw-images-on-web-uses-correct-origin-and-colors
+Future<bool> rawImageUsesCorrectBehavior(PixelFormat format) async {
+  final ImageDescriptor descriptor = ImageDescriptor.raw(
+    await ImmutableBuffer.fromUint8List(Uint8List.fromList(<int>[0xED, 0, 0, 0xFF])),
+    width: 1, height: 1, pixelFormat: format);
+  final Image image = (await (await descriptor.instantiateCodec()).getNextFrame()).image;
+  final Uint8List resultPixels = Uint8List.sublistView(
+    (await image.toByteData(format: ImageByteFormat.rawStraightRgba))!);
+  return resultPixels[0] == 0xED;
+}
+
 Future<void> testMain() async {
   test('Correctly encodes an opaque image', () async {
     // A 2x2 testing image without transparency.
@@ -144,5 +170,10 @@ Future<void> testMain() async {
       <int>[0x0603F9FF, 0x80407FFF, 0xC0603FFF, 0xFF8000FF],
     );
     expect(actualPixels, listEqual(benchmarkPixels, tolerance: 1));
+  });
+
+  test('The behavior detector works correctly', () async {
+    expect(await rawImageUsesCorrectBehavior(PixelFormat.rgba8888), true);
+    expect(await rawImageUsesCorrectBehavior(PixelFormat.bgra8888), false);
   });
 }
