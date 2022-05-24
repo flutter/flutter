@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -15,12 +13,12 @@ import '../src/darwin_common.dart';
 
 void main() {
   group('iOS app validation', () {
-    String flutterRoot;
-    Directory pluginRoot;
-    String projectRoot;
-    String flutterBin;
-    Directory tempDir;
-    File hiddenFile;
+    late String flutterRoot;
+    late Directory pluginRoot;
+    late String projectRoot;
+    late String flutterBin;
+    late Directory tempDir;
+    late File hiddenFile;
 
     setUpAll(() {
       flutterRoot = getFlutterRoot();
@@ -77,15 +75,15 @@ void main() {
 
     for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
       group('build in ${buildMode.name} mode', () {
-        Directory buildPath;
-        Directory outputApp;
-        Directory frameworkDirectory;
-        Directory outputFlutterFramework;
-        File outputFlutterFrameworkBinary;
-        Directory outputAppFramework;
-        File outputAppFrameworkBinary;
-        File outputPluginFrameworkBinary;
-        ProcessResult buildResult;
+        late Directory buildPath;
+        late Directory outputApp;
+        late Directory frameworkDirectory;
+        late Directory outputFlutterFramework;
+        late File outputFlutterFrameworkBinary;
+        late Directory outputAppFramework;
+        late File outputAppFrameworkBinary;
+        late File outputPluginFrameworkBinary;
+        late ProcessResult buildResult;
 
         setUpAll(() {
           buildResult = processManager.runSync(<String>[
