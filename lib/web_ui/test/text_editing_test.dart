@@ -353,7 +353,7 @@ Future<void> testMain() async {
         // TODO(mdebbar): https://github.com/flutter/flutter/issues/50769
         skip: browserEngine == BrowserEngine.edge);
 
-    test('Does not trigger input action in multi-line mode', () {
+    test('Triggers input action in multi-line mode', () {
       final InputConfiguration config = InputConfiguration(
         inputType: EngineInputType.multiline,
         inputAction: 'TextInputAction.done',
@@ -373,8 +373,8 @@ Future<void> testMain() async {
         keyCode: _kReturnKeyCode,
       );
 
-      // Still no input action.
-      expect(lastInputAction, isNull);
+      // Input action is triggered!
+      expect(lastInputAction, 'TextInputAction.done');
       // And default behavior of keyboard event shouldn't have been prevented.
       expect(event.defaultPrevented, isFalse);
     });
@@ -1903,7 +1903,7 @@ Future<void> testMain() async {
         // TODO(mdebbar): https://github.com/flutter/flutter/issues/50769
         skip: browserEngine == BrowserEngine.edge);
 
-    test('does not send input action in multi-line mode', () {
+    test('sends input action in multi-line mode', () {
       showKeyboard(
         inputType: 'multiline',
         inputAction: 'TextInputAction.next',
@@ -1915,8 +1915,14 @@ Future<void> testMain() async {
         keyCode: _kReturnKeyCode,
       );
 
-      // No input action and no platform message have been sent.
-      expect(spy.messages, isEmpty);
+      // Input action is sent as a platform message.
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.performAction');
+      expect(
+        spy.messages[0].methodArguments,
+        <dynamic>[clientId, 'TextInputAction.next'],
+      );
       // And default behavior of keyboard event shouldn't have been prevented.
       expect(event.defaultPrevented, isFalse);
     });
