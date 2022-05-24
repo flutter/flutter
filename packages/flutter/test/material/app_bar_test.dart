@@ -2574,8 +2574,9 @@ void main() {
         .delegate;
 
       // Ensure we have a non-null vsync when it's needed.
-      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
+      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null)) {
         expect(delegate.vsync, isNotNull);
+      }
 
       expect(delegate.showOnScreenConfiguration != null, snap && floating);
     }
