@@ -44,6 +44,20 @@ enum _SwitchType { material, adaptive }
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [Switch]. When the thumb slides to the other
+/// side of the track, the switch is toggled between on/off.
+///
+/// ** See code in examples/api/lib/material/switch/switch.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to customize [Switch] using [MaterialStateProperty]
+/// switch properties.
+///
+/// ** See code in examples/api/lib/material/switch/switch.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
@@ -51,6 +65,8 @@ enum _SwitchType { material, adaptive }
 ///  * [Checkbox], another widget with similar semantics.
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
+///  * [MaterialStateProperty], an interface for objects that "resolve" to
+///    different values depending on a widget's material state.
 ///  * <https://material.io/design/components/selection-controls.html#switches>
 class Switch extends StatelessWidget {
   /// Creates a Material Design switch.
