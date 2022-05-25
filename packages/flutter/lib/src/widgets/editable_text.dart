@@ -4104,41 +4104,39 @@ class _TransposeCharactersAction extends ContextAction<TransposeCharactersIntent
   final EditableTextState state;
 
   @override
-  Object? invoke(TransposeCharactersIntent intent, [BuildContext? context]) {
-    // Can't swap 1 or 0 characters.
-    if (state.textEditingValue.text.length <= 1) {
-      return null;
-    // Do nothing when there is no selection.
-    } else if (state.textEditingValue.selection == null) {
-      return null;
-    // Do nothing when the selection isn't collapsed.
-    } else if (!state.textEditingValue.selection.isCollapsed) {
-      return null;
-    // Do nothing when the selection is at the beginning of the text.
-    } else if (state.textEditingValue.selection.baseOffset == 0) {
-      return null;
+  void invoke(TransposeCharactersIntent intent, [BuildContext? context]) {
+    if (state.textEditingValue.text.characters.length <= 1
+        || state.textEditingValue.selection == null
+        || !state.textEditingValue.selection.isCollapsed
+        || state.textEditingValue.selection.baseOffset == 0) {
+      return;
     }
 
     final String text = state.textEditingValue.text;
     final TextSelection selection = state.textEditingValue.selection;
     final bool atEnd = selection.baseOffset == text.length;
-    final Characters before = selection.textBefore(text).characters;
-    final Characters after = selection.textAfter(text).characters;
+    final CharacterRange transposing = CharacterRange.at(
+      text,
+      0,
+      selection.baseOffset,
+    );
+    if (atEnd) {
+      transposing.dropFirst(transposing.currentCharacters.length - 2);
+    } else {
+      transposing
+        ..dropFirst(transposing.currentCharacters.length - 1)
+        ..expandNext();
+    }
+    assert(transposing.currentCharacters.length == 2);
 
-    final String replacement = atEnd
-        ? (before.takeLast(1) + before.characterAt(before.length - 2)).string
-        : after.first + before.last;
-
-    return Actions.invoke(
+    Actions.invoke(
       context!,
       ReplaceTextIntent(
         state.textEditingValue,
-        replacement,
+        transposing.currentCharacters.last + transposing.currentCharacters.first,
         TextRange(
-          start: atEnd
-              ? before.take(before.length - 2).string.length
-              : before.take(before.length - 1).string.length,
-          end: atEnd ? text.length : selection.baseOffset + after.first.length,
+          start: transposing.stringBeforeLength,
+          end: transposing.stringBeforeLength + transposing.current.length,
         ),
         SelectionChangedCause.keyboard,
       ),
@@ -4146,7 +4144,7 @@ class _TransposeCharactersAction extends ContextAction<TransposeCharactersIntent
   }
 
   @override
-  bool get isActionEnabled => state.widget.selectionEnabled;
+  bool get isActionEnabled => !state.widget.readOnly && state.widget.selectionEnabled;
 }
 
 class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
