@@ -899,8 +899,9 @@ void main() {
       editable.paintCount = 0;
 
       final AbstractNode? parent = editable.parent;
-      if (parent is RenderConstrainedBox)
+      if (parent is RenderConstrainedBox) {
         parent.child = null;
+      }
     });
 
     test('paints in the correct order', () {
