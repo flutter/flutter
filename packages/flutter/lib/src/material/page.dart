@@ -126,9 +126,9 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
 
-    // The builder should be kept unchanged during an iOS-style back swipe pop gesture.
+    // The builder should be kept unchanged during an user gesture.
     final PageTransitionsBuilder builder;
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(this) && _prevPageTranstionsBuilder != null) {
+    if ((navigator?.userGestureInProgress ?? false) && _prevPageTranstionsBuilder != null) {
       builder = _prevPageTranstionsBuilder!;
     } else {
       builder = _prevPageTranstionsBuilder = theme.getMatchingBuilder(context);
