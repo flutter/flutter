@@ -182,8 +182,9 @@ abstract class WidgetController {
 
   T _stateOf<T extends State>(Element element, Finder finder) {
     TestAsyncUtils.guardSync();
-    if (element is StatefulElement)
+    if (element is StatefulElement) {
       return element.state as T;
+    }
     throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
 
@@ -1155,8 +1156,9 @@ abstract class WidgetController {
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
   SemanticsNode getSemantics(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null)
+    if (binding.pipelineOwner.semanticsOwner == null) {
       throw StateError('Semantics are not enabled.');
+    }
     final Iterable<Element> candidates = finder.evaluate();
     if (candidates.isEmpty) {
       throw StateError('Finder returned no matching elements.');
@@ -1171,8 +1173,9 @@ abstract class WidgetController {
       renderObject = renderObject.parent as RenderObject?;
       result = renderObject?.debugSemantics;
     }
-    if (result == null)
+    if (result == null) {
       throw StateError('No Semantics data found.');
+    }
     return result;
   }
 
@@ -1297,8 +1300,9 @@ class LiveWidgetController extends WidgetController {
 
   @override
   Future<void> pump([Duration? duration]) async {
-    if (duration != null)
+    if (duration != null) {
       await Future<void>.delayed(duration);
+    }
     binding.scheduleFrame();
     await binding.endOfFrame;
   }

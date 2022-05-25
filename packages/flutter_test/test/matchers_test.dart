@@ -15,8 +15,9 @@ import 'package:flutter_test/flutter_test.dart';
 class _MockToStringDeep {
   _MockToStringDeep(String str) : _lines = <String>[] {
     final List<String> lines = str.split('\n');
-    for (int i = 0; i < lines.length - 1; ++i)
+    for (int i = 0; i < lines.length - 1; ++i) {
       _lines.add('${lines[i]}\n');
+    }
 
     // If the last line is empty, that really just means that the previous
     // line was terminated with a line break.
@@ -34,11 +35,13 @@ class _MockToStringDeep {
 
   String toStringDeep({ String prefixLineOne = '', String prefixOtherLines = '' }) {
     final StringBuffer sb = StringBuffer();
-    if (_lines.isNotEmpty)
+    if (_lines.isNotEmpty) {
       sb.write('$prefixLineOne${_lines.first}');
+    }
 
-    for (int i = 1; i < _lines.length; ++i)
+    for (int i = 1; i < _lines.length; ++i) {
       sb.write('$prefixOtherLines${_lines[i]}');
+    }
 
     return sb.toString();
   }
@@ -560,12 +563,15 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.keys)
+      for (final int index in SemanticsAction.values.keys) {
         actions |= index;
-      for (final int index in SemanticsFlag.values.keys)
+      }
+      for (final int index in SemanticsFlag.values.keys) {
         // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
-        if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline)
+        if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline) {
           flags |= index;
+        }
+      }
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,

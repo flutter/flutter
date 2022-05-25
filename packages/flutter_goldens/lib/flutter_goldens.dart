@@ -314,8 +314,9 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       suffix: 'flutter_goldens_presubmit.',
     );
 
-    if (!baseDirectory.existsSync())
+    if (!baseDirectory.existsSync()) {
       baseDirectory.createSync(recursive: true);
+    }
 
     goldens ??= SkiaGoldClient(baseDirectory);
 
@@ -535,8 +536,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       goldenBytes,
     );
 
-    if (result.passed)
+    if (result.passed) {
       return true;
+    }
 
     final String error = await generateFailureOutput(result, golden, basedir);
     throw FlutterError(error);
