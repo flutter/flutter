@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/painting/text_span.dart' show TextSpan;
-import 'package:flutter/src/painting/text_style.dart' show TextStyle;
-
-import 'text_input.dart' show TextEditingValue;
+import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart' show TextEditingValue;
 
 /// A data structure representing a range of misspelled text and the suggested
 /// replacements for this range. For example, one [SuggestionSpan] of the
@@ -37,8 +33,7 @@ class SuggestionSpan {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
+    if (identical(this, other)) return true;
     return other is SuggestionSpan &&
         other.startIndex == startIndex &&
         other.endIndex == endIndex &&
@@ -66,8 +61,7 @@ class SpellCheckResults {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
+    if (identical(this, other)) return true;
     return other is SpellCheckResults &&
         other.spellCheckedText == spellCheckedText &&
         listEquals<SuggestionSpan>(other.suggestionSpans, suggestionSpans);
