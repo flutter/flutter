@@ -18,7 +18,6 @@ void main() {
   late DapTestSession dap;
   late DapTestClient client;
   late TestsProject project;
-  List<String>? toolArgs;
 
   setUpAll(() {
     Cache.flutterRoot = getFlutterRoot();
@@ -35,7 +34,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  void standardTests() {
+  void standardTests({List<String>? toolArgs}) {
     test('can run in debug mode', () async {
       // Collect output and test events while running the script.
       final TestEvents outputEvents = await client.collectTestOutput(
@@ -113,7 +112,6 @@ void main() {
 
   group('widget tests', () {
     setUp(() async {
-      toolArgs = null;
       project = TestsProject();
       await project.setUpIn(tempDir);
     });
@@ -122,13 +120,14 @@ void main() {
   });
 
   group('integration tests', () {
+    const List<String> toolArgs = <String>['-d', 'flutter-tester'];
+
     setUp(() async {
-      toolArgs = <String>['-d', 'flutter-tester'];
       project = IntegrationTestsProject();
       await project.setUpIn(tempDir);
     });
 
-    standardTests();
+    standardTests(toolArgs: toolArgs);
   });
 }
 
