@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -117,8 +116,7 @@ dependencies {
         'apk',
         '--debug',
       ], workingDirectory: exampleAppDir.path);
-      print(result.stdout);
-      print(result.stderr);
+      expect(result.stdout, contains('Built build/app/outputs/flutter-apk/app-debug.apk.'));
       expect(exampleAppDir.childDirectory('build')
         .childDirectory('app')
         .childDirectory('outputs')
