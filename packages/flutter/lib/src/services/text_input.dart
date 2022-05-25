@@ -20,7 +20,6 @@ import '../../services.dart' show Clipboard;
 import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
-import 'spell_check.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
@@ -480,7 +479,7 @@ class TextInputConfiguration {
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
-\    this.enableIMEPersonalizedLearning = true,
+    this.enableIMEPersonalizedLearning = true,
     this.enableDeltaModel = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
@@ -1042,7 +1041,7 @@ mixin TextSelectionDelegate {
   /// will be hidden and the current selection will be scrolled into view.
   Future<void> pasteText(SelectionChangedCause cause);
 
-  // Replace misspelled wor dwith selected replacement suggestion.
+  // Replace misspelled word with selected replacement suggestion.
   void replaceSelection(SelectionChangedCause cause, String text, int start, int end);
 
   /// Set the current selection to contain the entire text value.

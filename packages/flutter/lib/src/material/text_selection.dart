@@ -6,8 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/src/services/spell_check.dart';
-
+import 'package:flutter/services.dart' show ToolbarType;
 
 import 'debug.dart';
 import 'material_localizations.dart';

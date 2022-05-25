@@ -302,7 +302,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _startNewMouseSelectionGesture(DragDownDetails details) {
     widget.focusNode.requestFocus();
-    hideToolbar();
+    hideToolbar(ToolbarType.copyPasteControls);
     _clearSelection();
   }
 
@@ -553,7 +553,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       _createSelectionOverlay();
 
     _selectionOverlay!.toolbarLocation = location;
-    _selectionOverlay!.showToolbar();
+    _selectionOverlay!.showToolbar(ToolbarType.copyPasteControls, null);
     return true;
   }
 
@@ -685,10 +685,10 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   bool get pasteEnabled => false;
 
   @override
-  void hideToolbar([bool hideHandles = true]) {
-    _selectionOverlay?.hideToolbar();
+  void hideToolbar(ToolbarType toolbarType, [bool hideHandles = true]) {
+    _selectionOverlay?.hideToolbar(toolbarType);
     if (hideHandles) {
-      _selectionOverlay?.hideToolbar();
+      _selectionOverlay?.hideToolbar(toolbarType);
     }
   }
 
@@ -707,6 +707,23 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _copy();
     _clearSelection();
   }
+
+  // @override
+  // void replaceSelection(SelectionChangedCause cause, String replacementSuggestion, int start, int end) {
+  //   if (widget.readOnly || widget.obscureText) {
+  //     return;
+  //   }
+  //   final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
+  //   final String text = textEditingValue.text;
+
+  //   _replaceText(ReplaceTextIntent(textEditingValue, replacementSuggestion, selection, cause));
+
+  //   bringIntoView(textEditingValue.selection.extent);
+  //   hideToolbar(ToolbarType.spellCheckSuggestionsControls);
+  // }
+
+  @override
+  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   // TODO(chunhtai): remove this workaround after decoupling text selection
   // from text editing in TextSelectionDelegate.
