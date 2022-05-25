@@ -4,7 +4,6 @@
 
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Directory;
 import 'dart:typed_data';
@@ -1087,23 +1086,6 @@ class FakeHttpClientRequest extends Fake implements HttpClientRequest {
   @override
   Future<HttpClientResponse> close() async {
     return response;
-  }
-}
-
-class FakeHttpClientResponse extends Fake implements HttpClientResponse {
-  FakeHttpClientResponse(this.response);
-
-  final List<int> response;
-
-  @override
-  StreamSubscription<List<int>> listen(
-    void Function(List<int> event)? onData, {
-      Function? onError,
-      void Function()? onDone,
-      bool? cancelOnError,
-    }) {
-    return Stream<List<int>>.fromFuture(Future<List<int>>.value(response))
-      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 }
 
