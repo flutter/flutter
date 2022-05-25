@@ -317,9 +317,10 @@ public class FlutterLoader {
 
       shellArgs.add("--prefetched-default-font-manager");
 
-      if (metaData == null || metaData.getBoolean(ENABLE_SKPARAGRAPH_META_DATA_KEY, true)) {
-        shellArgs.add("--enable-skparagraph");
-      }
+      boolean enableSkParagraph =
+          metaData == null || metaData.getBoolean(ENABLE_SKPARAGRAPH_META_DATA_KEY, true);
+      shellArgs.add("--enable-skparagraph=" + enableSkParagraph);
+
       if (metaData != null && metaData.getBoolean(ENABLE_IMPELLER_META_DATA_KEY, false)) {
         shellArgs.add("--enable-impeller");
       }
