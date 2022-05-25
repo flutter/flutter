@@ -103,15 +103,6 @@ Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 200));
 }
 
-double getOpacity(WidgetTester tester, Finder finder) {
-  return tester.widget<FadeTransition>(
-      find.ancestor(
-        of: finder,
-        matching: find.byType(FadeTransition),
-      ),
-  ).opacity.value;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();

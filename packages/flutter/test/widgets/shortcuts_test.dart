@@ -1737,27 +1737,12 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
   }
 }
 
-typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
-
 class TestAction extends CallbackAction<Intent> {
   TestAction({
     required super.onInvoke,
   })  : assert(onInvoke != null);
 
   static const LocalKey key = ValueKey<Type>(TestAction);
-}
-
-class TestDispatcher extends ActionDispatcher {
-  const TestDispatcher({this.postInvoke});
-
-  final PostInvokeCallback? postInvoke;
-
-  @override
-  Object? invokeAction(Action<TestIntent> action, Intent intent, [BuildContext? context]) {
-    final Object? result = super.invokeAction(action, intent, context);
-    postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
-    return result;
-  }
 }
 
 /// An activator that accepts down events that has [key] as the logical key.
