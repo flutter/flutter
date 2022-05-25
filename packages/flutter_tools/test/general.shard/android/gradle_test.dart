@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -704,12 +703,3 @@ flutter:
     // TODO(zanderso): This is an integration test and should be moved to the integration shard.
   }, skip: true); // https://github.com/flutter/flutter/issues/87922
 }
-
-class FakeGradleUtils extends GradleUtils {
-  @override
-  String getExecutable(FlutterProject project) {
-    return 'gradlew';
-  }
-}
-
-class FakeAndroidSdk extends Fake implements AndroidSdk { }

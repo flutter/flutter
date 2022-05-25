@@ -39,11 +39,6 @@ const String singleEsMessageArbFileString = '''
 {
   "title": "Título"
 }''';
-const String twoEsMessageArbFileString = '''
-{
-  "title": "Título",
-  "subtitle": "Subtitular"
-}''';
 const String singleZhMessageArbFileString = '''
 {
   "title": "标题"

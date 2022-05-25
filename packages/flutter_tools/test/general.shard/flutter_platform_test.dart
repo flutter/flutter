@@ -121,17 +121,3 @@ void main() {
 }
 
 class FakeSuitePlatform extends Fake implements SuitePlatform { }
-
-// A FlutterPlatform with enough fields set to load and start a test.
-class TestFlutterPlatform extends FlutterPlatform {
-  TestFlutterPlatform() : super(
-    shellPath: '/',
-    debuggingOptions: DebuggingOptions.enabled(
-      const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-      ),
-    ),
-  );
-}

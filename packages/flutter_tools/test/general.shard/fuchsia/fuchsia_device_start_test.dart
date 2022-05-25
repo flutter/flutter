@@ -9,7 +9,6 @@ import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -731,17 +730,6 @@ class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
     final String appName = fuchsiaProject.project.manifest.appName;
     final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
     globals.fs.file(manifestPath).createSync(recursive: true);
-  }
-}
-
-class FailingKernelCompiler implements FuchsiaKernelCompiler {
-  @override
-  Future<void> build({
-    @required FuchsiaProject fuchsiaProject,
-    @required String target, // E.g., lib/main.dart
-    BuildInfo buildInfo = BuildInfo.debug,
-  }) async {
-    throwToolExit('Build process failed');
   }
 }
 

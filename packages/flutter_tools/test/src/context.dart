@@ -51,9 +51,6 @@ export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, Fake
 BufferLogger get testLogger => context.get<Logger>() as BufferLogger;
 
 FakeDeviceManager get testDeviceManager => context.get<DeviceManager>() as FakeDeviceManager;
-FakeDoctor get testDoctor => context.get<Doctor>() as FakeDoctor;
-
-typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
 void testUsingContext(
