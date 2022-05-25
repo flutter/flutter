@@ -167,6 +167,8 @@ void main() {
         'size of the repository as it is distributed to all our developers. If you have a binary\n'
         'to which you need access, you should consider how to fetch it from another repository;\n'
         'for example, the "assets-for-api-docs" repository is used for images in API docs.\n'
+        'To add assets to flutter_tools templates, see the instructions in the wiki:\n'
+        'https://github.com/flutter/flutter/wiki/Managing-template-image-assets\n'
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
       );
     }

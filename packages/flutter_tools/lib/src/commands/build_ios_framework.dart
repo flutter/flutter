@@ -80,6 +80,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       ..addFlag('cocoapods',
         help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
       )
+      ..addFlag('static',
+        help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
+      )
       ..addOption('output',
         abbr: 'o',
         valueHelp: 'path/to/directory/',
@@ -428,6 +431,8 @@ end
         'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+        if (boolArg('static') ?? false)
+          'MACH_O_TYPE=staticlib',
       ];
 
       RunResult buildPluginsResult = await globals.processUtils.run(
@@ -453,6 +458,8 @@ end
         'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+        if (boolArg('static') ?? false)
+          'MACH_O_TYPE=staticlib',
       ];
 
       buildPluginsResult = await globals.processUtils.run(

@@ -30,4 +30,16 @@ void main() {
     expect(value.resolve(<MaterialState>{MaterialState.disabled}), 123);
     expect(value.resolve(<MaterialState>{MaterialState.error}), 123);
   });
+
+  test('MaterialStatePropertyAll', () {
+    const MaterialStatePropertyAll<int> value = MaterialStatePropertyAll<int>(123);
+    expect(value.resolve(<MaterialState>{}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.hovered}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.focused}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.pressed}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.dragged}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.selected}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.disabled}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.error}), 123);
+  });
 }

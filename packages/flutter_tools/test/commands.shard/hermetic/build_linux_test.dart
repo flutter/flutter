@@ -172,18 +172,15 @@ void main() {
     OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   });
 
-  testUsingContext('Handles argument error from missing cmake', () async {
+  testUsingContext('Handles missing cmake', () async {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
-    processManager = FakeProcessManager.list(<FakeCommand>[
-      cmakeCommand('release', onRun: () {
-        throw ArgumentError();
-      }),
-    ]);
+    processManager = FakeProcessManager.empty()
+        ..excludedExecutables.add('cmake');
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit(message: "cmake not found. Run 'flutter doctor' for more information."));
+    ), throwsToolExit(message: 'CMake is required for Linux development.'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

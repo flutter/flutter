@@ -436,8 +436,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           useIndicator: useIndicator,
                           indicatorColor: useIndicator ? indicatorColor : null,
                           onTap: () {
-                            if (widget.onDestinationSelected != null)
+                            if (widget.onDestinationSelected != null) {
                               widget.onDestinationSelected!(i);
+                            }
                           },
                           indexLabel: localizations.tabLabel(
                             tabIndex: i + 1,

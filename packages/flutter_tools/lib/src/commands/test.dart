@@ -320,8 +320,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
+    String testAssetDirectory;
     if (buildTestAssets) {
       await _buildTestAsset();
+      testAssetDirectory = globals.fs.path.
+        join(flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets');
     }
 
     final bool startPaused = boolArgDeprecated('start-paused');
@@ -377,7 +380,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
         verbose: !machine,
-        libraryPredicate: (String libraryName) => libraryName.contains(projectName),
+        libraryNames: <String>{projectName},
         packagesPath: buildInfo.packagesPath
       );
     }
@@ -444,7 +447,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       machine: machine,
       updateGoldens: boolArgDeprecated('update-goldens'),
       concurrency: jobs,
-      buildTestAssets: buildTestAssets,
+      testAssetDirectory: testAssetDirectory,
       flutterProject: flutterProject,
       web: stringArgDeprecated('platform') == 'chrome',
       randomSeed: stringArgDeprecated('test-randomize-ordering-seed'),

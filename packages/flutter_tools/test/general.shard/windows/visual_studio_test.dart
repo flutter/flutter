@@ -863,6 +863,177 @@ void main() {
       expect(visualStudio.getWindows10SDKVersion(), null);
     });
   });
+
+  // The output of vswhere.exe is known to contain bad UTF8.
+  // See: https://github.com/flutter/flutter/issues/102451
+  group('Correctly handles bad UTF-8 from vswhere.exe output', () {
+    late VisualStudioFixture fixture;
+    late VisualStudio visualStudio;
+
+    setUp(() {
+      fixture = setUpVisualStudio();
+      visualStudio = fixture.visualStudio;
+    });
+
+    testWithoutContext('Ignores unicode replacement char in unused properties', () {
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['unused'] = 'Bad UTF8 \u{FFFD}';
+
+      setMockCompatibleVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
+    });
+
+    testWithoutContext('Throws ToolExit on bad UTF-8 in installationPath', () {
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['installationPath'] = '\u{FFFD}';
+
+      setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
+
+      expect(() => visualStudio.isInstalled,
+          throwsToolExit(message: 'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string'));
+    });
+
+    testWithoutContext('Throws ToolExit on bad UTF-8 in installationVersion', () {
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['installationVersion'] = '\u{FFFD}';
+
+      setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
+
+      expect(() => visualStudio.isInstalled,
+          throwsToolExit(message: 'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string'));
+    });
+
+    testWithoutContext('Ignores bad UTF-8 in displayName', () {
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['displayName'] = '\u{FFFD}';
+
+      setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
+
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
+      expect(visualStudio.displayName, equals('\u{FFFD}'));
+    });
+
+    testWithoutContext("Ignores bad UTF-8 in catalog's productDisplayVersion", () {
+      final Map<String, dynamic> catalog = Map<String, dynamic>.of(_defaultResponse['catalog'] as Map<String, dynamic>)
+        ..['productDisplayVersion'] = '\u{FFFD}';
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['catalog'] = catalog;
+
+      setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
+
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
+      expect(visualStudio.displayVersion, equals('\u{FFFD}'));
+    });
+  });
+
+  group(VswhereDetails, () {
+      test('Accepts empty JSON', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = <String, dynamic>{};
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.installationPath, null);
+        expect(result.displayName, null);
+        expect(result.fullVersion, null);
+        expect(result.isComplete, null);
+        expect(result.isLaunchable, null);
+        expect(result.isRebootRequired, null);
+        expect(result.isPrerelease, null);
+        expect(result.catalogDisplayVersion, null);
+        expect(result.isUsable, isTrue);
+      });
+
+      test('Ignores unknown JSON properties', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = <String, dynamic>{
+          'hello': 'world',
+        };
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.installationPath, null);
+        expect(result.displayName, null);
+        expect(result.fullVersion, null);
+        expect(result.isComplete, null);
+        expect(result.isLaunchable, null);
+        expect(result.isRebootRequired, null);
+        expect(result.isPrerelease, null);
+        expect(result.catalogDisplayVersion, null);
+        expect(result.isUsable, isTrue);
+      });
+
+      test('Accepts JSON', () {
+        const bool meetsRequirements = true;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse);
+
+        expect(result.installationPath, visualStudioPath);
+        expect(result.displayName, 'Visual Studio Community 2019');
+        expect(result.fullVersion, '16.2.29306.81');
+        expect(result.isComplete, true);
+        expect(result.isLaunchable, true);
+        expect(result.isRebootRequired, false);
+        expect(result.isPrerelease, false);
+        expect(result.catalogDisplayVersion, '16.2.5');
+        expect(result.isUsable, isTrue);
+      });
+
+      test('Installation that does not satisfy requirements is not usable', () {
+        const bool meetsRequirements = false;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse);
+
+        expect(result.isUsable, isFalse);
+      });
+
+      test('Incomplete installation is not usable', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
+          ..['isComplete'] = false;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.isUsable, isFalse);
+      });
+
+      test('Unlaunchable installation is not usable', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
+          ..['isLaunchable'] = false;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.isUsable, isFalse);
+      });
+
+      test('Installation that requires reboot is not usable', () {
+        const bool meetsRequirements = true;
+        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
+          ..['isRebootRequired'] = true;
+
+        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+
+        expect(result.isUsable, isFalse);
+      });
+  });
 }
 
 class VisualStudioFixture {

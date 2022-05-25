@@ -182,7 +182,7 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
+    t = clampDouble((t - begin) / (end - begin), 0.0, 1.0);
     if (t == 0.0 || t == 1.0)
       return t;
     return curve.transform(t);
@@ -302,7 +302,7 @@ class Cubic extends Curve {
   /// Rather than creating a new instance, consider using one of the common
   /// cubic curves in [Curves].
   ///
-  /// The [a] (x1), [b](x2), [c](y1), and [d](y2) arguments must not be null.
+  /// The [a] (x1), [b] (y1), [c] (x2) and [d] (y2) arguments must not be null.
   const Cubic(this.a, this.b, this.c, this.d)
     : assert(a != null),
       assert(b != null),
