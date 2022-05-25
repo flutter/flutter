@@ -423,7 +423,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       canvas.drawArc(Offset.zero & size, 0, _sweep, false, backgroundPaint);
     }
 
-    if (value == null) {
+    if (value == null) { // Indeterminate
       paint.strokeCap = StrokeCap.square;
     }
 
