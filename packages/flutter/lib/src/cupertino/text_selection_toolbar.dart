@@ -763,8 +763,9 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       double paginationButtonsWidth = 0.0;
       if (currentPage == 0) {
         // If this is the last child, it's ok to fit without a forward button.
+        // Note childCount doesn't include slotted children which come before the list ones.
         paginationButtonsWidth =
-            i == childCount - 1 ? 0.0 : _nextButton!.size.width;
+            i == childCount + 2 ? 0.0 : _nextButton!.size.width;
       } else {
         paginationButtonsWidth = subsequentPageButtonsWidth;
       }
