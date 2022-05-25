@@ -97,6 +97,10 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// developers to change that if they add an ancestor [Actions] widget that maps
 /// [SelectAllTextIntent] to a different [Action].
 ///
+/// See the article on [Using Actions and
+/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// for a detailed explanation.
+///
 /// See also:
 ///
 ///  * [Shortcuts], which is a widget that contains a key map, in which it looks
