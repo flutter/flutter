@@ -803,11 +803,13 @@ class _AppBarState extends State<AppBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_scrollNotificationObserver != null)
+    if (_scrollNotificationObserver != null) {
       _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+    }
     _scrollNotificationObserver = ScrollNotificationObserver.of(context);
-    if (_scrollNotificationObserver != null)
+    if (_scrollNotificationObserver != null) {
       _scrollNotificationObserver!.addListener(_handleScrollNotification);
+    }
   }
 
   @override
@@ -949,10 +951,12 @@ class _AppBarState extends State<AppBar> {
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
-      if (titleTextStyle?.color != null)
+      if (titleTextStyle?.color != null) {
         titleTextStyle = titleTextStyle!.copyWith(color: titleTextStyle.color!.withOpacity(opacity));
-      if (toolbarTextStyle?.color != null)
+      }
+      if (toolbarTextStyle?.color != null) {
         toolbarTextStyle = toolbarTextStyle!.copyWith(color: toolbarTextStyle.color!.withOpacity(opacity));
+      }
       overallIconTheme = overallIconTheme.copyWith(
         opacity: opacity * (overallIconTheme.opacity ?? 1.0),
       );
@@ -2050,10 +2054,12 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   @override
   void didUpdateWidget(SliverAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
+    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating) {
       _updateSnapConfiguration();
-    if (widget.stretch != oldWidget.stretch)
+    }
+    if (widget.stretch != oldWidget.stretch) {
       _updateStretchConfiguration();
+    }
   }
 
   @override

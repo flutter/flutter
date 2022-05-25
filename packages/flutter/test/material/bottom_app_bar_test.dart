@@ -571,8 +571,9 @@ class RectangularNotch extends NotchedShape {
 
   @override
   Path getOuterPath(Rect host, Rect? guest) {
-    if (guest == null)
+    if (guest == null) {
       return Path()..addRect(host);
+    }
     return Path()
       ..moveTo(host.left, host.top)
       ..lineTo(guest.left, host.top)

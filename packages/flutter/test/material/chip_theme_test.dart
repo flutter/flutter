@@ -504,20 +504,25 @@ void main() {
     const Color disabledColor = Color(0x00000006);
 
     Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return disabledColor;
+      }
 
-      if (states.contains(MaterialState.pressed))
+      if (states.contains(MaterialState.pressed)) {
         return pressedColor;
+      }
 
-      if (states.contains(MaterialState.hovered))
+      if (states.contains(MaterialState.hovered)) {
         return hoverColor;
+      }
 
-      if (states.contains(MaterialState.focused))
+      if (states.contains(MaterialState.focused)) {
         return focusedColor;
+      }
 
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         return selectedColor;
+      }
 
       return defaultColor;
     }
@@ -591,8 +596,9 @@ void main() {
     BorderSide getBorderSide(Set<MaterialState> states) {
       Color color = defaultColor;
 
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         color = selectedColor;
+      }
 
       return BorderSide(color: color);
     }
@@ -629,8 +635,9 @@ void main() {
 
     BorderSide getBorderSide(Set<MaterialState> states) {
       Color color = defaultColor;
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         color = selectedColor;
+      }
       return BorderSide(color: color);
     }
 
@@ -666,8 +673,9 @@ void main() {
 
   testWidgets('Chip uses stateful shape from chip theme', (WidgetTester tester) async {
     OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         return const RoundedRectangleBorder();
+      }
 
       return null;
     }
