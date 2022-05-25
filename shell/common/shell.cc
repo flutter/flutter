@@ -1820,6 +1820,13 @@ static rapidjson::Value SerializeLayerSnapshot(
   result.AddMember("layer_unique_id", snapshot.GetLayerUniqueId(), allocator);
   result.AddMember("duration_micros", snapshot.GetDuration().ToMicroseconds(),
                    allocator);
+
+  const SkRect bounds = snapshot.GetBounds();
+  result.AddMember("top", bounds.top(), allocator);
+  result.AddMember("left", bounds.left(), allocator);
+  result.AddMember("width", bounds.width(), allocator);
+  result.AddMember("height", bounds.height(), allocator);
+
   sk_sp<SkData> snapshot_bytes = snapshot.GetSnapshot();
   if (snapshot_bytes) {
     rapidjson::Value image;
@@ -1867,6 +1874,11 @@ bool Shell::OnServiceProtocolRenderFrameWithRasterStats(
     }
 
     response->AddMember("snapshots", snapshots, allocator);
+
+    const auto& frame_size = last_layer_tree->frame_size();
+    response->AddMember("frame_width", frame_size.width(), allocator);
+    response->AddMember("frame_height", frame_size.height(), allocator);
+
     return true;
   } else {
     const char* error =
