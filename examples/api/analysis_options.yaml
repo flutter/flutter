@@ -1,6 +1,6 @@
 # This file is also used by dev/bots/analyze_snippet_code.dart to analyze code snippets (`{@tool snippet}` sections).
 
-include: ../../analysis_options.yaml
+include: package:flutter_lints/flutter.yaml
 
 linter:
   rules:
