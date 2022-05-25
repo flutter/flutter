@@ -140,10 +140,12 @@ class TextSelection extends TextRange {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other is! TextSelection)
+    }
+    if (other is! TextSelection) {
       return false;
+    }
     if (!isValid) {
       return !other.isValid;
     }
