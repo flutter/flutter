@@ -811,6 +811,21 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   _DraggableSheetExtent get extent => getExtent();
 
   @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    assert(_dragCancelCallback == null);
+
+    if (other is! _DraggableScrollableSheetScrollPosition) {
+      return;
+    }
+
+    if (other._dragCancelCallback != null) {
+      _dragCancelCallback = other._dragCancelCallback;
+      other._dragCancelCallback = null;
+    }
+  }
+
+  @override
   void beginActivity(ScrollActivity? newActivity) {
     // Cancel the running ballistic simulations
     for (final AnimationController ballisticController in _ballisticControllers) {
