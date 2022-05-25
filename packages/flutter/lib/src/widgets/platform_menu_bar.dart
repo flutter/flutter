@@ -160,19 +160,24 @@ mixin MenuSerializableShortcut {
 }
 
 /// An abstract class for describing cascading menu hierarchies that are part of
-/// a [PlatformMenuBar].
+/// a [MenuBar] or [PlatformMenuBar].
 ///
 /// This type is also used by [PlatformMenuDelegate.setMenus] to accept the menu
 /// hierarchy to be sent to the platform, and by [PlatformMenuBar] to define the
 /// menu hierarchy.
 ///
 /// This class is abstract, and so can't be used directly. Typically subclasses
-/// like [PlatformMenuItem] are used.
+/// like [MenuBarItem] and [PlatformMenuItem] are used in practice.
 ///
 /// See also:
 ///
+///  * [MenuBar], a widget that renders menus in Flutter with a Material design
+///    style.
 ///  * [PlatformMenuBar], a widget that renders menu items using platform APIs
 ///    instead of Flutter.
+///  * [MenuBar.adaptive], a factory constructor for [MenuBar] that renders the
+///    given menu hierarchy using [PlatformMenuBar] on platforms that support
+///    it, and [MenuBar] everywhere else.
 abstract class MenuItem with Diagnosticable {
   /// Allows subclasses to have const constructors.
   const MenuItem();

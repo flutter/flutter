@@ -205,7 +205,7 @@ void main() {
       );
     });
   });
-  group('PlatformMenuBarItem', () {
+  group('MenuBarItem', () {
     testWidgets('diagnostics', (WidgetTester tester) async {
       const PlatformMenuItem childItem = PlatformMenuItem(
         label: 'label',
