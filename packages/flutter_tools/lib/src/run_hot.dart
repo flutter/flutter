@@ -277,7 +277,6 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
-    logger.printBox('updateDevFS: $needsFullRestart');
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: needsFullRestart);
     _addBenchmarkData(
       'hotReloadInitialDevFSSyncMilliseconds',
