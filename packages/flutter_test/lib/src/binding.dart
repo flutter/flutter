@@ -1513,16 +1513,18 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void scheduleFrame() {
     if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+      // In benchmark mode, don't actually schedule any engine frames.
       return;
-    } // In benchmark mode, don't actually schedule any engine frames.
+    }
     super.scheduleFrame();
   }
 
   @override
   void scheduleForcedFrame() {
     if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+      // In benchmark mode, don't actually schedule any engine frames.
       return;
-    } // In benchmark mode, don't actually schedule any engine frames.
+    }
     super.scheduleForcedFrame();
   }
 
