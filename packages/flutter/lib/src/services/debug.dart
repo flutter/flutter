@@ -21,7 +21,7 @@ KeyDataTransitMode? debugKeyEventSimulatorTransitModeOverride;
 /// excluded).
 ///
 /// The statistics include the total bytes transmitted and the average number of
-/// bytes per invocation in the last quantum.  "Up" means in the direction of
+/// bytes per invocation in the last quantum. "Up" means in the direction of
 /// Flutter to the host platform, "down" is the host platform to flutter.
 bool debugProfilePlatformChannels = false;
 
