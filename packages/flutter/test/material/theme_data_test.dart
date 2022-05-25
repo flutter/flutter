@@ -699,6 +699,7 @@ void main() {
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       listTileTheme: const ListTileThemeData(),
+      menuBarTheme: MenuBarThemeData(barBackgroundColor: MaterialStateProperty.all(Colors.black)),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
@@ -811,6 +812,7 @@ void main() {
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
       listTileTheme: const ListTileThemeData(),
+      menuBarTheme: MenuBarThemeData(menuBackgroundColor: MaterialStateProperty.all(Colors.white)),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.white),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.white),
       outlinedButtonTheme: const OutlinedButtonThemeData(),
@@ -909,6 +911,7 @@ void main() {
       expansionTileTheme: otherTheme.expansionTileTheme,
       floatingActionButtonTheme: otherTheme.floatingActionButtonTheme,
       listTileTheme: otherTheme.listTileTheme,
+      menuBarTheme: otherTheme.menuBarTheme,
       navigationBarTheme: otherTheme.navigationBarTheme,
       navigationRailTheme: otherTheme.navigationRailTheme,
       outlinedButtonTheme: otherTheme.outlinedButtonTheme,
@@ -1006,6 +1009,7 @@ void main() {
     expect(themeDataCopy.expansionTileTheme, equals(otherTheme.expansionTileTheme));
     expect(themeDataCopy.floatingActionButtonTheme, equals(otherTheme.floatingActionButtonTheme));
     expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
+    expect(themeDataCopy.menuBarTheme, equals(otherTheme.menuBarTheme));
     expect(themeDataCopy.navigationBarTheme, equals(otherTheme.navigationBarTheme));
     expect(themeDataCopy.navigationRailTheme, equals(otherTheme.navigationRailTheme));
     expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
@@ -1140,6 +1144,7 @@ void main() {
       'elevatedButtonTheme',
       'floatingActionButtonTheme',
       'listTileTheme',
+      'menuBarTheme',
       'navigationBarTheme',
       'navigationRailTheme',
       'outlinedButtonTheme',

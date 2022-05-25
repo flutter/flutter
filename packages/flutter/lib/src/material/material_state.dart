@@ -714,7 +714,13 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
   T resolve(Set<MaterialState> states) => value;
 
   @override
-  String toString() => 'MaterialStatePropertyAll($value)';
+  String toString() {
+    if (value is double || value is double?) {
+      return 'MaterialStatePropertyAll(${debugFormatDouble(value as double?)})';
+    } else {
+      return 'MaterialStatePropertyAll($value)';
+    }
+  }
 }
 
 /// Manages a set of [MaterialState]s and notifies listeners of changes.
