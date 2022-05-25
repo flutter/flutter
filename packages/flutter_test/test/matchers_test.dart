@@ -570,8 +570,8 @@ void main() {
         // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
         if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline) {
           flags |= index;
-      }
         }
+      }
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
