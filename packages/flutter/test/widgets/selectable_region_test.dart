@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
+import 'semantics_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -34,7 +35,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  group('SelectionArea', () {
+  group('SelectableRegion', () {
     testWidgets('mouse selection sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
@@ -92,6 +93,75 @@ void main() {
         renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
         isTrue
       );
+    });
+
+    testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Text('Line one'),
+                    const Text('Line two'),
+                    ElevatedButton(
+                      onPressed: () {},
+                      child: const Text('Button'),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(semantics, hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          label: 'Line one',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          label: 'Line two',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          label: 'Button',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        ignoreId: true,
+      ),
+    );
+
+      semantics.dispose();
     });
 
     testWidgets('mouse selection always cancels previous selection', (WidgetTester tester) async {
