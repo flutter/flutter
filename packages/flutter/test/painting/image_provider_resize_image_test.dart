@@ -106,7 +106,7 @@ void main() {
       return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
     }
 
-    resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+    resizeImage.loadBuffer(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
   });
 
   test('ResizeImage handles sync obtainKey', () async {

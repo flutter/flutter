@@ -58,8 +58,8 @@ class LoadTestImageProvider extends ImageProvider<Object> {
 
   final ImageProvider provider;
 
-  ImageStreamCompleter testLoad(Object key, DecoderCallback decode) {
-    return provider.load(key, decode);
+  ImageStreamCompleter testLoad(Object key, DecoderBufferCallback decode) {
+    return provider.loadBuffer(key, decode);
   }
 
   @override
@@ -339,7 +339,7 @@ Future<void> main() async {
 
     group('ImageProvider', () {
 
-      testWidgets('memory placeholder cacheWidth and cacheHeight is passed through', (WidgetTester tester) async {
+      test('memory placeholder cacheWidth and cacheHeight is passed through', () async {
         final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
         final FadeInImage image = FadeInImage.memoryNetwork(
           placeholder: testBytes,
@@ -373,7 +373,7 @@ Future<void> main() async {
         expect(called, true);
       });
 
-      testWidgets('do not resize when null cache dimensions', (WidgetTester tester) async {
+      test('do not resize when null cache dimensions', () async {
         final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
         final FadeInImage image = FadeInImage.memoryNetwork(
           placeholder: testBytes,

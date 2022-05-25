@@ -1494,9 +1494,10 @@ class ClipRectLayer extends ContainerLayer {
     assert(clipRect != null);
     assert(clipBehavior != null);
     bool enabled = true;
-    if (!kReleaseMode) {
+    assert(() {
       enabled = !debugDisableClipLayers;
-    }
+      return true;
+    }());
     if (enabled) {
       engineLayer = builder.pushClipRect(
         clipRect!,
@@ -1581,9 +1582,10 @@ class ClipRRectLayer extends ContainerLayer {
     assert(clipRRect != null);
     assert(clipBehavior != null);
     bool enabled = true;
-    if (!kReleaseMode) {
+    assert(() {
       enabled = !debugDisableClipLayers;
-    }
+      return true;
+    }());
     if (enabled) {
       engineLayer = builder.pushClipRRect(
         clipRRect!,
@@ -1668,9 +1670,10 @@ class ClipPathLayer extends ContainerLayer {
     assert(clipPath != null);
     assert(clipBehavior != null);
     bool enabled = true;
-    if (!kReleaseMode) {
+    assert(() {
       enabled = !debugDisableClipLayers;
-    }
+      return true;
+    }());
     if (enabled) {
       engineLayer = builder.pushClipPath(
         clipPath!,
@@ -1925,9 +1928,10 @@ class OpacityLayer extends OffsetLayer {
       return;
     }
 
-    if (!kReleaseMode) {
+    assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
-    }
+      return true;
+    }());
 
     final int realizedAlpha = alpha!;
     // The type assertions work because the [alpha] setter nulls out the
