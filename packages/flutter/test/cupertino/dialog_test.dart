@@ -1480,7 +1480,6 @@ void main() {
 
     final Offset dialogAction = tester.getCenter(find.text('OK'));
     await gesture.moveTo(dialogAction);
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

@@ -98,8 +98,9 @@ class ImageConfiguration {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ImageConfiguration
         && other.bundle == bundle
         && other.devicePixelRatio == devicePixelRatio
@@ -122,32 +123,37 @@ class ImageConfiguration {
       hasArguments = true;
     }
     if (devicePixelRatio != null) {
-      if (hasArguments)
+      if (hasArguments) {
         result.write(', ');
+      }
       result.write('devicePixelRatio: ${devicePixelRatio!.toStringAsFixed(1)}');
       hasArguments = true;
     }
     if (locale != null) {
-      if (hasArguments)
+      if (hasArguments) {
         result.write(', ');
+      }
       result.write('locale: $locale');
       hasArguments = true;
     }
     if (textDirection != null) {
-      if (hasArguments)
+      if (hasArguments) {
         result.write(', ');
+      }
       result.write('textDirection: $textDirection');
       hasArguments = true;
     }
     if (size != null) {
-      if (hasArguments)
+      if (hasArguments) {
         result.write(', ');
+      }
       result.write('size: $size');
       hasArguments = true;
     }
     if (platform != null) {
-      if (hasArguments)
+      if (hasArguments) {
         result.write(', ');
+      }
       result.write('platform: ${platform!.name}');
       hasArguments = true;
     }
@@ -234,9 +240,9 @@ typedef DecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer, {
 /// ```dart
 /// class MyImage extends StatefulWidget {
 ///   const MyImage({
-///     Key? key,
+///     super.key,
 ///     required this.imageProvider,
-///   }) : super(key: key);
+///   });
 ///
 ///   final ImageProvider imageProvider;
 ///
@@ -515,9 +521,9 @@ abstract class ImageProvider<T extends Object> {
   /// ```dart
   /// class MyWidget extends StatelessWidget {
   ///   const MyWidget({
-  ///     Key? key,
+  ///     super.key,
   ///     this.url = ' ... ',
-  ///   }) : super(key: key);
+  ///   });
   ///
   ///   final String url;
   ///
@@ -601,8 +607,9 @@ class AssetBundleImageKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is AssetBundleImageKey
         && other.bundle == bundle
         && other.name == name
@@ -683,8 +690,9 @@ class ResizeImageKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ResizeImageKey
         && other._providerCacheKey == _providerCacheKey
         && other._width == _width
@@ -884,8 +892,9 @@ class FileImage extends ImageProvider<FileImage> {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FileImage
         && other.file.path == file.path
         && other.scale == scale;
@@ -959,8 +968,9 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is MemoryImage
         && other.bytes == bytes
         && other.scale == scale;
@@ -1101,8 +1111,9 @@ class ExactAssetImage extends AssetBundleImageProvider {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ExactAssetImage
         && other.keyName == keyName
         && other.scale == scale

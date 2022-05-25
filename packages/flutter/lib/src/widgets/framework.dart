@@ -34,7 +34,7 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
 // abstract class RenderFrogJar extends RenderObject { }
-// abstract class FrogJar extends RenderObjectWidget { const FrogJar({Key? key}) : super(key: key); }
+// abstract class FrogJar extends RenderObjectWidget { const FrogJar({super.key}); }
 // abstract class FrogJarParentData extends ParentData { late Size size; }
 
 // An annotation used by test_analysis package to verify patterns are followed
@@ -458,7 +458,7 @@ abstract class Widget extends DiagnosticableTree {
 ///
 /// ```dart
 /// class GreenFrog extends StatelessWidget {
-///   const GreenFrog({ Key? key }) : super(key: key);
+///   const GreenFrog({ super.key });
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -476,10 +476,10 @@ abstract class Widget extends DiagnosticableTree {
 /// ```dart
 /// class Frog extends StatelessWidget {
 ///   const Frog({
-///     Key? key,
+///     super.key,
 ///     this.color = const Color(0xFF2DBD3A),
 ///     this.child,
-///   }) : super(key: key);
+///   });
 ///
 ///   final Color color;
 ///   final Widget? child;
@@ -682,7 +682,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// ```dart
 /// class YellowBird extends StatefulWidget {
-///   const YellowBird({ Key? key }) : super(key: key);
+///   const YellowBird({ super.key });
 ///
 ///   @override
 ///   State<YellowBird> createState() => _YellowBirdState();
@@ -705,10 +705,10 @@ abstract class StatelessWidget extends Widget {
 /// ```dart
 /// class Bird extends StatefulWidget {
 ///   const Bird({
-///     Key? key,
+///     super.key,
 ///     this.color = const Color(0xFFFFE306),
 ///     this.child,
-///   }) : super(key: key);
+///   });
 ///
 ///   final Color color;
 ///   final Widget? child;
@@ -1408,10 +1408,10 @@ abstract class ProxyWidget extends Widget {
 /// ```dart
 /// class FrogSize extends ParentDataWidget<FrogJarParentData> {
 ///   const FrogSize({
-///     Key? key,
+///     super.key,
 ///     required this.size,
-///     required Widget child,
-///   }) : super(key: key, child: child);
+///     required super.child,
+///   });
 ///
 ///   final Size size;
 ///
@@ -1557,10 +1557,10 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// ```dart
 /// class FrogColor extends InheritedWidget {
 ///   const FrogColor({
-///     Key? key,
+///     super.key,
 ///     required this.color,
-///     required Widget child,
-///   }) : super(key: key, child: child);
+///     required super.child,
+///   });
 ///
 ///   final Color color;
 ///
@@ -1608,7 +1608,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 /// ```dart
 /// class MyPage extends StatelessWidget {
-///   const MyPage({Key? key}) : super(key: key);
+///   const MyPage({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -1637,7 +1637,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 /// ```dart
 /// class MyOtherPage extends StatelessWidget {
-///   const MyOtherPage({Key? key}) : super(key: key);
+///   const MyOtherPage({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -3191,15 +3191,21 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
   late int _depth;
 
+  /// Returns result < 0 when [a] < [b], result == 0 when [a] == [b], result > 0
+  /// when [a] > [b].
   static int _sort(Element a, Element b) {
-    if (a.depth < b.depth)
-      return -1;
-    if (b.depth < a.depth)
-      return 1;
-    if (b.dirty && !a.dirty)
-      return -1;
-    if (a.dirty && !b.dirty)
-      return 1;
+    final int diff = a.depth - b.depth;
+    // If depths are not equal, return the difference.
+    if (diff != 0) {
+      return diff;
+    }
+    // If the `dirty` values are not equal, sort with non-dirty elements being
+    // less than dirty elements.
+    final bool isBDirty = b.dirty;
+    if (a.dirty != isBDirty) {
+      return isBDirty ? -1 : 1;
+    }
+    // Otherwise, `depth`s and `dirty`s are equal.
     return 0;
   }
 

@@ -801,14 +801,6 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   String get adbPath => 'adb';
 }
 
-class TestRunCommand extends RunCommand {
-  @override
-  // ignore: must_call_super
-  Future<void> validateCommand() async {
-    devices = await globals.deviceManager.getDevices();
-  }
-}
-
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types

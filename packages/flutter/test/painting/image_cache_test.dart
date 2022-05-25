@@ -331,6 +331,33 @@ void main() {
     expect(imageCache.liveImageCount, 0);
   });
 
+  test('Clearing image cache does not leak live images', () async {
+    imageCache.maximumSize = 1;
+
+    final ui.Image testImage1 = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
+
+    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+    final TestImageStreamCompleter completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
+
+    imageCache.putIfAbsent(testImage1, () => completer1);
+    expect(imageCache.statusForKey(testImage1).pending, true);
+    expect(imageCache.statusForKey(testImage1).live, true);
+
+    imageCache.clear();
+    expect(imageCache.statusForKey(testImage1).pending, false);
+    expect(imageCache.statusForKey(testImage1).live, true);
+
+    completer1.testSetImage(testImage1);
+    expect(imageCache.statusForKey(testImage1).keepAlive, true);
+    expect(imageCache.statusForKey(testImage1).live, false);
+
+    imageCache.putIfAbsent(testImage2, () => completer2);
+    expect(imageCache.statusForKey(testImage1).tracked, false); // evicted
+    expect(imageCache.statusForKey(testImage2).tracked, true);
+  });
+
+
   test('Evicting a pending image clears the live image by default', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 

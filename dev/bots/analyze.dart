@@ -88,6 +88,9 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  print('$clock No Double.clamp');
+  await verifyNoDoubleClamp(flutterRoot);
+
   print('$clock All tool test files end in _test.dart...');
   await verifyToolTestsEndInTestDart(flutterRoot);
 
@@ -171,10 +174,10 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
-  // Analyze all the sample code in the repo.
-  print('$clock Sample code...');
+  // Analyze the code in `{@tool snippet}` sections in the repo.
+  print('$clock Snippet code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart'), '--verbose'],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 
@@ -202,6 +205,80 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+FeatureSet _parsingFeatureSet() => FeatureSet.fromEnableFlags2(
+    sdkLanguageVersion: Version.parse('2.17.0-0'),
+    flags: <String>['super-parameters']);
+
+_Line _getLine(ParseStringResult parseResult, int offset) {
+  final int lineNumber =
+      parseResult.lineInfo.getLocation(offset).lineNumber;
+  final String content = parseResult.content.substring(
+      parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
+      parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1);
+  return _Line(lineNumber, content);
+}
+
+class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
+  _DoubleClampVisitor(this.parseResult);
+
+  final List<_Line> clamps = <_Line>[];
+  final ParseStringResult parseResult;
+
+  @override
+  CompilationUnit? visitMethodInvocation(MethodInvocation node) {
+    if (node.methodName.name == 'clamp') {
+      final _Line line = _getLine(parseResult, node.function.offset);
+      if (!line.content.contains('// ignore_clamp_double_lint')) {
+        clamps.add(line);
+      }
+    }
+
+    node.visitChildren(this);
+    return null;
+  }
+}
+
+/// Verify that we use clampDouble instead of Double.clamp for performance reasons.
+///
+/// We currently can't distinguish valid uses of clamp from problematic ones so
+/// if the clamp is operating on a type other than a `double` the
+/// `// ignore_clamp_double_lint` comment must be added to the line where clamp is
+/// invoked.
+///
+/// See also:
+///   * https://github.com/flutter/flutter/pull/103559
+///   * https://github.com/flutter/flutter/issues/103917
+Future<void> verifyNoDoubleClamp(String workingDirectory) async {
+  final String flutterLibPath = '$workingDirectory/packages/flutter/lib';
+  final Stream<File> testFiles =
+      _allFiles(flutterLibPath, 'dart', minimumMatches: 100);
+  final List<String> errors = <String>[];
+  await for (final File file in testFiles) {
+    try {
+      final ParseStringResult parseResult = parseFile(
+        featureSet: _parsingFeatureSet(),
+        path: file.absolute.path,
+      );
+      final _DoubleClampVisitor visitor = _DoubleClampVisitor(parseResult);
+      visitor.visitCompilationUnit(parseResult.unit);
+      for (final _Line clamp in visitor.clamps) {
+        errors.add('${file.path}:${clamp.line}: `clamp` method used without ignore_clamp_double_lint comment.');
+      }
+    } catch (ex) {
+      // TODO(gaaclarke): There is a bug with super parameter parsing on mac so
+      // we skip certain files until that is fixed.
+      // https://github.com/dart-lang/sdk/issues/49032
+      print('skipping ${file.path}: $ex');
+    }
+  }
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '\n${bold}See: https://github.com/flutter/flutter/pull/103559',
+    ]);
+  }
+}
 
 /// Verify tool test files end in `_test.dart`.
 ///
@@ -518,16 +595,16 @@ Future<int> _verifyNoMissingLicenseForExtension(
   return 0;
 }
 
-class _TestSkip {
-  _TestSkip(this.line, this.content);
+class _Line {
+  _Line(this.line, this.content);
 
   final int line;
   final String content;
 }
 
-Iterable<_TestSkip> _getTestSkips(File file) {
+Iterable<_Line> _getTestSkips(File file) {
   final ParseStringResult parseResult = parseFile(
-    featureSet: FeatureSet.fromEnableFlags2(sdkLanguageVersion: Version.parse('2.17.0-0'), flags: <String>['super-parameters']),
+    featureSet: _parsingFeatureSet(),
     path: file.absolute.path,
   );
   final _TestSkipLinesVisitor<CompilationUnit> visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);
@@ -536,10 +613,10 @@ Iterable<_TestSkip> _getTestSkips(File file) {
 }
 
 class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
-  _TestSkipLinesVisitor(this.parseResult) : skips = <_TestSkip>{};
+  _TestSkipLinesVisitor(this.parseResult) : skips = <_Line>{};
 
   final ParseStringResult parseResult;
-  final Set<_TestSkip> skips;
+  final Set<_Line> skips;
 
   static bool isTestMethod(String name) {
     return name.startsWith('test') || name == 'group' || name == 'expect';
@@ -550,10 +627,7 @@ class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
     if (isTestMethod(node.methodName.toString())) {
       for (final Expression argument in node.argumentList.arguments) {
         if (argument is NamedExpression && argument.name.label.name == 'skip') {
-          final int lineNumber = parseResult.lineInfo.getLocation(argument.beginToken.charOffset).lineNumber;
-          final String content = parseResult.content.substring(parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
-                                                               parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1);
-          skips.add(_TestSkip(lineNumber, content));
+          skips.add(_getLine(parseResult, argument.beginToken.charOffset));
         }
       }
     }
@@ -571,7 +645,7 @@ Future<void> verifySkipTestComments(String workingDirectory) async {
     .where((File f) => f.path.endsWith('_test.dart'));
 
   await for (final File file in testFiles) {
-    for (final _TestSkip skip in _getTestSkips(file)) {
+    for (final _Line skip in _getTestSkips(file)) {
       final Match? match = _skipTestCommentPattern.firstMatch(skip.content);
       final String? skipComment = match?.group(1);
       if (skipComment == null ||
@@ -1420,6 +1494,8 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
         'size of the repository as it is distributed to all our developers. If you have a binary',
         'to which you need access, you should consider how to fetch it from another repository;',
         'for example, the "assets-for-api-docs" repository is used for images in API docs.',
+        'To add assets to flutter_tools templates, see the instructions in the wiki:',
+        'https://github.com/flutter/flutter/wiki/Managing-template-image-assets',
       ]);
     }
   }

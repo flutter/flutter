@@ -27,11 +27,11 @@ import 'scroll_controller.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// dynamic routeObserver;
+// late RouteObserver<Route<void>> routeObserver;
 // late NavigatorState navigator;
 // late BuildContext context;
 // Future<bool> askTheUserIfTheyAreSure() async { return true; }
-// abstract class MyWidget extends StatefulWidget { const MyWidget({Key? key}) : super(key: key); }
+// abstract class MyWidget extends StatefulWidget { const MyWidget({super.key}); }
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -515,7 +515,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///
   /// ```dart
   /// class App extends StatelessWidget {
-  ///   const App({Key? key}) : super(key: key);
+  ///   const App({super.key});
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -530,7 +530,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// }
   ///
   /// class HomePage extends StatefulWidget {
-  ///   const HomePage({Key? key}) : super(key: key);
+  ///   const HomePage({super.key});
   ///
   ///   @override
   ///   State<HomePage> createState() => _HomePageState();
@@ -560,7 +560,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// }
   ///
   /// class SecondPage extends StatefulWidget {
-  ///   const SecondPage({Key? key}) : super(key: key);
+  ///   const SecondPage({super.key});
   ///
   ///   @override
   ///   State<SecondPage> createState() => _SecondPageState();
@@ -1058,7 +1058,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// defined in the same way.
   ///
   /// ```dart
-  /// PageRouteBuilder(
+  /// PageRouteBuilder<void>(
   ///   pageBuilder: (BuildContext context,
   ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
@@ -1105,7 +1105,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// route has been popped off.
   ///
   /// ```dart
-  /// PageRouteBuilder(
+  /// PageRouteBuilder<void>(
   ///   pageBuilder: (BuildContext context,
   ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
@@ -1734,7 +1734,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// }
 ///
 /// class RouteAwareWidget extends StatefulWidget {
-///   const RouteAwareWidget({Key? key}) : super(key: key);
+///   const RouteAwareWidget({super.key});
 ///
 ///   @override
 ///   State<RouteAwareWidget> createState() => RouteAwareWidgetState();

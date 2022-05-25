@@ -139,9 +139,10 @@ class NetworkImage
 
       final Uint8List bytes = (request.response as ByteBuffer).asUint8List();
 
-      if (bytes.lengthInBytes == 0)
+      if (bytes.lengthInBytes == 0) {
         throw image_provider.NetworkImageLoadException(
             statusCode: request.status!, uri: resolved);
+      }
 
       final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
       return decode(buffer);

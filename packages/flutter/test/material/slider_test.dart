@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -100,6 +101,46 @@ class _StateDependentMouseCursor extends MaterialStateMouseCursor {
 }
 
 void main() {
+  testWidgets('The initial value should respect the discrete value', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.20;
+    final List<Offset> log = <Offset>[];
+    final LoggingThumbShape loggingThumb = LoggingThumbShape(log);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
+              return Material(
+                child: Center(
+                  child: SliderTheme(
+                    data: sliderTheme,
+                    child: Slider(
+                      key: sliderKey,
+                      value: value,
+                      divisions: 4,
+                      onChanged: (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(value, equals(0.20));
+    expect(log.length, 1);
+    expect(log[0], const Offset(212.0, 300.0));
+  });
+
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
@@ -1964,7 +2005,6 @@ void main() {
     // Start hovering.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Slider)));
 
     // Slider has overlay when enabled and hovering.
@@ -2655,7 +2695,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Slider)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -2738,7 +2777,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(buildFrame(enabled: false));
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
@@ -2886,8 +2924,9 @@ void main() {
 
     late RRect activeTrackRRect;
     expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRRect)
+      if (method != #drawRRect) {
         return false;
+      }
       activeTrackRRect = arguments[0] as RRect;
       return true;
     }));
@@ -2997,5 +3036,112 @@ void main() {
       material,
       paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: color),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/103566
+  testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
+    double value = 0.5;
+    bool dragStarted = false;
+    final Key sliderKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 20)),
+                      child: Slider(
+                        value: value,
+                        key: sliderKey,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    // Less than configured touch slop, more than default touch slop
+    await drag.moveBy(const Offset(19.0, 0));
+    await tester.pump();
+
+    expect(value, 0.5);
+    expect(dragStarted, true);
+
+    dragStarted = false;
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    bool sliderEnd = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 10)),
+                      child: Slider(
+                        value: value,
+                        key: sliderKey,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                        onChangeEnd: (double endValue) {
+                          sliderEnd = true;
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // More than touch slop.
+    await drag.moveBy(const Offset(12.0, 0));
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(sliderEnd, true);
+    expect(dragStarted, false);
   });
 }
