@@ -1697,7 +1697,7 @@ void main() {
     final String messagesStr = messages.toString();
     expect(messagesStr.split('\n').length, equals(58));
     expect(messagesStr, contains(RegExp(r'   └─Child 1: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')));
-    expect(messagesStr, contains('FOCUS: Notifying 2 dirty nodes'));
+    expect(messagesStr, contains('FOCUS: Notified 2 dirty nodes'));
     expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
   });
 }

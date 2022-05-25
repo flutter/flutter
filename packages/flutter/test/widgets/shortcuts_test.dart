@@ -1354,6 +1354,51 @@ void main() {
       expect(invokedB, equals(1));
     });
 
+    testWidgets('MaterialApp has a ShortcutRegistrar listening', (WidgetTester tester) async {
+      int invokedA = 0;
+      int invokedB = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestCallbackRegistration(
+            shortcuts: <ShortcutActivator, Intent>{
+              const SingleActivator(LogicalKeyboardKey.keyA): VoidCallbackIntent(() {
+                invokedA += 1;
+              }),
+              const SingleActivator(LogicalKeyboardKey.keyB): VoidCallbackIntent(() {
+                invokedB += 1;
+              }),
+            },
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                VoidCallbackIntent: VoidCallbackAction(),
+              },
+              child: const Focus(
+                autofocus: true,
+                child: Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      await tester.pump();
+      expect(invokedA, equals(1));
+      expect(invokedB, equals(0));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(invokedA, equals(1));
+      expect(invokedB, equals(0));
+      invokedA = 0;
+      invokedB = 0;
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyB);
+      expect(invokedA, equals(0));
+      expect(invokedB, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
+      expect(invokedA, equals(0));
+      expect(invokedB, equals(1));
+    });
+
     testWidgets("doesn't override text field shortcuts", (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
