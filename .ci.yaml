@@ -1743,6 +1743,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android frame_policy_delay_test_android
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/104630
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
