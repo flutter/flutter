@@ -48,8 +48,9 @@ class StadiumBorder extends OutlinedBorder {
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     assert(t != null);
-    if (a is StadiumBorder)
+    if (a is StadiumBorder) {
       return StadiumBorder(side: BorderSide.lerp(a.side, side, t));
+    }
     if (a is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -69,8 +70,9 @@ class StadiumBorder extends OutlinedBorder {
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     assert(t != null);
-    if (b is StadiumBorder)
+    if (b is StadiumBorder) {
       return StadiumBorder(side: BorderSide.lerp(side, b.side, t));
+    }
     if (b is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -148,8 +150,9 @@ class StadiumBorder extends OutlinedBorder {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is StadiumBorder
         && other.side == side;
   }
@@ -235,8 +238,9 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   Rect _adjustRect(Rect rect) {
-    if (circleness == 0.0 || rect.width == rect.height)
+    if (circleness == 0.0 || rect.width == rect.height) {
       return rect;
+    }
     if (rect.width < rect.height) {
       final double delta = circleness * (rect.height - rect.width) / 2.0;
       return Rect.fromLTRB(
@@ -310,8 +314,9 @@ class _StadiumToCircleBorder extends OutlinedBorder {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _StadiumToCircleBorder
         && other.side == side
         && other.circleness == circleness;
@@ -482,8 +487,9 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _StadiumToRoundedRectangleBorder
         && other.side == side
         && other.borderRadius == borderRadius
