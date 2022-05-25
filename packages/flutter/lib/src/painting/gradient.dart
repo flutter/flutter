@@ -315,11 +315,11 @@ abstract class Gradient {
     assert(t != null);
     Gradient? result;
     if (b != null) {
-      result = b.lerpFrom(a, t);
-    } // if a is null, this must return non-null
+      result = b.lerpFrom(a, t); // if a is null, this must return non-null
+    }
     if (result == null && a != null) {
-      result = a.lerpTo(b, t);
-    } // if b is null, this must return non-null
+      result = a.lerpTo(b, t); // if b is null, this must return non-null
+    }
     if (result != null) {
       return result;
     }

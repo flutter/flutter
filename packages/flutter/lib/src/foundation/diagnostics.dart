@@ -895,8 +895,8 @@ class _PrefixedStringBuilder {
         }
 
         if (index < wrapRanges[currentChunk + 1]) {
-          break;
-        } // Found nearest chunk.
+          break; // Found nearest chunk.
+        }
         currentChunk+= 2;
       }
       return index < wrapRanges[currentChunk];
@@ -2689,6 +2689,8 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       json['isDiagnosticableValue'] = true;
     }
     if (v is num) {
+      // TODO(https://github.com/flutter/flutter/issues/39937#issuecomment-529558033)
+      // Workaround, since JSON.stringify replaces infinity and NaN with null. 
       json['value'] = v.isFinite ? v :  v.toString();
     }
     if (value is String || value is bool || value == null) {

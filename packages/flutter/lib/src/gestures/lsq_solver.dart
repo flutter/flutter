@@ -102,6 +102,7 @@ class LeastSquaresSolver {
   /// When there is not enough data to fit a curve null is returned.
   PolynomialFit? solve(int degree) {
     if (degree > x.length) {
+      // Not enough data to fit a curve.
       return null;
     }
 

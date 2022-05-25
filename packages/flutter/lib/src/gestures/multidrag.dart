@@ -278,8 +278,8 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(_pointers != null);
     final MultiDragPointerState? state = _pointers![pointer];
     if (state == null) {
-      return;
-    } // We might already have canceled this drag if the up comes before the accept.
+      return;  // We might already have canceled this drag if the up comes before the accept.
+    }
     state.accepted((Offset initialPosition) => _startDrag(initialPosition, pointer));
   }
 

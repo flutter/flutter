@@ -453,8 +453,8 @@ class _TapGesture extends _TapTracker {
     if (_wonArena) {
       reject();
     } else {
-      entry.resolve(GestureDisposition.rejected);
-    } // eventually calls reject()
+      entry.resolve(GestureDisposition.rejected); // eventually calls reject()
+    }
   }
 
   void _check() {
