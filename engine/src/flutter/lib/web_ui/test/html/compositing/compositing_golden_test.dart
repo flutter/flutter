@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
@@ -31,7 +30,7 @@ Future<void> testMain() async {
     // layers:
     // debugShowClipLayers = true;
     SurfaceSceneBuilder.debugForgetFrameScene();
-    for (final html.Node scene in html.document.querySelectorAll('flt-scene')) {
+    for (final DomNode scene in domDocument.querySelectorAll('flt-scene')) {
       scene.remove();
     }
   });
@@ -44,7 +43,7 @@ Future<void> testMain() async {
     _drawTestPicture(builder);
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_shifted_clip_rect.png', region: region);
   });
@@ -64,7 +63,7 @@ Future<void> testMain() async {
     builder.pop();
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_clip_rect_with_offset_and_transform.png',
         region: region);
@@ -85,7 +84,7 @@ Future<void> testMain() async {
     builder.pop();
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_clip_rect_clipop_none.png',
         region: region);
@@ -110,7 +109,7 @@ Future<void> testMain() async {
     builder.pop();
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_clip_rrect_clipop_none.png',
         region: region);
@@ -124,7 +123,7 @@ Future<void> testMain() async {
     _drawTestPicture(builder);
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_shifted_clip_rrect.png', region: region);
   });
@@ -152,7 +151,7 @@ Future<void> testMain() async {
     builder.pop();
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_shifted_physical_shape_clip.png',
         region: region);
@@ -181,7 +180,7 @@ Future<void> testMain() async {
     builder.pop();
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_shifted_physical_shape_clipnone.png',
         region: region);
@@ -241,7 +240,7 @@ Future<void> testMain() async {
     builder.pop();
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_physical_shape_path.png',
         region: region);
@@ -267,8 +266,8 @@ Future<void> testMain() async {
     _drawTestPicture(builder);
     builder.pop();
 
-    final html.Element viewElement = builder.build().webOnlyRootElement!;
-    html.document.body!.append(viewElement);
+    final DomElement viewElement = builder.build().webOnlyRootElement!;
+    domDocument.body!.append(viewElement);
     await matchGoldenFile('compositing_physical_update_1.png', region: region);
     viewElement.remove();
 
@@ -284,8 +283,8 @@ Future<void> testMain() async {
     _drawTestPicture(builder2);
     builder2.pop();
 
-    final html.Element viewElement2 = builder2.build().webOnlyRootElement!;
-    html.document.body!.append(viewElement2);
+    final DomElement viewElement2 = builder2.build().webOnlyRootElement!;
+    domDocument.body!.append(viewElement2);
     await matchGoldenFile('compositing_physical_update_2.png', region: region);
     viewElement2.remove();
 
@@ -301,8 +300,8 @@ Future<void> testMain() async {
     _drawTestPicture(builder3);
     builder3.pop();
 
-    final html.Element viewElement3 = builder3.build().webOnlyRootElement!;
-    html.document.body!.append(viewElement3);
+    final DomElement viewElement3 = builder3.build().webOnlyRootElement!;
+    domDocument.body!.append(viewElement3);
     await matchGoldenFile('compositing_physical_update_3.png',
         region: region, maxDiffRatePercent: 0.8);
     viewElement3.remove();
@@ -319,8 +318,8 @@ Future<void> testMain() async {
     _drawTestPicture(builder4);
     builder4.pop();
 
-    final html.Element viewElement4 = builder4.build().webOnlyRootElement!;
-    html.document.body!.append(viewElement4);
+    final DomElement viewElement4 = builder4.build().webOnlyRootElement!;
+    domDocument.body!.append(viewElement4);
     await matchGoldenFile('compositing_physical_update_4.png', region: region);
     viewElement4.remove();
 
@@ -336,8 +335,8 @@ Future<void> testMain() async {
     _drawTestPicture(builder5);
     builder5.pop();
 
-    final html.Element viewElement5 = builder5.build().webOnlyRootElement!;
-    html.document.body!.append(viewElement5);
+    final DomElement viewElement5 = builder5.build().webOnlyRootElement!;
+    domDocument.body!.append(viewElement5);
     await matchGoldenFile('compositing_physical_update_3.png',
         region: region,
         maxDiffRatePercent: browserEngine == BrowserEngine.webkit ? 0.6 : 0.4);
@@ -356,8 +355,8 @@ Future<void> testMain() async {
     _drawTestPicture(builder6);
     builder6.pop();
 
-    final html.Element viewElement6 = builder6.build().webOnlyRootElement!;
-    html.document.body!.append(viewElement6);
+    final DomElement viewElement6 = builder6.build().webOnlyRootElement!;
+    domDocument.body!.append(viewElement6);
     await matchGoldenFile('compositing_physical_update_5.png', region: region);
     viewElement6.remove();
   });
@@ -370,7 +369,7 @@ Future<void> testMain() async {
     _drawTestPicture(builder);
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_image_filter.png', region: region);
   });
@@ -389,7 +388,7 @@ Future<void> testMain() async {
     _drawTestPicture(builder);
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_image_filter_matrix.png', region: region);
   });
@@ -518,7 +517,7 @@ void _testCullRectComputation() {
 
     builder.pop(); // pushClipRect
     builder.pop(); // pushClipRect
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_cull_rect_fills_layer_clip.png',
         region: region);
@@ -547,7 +546,7 @@ void _testCullRectComputation() {
 
     builder.pop(); // pushClipRect
     builder.pop(); // pushClipRect
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile(
         'compositing_cull_rect_intersects_clip_and_paint_bounds.png',
@@ -579,7 +578,7 @@ void _testCullRectComputation() {
     builder.pop(); // pushOffset
     builder.pop(); // pushClipRect
     builder.pop(); // pushClipRect
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_cull_rect_offset_inside_layer_clip.png',
         region: region);
@@ -653,7 +652,7 @@ void _testCullRectComputation() {
     builder.pop(); // pushClipRect
     builder.pop(); // pushTransform
     builder.pop(); // pushOffset
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_cull_rect_rotated.png', region: region);
 
@@ -675,7 +674,7 @@ void _testCullRectComputation() {
     _drawTestPicture(builder);
     builder.pop();
 
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_clip_path.png', region: region);
   });
@@ -785,7 +784,7 @@ void _testCullRectComputation() {
     builder.pop(); // pushOffset
     builder.pop(); // pushTransform scale
     builder.pop(); // pushTransform scale devicepixelratio
-    html.document.body!.append(builder.build().webOnlyRootElement!);
+    domDocument.body!.append(builder.build().webOnlyRootElement!);
 
     await matchGoldenFile('compositing_3d_rotate1.png', region: region);
 
@@ -871,16 +870,16 @@ void _testCullRectComputation() {
       builder.pop(); // inner clip
       builder.pop(); // outer clip
 
-      final html.Element sceneElement = builder.build().webOnlyRootElement!;
+      final DomElement sceneElement = builder.build().webOnlyRootElement!;
       expect(
         sceneElement
             .querySelectorAll('flt-paragraph')
-            .map<String>((html.Element e) => e.innerText)
+            .map<String>((DomElement e) => e.innerText)
             .toList(),
         <String>['Am I blurry?', 'Am I blurry?'],
         reason: 'Expected to render text using HTML',
       );
-      html.document.body!.append(sceneElement);
+      domDocument.body!.append(sceneElement);
 
       await matchGoldenFile(
         'compositing_draw_high_quality_text.png',
