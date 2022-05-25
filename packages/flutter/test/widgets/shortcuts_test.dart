@@ -580,6 +580,25 @@ void main() {
       expect(Shortcuts.maybeOf(containerKey.currentContext!), equals(testManager));
       expect(Shortcuts.of(containerKey.currentContext!), equals(testManager));
     });
+    testWidgets('Locked ShortcutManager asserts if shortcuts are modified', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
+      await tester.pumpWidget(
+        Shortcuts(
+          shortcuts: <LogicalKeySet, Intent>{
+            LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
+          },
+          child: Focus(
+            autofocus: true,
+            child: SizedBox(key: containerKey, width: 100, height: 100),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(Shortcuts.maybeOf(containerKey.currentContext!), isNotNull);
+      expect(Shortcuts.of(containerKey.currentContext!).locked, isTrue);
+      expect(() => Shortcuts.of(containerKey.currentContext!).shortcuts = <LogicalKeySet, Intent>{}, throwsAssertionError);
+    });
     testWidgets('ShortcutManager handles shortcuts', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];

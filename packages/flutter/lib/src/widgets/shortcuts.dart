@@ -651,6 +651,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   ShortcutManager({
     Map<ShortcutActivator, Intent> shortcuts = const <ShortcutActivator, Intent>{},
     this.modal = false,
+    this.locked = false,
   })  : assert(shortcuts != null),
         _shortcuts = shortcuts;
 
@@ -667,6 +668,13 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// [KeyEventResult.ignored].
   final bool modal;
 
+  /// If this [ShortcutManager] was created by a [Shortcuts] widget, then the
+  /// list of shortcuts will be locked, and can't be changed.
+  ///
+  /// If the [shortcuts] setter is called when the manager is locked, it will
+  /// assert in debug mode.
+  final bool locked;
+
   /// Returns the shortcut map.
   ///
   /// When the map is changed, listeners to this manager will be notified.
@@ -676,7 +684,15 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{};
   set shortcuts(Map<ShortcutActivator, Intent> value) {
     assert(value != null);
-    if (!mapEquals<ShortcutActivator, Intent>(_shortcuts, value)) {
+    assert(!locked, 'This $ShortcutManager is locked, meaning that it was probably '
+        'created by a Shortcuts widget, instead of being passed in to Shortcuts.manager, '
+        'and the shortcuts cannot be modified. If you want to check a manager to see its '
+        'locked status, check ShortcutManager.locked');
+    _setShortcuts(value);
+  }
+
+  void _setShortcuts(Map<ShortcutActivator, Intent> value) {
+      if (!mapEquals<ShortcutActivator, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       _indexedShortcutsCache = null;
       notifyListeners();
@@ -860,7 +876,7 @@ class Shortcuts extends StatefulWidget {
   /// If this widget was created with [Shortcuts.manager], then
   /// [ShortcutManager.shortcuts] will be used as the source for shortcuts. If
   /// the unnamed constructor is used, this manager will be null, and a
-  /// default-constructed `ShortcutsManager` will be used.
+  /// default-constructed [ShortcutManager] will be used.
   final ShortcutManager? manager;
 
   /// {@template flutter.widgets.shortcuts.shortcuts}
@@ -958,8 +974,8 @@ class _ShortcutsState extends State<Shortcuts> {
   void initState() {
     super.initState();
     if (widget.manager == null) {
-      _internalManager = ShortcutManager();
-      _internalManager!.shortcuts = widget.shortcuts;
+      _internalManager = ShortcutManager(locked: true);
+      _internalManager!._setShortcuts(widget.shortcuts);
     }
   }
 
@@ -974,7 +990,7 @@ class _ShortcutsState extends State<Shortcuts> {
         _internalManager ??= ShortcutManager();
       }
     }
-    _internalManager?.shortcuts = widget.shortcuts;
+    _internalManager?._setShortcuts(widget.shortcuts);
   }
 
   KeyEventResult _handleOnKey(FocusNode node, RawKeyEvent event) {
@@ -1341,7 +1357,7 @@ class ShortcutRegistrar extends StatefulWidget {
 
 class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   final ShortcutRegistry registry = ShortcutRegistry();
-  final ShortcutManager manager = ShortcutManager();
+  final ShortcutManager manager = ShortcutManager(locked: true);
 
   @override
   void initState() {
@@ -1352,7 +1368,7 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   void _shortcutsChanged() {
     // This shouldn't need to update the widget, and avoids calling setState
     // during build phase.
-    manager.shortcuts = registry.shortcuts;
+    manager._setShortcuts(registry.shortcuts);
   }
 
   @override
