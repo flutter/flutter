@@ -813,7 +813,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   @override
   void absorb(ScrollPosition other) {
     super.absorb(other);
-    assert(_dragCancelCallback = null);
+    assert(_dragCancelCallback == null);
 
     if (other is! _DraggableScrollableSheetScrollPosition) {
       return;
