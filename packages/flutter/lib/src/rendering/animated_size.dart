@@ -327,6 +327,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       if (!_controller.isAnimating) {
         // Resume the animation after being detached.
         _controller.forward();
+      }
     }
   }
 
