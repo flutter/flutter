@@ -18,7 +18,7 @@ class SuggestionSpan {
   /// Creates a span representing a misspelled range of text and the replacements
   /// suggested by a spell checker.
   ///
-  /// The [startIndex], [endIndex], and replcaement [suggestions] must all not
+  /// The [startIndex], [endIndex], and replacement [suggestions] must all not
   /// be null.
   const SuggestionSpan(this.startIndex, this.endIndex, this.suggestions)
       : assert(startIndex != null),
@@ -31,7 +31,7 @@ class SuggestionSpan {
   /// The end index of the misspelled range of text, inclusive.
   final int endIndex;
 
-  /// The alternate suggestions for mispelled range of text.
+  /// The alternate suggestions for misspelled range of text.
   final List<String> suggestions;
 
   @override
@@ -48,13 +48,8 @@ class SuggestionSpan {
   int get hashCode => Object.hash(startIndex, endIndex, hashList(suggestions));
 }
 
-/// A data structure grouping the [SuggestionSpan]s and related text of a
-/// result returned by the active spell checker.
-///
-/// See also:
-///
-///  * [SuggestionSpan], the ranges of mispelled text and corresponding
-///    replacement suggestions.
+/// A data structure grouping together the [SuggestionSpan]s and related text of
+/// results returned by a spell checker.
 @immutable
 class SpellCheckResults {
   /// Creates results based off those received by spell checking some text input.
@@ -64,6 +59,10 @@ class SpellCheckResults {
   final String spellCheckedText;
 
   /// The spell check results of the [spellCheckedText].
+  /// See also:
+  ///
+  ///  * [SuggestionSpan], the ranges of misspelled text and corresponding
+  ///    replacement suggestions.
   final List<SuggestionSpan> suggestionSpans;
 
   @override
@@ -81,10 +80,10 @@ class SpellCheckResults {
 
 /// Controls how spell check is performed for text input.
 ///
-/// The spell check configuration determines the [SpellCheckService] used to
-/// fetch spell check results of type [List<SuggestionSpan>] and the
+/// This configuration determines the [SpellCheckService] used to fetch the
+/// [List<SuggestionSpan>] spell check results and the
 /// [SpellCheckSuggestionsHandler] used to mark and display replacement
-/// suggestions for mispelled words within text input.
+/// suggestions for misspelled words within text input.
 class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
@@ -94,16 +93,16 @@ class SpellCheckConfiguration {
   /// The service used to fetch spell check results for text input.
   final SpellCheckService? spellCheckService;
 
-  /// The handler used to mark mispelled words in text input and display
-  /// a menu of the replcament suggestions for these mispelled words.
+  /// The handler used to mark misspelled words in text input and display
+  /// a menu of the replacement suggestions for these misspelled words.
   final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
 
   /// The most up-to-date spell check results for text input.
   ///
   /// These results will be updated by the
-  /// [SpellCheckService] and used by the [SpellCheckSuggestionsHandler] to
+  /// [spellCheckService] and used by the [spellCheckSuggestionsHandler] to
   /// build the [TextSpan] tree for text input and menus for replacement
-  /// suggestions of mispelled words.
+  /// suggestions of misspelled words.
   SpellCheckResults? spellCheckResults;
 
   /// Configuration that indicates that spell check should not be run on text
@@ -118,7 +117,7 @@ abstract class SpellCheckService {
       Locale locale, String text);
 }
 
-/// Determines how mispelled words are indicated in text input and how
+/// Determines how misspelled words are indicated in text input and how
 /// replacement suggestions for misspelled words are displayed via menu.
 abstract class SpellCheckSuggestionsHandler {
   /// Builds the [TextSpan] tree given the current state of the text input and
