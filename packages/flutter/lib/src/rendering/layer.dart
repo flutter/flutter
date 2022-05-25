@@ -118,7 +118,6 @@ class AnnotationResult<T> {
 ///       offset,
 ///       Offset.zero & size,
 ///       super.paint,
-///       clipBehavior: Clip.hardEdge,
 ///       oldLayer: _clipRectLayer.layer,
 ///     );
 ///   }
@@ -136,6 +135,91 @@ class AnnotationResult<T> {
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+  final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
+  static int _nextCallbackId = 0;
+
+  /// Whether the subtree rooted at this layer has any composition callback
+  /// observers.
+  ///
+  /// This only evaluates to true if the subtree rooted at this node has
+  /// observers. For example, it may evaluate to true on a parent node but false
+  /// on a child if the parent has observers but the child does not.
+  ///
+  /// See also:
+  ///
+  ///   * [Layer.addCompositionCallback].
+  bool get subtreeHasCompositionCallbacks => _compositionCallbackCount > 0;
+
+  int _compositionCallbackCount = 0;
+  void _updateSubtreeCompositionObserverCount(int delta) {
+    assert(delta != 0);
+    _compositionCallbackCount += delta;
+    assert(_compositionCallbackCount >= 0);
+    if (parent != null) {
+      parent!._updateSubtreeCompositionObserverCount(delta);
+    }
+  }
+
+  void _fireCompositionCallbacks({required bool includeChildren}) {
+    for (final VoidCallback callback in List<VoidCallback>.of(_callbacks.values)) {
+      callback();
+    }
+  }
+
+  bool _debugMutationsLocked = false;
+
+  /// Describes the clip that would be applied to contents of this layer,
+  /// if any.
+  Rect? describeClipBounds() => null;
+
+  /// Adds a callback for when the layer tree that this layer is part of gets
+  /// composited, or when it is detached and will not be rendered again.
+  ///
+  /// This callback will fire even if an ancestor layer is added with retained
+  /// rendering, meaning that it will fire even if this layer gets added to the
+  /// scene via some call to [ui.SceneBuilder.addRetained] on one of its
+  /// ancestor layers.
+  ///
+  /// The callback receives a reference to this layer. The recipient must not
+  /// mutate the layer during the scope of the callback, but may traverse the
+  /// tree to find information about the current transform or clip. The layer
+  /// may not be [attached] anymore in this state, but even if it is detached it
+  /// may still have an also detached parent it can visit.
+  ///
+  /// If new callbacks are added or removed within the [callback], the new
+  /// callbacks will fire (or stop firing) on the _next_ compositing event.
+  ///
+  /// {@template flutter.rendering.Layer.compositionCallbacks}
+  /// Composition callbacks are useful in place of pushing a layer that would
+  /// otherwise try to observe the layer tree without actually affecting
+  /// compositing. For example, a composition callback may be used to observe
+  /// the total transform and clip of the current container layer to determine
+  /// whether a render object drawn into it is visible or not.
+  ///
+  /// Calling the returned callback will remove [callback] from the composition
+  /// callbacks.
+  /// {@endtemplate}
+  VoidCallback addCompositionCallback(CompositionCallback callback) {
+    _updateSubtreeCompositionObserverCount(1);
+    final int callbackId = _nextCallbackId += 1;
+    _callbacks[callbackId] = () {
+      assert(() {
+        _debugMutationsLocked = true;
+        return true;
+      }());
+      callback(this);
+      assert(() {
+        _debugMutationsLocked = false;
+        return true;
+      }());
+    };
+    return () {
+      assert(debugDisposed || _callbacks.containsKey(callbackId));
+      _callbacks.remove(callbackId);
+      _updateSubtreeCompositionObserverCount(-1);
+    };
+  }
+
   /// If asserts are enabled, returns whether [dispose] has
   /// been called since the last time any retained resources were created.
   ///
@@ -165,6 +249,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Called by [LayerHandle].
   void _unref() {
+    assert(!_debugMutationsLocked);
     assert(_refCount > 0);
     _refCount -= 1;
     if (_refCount == 0) {
@@ -206,6 +291,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   @visibleForTesting
   void dispose() {
+    assert(!_debugMutationsLocked);
     assert(
       !_debugDisposed,
       'Layers must only be disposed once. This is typically handled by '
@@ -262,6 +348,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   @visibleForTesting
   void markNeedsAddToScene() {
+    assert(!_debugMutationsLocked);
     assert(
       !alwaysNeedsAddToScene,
       '$runtimeType with alwaysNeedsAddToScene set called markNeedsAddToScene.\n'
@@ -283,6 +370,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// this method has no effect.
   @visibleForTesting
   void debugMarkClean() {
+    assert(!_debugMutationsLocked);
     assert(() {
       _needsAddToScene = false;
       return true;
@@ -332,6 +420,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   @visibleForTesting
   set engineLayer(ui.EngineLayer? value) {
+    assert(!_debugMutationsLocked);
     assert(!_debugDisposed);
 
     _engineLayer?.dispose();
@@ -376,6 +465,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   @visibleForTesting
   void updateSubtreeNeedsAddToScene() {
+    assert(!_debugMutationsLocked);
     _needsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
 
@@ -388,17 +478,25 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   Layer? _previousSibling;
 
   @override
-  void dropChild(AbstractNode child) {
+  void dropChild(Layer child) {
+    assert(!_debugMutationsLocked);
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
+    }
+    if (child._compositionCallbackCount != 0) {
+      _updateSubtreeCompositionObserverCount(-child._compositionCallbackCount);
     }
     super.dropChild(child);
   }
 
   @override
-  void adoptChild(AbstractNode child) {
+  void adoptChild(Layer child) {
+    assert(!_debugMutationsLocked);
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
+    }
+    if (child._compositionCallbackCount != 0) {
+      _updateSubtreeCompositionObserverCount(child._compositionCallbackCount);
     }
     super.adoptChild(child);
   }
@@ -408,6 +506,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This has no effect if the layer's parent is already null.
   @mustCallSuper
   void remove() {
+    assert(!_debugMutationsLocked);
     parent?._removeChild(this);
   }
 
@@ -530,6 +629,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   void addToScene(ui.SceneBuilder builder);
 
   void _addToSceneWithRetainedRendering(ui.SceneBuilder builder) {
+    assert(!_debugMutationsLocked);
     // There can't be a loop by adding a retained layer subtree whose
     // _needsAddToScene is false.
     //
@@ -910,12 +1010,28 @@ class PerformanceOverlayLayer extends Layer {
   }
 }
 
+/// The signature of the callback added in [Layer.addCompositionCallback].
+typedef CompositionCallback = void Function(Layer);
+
 /// A composited layer that has a list of children.
 ///
 /// A [ContainerLayer] instance merely takes a list of children and inserts them
 /// into the composited rendering in order. There are subclasses of
 /// [ContainerLayer] which apply more elaborate effects in the process.
 class ContainerLayer extends Layer {
+  @override
+  void _fireCompositionCallbacks({required bool includeChildren}) {
+    super._fireCompositionCallbacks(includeChildren: includeChildren);
+    if (!includeChildren) {
+      return;
+    }
+    Layer? child = firstChild;
+    while (child != null) {
+      child._fireCompositionCallbacks(includeChildren: includeChildren);
+      child = child.nextSibling;
+    }
+  }
+
   /// The first composited layer in this layer's child list.
   Layer? get firstChild => _firstChild;
   Layer? _firstChild;
@@ -936,6 +1052,9 @@ class ContainerLayer extends Layer {
   ui.Scene buildScene(ui.SceneBuilder builder) {
     updateSubtreeNeedsAddToScene();
     addToScene(builder);
+    if (subtreeHasCompositionCallbacks) {
+      _fireCompositionCallbacks(includeChildren: true);
+    }
     // Clearing the flag _after_ calling `addToScene`, not _before_. This is
     // because `addToScene` calls children's `addToScene` methods, which may
     // mark this layer as dirty.
@@ -967,6 +1086,7 @@ class ContainerLayer extends Layer {
   @override
   void dispose() {
     removeAllChildren();
+    _callbacks.clear();
     super.dispose();
   }
 
@@ -995,6 +1115,7 @@ class ContainerLayer extends Layer {
 
   @override
   void attach(Object owner) {
+    assert(!_debugMutationsLocked);
     super.attach(owner);
     Layer? child = firstChild;
     while (child != null) {
@@ -1005,16 +1126,25 @@ class ContainerLayer extends Layer {
 
   @override
   void detach() {
+    assert(!_debugMutationsLocked);
     super.detach();
     Layer? child = firstChild;
     while (child != null) {
       child.detach();
       child = child.nextSibling;
     }
+    // Detach indicates that we may never be composited again. Clients
+    // interested in observing composition need to get an update here because
+    // they might otherwise never get another one even though the layer is no
+    // longer visible.
+    //
+    // Children fired them already in child.detach().
+    _fireCompositionCallbacks(includeChildren: false);
   }
 
   /// Adds the given layer to the end of this layer's child list.
   void append(Layer child) {
+    assert(!_debugMutationsLocked);
     assert(child != this);
     assert(child != firstChild);
     assert(child != lastChild);
@@ -1073,6 +1203,7 @@ class ContainerLayer extends Layer {
 
   /// Removes all of this layer's children from its child list.
   void removeAllChildren() {
+    assert(!_debugMutationsLocked);
     Layer? child = firstChild;
     while (child != null) {
       final Layer? next = child.nextSibling;
@@ -1222,7 +1353,7 @@ class OffsetLayer extends ContainerLayer {
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
-    transform.multiply(Matrix4.translationValues(offset.dx, offset.dy, 0.0));
+    transform.translate(offset.dx, offset.dy);
   }
 
   @override
@@ -1322,6 +1453,9 @@ class ClipRectLayer extends ContainerLayer {
     }
   }
 
+  @override
+  Rect? describeClipBounds() => clipRect;
+
   /// {@template flutter.rendering.ClipRectLayer.clipBehavior}
   /// Controls how to clip.
   ///
@@ -1409,6 +1543,9 @@ class ClipRRectLayer extends ContainerLayer {
     }
   }
 
+  @override
+  Rect? describeClipBounds() => clipRRect?.outerRect;
+
   /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   ///
   /// Defaults to [Clip.antiAlias].
@@ -1491,6 +1628,9 @@ class ClipPathLayer extends ContainerLayer {
       markNeedsAddToScene();
     }
   }
+
+  @override
+  Rect? describeClipBounds() => clipPath?.getBounds();
 
   /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   ///
@@ -1637,9 +1777,8 @@ class TransformLayer extends OffsetLayer {
   ///
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
-  TransformLayer({ Matrix4? transform, Offset offset = Offset.zero })
-    : _transform = transform,
-      super(offset: offset);
+  TransformLayer({ Matrix4? transform, super.offset })
+    : _transform = transform;
 
   /// The matrix to apply.
   ///
@@ -1737,9 +1876,8 @@ class OpacityLayer extends OffsetLayer {
   /// the pipeline.
   OpacityLayer({
     int? alpha,
-    Offset offset = Offset.zero,
-  }) : _alpha = alpha,
-       super(offset: offset);
+    super.offset,
+  }) : _alpha = alpha;
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1897,7 +2035,7 @@ class ShaderMaskLayer extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Shader>('shader', shader));
     properties.add(DiagnosticsProperty<Rect>('maskRect', maskRect));
-    properties.add(DiagnosticsProperty<BlendMode>('blendMode', blendMode));
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
   }
 }
 
@@ -1956,6 +2094,13 @@ class BackdropFilterLayer extends ContainerLayer {
     addChildrenToScene(builder);
     builder.pop();
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter));
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+  }
 }
 
 /// A composited layer that uses a physical model to producing lighting effects.
@@ -1967,12 +2112,20 @@ class BackdropFilterLayer extends ContainerLayer {
 /// When debugging, setting [debugDisablePhysicalShapeLayers] to true will cause this
 /// layer to be skipped (directly replaced by its children). This can be helpful
 /// to track down the cause of performance problems.
+@Deprecated(
+  'Use a clip and canvas operations directly (See RenderPhysicalModel). '
+  'This feature was deprecated after v2.13.0-0.0.pre.',
+)
 class PhysicalModelLayer extends ContainerLayer {
   /// Creates a composited layer that uses a physical model to producing
   /// lighting effects.
   ///
   /// The [clipPath], [clipBehavior], [elevation], [color], and [shadowColor]
   /// arguments must be non-null before the compositing phase of the pipeline.
+  @Deprecated(
+    'Use a clip and canvas operations directly (See RenderPhysicalModel). '
+    'This feature was deprecated after v2.13.0-0.0.pre.',
+  )
   PhysicalModelLayer({
     Path? clipPath,
     Clip clipBehavior = Clip.none,

@@ -409,8 +409,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     _lastMetrics = metrics;
     _lastAxisDirection = axisDirection;
 
-    bool _needPaint(ScrollMetrics? metrics) => metrics != null && metrics.maxScrollExtent > metrics.minScrollExtent;
-    if (!_needPaint(oldMetrics) && !_needPaint(metrics))
+    bool needPaint(ScrollMetrics? metrics) => metrics != null && metrics.maxScrollExtent > metrics.minScrollExtent;
+    if (!needPaint(oldMetrics) && !needPaint(metrics))
       return;
 
     notifyListeners();
@@ -539,8 +539,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // Thumb extent reflects fraction of content visible, as long as this
     // isn't less than the absolute minimum size.
     // _totalContentExtent >= viewportDimension, so (_totalContentExtent - _mainAxisPadding) > 0
-    final double fractionVisible = ((_lastMetrics!.extentInside - _mainAxisPadding) / (_totalContentExtent - _mainAxisPadding))
-      .clamp(0.0, 1.0);
+    final double fractionVisible = clampDouble(
+        (_lastMetrics!.extentInside - _mainAxisPadding) /
+            (_totalContentExtent - _mainAxisPadding),
+        0.0,
+        1.0);
 
     final double thumbExtent = math.max(
       math.min(_trackExtent, minOverscrollLength),
@@ -563,11 +566,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
       // values for the thumb that range between minLength and the smallest
       // possible value, minOverscrollLength.
-      : safeMinLength * (1.0 - fractionOverscrolled.clamp(0.0, 0.2) / 0.2);
+      : safeMinLength * (1.0 - clampDouble(fractionOverscrolled, 0.0, 0.2) / 0.2);
 
     // The `thumbExtent` should be no greater than `trackSize`, otherwise
     // the scrollbar may scroll towards the wrong direction.
-    return thumbExtent.clamp(newMinLength, _trackExtent);
+    return clampDouble(thumbExtent, newMinLength, _trackExtent);
   }
 
   @override
@@ -611,7 +614,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
 
     final double fractionPast = (scrollableExtent > 0)
-      ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
+      ? clampDouble((metrics.pixels - metrics.minScrollExtent) / scrollableExtent, 0.0, 1.0)
       : 0;
 
     return (_isReversed ? 1 - fractionPast : fractionPast) * (_trackExtent - thumbExtent);
@@ -682,13 +685,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     switch (kind) {
       case PointerDeviceKind.touch:
+      case PointerDeviceKind.trackpad:
         return paddedRect.contains(position);
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
-      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         return interactiveRect.contains(position);
     }
   }
@@ -713,6 +715,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     switch (kind) {
       case PointerDeviceKind.touch:
+      case PointerDeviceKind.trackpad:
         final Rect touchThumbRect = _thumbRect!.expandToInclude(
           Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
         );
@@ -721,8 +724,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
-      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         return _thumbRect!.contains(position);
     }
   }
@@ -890,7 +891,7 @@ class RawScrollbar extends StatefulWidget {
   /// The [child], [fadeDuration], [pressDuration], and [timeToFade] arguments
   /// must not be null.
   const RawScrollbar({
-    Key? key,
+    super.key,
     required this.child,
     this.controller,
     this.thumbVisibility,
@@ -936,8 +937,7 @@ class RawScrollbar extends StatefulWidget {
        assert(timeToFade != null),
        assert(pressDuration != null),
        assert(mainAxisMargin != null),
-       assert(crossAxisMargin != null),
-       super(key: key);
+       assert(crossAxisMargin != null);
 
   /// {@template flutter.widgets.Scrollbar.child}
   /// The widget below this widget in the tree.
@@ -1447,6 +1447,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _debugCheckHasValidScrollPosition() {
+    if (!mounted) {
+      return true;
+    }
     final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
     final bool tryPrimary = widget.controller == null;
     final String controllerForError = tryPrimary
@@ -1611,7 +1614,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
-          newPosition = newPosition.clamp(position.minScrollExtent, position.maxScrollExtent);
+          newPosition = clampDouble(newPosition, position.minScrollExtent, position.maxScrollExtent);
           break;
         case TargetPlatform.iOS:
         case TargetPlatform.android:
@@ -1963,6 +1966,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               onExit: (PointerExitEvent event) {
                 switch(event.kind) {
                   case PointerDeviceKind.mouse:
+                  case PointerDeviceKind.trackpad:
                     if (enableGestures)
                       handleHoverExit(event);
                     break;
@@ -1970,14 +1974,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
-                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-                           // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
                     break;
                 }
               },
               onHover: (PointerHoverEvent event) {
                 switch(event.kind) {
                   case PointerDeviceKind.mouse:
+                  case PointerDeviceKind.trackpad:
                     if (enableGestures)
                       handleHover(event);
                     break;
@@ -1985,8 +1988,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
-                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-                           // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
                     break;
                 }
               },
@@ -2007,16 +2008,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 // thumb and ignores everything else.
 class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
   _ThumbPressGestureRecognizer({
-    double? postAcceptSlopTolerance,
-    Set<PointerDeviceKind>? supportedDevices,
-    required Object debugOwner,
+    required Object super.debugOwner,
     required GlobalKey customPaintKey,
     required Duration pressDuration,
   }) : _customPaintKey = customPaintKey,
        super(
-         postAcceptSlopTolerance: postAcceptSlopTolerance,
-         supportedDevices: supportedDevices,
-         debugOwner: debugOwner,
          duration: pressDuration,
        );
 

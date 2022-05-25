@@ -81,8 +81,9 @@ class ProgressIndicatorThemeData with Diagnosticable {
   ///
   /// If both arguments are null, then null is returned.
   static ProgressIndicatorThemeData? lerp(ProgressIndicatorThemeData? a, ProgressIndicatorThemeData? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     assert(t != null);
     return ProgressIndicatorThemeData(
       color: Color.lerp(a?.color, b?.color, t),
@@ -104,10 +105,12 @@ class ProgressIndicatorThemeData with Diagnosticable {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ProgressIndicatorThemeData
       && other.color == color
       && other.linearTrackColor == linearTrackColor
@@ -151,10 +154,10 @@ class ProgressIndicatorTheme extends InheritedTheme {
   /// Creates a theme that controls the configurations for [ProgressIndicator]
   /// widgets.
   const ProgressIndicatorTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties for descendant [ProgressIndicator] widgets.
   final ProgressIndicatorThemeData data;

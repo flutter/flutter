@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestValueKey<T> extends ValueKey<T> {
-  const TestValueKey(T value) : super(value);
+  const TestValueKey(super.value);
 }
 
 @immutable

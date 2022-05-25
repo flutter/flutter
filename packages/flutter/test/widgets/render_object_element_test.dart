@@ -28,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({ Key? key, this.stable, this.swapper }) : super(key: key);
+  const Swapper({ super.key, this.stable, this.swapper });
 
   final Widget? stable;
   final Widget? swapper;
@@ -42,10 +42,10 @@ abstract class Swapper extends RenderObjectWidget {
 
 class SwapperWithProperOverrides extends Swapper {
   const SwapperWithProperOverrides({
-    Key? key,
-    Widget? stable,
-    Widget? swapper,
-  }) : super(key: key, stable: stable, swapper: swapper);
+    super.key,
+    super.stable,
+    super.swapper,
+  });
 
   @override
   SwapperElement createElement() => SwapperElementWithProperOverrides(this);
@@ -53,17 +53,17 @@ class SwapperWithProperOverrides extends Swapper {
 
 class SwapperWithNoOverrides extends Swapper {
   const SwapperWithNoOverrides({
-    Key? key,
-    Widget? stable,
-    Widget? swapper,
-  }) : super(key: key, stable: stable, swapper: swapper);
+    super.key,
+    super.stable,
+    super.swapper,
+  });
 
   @override
   SwapperElement createElement() => SwapperElementWithNoOverrides(this);
 }
 
 abstract class SwapperElement extends RenderObjectElement {
-  SwapperElement(Swapper widget) : super(widget);
+  SwapperElement(Swapper super.widget);
 
   Element? stable;
   Element? swapper;
@@ -106,7 +106,7 @@ abstract class SwapperElement extends RenderObjectElement {
 }
 
 class SwapperElementWithProperOverrides extends SwapperElement {
-  SwapperElementWithProperOverrides(Swapper widget) : super(widget);
+  SwapperElementWithProperOverrides(super.widget);
 
   @override
   void insertRenderObjectChild(RenderBox child, Object? slot) {
@@ -136,7 +136,7 @@ class SwapperElementWithProperOverrides extends SwapperElement {
 }
 
 class SwapperElementWithNoOverrides extends SwapperElement {
-  SwapperElementWithNoOverrides(Swapper widget) : super(widget);
+  SwapperElementWithNoOverrides(super.widget);
 }
 
 class RenderSwapper extends RenderBox {

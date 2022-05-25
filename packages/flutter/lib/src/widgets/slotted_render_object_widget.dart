@@ -187,7 +187,7 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
 /// Element used by the [SlottedMultiChildRenderObjectWidgetMixin].
 class SlottedRenderObjectElement<S> extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
-  SlottedRenderObjectElement(SlottedMultiChildRenderObjectWidgetMixin<S> widget) : super(widget);
+  SlottedRenderObjectElement(SlottedMultiChildRenderObjectWidgetMixin<S> super.widget);
 
   final Map<S, Element> _slotToChild = <S, Element>{};
 

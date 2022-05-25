@@ -372,14 +372,13 @@ class LinearGradient extends Gradient {
   const LinearGradient({
     this.begin = Alignment.centerLeft,
     this.end = Alignment.centerRight,
-    required List<Color> colors,
-    List<double>? stops,
+    required super.colors,
+    super.stops,
     this.tileMode = TileMode.clamp,
-    GradientTransform? transform,
+    super.transform,
   }) : assert(begin != null),
        assert(end != null),
-       assert(tileMode != null),
-       super(colors: colors, stops: stops, transform: transform);
+       assert(tileMode != null);
 
   /// The offset at which stop 0.0 of the gradient is placed.
   ///
@@ -620,17 +619,16 @@ class RadialGradient extends Gradient {
   const RadialGradient({
     this.center = Alignment.center,
     this.radius = 0.5,
-    required List<Color> colors,
-    List<double>? stops,
+    required super.colors,
+    super.stops,
     this.tileMode = TileMode.clamp,
     this.focal,
     this.focalRadius = 0.0,
-    GradientTransform? transform,
+    super.transform,
   }) : assert(center != null),
        assert(radius != null),
        assert(tileMode != null),
-       assert(focalRadius != null),
-       super(colors: colors, stops: stops, transform: transform);
+       assert(focalRadius != null);
 
   /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
   /// square describing the gradient which will be mapped onto the paint box.
@@ -859,8 +857,6 @@ class RadialGradient extends Gradient {
 ///   decoration: const BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
-///       startAngle: 0.0,
-///       endAngle: math.pi * 2,
 ///       colors: <Color>[
 ///         Color(0xFF4285F4), // blue
 ///         Color(0xFF34A853), // green
@@ -885,8 +881,6 @@ class RadialGradient extends Gradient {
 ///   decoration: const BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
-///       startAngle: 0.0,
-///       endAngle: math.pi * 2,
 ///       colors: <Color>[
 ///         Color(0xFF4285F4), // blue
 ///         Color(0xFF34A853), // green
@@ -919,15 +913,14 @@ class SweepGradient extends Gradient {
     this.center = Alignment.center,
     this.startAngle = 0.0,
     this.endAngle = math.pi * 2,
-    required List<Color> colors,
-    List<double>? stops,
+    required super.colors,
+    super.stops,
     this.tileMode = TileMode.clamp,
-    GradientTransform? transform,
+    super.transform,
   }) : assert(center != null),
        assert(startAngle != null),
        assert(endAngle != null),
-       assert(tileMode != null),
-       super(colors: colors, stops: stops, transform: transform);
+       assert(tileMode != null);
 
   /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
   /// square describing the gradient which will be mapped onto the paint box.

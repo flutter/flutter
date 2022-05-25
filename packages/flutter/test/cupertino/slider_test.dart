@@ -24,7 +24,7 @@ const CupertinoDynamicColor _kSystemFill = CupertinoDynamicColor(
 
 void main() {
 
-  Future<void> _dragSlider(WidgetTester tester, Key sliderKey) {
+  Future<void> dragSlider(WidgetTester tester, Key sliderKey) {
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
@@ -134,7 +134,7 @@ void main() {
       ),
     );
 
-    await _dragSlider(tester, sliderKey);
+    await dragSlider(tester, sliderKey);
 
     expect(numberOfTimesOnChangeStartIsCalled, equals(1));
 
@@ -175,7 +175,7 @@ void main() {
       ),
     );
 
-    await _dragSlider(tester, sliderKey);
+    await dragSlider(tester, sliderKey);
 
     expect(numberOfTimesOnChangeEndIsCalled, equals(1));
 

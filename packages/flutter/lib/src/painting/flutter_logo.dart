@@ -119,7 +119,7 @@ class FlutterLogoDecoration extends Decoration {
         b.style,
         b.margin * t,
         b._position,
-        b._opacity * t.clamp(0.0, 1.0),
+        b._opacity * clampDouble(t, 0.0, 1.0),
       );
     }
     if (b == null) {
@@ -128,7 +128,7 @@ class FlutterLogoDecoration extends Decoration {
         a.style,
         a.margin * t,
         a._position,
-        a._opacity * (1.0 - t).clamp(0.0, 1.0),
+        a._opacity * clampDouble(1.0 - t, 0.0, 1.0),
       );
     }
     if (t == 0.0)
@@ -140,7 +140,7 @@ class FlutterLogoDecoration extends Decoration {
       t < 0.5 ? a.style : b.style,
       EdgeInsets.lerp(a.margin, b.margin, t)!,
       a._position + (b._position - a._position) * t,
-      (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0),
+      clampDouble(a._opacity + (b._opacity - a._opacity) * t, 0.0, 1.0),
     );
   }
 

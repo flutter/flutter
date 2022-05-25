@@ -26,6 +26,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -368,6 +369,42 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
+      testUsingContext('forwards --uninstall-only to DebuggingOptions', () async {
+        final RunCommand command = RunCommand();
+        final FakeDevice mockDevice = FakeDevice(
+          sdkNameAndVersion: 'iOS 13',
+        )..startAppSuccess = false;
+
+        mockDeviceManager
+          ..devices = <Device>[
+            mockDevice,
+          ]
+          ..targetDevices = <Device>[
+            mockDevice,
+          ];
+
+        // Causes swift to be detected in the analytics.
+        fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
+
+        await expectToolExitLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          '--uninstall-first',
+        ]), isNull);
+
+        final DebuggingOptions options = await command.createDebuggingOptions(false);
+        expect(options.uninstallFirst, isTrue);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => artifacts,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        DeviceManager: () => mockDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => usage,
+      });
+
+
       testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
@@ -404,6 +441,67 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => usage,
+      });
+
+      group('--machine', () {
+        testUsingContext('enables multidex by default', () async {
+          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+          final FakeDevice device = FakeDevice();
+          mockDeviceManager
+          ..devices = <Device>[device]
+          ..targetDevices = <Device>[device];
+
+          await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--machine',
+              '-d',
+              device.id,
+            ]),
+            throwsToolExit(),
+          );
+          expect(command.appDomain.multidexEnabled, isTrue);
+        }, overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => mockDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Usage: () => usage,
+          Stdio: () => FakeStdio(),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+        });
+
+        testUsingContext('can disable multidex with --no-multidex', () async {
+          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+          final FakeDevice device = FakeDevice();
+          mockDeviceManager
+          ..devices = <Device>[device]
+          ..targetDevices = <Device>[device];
+
+          await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--no-multidex',
+              '--machine',
+              '-d',
+              device.id,
+            ]),
+            throwsToolExit(),
+          );
+          expect(command.appDomain.multidexEnabled, isFalse);
+        }, overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => mockDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Usage: () => usage,
+          Stdio: () => FakeStdio(),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+        });
       });
     });
 
@@ -688,6 +786,13 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   }
 
   @override
+  List<DeviceDiscovery> get deviceDiscoverers {
+    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    devices.forEach(discoverer.addDevice);
+    return <DeviceDiscovery>[discoverer];
+  }
+
+  @override
   Future<List<Device>> getAllConnectedDevices() async => devices;
 }
 
@@ -738,6 +843,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool supportsHotReload = false;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   bool get supportsFastStart => false;
@@ -856,5 +964,46 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
       throw rpcError;
     }
     return 0;
+  }
+}
+
+class DaemonCapturingRunCommand extends RunCommand {
+  /*late*/ Daemon daemon;
+  /*late*/ CapturingAppDomain appDomain;
+
+  @override
+  Daemon createMachineDaemon() {
+    daemon = super.createMachineDaemon();
+    appDomain = daemon.appDomain = CapturingAppDomain(daemon);
+    daemon.registerDomain(appDomain);
+    return daemon;
+  }
+}
+
+class CapturingAppDomain extends AppDomain {
+  CapturingAppDomain(Daemon daemon) : super(daemon);
+
+  bool /*?*/ multidexEnabled;
+
+  @override
+  Future<AppInstance> startApp(
+    Device device,
+    String projectDirectory,
+    String target,
+    String route,
+    DebuggingOptions options,
+    bool enableHotReload, {
+    File applicationBinary,
+    @required bool trackWidgetCreation,
+    String projectRootPath,
+    String packagesFilePath,
+    String dillOutputPath,
+    bool ipv6 = false,
+    bool multidexEnabled = false,
+    String isolateFilter,
+    bool machine = true,
+  }) async {
+    this.multidexEnabled = multidexEnabled;
+    throwToolExit('');
   }
 }

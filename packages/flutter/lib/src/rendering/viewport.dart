@@ -562,7 +562,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderSliver child) {
+  Rect? describeApproximatePaintClip(RenderSliver child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        break;
+    }
+
     final Rect viewportClip = Offset.zero & size;
     // The child's viewportMainAxisExtent can be infinite when a
     // RenderShrinkWrappingViewport is given infinite constraints, such as when
@@ -1256,29 +1265,21 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// The [offset] must be specified. For testing purposes, consider passing a
   /// [ViewportOffset.zero] or [ViewportOffset.fixed].
   RenderViewport({
-    AxisDirection axisDirection = AxisDirection.down,
-    required AxisDirection crossAxisDirection,
-    required ViewportOffset offset,
+    super.axisDirection,
+    required super.crossAxisDirection,
+    required super.offset,
     double anchor = 0.0,
     List<RenderSliver>? children,
     RenderSliver? center,
-    double? cacheExtent,
-    CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
-    Clip clipBehavior = Clip.hardEdge,
+    super.cacheExtent,
+    super.cacheExtentStyle,
+    super.clipBehavior,
   }) : assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
        assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        assert(clipBehavior != null),
        _anchor = anchor,
-       _center = center,
-       super(
-         axisDirection: axisDirection,
-         crossAxisDirection: crossAxisDirection,
-         offset: offset,
-         cacheExtent: cacheExtent,
-         cacheExtentStyle: cacheExtentStyle,
-         clipBehavior: clipBehavior,
-       ) {
+       _center = center {
     addAll(children);
     if (center == null && firstChild != null)
       _center = firstChild;
@@ -1384,9 +1385,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                   'If this widget is always nested in a scrollable widget there '
                   'is no need to use a viewport because there will always be enough '
                   'vertical space for the children. In this case, consider using a '
-                  'Column instead. Otherwise, consider using the "shrinkWrap" property '
-                  '(or a ShrinkWrappingViewport) to size the height of the viewport '
-                  'to the sum of the heights of its children.',
+                  'Column or Wrap instead. Otherwise, consider using a '
+                  'CustomScrollView to concatenate arbitrary slivers into a '
+                  'single scrollable.',
                 ),
               ]);
             }
@@ -1414,9 +1415,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                   'If this widget is always nested in a scrollable widget there '
                   'is no need to use a viewport because there will always be enough '
                   'horizontal space for the children. In this case, consider using a '
-                  'Row instead. Otherwise, consider using the "shrinkWrap" property '
-                  '(or a ShrinkWrappingViewport) to size the width of the viewport '
-                  'to the sum of the widths of its children.',
+                  'Row or Wrap instead. Otherwise, consider using a '
+                  'CustomScrollView to concatenate arbitrary slivers into a '
+                  'single scrollable.',
                 ),
               ]);
             }
@@ -1538,8 +1539,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     // to the zero scroll offset (the line between the forward slivers and the
     // reverse slivers).
     final double centerOffset = mainAxisExtent * anchor - correctedOffset;
-    final double reverseDirectionRemainingPaintExtent = centerOffset.clamp(0.0, mainAxisExtent);
-    final double forwardDirectionRemainingPaintExtent = (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
+    final double reverseDirectionRemainingPaintExtent = clampDouble(centerOffset, 0.0, mainAxisExtent);
+    final double forwardDirectionRemainingPaintExtent = clampDouble(mainAxisExtent - centerOffset, 0.0, mainAxisExtent);
 
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
@@ -1552,8 +1553,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
     final double fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
     final double centerCacheOffset = centerOffset + _calculatedCacheExtent!;
-    final double reverseDirectionRemainingCacheExtent = centerCacheOffset.clamp(0.0, fullCacheExtent);
-    final double forwardDirectionRemainingCacheExtent = (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
+    final double reverseDirectionRemainingCacheExtent = clampDouble(centerCacheOffset, 0.0, fullCacheExtent);
+    final double forwardDirectionRemainingCacheExtent = clampDouble(fullCacheExtent - centerCacheOffset, 0.0, fullCacheExtent);
 
     final RenderSliver? leadingNegativeChild = childBefore(center!);
 
@@ -1570,7 +1571,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         growthDirection: GrowthDirection.reverse,
         advance: childBefore,
         remainingCacheExtent: reverseDirectionRemainingCacheExtent,
-        cacheOrigin: (mainAxisExtent - centerOffset).clamp(-_calculatedCacheExtent!, 0.0),
+        cacheOrigin: clampDouble(mainAxisExtent - centerOffset, -_calculatedCacheExtent!, 0.0),
       );
       if (result != 0.0)
         return -result;
@@ -1588,7 +1589,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       growthDirection: GrowthDirection.forward,
       advance: childAfter,
       remainingCacheExtent: forwardDirectionRemainingCacheExtent,
-      cacheOrigin: centerOffset.clamp(-_calculatedCacheExtent!, 0.0),
+      cacheOrigin: clampDouble(centerOffset, -_calculatedCacheExtent!, 0.0),
     );
   }
 
@@ -1793,17 +1794,12 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   /// The [offset] must be specified. For testing purposes, consider passing a
   /// [ViewportOffset.zero] or [ViewportOffset.fixed].
   RenderShrinkWrappingViewport({
-    AxisDirection axisDirection = AxisDirection.down,
-    required AxisDirection crossAxisDirection,
-    required ViewportOffset offset,
-    Clip clipBehavior = Clip.hardEdge,
+    super.axisDirection,
+    required super.crossAxisDirection,
+    required super.offset,
+    super.clipBehavior,
     List<RenderSliver>? children,
-  }) : super(
-        axisDirection: axisDirection,
-        crossAxisDirection: crossAxisDirection,
-        offset: offset,
-        clipBehavior: clipBehavior,
-       ) {
+  }) {
     addAll(children);
   }
 

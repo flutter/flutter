@@ -169,6 +169,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///  * [EditableText], which is the raw text editing control at the heart of a
 ///    [TextField].
 ///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/text-fields/>
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
   ///
@@ -200,6 +201,8 @@ class CupertinoTextField extends StatefulWidget {
   /// [enableSuggestions], and [enableIMEPersonalizedLearning] properties must
   /// not be null.
   ///
+  /// {@macro flutter.widgets.editableText.accessibility}
+  ///
   /// See also:
   ///
   ///  * [minLines], which is the minimum number of lines to occupy when the
@@ -208,7 +211,7 @@ class CupertinoTextField extends StatefulWidget {
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.decoration = _kDefaultRoundedBorderDecoration,
@@ -333,8 +336,7 @@ class CupertinoTextField extends StatefulWidget {
                        cut: true,
                        selectAll: true,
                        paste: true,
-                     ))),
-       super(key: key);
+                     )));
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -373,7 +375,7 @@ class CupertinoTextField extends StatefulWidget {
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField.borderless({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.decoration,
@@ -496,8 +498,7 @@ class CupertinoTextField extends StatefulWidget {
                        cut: true,
                        selectAll: true,
                        paste: true,
-                     ))),
-       super(key: key);
+                     )));
 
   /// Controls the text being edited.
   ///
@@ -715,7 +716,8 @@ class CupertinoTextField extends StatefulWidget {
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to the [CupertinoThemeData.primaryColor] of the ambient theme,
+  /// Defaults to the [DefaultSelectionStyle.cursorColor]. If that color is
+  /// null, it uses the [CupertinoThemeData.primaryColor] of the ambient theme,
   /// which itself defaults to [CupertinoColors.activeBlue] in the light theme
   /// and [CupertinoColors.activeOrange] in the dark theme.
   final Color? cursorColor;
@@ -1186,7 +1188,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
 
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context);
-    final Color cursorColor = CupertinoDynamicColor.maybeResolve(widget.cursorColor, context) ?? themeData.primaryColor;
+    final Color cursorColor = CupertinoDynamicColor.maybeResolve(
+      widget.cursorColor ?? DefaultSelectionStyle.of(context).cursorColor,
+      context,
+    ) ?? themeData.primaryColor;
+
     final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
 
     final Color? decorationColor = CupertinoDynamicColor.maybeResolve(widget.decoration?.color, context);
@@ -1214,7 +1220,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       color: enabled ? decorationColor : disabledColor,
     );
 
-    final Color selectionColor = CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
+    final Color selectionColor = CupertinoDynamicColor.maybeResolve(
+      DefaultSelectionStyle.of(context).selectionColor,
+      context,
+    ) ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,

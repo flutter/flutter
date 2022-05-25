@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -92,11 +92,9 @@ final TextSelectionControls desktopTextSelectionControls =
 class DesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of _DesktopTextSelectionToolbar.
   const DesktopTextSelectionToolbar({
-    Key? key,
     required this.anchor,
     required this.children,
-  }) : assert(children.length > 0),
-       super(key: key);
+  }) : assert(children.length > 0);
 
   /// The point at which the toolbar will attempt to position itself as closely
   /// as possible.
@@ -169,15 +167,13 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 class DesktopTextSelectionToolbarButton extends StatelessWidget {
   /// Creates an instance of DesktopTextSelectionToolbarButton.
   const DesktopTextSelectionToolbarButton({
-    Key? key,
     required this.onPressed,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// Create an instance of [DesktopTextSelectionToolbarButton] whose child is
   /// a [Text] widget in the style of the Material text selection toolbar.
   DesktopTextSelectionToolbarButton.text({
-    Key? key,
     required BuildContext context,
     required this.onPressed,
     required String text,
@@ -189,8 +185,7 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
                ? Colors.white
                : Colors.black87,
          ),
-       ),
-       super(key: key);
+       );
 
   /// {@macro flutter.material.TextSelectionToolbarTextButton.onPressed}
   final VoidCallback onPressed;

@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -19,28 +18,17 @@ import 'theme_data.dart';
 /// A utility class for building Material buttons that depend on the
 /// ambient [ButtonTheme] and [Theme].
 ///
-/// ### This class is obsolete.
+/// This class is planned to be deprecated in a future release.
+/// Please use one or more of these buttons and associated themes instead:
 ///
-/// FlatButton and RaisedButton have been replaced by
-/// TextButton and ElevatedButton respectively.
-/// ButtonTheme has been replaced by TextButtonTheme and
-/// ElevatedButtonTheme. The appearance of the
-/// new widgets can be customized by specifying a [ButtonStyle]
-/// or by creating a one-off style using a `styleFrom` method like
-/// [TextButton.styleFrom]. The original button classes
-/// have been deprecated, please migrate code that uses them.
-/// There's a detailed migration guide for the new button and button
-/// theme classes in
-/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
+///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
+///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
+///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
 ///
 /// The button's size will expand to fit the child widget, if necessary.
 ///
 /// MaterialButtons whose [onPressed] and [onLongPress] callbacks are null will be disabled. To have
 /// an enabled button, make sure to pass a non-null value for [onPressed] or [onLongPress].
-///
-/// Rather than using this class directly, consider using [FlatButton]
-/// or [RaisedButton], which configure this class with
-/// appropriate defaults that match the material design specification.
 ///
 /// To create a button directly, without inheriting theme defaults, use
 /// [RawMaterialButton].
@@ -52,18 +40,17 @@ import 'theme_data.dart';
 ///
 ///  * [IconButton], to create buttons that contain icons rather than text.
 class MaterialButton extends StatelessWidget {
-  /// Creates a material button.
+  /// Creates a Material Design button.
   ///
-  /// Rather than creating a material button directly, consider using
-  /// [FlatButton] or [RaisedButton]. To create a custom Material button
-  /// consider using [RawMaterialButton].
+  /// To create a custom Material button consider using [TextButton],
+  /// [ElevatedButton], or [OutlinedButton].
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
   /// Additionally,  [elevation], [hoverElevation], [focusElevation],
   /// [highlightElevation], and [disabledElevation] must be non-negative, if
   /// specified.
   const MaterialButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
@@ -101,8 +88,7 @@ class MaterialButton extends StatelessWidget {
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
-       assert(disabledElevation == null || disabledElevation >= 0.0),
-       super(key: key);
+       assert(disabledElevation == null || disabledElevation >= 0.0);
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -240,7 +226,7 @@ class MaterialButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [FlatButton], a button with no elevation or fill color.
+  ///  * [TextButton], a button with no elevation or fill color.
   ///  * [focusElevation], the elevation when the button is focused.
   ///  * [hoverElevation], the elevation when a pointer is hovering over the
   ///    button.
@@ -457,8 +443,9 @@ class MaterialButton extends StatelessWidget {
   }
 }
 
-/// The type of [MaterialButton]s created with RaisedButton.icon] and
-/// FlatButton.icon.
+/// The distinguished type of [MaterialButton].
+///
+/// This class is deprecated and will be removed in a future release.
 ///
 /// This mixin only exists to give the "label and icon" button widgets a distinct
 /// type for the sake of [ButtonTheme].

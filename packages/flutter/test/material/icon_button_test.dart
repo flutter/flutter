@@ -769,7 +769,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(IconButton)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -810,7 +809,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(IconButton)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -835,7 +833,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(IconButton)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 

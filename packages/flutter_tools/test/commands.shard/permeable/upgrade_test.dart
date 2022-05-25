@@ -157,10 +157,10 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
+          'git', 'fetch', '--tags',
         ]),
         const FakeCommand(command: <String>[
-          'git', 'rev-parse', '--verify', '@{u}',
+          'git', 'rev-parse', '--verify', '@{upstream}',
         ],
         stdout: revision),
         const FakeCommand(command: <String>[
@@ -185,13 +185,13 @@ void main() {
     testUsingContext('fetchLatestVersion throws toolExit if HEAD is detached', () async {
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
+          'git', 'fetch', '--tags',
         ]),
         FakeCommand(
-          command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
           exception: ProcessException(
             'git',
-            <String>['rev-parse', '--verify', '@{u}'],
+            <String>['rev-parse', '--verify', '@{upstream}'],
             'fatal: HEAD does not point to a branch',
           ),
         ),
@@ -214,13 +214,13 @@ void main() {
     testUsingContext('fetchLatestVersion throws toolExit if no upstream configured', () async {
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
+          'git', 'fetch', '--tags',
         ]),
         FakeCommand(
-          command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
           exception: ProcessException(
             'git',
-            <String>['rev-parse', '--verify', '@{u}'],
+            <String>['rev-parse', '--verify', '@{upstream}'],
             'fatal: no upstream configured for branch',
           ),
         ),

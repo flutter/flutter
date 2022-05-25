@@ -78,7 +78,7 @@ class FakeImageStreamCompleter extends ImageStreamCompleter {
 }
 
 class TestAssetImage extends AssetImage {
-  const TestAssetImage(String name, this.images) : super(name);
+  const TestAssetImage(super.name, this.images);
 
   final Map<double, ui.Image> images;
 

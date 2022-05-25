@@ -50,8 +50,6 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for Linux desktop development.');
     argParser.addFlag('windows', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for Windows desktop development.');
-    argParser.addFlag('winuwp', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for Windows UWP desktop development.');
     argParser.addFlag('macos', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for macOS desktop development.');
     argParser.addFlag('fuchsia', negatable: true, defaultsTo: false,
@@ -89,7 +87,7 @@ class PrecacheCommand extends FlutterCommand {
       'android_gen_snapshot',
       'android_maven',
       'android_internal_build',
-    ]
+    ],
   };
 
   /// Returns a reverse mapping of _expandedArtifacts, from child artifact name
@@ -98,7 +96,7 @@ class PrecacheCommand extends FlutterCommand {
     return <String, String>{
       for (final MapEntry<String, List<String>> entry in _expandedArtifacts.entries)
         for (final String childArtifactName in entry.value)
-          childArtifactName: entry.key
+          childArtifactName: entry.key,
     };
   }
 
@@ -108,7 +106,7 @@ class PrecacheCommand extends FlutterCommand {
   Set<String> _explicitArtifactSelections() {
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<String> selections = <String>{};
-    bool explicitlySelected(String name) => boolArg(name) && argResults.wasParsed(name);
+    bool explicitlySelected(String name) => boolArgDeprecated(name) && argResults.wasParsed(name);
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       final String umbrellaName = umbrellaForArtifact[artifact.name];
       if (explicitlySelected(artifact.name) ||
@@ -141,15 +139,15 @@ class PrecacheCommand extends FlutterCommand {
     if (_platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
       await _cache.lock();
     }
-    if (boolArg('force')) {
+    if (boolArgDeprecated('force')) {
       _cache.clearStampFiles();
     }
 
-    final bool includeAllPlatforms = boolArg('all-platforms');
+    final bool includeAllPlatforms = boolArgDeprecated('all-platforms');
     if (includeAllPlatforms) {
       _cache.includeAllPlatforms = true;
     }
-    if (boolArg('use-unsigned-mac-binaries')) {
+    if (boolArgDeprecated('use-unsigned-mac-binaries')) {
       _cache.useUnsignedMacBinaries = true;
     }
     final Set<String> explicitlyEnabled = _explicitArtifactSelections();
@@ -166,7 +164,7 @@ class PrecacheCommand extends FlutterCommand {
       }
 
       final String argumentName = umbrellaForArtifact[artifact.name] ?? artifact.name;
-      if (includeAllPlatforms || boolArg(argumentName) || downloadDefaultArtifacts) {
+      if (includeAllPlatforms || boolArgDeprecated(argumentName) || downloadDefaultArtifacts) {
         requiredArtifacts.add(artifact);
       }
     }

@@ -239,7 +239,7 @@ class Banner extends StatelessWidget {
   ///
   /// The [message] and [location] arguments must not be null.
   const Banner({
-    Key? key,
+    super.key,
     this.child,
     required this.message,
     this.textDirection,
@@ -250,8 +250,7 @@ class Banner extends StatelessWidget {
   }) : assert(message != null),
        assert(location != null),
        assert(color != null),
-       assert(textStyle != null),
-       super(key: key);
+       assert(textStyle != null);
 
   /// The widget to show behind the banner.
   ///
@@ -327,13 +326,14 @@ class Banner extends StatelessWidget {
 
 /// Displays a [Banner] saying "DEBUG" when running in debug mode.
 /// [MaterialApp] builds one of these by default.
+///
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
   /// Creates a const debug mode banner.
   const CheckedModeBanner({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The widget to show behind the banner.
   ///

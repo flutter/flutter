@@ -419,7 +419,7 @@ void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
           home: Scaffold(
             body: Wrap(
               children: const [
-                ${newIconUsages.toString()}
+                $newIconUsages
               ],
             ),
           ),
@@ -474,7 +474,7 @@ class Icon {
     '_monoline_filled',
     '_outlined',
     '_rounded',
-    '_sharp'
+    '_sharp',
   ];
 
   late String id; // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp

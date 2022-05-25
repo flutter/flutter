@@ -84,7 +84,7 @@ class IconThemeData with Diagnosticable {
   final Color? color;
 
   /// An opacity to apply to both explicit and default icon colors.
-  double? get opacity => _opacity?.clamp(0.0, 1.0);
+  double? get opacity => _opacity == null ? null : clampDouble(_opacity!, 0.0, 1.0);
   final double? _opacity;
 
   /// The default size for icons.

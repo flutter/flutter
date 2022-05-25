@@ -146,7 +146,7 @@ class Ink extends StatefulWidget {
   /// If there is no intention to render anything on this decoration, consider
   /// using a [Container] with a [BoxDecoration] instead.
   Ink({
-    Key? key,
+    super.key,
     this.padding,
     Color? color,
     Decoration? decoration,
@@ -159,8 +159,7 @@ class Ink extends StatefulWidget {
          'Cannot provide both a color and a decoration\n'
          'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
        ),
-       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
-       super(key: key);
+       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null);
 
   /// Creates a widget that shows an image (obtained from an [ImageProvider]) on
   /// a [Material].
@@ -180,7 +179,7 @@ class Ink extends StatefulWidget {
   ///
   /// See [paintImage] for a description of the meaning of these arguments.
   Ink.image({
-    Key? key,
+    super.key,
     this.padding,
     required ImageProvider image,
     ImageErrorListener? onImageError,
@@ -209,8 +208,7 @@ class Ink extends StatefulWidget {
            repeat: repeat,
            matchTextDirection: matchTextDirection,
          ),
-       ),
-       super(key: key);
+       );
 
   /// The [child] contained by the container.
   ///
@@ -243,11 +241,13 @@ class Ink extends StatefulWidget {
   final double? height;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null)
+    if (decoration == null || decoration!.padding == null) {
       return padding ?? EdgeInsets.zero;
+    }
     final EdgeInsetsGeometry decorationPadding = decoration!.padding!;
-    if (padding == null)
+    if (padding == null) {
       return decorationPadding;
+    }
     return padding!.add(decorationPadding);
   }
 
@@ -335,11 +335,11 @@ class InkDecoration extends InkFeature {
     required Decoration? decoration,
     required ImageConfiguration configuration,
     required MaterialInkController controller,
-    required RenderBox referenceBox,
-    VoidCallback? onRemoved,
+    required super.referenceBox,
+    super.onRemoved,
   }) : assert(configuration != null),
        _configuration = configuration,
-       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
+       super(controller: controller) {
     this.decoration = decoration;
     controller.addInkFeature(this);
   }
@@ -353,8 +353,9 @@ class InkDecoration extends InkFeature {
   Decoration? get decoration => _decoration;
   Decoration? _decoration;
   set decoration(Decoration? value) {
-    if (value == _decoration)
+    if (value == _decoration) {
       return;
+    }
     _decoration = value;
     _painter?.dispose();
     _painter = _decoration?.createBoxPainter(_handleChanged);
@@ -370,8 +371,9 @@ class InkDecoration extends InkFeature {
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
     assert(value != null);
-    if (value == _configuration)
+    if (value == _configuration) {
       return;
+    }
     _configuration = value;
     controller.markNeedsPaint();
   }
@@ -388,8 +390,9 @@ class InkDecoration extends InkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    if (_painter == null)
+    if (_painter == null) {
       return;
+    }
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     final ImageConfiguration sizedConfiguration = configuration.copyWith(
       size: referenceBox.size,

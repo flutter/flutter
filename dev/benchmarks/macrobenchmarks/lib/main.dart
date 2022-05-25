@@ -6,16 +6,19 @@ import 'package:flutter/material.dart';
 
 import 'common.dart';
 
+import 'src/animated_complex_opacity.dart';
 import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
 import 'src/animation_with_microtasks.dart';
 import 'src/backdrop_filter.dart';
+import 'src/clipper_cache.dart';
 import 'src/color_filter_and_fade.dart';
 import 'src/color_filter_cache.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 import 'src/filtered_child_animation.dart';
 import 'src/fullscreen_textfield.dart';
+import 'src/gradient_perf.dart';
 import 'src/heavy_grid_view.dart';
 import 'src/large_image_changer.dart';
 import 'src/large_images.dart';
@@ -56,6 +59,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kTextRouteName: (BuildContext context) => const TextPage(),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
+        kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
         kColorFilterCacheRouteName: (BuildContext context) => const ColorFilterCachePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
@@ -69,6 +73,9 @@ class MacrobenchmarksApp extends StatelessWidget {
         kAnimatedImageRouteName: (BuildContext context) => const AnimatedImagePage(),
         kOpacityPeepholeRouteName: (BuildContext context) => const OpacityPeepholePage(),
         ...opacityPeepholeRoutes,
+        kGradientPerfRouteName: (BuildContext context) => const GradientPerfHomePage(),
+        ...gradientPerfRoutes,
+        kAnimatedComplexOpacityPerfRouteName: (BuildContext context) => const AnimatedComplexOpacity(),
       },
     );
   }
@@ -164,6 +171,13 @@ class HomePage extends StatelessWidget {
             },
           ),
           ElevatedButton(
+            key: const Key(kClipperCacheRouteName),
+            child: const Text('Clipper Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kClipperCacheRouteName);
+            },
+          ),
+          ElevatedButton(
             key: const Key(kColorFilterAndFadeRouteName),
             child: const Text('Color Filter and Fade'),
             onPressed: () {
@@ -245,6 +259,20 @@ class HomePage extends StatelessWidget {
             child: const Text('Opacity Peephole tests'),
             onPressed: () {
               Navigator.pushNamed(context, kOpacityPeepholeRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kGradientPerfRouteName),
+            child: const Text('Gradient performance tests'),
+            onPressed: () {
+              Navigator.pushNamed(context, kGradientPerfRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedComplexOpacityPerfRouteName),
+            child: const Text('Animated complex opacity perf'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedComplexOpacityPerfRouteName);
             },
           ),
         ],

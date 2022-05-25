@@ -106,17 +106,11 @@ class LinkedScrollController extends ScrollController {
 class LinkedScrollPosition extends ScrollPositionWithSingleContext {
   LinkedScrollPosition(
     this.owner, {
-    required ScrollPhysics physics,
-    required ScrollContext context,
-    required double initialPixels,
-    ScrollPosition? oldPosition,
-  }) : assert(owner != null),
-       super(
-         physics: physics,
-         context: context,
-         initialPixels: initialPixels,
-         oldPosition: oldPosition,
-       );
+    required super.physics,
+    required super.context,
+    required double super.initialPixels,
+    super.oldPosition,
+  }) : assert(owner != null);
 
   final LinkedScrollController owner;
 
@@ -206,8 +200,8 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
 class LinkedScrollActivity extends ScrollActivity {
   LinkedScrollActivity(
-    LinkedScrollPosition delegate,
-  ) : super(delegate);
+    LinkedScrollPosition super.delegate,
+  );
 
   @override
   LinkedScrollPosition get delegate => super.delegate as LinkedScrollPosition;
@@ -259,7 +253,7 @@ class LinkedScrollActivity extends ScrollActivity {
 }
 
 class Test extends StatefulWidget {
-  const Test({ Key? key }) : super(key: key);
+  const Test({ super.key });
   @override
   State<Test> createState() => _TestState();
 }

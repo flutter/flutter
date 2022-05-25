@@ -845,6 +845,13 @@ class RenderOpacity extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
 
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
+    return updatedLayer;
+  }
+
   int _alpha;
 
   /// The fraction to scale the child's alpha value.
@@ -890,6 +897,12 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return _alpha > 0;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       if (_alpha == 0) {
@@ -899,6 +912,10 @@ class RenderOpacity extends RenderProxyBox {
       }
       assert(needsCompositing);
       layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     }
   }
 
@@ -925,8 +942,15 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   int? _alpha;
 
   @override
-  bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing!;
-  bool? _currentlyNeedsCompositing;
+  bool get isRepaintBoundary => child != null && _currentlyIsRepaintBoundary!;
+  bool? _currentlyIsRepaintBoundary;
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
+    return updatedLayer;
+  }
 
   /// The animation that drives this render object's opacity.
   ///
@@ -986,27 +1010,28 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     final int? oldAlpha = _alpha;
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
-      final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0;
-      if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
+      final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
+      _currentlyIsRepaintBoundary = _alpha! > 0;
+      if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary)
         markNeedsCompositingBitsUpdate();
-      markNeedsPaint();
+      markNeedsCompositedLayerUpdate();
       if (oldAlpha == 0 || _alpha == 0)
         markNeedsSemanticsUpdate();
     }
   }
 
   @override
+  bool paintsChild(RenderObject child) {
+    assert(child.parent == this);
+    return opacity.value > 0;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha!, super.paint, oldLayer: layer as OpacityLayer?);
+    if (_alpha == 0) {
+      return;
     }
+    super.paint(context, offset);
   }
 
   @override
@@ -1115,6 +1140,10 @@ class RenderShaderMask extends RenderProxyBox {
         ..maskRect = offset & size
         ..blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -1181,6 +1210,10 @@ class RenderBackdropFilter extends RenderProxyBox {
       layer!.filter = _filter;
       layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -1383,8 +1416,15 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) {
-    return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
+    }
   }
 
   Paint? _debugPaint;
@@ -1432,11 +1472,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// The [clipBehavior] must not be null. If [clipBehavior] is
   /// [Clip.none], no clipping will be applied.
   RenderClipRect({
-    RenderBox? child,
-    CustomClipper<Rect>? clipper,
-    Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != null),
-       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+    super.child,
+    super.clipper,
+    super.clipBehavior,
+  }) : assert(clipBehavior != null);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1503,13 +1542,15 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// The [clipBehavior] argument must not be null. If [clipBehavior] is
   /// [Clip.none], no clipping will be applied.
   RenderClipRRect({
-    RenderBox? child,
-    BorderRadius borderRadius = BorderRadius.zero,
+    super.child,
+    BorderRadiusGeometry borderRadius = BorderRadius.zero,
     CustomClipper<RRect>? clipper,
-    Clip clipBehavior = Clip.antiAlias,
+    super.clipBehavior,
+    TextDirection? textDirection,
   }) : assert(clipBehavior != null),
        _borderRadius = borderRadius,
-       super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
+       _textDirection = textDirection,
+       super(clipper: clipper) {
     assert(_borderRadius != null || clipper != null);
   }
 
@@ -1519,9 +1560,9 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// exceed width/height.
   ///
   /// This value is ignored if [clipper] is non-null.
-  BorderRadius get borderRadius => _borderRadius;
-  BorderRadius _borderRadius;
-  set borderRadius(BorderRadius value) {
+  BorderRadiusGeometry get borderRadius => _borderRadius;
+  BorderRadiusGeometry _borderRadius;
+  set borderRadius(BorderRadiusGeometry value) {
     assert(value != null);
     if (_borderRadius == value)
       return;
@@ -1529,8 +1570,18 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     _markNeedsClip();
   }
 
+  /// The text direction with which to resolve [borderRadius].
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    _markNeedsClip();
+  }
+
   @override
-  RRect get _defaultClip => _borderRadius.toRRect(Offset.zero & size);
+  RRect get _defaultClip => _borderRadius.resolve(textDirection).toRRect(Offset.zero & size);
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
@@ -1593,11 +1644,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// The [clipBehavior] argument must not be null. If [clipBehavior] is
   /// [Clip.none], no clipping will be applied.
   RenderClipOval({
-    RenderBox? child,
-    CustomClipper<Rect>? clipper,
-    Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != null),
-       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+    super.child,
+    super.clipper,
+    super.clipBehavior,
+  }) : assert(clipBehavior != null);
 
   Rect? _cachedRect;
   late Path _cachedPath;
@@ -1687,11 +1737,10 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// The [clipBehavior] argument must not be null. If [clipBehavior] is
   /// [Clip.none], no clipping will be applied.
   RenderClipPath({
-    RenderBox? child,
-    CustomClipper<Path>? clipper,
-    Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != null),
-       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+    super.child,
+    super.clipper,
+    super.clipBehavior,
+  }) : assert(clipBehavior != null);
 
   @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
@@ -1751,20 +1800,19 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
   /// Additionally, the [elevation] must be non-negative.
   _RenderPhysicalModelBase({
-    required RenderBox? child,
+    required super.child,
     required double elevation,
     required Color color,
     required Color shadowColor,
-    Clip clipBehavior = Clip.none,
-    CustomClipper<T>? clipper,
+    super.clipBehavior = Clip.none,
+    super.clipper,
   }) : assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        assert(clipBehavior != null),
        _elevation = elevation,
        _color = color,
-       _shadowColor = shadowColor,
-       super(child: child, clipBehavior: clipBehavior, clipper: clipper);
+       _shadowColor = shadowColor;
 
   /// The z-coordinate relative to the parent at which to place this material.
   ///
@@ -1808,9 +1856,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 
   @override
-  bool get alwaysNeedsCompositing => true;
-
-  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.elevation = elevation;
@@ -1825,6 +1870,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 }
 
+final Paint _transparentPaint = Paint()..color = const Color(0x00000000);
+
 /// Creates a physical model layer that clips its child to a rounded
 /// rectangle.
 ///
@@ -1838,30 +1885,20 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   /// arguments must not be null. Additionally, the [elevation] must be
   /// non-negative.
   RenderPhysicalModel({
-    RenderBox? child,
+    super.child,
     BoxShape shape = BoxShape.rectangle,
-    Clip clipBehavior = Clip.none,
+    super.clipBehavior,
     BorderRadius? borderRadius,
-    double elevation = 0.0,
-    required Color color,
-    Color shadowColor = const Color(0xFF000000),
+    super.elevation = 0.0,
+    required super.color,
+    super.shadowColor = const Color(0xFF000000),
   }) : assert(shape != null),
        assert(clipBehavior != null),
        assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        _shape = shape,
-       _borderRadius = borderRadius,
-       super(
-         clipBehavior: clipBehavior,
-         child: child,
-         elevation: elevation,
-         color: color,
-         shadowColor: shadowColor,
-       );
-
-  @override
-  PhysicalModelLayer? get layer => super.layer as PhysicalModelLayer?;
+       _borderRadius = borderRadius;
 
   /// The shape of the layer.
   ///
@@ -1920,42 +1957,79 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      _updateClip();
-      final RRect offsetRRect = _clip!.shift(offset);
-      final Rect offsetBounds = offsetRRect.outerRect;
-      final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
-      bool paintShadows = true;
-      assert(() {
-        if (debugDisableShadows) {
-          if (elevation > 0.0) {
-            context.canvas.drawRRect(
-              offsetRRect,
-              Paint()
-                ..color = shadowColor
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = elevation * 2.0,
-            );
-          }
-          paintShadows = false;
-        }
-        return true;
-      }());
-      layer ??= PhysicalModelLayer();
-      layer!
-        ..clipPath = offsetRRectAsPath
-        ..clipBehavior = clipBehavior
-        ..elevation = paintShadows ? elevation : 0.0
-        ..color = color
-        ..shadowColor = shadowColor;
-      context.pushLayer(layer!, super.paint, offset, childPaintBounds: offsetBounds);
-      assert(() {
-        layer!.debugCreator = debugCreator;
-        return true;
-      }());
-    } else {
+    if (child == null) {
       layer = null;
+      return;
     }
+
+    _updateClip();
+    final RRect offsetRRect = _clip!.shift(offset);
+    final Rect offsetBounds = offsetRRect.outerRect;
+    final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        if (elevation > 0.0) {
+          context.canvas.drawRRect(
+            offsetRRect,
+            Paint()
+              ..color = shadowColor
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = elevation * 2.0,
+          );
+        }
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    final Canvas canvas = context.canvas;
+    if (elevation != 0.0 && paintShadows) {
+      // The drawShadow call doesn't add the region of the shadow to the
+      // picture's bounds, so we draw a hardcoded amount of extra space to
+      // account for the maximum potential area of the shadow.
+      // TODO(jsimmons): remove this when Skia does it for us.
+      canvas.drawRect(
+        offsetBounds.inflate(20.0),
+        _transparentPaint,
+      );
+      canvas.drawShadow(
+        offsetRRectAsPath,
+        shadowColor,
+        elevation,
+        color.alpha != 0xFF,
+      );
+    }
+    final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
+    if (!usesSaveLayer) {
+      canvas.drawRRect(
+        offsetRRect,
+        Paint()..color = color
+      );
+    }
+    layer = context.pushClipRRect(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      _clip!,
+      (PaintingContext context, Offset offset) {
+        if (usesSaveLayer) {
+          // If we want to avoid the bleeding edge artifact
+          // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
+          // using saveLayer, we have to call drawPaint instead of drawPath as
+          // anti-aliased drawPath will always have such artifacts.
+          context.canvas.drawPaint( Paint()..color = color);
+        }
+        super.paint(context, offset);
+      },
+      oldLayer: layer as ClipRRectLayer?,
+      clipBehavior: clipBehavior,
+    );
+
+    assert(() {
+      layer?.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -1982,27 +2056,16 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   /// The [clipper], [elevation], [color] and [shadowColor] must not be null.
   /// Additionally, the [elevation] must be non-negative.
   RenderPhysicalShape({
-    RenderBox? child,
-    required CustomClipper<Path> clipper,
-    Clip clipBehavior = Clip.none,
-    double elevation = 0.0,
-    required Color color,
-    Color shadowColor = const Color(0xFF000000),
+    super.child,
+    required CustomClipper<Path> super.clipper,
+    super.clipBehavior,
+    super.elevation = 0.0,
+    required super.color,
+    super.shadowColor = const Color(0xFF000000),
   }) : assert(clipper != null),
        assert(elevation != null && elevation >= 0.0),
        assert(color != null),
-       assert(shadowColor != null),
-       super(
-         child: child,
-         elevation: elevation,
-         color: color,
-         shadowColor: shadowColor,
-         clipper: clipper,
-         clipBehavior: clipBehavior,
-       );
-
-  @override
-  PhysicalModelLayer? get layer => super.layer as PhysicalModelLayer?;
+       assert(shadowColor != null);
 
   @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
@@ -2020,41 +2083,78 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      _updateClip();
-      final Rect offsetBounds = offset & size;
-      final Path offsetPath = _clip!.shift(offset);
-      bool paintShadows = true;
-      assert(() {
-        if (debugDisableShadows) {
-          if (elevation > 0.0) {
-            context.canvas.drawPath(
-              offsetPath,
-              Paint()
-                ..color = shadowColor
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = elevation * 2.0,
-            );
-          }
-          paintShadows = false;
-        }
-        return true;
-      }());
-      layer ??= PhysicalModelLayer();
-      layer!
-        ..clipPath = offsetPath
-        ..clipBehavior = clipBehavior
-        ..elevation = paintShadows ? elevation : 0.0
-        ..color = color
-        ..shadowColor = shadowColor;
-      context.pushLayer(layer!, super.paint, offset, childPaintBounds: offsetBounds);
-      assert(() {
-        layer!.debugCreator = debugCreator;
-        return true;
-      }());
-    } else {
+    if (child == null) {
       layer = null;
+      return;
     }
+
+    _updateClip();
+    final Rect offsetBounds = offset & size;
+    final Path offsetPath = _clip!.shift(offset);
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        if (elevation > 0.0) {
+          context.canvas.drawPath(
+            offsetPath,
+            Paint()
+              ..color = shadowColor
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = elevation * 2.0,
+          );
+        }
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    final Canvas canvas = context.canvas;
+    if (elevation != 0.0 && paintShadows) {
+      // The drawShadow call doesn't add the region of the shadow to the
+      // picture's bounds, so we draw a hardcoded amount of extra space to
+      // account for the maximum potential area of the shadow.
+      // TODO(jsimmons): remove this when Skia does it for us.
+      canvas.drawRect(
+        offsetBounds.inflate(20.0),
+        _transparentPaint,
+      );
+      canvas.drawShadow(
+        offsetPath,
+        shadowColor,
+        elevation,
+        color.alpha != 0xFF,
+      );
+    }
+    final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
+    if (!usesSaveLayer) {
+      canvas.drawPath(
+        offsetPath,
+        Paint()..color = color
+      );
+    }
+    layer = context.pushClipPath(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      _clip!,
+      (PaintingContext context, Offset offset) {
+        if (usesSaveLayer) {
+          // If we want to avoid the bleeding edge artifact
+          // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
+          // using saveLayer, we have to call drawPaint instead of drawPath as
+          // anti-aliased drawPath will always have such artifacts.
+          context.canvas.drawPaint( Paint()..color = color);
+        }
+        super.paint(context, offset);
+      },
+      oldLayer: layer as ClipPathLayer?,
+      clipBehavior: clipBehavior,
+    );
+
+    assert(() {
+      layer?.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -2433,6 +2533,10 @@ class RenderTransform extends RenderProxyBox {
           layer = ImageFilterLayer(imageFilter: filter);
         }
         context.pushLayer(layer!, super.paint, offset);
+        assert(() {
+          layer!.debugCreator = debugCreator;
+          return true;
+        }());
       }
     }
   }
@@ -2714,8 +2818,14 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return !size.isEmpty && !child.size.isEmpty;
+  }
+
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (size.isEmpty || child.size.isEmpty) {
+    if (!paintsChild(child)) {
       transform.setZero();
     } else {
       _updatePaintData();
@@ -2846,6 +2956,21 @@ typedef PointerUpEventListener = void Function(PointerUpEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 
+/// Signature for listening to [PointerPanZoomStartEvent] events.
+///
+/// Used by [Listener] and [RenderPointerListener].
+typedef PointerPanZoomStartEventListener = void Function(PointerPanZoomStartEvent event);
+
+/// Signature for listening to [PointerPanZoomUpdateEvent] events.
+///
+/// Used by [Listener] and [RenderPointerListener].
+typedef PointerPanZoomUpdateEventListener = void Function(PointerPanZoomUpdateEvent event);
+
+/// Signature for listening to [PointerPanZoomEndEvent] events.
+///
+/// Used by [Listener] and [RenderPointerListener].
+typedef PointerPanZoomEndEventListener = void Function(PointerPanZoomEndEvent event);
+
 /// Signature for listening to [PointerSignalEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
@@ -2873,10 +2998,13 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     this.onPointerUp,
     this.onPointerHover,
     this.onPointerCancel,
+    this.onPointerPanZoomStart,
+    this.onPointerPanZoomUpdate,
+    this.onPointerPanZoomEnd,
     this.onPointerSignal,
-    HitTestBehavior behavior = HitTestBehavior.deferToChild,
-    RenderBox? child,
-  }) : super(behavior: behavior, child: child);
+    super.behavior,
+    super.child,
+  });
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -2896,6 +3024,15 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Called when the input from a pointer that triggered an [onPointerDown] is
   /// no longer directed towards this receiver.
   PointerCancelEventListener? onPointerCancel;
+
+  /// Called when a pan/zoom begins such as from a trackpad gesture.
+  PointerPanZoomStartEventListener? onPointerPanZoomStart;
+
+  /// Called when a pan/zoom is updated.
+  PointerPanZoomUpdateEventListener? onPointerPanZoomUpdate;
+
+  /// Called when a pan/zoom finishes.
+  PointerPanZoomEndEventListener? onPointerPanZoomEnd;
 
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener? onPointerSignal;
@@ -2918,6 +3055,12 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       return onPointerHover?.call(event);
     if (event is PointerCancelEvent)
       return onPointerCancel?.call(event);
+    if (event is PointerPanZoomStartEvent)
+      return onPointerPanZoomStart?.call(event);
+    if (event is PointerPanZoomUpdateEvent)
+      return onPointerPanZoomUpdate?.call(event);
+    if (event is PointerPanZoomEndEvent)
+      return onPointerPanZoomEnd?.call(event);
     if (event is PointerSignalEvent)
       return onPointerSignal?.call(event);
   }
@@ -2933,6 +3076,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
         'up': onPointerUp,
         'hover': onPointerHover,
         'cancel': onPointerCancel,
+        'panZoomStart': onPointerPanZoomStart,
+        'panZoomUpdate': onPointerPanZoomUpdate,
+        'panZoomEnd': onPointerPanZoomEnd,
         'signal': onPointerSignal,
       },
       ifEmpty: '<none>',
@@ -2971,14 +3117,14 @@ class RenderMouseRegion extends RenderProxyBoxWithHitTestBehavior implements Mou
     MouseCursor cursor = MouseCursor.defer,
     bool validForMouseTracker = true,
     bool opaque = true,
-    RenderBox? child,
+    super.child,
     HitTestBehavior? hitTestBehavior = HitTestBehavior.opaque,
   }) : assert(opaque != null),
        assert(cursor != null),
        _cursor = cursor,
        _validForMouseTracker = validForMouseTracker,
        _opaque = opaque,
-       super(behavior: hitTestBehavior ?? HitTestBehavior.opaque, child: child);
+       super(behavior: hitTestBehavior ?? HitTestBehavior.opaque);
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
@@ -3149,7 +3295,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   const PngHome({Key? key}) : super(key: key);
+  ///   const PngHome({super.key});
   ///
   ///   @override
   ///   State<PngHome> createState() => _PngHomeState();
@@ -3447,7 +3593,6 @@ class RenderOffstage extends RenderProxyBox {
     return super.computeDryLayout(constraints);
   }
 
-
   @override
   void performResize() {
     assert(offstage);
@@ -3466,6 +3611,12 @@ class RenderOffstage extends RenderProxyBox {
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     return !offstage && super.hitTest(result, position: position);
+  }
+
+  @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return !offstage;
   }
 
   @override
@@ -3598,9 +3749,9 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
   RenderMetaData({
     this.metaData,
-    HitTestBehavior behavior = HitTestBehavior.deferToChild,
-    RenderBox? child,
-  }) : super(behavior: behavior, child: child);
+    super.behavior,
+    super.child,
+  });
 
   /// Opaque meta data ignored by the render tree.
   dynamic metaData;
@@ -3619,19 +3770,18 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   ///
   /// The [scrollFactor] and [behavior] arguments must not be null.
   RenderSemanticsGestureHandler({
-    RenderBox? child,
+    super.child,
     GestureTapCallback? onTap,
     GestureLongPressCallback? onLongPress,
     GestureDragUpdateCallback? onHorizontalDragUpdate,
     GestureDragUpdateCallback? onVerticalDragUpdate,
     this.scrollFactor = 0.8,
-    HitTestBehavior behavior = HitTestBehavior.deferToChild,
+    super.behavior,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onHorizontalDragUpdate = onHorizontalDragUpdate,
-       _onVerticalDragUpdate = onVerticalDragUpdate,
-       super(behavior: behavior, child: child);
+       _onVerticalDragUpdate = onVerticalDragUpdate;
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.
@@ -3797,123 +3947,35 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// The [container] argument must not be null.
   ///
-  /// If the [attributedLabel] is not null, the [textDirection] must also not be null.
+  /// If the [SemanticsProperties.attributedLabel] is not null, the [textDirection] must also not be null.
   RenderSemanticsAnnotations({
     RenderBox? child,
+    required SemanticsProperties properties,
     bool container = false,
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
-    bool? enabled,
-    bool? checked,
-    bool? toggled,
-    bool? selected,
-    bool? button,
-    bool? slider,
-    bool? keyboardKey,
-    bool? link,
-    bool? header,
-    bool? textField,
-    bool? readOnly,
-    bool? focusable,
-    bool? focused,
-    bool? inMutuallyExclusiveGroup,
-    bool? obscured,
-    bool? multiline,
-    bool? scopesRoute,
-    bool? namesRoute,
-    bool? hidden,
-    bool? image,
-    bool? liveRegion,
-    int? maxValueLength,
-    int? currentValueLength,
-    AttributedString? attributedLabel,
-    AttributedString? attributedValue,
-    AttributedString? attributedIncreasedValue,
-    AttributedString? attributedDecreasedValue,
-    AttributedString? attributedHint,
-    SemanticsHintOverrides? hintOverrides,
     TextDirection? textDirection,
-    SemanticsSortKey? sortKey,
-    SemanticsTag? tagForChildren,
-    VoidCallback? onTap,
-    VoidCallback? onDismiss,
-    VoidCallback? onLongPress,
-    VoidCallback? onScrollLeft,
-    VoidCallback? onScrollRight,
-    VoidCallback? onScrollUp,
-    VoidCallback? onScrollDown,
-    VoidCallback? onIncrease,
-    VoidCallback? onDecrease,
-    VoidCallback? onCopy,
-    VoidCallback? onCut,
-    VoidCallback? onPaste,
-    MoveCursorHandler? onMoveCursorForwardByCharacter,
-    MoveCursorHandler? onMoveCursorBackwardByCharacter,
-    MoveCursorHandler? onMoveCursorForwardByWord,
-    MoveCursorHandler? onMoveCursorBackwardByWord,
-    SetSelectionHandler? onSetSelection,
-    SetTextHandler? onSetText,
-    VoidCallback? onDidGainAccessibilityFocus,
-    VoidCallback? onDidLoseAccessibilityFocus,
-    Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
-  }) : assert(container != null),
-       _container = container,
-       _explicitChildNodes = explicitChildNodes,
-       _excludeSemantics = excludeSemantics,
-       _enabled = enabled,
-       _checked = checked,
-       _toggled = toggled,
-       _selected = selected,
-       _button = button,
-       _slider = slider,
-       _keyboardKey = keyboardKey,
-       _link = link,
-       _header = header,
-       _textField = textField,
-       _readOnly = readOnly,
-       _focusable = focusable,
-       _focused = focused,
-       _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
-       _obscured = obscured,
-       _multiline = multiline,
-       _scopesRoute = scopesRoute,
-       _namesRoute = namesRoute,
-       _liveRegion = liveRegion,
-       _maxValueLength = maxValueLength,
-       _currentValueLength = currentValueLength,
-       _hidden = hidden,
-       _image = image,
-       _onDismiss = onDismiss,
-       _attributedLabel = attributedLabel,
-       _attributedValue = attributedValue,
-       _attributedIncreasedValue = attributedIncreasedValue,
-       _attributedDecreasedValue = attributedDecreasedValue,
-       _attributedHint = attributedHint,
-       _hintOverrides = hintOverrides,
-       _textDirection = textDirection,
-       _sortKey = sortKey,
-       _tagForChildren = tagForChildren,
-       _onTap = onTap,
-       _onLongPress = onLongPress,
-       _onScrollLeft = onScrollLeft,
-       _onScrollRight = onScrollRight,
-       _onScrollUp = onScrollUp,
-       _onScrollDown = onScrollDown,
-       _onIncrease = onIncrease,
-       _onDecrease = onDecrease,
-       _onCopy = onCopy,
-       _onCut = onCut,
-       _onPaste = onPaste,
-       _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
-       _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
-       _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
-       _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
-       _onSetSelection = onSetSelection,
-       _onSetText = onSetText,
-       _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
-       _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
-       _customSemanticsActions = customSemanticsActions,
-       super(child);
+  })  : assert(container != null),
+        _container = container,
+        _explicitChildNodes = explicitChildNodes,
+        _excludeSemantics = excludeSemantics,
+        _textDirection = textDirection,
+        _properties = properties,
+        super(child) {
+    _updateAttributedFields(_properties);
+  }
+
+  /// All of the [SemanticsProperties] for this [RenderSemanticsAnnotations].
+  SemanticsProperties get properties => _properties;
+  SemanticsProperties _properties;
+  set properties(SemanticsProperties value) {
+    assert(value != null);
+    if (_properties == value)
+      return;
+    _properties = value;
+    _updateAttributedFields(_properties);
+    markNeedsSemanticsUpdate();
+  }
 
   /// If 'container' is true, this [RenderObject] will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
@@ -3971,780 +4033,65 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsFlag.hasCheckedState] semantic to true and
-  /// the [SemanticsConfiguration.isChecked] semantic to the given value.
-  bool? get checked => _checked;
-  bool? _checked;
-  set checked(bool? value) {
-    if (checked == value)
-      return;
-    _checked = value;
-    markNeedsSemanticsUpdate();
+  void _updateAttributedFields(SemanticsProperties value) {
+    _attributedLabel = _effectiveAttributedLabel(value);
+    _attributedValue = _effectiveAttributedValue(value);
+    _attributedIncreasedValue = _effectiveAttributedIncreasedValue(value);
+    _attributedDecreasedValue = _effectiveAttributedDecreasedValue(value);
+    _attributedHint = _effectiveAttributedHint(value);
   }
 
-  /// If non-null, sets the [SemanticsFlag.hasEnabledState] semantic to true and
-  /// the [SemanticsConfiguration.isEnabled] semantic to the given value.
-  bool? get enabled => _enabled;
-  bool? _enabled;
-  set enabled(bool? value) {
-    if (enabled == value)
-      return;
-    _enabled = value;
-    markNeedsSemanticsUpdate();
+  AttributedString? _effectiveAttributedLabel(SemanticsProperties value) {
+    return value.attributedLabel ??
+        (value.label == null ? null : AttributedString(value.label!));
   }
 
-  /// If non-null, sets the [SemanticsConfiguration.isSelected] semantic to the
-  /// given value.
-  bool? get selected => _selected;
-  bool? _selected;
-  set selected(bool? value) {
-    if (selected == value)
-      return;
-    _selected = value;
-    markNeedsSemanticsUpdate();
+  AttributedString? _effectiveAttributedValue(SemanticsProperties value) {
+    return value.attributedValue ??
+        (value.value == null ? null : AttributedString(value.value!));
   }
 
-  /// If non-null, sets the [SemanticsConfiguration.isButton] semantic to the
-  /// given value.
-  bool? get button => _button;
-  bool? _button;
-  set button(bool? value) {
-    if (button == value)
-      return;
-    _button = value;
-    markNeedsSemanticsUpdate();
+  AttributedString? _effectiveAttributedIncreasedValue(
+      SemanticsProperties value) {
+    return value.attributedIncreasedValue ??
+        (value.increasedValue == null
+            ? null
+            : AttributedString(value.increasedValue!));
   }
 
-  /// If non-null, sets the [SemanticsConfiguration.isSlider] semantic to the
-  /// given value.
-  bool? get slider => _slider;
-  bool? _slider;
-  set slider(bool? value) {
-    if (slider == value)
-      return;
-    _slider = value;
-    markNeedsSemanticsUpdate();
+  AttributedString? _effectiveAttributedDecreasedValue(
+      SemanticsProperties value) {
+    return properties.attributedDecreasedValue ??
+        (value.decreasedValue == null
+            ? null
+            : AttributedString(value.decreasedValue!));
   }
 
-  /// If non-null, sets the [SemanticsConfiguration.isKeyboardKey] semantic to the
-  /// given value.
-  bool? get keyboardKey => _keyboardKey;
-  bool? _keyboardKey;
-  set keyboardKey(bool? value) {
-    if (keyboardKey == value)
-      return;
-    _keyboardKey = value;
-    markNeedsSemanticsUpdate();
+  AttributedString? _effectiveAttributedHint(SemanticsProperties value) {
+    return value.attributedHint ??
+        (value.hint == null ? null : AttributedString(value.hint!));
   }
 
-  /// If non-null, sets the [SemanticsConfiguration.isLink] semantic to the
-  /// given value.
-  bool? get link => _link;
-  bool? _link;
-  set link(bool? value) {
-    if (link == value)
-      return;
-    _link = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isHeader] semantic to the
-  /// given value.
-  bool? get header => _header;
-  bool? _header;
-  set header(bool? value) {
-    if (header == value)
-      return;
-    _header = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isTextField] semantic to the
-  /// given value.
-  bool? get textField => _textField;
-  bool? _textField;
-  set textField(bool? value) {
-    if (textField == value)
-      return;
-    _textField = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isReadOnly] semantic to the
-  /// given value.
-  bool? get readOnly => _readOnly;
-  bool? _readOnly;
-  set readOnly(bool? value) {
-    if (readOnly == value)
-      return;
-    _readOnly = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isFocusable] semantic to the
-  /// given value.
-  bool? get focusable => _focusable;
-  bool? _focusable;
-  set focusable(bool? value) {
-    if (focusable == value)
-      return;
-    _focusable = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isFocused] semantic to the
-  /// given value.
-  bool? get focused => _focused;
-  bool? _focused;
-  set focused(bool? value) {
-    if (focused == value)
-      return;
-    _focused = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isInMutuallyExclusiveGroup]
-  /// semantic to the given value.
-  bool? get inMutuallyExclusiveGroup => _inMutuallyExclusiveGroup;
-  bool? _inMutuallyExclusiveGroup;
-  set inMutuallyExclusiveGroup(bool? value) {
-    if (inMutuallyExclusiveGroup == value)
-      return;
-    _inMutuallyExclusiveGroup = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isObscured] semantic to the
-  /// given value.
-  bool? get obscured => _obscured;
-  bool? _obscured;
-  set obscured(bool? value) {
-    if (obscured == value)
-      return;
-    _obscured = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.isMultiline] semantic to the given
-  /// value.
-  bool? get multiline => _multiline;
-  bool? _multiline;
-  set multiline(bool? value) {
-    if (multiline == value)
-      return;
-    _multiline = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.scopesRoute] semantic to the
-  /// give value.
-  bool? get scopesRoute => _scopesRoute;
-  bool? _scopesRoute;
-  set scopesRoute(bool? value) {
-    if (scopesRoute == value)
-      return;
-    _scopesRoute = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.namesRoute] semantic to the
-  /// give value.
-  bool? get namesRoute => _namesRoute;
-  bool? _namesRoute;
-  set namesRoute(bool? value) {
-    if (_namesRoute == value)
-      return;
-    _namesRoute = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isHidden] semantic to the
-  /// given value.
-  bool? get hidden => _hidden;
-  bool? _hidden;
-  set hidden(bool? value) {
-    if (hidden == value)
-      return;
-    _hidden = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isImage] semantic to the
-  /// given value.
-  bool? get image => _image;
-  bool? _image;
-  set image(bool? value) {
-    if (_image == value)
-      return;
-    _image = value;
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.liveRegion] semantic to
-  /// the given value.
-  bool? get liveRegion => _liveRegion;
-  bool? _liveRegion;
-  set liveRegion(bool? value) {
-    if (_liveRegion == value)
-      return;
-    _liveRegion = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.maxValueLength] semantic to the given
-  /// value.
-  int? get maxValueLength => _maxValueLength;
-  int? _maxValueLength;
-  set maxValueLength(int? value) {
-    if (_maxValueLength == value)
-      return;
-    _maxValueLength = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.currentValueLength] semantic to the
-  /// given value.
-  int? get currentValueLength => _currentValueLength;
-  int? _currentValueLength;
-  set currentValueLength(int? value) {
-    if (_currentValueLength == value)
-      return;
-    _currentValueLength = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.isToggled] semantic to the given
-  /// value.
-  bool? get toggled => _toggled;
-  bool? _toggled;
-  set toggled(bool? value) {
-    if (_toggled == value)
-      return;
-    _toggled = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.attributedLabel] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedLabel => _attributedLabel;
   AttributedString? _attributedLabel;
-  set attributedLabel(AttributedString? value) {
-    if (_attributedLabel == value)
-      return;
-    _attributedLabel = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.attributedValue] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedValue => _attributedValue;
   AttributedString? _attributedValue;
-  set attributedValue(AttributedString? value) {
-    if (_attributedValue == value)
-      return;
-    _attributedValue = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.attributedIncreasedValue] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedIncreasedValue => _attributedIncreasedValue;
   AttributedString? _attributedIncreasedValue;
-  set attributedIncreasedValue(AttributedString? value) {
-    if (_attributedIncreasedValue == value)
-      return;
-    _attributedIncreasedValue = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.attributedDecreasedValue] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedDecreasedValue => _attributedDecreasedValue;
   AttributedString? _attributedDecreasedValue;
-  set attributedDecreasedValue(AttributedString? value) {
-    if (_attributedDecreasedValue == value)
-      return;
-    _attributedDecreasedValue = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsNode.attributedHint] semantic to the given value.
-  ///
-  /// The reading direction is given by [textDirection].
-  AttributedString? get attributedHint => _attributedHint;
   AttributedString? _attributedHint;
-  set attributedHint(AttributedString? value) {
-    if (_attributedHint == value)
-      return;
-    _attributedHint = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If non-null, sets the [SemanticsConfiguration.hintOverrides] to the given value.
-  SemanticsHintOverrides? get hintOverrides => _hintOverrides;
-  SemanticsHintOverrides? _hintOverrides;
-  set hintOverrides(SemanticsHintOverrides? value) {
-    if (_hintOverrides == value)
-      return;
-    _hintOverrides = value;
-    markNeedsSemanticsUpdate();
-  }
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given
   /// value.
   ///
-  /// This must not be null if [attributedLabel], [attributedHint],
-  /// [attributedValue], [attributedIncreasedValue], or
-  /// [attributedDecreasedValue] are not null.
+  /// This must not be null if [SemanticsProperties.attributedLabel],
+  /// [SemanticsProperties.attributedHint],
+  /// [SemanticsProperties.attributedValue],
+  /// [SemanticsProperties.attributedIncreasedValue], or
+  /// [SemanticsProperties.attributedDecreasedValue] are not null.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
   set textDirection(TextDirection? value) {
     if (textDirection == value)
       return;
     _textDirection = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// Sets the [SemanticsNode.sortKey] to the given value.
-  ///
-  /// This defines how this node is sorted among the sibling semantics nodes
-  /// to determine the order in which they are traversed by the accessibility
-  /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
-  SemanticsSortKey? get sortKey => _sortKey;
-  SemanticsSortKey? _sortKey;
-  set sortKey(SemanticsSortKey? value) {
-    if (sortKey == value)
-      return;
-    _sortKey = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// Adds a semantics tag to the semantics subtree.
-  SemanticsTag? get tagForChildren => _tagForChildren;
-  SemanticsTag? _tagForChildren;
-  set tagForChildren(SemanticsTag? value) {
-    if (_tagForChildren == value)
-      return;
-    markNeedsSemanticsUpdate();
-    _tagForChildren = value;
-  }
-
-  /// The handler for [SemanticsAction.tap].
-  ///
-  /// This is the semantic equivalent of a user briefly tapping the screen with
-  /// the finger without moving it. For example, a button should implement this
-  /// action.
-  ///
-  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
-  /// action by double-tapping the screen while an element is focused.
-  VoidCallback? get onTap => _onTap;
-  VoidCallback? _onTap;
-  set onTap(VoidCallback? handler) {
-    if (_onTap == handler)
-      return;
-    final bool hadValue = _onTap != null;
-    _onTap = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.dismiss].
-  ///
-  /// This is a request to dismiss the currently focused node.
-  ///
-  /// TalkBack users on Android can trigger this action in the local context
-  /// menu, and VoiceOver users on iOS can trigger this action with a standard
-  /// gesture or menu option.
-  VoidCallback? get onDismiss => _onDismiss;
-  VoidCallback? _onDismiss;
-  set onDismiss(VoidCallback? handler) {
-    if (_onDismiss == handler)
-      return;
-    final bool hadValue = _onDismiss != null;
-    _onDismiss = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.longPress].
-  ///
-  /// This is the semantic equivalent of a user pressing and holding the screen
-  /// with the finger for a few seconds without moving it.
-  ///
-  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
-  /// action by double-tapping the screen without lifting the finger after the
-  /// second tap.
-  VoidCallback? get onLongPress => _onLongPress;
-  VoidCallback? _onLongPress;
-  set onLongPress(VoidCallback? handler) {
-    if (_onLongPress == handler)
-      return;
-    final bool hadValue = _onLongPress != null;
-    _onLongPress = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.scrollLeft].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from right to left. It should be recognized by controls that are
-  /// horizontally scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping left with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path. On Android, [onScrollUp] and
-  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  VoidCallback? get onScrollLeft => _onScrollLeft;
-  VoidCallback? _onScrollLeft;
-  set onScrollLeft(VoidCallback? handler) {
-    if (_onScrollLeft == handler)
-      return;
-    final bool hadValue = _onScrollLeft != null;
-    _onScrollLeft = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.scrollRight].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from left to right. It should be recognized by controls that are
-  /// horizontally scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping right with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path. On Android, [onScrollDown] and
-  /// [onScrollRight] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  VoidCallback? get onScrollRight => _onScrollRight;
-  VoidCallback? _onScrollRight;
-  set onScrollRight(VoidCallback? handler) {
-    if (_onScrollRight == handler)
-      return;
-    final bool hadValue = _onScrollRight != null;
-    _onScrollRight = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.scrollUp].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from bottom to top. It should be recognized by controls that are
-  /// vertically scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping up with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path. On Android, [onScrollUp] and
-  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  VoidCallback? get onScrollUp => _onScrollUp;
-  VoidCallback? _onScrollUp;
-  set onScrollUp(VoidCallback? handler) {
-    if (_onScrollUp == handler)
-      return;
-    final bool hadValue = _onScrollUp != null;
-    _onScrollUp = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.scrollDown].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from top to bottom. It should be recognized by controls that are
-  /// vertically scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping down with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path. On Android, [onScrollDown] and
-  /// [onScrollRight] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  VoidCallback? get onScrollDown => _onScrollDown;
-  VoidCallback? _onScrollDown;
-  set onScrollDown(VoidCallback? handler) {
-    if (_onScrollDown == handler)
-      return;
-    final bool hadValue = _onScrollDown != null;
-    _onScrollDown = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.increase].
-  ///
-  /// This is a request to increase the value represented by the widget. For
-  /// example, this action might be recognized by a slider control.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping up with one
-  /// finger. TalkBack users on Android can trigger this action by pressing the
-  /// volume up button.
-  VoidCallback? get onIncrease => _onIncrease;
-  VoidCallback? _onIncrease;
-  set onIncrease(VoidCallback? handler) {
-    if (_onIncrease == handler)
-      return;
-    final bool hadValue = _onIncrease != null;
-    _onIncrease = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.decrease].
-  ///
-  /// This is a request to decrease the value represented by the widget. For
-  /// example, this action might be recognized by a slider control.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping down with one
-  /// finger. TalkBack users on Android can trigger this action by pressing the
-  /// volume down button.
-  VoidCallback? get onDecrease => _onDecrease;
-  VoidCallback? _onDecrease;
-  set onDecrease(VoidCallback? handler) {
-    if (_onDecrease == handler)
-      return;
-    final bool hadValue = _onDecrease != null;
-    _onDecrease = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.copy].
-  ///
-  /// This is a request to copy the current selection to the clipboard.
-  ///
-  /// TalkBack users on Android can trigger this action from the local context
-  /// menu of a text field, for example.
-  VoidCallback? get onCopy => _onCopy;
-  VoidCallback? _onCopy;
-  set onCopy(VoidCallback? handler) {
-    if (_onCopy == handler)
-      return;
-    final bool hadValue = _onCopy != null;
-    _onCopy = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.cut].
-  ///
-  /// This is a request to cut the current selection and place it in the
-  /// clipboard.
-  ///
-  /// TalkBack users on Android can trigger this action from the local context
-  /// menu of a text field, for example.
-  VoidCallback? get onCut => _onCut;
-  VoidCallback? _onCut;
-  set onCut(VoidCallback? handler) {
-    if (_onCut == handler)
-      return;
-    final bool hadValue = _onCut != null;
-    _onCut = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.paste].
-  ///
-  /// This is a request to paste the current content of the clipboard.
-  ///
-  /// TalkBack users on Android can trigger this action from the local context
-  /// menu of a text field, for example.
-  VoidCallback? get onPaste => _onPaste;
-  VoidCallback? _onPaste;
-  set onPaste(VoidCallback? handler) {
-    if (_onPaste == handler)
-      return;
-    final bool hadValue = _onPaste != null;
-    _onPaste = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.moveCursorForwardByCharacter].
-  ///
-  /// This handler is invoked when the user wants to move the cursor in a
-  /// text field forward by one character.
-  ///
-  /// TalkBack users can trigger this by pressing the volume up key while the
-  /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
-  MoveCursorHandler? _onMoveCursorForwardByCharacter;
-  set onMoveCursorForwardByCharacter(MoveCursorHandler? handler) {
-    if (_onMoveCursorForwardByCharacter == handler)
-      return;
-    final bool hadValue = _onMoveCursorForwardByCharacter != null;
-    _onMoveCursorForwardByCharacter = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.moveCursorBackwardByCharacter].
-  ///
-  /// This handler is invoked when the user wants to move the cursor in a
-  /// text field backward by one character.
-  ///
-  /// TalkBack users can trigger this by pressing the volume down key while the
-  /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
-  MoveCursorHandler? _onMoveCursorBackwardByCharacter;
-  set onMoveCursorBackwardByCharacter(MoveCursorHandler? handler) {
-    if (_onMoveCursorBackwardByCharacter == handler)
-      return;
-    final bool hadValue = _onMoveCursorBackwardByCharacter != null;
-    _onMoveCursorBackwardByCharacter = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.moveCursorForwardByWord].
-  ///
-  /// This handler is invoked when the user wants to move the cursor in a
-  /// text field backward by one character.
-  ///
-  /// TalkBack users can trigger this by pressing the volume down key while the
-  /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
-  MoveCursorHandler? _onMoveCursorForwardByWord;
-  set onMoveCursorForwardByWord(MoveCursorHandler? handler) {
-    if (_onMoveCursorForwardByWord == handler)
-      return;
-    final bool hadValue = _onMoveCursorForwardByWord != null;
-    _onMoveCursorForwardByWord = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.moveCursorBackwardByWord].
-  ///
-  /// This handler is invoked when the user wants to move the cursor in a
-  /// text field backward by one character.
-  ///
-  /// TalkBack users can trigger this by pressing the volume down key while the
-  /// input focus is in a text field.
-  MoveCursorHandler? get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
-  MoveCursorHandler? _onMoveCursorBackwardByWord;
-  set onMoveCursorBackwardByWord(MoveCursorHandler? handler) {
-    if (_onMoveCursorBackwardByWord == handler)
-      return;
-    final bool hadValue = _onMoveCursorBackwardByWord != null;
-    _onMoveCursorBackwardByWord = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.setSelection].
-  ///
-  /// This handler is invoked when the user either wants to change the currently
-  /// selected text in a text field or change the position of the cursor.
-  ///
-  /// TalkBack users can trigger this handler by selecting "Move cursor to
-  /// beginning/end" or "Select all" from the local context menu.
-  SetSelectionHandler? get onSetSelection => _onSetSelection;
-  SetSelectionHandler? _onSetSelection;
-  set onSetSelection(SetSelectionHandler? handler) {
-    if (_onSetSelection == handler)
-      return;
-    final bool hadValue = _onSetSelection != null;
-    _onSetSelection = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.setText].
-  ///
-  /// This handler is invoked when the user wants to replace the current text in
-  /// the text field with a new text.
-  ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
-  /// their Android devices.
-  SetTextHandler? get onSetText => _onSetText;
-  SetTextHandler? _onSetText;
-  set onSetText(SetTextHandler? handler) {
-    if (_onSetText == handler)
-      return;
-    final bool hadValue = _onSetText != null;
-    _onSetText = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.didGainAccessibilityFocus].
-  ///
-  /// This handler is invoked when the node annotated with this handler gains
-  /// the accessibility focus. The accessibility focus is the
-  /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
-  /// rectangle shown on screen to indicate what element an accessibility
-  /// user is currently interacting with.
-  ///
-  /// The accessibility focus is different from the input focus. The input focus
-  /// is usually held by the element that currently responds to keyboard inputs.
-  /// Accessibility focus and input focus can be held by two different nodes!
-  ///
-  /// See also:
-  ///
-  ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
-  ///    focus is removed from the node.
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback? get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
-  VoidCallback? _onDidGainAccessibilityFocus;
-  set onDidGainAccessibilityFocus(VoidCallback? handler) {
-    if (_onDidGainAccessibilityFocus == handler)
-      return;
-    final bool hadValue = _onDidGainAccessibilityFocus != null;
-    _onDidGainAccessibilityFocus = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
-  ///
-  /// This handler is invoked when the node annotated with this handler
-  /// loses the accessibility focus. The accessibility focus is
-  /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
-  /// rectangle shown on screen to indicate what element an accessibility
-  /// user is currently interacting with.
-  ///
-  /// The accessibility focus is different from the input focus. The input focus
-  /// is usually held by the element that currently responds to keyboard inputs.
-  /// Accessibility focus and input focus can be held by two different nodes!
-  ///
-  /// See also:
-  ///
-  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
-  ///    accessibility focus.
-  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback? get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
-  VoidCallback? _onDidLoseAccessibilityFocus;
-  set onDidLoseAccessibilityFocus(VoidCallback? handler) {
-    if (_onDidLoseAccessibilityFocus == handler)
-      return;
-    final bool hadValue = _onDidLoseAccessibilityFocus != null;
-    _onDidLoseAccessibilityFocus = handler;
-    if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate();
-  }
-
-  /// The handlers and supported [CustomSemanticsAction]s for this node.
-  ///
-  /// These handlers are called whenever the user performs the associated
-  /// custom accessibility action from a special platform menu. Providing any
-  /// custom actions here also adds [SemanticsAction.customAction] to the node.
-  ///
-  /// See also:
-  ///
-  ///  * [CustomSemanticsAction], for an explanation of custom actions.
-  Map<CustomSemanticsAction, VoidCallback>? get customSemanticsActions => _customSemanticsActions;
-  Map<CustomSemanticsAction, VoidCallback>? _customSemanticsActions;
-  set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback>? value) {
-    if (_customSemanticsActions == value)
-      return;
-    _customSemanticsActions = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4761,205 +4108,207 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     assert(
-      ((scopesRoute ?? false) && explicitChildNodes) || !(scopesRoute ?? false),
+      ((_properties.scopesRoute ?? false) && explicitChildNodes) || !(_properties.scopesRoute ?? false),
       'explicitChildNodes must be set to true if scopes route is true',
     );
     assert(
-      !((toggled ?? false) && (checked ?? false)),
+      !((_properties.toggled ?? false) && (_properties.checked ?? false)),
       'A semantics node cannot be toggled and checked at the same time',
     );
 
-    if (enabled != null)
-      config.isEnabled = enabled;
-    if (checked != null)
-      config.isChecked = checked;
-    if (toggled != null)
-      config.isToggled = toggled;
-    if (selected != null)
-      config.isSelected = selected!;
-    if (button != null)
-      config.isButton = button!;
-    if (link != null)
-      config.isLink = link!;
-    if (slider != null)
-      config.isSlider = slider!;
-    if (keyboardKey != null)
-      config.isKeyboardKey = keyboardKey!;
-    if (header != null)
-      config.isHeader = header!;
-    if (textField != null)
-      config.isTextField = textField!;
-    if (readOnly != null)
-      config.isReadOnly = readOnly!;
-    if (focusable != null)
-      config.isFocusable = focusable!;
-    if (focused != null)
-      config.isFocused = focused!;
-    if (inMutuallyExclusiveGroup != null)
-      config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup!;
-    if (obscured != null)
-      config.isObscured = obscured!;
-    if (multiline != null)
-      config.isMultiline = multiline!;
-    if (hidden != null)
-      config.isHidden = hidden!;
-    if (image != null)
-      config.isImage = image!;
-    if (attributedLabel != null)
-      config.attributedLabel = attributedLabel!;
-    if (attributedValue != null)
-      config.attributedValue = attributedValue!;
-    if (attributedIncreasedValue != null)
-      config.attributedIncreasedValue = attributedIncreasedValue!;
-    if (attributedDecreasedValue != null)
-      config.attributedDecreasedValue = attributedDecreasedValue!;
-    if (attributedHint != null)
-      config.attributedHint = attributedHint!;
-    if (hintOverrides != null && hintOverrides!.isNotEmpty)
-      config.hintOverrides = hintOverrides;
-    if (scopesRoute != null)
-      config.scopesRoute = scopesRoute!;
-    if (namesRoute != null)
-      config.namesRoute = namesRoute!;
-    if (liveRegion != null)
-      config.liveRegion = liveRegion!;
-    if (maxValueLength != null) {
-      config.maxValueLength = maxValueLength;
+    if (_properties.enabled != null)
+      config.isEnabled = _properties.enabled;
+    if (_properties.checked != null)
+      config.isChecked = _properties.checked;
+    if (_properties.toggled != null)
+      config.isToggled = _properties.toggled;
+    if (_properties.selected != null)
+      config.isSelected = _properties.selected!;
+    if (_properties.button != null)
+      config.isButton = _properties.button!;
+    if (_properties.link != null)
+      config.isLink = _properties.link!;
+    if (_properties.slider != null)
+      config.isSlider = _properties.slider!;
+    if (_properties.keyboardKey != null)
+      config.isKeyboardKey = _properties.keyboardKey!;
+    if (_properties.header != null)
+      config.isHeader = _properties.header!;
+    if (_properties.textField != null)
+      config.isTextField = _properties.textField!;
+    if (_properties.readOnly != null)
+      config.isReadOnly = _properties.readOnly!;
+    if (_properties.focusable != null)
+      config.isFocusable = _properties.focusable!;
+    if (_properties.focused != null)
+      config.isFocused = _properties.focused!;
+    if (_properties.inMutuallyExclusiveGroup != null)
+      config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
+    if (_properties.obscured != null)
+      config.isObscured = _properties.obscured!;
+    if (_properties.multiline != null)
+      config.isMultiline = _properties.multiline!;
+    if (_properties.hidden != null)
+      config.isHidden = _properties.hidden!;
+    if (_properties.image != null)
+      config.isImage = _properties.image!;
+    if (_attributedLabel != null)
+      config.attributedLabel = _attributedLabel!;
+    if (_attributedValue != null)
+      config.attributedValue = _attributedValue!;
+    if (_attributedIncreasedValue != null)
+      config.attributedIncreasedValue = _attributedIncreasedValue!;
+    if (_attributedDecreasedValue != null)
+      config.attributedDecreasedValue = _attributedDecreasedValue!;
+    if (_attributedHint != null)
+      config.attributedHint = _attributedHint!;
+    if (_properties.tooltip != null)
+      config.tooltip = _properties.tooltip!;
+    if (_properties.hintOverrides != null && _properties.hintOverrides!.isNotEmpty)
+      config.hintOverrides = _properties.hintOverrides;
+    if (_properties.scopesRoute != null)
+      config.scopesRoute = _properties.scopesRoute!;
+    if (_properties.namesRoute != null)
+      config.namesRoute = _properties.namesRoute!;
+    if (_properties.liveRegion != null)
+      config.liveRegion = _properties.liveRegion!;
+    if (_properties.maxValueLength != null) {
+      config.maxValueLength = _properties.maxValueLength;
     }
-    if (currentValueLength != null) {
-      config.currentValueLength = currentValueLength;
+    if (_properties.currentValueLength != null) {
+      config.currentValueLength = _properties.currentValueLength;
     }
     if (textDirection != null)
       config.textDirection = textDirection;
-    if (sortKey != null)
-      config.sortKey = sortKey;
-    if (tagForChildren != null)
-      config.addTagForChildren(tagForChildren!);
+    if (_properties.sortKey != null)
+      config.sortKey = _properties.sortKey;
+    if (_properties.tagForChildren != null)
+      config.addTagForChildren(_properties.tagForChildren!);
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
-    if (onTap != null)
+    if (_properties.onTap != null)
       config.onTap = _performTap;
-    if (onLongPress != null)
+    if (_properties.onLongPress != null)
       config.onLongPress = _performLongPress;
-    if (onDismiss != null)
+    if (_properties.onDismiss != null)
       config.onDismiss = _performDismiss;
-    if (onScrollLeft != null)
+    if (_properties.onScrollLeft != null)
       config.onScrollLeft = _performScrollLeft;
-    if (onScrollRight != null)
+    if (_properties.onScrollRight != null)
       config.onScrollRight = _performScrollRight;
-    if (onScrollUp != null)
+    if (_properties.onScrollUp != null)
       config.onScrollUp = _performScrollUp;
-    if (onScrollDown != null)
+    if (_properties.onScrollDown != null)
       config.onScrollDown = _performScrollDown;
-    if (onIncrease != null)
+    if (_properties.onIncrease != null)
       config.onIncrease = _performIncrease;
-    if (onDecrease != null)
+    if (_properties.onDecrease != null)
       config.onDecrease = _performDecrease;
-    if (onCopy != null)
+    if (_properties.onCopy != null)
       config.onCopy = _performCopy;
-    if (onCut != null)
+    if (_properties.onCut != null)
       config.onCut = _performCut;
-    if (onPaste != null)
+    if (_properties.onPaste != null)
       config.onPaste = _performPaste;
-    if (onMoveCursorForwardByCharacter != null)
+    if (_properties.onMoveCursorForwardByCharacter != null)
       config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
-    if (onMoveCursorBackwardByCharacter != null)
+    if (_properties.onMoveCursorBackwardByCharacter != null)
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
-    if (onMoveCursorForwardByWord != null)
+    if (_properties.onMoveCursorForwardByWord != null)
       config.onMoveCursorForwardByWord = _performMoveCursorForwardByWord;
-    if (onMoveCursorBackwardByWord != null)
+    if (_properties.onMoveCursorBackwardByWord != null)
       config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
-    if (onSetSelection != null)
+    if (_properties.onSetSelection != null)
       config.onSetSelection = _performSetSelection;
-    if (onSetText != null)
+    if (_properties.onSetText != null)
       config.onSetText = _performSetText;
-    if (onDidGainAccessibilityFocus != null)
+    if (_properties.onDidGainAccessibilityFocus != null)
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
-    if (onDidLoseAccessibilityFocus != null)
+    if (_properties.onDidLoseAccessibilityFocus != null)
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
-    if (customSemanticsActions != null)
-      config.customSemanticsActions = _customSemanticsActions!;
+    if (_properties.customSemanticsActions != null)
+      config.customSemanticsActions = _properties.customSemanticsActions!;
   }
 
   void _performTap() {
-    onTap?.call();
+    _properties.onTap?.call();
   }
 
   void _performLongPress() {
-    onLongPress?.call();
+    _properties.onLongPress?.call();
   }
 
   void _performDismiss() {
-    onDismiss?.call();
+    _properties.onDismiss?.call();
   }
 
   void _performScrollLeft() {
-    onScrollLeft?.call();
+    _properties.onScrollLeft?.call();
   }
 
   void _performScrollRight() {
-    onScrollRight?.call();
+    _properties.onScrollRight?.call();
   }
 
   void _performScrollUp() {
-    onScrollUp?.call();
+    _properties.onScrollUp?.call();
   }
 
   void _performScrollDown() {
-    onScrollDown?.call();
+    _properties.onScrollDown?.call();
   }
 
   void _performIncrease() {
-    onIncrease?.call();
+    _properties.onIncrease?.call();
   }
 
   void _performDecrease() {
-    onDecrease?.call();
+    _properties.onDecrease?.call();
   }
 
   void _performCopy() {
-    onCopy?.call();
+    _properties.onCopy?.call();
   }
 
   void _performCut() {
-    onCut?.call();
+    _properties.onCut?.call();
   }
 
   void _performPaste() {
-    onPaste?.call();
+    _properties.onPaste?.call();
   }
 
   void _performMoveCursorForwardByCharacter(bool extendSelection) {
-    onMoveCursorForwardByCharacter?.call(extendSelection);
+    _properties.onMoveCursorForwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByCharacter(bool extendSelection) {
-    onMoveCursorBackwardByCharacter?.call(extendSelection);
+    _properties.onMoveCursorBackwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorForwardByWord(bool extendSelection) {
-    onMoveCursorForwardByWord?.call(extendSelection);
+    _properties.onMoveCursorForwardByWord?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByWord(bool extendSelection) {
-    onMoveCursorBackwardByWord?.call(extendSelection);
+    _properties.onMoveCursorBackwardByWord?.call(extendSelection);
   }
 
   void _performSetSelection(TextSelection selection) {
-    onSetSelection?.call(selection);
+    _properties.onSetSelection?.call(selection);
   }
 
   void _performSetText(String text) {
-    onSetText?.call(text);
+    _properties.onSetText?.call(text);
   }
 
   void _performDidGainAccessibilityFocus() {
-    onDidGainAccessibilityFocus?.call();
+    _properties.onDidGainAccessibilityFocus?.call();
   }
 
   void _performDidLoseAccessibilityFocus() {
-    onDidLoseAccessibilityFocus?.call();
+    _properties.onDidLoseAccessibilityFocus?.call();
   }
 }
 
@@ -5168,7 +4517,10 @@ class RenderLeaderLayer extends RenderProxyBox {
         ..offset = offset;
     }
     context.pushLayer(layer!, super.paint, Offset.zero);
-    assert(layer != null);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -5380,6 +4732,10 @@ class RenderFollowerLayer extends RenderProxyBox {
         double.infinity,
       ),
     );
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override

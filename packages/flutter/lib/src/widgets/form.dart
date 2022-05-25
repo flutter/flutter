@@ -38,14 +38,13 @@ class Form extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const Form({
-    Key? key,
+    super.key,
     required this.child,
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
   }) : assert(child != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-       super(key: key);
+       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// Returns the closest [FormState] which encloses the given context.
   ///
@@ -195,13 +194,11 @@ class FormState extends State<Form> {
 
 class _FormScope extends InheritedWidget {
   const _FormScope({
-    Key? key,
-    required Widget child,
+    required super.child,
     required FormState formState,
     required int generation,
   }) : _formState = formState,
-       _generation = generation,
-       super(key: key, child: child);
+       _generation = generation;
 
   final FormState _formState;
 
@@ -260,7 +257,7 @@ class FormField<T> extends StatefulWidget {
   ///
   /// The [builder] argument must not be null.
   const FormField({
-    Key? key,
+    super.key,
     required this.builder,
     this.onSaved,
     this.validator,
@@ -269,8 +266,7 @@ class FormField<T> extends StatefulWidget {
     AutovalidateMode? autovalidateMode,
     this.restorationId,
   }) : assert(builder != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-       super(key: key);
+       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].

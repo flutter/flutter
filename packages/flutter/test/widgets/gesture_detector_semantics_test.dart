@@ -701,9 +701,8 @@ void main() {
 
 class _TestLayoutPerformer extends SingleChildRenderObjectWidget {
   const _TestLayoutPerformer({
-    Key? key,
     required this.performLayout,
-  }) : super(key: key);
+  });
 
   final VoidCallback performLayout;
 

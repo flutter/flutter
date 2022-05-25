@@ -70,7 +70,7 @@ class BuildInfo {
   /// The path to the package configuration file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provided, defaults to `.dart_tool/packages`.
+  /// file. If not provided, defaults to `.dart_tool/package_config.json`.
   final String packagesPath;
 
   final List<String> fileSystemRoots;
@@ -164,7 +164,7 @@ class BuildInfo {
   /// and skips the check and potential invalidation of files.
   final bool assumeInitializeFromDillUpToDate;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
   static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
   static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -237,6 +237,10 @@ class BuildInfo {
         kFileSystemRoots: fileSystemRoots.join(','),
       if (fileSystemScheme != null)
         kFileSystemScheme: fileSystemScheme!,
+      if (buildName != null)
+        kBuildName: buildName!,
+      if (buildNumber != null)
+        kBuildNumber: buildNumber!,
     };
   }
 
@@ -523,7 +527,6 @@ enum TargetPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
-  windows_uwp_x64,
   fuchsia_arm64,
   fuchsia_x64,
   tester,
@@ -542,7 +545,7 @@ enum TargetPlatform {
 //
 // TODO(cbracken): split TargetPlatform.ios into ios_armv7, ios_arm64.
 enum DarwinArch {
-  armv7,
+  armv7, // Deprecated. Used to display 32-bit unsupported devices.
   arm64,
   x86_64,
 }
@@ -565,7 +568,6 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
     ];
   }
   return <DarwinArch>[
-    DarwinArch.armv7,
     DarwinArch.arm64,
   ];
 }
@@ -657,8 +659,6 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
       return 'linux-arm64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
-    case TargetPlatform.windows_uwp_x64:
-      return 'windows-uwp-x64';
     case TargetPlatform.fuchsia_arm64:
       return 'fuchsia-arm64';
     case TargetPlatform.fuchsia_x64:
@@ -702,8 +702,6 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
-    case 'windows-uwp-x64':
-      return TargetPlatform.windows_uwp_x64;
     case 'web-javascript':
       return TargetPlatform.web_javascript;
   }
@@ -767,7 +765,6 @@ String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_uwp_x64:
     case TargetPlatform.windows_x64:
       throw UnsupportedError('Unexpected Fuchsia platform $targetPlatform');
   }
@@ -856,11 +853,6 @@ String getWindowsBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'windows');
 }
 
-/// Returns the Windows UWP build output directory.
-String getWindowsBuildUwpDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'winuwp');
-}
-
 /// Returns the Fuchsia build output directory.
 String getFuchsiaBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
@@ -918,8 +910,6 @@ const String kFileSystemRoots = 'FileSystemRoots';
 ///
 /// This is expected to be a space-delimited list of architectures. If not
 /// provided, defaults to arm64.
-///
-/// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
 
 /// The define to control what macOS architectures are built for.
@@ -951,6 +941,12 @@ const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// The input key for an SkSL bundle path.
 const String kBundleSkSLPath = 'BundleSkSLPath';
+
+/// The define to pass build name
+const String kBuildName = 'BuildName';
+
+/// The define to pass build number
+const String kBuildNumber = 'BuildNumber';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
@@ -1023,7 +1019,6 @@ String getNameForTargetPlatformArch(TargetPlatform platform) {
     case TargetPlatform.ios:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_uwp_x64:
       throw UnsupportedError('Unexpected target platform $platform');
   }
 }

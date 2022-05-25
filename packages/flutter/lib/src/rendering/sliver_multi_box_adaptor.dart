@@ -117,6 +117,7 @@ abstract class RenderSliverBoxChildManager {
   /// true without making any assertions.
   bool debugAssertChildListLocked() => true;
 }
+
 /// Parent data structure used by [RenderSliverWithKeepAliveMixin].
 mixin KeepAliveParentDataMixin implements ParentData {
   /// Whether to keep the child alive even when it is no longer visible.
@@ -576,18 +577,22 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    final SliverMultiBoxAdaptorParentData? childParentData = child.parentData as SliverMultiBoxAdaptorParentData?;
+    return childParentData?.index != null &&
+           !_keepAliveBucket.containsKey(childParentData!.index);
+  }
+
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
-    if (childParentData.index == null) {
-      // If the child has no index, such as with the prototype of a
-      // SliverPrototypeExtentList, then it is not visible, so we give it a
-      // zero transform to prevent it from painting.
-      transform.setZero();
-    } else if (_keepAliveBucket.containsKey(childParentData.index)) {
-      // It is possible that widgets under kept alive children want to paint
-      // themselves. For example, the Material widget tries to paint all
-      // InkFeatures under its subtree as long as they are not disposed. In
-      // such case, we give it a zero transform to prevent them from painting.
+    if (!paintsChild(child)) {
+      // This can happen if some child asks for the global transform even though
+      // they are not getting painted. In that case, the transform sets set to
+      // zero since [applyPaintTransformForBoxChild] would end up throwing due
+      // to the child not being configured correctly for applying a transform.
+      // There's no assert here because asking for the paint transform is a
+      // valid thing to do even if a child would not be painted, but there is no
+      // meaningful non-zero matrix to use in this case.
       transform.setZero();
     } else {
       applyPaintTransformForBoxChild(child, transform);

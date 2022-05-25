@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 import 'inherited_model.dart';
@@ -75,7 +74,7 @@ class SharedAppData extends StatefulWidget {
   /// rebuilds with [SharedAppData.setValue].
   ///
   /// This widget is automatically created by the [WidgetsApp].
-  const SharedAppData({ Key? key, required this.child }) : super(key: key);
+  const SharedAppData({ super.key, required this.child });
 
   /// The widget below this widget in the tree.
   ///
@@ -176,10 +175,9 @@ class _SharedAppDataState extends State<SharedAppData> {
 
 class _SharedAppModel extends InheritedModel<Object> {
   _SharedAppModel({
-    Key? key,
     required this.sharedAppDataState,
-    required Widget child
-  }) : data = sharedAppDataState.data, super(key: key, child: child);
+    required super.child
+  }) : data = sharedAppDataState.data;
 
   final _SharedAppDataState sharedAppDataState;
   final Map<Object, Object?> data;

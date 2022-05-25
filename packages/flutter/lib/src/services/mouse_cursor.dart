@@ -266,8 +266,7 @@ class _DeferringMouseCursor extends MouseCursor {
 }
 
 class _NoopMouseCursorSession extends MouseCursorSession {
-  _NoopMouseCursorSession(_NoopMouseCursor cursor, int device)
-    : super(cursor, device);
+  _NoopMouseCursorSession(_NoopMouseCursor super.cursor, super.device);
 
   @override
   Future<void> activate() async { /* Nothing */ }
@@ -299,8 +298,7 @@ class _NoopMouseCursor extends MouseCursor {
 }
 
 class _SystemMouseCursorSession extends MouseCursorSession {
-  _SystemMouseCursorSession(SystemMouseCursor cursor, int device)
-    : super(cursor, device);
+  _SystemMouseCursorSession(SystemMouseCursor super.cursor, super.device);
 
   @override
   SystemMouseCursor get cursor => super.cursor as SystemMouseCursor;

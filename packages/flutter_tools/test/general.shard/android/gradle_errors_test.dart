@@ -29,13 +29,14 @@ void main() {
           permissionDeniedErrorHandler,
           flavorUndefinedHandler,
           r8FailureHandler,
-          minSdkVersion,
-          transformInputIssue,
-          lockFileDepMissing,
+          minSdkVersionHandler,
+          transformInputIssueHandler,
+          lockFileDepMissingHandler,
           multidexErrorHandler,
           incompatibleKotlinVersionHandler,
           minCompileSdkVersionHandler,
-          jvm11Required,
+          jvm11RequiredHandler,
+          outdatedGradleHandler,
         ])
       );
     });
@@ -427,7 +428,7 @@ Execution failed for task ':app:mergeDexDebug'.
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      AnsiTerminal: () => _TestPromptTerminal('y')
+      AnsiTerminal: () => _TestPromptTerminal('y'),
     });
 
     testUsingContext('exits if multidex support skipped', () async {
@@ -493,7 +494,7 @@ Execution failed for task ':app:mergeDexDebug'.
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      AnsiTerminal: () => _TestPromptTerminal('n')
+      AnsiTerminal: () => _TestPromptTerminal('n'),
     });
 
     testUsingContext('exits if multidex support disabled', () async {
@@ -754,13 +755,13 @@ assembleProfile
 
     testWithoutContext('pattern', () {
       expect(
-        minSdkVersion.test(stdoutLine),
+        minSdkVersionHandler.test(stdoutLine),
         isTrue,
       );
     });
 
     testUsingContext('suggestion', () async {
-      await minSdkVersion.handler(
+      await minSdkVersionHandler.handler(
         line: stdoutLine,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
@@ -798,7 +799,7 @@ assembleProfile
   group('transform input issue', () {
     testWithoutContext('pattern', () {
       expect(
-        transformInputIssue.test(
+        transformInputIssueHandler.test(
           'https://issuetracker.google.com/issues/158753935'
         ),
         isTrue,
@@ -806,7 +807,7 @@ assembleProfile
     });
 
     testUsingContext('suggestion', () async {
-      await transformInputIssue.handler(
+      await transformInputIssueHandler.handler(
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
@@ -836,7 +837,7 @@ assembleProfile
   group('Dependency mismatch', () {
     testWithoutContext('pattern', () {
       expect(
-        lockFileDepMissing.test('''
+        lockFileDepMissingHandler.test('''
 * What went wrong:
 Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 > Could not resolve all artifacts for configuration ':app:debugRuntimeClasspath'.
@@ -848,7 +849,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
     });
 
     testUsingContext('suggestion', () async {
-      await lockFileDepMissing.handler(
+      await lockFileDepMissingHandler.handler(
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
@@ -877,6 +878,10 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         incompatibleKotlinVersionHandler.test('Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.5.1, expected version is 1.1.15.'),
         isTrue,
       );
+      expect(
+        incompatibleKotlinVersionHandler.test("class 'kotlin.Unit' was compiled with an incompatible version of Kotlin."),
+        isTrue,
+      );
     });
 
     testUsingContext('suggestion', () async {
@@ -894,6 +899,51 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
           '│ update /android/build.gradle:                                                                │\n'
           "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
           '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Bump Gradle', () {
+    const String errorMessage = '''
+A problem occurred evaluating project ':app'.
+> Failed to apply plugin [id 'kotlin-android']
+   > The current Gradle version 4.10.2 is not compatible with the Kotlin Gradle plugin. Please use Gradle 6.1.1 or newer, or the previous version of the Kotlin plugin.
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        outdatedGradleHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await outdatedGradleHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project needs to upgrade Gradle and the Android Gradle plugin.          │\n'
+          '│                                                                                  │\n'
+          '│ To fix this issue, replace the following content:                                │\n'
+          '│ /android/build.gradle:                                                           │\n'
+          "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
+          "│     + classpath 'com.android.tools.build:gradle:7.1.2'                           │\n"
+          '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
+          '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
+          '│     + https://services.gradle.org/distributions/gradle-7.4-all.zip               │\n'
+          '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{
@@ -960,7 +1010,7 @@ Execution failed for task ':app:checkDebugAarMetadata'.
   group('Java 11 requirement', () {
     testWithoutContext('pattern', () {
       expect(
-        jvm11Required.test('''
+        jvm11RequiredHandler.test('''
 * What went wrong:
 A problem occurred evaluating project ':flutter'.
 > Failed to apply plugin 'com.android.internal.library'.
@@ -975,7 +1025,7 @@ A problem occurred evaluating project ':flutter'.
     });
 
     testUsingContext('suggestion', () async {
-      await jvm11Required.handler();
+      await jvm11RequiredHandler.handler();
 
       expect(
         testLogger.statusText,

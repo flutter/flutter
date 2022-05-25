@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const RestorationExampleApp());
 
 class RestorationExampleApp extends StatelessWidget {
-  const RestorationExampleApp({Key? key}) : super(key: key);
+  const RestorationExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class RestorationExampleApp extends StatelessWidget {
 }
 
 class RestorableCounter extends StatefulWidget {
-  const RestorableCounter({Key? key, this.restorationId}) : super(key: key);
+  const RestorableCounter({super.key, this.restorationId});
 
   final String? restorationId;
 

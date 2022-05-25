@@ -1635,7 +1635,6 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const Text('Visible'),
-                barrierDismissible: true,
               );
             },
             child: const Text('tap'),

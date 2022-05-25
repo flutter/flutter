@@ -83,7 +83,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// The [showLeading], [showTrailing], [axisDirection], [color], and
   /// [notificationPredicate] arguments must not be null.
   const GlowingOverscrollIndicator({
-    Key? key,
+    super.key,
     this.showLeading = true,
     this.showTrailing = true,
     required this.axisDirection,
@@ -94,8 +94,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
        assert(showTrailing != null),
        assert(axisDirection != null),
        assert(color != null),
-       assert(notificationPredicate != null),
-       super(key: key);
+       assert(notificationPredicate != null);
 
   /// Whether to show the overscroll glow on the side with negative scroll
   /// offsets.
@@ -256,10 +255,10 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             final Offset position = renderer.globalToLocal(notification.dragDetails!.globalPosition);
             switch (notification.metrics.axis) {
               case Axis.horizontal:
-                controller!.pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height), size.height);
+                controller!.pull(notification.overscroll.abs(), size.width, clampDouble(position.dy, 0.0, size.height), size.height);
                 break;
               case Axis.vertical:
-                controller!.pull(notification.overscroll.abs(), size.height, position.dx.clamp(0.0, size.width), size.width);
+                controller!.pull(notification.overscroll.abs(), size.height, clampDouble(position.dx, 0.0, size.width), size.width);
                 break;
             }
           }
@@ -406,9 +405,9 @@ class _GlowController extends ChangeNotifier {
     assert(velocity >= 0.0);
     _pullRecedeTimer?.cancel();
     _pullRecedeTimer = null;
-    velocity = velocity.clamp(_minVelocity, _maxVelocity);
+    velocity = clampDouble(velocity, _minVelocity, _maxVelocity);
     _glowOpacityTween.begin = _state == _GlowState.idle ? 0.3 : _glowOpacity.value;
-    _glowOpacityTween.end = (velocity * _velocityGlowFactor).clamp(_glowOpacityTween.begin!, _maxOpacity);
+    _glowOpacityTween.end = clampDouble(velocity * _velocityGlowFactor, _glowOpacityTween.begin!, _maxOpacity);
     _glowSizeTween.begin = _glowSize.value;
     _glowSizeTween.end = math.min(0.025 + 7.5e-7 * velocity * velocity, 1.0);
     _glowController.duration = Duration(milliseconds: (0.15 + velocity * 0.02).round());
@@ -538,10 +537,8 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
     this.leadingController,
     this.trailingController,
     required this.axisDirection,
-    Listenable? repaint,
-  }) : super(
-    repaint: repaint,
-  );
+    super.repaint,
+  });
 
   /// The controller for the overscroll glow on the side with negative scroll offsets.
   ///
@@ -645,13 +642,12 @@ class StretchingOverscrollIndicator extends StatefulWidget {
   ///
   /// The [axisDirection] and [notificationPredicate] arguments must not be null.
   const StretchingOverscrollIndicator({
-    Key? key,
+    super.key,
     required this.axisDirection,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.child,
   }) : assert(axisDirection != null),
-       assert(notificationPredicate != null),
-       super(key: key);
+       assert(notificationPredicate != null);
 
   /// {@macro flutter.overscroll.axisDirection}
   final AxisDirection axisDirection;
@@ -720,7 +716,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             final double viewportDimension = notification.metrics.viewportDimension;
             final double distanceForPull =
               (notification.overscroll.abs() / viewportDimension) + _stretchController.pullDistance;
-            final double clampedOverscroll = distanceForPull.clamp(0, 1.0);
+            final double clampedOverscroll = clampDouble(distanceForPull, 0, 1.0);
             _stretchController.pull(clampedOverscroll);
           }
         }
@@ -849,7 +845,7 @@ class _StretchController extends ChangeNotifier {
   /// The velocity must be positive.
   void absorbImpact(double velocity) {
     assert(velocity >= 0.0);
-    velocity = velocity.clamp(1, 10000);
+    velocity = clampDouble(velocity, 1, 10000);
     _stretchSizeTween.begin = _stretchSize.value;
     _stretchSizeTween.end = math.min(_stretchIntensity + (_flingFriction / velocity), 1.0);
     _stretchController.duration = Duration(milliseconds: (velocity * 0.02).round());

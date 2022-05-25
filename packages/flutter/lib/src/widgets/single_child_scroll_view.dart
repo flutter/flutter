@@ -138,7 +138,7 @@ import 'scrollable.dart';
 class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
   const SingleChildScrollView({
-    Key? key,
+    super.key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.padding,
@@ -157,8 +157,7 @@ class SingleChildScrollView extends StatelessWidget {
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.',
        ),
-       primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
-       super(key: key);
+       primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical);
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -288,14 +287,12 @@ class SingleChildScrollView extends StatelessWidget {
 
 class _SingleChildViewport extends SingleChildRenderObjectWidget {
   const _SingleChildViewport({
-    Key? key,
     this.axisDirection = AxisDirection.down,
     required this.offset,
-    Widget? child,
+    super.child,
     required this.clipBehavior,
   }) : assert(axisDirection != null),
-       assert(clipBehavior != null),
-       super(key: key, child: child);
+       assert(clipBehavior != null);
 
   final AxisDirection axisDirection;
   final ViewportOffset offset;
@@ -326,7 +323,7 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
 }
 
 class _SingleChildViewportElement extends SingleChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
-  _SingleChildViewportElement(_SingleChildViewport widget) : super(widget);
+  _SingleChildViewportElement(_SingleChildViewport super.widget);
 }
 
 class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {
@@ -536,10 +533,17 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   bool _shouldClipAtPaintOffset(Offset paintOffset) {
     assert(child != null);
-    return paintOffset.dx < 0 ||
-      paintOffset.dy < 0 ||
-      paintOffset.dx + child!.size.width > size.width ||
-      paintOffset.dy + child!.size.height > size.height;
+    switch (clipBehavior) {
+      case Clip.none:
+        return false;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return paintOffset.dx < 0 ||
+               paintOffset.dy < 0 ||
+               paintOffset.dx + child!.size.width > size.width ||
+               paintOffset.dy + child!.size.height > size.height;
+    }
   }
 
   @override
@@ -551,7 +555,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
         context.paintChild(child!, offset + paintOffset);
       }
 
-      if (_shouldClipAtPaintOffset(paintOffset) && clipBehavior != Clip.none) {
+      if (_shouldClipAtPaintOffset(paintOffset)) {
         _clipRectLayer.layer = context.pushClipRect(
           needsCompositing,
           offset,

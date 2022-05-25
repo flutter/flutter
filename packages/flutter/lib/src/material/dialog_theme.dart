@@ -24,7 +24,7 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [Dialog], a material dialog that can be customized using this [DialogTheme].
+///  * [Dialog], a Material Design dialog that can be customized using this [DialogTheme].
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 @immutable
@@ -115,10 +115,12 @@ class DialogTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DialogTheme
         && other.backgroundColor == backgroundColor
         && other.elevation == elevation

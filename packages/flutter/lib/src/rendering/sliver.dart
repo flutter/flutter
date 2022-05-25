@@ -814,7 +814,7 @@ class SliverHitTestResult extends HitTestResult {
   ///    generic [HitTestResult].
   ///  * [BoxHitTestResult.wrap], which turns a [SliverHitTestResult] into a
   ///    [BoxHitTestResult] for hit testing on [RenderBox] children.
-  SliverHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+  SliverHitTestResult.wrap(super.result) : super.wrap();
 
   /// Transforms `mainAxisPosition` and `crossAxisPosition` to the local
   /// coordinate system of a child for hit-testing the child.
@@ -873,12 +873,11 @@ class SliverHitTestEntry extends HitTestEntry<RenderSliver> {
   ///
   /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
   SliverHitTestEntry(
-    RenderSliver target, {
+    super.target, {
     required this.mainAxisPosition,
     required this.crossAxisPosition,
   }) : assert(mainAxisPosition != null),
-       assert(crossAxisPosition != null),
-       super(target);
+       assert(crossAxisPosition != null);
 
   /// The distance in the [AxisDirection] from the edge of the sliver's painted
   /// area (as given by the [SliverConstraints.scrollOffset]) to the hit point.
@@ -1338,7 +1337,7 @@ abstract class RenderSliver extends RenderObject {
     final double a = constraints.scrollOffset;
     final double b = constraints.scrollOffset + constraints.remainingPaintExtent;
     // the clamp on the next line is to avoid floating point rounding errors
-    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingPaintExtent);
+    return clampDouble(clampDouble(to, a, b) - clampDouble(from, a, b), 0.0, constraints.remainingPaintExtent);
   }
 
   /// Computes the portion of the region from `from` to `to` that is within
@@ -1354,7 +1353,7 @@ abstract class RenderSliver extends RenderObject {
     final double a = constraints.scrollOffset + constraints.cacheOrigin;
     final double b = constraints.scrollOffset + constraints.remainingCacheExtent;
     // the clamp on the next line is to avoid floating point rounding errors
-    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingCacheExtent);
+    return clampDouble(clampDouble(to, a, b) - clampDouble(from, a, b), 0.0, constraints.remainingCacheExtent);
   }
 
   /// Returns the distance from the leading _visible_ edge of the sliver to the
@@ -1791,8 +1790,8 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
 class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a [RenderBox].
   RenderSliverToBoxAdapter({
-    RenderBox? child,
-  }) : super(child: child);
+    super.child,
+  });
 
   @override
   void performLayout() {

@@ -12,7 +12,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 
@@ -121,22 +120,38 @@ class PaintingContext extends ClipContext {
     if (childLayer == null) {
       assert(debugAlsoPaintedParent);
       assert(child._layerHandle.layer == null);
+
       // Not using the `layer` setter because the setter asserts that we not
       // replace the layer for repaint boundaries. That assertion does not
       // apply here because this is exactly the place designed to create a
       // layer for repaint boundaries.
-      final OffsetLayer layer = OffsetLayer();
+      final OffsetLayer layer = child.updateCompositedLayer(oldLayer: null);
       child._layerHandle.layer = childLayer = layer;
     } else {
       assert(debugAlsoPaintedParent || childLayer.attached);
+      Offset? debugOldOffset;
+      assert(() {
+        debugOldOffset = childLayer!.offset;
+        return true;
+      }());
       childLayer.removeAllChildren();
+      final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
+      assert(identical(updatedLayer, childLayer),
+        '$child created a new layer instance $updatedLayer instead of reusing the '
+        'existing layer $childLayer. See the documentation of RenderObject.updateCompositedLayer '
+        'for more information on how to correctly implement this method.'
+      );
+      assert(debugOldOffset == updatedLayer.offset);
     }
+    child._needsCompositedLayerUpdate = false;
+
     assert(identical(childLayer, child._layerHandle.layer));
     assert(child._layerHandle.layer is OffsetLayer);
     assert(() {
       childLayer!.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     }());
+
     childContext ??= PaintingContext(childLayer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
 
@@ -144,6 +159,38 @@ class PaintingContext extends ClipContext {
     // check is done in the [layer] setter itself).
     assert(identical(childLayer, child._layerHandle.layer));
     childContext.stopRecordingIfNeeded();
+  }
+
+  /// Update the composited layer of [child] without repainting its children.
+  ///
+  /// The render object must be attached to a [PipelineOwner], must have a
+  /// composited layer, and must be in need of a composited layer update but
+  /// not in need of painting. The render object's layer is re-used, and none
+  /// of its children are repaint or their layers updated.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
+  ///    has a composited layer.
+  static void updateLayerProperties(RenderObject child) {
+    assert(child.isRepaintBoundary && child._wasRepaintBoundary);
+    assert(!child._needsPaint);
+    assert(child._layerHandle.layer != null);
+
+    final OffsetLayer childLayer = child._layerHandle.layer! as OffsetLayer;
+    Offset? debugOldOffset;
+    assert(() {
+      debugOldOffset = childLayer.offset;
+      return true;
+    }());
+    final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
+    assert(identical(updatedLayer, childLayer),
+      '$child created a new layer instance $updatedLayer instead of reusing the '
+      'existing layer $childLayer. See the documentation of RenderObject.updateCompositedLayer '
+      'for more information on how to correctly implement this method.'
+    );
+    assert(debugOldOffset == updatedLayer.offset);
+    child._needsCompositedLayerUpdate = false;
   }
 
   /// In debug mode, repaint the given render object using a custom painting
@@ -183,6 +230,12 @@ class PaintingContext extends ClipContext {
     if (child.isRepaintBoundary) {
       stopRecordingIfNeeded();
       _compositeChild(child, offset);
+    // If a render object was a repaint boundary but no longer is one, this
+    // is where the framework managed layer is automatically disposed.
+    } else if (child._wasRepaintBoundary) {
+      assert(child._layerHandle.layer is OffsetLayer);
+      child._layerHandle.layer = null;
+      child._paintWithContext(this, offset);
     } else {
       child._paintWithContext(this, offset);
     }
@@ -194,9 +247,12 @@ class PaintingContext extends ClipContext {
     assert(_canvas == null || _canvas!.getSaveCount() == 1);
 
     // Create a layer for our child, and paint the child into it.
-    if (child._needsPaint) {
+    if (child._needsPaint || !child._wasRepaintBoundary) {
       repaintCompositedChild(child, debugAlsoPaintedParent: true);
     } else {
+      if (child._needsCompositedLayerUpdate) {
+        updateLayerProperties(child);
+      }
       assert(() {
         // register the call for RepaintBoundary metrics
         child.debugRegisterRepaintBoundaryPaint();
@@ -267,6 +323,22 @@ class PaintingContext extends ClipContext {
     _recorder = ui.PictureRecorder();
     _canvas = Canvas(_recorder!);
     _containerLayer.append(_currentLayer!);
+  }
+
+  /// Adds a [CompositionCallback] for the current [ContainerLayer] used by this
+  /// context.
+  ///
+  /// Composition callbacks are called whenever the layer tree containing the
+  /// current layer of this painting context gets composited, or when it gets
+  /// detached and will not be rendered again. This happens regardless of
+  /// whether the layer is added via retained rendering or not.
+  ///
+  /// {@macro flutter.rendering.Layer.compositionCallbacks}
+  ///
+  /// See also:
+  ///   *  [Layer.addCompositionCallback].
+  VoidCallback addCompositionCallback(CompositionCallback callback) {
+    return _containerLayer.addCompositionCallback(callback);
   }
 
   /// Stop recording to a canvas if recording has started.
@@ -434,6 +506,10 @@ class PaintingContext extends ClipContext {
   /// (e.g. from opacity layer to a clip rect layer).
   /// {@endtemplate}
   ClipRectLayer? pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer? oldLayer }) {
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    }
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
       final ClipRectLayer layer = oldLayer ?? ClipRectLayer();
@@ -469,6 +545,10 @@ class PaintingContext extends ClipContext {
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ClipRRectLayer? pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer? oldLayer }) {
     assert(clipBehavior != null);
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    }
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
@@ -505,6 +585,10 @@ class PaintingContext extends ClipContext {
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ClipPathLayer? pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer? oldLayer }) {
     assert(clipBehavior != null);
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    }
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
@@ -858,11 +942,10 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
     if (!kReleaseMode) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = <String, String>{
-            ...debugTimelineArguments,
             'dirty count': '${_nodesNeedingLayout.length}',
             'dirty list': '$_nodesNeedingLayout',
           };
@@ -931,7 +1014,7 @@ class PipelineOwner {
   /// [flushPaint].
   void flushCompositingBits() {
     if (!kReleaseMode) {
-      Timeline.startSync('UPDATING COMPOSITING BITS', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Timeline.startSync('UPDATING COMPOSITING BITS');
     }
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (final RenderObject node in _nodesNeedingCompositingBitsUpdate) {
@@ -964,11 +1047,10 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
     if (!kReleaseMode) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfilePaintsEnabled) {
+        if (debugEnhancePaintTimelineArguments) {
           debugTimelineArguments = <String, String>{
-            ...debugTimelineArguments,
             'dirty count': '${_nodesNeedingPaint.length}',
             'dirty list': '$_nodesNeedingPaint',
           };
@@ -980,19 +1062,25 @@ class PipelineOwner {
         arguments: debugTimelineArguments,
       );
     }
-    assert(() {
-      _debugDoingPaint = true;
-      return true;
-    }());
     try {
+      assert(() {
+        _debugDoingPaint = true;
+        return true;
+      }());
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = <RenderObject>[];
+
       // Sort the dirty nodes in reverse order (deepest first).
       for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         assert(node._layerHandle.layer != null);
-        if (node._needsPaint && node.owner == this) {
+        if ((node._needsPaint || node._needsCompositedLayerUpdate) && node.owner == this) {
           if (node._layerHandle.layer!.attached) {
-            PaintingContext.repaintCompositedChild(node);
+            assert(node.isRepaintBoundary);
+            if (node._needsPaint) {
+              PaintingContext.repaintCompositedChild(node);
+            } else {
+              PaintingContext.updateLayerProperties(node);
+            }
           } else {
             node._skippedPaintingOnLayer();
           }
@@ -1080,7 +1168,7 @@ class PipelineOwner {
     if (_semanticsOwner == null)
       return;
     if (!kReleaseMode) {
-      Timeline.startSync('SEMANTICS', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Timeline.startSync('SEMANTICS');
     }
     assert(_semanticsOwner != null);
     assert(() {
@@ -1238,6 +1326,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Initializes internal fields for subclasses.
   RenderObject() {
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
+    _wasRepaintBoundary = isRepaintBoundary;
   }
 
   /// Cause the entire subtree rooted at the given [RenderObject] to be marked
@@ -1796,9 +1885,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
     assert(!_debugDisposed);
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        if (debugEnhanceLayoutTimelineArguments) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        }
         return true;
       }());
       Timeline.startSync(
@@ -2028,24 +2119,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
-  /// Rotate this render object (not yet implemented).
-  void rotate({
-    int? oldAngle, // 0..3
-    int? newAngle, // 0..3
-    Duration? time,
-  }) { }
-
-  // when the parent has rotated (e.g. when the screen has been turned
-  // 90 degrees), immediately prior to layout() being called for the
-  // new dimensions, rotate() is called with the old and new angles.
-  // The next time paint() is called, the coordinate space will have
-  // been rotated N quarter-turns clockwise, where:
-  //    N = newAngle-oldAngle
-  // ...but the rendering is expected to remain the same, pixel for
-  // pixel, on the output device. Then, the layout() method or
-  // equivalent will be called.
-
-
   // PAINTING
 
   /// Whether [paint] for this render object is currently running.
@@ -2070,12 +2143,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// to repaint.
   ///
   /// If this getter returns true, the [paintBounds] are applied to this object
-  /// and all descendants. The framework automatically creates an [OffsetLayer]
-  /// and assigns it to the [layer] field. Render objects that declare
-  /// themselves as repaint boundaries must not replace the layer created by
-  /// the framework.
+  /// and all descendants. The framework invokes [RenderObject.updateCompositedLayer]
+  /// to create an [OffsetLayer] and assigns it to the [layer] field.
+  /// Render objects that declare themselves as repaint boundaries must not replace
+  /// the layer created by the framework.
   ///
-  /// Warning: This getter must not change value over the lifetime of this object.
+  /// If the value of this getter changes, [markNeedsCompositingBitsUpdate] must
+  /// be called.
   ///
   /// See [RepaintBoundary] for more information about how repaint boundaries function.
   bool get isRepaintBoundary => false;
@@ -2097,6 +2171,34 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// changes. (This is implied when [adoptChild] or [dropChild] are called.)
   @protected
   bool get alwaysNeedsCompositing => false;
+
+  late bool _wasRepaintBoundary;
+
+  /// Update the composited layer owned by this render object.
+  ///
+  /// This method is called by the framework when [isRepaintBoundary] is true.
+  ///
+  /// If [oldLayer] is `null`, this method must return a new [OffsetLayer]
+  /// (or subtype thereof). If [oldLayer] is not `null`, then this method must
+  /// reuse the layer instance that is provided - it is an error to create a new
+  /// layer in this instance. The layer will be disposed by the framework when
+  /// either the render object is disposed or if it is no longer a repaint
+  /// boundary.
+  ///
+  /// The [OffsetLayer.offset] property will be managed by the framework and
+  /// must not be updated by this method.
+  ///
+  /// If a property of the composited layer needs to be updated, the render object
+  /// must call [markNeedsCompositedLayerUpdate] which will schedule this method
+  /// to be called without repainting children. If this widget was marked as
+  /// needing to paint and needing a composited layer update, this method is only
+  /// called once.
+  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/102102 revisit the
+  // contraint that the instance/type of layer cannot be changed at runtime.
+  OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
+    assert(isRepaintBoundary);
+    return oldLayer ?? OffsetLayer();
+  }
 
   /// The compositing layer that this render object uses to repaint.
   ///
@@ -2184,17 +2286,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       final RenderObject parent = this.parent! as RenderObject;
       if (parent._needsCompositingBitsUpdate)
         return;
-      if (!isRepaintBoundary && !parent.isRepaintBoundary) {
+
+      if ((!_wasRepaintBoundary || !isRepaintBoundary) && !parent.isRepaintBoundary) {
         parent.markNeedsCompositingBitsUpdate();
         return;
       }
     }
-    assert(() {
-      final AbstractNode? parent = this.parent;
-      if (parent is RenderObject)
-        return parent._needsCompositing;
-      return true;
-    }());
     // parent is fine (or there isn't one), but we are dirty
     if (owner != null)
       owner!._nodesNeedingCompositingBitsUpdate.add(this);
@@ -2225,9 +2322,23 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     });
     if (isRepaintBoundary || alwaysNeedsCompositing)
       _needsCompositing = true;
-    if (oldNeedsCompositing != _needsCompositing)
+    // If a node was previously a repaint boundary, but no longer is one, then
+    // regardless of its compositing state we need to find a new parent to
+    // paint from. To do this, we mark it clean again so that the traversal
+    // in markNeedsPaint is not short-circuited. It is removed from _nodesNeedingPaint
+    // so that we do not attempt to paint from it after locating a parent.
+    if (!isRepaintBoundary && _wasRepaintBoundary) {
+      _needsPaint = false;
+      _needsCompositedLayerUpdate = false;
+      owner?._nodesNeedingPaint.remove(this);
+      _needsCompositingBitsUpdate = false;
       markNeedsPaint();
-    _needsCompositingBitsUpdate = false;
+    } else if (oldNeedsCompositing != _needsCompositing) {
+      _needsCompositingBitsUpdate = false;
+      markNeedsPaint();
+    } else {
+      _needsCompositingBitsUpdate = false;
+    }
   }
 
   /// Whether this render object's paint information is dirty.
@@ -2253,6 +2364,24 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     return result;
   }
   bool _needsPaint = true;
+
+  /// Whether this render object's layer information is dirty.
+  ///
+  /// This is only set in debug mode. In general, render objects should not need
+  /// to condition their runtime behavior on whether they are dirty or not,
+  /// since they should only be marked dirty immediately prior to being laid
+  /// out and painted. (In release builds, this throws.)
+  ///
+  /// It is intended to be used by tests and asserts.
+  bool get debugNeedsCompositedLayerUpdate {
+    late bool result;
+    assert(() {
+      result = _needsCompositedLayerUpdate;
+      return true;
+    }());
+    return result;
+  }
+  bool _needsCompositedLayerUpdate = false;
 
   /// Mark this render object as having changed its visual appearance.
   ///
@@ -2280,7 +2409,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_needsPaint)
       return;
     _needsPaint = true;
-    if (isRepaintBoundary) {
+    // If this was not previously a repaint boundary it will not have
+    // a layer we can paint from.
+    if (isRepaintBoundary && _wasRepaintBoundary) {
       assert(() {
         if (debugPrintMarkNeedsPaintStacks)
           debugPrintStack(label: 'markNeedsPaint() called for $this');
@@ -2312,6 +2443,45 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
+  /// Mark this render object as having changed a property on its composited
+  /// layer.
+  ///
+  /// Render objects that have a composited layer have [isRepaintBoundary] equal
+  /// to true may update the properties of that composited layer without repainting
+  /// their children. If this render object is a repaint boundary but does
+  /// not yet have a composited layer created for it, this method will instead
+  /// mark the nearest repaint boundary parent as needing to be painted.
+  ///
+  /// If this method is called on a render object that is not a repaint boundary
+  /// or is a repaint boundary but hasn't been composited yet, it is equivalent
+  /// to calling [markNeedsPaint].
+  ///
+  /// See also:
+  ///
+  ///  * [RenderOpacity], which uses this method when its opacity is updated to
+  ///    update the layer opacity without repainting children.
+  void markNeedsCompositedLayerUpdate() {
+    assert(!_debugDisposed);
+    assert(owner == null || !owner!.debugDoingPaint);
+    if (_needsCompositedLayerUpdate || _needsPaint) {
+      return;
+    }
+    _needsCompositedLayerUpdate = true;
+    // If this was not previously a repaint boundary it will not have
+    // a layer we can paint from.
+    if (isRepaintBoundary && _wasRepaintBoundary) {
+      // If we always have our own layer, then we can just repaint
+      // ourselves without involving any other nodes.
+      assert(_layerHandle.layer != null);
+      if (owner != null) {
+        owner!._nodesNeedingPaint.add(this);
+        owner!.requestVisualUpdate();
+      }
+    } else {
+      markNeedsPaint();
+    }
+  }
+
   // Called when flushPaint() tries to make us paint but our layer is detached.
   // To make sure that our subtree is repainted when it's finally reattached,
   // even in the case where some ancestor layer is itself never marked dirty, we
@@ -2320,7 +2490,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _skippedPaintingOnLayer() {
     assert(attached);
     assert(isRepaintBoundary);
-    assert(_needsPaint);
+    assert(_needsPaint || _needsCompositedLayerUpdate);
     assert(_layerHandle.layer != null);
     assert(!_layerHandle.layer!.attached);
     AbstractNode? node = parent;
@@ -2400,9 +2570,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_needsLayout)
       return;
     if (!kReleaseMode && debugProfilePaintsEnabled) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        if (debugEnhancePaintTimelineArguments) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        }
         return true;
       }());
       Timeline.startSync(
@@ -2473,6 +2645,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return true;
     }());
     _needsPaint = false;
+    _needsCompositedLayerUpdate = false;
+    _wasRepaintBoundary = isRepaintBoundary;
     try {
       paint(context, offset);
       assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
@@ -2524,10 +2698,36 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// Used by coordinate conversion functions to translate coordinates local to
   /// one render object into coordinates local to another render object.
+  ///
+  /// Some RenderObjects will provide a zeroed out matrix in this method,
+  /// indicating that the child should not paint anything or respond to hit
+  /// tests currently. A parent may supply a non-zero matrix even though it
+  /// does not paint its child currently, for example if the parent is a
+  /// [RenderOffstage] with `offstage` set to true. In both of these cases,
+  /// the parent must return `false` from [paintsChild].
   void applyPaintTransform(covariant RenderObject child, Matrix4 transform) {
     assert(child.parent == this);
   }
 
+  /// Whether the given child would be painted if [paint] were called.
+  ///
+  /// Some RenderObjects skip painting their children if they are configured to
+  /// not produce any visible effects. For example, a [RenderOffstage] with
+  /// its `offstage` property set to true, or a [RenderOpacity] with its opacity
+  /// value set to zero.
+  ///
+  /// In these cases, the parent may still supply a non-zero matrix in
+  /// [applyPaintTransform] to inform callers about where it would paint the
+  /// child if the child were painted at all. Alternatively, the parent may
+  /// supply a zeroed out matrix if it would not otherwise be able to determine
+  /// a valid matrix for the child and thus cannot meaningfully determine where
+  /// the child would paint.
+  bool paintsChild(covariant RenderObject child) {
+    assert(child.parent == this);
+    return true;
+  }
+
+  /// {@template flutter.rendering.RenderObject.getTransformTo}
   /// Applies the paint transform up the tree to `ancestor`.
   ///
   /// Returns a matrix that maps the local paint coordinate system to the
@@ -2535,11 +2735,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// If `ancestor` is null, this method returns a matrix that maps from the
   /// local paint coordinate system to the coordinate system of the
-  /// [PipelineOwner.rootNode]. For the render tree owner by the
-  /// [RendererBinding] (i.e. for the main render tree displayed on the device)
-  /// this means that this method maps to the global coordinate system in
-  /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
-  /// [RenderView] to further transform the coordinate.
+  /// [PipelineOwner.rootNode].
+  /// {@endtemplate}
+  ///
+  /// For the render tree owned by the [RendererBinding] (i.e. for the main
+  /// render tree displayed on the device) this means that this method maps to
+  /// the global coordinate system in logical pixels. To get physical pixels,
+  /// use [applyPaintTransform] from the [RenderView] to further transform the
+  /// coordinate.
   Matrix4 getTransformTo(RenderObject? ancestor) {
     final bool ancestorSpecified = ancestor != null;
     assert(attached);
@@ -2571,6 +2774,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// This is used in the semantics phase to avoid including children
   /// that are not physically visible.
+  ///
+  /// RenderObjects that respect a [Clip] behavior when painting _must_ respect
+  /// that same behavior when describing this value. For example, if passing
+  /// [Clip.none] to [PaintingContext.pushClipRect] as the `clipBehavior`, then
+  /// the implementation of this method must return null.
   Rect? describeApproximatePaintClip(covariant RenderObject child) => null;
 
   /// Returns a rect in this object's coordinate system that describes
@@ -3603,8 +3811,7 @@ abstract class _SemanticsFragment {
 /// obtained via [interestingFragments].
 class _ContainerSemanticsFragment extends _SemanticsFragment {
 
-  _ContainerSemanticsFragment({ required bool dropsSemanticsOfPreviousSiblings })
-    : super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+  _ContainerSemanticsFragment({ required super.dropsSemanticsOfPreviousSiblings });
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
@@ -3624,10 +3831,9 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
     required RenderObject owner,
-    required bool dropsSemanticsOfPreviousSiblings,
+    required super.dropsSemanticsOfPreviousSiblings,
   }) : assert(owner != null),
-       _ancestorChain = <RenderObject>[owner],
-       super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+       _ancestorChain = <RenderObject>[owner];
 
   /// The [RenderObject] that owns this fragment (and any new [SemanticsNode]
   /// introduced by it).
@@ -3711,9 +3917,9 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 /// [children].
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
-    required RenderObject owner,
-    required bool dropsSemanticsOfPreviousSiblings,
-  }) : super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+    required super.owner,
+    required super.dropsSemanticsOfPreviousSiblings,
+  });
 
   @override
   void compileChildren({ Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, required double elevationAdjustment, required List<SemanticsNode> result }) {
@@ -3793,13 +3999,12 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   _SwitchableSemanticsFragment({
     required bool mergeIntoParent,
     required SemanticsConfiguration config,
-    required RenderObject owner,
-    required bool dropsSemanticsOfPreviousSiblings,
+    required super.owner,
+    required super.dropsSemanticsOfPreviousSiblings,
   }) : _mergeIntoParent = mergeIntoParent,
        _config = config,
        assert(mergeIntoParent != null),
-       assert(config != null),
-       super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+       assert(config != null);
 
   final bool _mergeIntoParent;
   SemanticsConfiguration _config;

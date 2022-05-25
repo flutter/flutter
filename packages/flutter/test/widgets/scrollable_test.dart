@@ -402,12 +402,14 @@ void main() {
         MaterialApp(
           home: CustomScrollView(
             physics: canDrag ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
-            slivers: <Widget>[SliverToBoxAdapter(
-              child: SizedBox(
-                height: 2000,
-                child: GestureDetector(onTap: () {}),
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 2000,
+                  child: GestureDetector(onTap: () {}),
+                ),
               ),
-            )],
+            ],
           ),
         ),
       );
@@ -1403,7 +1405,7 @@ void main() {
 
 // ignore: must_be_immutable
 class SuperPessimisticScrollPhysics extends ScrollPhysics {
-  SuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+  SuperPessimisticScrollPhysics({super.parent});
 
   int count = 0;
 
@@ -1420,7 +1422,7 @@ class SuperPessimisticScrollPhysics extends ScrollPhysics {
 }
 
 class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
-  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+  const ExtraSuperPessimisticScrollPhysics({super.parent});
 
   @override
   bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
