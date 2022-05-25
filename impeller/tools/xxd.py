@@ -41,12 +41,14 @@ def Main():
 
   output_header = os.path.abspath(args.output_header)
   output_source = os.path.abspath(args.output_source)
+  output_header_basename = output_header[output_header.rfind('/') + 1:]
 
   MakeDirectories(os.path.dirname(output_header))
   MakeDirectories(os.path.dirname(output_source))
 
   with open(args.source, "rb") as source, open(output_source, "w") as output:
     data_len = 0
+    output.write(f"#include \"{output_header_basename}\"\n")
     output.write(f"const unsigned char impeller_{args.symbol_name}_data[] =\n")
     output.write("{\n")
     while True:
@@ -64,8 +66,8 @@ def Main():
     output.write("extern \"C\" {\n")
     output.write("#endif\n\n")
 
-    output.write(f"extern unsigned char impeller_{args.symbol_name}_data[];\n")
-    output.write(f"extern unsigned long impeller_{args.symbol_name}_length;\n\n")
+    output.write(f"extern const unsigned char impeller_{args.symbol_name}_data[];\n")
+    output.write(f"extern const unsigned long impeller_{args.symbol_name}_length;\n\n")
 
     output.write("#ifdef __cplusplus\n")
     output.write("}\n")
