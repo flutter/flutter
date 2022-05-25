@@ -981,20 +981,20 @@ void main() {
     testWidgets('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsShadowRect({required double dx, required Color color}) {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
-          if (methodName != #drawRect)
+          if (methodName != #drawRect) {
             return true;
+          }
           final Rect rect = arguments[0] as Rect;
           final Color paintColor = (arguments[1] as Paint).color;
-          if (rect.top != 0 || rect.width != 1.0 || rect.height != 600)
-            // _CupertinoEdgeShadowDecoration draws the shadows with a series of
-            // differently colored 1px-wide rects. Skip rects that aren't being
-            // drawn by the _CupertinoEdgeShadowDecoration.
+          if (rect.top != 0 || rect.width != 1.0 || rect.height != 600) {
             return true;
-          if ((rect.left - dx).abs() >= 1)
-            // Skip calls for rects until the one with the given position offset
+          }
+          if ((rect.left - dx).abs() >= 1) {
             return true;
-          if (paintColor.value == color.value)
+          }
+          if (paintColor.value == color.value) {
             return true;
+          }
           throw '''
   For a rect with an expected left-side position: $dx (drawn at ${rect.left}):
               Expected a rect with color: $color,
@@ -1067,14 +1067,16 @@ void main() {
     testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsNoShadows() {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
-          if (methodName != #drawRect)
+          if (methodName != #drawRect) {
             return true;
+          }
           final Rect rect = arguments[0] as Rect;
           // _CupertinoEdgeShadowDecoration draws the shadows with a series of
           // differently colored 1px rects. Skip all rects not drawn by a
           // _CupertinoEdgeShadowDecoration.
-          if (rect.width != 1.0)
+          if (rect.width != 1.0) {
             return true;
+          }
           throw '''
     Expected: no rects with a width of 1px.
           Found: $rect.

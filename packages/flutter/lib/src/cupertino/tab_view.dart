@@ -190,8 +190,9 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
         settings: settings,
       );
     }
-    if (widget.onGenerateRoute != null)
+    if (widget.onGenerateRoute != null) {
       return widget.onGenerateRoute!(settings);
+    }
     return null;
   }
 
