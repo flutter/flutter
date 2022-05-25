@@ -886,6 +886,52 @@ class Shortcuts extends StatefulWidget {
   /// unnecessarily with large default shortcut maps.
   final String? debugLabel;
 
+  /// Returns the [ShortcutManager] that most tightly encloses the given
+  /// [BuildContext].
+  ///
+  /// If no [Shortcuts] widget encloses the context given, will assert in debug
+  /// mode and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is similar to this function, but will return null if
+  ///    it doesn't find a [Shortcuts] ancestor.
+  static ShortcutManager of(BuildContext context) {
+    assert(context != null);
+    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
+    assert(() {
+      if (inherited == null) {
+        throw FlutterError(
+          'Unable to find a $Shortcuts widget in the context.\n'
+              '$Shortcuts.of() was called with a context that does not contain a '
+              '$Shortcuts widget.\n'
+              'No $Shortcuts ancestor could be found starting from the context that was '
+              'passed to $Shortcuts.of().\n'
+              'The context used was:\n'
+              '  $context',
+        );
+      }
+      return true;
+    }());
+    return inherited!.manager;
+  }
+
+  /// Returns the [ShortcutManager] that most tightly encloses the given
+  /// [BuildContext].
+  ///
+  /// If no [Shortcuts] widget encloses the context given, will return null.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is similar to this function, but returns a non-nullable
+  ///    result, and will throw an exception if it doesn't find a [Shortcuts]
+  ///    ancestor.
+  static ShortcutManager? maybeOf(BuildContext context) {
+    assert(context != null);
+    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
+    return inherited?.manager;
+  }
+
   @override
   State<Shortcuts> createState() => _ShortcutsState();
 
