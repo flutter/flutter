@@ -18,7 +18,6 @@
 ///    for the Material 2 specification.
 ///  * [m3.material.io](https://m3.material.io)
 ///    for the Material 3 specification.
-
 library material;
 
 export 'src/material/about.dart';
