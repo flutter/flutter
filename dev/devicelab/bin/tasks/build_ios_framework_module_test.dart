@@ -194,6 +194,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'App',
     );
 
+    await _checkDylib(appFrameworkPath);
     await _checkBitcode(appFrameworkPath, mode);
 
     final String aotSymbols = await _dylibSymbols(appFrameworkPath);
@@ -292,6 +293,8 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'connectivity.framework',
       'connectivity',
     );
+
+    await _checkDylib(pluginFrameworkPath);
     await _checkBitcode(pluginFrameworkPath, mode);
     if (!await _linksOnFlutter(pluginFrameworkPath)) {
       throw TaskResult.failure('$pluginFrameworkPath does not link on Flutter');
@@ -375,6 +378,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'FlutterPluginRegistrant.framework',
       'FlutterPluginRegistrant',
     );
+    await _checkStatic(registrantFrameworkPath);
     await _checkBitcode(registrantFrameworkPath, mode);
 
     checkFileExists(path.join(
@@ -399,7 +403,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   }
 
   // This builds all build modes' frameworks by default
-  section('Build podspec');
+  section('Build podspec and static plugins');
 
   const String cocoapodsOutputDirectoryName = 'flutter-frameworks-cocoapods';
 
@@ -411,6 +415,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
         '--cocoapods',
         '--force', // Allow podspec creation on master.
         '--output=$cocoapodsOutputDirectoryName',
+        '--static',
       ],
     );
   });
@@ -422,11 +427,13 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       mode,
       'Flutter.podspec',
     ));
-
-    checkDirectoryExists(path.join(
+    await _checkDylib(path.join(
       cocoapodsOutputPath,
       mode,
       'App.xcframework',
+      'ios-arm64',
+      'App.framework',
+      'App',
     ));
 
     if (Directory(path.join(
@@ -439,16 +446,22 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
           'Unexpected FlutterPluginRegistrant.xcframework.');
     }
 
-    checkDirectoryExists(path.join(
+    await _checkStatic(path.join(
       cocoapodsOutputPath,
       mode,
       'package_info.xcframework',
+      'ios-arm64',
+      'package_info.framework',
+      'package_info',
     ));
 
-    checkDirectoryExists(path.join(
+    await _checkStatic(path.join(
       cocoapodsOutputPath,
       mode,
       'connectivity.xcframework',
+      'ios-arm64',
+      'connectivity.framework',
+      'connectivity',
     ));
 
     checkDirectoryExists(path.join(
@@ -472,6 +485,20 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       )).existsSync() ==
       isModule) {
     throw TaskResult.failure('Unexpected GeneratedPluginRegistrant.m.');
+  }
+}
+
+Future<void> _checkDylib(String pathToLibrary) async {
+  final String binaryFileType = await fileType(pathToLibrary);
+  if (!binaryFileType.contains('dynamically linked')) {
+    throw TaskResult.failure('$pathToLibrary is not a dylib, found: $binaryFileType');
+  }
+}
+
+Future<void> _checkStatic(String pathToLibrary) async {
+  final String binaryFileType = await fileType(pathToLibrary);
+  if (!binaryFileType.contains('current ar archive random library')) {
+    throw TaskResult.failure('$pathToLibrary is not a static library, found: $binaryFileType');
   }
 }
 
