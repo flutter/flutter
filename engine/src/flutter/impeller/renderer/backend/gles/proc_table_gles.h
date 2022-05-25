@@ -27,11 +27,9 @@ struct AutoErrorCheck {
   ~AutoErrorCheck() {
     if (error_fn) {
       auto error = error_fn();
-      if (error != GL_NO_ERROR) {
-        FML_LOG(ERROR) << "GL Error " << GLErrorToString(error) << "(" << error
-                       << ")"
-                       << " encountered on call to " << name;
-      }
+      FML_CHECK(error == GL_NO_ERROR)
+          << "GL Error " << GLErrorToString(error) << "(" << error << ")"
+          << " encountered on call to " << name;
     }
   }
 };
@@ -130,8 +128,12 @@ struct GLProc {
   PROC(GetShaderiv);                         \
   PROC(GetString);                           \
   PROC(GetUniformLocation);                  \
+  PROC(IsBuffer);                            \
   PROC(IsFramebuffer);                       \
   PROC(IsProgram);                           \
+  PROC(IsRenderbuffer);                      \
+  PROC(IsShader);                            \
+  PROC(IsTexture);                           \
   PROC(LinkProgram);                         \
   PROC(RenderbufferStorage);                 \
   PROC(Scissor);                             \
@@ -191,7 +193,7 @@ class ProcTableGLES {
 
   bool IsCurrentFramebufferComplete() const;
 
-  void SetDebugLabel(DebugResourceType type,
+  bool SetDebugLabel(DebugResourceType type,
                      GLint name,
                      const std::string& label) const;
 

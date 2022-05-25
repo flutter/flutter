@@ -5,6 +5,8 @@
 #pragma once
 
 #include <optional>
+#include <sstream>
+#include <string>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
@@ -25,51 +27,61 @@ enum class HandleType {
   kFrameBuffer,
 };
 
+std::string HandleTypeToString(HandleType type);
+
 class ReactorGLES;
 
 struct HandleGLES {
   HandleType type = HandleType::kUnknown;
+  std::optional<UniqueID> name;
 
   static HandleGLES DeadHandle() {
     return HandleGLES{HandleType::kUnknown, std::nullopt};
   }
 
-  constexpr bool IsDead() const { return !name_.has_value(); }
+  constexpr bool IsDead() const { return !name.has_value(); }
 
   struct Hash {
     std::size_t operator()(const HandleGLES& handle) const {
       return fml::HashCombine(
           std::underlying_type_t<decltype(handle.type)>(handle.type),
-          handle.name_);
+          handle.name);
     }
   };
 
   struct Equal {
     bool operator()(const HandleGLES& lhs, const HandleGLES& rhs) const {
-      return lhs.type == rhs.type && lhs.name_ == rhs.name_;
+      return lhs.type == rhs.type && lhs.name == rhs.name;
     }
   };
 
  private:
   friend class ReactorGLES;
 
-  std::optional<UniqueID> name_;
-
-  HandleGLES(HandleType p_type, UniqueID p_name)
-      : type(p_type), name_(p_name) {}
+  HandleGLES(HandleType p_type, UniqueID p_name) : type(p_type), name(p_name) {}
 
   HandleGLES(HandleType p_type, std::optional<UniqueID> p_name)
-      : type(p_type), name_(p_name) {}
+      : type(p_type), name(p_name) {}
 
   static HandleGLES Create(HandleType type) {
     return HandleGLES{type, UniqueID{}};
   }
 };
 
-using GLESHandleSet =
-    std::unordered_set<HandleGLES, HandleGLES::Hash, HandleGLES::Equal>;
-template <class T>
-using GLESHandleMap =
-    std::unordered_map<HandleGLES, T, HandleGLES::Hash, HandleGLES::Equal>;
-
 }  // namespace impeller
+
+namespace std {
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const impeller::HandleGLES& handle) {
+  out << HandleTypeToString(handle.type) << "(";
+  if (handle.IsDead()) {
+    out << "DEAD";
+  } else {
+    out << handle.name.value().id;
+  }
+  out << ")";
+  return out;
+}
+
+}  // namespace std

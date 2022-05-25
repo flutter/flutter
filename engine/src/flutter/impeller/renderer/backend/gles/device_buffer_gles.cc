@@ -86,12 +86,11 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
   gl.BindBuffer(target_type, buffer.value());
 
   if (upload_generation_ != generation_) {
-    TRACE_EVENT0("impeller", "BufferData");
+    TRACE_EVENT1("impeller", "BufferData", "Bytes",
+                 std::to_string(backing_store_->GetLength()).c_str());
     gl.BufferData(target_type, backing_store_->GetLength(),
                   backing_store_->GetBuffer(), GL_STATIC_DRAW);
     upload_generation_ = generation_;
-
-    reactor_->SetDebugLabel(handle_, label_);
   }
 
   return true;
@@ -99,10 +98,7 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
 
 // |DeviceBuffer|
 bool DeviceBufferGLES::SetLabel(const std::string& label) {
-  label_ = label;
-  if (upload_generation_ > 0) {
-    reactor_->SetDebugLabel(handle_, label_);
-  }
+  reactor_->SetDebugLabel(handle_, label);
   return true;
 }
 

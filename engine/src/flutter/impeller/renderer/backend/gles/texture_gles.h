@@ -55,7 +55,6 @@ class TextureGLES final : public Texture,
   HandleGLES handle_;
   mutable bool contents_initialized_ = false;
   const bool is_wrapped_;
-  std::string label_;
   bool is_valid_ = false;
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,

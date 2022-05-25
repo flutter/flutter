@@ -38,7 +38,6 @@ class DeviceBufferGLES final
  private:
   ReactorGLES::Ref reactor_;
   HandleGLES handle_;
-  std::string label_;
   mutable std::shared_ptr<Allocation> backing_store_;
   mutable uint32_t generation_ = 0;
   mutable uint32_t upload_generation_ = 0;
