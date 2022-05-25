@@ -1739,7 +1739,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
       (position.dy - center.dy) / _clip!.height,
     );
     // check if the point is outside the unit circle
-    if (offset.distanceSquared > 0.25) {
+    if (offset.distanceSquared > 0.25) { // x^2 + y^2 > r^2
       return false;
     }
     return super.hitTest(result, position: position);

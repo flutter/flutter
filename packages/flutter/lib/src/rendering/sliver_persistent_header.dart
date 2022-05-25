@@ -680,12 +680,14 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         || (_lastStartedScrollDirection != null && _lastStartedScrollDirection == ScrollDirection.forward);
       if (allowFloatingExpansion) {
         if (_effectiveScrollOffset! > maxExtent) {
+          // We're scrolled off-screen, but should reveal, so pretend we're just at the limit.
           _effectiveScrollOffset = maxExtent;
-        } // pretend we're just at the limit.
+        }
       } else {
         if (delta > 0.0) {
+          // Disallow the expansion. (But allow shrinking, i.e. delta < 0.0 is fine.)
           delta = 0.0;
-        } // disallow the expansion. (But allow shrinking, i.e. delta < 0.0 is fine.)
+        }
       }
       _effectiveScrollOffset = clampDouble(_effectiveScrollOffset! - delta, 0.0, constraints.scrollOffset);
     } else {

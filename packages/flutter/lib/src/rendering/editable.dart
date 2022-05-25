@@ -1809,6 +1809,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       final String text = _plainText;
       int lines = 1;
       for (int index = 0; index < text.length; index += 1) {
+        // Count explicit line breaks.
         if (text.codeUnitAt(index) == 0x0A) {
           lines += 1;
         }

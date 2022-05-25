@@ -325,8 +325,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       // Child size stabilized.
       _state = RenderAnimatedSizeState.stable;
       if (!_controller.isAnimating) {
+        // Resume the animation after being detached.
         _controller.forward();
-      } // resume the animation after being detached
     }
   }
 

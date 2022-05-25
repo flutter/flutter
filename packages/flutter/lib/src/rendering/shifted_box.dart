@@ -173,6 +173,7 @@ class RenderPadding extends RenderShiftedBox {
     final double totalHorizontalPadding = _resolvedPadding!.left + _resolvedPadding!.right;
     final double totalVerticalPadding = _resolvedPadding!.top + _resolvedPadding!.bottom;
     if (child != null) {
+      // Relies on double.infinity absorption.
       return child!.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     }
     return totalHorizontalPadding;
@@ -184,6 +185,7 @@ class RenderPadding extends RenderShiftedBox {
     final double totalHorizontalPadding = _resolvedPadding!.left + _resolvedPadding!.right;
     final double totalVerticalPadding = _resolvedPadding!.top + _resolvedPadding!.bottom;
     if (child != null) {
+      // Relies on double.infinity absorption.
       return child!.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     }
     return totalHorizontalPadding;
@@ -195,6 +197,7 @@ class RenderPadding extends RenderShiftedBox {
     final double totalHorizontalPadding = _resolvedPadding!.left + _resolvedPadding!.right;
     final double totalVerticalPadding = _resolvedPadding!.top + _resolvedPadding!.bottom;
     if (child != null) {
+      // Relies on double.infinity absorption.
       return child!.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     }
     return totalVerticalPadding;
@@ -206,6 +209,7 @@ class RenderPadding extends RenderShiftedBox {
     final double totalHorizontalPadding = _resolvedPadding!.left + _resolvedPadding!.right;
     final double totalVerticalPadding = _resolvedPadding!.top + _resolvedPadding!.bottom;
     if (child != null) {
+      // Relies on double.infinity absorption.
       return child!.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     }
     return totalVerticalPadding;

@@ -1672,8 +1672,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   static bool debugCheckingIntrinsics = false;
   bool _debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout() {
     if (_relayoutBoundary == null) {
+      // We don't know where our relayout boundary is yet.
       return true;
-    } // we don't know where our relayout boundary is yet
+    }
     RenderObject node = this;
     while (node != _relayoutBoundary) {
       assert(node._relayoutBoundary == _relayoutBoundary);
@@ -2525,11 +2526,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     while (node is RenderObject) {
       if (node.isRepaintBoundary) {
         if (node._layerHandle.layer == null) {
+          // Looks like the subtree here has never been painted. Let it handle itself.
           break;
-        } // looks like the subtree here has never been painted. let it handle itself.
+        }
         if (node._layerHandle.layer!.attached) {
+          // It's the one that detached us, so it's the one that will decide to repaint us.
           break;
-        } // it's the one that detached us, so it's the one that will decide to repaint us.
+        }
         node._needsPaint = true;
       }
       node = node.parent;
@@ -4089,8 +4092,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         : null;
 
     if (!_mergeIntoParent && (geometry?.dropFromTree ?? false)) {
-      return;
-    }  // Drop the node, it's not going to be visible.
+      return; // Drop the node, it's not going to be visible.
+    }
 
     owner._semantics ??= SemanticsNode(showOnScreen: owner.showOnScreen);
     final SemanticsNode node = owner._semantics!
