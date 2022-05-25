@@ -8,7 +8,7 @@ import 'package:flutter/services.dart' show TextEditingValue;
 
 /// A data structure representing a range of misspelled text and the suggested
 /// replacements for this range. For example, one [SuggestionSpan] of the
-/// [List<SuggestionSpan> suggestions] of the [SpellCheckResults] corresponding
+/// [List<SuggestionSpan>] suggestions of the [SpellCheckResults] corresponding
 /// to "Hello, wrold!" may be:
 /// ```dart
 /// SuggestionSpan(7, 11, List<String>.from["word, world, old"])
