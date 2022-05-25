@@ -133,8 +133,9 @@ class ImageInfo {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ImageInfo
         && other.image == image
         && other.scale == scale
@@ -212,8 +213,9 @@ class ImageStreamListener {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ImageStreamListener
         && other.onImage == onImage
         && other.onChunk == onChunk
@@ -367,8 +369,9 @@ class ImageStream with Diagnosticable {
   /// responsible for disposing of the [ImageInfo.image].
   /// {@endtemplate}
   void addListener(ImageStreamListener listener) {
-    if (_completer != null)
+    if (_completer != null) {
       return _completer!.addListener(listener);
+    }
     _listeners ??= <ImageStreamListener>[];
     _listeners!.add(listener);
   }
@@ -378,8 +381,9 @@ class ImageStream with Diagnosticable {
   /// If [listener] has been added multiple times, this removes the _first_
   /// instance of the listener.
   void removeListener(ImageStreamListener listener) {
-    if (_completer != null)
+    if (_completer != null) {
       return _completer!.removeListener(listener);
+    }
     assert(_listeners != null);
     for (int i = 0; i < _listeners!.length; i += 1) {
       if (_listeners![i] == listener) {
@@ -635,8 +639,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _currentImage?.dispose();
     _currentImage = image;
 
-    if (_listeners.isEmpty)
+    if (_listeners.isEmpty) {
       return;
+    }
     // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
         List<ImageStreamListener>.of(_listeners);
@@ -904,8 +909,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   void _handleAppFrame(Duration timestamp) {
     _frameCallbackScheduled = false;
-    if (!hasListeners)
+    if (!hasListeners) {
       return;
+    }
     assert(_nextFrame != null);
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
       _emitFrame(ImageInfo(
@@ -990,8 +996,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   @override
   void addListener(ImageStreamListener listener) {
-    if (!hasListeners && _codec != null && (_currentImage == null || _codec!.frameCount > 1))
+    if (!hasListeners && _codec != null && (_currentImage == null || _codec!.frameCount > 1)) {
       _decodeNextFrameAndSchedule();
+    }
     super.addListener(listener);
   }
 

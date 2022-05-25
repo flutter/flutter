@@ -165,8 +165,9 @@ class RoundedRectangleBorder extends OutlinedBorder {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RoundedRectangleBorder
         && other.side == side
         && other.borderRadius == borderRadius;
@@ -262,8 +263,9 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   }
 
   Rect _adjustRect(Rect rect) {
-    if (circleness == 0.0 || rect.width == rect.height)
+    if (circleness == 0.0 || rect.width == rect.height) {
       return rect;
+    }
     if (rect.width < rect.height) {
       final double delta = circleness * (rect.height - rect.width) / 2.0;
       return Rect.fromLTRB(
@@ -285,8 +287,9 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
 
   BorderRadius? _adjustBorderRadius(Rect rect, TextDirection? textDirection) {
     final BorderRadius resolvedRadius = borderRadius.resolve(textDirection);
-    if (circleness == 0.0)
+    if (circleness == 0.0) {
       return resolvedRadius;
+    }
     return BorderRadius.lerp(resolvedRadius, BorderRadius.circular(rect.shortestSide / 2.0), circleness);
   }
 
@@ -354,8 +357,9 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _RoundedRectangleToCircleBorder
         && other.side == side
         && other.borderRadius == borderRadius

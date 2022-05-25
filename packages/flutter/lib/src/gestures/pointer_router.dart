@@ -44,8 +44,9 @@ class PointerRouter {
     final Map<PointerRoute, Matrix4?> routes = _routeMap[pointer]!;
     assert(routes.containsKey(route));
     routes.remove(route);
-    if (routes.isEmpty)
+    if (routes.isEmpty) {
       _routeMap.remove(pointer);
+    }
   }
 
   /// Adds a route to the global entry in the routing table.

@@ -347,8 +347,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void resolve(GestureDisposition disposition) {
     final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.of(_entries.values);
     _entries.clear();
-    for (final GestureArenaEntry entry in localEntries)
+    for (final GestureArenaEntry entry in localEntries) {
       entry.resolve(disposition);
+    }
   }
 
   /// Resolves this recognizer's participation in the given gesture arena with
@@ -366,8 +367,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @override
   void dispose() {
     resolve(GestureDisposition.rejected);
-    for (final int pointer in _trackedPointers)
+    for (final int pointer in _trackedPointers) {
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
+    }
     _trackedPointers.clear();
     assert(_entries.isEmpty);
     super.dispose();
@@ -395,8 +397,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   }
 
   GestureArenaEntry _addPointerToArena(int pointer) {
-    if (_team != null)
+    if (_team != null) {
       return _team!.add(pointer, this);
+    }
     return GestureBinding.instance.gestureArena.add(pointer, this);
   }
 
@@ -433,8 +436,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     if (_trackedPointers.contains(pointer)) {
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
       _trackedPointers.remove(pointer);
-      if (_trackedPointers.isEmpty)
+      if (_trackedPointers.isEmpty) {
         didStopTrackingLastPointer(pointer);
+      }
     }
   }
 
@@ -442,8 +446,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// a [PointerUpEvent] or a [PointerCancelEvent] event.
   @protected
   void stopTrackingIfPointerNoLongerDown(PointerEvent event) {
-    if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent)
+    if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       stopTrackingPointer(event.pointer);
+    }
   }
 }
 
@@ -571,8 +576,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       _state = GestureRecognizerState.possible;
       _primaryPointer = event.pointer;
       _initialPosition = OffsetPair(local: event.localPosition, global: event.position);
-      if (deadline != null)
+      if (deadline != null) {
         _timer = Timer(deadline!, () => didExceedDeadlineWithEvent(event));
+      }
     }
   }
 

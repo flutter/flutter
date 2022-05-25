@@ -262,7 +262,8 @@ class ReadBuffer {
 
   void _alignTo(int alignment) {
     final int mod = _position % alignment;
-    if (mod != 0)
+    if (mod != 0) {
       _position += alignment - mod;
+    }
   }
 }
