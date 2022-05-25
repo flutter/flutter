@@ -26,8 +26,9 @@ bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debug
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
         debugDoublePrecision != null ||
-        debugBrightnessOverride != null)
+        debugBrightnessOverride != null) {
       throw FlutterError(reason);
+    }
     return true;
   }());
   return true;

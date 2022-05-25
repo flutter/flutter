@@ -40,8 +40,9 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (callback != null)
+    if (callback != null) {
       callback?.call(event);
+    }
   }
 }
 
@@ -144,8 +145,9 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = (PointerEvent event) {
       events.add(event);
-      if (event is PointerDownEvent)
+      if (event is PointerDownEvent) {
         binding.cancelPointer(event.pointer);
+      }
     };
 
     GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
