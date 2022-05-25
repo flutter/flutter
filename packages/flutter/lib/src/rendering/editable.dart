@@ -381,6 +381,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _clipRectLayer.layer = null;
     _cachedBuiltInForegroundPainters?.dispose();
     _cachedBuiltInPainters?.dispose();
+    _selectionStartInViewport.dispose();
+    _selectionEndInViewport.dispose();
     super.dispose();
   }
 
