@@ -1426,37 +1426,6 @@ class FakeRenderEditable extends RenderEditable {
   bool hasFocus = false;
 }
 
-class CustomTextSelectionControls extends TextSelectionControls {
-  @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset position,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Size getHandleSize(double textLineHeight) {
-    throw UnimplementedError();
-  }
-}
-
 class TextSelectionControlsSpy extends TextSelectionControls {
   UniqueKey leftHandleKey = UniqueKey();
   UniqueKey rightHandleKey = UniqueKey();

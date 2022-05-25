@@ -27,16 +27,6 @@ Material getMaterial(WidgetTester tester) {
   );
 }
 
-IconThemeData getIconData(WidgetTester tester) {
-  final IconTheme iconTheme = tester.firstWidget(
-    find.descendant(
-      of: find.byType(RawChip),
-      matching: find.byType(IconTheme),
-    ),
-  );
-  return iconTheme.data;
-}
-
 DefaultTextStyle getLabelStyle(WidgetTester tester) {
   return tester.widget(
     find.descendant(
