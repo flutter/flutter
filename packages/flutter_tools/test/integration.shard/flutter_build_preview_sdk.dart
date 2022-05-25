@@ -40,75 +40,35 @@ void main() {
     'build succeeds targeting string compileSdkVersion',
     () async {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
-      // write a build.gradle with compileSdkVersion as `Tiramisu` which is a string preview version
-      buildGradleFile.writeAsStringSync(r'''
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
-        localProperties.load(reader)
-    }
-}
+      // write a build.gradle with compileSdkVersion as `android-Tiramisu` which is a string preview version
+      buildGradleFile.writeAsStringSync(buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkVersion "android-Tiramisu"'), flush: true);
+      expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion "android-Tiramisu"'));
 
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
-}
+      final ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'build',
+        'apk',
+        '--debug',
+      ], workingDirectory: exampleAppDir.path);
+      expect(result.stdout, contains('Built build/app/outputs/flutter-apk/app-debug.apk.'));
+      expect(exampleAppDir.childDirectory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('apk')
+        .childDirectory('debug')
+        .childFile('app-debug.apk').existsSync(), true);
+    },
+  );
 
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
-}
+  test(
+    'build succeeds targeting string compileSdkPreview',
+    () async {
+      final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+      // write a build.gradle with compileSdkPreview as `Tiramisu` which is a string preview version
+      buildGradleFile.writeAsStringSync(buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkPreview "Tiramisu"'), flush: true);
+      expect(buildGradleFile.readAsStringSync(), contains('compileSdkPreview "Tiramisu"'));
 
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
-
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
-android {
-    compileSdkVersion "android-Tiramisu"
-    ndkVersion flutter.ndkVersion
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-    }
-
-    defaultConfig {
-        applicationId "com.example.buildtest"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
-    }
-
-    buildTypes {
-        release {
-            signingConfig signingConfigs.debug
-        }
-    }
-}
-
-flutter {
-    source '../..'
-}
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-}
-''', flush: true);
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
