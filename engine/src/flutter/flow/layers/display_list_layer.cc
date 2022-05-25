@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_flags.h"
+#include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/offscreen_surface.h"
 
 namespace flutter {
@@ -152,8 +153,9 @@ void DisplayListLayer::Paint(PaintContext& context) const {
         fml::TimePoint::Now() - start_time;
 
     sk_sp<SkData> raster_data = offscreen_surface->GetRasterData(true);
-    context.layer_snapshot_store->Add(unique_id(), offscreen_render_time,
-                                      raster_data);
+    LayerSnapshotData snapshot_data(unique_id(), offscreen_render_time,
+                                    raster_data, paint_bounds());
+    context.layer_snapshot_store->Add(snapshot_data);
   }
 
   if (context.leaf_nodes_builder) {

@@ -10,20 +10,20 @@
 namespace flutter {
 
 LayerSnapshotData::LayerSnapshotData(int64_t layer_unique_id,
-                                     fml::TimeDelta duration,
-                                     sk_sp<SkData> snapshot)
+                                     const fml::TimeDelta& duration,
+                                     const sk_sp<SkData>& snapshot,
+                                     const SkRect& bounds)
     : layer_unique_id_(layer_unique_id),
       duration_(duration),
-      snapshot_(snapshot) {}
+      snapshot_(snapshot),
+      bounds_(bounds) {}
 
 void LayerSnapshotStore::Clear() {
   layer_snapshots_.clear();
 }
 
-void LayerSnapshotStore::Add(int64_t layer_unique_id,
-                             fml::TimeDelta duration,
-                             sk_sp<SkData> snapshot) {
-  layer_snapshots_.emplace_back(layer_unique_id, duration, snapshot);
+void LayerSnapshotStore::Add(const LayerSnapshotData& data) {
+  layer_snapshots_.push_back(data);
 }
 
 }  // namespace flutter
