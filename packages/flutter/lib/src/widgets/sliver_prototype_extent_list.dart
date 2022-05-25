@@ -87,6 +87,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   @override
   void moveRenderObjectChild(RenderBox child, Object oldSlot, Object newSlot) {
     if (newSlot == _prototypeSlot) {
+      // There's only one prototype child so it cannot be moved.
       assert(false);
     } else {
       super.moveRenderObjectChild(child, oldSlot as int, newSlot as int);

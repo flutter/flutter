@@ -883,8 +883,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       oldIgnorePointer = _activity!.shouldIgnorePointer;
       wasScrolling = _activity!.isScrolling;
       if (wasScrolling && !newActivity.isScrolling) {
+        // Notifies and then saves the scroll offset.
         didEndScroll();
-      } // notifies and then saves the scroll offset
+      }
       _activity!.dispose();
     } else {
       oldIgnorePointer = false;

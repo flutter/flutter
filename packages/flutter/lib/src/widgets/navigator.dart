@@ -4860,14 +4860,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool canPop() {
     final Iterator<_RouteEntry> iterator = _history.where(_RouteEntry.isPresentPredicate).iterator;
     if (!iterator.moveNext()) {
+      // We have no active routes, so we can't pop.
       return false;
-    } // we have no active routes, so we can't pop
+    }
     if (iterator.current.route.willHandlePopInternally) {
+      // The first route can handle pops itself, so we can pop.
       return true;
-    } // the first route can handle pops itself, so we can pop
+    }
     if (!iterator.moveNext()) {
+      // There's only one route, so we can't pop.
       return false;
-    } // there's only one route, so we can't pop
+    }
     return true; // there's at least two routes, so we can pop
   }
 

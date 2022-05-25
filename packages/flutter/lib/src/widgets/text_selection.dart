@@ -465,8 +465,8 @@ class TextSelectionOverlay {
     );
 
     if (newSelection.baseOffset >= newSelection.extentOffset) {
-      return;
-    } // don't allow order swapping.
+      return; // Don't allow order swapping.
+    }
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
   }
@@ -495,8 +495,8 @@ class TextSelectionOverlay {
     );
 
     if (newSelection.baseOffset >= newSelection.extentOffset) {
-      return;
-    } // don't allow order swapping.
+      return; // Don't allow order swapping.
+    }
 
     _handleSelectionHandleChanged(newSelection, isEnd: false);
   }
@@ -919,6 +919,7 @@ class SelectionOverlay {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed) {
+      // Hide the second handle when collapsed.
       handle = Container();
     } else {
       handle = _SelectionHandleOverlay(

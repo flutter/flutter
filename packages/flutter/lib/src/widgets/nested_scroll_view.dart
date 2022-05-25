@@ -1264,8 +1264,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       delta,
     );
     if (oldPixels == newPixels) {
+      // Delta must have been so small we dropped it during floating point addition.
       return 0.0;
-    } // delta must have been so small we dropped it during floating point addition
+    }
     // Check for overscroll:
     final double overscroll = physics.applyBoundaryConditions(this, newPixels);
     final double actualNewPixels = newPixels - overscroll;
