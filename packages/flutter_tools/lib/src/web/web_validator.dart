@@ -63,22 +63,3 @@ class ChromeValidator extends ChromiumValidator {
   @override
   String get _name => 'Chrome';
 }
-
-/// A validator that checks whether Edge is installed and can run.
-class EdgeValidator extends ChromiumValidator {
-  const EdgeValidator({
-    required Platform platform,
-    required ChromiumLauncher chromiumLauncher,
-  }) : _platform = platform,
-       _chromiumLauncher = chromiumLauncher,
-       super('Edge - develop for the web');
-
-  @override
-  final Platform _platform;
-
-  @override
-  final ChromiumLauncher _chromiumLauncher;
-
-  @override
-  String get _name => 'Edge';
-}

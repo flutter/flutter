@@ -279,30 +279,6 @@ class SimControlListSection {
   static const SimControlListSection pairs = SimControlListSection._('pairs');
 }
 
-/// A simulated device type.
-///
-/// Simulated device types can be listed using the command
-/// `xcrun simctl list devicetypes`.
-class SimDeviceType {
-  SimDeviceType(this.name, this.identifier);
-
-  /// The name of the device type.
-  ///
-  /// Examples:
-  ///
-  ///     "iPhone 6s"
-  ///     "iPhone 6 Plus"
-  final String name;
-
-  /// The identifier of the device type.
-  ///
-  /// Examples:
-  ///
-  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6s"
-  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6-Plus"
-  final String identifier;
-}
-
 class SimDevice {
   SimDevice(this.category, this.data);
 
@@ -906,22 +882,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   void dispose() {
     _stop();
   }
-}
-
-int compareIosVersions(String v1, String v2) {
-  final List<int> v1Fragments = v1.split('.').map<int>(int.parse).toList();
-  final List<int> v2Fragments = v2.split('.').map<int>(int.parse).toList();
-
-  int i = 0;
-  while (i < v1Fragments.length && i < v2Fragments.length) {
-    final int v1Fragment = v1Fragments[i];
-    final int v2Fragment = v2Fragments[i];
-    if (v1Fragment != v2Fragment) {
-      return v1Fragment.compareTo(v2Fragment);
-    }
-    i += 1;
-  }
-  return v1Fragments.length.compareTo(v2Fragments.length);
 }
 
 class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {

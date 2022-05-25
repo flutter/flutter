@@ -814,11 +814,6 @@ String getAndroidBuildDirectory() {
   return getBuildDirectory();
 }
 
-/// Returns the AOT build output directory.
-String getAotBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'aot');
-}
-
 /// Returns the asset build output directory.
 String getAssetBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'flutter_assets');

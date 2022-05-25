@@ -5,8 +5,6 @@
 import 'package:yaml/yaml.dart';
 
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/terminal.dart';
 import 'migrate_result.dart';
 import 'migrate_utils.dart';
 
@@ -184,58 +182,4 @@ bool _conflictsResolved(String contents) {
     return false;
   }
   return true;
-}
-
-/// Returns true if the migration working directory has all conflicts resolved and prints the migration status.
-///
-/// The migration status printout lists all added, deleted, merged, and conflicted files.
-bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false, Logger? logger}) {
-  final StringBuffer printout = StringBuffer();
-  final StringBuffer redPrintout = StringBuffer();
-  bool result = true;
-  final List<String> remainingConflicts = <String>[];
-  final List<String> mergedFiles = <String>[];
-  for (final String localPath in manifest.conflictFiles) {
-    if (!_conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
-      remainingConflicts.add(localPath);
-    } else {
-      mergedFiles.add(localPath);
-    }
-  }
-
-  mergedFiles.addAll(manifest.mergedFiles);
-  if (manifest.addedFiles.isNotEmpty) {
-    printout.write('Added files:\n');
-    for (final String localPath in manifest.addedFiles) {
-      printout.write('  - $localPath\n');
-    }
-  }
-  if (manifest.deletedFiles.isNotEmpty) {
-    printout.write('Deleted files:\n');
-    for (final String localPath in manifest.deletedFiles) {
-      printout.write('  - $localPath\n');
-    }
-  }
-  if (mergedFiles.isNotEmpty) {
-    printout.write('Modified files:\n');
-    for (final String localPath in mergedFiles) {
-      printout.write('  - $localPath\n');
-    }
-  }
-  if (remainingConflicts.isNotEmpty) {
-    if (warnConflict) {
-      printout.write('Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:');
-    } else {
-      printout.write('Merge conflicted files:');
-    }
-    for (final String localPath in remainingConflicts) {
-      redPrintout.write('  - $localPath\n');
-    }
-    result = false;
-  }
-  if (logger != null) {
-    logger.printStatus(printout.toString());
-    logger.printStatus(redPrintout.toString(), color: TerminalColor.red, newline: false);
-  }
-  return result;
 }

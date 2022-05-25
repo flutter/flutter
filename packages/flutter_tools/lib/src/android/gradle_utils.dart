@@ -273,18 +273,6 @@ void updateLocalProperties({
   }
 }
 
-/// Writes standard Android local properties to the specified [properties] file.
-///
-/// Writes the path to the Android SDK, if known.
-void writeLocalProperties(File properties) {
-  final SettingsFile settings = SettingsFile();
-  final AndroidSdk? androidSdk = globals.androidSdk;
-  if (androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
-  }
-  settings.writeContents(properties);
-}
-
 void exitWithNoSdkMessage() {
   BuildEvent('unsupported-project', type: 'gradle', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
   throwToolExit(

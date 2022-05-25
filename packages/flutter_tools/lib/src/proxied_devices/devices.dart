@@ -34,6 +34,7 @@ T _cast<T>(Object? object) {
 ///
 /// If [deltaFileTransfer] is true, the proxy will use an rsync-like algorithm that
 /// only transfers the changed part of the application package for deployment.
+// While unused in the tool, this class is used by Google-internal tooling.
 class ProxiedDevices extends DeviceDiscovery {
   ProxiedDevices(this.connection, {
     bool deltaFileTransfer = true,

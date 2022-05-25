@@ -60,5 +60,3 @@ String getKernelPathForTransformerOptions(
   }
   return path;
 }
-
-const String defaultPrivateKeyPath = 'privatekey.der';

@@ -246,11 +246,6 @@ class CodeSizeEvent extends UsageEvent {
   );
 }
 
-/// An event for tracking the usage of specific error handling fallbacks.
-class ErrorHandlingEvent extends UsageEvent {
-  ErrorHandlingEvent(String parameter) : super('error-handling', parameter, flutterUsage: globals.flutterUsage);
-}
-
 /// Emit various null safety analytic events.
 ///
 /// 1. The current null safety runtime mode.

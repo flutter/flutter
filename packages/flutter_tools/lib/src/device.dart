@@ -23,6 +23,7 @@ import 'device_port_forwarder.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
+// While unused in the tool, this getter is used by Google-internal tooling.
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
 /// A description of the kind of workflow the device supports.
@@ -1078,13 +1079,6 @@ abstract class DeviceLogReader {
 
   // Clean up resources allocated by log reader e.g. subprocesses
   void dispose();
-}
-
-/// Describes an app running on the device.
-class DiscoveredApp {
-  DiscoveredApp(this.id, this.observatoryPort);
-  final String id;
-  final int observatoryPort;
 }
 
 // An empty device log reader
