@@ -799,14 +799,9 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   _DraggableScrollableSheetScrollPosition({
     required super.physics,
     required super.context,
-    ScrollPosition? oldPosition,
+    super.oldPosition,
     required this.getExtent,
-  }) : super(oldPosition: oldPosition) {
-    if (oldPosition is _DraggableScrollableSheetScrollPosition
-        && oldPosition._dragCancelCallback != null) {
-      _dragCancelCallback = oldPosition._dragCancelCallback;
-    }
-  }
+  });
 
   VoidCallback? _dragCancelCallback;
   final _DraggableSheetExtent Function() getExtent;
@@ -814,6 +809,21 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   bool get listShouldScroll => pixels > 0.0;
 
   _DraggableSheetExtent get extent => getExtent();
+
+  @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    assert(_dragCancelCallback = null);
+
+    if (other is! _DraggableScrollableSheetScrollPosition) {
+      return;
+    }
+
+    if (other._dragCancelCallback != null) {
+      _dragCancelCallback = other._dragCancelCallback;
+      other._dragCancelCallback = null;
+    }
+  }
 
   @override
   void beginActivity(ScrollActivity? newActivity) {
