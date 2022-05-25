@@ -10,23 +10,19 @@ import 'package:flutter/foundation.dart';
 
 import 'binary_messenger.dart';
 import 'binding.dart';
+import 'debug.dart' show debugProfilePlatformChannels;
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
-/// When this is is true statistics about the usage of Platform Channels will
-/// be printed out periodically and Timeline events will show the time between
-/// sending and receiving a message (encoding and decoding time excluded).
-bool debugProfilePlatformChannels = false;
 bool _debugProfilePlatformChannelsIsRunning = false;
 const Duration _debugProfilePlatformChannelsRate = Duration(seconds: 1);
 final Expando<BinaryMessenger> _debugBinaryMessengers = Expando<BinaryMessenger>();
 
 class _ProfiledBinaryMessenger implements BinaryMessenger {
-  const _ProfiledBinaryMessenger(this.proxy, this.channel, this.name, this.codec);
+  const _ProfiledBinaryMessenger(this.proxy, this.channelTypeName, this.codecTypeName);
   final BinaryMessenger proxy;
-  final Object channel;
-  final String name;
-  final String codec;
+  final String channelTypeName;
+  final String codecTypeName;
 
   @override
   Future<void> handlePlatformMessage(String channel, ByteData? data, PlatformMessageResponseCallback? callback) {
@@ -35,11 +31,15 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
 
   Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
     final TimelineTask task = TimelineTask();
-    _debugRecordUpStream(channel, '$name$postfix', codec, message);
-    task.start('Platform Channel send $name$postfix');
-    final ByteData? result = await proxy.send(channel, message);
-    task.finish();
-    _debugRecordDownStream(channel, '$name$postfix', codec, result);
+    _debugRecordUpStream(channelTypeName, '$channel$postfix', codecTypeName, message);
+    task.start('Platform Channel send $channel$postfix');
+    final ByteData? result;
+    try {
+      result = await proxy.send(channel, message);
+    } finally {
+      task.finish();
+    }
+    _debugRecordDownStream(channelTypeName, '$channel$postfix', codecTypeName, result);
     return result;
   }
 
@@ -96,30 +96,27 @@ Future<void> _debugLaunchProfilePlatformChannels() async {
         (y.upBytes + y.downBytes) - (x.upBytes + x.downBytes));
     for (final _PlatformChannelStats stats in allStats) {
       log.writeln(
-          '  (name:${stats.channel} type:${stats.type} codec:${stats.codec} up:${stats.upBytes} up_avg:${stats.averageUpPayload} down:${stats.downBytes} down_avg:${stats.averageDownPayload})');
+          '  (name:"${stats.channel}" type:"${stats.type}" codec:"${stats.codec}" upBytes:${stats.upBytes} upBytes_avg:${stats.averageUpPayload.toStringAsFixed(1)} downBytes:${stats.downBytes} downBytes_avg:${stats.averageDownPayload.toStringAsFixed(1)})');
     }
-    // ignore: avoid_print
-    print(log.toString());
+    debugPrint(log.toString());
     _debugProfilePlatformChannelsStats.clear();
   }
 }
 
-void _debugRecordUpStream(
-    Object channel, String name, Object codec, ByteData? bytes) {
+void _debugRecordUpStream(String channelTypeName, String name,
+    String codecTypeName, ByteData? bytes) {
   final _PlatformChannelStats stats =
       _debugProfilePlatformChannelsStats[name] ??=
-          _PlatformChannelStats(
-              name, codec.toString(), channel.runtimeType.toString());
+          _PlatformChannelStats(name, codecTypeName, channelTypeName);
   stats.addUpStream(bytes?.lengthInBytes ?? 0);
   _debugLaunchProfilePlatformChannels();
 }
 
-void _debugRecordDownStream(
-    Object channel, String name, Object codec, ByteData? bytes) {
+void _debugRecordDownStream(String channelTypeName, String name,
+    String codecTypeName, ByteData? bytes) {
   final _PlatformChannelStats stats =
       _debugProfilePlatformChannelsStats[name] ??=
-          _PlatformChannelStats(
-              name, codec.toString(), channel.runtimeType.toString());
+          _PlatformChannelStats(name, codecTypeName, channelTypeName);
   stats.addDownStream(bytes?.lengthInBytes ?? 0);
   _debugLaunchProfilePlatformChannels();
 }
@@ -166,7 +163,9 @@ class BasicMessageChannel<T> {
     final BinaryMessenger result =
         _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
     return !kReleaseMode && debugProfilePlatformChannels
-        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(result, this, name, codec.toString())
+        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+            // ignore: no_runtimetype_tostring
+            result, runtimeType.toString(), codec.runtimeType.toString())
         : result;
   }
   final BinaryMessenger? _binaryMessenger;
@@ -252,7 +251,9 @@ class MethodChannel {
     final BinaryMessenger result =
         _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
     return !kReleaseMode && debugProfilePlatformChannels
-        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(result, this, name, codec.toString())
+        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+            // ignore: no_runtimetype_tostring
+            result, runtimeType.toString(), codec.runtimeType.toString())
         : result;
   }
   final BinaryMessenger? _binaryMessenger;
