@@ -169,13 +169,13 @@ abstract class MenuItem with Diagnosticable {
   /// Returns a callback, if any, to be invoked if the platform menu receives a
   /// "Menu.opened" method call from the platform for this item.
   ///
-  /// Only items that have submenus will have this callback invokes
+  /// Only items that have submenus will have this callback invoked.
   ///
   /// The default implementation returns null.
   VoidCallback? get onOpen => null;
 
   /// Returns a callback, if any, to be invoked if the platform menu receives a
-  /// "Menu.opened" method call from the platform for this item.
+  /// "Menu.closed" method call from the platform for this item.
   ///
   /// Only items that have submenus will have this callback invoked.
   ///
