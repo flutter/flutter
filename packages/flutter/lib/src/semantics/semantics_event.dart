@@ -34,8 +34,9 @@ abstract class SemanticsEvent {
       'type': type,
       'data': getDataMap(),
     };
-    if (nodeId != null)
+    if (nodeId != null) {
       event['nodeId'] = nodeId;
+    }
 
     return event;
   }
@@ -48,8 +49,9 @@ abstract class SemanticsEvent {
     final List<String> pairs = <String>[];
     final Map<String, dynamic> dataMap = getDataMap();
     final List<String> sortedKeys = dataMap.keys.toList()..sort();
-    for (final String key in sortedKeys)
+    for (final String key in sortedKeys) {
       pairs.add('$key: ${dataMap[key]}');
+    }
     return '${objectRuntimeType(this, 'SemanticsEvent')}(${pairs.join(', ')})';
   }
 }

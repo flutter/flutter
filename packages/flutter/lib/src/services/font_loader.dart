@@ -34,8 +34,9 @@ class FontLoader {
   /// The [bytes] argument specifies the actual font asset bytes. Currently,
   /// only OpenType (OTF) and TrueType (TTF) fonts are supported.
   void addFont(Future<ByteData> bytes) {
-    if (_loaded)
+    if (_loaded) {
       throw StateError('FontLoader is already loaded');
+    }
 
     _fontFutures.add(bytes.then(
         (ByteData data) => Uint8List.view(data.buffer, data.offsetInBytes, data.lengthInBytes),
@@ -53,8 +54,9 @@ class FontLoader {
   /// The returned future will complete with an error if any of the font asset
   /// futures yield an error.
   Future<void> load() async {
-    if (_loaded)
+    if (_loaded) {
       throw StateError('FontLoader is already loaded');
+    }
     _loaded = true;
 
     final Iterable<Future<void>> loadFutures = _fontFutures.map(

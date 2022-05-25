@@ -527,8 +527,9 @@ abstract class RawKeyEvent with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<LogicalKeyboardKey>('logicalKey', logicalKey));
     properties.add(DiagnosticsProperty<PhysicalKeyboardKey>('physicalKey', physicalKey));
-    if (this is RawKeyDownEvent)
+    if (this is RawKeyDownEvent) {
       properties.add(DiagnosticsProperty<bool>('repeat', repeat));
+    }
   }
 }
 
@@ -651,8 +652,9 @@ class RawKeyboard {
     _cachedKeyMessageHandler = handler == null ?
       null :
       (KeyMessage message) {
-        if (message.rawEvent != null)
+        if (message.rawEvent != null) {
           return handler(message.rawEvent!);
+        }
         return false;
       };
     ServicesBinding.instance.keyEventManager.keyMessageHandler = _cachedKeyMessageHandler;
@@ -783,8 +785,9 @@ class RawKeyboard {
     ModifierKey? thisKeyModifier;
     for (final ModifierKey key in ModifierKey.values) {
       final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
-      if (thisModifierKeys == null)
+      if (thisModifierKeys == null) {
         continue;
+      }
       if (thisModifierKeys.contains(event.physicalKey)) {
         thisKeyModifier = key;
       }
@@ -869,8 +872,9 @@ class _ModifierSidePair {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _ModifierSidePair
         && other.modifier == modifier
         && other.side == side;

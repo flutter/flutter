@@ -333,8 +333,9 @@ class SystemUiOverlayStyle {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SystemUiOverlayStyle
         && other.systemNavigationBarColor == systemNavigationBarColor
         && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
