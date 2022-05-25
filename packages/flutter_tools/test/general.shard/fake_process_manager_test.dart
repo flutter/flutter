@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/convert.dart' show utf8;
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
@@ -170,6 +173,151 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(stderr, 'stderr'.codeUnits);
       expect(stdout, 'stdout'.codeUnits);
+    });
+  });
+
+  group(FakeProcessManager, () {
+    late FakeProcessManager manager;
+
+    setUp(() {
+      manager = FakeProcessManager.empty();
+    });
+
+    group('start', () {
+      testWithoutContext('can run a fake command', () async {
+        manager.addCommand(const FakeCommand(command: <String>['faketool']));
+
+        final Process process = await manager.start(<String>['faketool']);
+        expect(await process.exitCode, 0);
+        expect(await utf8.decodeStream(process.stdout), isEmpty);
+        expect(await utf8.decodeStream(process.stderr), isEmpty);
+      });
+
+      testWithoutContext('outputFollowsExit delays stderr, stdout until after process exit', () async {
+        manager.addCommand(const FakeCommand(
+          command: <String>['faketool'],
+          stderr: 'hello',
+          stdout: 'world',
+          outputFollowsExit: true,
+        ));
+
+        final List<int> stderrBytes = <int>[];
+        final List<int> stdoutBytes = <int>[];
+
+        // Start the process.
+        final Process process = await manager.start(<String>['faketool']);
+        final StreamSubscription<List<int>> stderrSubscription = process.stderr.listen((List<int> chunk) { stderrBytes.addAll(chunk); });
+        final StreamSubscription<List<int>> stdoutSubscription = process.stdout.listen((List<int> chunk) { stdoutBytes.addAll(chunk); });
+
+        // Immediately after exit, no output is emitted.
+        await process.exitCode;
+        expect(utf8.decode(stderrBytes), isEmpty);
+        expect(utf8.decode(stdoutBytes), isEmpty);
+
+        // Output is emitted asynchronously after process exit.
+        await Future.wait(<Future<void>>[
+          stderrSubscription.asFuture(),
+          stdoutSubscription.asFuture(),
+        ]);
+        expect(utf8.decode(stderrBytes), 'hello');
+        expect(utf8.decode(stdoutBytes), 'world');
+
+        // Clean up stream subscriptions.
+        await stderrSubscription.cancel();
+        await stdoutSubscription.cancel();
+      });
+    });
+
+    group('run', () {
+      testWithoutContext('can run a fake command', () async {
+        manager.addCommand(const FakeCommand(command: <String>['faketool']));
+
+        final ProcessResult result = await manager.run(<String>['faketool']);
+        expect(result.exitCode, 0);
+        expect(result.stdout, isEmpty);
+        expect(result.stderr, isEmpty);
+      });
+
+      testWithoutContext('stderr, stdout are String if encoding is unspecified', () async {
+        manager.addCommand(const FakeCommand(command: <String>['faketool']));
+
+        final ProcessResult result = await manager.run(<String>['faketool']);
+        expect(result.exitCode, 0);
+        expect(result.stdout, isA<String>());
+        expect(result.stderr, isA<String>());
+      });
+
+      testWithoutContext('stderr, stdout are List<int> if encoding is null', () async {
+        manager.addCommand(const FakeCommand(command: <String>['faketool']));
+
+        final ProcessResult result = await manager.run(
+          <String>['faketool'],
+          stderrEncoding: null,
+          stdoutEncoding: null,
+        );
+        expect(result.exitCode, 0);
+        expect(result.stdout, isA<List<int>>());
+        expect(result.stderr, isA<List<int>>());
+      });
+
+      testWithoutContext('stderr, stdout are String if encoding is specified', () async {
+        manager.addCommand(const FakeCommand(command: <String>['faketool']));
+
+        final ProcessResult result = await manager.run(
+          <String>['faketool'],
+          stderrEncoding: utf8,
+          stdoutEncoding: utf8,
+        );
+        expect(result.exitCode, 0);
+        expect(result.stdout, isA<String>());
+        expect(result.stderr, isA<String>());
+      });
+    });
+
+    group('runSync', () {
+      testWithoutContext('can run a fake command', () {
+        manager.addCommand(const FakeCommand(command: <String>['faketool']));
+
+        final ProcessResult result = manager.runSync(<String>['faketool']);
+        expect(result.exitCode, 0);
+        expect(result.stdout, isEmpty);
+        expect(result.stderr, isEmpty);
+      });
+
+      testWithoutContext('stderr, stdout are String if encoding is unspecified', () {
+        manager.addCommand(const FakeCommand(command: <String>['faketool']));
+
+        final ProcessResult result = manager.runSync(<String>['faketool']);
+        expect(result.exitCode, 0);
+        expect(result.stdout, isA<String>());
+        expect(result.stderr, isA<String>());
+      });
+
+      testWithoutContext('stderr, stdout are List<int> if encoding is null', () {
+        manager.addCommand(const FakeCommand(command: <String>['faketool']));
+
+        final ProcessResult result = manager.runSync(
+          <String>['faketool'],
+          stderrEncoding: null,
+          stdoutEncoding: null,
+        );
+        expect(result.exitCode, 0);
+        expect(result.stdout, isA<List<int>>());
+        expect(result.stderr, isA<List<int>>());
+      });
+
+      testWithoutContext('stderr, stdout are String if encoding is specified', () {
+        manager.addCommand(const FakeCommand(command: <String>['faketool']));
+
+        final ProcessResult result = manager.runSync(
+          <String>['faketool'],
+          stderrEncoding: utf8,
+          stdoutEncoding: utf8,
+        );
+        expect(result.exitCode, 0);
+        expect(result.stdout, isA<String>());
+        expect(result.stderr, isA<String>());
+      });
     });
   });
 }

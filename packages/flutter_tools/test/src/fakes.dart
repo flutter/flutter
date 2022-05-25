@@ -360,7 +360,7 @@ class FakeFlutterVersion implements FlutterVersion {
   final String engineRevisionShort;
 
   @override
-  final String repositoryUrl;
+  final String? repositoryUrl;
 
   @override
   final String frameworkVersion;

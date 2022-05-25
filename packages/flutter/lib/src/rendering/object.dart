@@ -2119,24 +2119,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
-  /// Rotate this render object (not yet implemented).
-  void rotate({
-    int? oldAngle, // 0..3
-    int? newAngle, // 0..3
-    Duration? time,
-  }) { }
-
-  // when the parent has rotated (e.g. when the screen has been turned
-  // 90 degrees), immediately prior to layout() being called for the
-  // new dimensions, rotate() is called with the old and new angles.
-  // The next time paint() is called, the coordinate space will have
-  // been rotated N quarter-turns clockwise, where:
-  //    N = newAngle-oldAngle
-  // ...but the rendering is expected to remain the same, pixel for
-  // pixel, on the output device. Then, the layout() method or
-  // equivalent will be called.
-
-
   // PAINTING
 
   /// Whether [paint] for this render object is currently running.
@@ -2745,6 +2727,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     return true;
   }
 
+  /// {@template flutter.rendering.RenderObject.getTransformTo}
   /// Applies the paint transform up the tree to `ancestor`.
   ///
   /// Returns a matrix that maps the local paint coordinate system to the
@@ -2752,11 +2735,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// If `ancestor` is null, this method returns a matrix that maps from the
   /// local paint coordinate system to the coordinate system of the
-  /// [PipelineOwner.rootNode]. For the render tree owner by the
-  /// [RendererBinding] (i.e. for the main render tree displayed on the device)
-  /// this means that this method maps to the global coordinate system in
-  /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
-  /// [RenderView] to further transform the coordinate.
+  /// [PipelineOwner.rootNode].
+  /// {@endtemplate}
+  ///
+  /// For the render tree owned by the [RendererBinding] (i.e. for the main
+  /// render tree displayed on the device) this means that this method maps to
+  /// the global coordinate system in logical pixels. To get physical pixels,
+  /// use [applyPaintTransform] from the [RenderView] to further transform the
+  /// coordinate.
   Matrix4 getTransformTo(RenderObject? ancestor) {
     final bool ancestorSpecified = ancestor != null;
     assert(attached);
