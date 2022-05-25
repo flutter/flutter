@@ -59,8 +59,9 @@ abstract class InteractiveInkFeature extends InkFeature {
   Color get color => _color;
   Color _color;
   set color(Color value) {
-    if (value == _color)
+    if (value == _color) {
       return;
+    }
     _color = value;
     controller.markNeedsPaint();
   }
@@ -846,8 +847,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (type == _HighlightType.pressed) {
       widget.parentState?.markChildInkResponsePressed(this, value);
     }
-    if (value == (highlight != null && highlight.active))
+    if (value == (highlight != null && highlight.active)) {
       return;
+    }
     if (value) {
       if (highlight == null) {
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
@@ -878,8 +880,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         widget.onHighlightChanged?.call(value);
         break;
       case _HighlightType.hover:
-        if (callOnHover)
+        if (callOnHover) {
           widget.onHover?.call(value);
+        }
         break;
       case _HighlightType.focus:
         break;
@@ -901,8 +904,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       if (_splashes != null) {
         assert(_splashes!.contains(splash));
         _splashes!.remove(splash);
-        if (_currentSplash == splash)
+        if (_currentSplash == splash) {
           _currentSplash = null;
+        }
         updateKeepAlive();
       } // else we're probably in deactivate()
     }
@@ -964,8 +968,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void _handleTapDown(TapDownDetails details) {
-    if (_anyChildInkResponsePressed)
+    if (_anyChildInkResponsePressed) {
       return;
+    }
     _startNewSplash(details: details);
     widget.onTapDown?.call(details);
   }
@@ -999,8 +1004,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     _currentSplash = null;
     updateHighlight(_HighlightType.pressed, value: false);
     if (widget.onTap != null) {
-      if (widget.enableFeedback)
+      if (widget.enableFeedback) {
         Feedback.forTap(context);
+      }
       widget.onTap?.call();
     }
   }
@@ -1023,8 +1029,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     _currentSplash?.confirm();
     _currentSplash = null;
     if (widget.onLongPress != null) {
-      if (widget.enableFeedback)
+      if (widget.enableFeedback) {
         Feedback.forLongPress(context);
+      }
       widget.onLongPress!();
     }
   }
@@ -1034,8 +1041,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes!;
       _splashes = null;
-      for (final InteractiveInkFeature splash in splashes)
+      for (final InteractiveInkFeature splash in splashes) {
         splash.dispose();
+      }
       _currentSplash = null;
     }
     assert(_currentSplash == null);

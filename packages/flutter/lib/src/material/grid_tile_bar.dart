@@ -59,8 +59,9 @@ class GridTileBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     BoxDecoration? decoration;
-    if (backgroundColor != null)
+    if (backgroundColor != null) {
       decoration = BoxDecoration(color: backgroundColor);
+    }
 
     final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
       start: leading != null ? 8.0 : 16.0,

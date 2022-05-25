@@ -392,10 +392,12 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   }
 
   BorderSide? _resolveSide(BorderSide? side) {
-    if (side is MaterialStateBorderSide)
+    if (side is MaterialStateBorderSide) {
       return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
-    if (!states.contains(MaterialState.selected))
+    }
+    if (!states.contains(MaterialState.selected)) {
       return side;
+    }
     return null;
   }
 
@@ -647,10 +649,11 @@ class _CheckboxPainter extends ToggleablePainter {
       } else {
         _drawBox(canvas, outer, paint, side, true);
         final double tShrink = (t - 0.5) * 2.0;
-        if (previousValue == null || value == null)
+        if (previousValue == null || value == null) {
           _drawDash(canvas, origin, tShrink, strokePaint);
-        else
+        } else {
           _drawCheck(canvas, origin, tShrink, strokePaint);
+        }
       }
     } else { // Two cases: null to true, true to null
       final Rect outer = _outerRectAt(origin, 1.0);
@@ -659,16 +662,18 @@ class _CheckboxPainter extends ToggleablePainter {
       _drawBox(canvas, outer, paint, side, true);
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
-        if (previousValue ?? false)
+        if (previousValue ?? false) {
           _drawCheck(canvas, origin, tShrink, strokePaint);
-        else
+        } else {
           _drawDash(canvas, origin, tShrink, strokePaint);
+        }
       } else {
         final double tExpand = (tNormalized - 0.5) * 2.0;
-        if (value ?? false)
+        if (value ?? false) {
           _drawCheck(canvas, origin, tExpand, strokePaint);
-        else
+        } else {
           _drawDash(canvas, origin, tExpand, strokePaint);
+        }
       }
     }
   }

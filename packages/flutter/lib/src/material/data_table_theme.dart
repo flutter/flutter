@@ -152,10 +152,12 @@ class DataTableThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DataTableThemeData
       && other.decoration == decoration
       && other.dataRowColor == dataRowColor
@@ -188,8 +190,9 @@ class DataTableThemeData with Diagnosticable {
 
   static MaterialStateProperty<T>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T Function(T?, T?, double) lerpFunction ) {
     // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 }

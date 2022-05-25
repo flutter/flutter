@@ -5151,11 +5151,12 @@ void main() {
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.setData')
+        if (methodCall.method == 'Clipboard.setData') {
           // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
-        else if (methodCall.method == 'Clipboard.getData')
+        } else if (methodCall.method == 'Clipboard.getData') {
           return <String, dynamic>{'text': clipboardContent};
+        }
         return null;
       });
 
@@ -5227,8 +5228,9 @@ void main() {
     const String clipboardContent = 'I love Flutter!';
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.getData')
+        if (methodCall.method == 'Clipboard.getData') {
           return <String, dynamic>{'text': clipboardContent};
+        }
         return null;
       });
 
@@ -5276,11 +5278,12 @@ void main() {
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.setData')
+        if (methodCall.method == 'Clipboard.setData') {
           // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
-        else if (methodCall.method == 'Clipboard.getData')
+        } else if (methodCall.method == 'Clipboard.getData') {
           return <String, dynamic>{'text': clipboardContent};
+        }
         return null;
       });
 

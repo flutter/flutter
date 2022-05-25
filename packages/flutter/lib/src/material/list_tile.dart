@@ -614,16 +614,18 @@ class ListTile extends StatelessWidget {
   }
 
   Color? _iconColor(ThemeData theme, ListTileThemeData tileTheme) {
-    if (!enabled)
+    if (!enabled) {
       return theme.disabledColor;
+    }
 
     if (selected) {
       return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
     }
 
     final Color? color = iconColor ?? tileTheme.iconColor ?? theme.listTileTheme.iconColor;
-    if (color != null)
+    if (color != null) {
       return color;
+    }
 
     switch (theme.brightness) {
       case Brightness.light:
@@ -636,8 +638,9 @@ class ListTile extends StatelessWidget {
   }
 
   Color? _textColor(ThemeData theme, ListTileThemeData tileTheme, Color? defaultColor) {
-    if (!enabled)
+    if (!enabled) {
       return theme.disabledColor;
+    }
 
     if (selected) {
       return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
@@ -977,8 +980,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool _isDense;
   set isDense(bool value) {
     assert(value != null);
-    if (_isDense == value)
+    if (_isDense == value) {
       return;
+    }
     _isDense = value;
     markNeedsLayout();
   }
@@ -987,8 +991,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   VisualDensity _visualDensity;
   set visualDensity(VisualDensity value) {
     assert(value != null);
-    if (_visualDensity == value)
+    if (_visualDensity == value) {
       return;
+    }
     _visualDensity = value;
     markNeedsLayout();
   }
@@ -997,8 +1002,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool _isThreeLine;
   set isThreeLine(bool value) {
     assert(value != null);
-    if (_isThreeLine == value)
+    if (_isThreeLine == value) {
       return;
+    }
     _isThreeLine = value;
     markNeedsLayout();
   }
@@ -1007,8 +1013,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsLayout();
   }
@@ -1017,8 +1024,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextBaseline _titleBaselineType;
   set titleBaselineType(TextBaseline value) {
     assert(value != null);
-    if (_titleBaselineType == value)
+    if (_titleBaselineType == value) {
       return;
+    }
     _titleBaselineType = value;
     markNeedsLayout();
   }
@@ -1026,8 +1034,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextBaseline? get subtitleBaselineType => _subtitleBaselineType;
   TextBaseline? _subtitleBaselineType;
   set subtitleBaselineType(TextBaseline? value) {
-    if (_subtitleBaselineType == value)
+    if (_subtitleBaselineType == value) {
       return;
+    }
     _subtitleBaselineType = value;
     markNeedsLayout();
   }
@@ -1038,8 +1047,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   set horizontalTitleGap(double value) {
     assert(value != null);
-    if (_horizontalTitleGap == value)
+    if (_horizontalTitleGap == value) {
       return;
+    }
     _horizontalTitleGap = value;
     markNeedsLayout();
   }
@@ -1049,8 +1059,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   set minVerticalPadding(double value) {
     assert(value != null);
-    if (_minVerticalPadding == value)
+    if (_minVerticalPadding == value) {
       return;
+    }
     _minVerticalPadding = value;
     markNeedsLayout();
   }
@@ -1060,8 +1071,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   set minLeadingWidth(double value) {
     assert(value != null);
-    if (_minLeadingWidth == value)
+    if (_minLeadingWidth == value) {
       return;
+    }
     _minLeadingWidth = value;
     markNeedsLayout();
   }
@@ -1103,10 +1115,12 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     final bool isOneLine = !isThreeLine && !hasSubtitle;
 
     final Offset baseDensity = visualDensity.baseSizeAdjustment;
-    if (isOneLine)
+    if (isOneLine) {
       return (isDense ? 48.0 : 56.0) + baseDensity.dy;
-    if (isTwoLine)
+    }
+    if (isTwoLine) {
       return (isDense ? 64.0 : 72.0) + baseDensity.dy;
+    }
     return (isDense ? 76.0 : 88.0) + baseDensity.dy;
   }
 
@@ -1135,8 +1149,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   static Size _layoutBox(RenderBox? box, BoxConstraints constraints) {
-    if (box == null)
+    if (box == null) {
       return Size.zero;
+    }
     box.layout(constraints, parentUsesSize: true);
     return box.size;
   }
@@ -1272,23 +1287,29 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
     switch (textDirection) {
       case TextDirection.rtl: {
-        if (hasLeading)
+        if (hasLeading) {
           _positionBox(leading!, Offset(tileWidth - leadingSize.width, leadingY));
+        }
         _positionBox(title!, Offset(adjustedTrailingWidth, titleY));
-        if (hasSubtitle)
+        if (hasSubtitle) {
           _positionBox(subtitle!, Offset(adjustedTrailingWidth, subtitleY!));
-        if (hasTrailing)
+        }
+        if (hasTrailing) {
           _positionBox(trailing!, Offset(0.0, trailingY));
+        }
         break;
       }
       case TextDirection.ltr: {
-        if (hasLeading)
+        if (hasLeading) {
           _positionBox(leading!, Offset(0.0, leadingY));
+        }
         _positionBox(title!, Offset(titleStart, titleY));
-        if (hasSubtitle)
+        if (hasSubtitle) {
           _positionBox(subtitle!, Offset(titleStart, subtitleY!));
-        if (hasTrailing)
+        }
+        if (hasTrailing) {
           _positionBox(trailing!, Offset(tileWidth - trailingSize.width, trailingY));
+        }
         break;
       }
     }
@@ -1328,8 +1349,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
           return child.hitTest(result, position: transformed);
         },
       );
-      if (isHit)
+      if (isHit) {
         return true;
+      }
     }
     return false;
   }

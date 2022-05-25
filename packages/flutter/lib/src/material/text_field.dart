@@ -861,8 +861,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       );
 
     // No need to build anything if counter or counterText were given directly.
-    if (effectiveDecoration.counter != null || effectiveDecoration.counterText != null)
+    if (effectiveDecoration.counter != null || effectiveDecoration.counterText != null) {
       return effectiveDecoration;
+    }
 
     // If buildCounter was provided, use it to generate a counter widget.
     Widget? counter;
@@ -888,8 +889,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       return effectiveDecoration.copyWith(counter: counter);
     }
 
-    if (widget.maxLength == null)
-      return effectiveDecoration; // No counter widget
+    if (widget.maxLength == null) {
+      return effectiveDecoration;
+    } // No counter widget
 
     String counterText = '$currentLength';
     String semanticCounterText = '';
@@ -1012,23 +1014,29 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
       return false;
+    }
 
-    if (cause == SelectionChangedCause.keyboard)
+    if (cause == SelectionChangedCause.keyboard) {
       return false;
+    }
 
-    if (widget.readOnly && _effectiveController.selection.isCollapsed)
+    if (widget.readOnly && _effectiveController.selection.isCollapsed) {
       return false;
+    }
 
-    if (!_isEnabled)
+    if (!_isEnabled) {
       return false;
+    }
 
-    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.scribble)
+    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.scribble) {
       return true;
+    }
 
-    if (_effectiveController.text.isNotEmpty)
+    if (_effectiveController.text.isNotEmpty) {
       return true;
+    }
 
     return false;
   }
@@ -1327,8 +1335,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
                 onTap: widget.readOnly ? null : () {
-                  if (!_effectiveController.selection.isValid)
+                  if (!_effectiveController.selection.isValid) {
                     _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                  }
                   _requestKeyboard();
                 },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,

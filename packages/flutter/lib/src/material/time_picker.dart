@@ -125,8 +125,9 @@ class _TimePickerHeader extends StatelessWidget {
   final String? helpText;
 
   void _handleChangeMode(_TimePickerMode value) {
-    if (value != mode)
+    if (value != mode) {
       onModeChanged(value);
+    }
   }
 
   @override
@@ -693,8 +694,9 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value)
+    if (_minSize == value) {
       return;
+    }
     _minSize = value;
     markNeedsLayout();
   }
@@ -857,8 +859,9 @@ class _DialPainter extends CustomPainter {
     }
 
     void paintLabels(List<_TappableLabel>? labels) {
-      if (labels == null)
+      if (labels == null) {
         return;
+      }
       final double labelThetaIncrement = -_kTwoPi / labels.length;
       double labelTheta = math.pi / 2.0;
 
@@ -963,8 +966,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void didUpdateWidget(_Dial oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.mode != oldWidget.mode || widget.selectedTime != oldWidget.selectedTime) {
-      if (!_dragging)
+      if (!_dragging) {
         _animateTo(_getThetaForTime(widget.selectedTime));
+      }
     }
   }
 
@@ -1026,10 +1030,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   TimeOfDay _notifyOnChangedIfNeeded({ bool roundMinutes = false }) {
     final TimeOfDay current = _getTimeForTheta(_theta.value, roundMinutes: roundMinutes);
-    if (widget.onChanged == null)
+    if (widget.onChanged == null) {
       return current;
-    if (current != widget.selectedTime)
+    }
+    if (current != widget.selectedTime) {
       widget.onChanged!(current);
+    }
     return current;
   }
 
@@ -2071,8 +2077,9 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   }
 
   void _announceInitialTimeOnce() {
-    if (_announcedInitialTime.value)
+    if (_announcedInitialTime.value) {
       return;
+    }
 
     final MediaQueryData media = MediaQuery.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);

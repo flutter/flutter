@@ -829,10 +829,12 @@ void main() {
                 minimumSize: const Size(64, 36),
               ).copyWith(
                 side: MaterialStateProperty.resolveWith<BorderSide>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled))
+                  if (states.contains(MaterialState.disabled)) {
                     return disabledBorderSide;
-                  if (states.contains(MaterialState.pressed))
+                  }
+                  if (states.contains(MaterialState.pressed)) {
                     return pressedBorderSide;
+                  }
                   return enabledBorderSide;
                 }),
               ),

@@ -43,8 +43,9 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null)
+    if (widget.child != null) {
       return widget.child!;
+    }
     return Container();
   }
 }
@@ -204,8 +205,9 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
   void drawLine(Offset p1, Offset p2, Paint paint) {
     // Assuming that the indicatorWeight is 2.0, the default.
     const double indicatorWeight = 2.0;
-    if (paint.color == indicatorColor)
+    if (paint.color == indicatorColor) {
       indicatorRect = Rect.fromPoints(p1, p2).inflate(indicatorWeight / 2.0);
+    }
   }
 }
 
@@ -812,8 +814,9 @@ void main() {
     ));
 
     tabController.animation!.addListener(() {
-      if (tabController.animation!.status == AnimationStatus.forward)
+      if (tabController.animation!.status == AnimationStatus.forward) {
         tabController.index = 2;
+      }
       expect(tabController.indexIsChanging, true);
     });
 
@@ -3207,10 +3210,12 @@ void main() {
               ],
               overlayColor: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
-                 if (states.contains(MaterialState.hovered))
-                    return const Color(0xff00ff00);
-                  if (states.contains(MaterialState.pressed))
+                 if (states.contains(MaterialState.hovered)) {
+                   return const Color(0xff00ff00);
+                 }
+                  if (states.contains(MaterialState.pressed)) {
                     return const Color(0xf00fffff);
+                  }
                   return const Color(0xffbadbad); // Shouldn't happen.
                 },
               ),
@@ -3240,10 +3245,12 @@ void main() {
                 ],
                 overlayColor: MaterialStateProperty.resolveWith<Color>(
                   (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered))
+                    if (states.contains(MaterialState.hovered)) {
                       return const Color(0xff00ff00);
-                    if (states.contains(MaterialState.pressed))
+                    }
+                    if (states.contains(MaterialState.pressed)) {
                       return splashColor;
+                    }
                     return const Color(0xffbadbad); // Shouldn't happen.
                   },
                 ),

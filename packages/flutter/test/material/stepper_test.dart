@@ -462,8 +462,9 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     Widget builder(BuildContext context, ControlsDetails details) {
       // For the purposes of testing, only render something for the active
       // step.
-      if (!details.isActive)
+      if (!details.isActive) {
         return Container();
+      }
 
       return Container(
         margin: const EdgeInsets.only(top: 16.0),

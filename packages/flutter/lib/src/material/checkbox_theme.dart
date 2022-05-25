@@ -155,10 +155,12 @@ class CheckboxThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is CheckboxThemeData
       && other.mouseCursor == mouseCursor
       && other.fillColor == fillColor
@@ -192,15 +194,17 @@ class CheckboxThemeData with Diagnosticable {
     T Function(T?, T?, double) lerpFunction,
   ) {
     // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return BorderSide.lerp(a!, b!, t);
   }
 }

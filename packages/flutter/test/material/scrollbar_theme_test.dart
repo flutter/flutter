@@ -706,29 +706,34 @@ ScrollbarThemeData _scrollbarTheme({
 }
 
 double? _getThickness(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered))
+  if (states.contains(MaterialState.hovered)) {
     return 20.0;
+  }
   return 10.0;
 }
 
 bool? _getThumbVisibility(Set<MaterialState> states) => true;
 
 Color? _getThumbColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.dragged))
+  if (states.contains(MaterialState.dragged)) {
     return Colors.red;
-  if (states.contains(MaterialState.hovered))
+  }
+  if (states.contains(MaterialState.hovered)) {
     return Colors.blue;
+  }
   return Colors.green;
 }
 
 Color? _getTrackColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered))
+  if (states.contains(MaterialState.hovered)) {
     return Colors.black;
+  }
   return null;
 }
 
 Color? _getTrackBorderColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered))
+  if (states.contains(MaterialState.hovered)) {
     return Colors.yellow;
+  }
   return null;
 }

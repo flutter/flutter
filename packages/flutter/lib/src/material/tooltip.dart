@@ -529,8 +529,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
   /// was already visible.
   bool ensureTooltipVisible() {
-    if (!_visible)
+    if (!_visible) {
       return false;
+    }
     _showTimer?.cancel();
     _showTimer = null;
     _forceRemoval = false;
@@ -668,10 +669,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _pressActivated = true;
     final bool tooltipCreated = ensureTooltipVisible();
     if (tooltipCreated && _enableFeedback) {
-      if (_triggerMode == TooltipTriggerMode.longPress)
+      if (_triggerMode == TooltipTriggerMode.longPress) {
         Feedback.forLongPress(context);
-      else
+      } else {
         Feedback.forTap(context);
+      }
     }
     widget.onTriggered?.call();
   }

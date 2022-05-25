@@ -1051,8 +1051,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TargetPlatform _platform;
   TargetPlatform get platform => _platform;
   set platform(TargetPlatform value) {
-    if (_platform == value)
+    if (_platform == value) {
       return;
+    }
     _platform = value;
     markNeedsSemanticsUpdate();
   }
@@ -1060,8 +1061,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   SemanticFormatterCallback? _semanticFormatterCallback;
   SemanticFormatterCallback? get semanticFormatterCallback => _semanticFormatterCallback;
   set semanticFormatterCallback(SemanticFormatterCallback? value) {
-    if (_semanticFormatterCallback == value)
+    if (_semanticFormatterCallback == value) {
       return;
+    }
     _semanticFormatterCallback = value;
     markNeedsSemanticsUpdate();
   }
@@ -1154,8 +1156,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hasFocus;
   set hasFocus(bool value) {
     assert(value != null);
-    if (value == _hasFocus)
+    if (value == _hasFocus) {
       return;
+    }
     _hasFocus = value;
     _updateForFocusOrHover(_hasFocus);
     markNeedsSemanticsUpdate();
@@ -1166,8 +1169,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hovering;
   set hovering(bool value) {
     assert(value != null);
-    if (value == _hovering)
+    if (value == _hovering) {
       return;
+    }
     _hovering = value;
     _updateForFocusOrHover(_hovering);
   }
