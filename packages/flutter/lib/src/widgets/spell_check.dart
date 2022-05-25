@@ -119,7 +119,7 @@ abstract class SpellCheckService {
 
 /// Determines how misspelled words are indicated in text input and how
 /// replacement suggestions for misspelled words are displayed via menu.
-abstract class SpellCheckSuggestionsHandler {
+mixin SpellCheckSuggestionsHandler {
   /// Builds the [TextSpan] tree given the current state of the text input and
   /// spell check results.
   TextSpan buildTextSpanWithSpellCheckSuggestions(
