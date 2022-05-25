@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' show SpellCheckSuggestionsHandler, DefaultSpellCheckSuggestionsHandler;
 
 import 'debug.dart';
 import 'desktop_text_selection.dart';

@@ -32,6 +32,7 @@ import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'spell_check.dart';
 import 'shortcuts.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
