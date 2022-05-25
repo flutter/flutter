@@ -1605,7 +1605,7 @@ class TextSelectionGestureDetectorBuilder {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (!_lastSecondaryTapWasOnSelection) {
+        if (!_lastSecondaryTapWasOnSelection || !renderEditable.hasFocus) {
           renderEditable.selectWord(cause: SelectionChangedCause.tap);
         }
         if (shouldShowSelectionToolbar) {
