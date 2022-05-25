@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -17,7 +15,7 @@ class SurfaceScene implements ui.Scene {
   /// To create a Scene object, use a [SceneBuilder].
   SurfaceScene(this.webOnlyRootElement);
 
-  final html.Element? webOnlyRootElement;
+  final DomElement? webOnlyRootElement;
 
   /// Creates a raster image representation of the current state of the scene.
   /// This is a slow operation that is performed on a background thread.
@@ -45,8 +43,8 @@ class PersistedScene extends PersistedContainerSurface {
     // TODO(yjbanov): in the add2app scenario where we might be hosted inside
     //                a custom element, this will be different. We will need to
     //                update this code when we add add2app support.
-    final double screenWidth = html.window.innerWidth!.toDouble();
-    final double screenHeight = html.window.innerHeight!.toDouble();
+    final double screenWidth = domWindow.innerWidth!.toDouble();
+    final double screenHeight = domWindow.innerHeight!.toDouble();
     localClipBounds = ui.Rect.fromLTRB(0, 0, screenWidth, screenHeight);
     projectedClip = null;
   }

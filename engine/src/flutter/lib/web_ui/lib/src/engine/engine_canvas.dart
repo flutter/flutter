@@ -282,7 +282,7 @@ class _SaveElementStackEntry {
     required this.transform,
   });
 
-  final html.Element savedElement;
+  final DomElement savedElement;
   final Matrix4 transform;
 }
 
@@ -295,18 +295,18 @@ mixin SaveElementStackTracking on EngineCanvas {
 
   /// The element at the top of the element stack, or [rootElement] if the stack
   /// is empty.
-  html.Element get currentElement =>
-      _elementStack.isEmpty ? rootElement as html.Element : _elementStack.last;
+  DomElement get currentElement =>
+      _elementStack.isEmpty ? rootElement : _elementStack.last;
 
   /// The stack that maintains the DOM elements used to express certain paint
   /// operations, such as clips.
-  final List<html.Element> _elementStack = <html.Element>[];
+  final List<DomElement> _elementStack = <DomElement>[];
 
   /// Pushes the [element] onto the element stack for the purposes of applying
   /// a paint effect using a DOM element, e.g. for clipping.
   ///
   /// The [restore] method automatically pops the element off the stack.
-  void pushElement(html.Element element) {
+  void pushElement(DomElement element) {
     _elementStack.add(element);
   }
 

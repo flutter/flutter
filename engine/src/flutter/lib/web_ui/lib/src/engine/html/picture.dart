@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -118,8 +117,8 @@ class PersistedPicture extends PersistedLeafSurface {
   bool _requiresRepaint = false;
 
   /// Cache for reusing elements such as images across picture updates.
-  CrossFrameCache<html.HtmlElement>? _elementCache =
-      CrossFrameCache<html.HtmlElement>();
+  CrossFrameCache<DomHTMLElement>? _elementCache =
+      CrossFrameCache<DomHTMLElement>();
 
   @override
   DomElement createElement() {
@@ -645,7 +644,7 @@ class PersistedPicture extends PersistedLeafSurface {
   void debugPrintChildren(StringBuffer buffer, int indent) {
     super.debugPrintChildren(buffer, indent);
     if (rootElement != null && rootElement!.firstChild != null) {
-      final html.Element firstChild = rootElement!.firstChild! as html.Element;
+      final DomElement firstChild = rootElement!.firstChild! as DomElement;
       final String canvasTag = firstChild.tagName.toLowerCase();
       final int canvasHash = firstChild.hashCode;
       buffer.writeln('${'  ' * (indent + 1)}<$canvasTag @$canvasHash />');

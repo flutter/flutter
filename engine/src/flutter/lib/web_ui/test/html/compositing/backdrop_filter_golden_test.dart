@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' hide ClipRectEngineLayer, BackdropFilterEngineLayer;
@@ -25,7 +23,7 @@ Future<void> testMain() async {
   setUp(() async {
     debugShowClipLayers = true;
     SurfaceSceneBuilder.debugForgetFrameScene();
-    for (final html.Node scene in html.document.querySelectorAll('flt-scene')) {
+    for (final DomNode scene in domDocument.querySelectorAll('flt-scene')) {
       scene.remove();
     }
   });
@@ -57,7 +55,7 @@ Future<void> testMain() async {
     builder.pop();
     builder.pop();
 
-    html.document.body!.append(builder
+    domDocument.body!.append(builder
         .build()
         .webOnlyRootElement!);
 
@@ -107,7 +105,7 @@ Future<void> testMain() async {
     builder2.pop();
     builder2.pop();
 
-    html.document.body!.append(builder2
+    domDocument.body!.append(builder2
         .build()
         .webOnlyRootElement!);
 
@@ -138,7 +136,7 @@ Future<void> testMain() async {
     builder.pop();
     builder.pop();
 
-    html.document.body!.append(builder
+    domDocument.body!.append(builder
         .build()
         .webOnlyRootElement!);
 

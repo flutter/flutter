@@ -10,6 +10,9 @@ import 'dom.dart';
 @staticInterop
 class SVGElement extends DomElement {}
 
+SVGElement createSVGElement(String tag) =>
+    domDocument.createElementNS('http://www.w3.org/2000/svg', tag) as SVGElement;
+
 @JS()
 @staticInterop
 class SVGGraphicsElement extends SVGElement {}
@@ -17,6 +20,12 @@ class SVGGraphicsElement extends SVGElement {}
 @JS()
 @staticInterop
 class SVGSVGElement extends SVGGraphicsElement {}
+
+SVGSVGElement createSVGSVGElement() {
+  final SVGElement el = createSVGElement('svg');
+  el.setAttribute('version', '1.1');
+  return el as SVGSVGElement;
+}
 
 @JS()
 @staticInterop

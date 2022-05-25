@@ -163,7 +163,8 @@ void _renderCirclesScene(BlendMode blendMode) {
   builder.addPicture(Offset.zero, circles2);
   builder.pop();
 
-  flutterViewEmbedder.sceneHostElement!.append(builder.build().webOnlyRootElement!);
+  flutterViewEmbedder.sceneHostElement!.append(builder.build().webOnlyRootElement!
+      as html.Element);
 }
 
 Picture _drawTestPictureWithText(
@@ -219,5 +220,6 @@ void _renderTextScene(BlendMode blendMode) {
   builder.addPicture(Offset.zero, textPicture2);
   builder.pop();
 
-  flutterViewEmbedder.sceneHostElement!.append(builder.build().webOnlyRootElement!);
+  flutterViewEmbedder.sceneHostElement!.append(builder.build().webOnlyRootElement!
+      as html.Element);
 }

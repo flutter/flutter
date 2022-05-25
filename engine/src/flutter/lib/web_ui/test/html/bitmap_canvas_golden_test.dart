@@ -251,7 +251,7 @@ Future<void> testMain() async {
     sb.pop();
     sb.pop();
     final SurfaceScene scene = sb.build() as SurfaceScene;
-    final html.Element sceneElement = scene.webOnlyRootElement!;
+    final DomElement sceneElement = scene.webOnlyRootElement!;
     if (isIosSafari) {
       // Shrink to fit on the iPhone screen.
       sceneElement.style.position = 'absolute';
@@ -259,8 +259,8 @@ Future<void> testMain() async {
       sceneElement.style.transform = 'scale(0.3)';
     }
 
-    sceneElement.querySelector('flt-clip')!.append(canvas.rootElement as html.Node);
-    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(sceneElement);
+    sceneElement.querySelector('flt-clip')!.append(canvas.rootElement);
+    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(sceneElement as html.Node);
 
     await matchGoldenFile(
       'bitmap_canvas_draws_text_on_top_of_canvas.png',

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:svg' as svg;
 
 import 'package:ui/ui.dart' as ui;
@@ -210,8 +209,8 @@ class PersistedPhysicalShape extends PersistedContainerSurface
   final ui.Color color;
   final ui.Color shadowColor;
   final ui.Clip clipBehavior;
-  html.Element? _clipElement;
-  html.Element? _svgElement;
+  DomElement? _clipElement;
+  DomElement? _svgElement;
 
   @override
   void recomputeTransformAndClip() {
@@ -361,8 +360,8 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     /// svg clip and render elements.
     _clipElement?.remove();
     _svgElement?.remove();
-    _clipElement = svgClipPath;
-    rootElement!.append(_clipElement! as DomElement);
+    _clipElement = svgClipPath as DomElement;
+    rootElement!.append(_clipElement!);
     if (elevation == 0.0) {
       setClipPath(rootElement!, createSvgClipUrl());
       final DomCSSStyleDeclaration rootElementStyle = rootElement!.style;
@@ -404,7 +403,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
         '${pathBounds2.bottom}');
 
     /// Render element behind the clipped content.
-    rootElement!.insertBefore(_svgElement! as DomElement, childContainer);
+    rootElement!.insertBefore(_svgElement!, childContainer);
 
     final SurfaceShadowData shadow = computeShadow(pathBounds, elevation)!;
     final ui.Color boxShadowColor = toShadowColor(shadowColor);
@@ -445,12 +444,12 @@ class PersistedPhysicalShape extends PersistedContainerSurface
       // Reuse clipElement from prior surface.
       _clipElement = oldSurface._clipElement;
       if (_clipElement != null) {
-        rootElement!.append(_clipElement! as DomElement);
+        rootElement!.append(_clipElement!);
       }
       oldSurface._clipElement = null;
       _svgElement = oldSurface._svgElement;
       if (_svgElement != null) {
-        rootElement!.insertBefore(_svgElement! as DomElement, childContainer);
+        rootElement!.insertBefore(_svgElement!, childContainer);
       }
       oldSurface._svgElement = null;
     }
