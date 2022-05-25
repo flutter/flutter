@@ -1985,6 +1985,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     if (_transitionBuilder == null) {
+      // Some default transition.
       return FadeTransition(
         opacity: CurvedAnimation(
           parent: animation,
@@ -1992,7 +1993,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
         ),
         child: child,
       );
-    } // Some default transition
+    }
     return _transitionBuilder!(context, animation, secondaryAnimation, child);
   }
 }

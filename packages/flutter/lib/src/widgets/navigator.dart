@@ -4899,15 +4899,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     final RoutePopDisposition disposition = await lastEntry.route.willPop(); // this is asynchronous
     assert(disposition != null);
     if (!mounted) {
+      // Forget about this pop, we were disposed in the meantime.
       return true;
-    } // forget about this pop, we were disposed in the meantime
+    }
     final _RouteEntry? newLastEntry = _history.cast<_RouteEntry?>().lastWhere(
       (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
       orElse: () => null,
     );
     if (lastEntry != newLastEntry) {
+      // Forget about this pop, something happened to our history in the meantime.
       return true;
-    } // forget about this pop, something happened to our history in the meantime
+    }
     switch (disposition) {
       case RoutePopDisposition.bubble:
         return false;
