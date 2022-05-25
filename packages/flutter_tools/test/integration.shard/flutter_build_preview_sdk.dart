@@ -41,7 +41,10 @@ void main() {
     () async {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
       // write a build.gradle with compileSdkVersion as `android-Tiramisu` which is a string preview version
-      buildGradleFile.writeAsStringSync(buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkVersion "android-Tiramisu"'), flush: true);
+      buildGradleFile.writeAsStringSync(
+        buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkVersion "android-Tiramisu"'),
+        flush: true
+      );
       expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion "android-Tiramisu"'));
 
       final ProcessResult result = await processManager.run(<String>[
@@ -66,7 +69,10 @@ void main() {
     () async {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
       // write a build.gradle with compileSdkPreview as `Tiramisu` which is a string preview version
-      buildGradleFile.writeAsStringSync(buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkPreview "Tiramisu"'), flush: true);
+      buildGradleFile.writeAsStringSync(
+        buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkPreview "Tiramisu"'),
+        flush: true
+      );
       expect(buildGradleFile.readAsStringSync(), contains('compileSdkPreview "Tiramisu"'));
 
       final ProcessResult result = await processManager.run(<String>[
