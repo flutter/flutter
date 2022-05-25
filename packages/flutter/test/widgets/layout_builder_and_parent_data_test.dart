@@ -41,20 +41,6 @@ class SizeChangerState extends State<SizeChanger> {
   }
 }
 
-class Wrapper extends StatelessWidget {
-  const Wrapper({
-    super.key,
-    required this.child,
-  });
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return child;
-  }
-}
-
 void main() {
   testWidgets('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
     int frame = 1;

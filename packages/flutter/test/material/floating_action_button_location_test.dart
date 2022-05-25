@@ -1536,11 +1536,13 @@ class _GeometryListenerState extends State<_GeometryListener> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
-    if (geometryListenable == newListenable)
+    if (geometryListenable == newListenable) {
       return;
+    }
 
-    if (geometryListenable != null)
+    if (geometryListenable != null) {
       geometryListenable!.removeListener(onGeometryChanged);
+    }
 
     geometryListenable = newListenable;
     geometryListenable!.addListener(onGeometryChanged);

@@ -2574,8 +2574,9 @@ void main() {
         .delegate;
 
       // Ensure we have a non-null vsync when it's needed.
-      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
+      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null)) {
         expect(delegate.vsync, isNotNull);
+      }
 
       expect(delegate.showOnScreenConfiguration != null, snap && floating);
     }
@@ -3265,6 +3266,44 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/80256
+  testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+        key: const ValueKey<String>('1'),
+        child: Scaffold(
+          key: const ValueKey<String>('1'),
+          appBar: AppBar(),
+          endDrawer: const Drawer(),
+        )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+          endDrawer: const Drawer(),
+        )
+    );
+    final List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<Object?> route, Object? result) => false,
+        ),
+      ),
+    );
+
+    // The page2 should have a back button.
+    expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('2')),
+          matching: find.byType(BackButton),
+        ),
+        findsOneWidget
+    );
   });
 
   testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {

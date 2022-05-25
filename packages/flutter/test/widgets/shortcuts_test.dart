@@ -1354,6 +1354,51 @@ void main() {
       expect(invokedB, equals(1));
     });
 
+    testWidgets('MaterialApp has a ShortcutRegistrar listening', (WidgetTester tester) async {
+      int invokedA = 0;
+      int invokedB = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestCallbackRegistration(
+            shortcuts: <ShortcutActivator, Intent>{
+              const SingleActivator(LogicalKeyboardKey.keyA): VoidCallbackIntent(() {
+                invokedA += 1;
+              }),
+              const SingleActivator(LogicalKeyboardKey.keyB): VoidCallbackIntent(() {
+                invokedB += 1;
+              }),
+            },
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                VoidCallbackIntent: VoidCallbackAction(),
+              },
+              child: const Focus(
+                autofocus: true,
+                child: Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      await tester.pump();
+      expect(invokedA, equals(1));
+      expect(invokedB, equals(0));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(invokedA, equals(1));
+      expect(invokedB, equals(0));
+      invokedA = 0;
+      invokedB = 0;
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyB);
+      expect(invokedA, equals(0));
+      expect(invokedB, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
+      expect(invokedA, equals(0));
+      expect(invokedB, equals(1));
+    });
+
     testWidgets("doesn't override text field shortcuts", (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
@@ -1692,27 +1737,12 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
   }
 }
 
-typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
-
 class TestAction extends CallbackAction<Intent> {
   TestAction({
     required super.onInvoke,
   })  : assert(onInvoke != null);
 
   static const LocalKey key = ValueKey<Type>(TestAction);
-}
-
-class TestDispatcher extends ActionDispatcher {
-  const TestDispatcher({this.postInvoke});
-
-  final PostInvokeCallback? postInvoke;
-
-  @override
-  Object? invokeAction(Action<TestIntent> action, Intent intent, [BuildContext? context]) {
-    final Object? result = super.invokeAction(action, intent, context);
-    postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
-    return result;
-  }
 }
 
 /// An activator that accepts down events that has [key] as the logical key.
