@@ -21,25 +21,29 @@ import 'package:flutter/src/services/system_channels.dart';
 /// ```
 @immutable
 class SuggestionSpan {
+  /// Creates a span representing a misspelled range of text and the replacements
+  /// suggested by a spell checker.
+  ///
+  /// The [startIndex], [endIndex], and replcaement [suggestions] must all not
+  /// be null.
   const SuggestionSpan(this.startIndex, this.endIndex, this.suggestions)
       : assert(startIndex != null),
         assert(endIndex != null),
         assert(suggestions != null);
 
+  /// The start index of the misspelled range of text.
   final int startIndex;
 
+  /// The end index of the misspelled range of text, inclusive.
   final int endIndex;
 
   /// The alternate suggestions for mispelled range of text.
-  ///
-  /// The maximum length of this list depends on the spell checker used. If
-  /// [DefaultSpellCheckService] is used, the maximum length of this list will be
-  /// 5 on Android platforms and there will be no maximum length on iOS platforms.
   final List<String> suggestions;
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other))
+        return true;
     return other is SuggestionSpan &&
         other.startIndex == startIndex &&
         other.endIndex == endIndex &&
@@ -55,19 +59,23 @@ class SuggestionSpan {
 ///
 /// See also:
 ///
-///  * [SuggestionSpan], the ranges of mispelled text and corresponding replacement
-///    suggestions.
+///  * [SuggestionSpan], the ranges of mispelled text and corresponding
+///    replacement suggestions.
 @immutable
 class SpellCheckResults {
+  /// Creates results based off those received by spell checking some text input.
   const SpellCheckResults(this.spellCheckedText, this.suggestionSpans);
 
+  /// The text that the [suggestionSpans] correspond to.
   final String spellCheckedText;
 
+  /// The spell check results of the [spellCheckedText].
   final List<SuggestionSpan> suggestionSpans;
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other))
+        return true;
     return other is SpellCheckResults &&
         other.spellCheckedText == spellCheckedText &&
         listEquals<SuggestionSpan>(other.suggestionSpans, suggestionSpans);
@@ -84,11 +92,16 @@ class SpellCheckResults {
 /// [SpellCheckSuggestionsHandler] used to mark and display replacement
 /// suggestions for mispelled words within text input.
 class SpellCheckConfiguration {
+  /// Creates a configuration that specifies the service and suggestions handler
+  /// for spell check.
   SpellCheckConfiguration(
       {this.spellCheckService, this.spellCheckSuggestionsHandler});
 
+  /// The service used to fetch spell check results for text input.
   final SpellCheckService? spellCheckService;
 
+  /// The handler used to mark mispelled words in text input and display
+  /// a menu of the replcament suggestions for these mispelled words.
   final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
 
   /// The most up-to-date spell check results for text input.
@@ -105,34 +118,17 @@ class SpellCheckConfiguration {
 }
 
 /// Determines how spell check results are received for text input.
-///
-/// See also:
-///
-///  * [DefaultSpellCheckService], implementation used on Android and iOS
-///    platforms when spell check is enabled for an [EditableText] instance
-///    but no [SpellCheckService] implementation is provided.
 abstract class SpellCheckService {
-  /// Initiates and receives results for a spell check request.
+  /// Facilitates a spell check request.
   Future<SpellCheckResults?> fetchSpellCheckSuggestions(
       Locale locale, String text);
 }
 
 /// Determines how mispelled words are indicated in text input and how
-/// replacement suggestions for misspelled words are displayed via a menu.
-///
-/// See also:
-///
-/// * [DefaultSpellCheckSuggestionsHandler], implementation used on Android and
-///   iOS platforms when spell check is enabled for an [EditableText] instance
-///   but no [SpellCheckSuggestionsHandler] implementation is provided.
+/// replacement suggestions for misspelled words are displayed via menu.
 abstract class SpellCheckSuggestionsHandler {
-  /// Builds [TextSpan] tree given the current state of the text input and spell
-  /// check results.
-  ///
-  /// An implementation should handle any cases concerning the [spellCheckResults]
-  /// being out of date with the [value] if the [DefaultSpellCheckService] is
-  /// used due to the asynchronous communication between the Android and iOS
-  /// engines and the framework.
+  /// Builds the [TextSpan] tree given the current state of the text input and
+  /// spell check results.
   TextSpan buildTextSpanWithSpellCheckSuggestions(
       TextEditingValue value,
       bool composingWithinCurrentTextRange,
