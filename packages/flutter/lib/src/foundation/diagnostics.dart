@@ -2689,8 +2689,8 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       json['isDiagnosticableValue'] = true;
     }
     if (v is num) {
-      // TODO(https://github.com/flutter/flutter/issues/39937#issuecomment-529558033)
-      // Workaround, since JSON.stringify replaces infinity and NaN with null.
+      // TODO(jacob314): Workaround, since JSON.stringify replaces infinity and NaN with null,
+      // https://github.com/flutter/flutter/issues/39937#issuecomment-529558033)
       json['value'] = v.isFinite ? v :  v.toString();
     }
     if (value is String || value is bool || value == null) {
