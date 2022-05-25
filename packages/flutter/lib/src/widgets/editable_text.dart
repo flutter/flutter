@@ -2578,10 +2578,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (_spellCheckEnabled! && _value.text.length > 0 && cause! == SelectionChangedCause.tap) {
       Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-      Future<SpellCheckResults?> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value.text);
+      Future<SpellCheckResults?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value.text);
 
       spellCheckResultsFuture.then((SpellCheckResults? results) {
-        _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results ?? _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults;
+       _spellCheckConfiguration!.spellCheckResults = results ?? _spellCheckConfiguration!.spellCheckResults;
         renderEditable.text = buildTextSpan();
       });
     }
@@ -2698,10 +2698,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
         if (_spellCheckEnabled! && value.text.length > 0 && _value.text != value.text) {
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          Future<SpellCheckResults?> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
+          Future<SpellCheckResults?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
 
           spellCheckResultsFuture.then((SpellCheckResults? results) {
-            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results ?? _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults;
+            _spellCheckConfiguration!.spellCheckResults = results ?? _spellCheckConfiguration!.spellCheckResults;
             renderEditable.text = buildTextSpan();
       });
         }
@@ -3069,7 +3069,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
 
       _selectionOverlay!.showToolbar(toolbarType,  
-      _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration);
+      _spellCheckConfiguration);
       return true;
     }
 
@@ -3160,7 +3160,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-      spellCheckConfiguration: _spellCheckConfiguration
     );
   }
 
@@ -3521,7 +3520,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         context: context,
         style: widget.style,
         withComposing: !widget.readOnly && _hasFocus,
-        spellCheckConfiguration: _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration,
+        spellCheckConfiguration: _spellCheckConfiguration,
       );
   }
 }

@@ -2254,15 +2254,3 @@ enum ClipboardStatus {
   /// The content on the clipboard is not pasteable, such as when it is empty.
   notPasteable,
 }
-
-/// An enumeration of the types of toolbars that can be rendered by a
-/// TextSelectionOverlay.
-enum ToolbarType {
-  /// The toolbar that will provide copy, paste, and cut options for a selection
-  /// of text.
-  copyPasteControls,
-
-  /// The toolbar that will provide suggestions for misspelled words and a click
-  /// and replace option for Android.
-  spellCheckSuggestionsControls,
-}

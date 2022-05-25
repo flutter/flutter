@@ -14,7 +14,6 @@ import 'dart:ui' show
   TextDirection;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/widgets/text_selection.dart' show ToolbarType;
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import '../../services.dart' show Clipboard;
@@ -72,6 +71,18 @@ enum SmartQuotesType {
   /// This corresponds to the
   /// ["yes" value of UITextSmartQuotesType](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/yes).
   enabled,
+}
+
+/// An enumeration of the types of toolbars that can be rendered by a
+/// TextSelectionOverlay.
+enum ToolbarType {
+  /// The toolbar that will provide copy, paste, and cut options for a selection
+  /// of text.
+  copyPasteControls,
+
+  /// The toolbar that will provide suggestions for misspelled words and a click
+  /// and replace option for Android.
+  spellCheckSuggestionsControls,
 }
 
 /// The type of information for which to optimize the text input control.
@@ -469,8 +480,7 @@ class TextInputConfiguration {
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
-    this.spellCheckConfiguration,
-    this.enableIMEPersonalizedLearning = true,
+\    this.enableIMEPersonalizedLearning = true,
     this.enableDeltaModel = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
@@ -509,12 +519,6 @@ class TextInputConfiguration {
   /// participating in autofills triggered by other fields. Additionally, on
   /// Android and web, setting [autofillConfiguration] to null disables autofill.
   final AutofillConfiguration autofillConfiguration;
-
-
-  /// The configuration to use for spell check.
-  ///
-  /// Defaults to disabled, in which case no spell check will be performed.
-  final SpellCheckConfiguration? spellCheckConfiguration;
 
   /// {@template flutter.services.TextInputConfiguration.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -644,7 +648,6 @@ class TextInputConfiguration {
     TextCapitalization? textCapitalization,
     bool? enableIMEPersonalizedLearning,
     AutofillConfiguration? autofillConfiguration,
-    SpellCheckConfiguration? spellCheckConfiguration,
     bool? enableDeltaModel,
   }) {
     return TextInputConfiguration(
@@ -661,7 +664,6 @@ class TextInputConfiguration {
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
       enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
-      spellCheckConfiguration: spellCheckConfiguration ?? this.spellCheckConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
   }
@@ -694,7 +696,6 @@ class TextInputConfiguration {
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
-    //TODO(camillesimon): add JSON representation of spellCheckConfiguration
     return <String, dynamic>{
       'inputType': inputType.toJson(),
       'readOnly': readOnly,

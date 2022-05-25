@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/services/spell_check.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -53,7 +52,6 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
     ToolbarType toolbarType,
-    SpellCheckConfiguration? spellCheckConfiguration,
   ) {
     return _CupertinoDesktopTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,
