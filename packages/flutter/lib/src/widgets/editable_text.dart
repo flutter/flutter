@@ -1646,6 +1646,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   AnimationController? _floatingCursorResetController;
 
+  Orientation? _lastOrientation;
+
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
@@ -1848,6 +1850,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // Cannot use _stopCursorTimer because it would reset _cursorActive.
         _cursorTimer!.cancel();
         _cursorTimer = null;
+      }
+    }
+
+    if (defaultTargetPlatform != TargetPlatform.iOS && defaultTargetPlatform != TargetPlatform.android) {
+      return;
+    }
+
+    // Hide the text selection toolbar on mobile when orientation changes.
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    if (_lastOrientation == null) {
+      _lastOrientation = orientation;
+      return;
+    }
+    if (orientation != _lastOrientation) {
+      _lastOrientation = orientation;
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        hideToolbar(false);
+      }
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        hideToolbar();
       }
     }
   }

@@ -1503,6 +1503,54 @@ void main() {
     expect(find.text('Paste'), findsNothing);
   });
 
+  testWidgets('toolbar hidden on mobile when orientation changes', (WidgetTester tester) async {
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Show the toolbar
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+
+    expect(state.showToolbar(), true);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
+
+    // Hide the menu by changing orientation.
+    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsNothing);
+
+    // Handles should be hidden as well on Android
+    expect(
+      find.descendant(
+        of: find.byType(CompositedTransformFollower),
+        matching: find.byType(Padding),
+      ),
+      defaultTargetPlatform == TargetPlatform.android ? findsNothing : findsOneWidget,
+    );
+
+    // On web, we don't show the Flutter toolbar and instead rely on the browser
+    // toolbar. Until we change that, this test should remain skipped.
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android })); // [intended]
+
   testWidgets('Paste is shown only when there is something to paste', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
