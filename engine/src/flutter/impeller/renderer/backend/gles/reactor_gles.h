@@ -56,26 +56,38 @@ class ReactorGLES {
   [[nodiscard]] bool React();
 
  private:
+  struct LiveHandle {
+    std::optional<GLuint> name;
+    std::optional<std::string> pending_debug_label;
+    bool pending_collection = false;
+
+    LiveHandle() = default;
+
+    explicit LiveHandle(std::optional<GLuint> p_name)
+        : name(std::move(p_name)) {}
+
+    constexpr bool IsLive() const { return name.has_value(); }
+  };
+
   std::unique_ptr<ProcTableGLES> proc_table_;
 
   mutable Mutex ops_mutex_;
-  std::vector<Operation> pending_operations_ IPLR_GUARDED_BY(ops_mutex_);
-  GLESHandleMap<GLuint> gl_handles_to_collect_ IPLR_GUARDED_BY(ops_mutex_);
+  std::vector<Operation> ops_ IPLR_GUARDED_BY(ops_mutex_);
 
+  // Make sure the container is one where erasing items during iteration doesn't
+  // invalidate other iterators.
+  using LiveHandles = std::unordered_map<HandleGLES,
+                                         LiveHandle,
+                                         HandleGLES::Hash,
+                                         HandleGLES::Equal>;
   mutable RWMutex handles_mutex_;
-  GLESHandleMap<std::optional<GLuint>> live_gl_handles_
-      IPLR_GUARDED_BY(handles_mutex_);
-  GLESHandleMap<std::string> pending_debug_labels_
-      IPLR_GUARDED_BY(handles_mutex_);
+  LiveHandles handles_ IPLR_GUARDED_BY(handles_mutex_);
 
   mutable Mutex workers_mutex_;
   mutable std::map<WorkerID, std::weak_ptr<Worker>> workers_
       IPLR_GUARDED_BY(workers_mutex_);
 
-  // TODO(csg): Make this thread safe.
-  bool in_reaction_ = false;
   bool can_set_debug_labels_ = false;
-
   bool is_valid_ = false;
 
   bool ReactOnce();
@@ -83,6 +95,10 @@ class ReactorGLES {
   bool HasPendingOperations() const;
 
   bool CanReactOnCurrentThread() const;
+
+  bool ConsolidateHandles();
+
+  bool FlushOps();
 
   FML_DISALLOW_COPY_AND_ASSIGN(ReactorGLES);
 };

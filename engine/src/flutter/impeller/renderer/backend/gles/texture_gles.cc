@@ -69,10 +69,7 @@ bool TextureGLES::IsValid() const {
 
 // |Texture|
 void TextureGLES::SetLabel(const std::string_view& label) {
-  label_ = std::string{label.data(), label.size()};
-  if (contents_initialized_) {
-    reactor_->SetDebugLabel(handle_, label_);
-  }
+  reactor_->SetDebugLabel(handle_, std::string{label.data(), label.size()});
 }
 
 struct TexImage2DData {
@@ -247,9 +244,6 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
   };
 
   contents_initialized_ = reactor_->AddOperation(texture_upload);
-  if (contents_initialized_) {
-    reactor_->SetDebugLabel(handle_, label_);
-  }
   return contents_initialized_;
 }
 
@@ -342,7 +336,6 @@ void TextureGLES::InitializeContentsIfNecessary() const {
 
       break;
   }
-  reactor_->SetDebugLabel(handle_, label_);
 }
 
 bool TextureGLES::Bind() const {
