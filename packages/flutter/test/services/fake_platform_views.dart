@@ -340,13 +340,6 @@ class FakeIosPlatformViewsController {
     _registeredViewTypes.add(viewType);
   }
 
-  void invokeViewFocused(int viewId) {
-    final MethodCodec codec = SystemChannels.platform_views.codec;
-    final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
-  }
-
   Future<dynamic> _onMethodCall(MethodCall call) {
     switch(call.method) {
       case 'create':
