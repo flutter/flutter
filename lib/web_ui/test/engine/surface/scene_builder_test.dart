@@ -206,7 +206,7 @@ void testMain() {
       builder.addPicture(ui.Offset.zero, picture1);
       builder.pop();
 
-      final html.Element content = builder.build().webOnlyRootElement!;
+      final DomElement content = builder.build().webOnlyRootElement!;
       expect(content.querySelector('canvas')!.style.zIndex, '-1');
 
       // Force update to scene which will utilize reuse code path.
@@ -219,7 +219,7 @@ void testMain() {
       builder2.addPicture(ui.Offset.zero, picture2);
       builder2.pop();
 
-      final html.Element contentAfterReuse = builder2.build().webOnlyRootElement!;
+      final DomElement contentAfterReuse = builder2.build().webOnlyRootElement!;
       expect(contentAfterReuse.querySelector('canvas')!.style.zIndex, '-1');
     });
 
@@ -232,8 +232,8 @@ void testMain() {
       builder.addPicture(ui.Offset.zero, picture1);
       builder.pop();
 
-      final html.Element content = builder.build().webOnlyRootElement!;
-      html.document.body!.append(content);
+      final DomElement content = builder.build().webOnlyRootElement!;
+      domDocument.body!.append(content);
       expect(content.querySelector('canvas')!.style.zIndex, '-1');
 
       // Force update to scene which will utilize reuse code path.
@@ -246,9 +246,9 @@ void testMain() {
       builder2.addPicture(ui.Offset.zero, picture2);
       builder2.pop();
 
-      final html.Element contentAfterReuse = builder2.build().webOnlyRootElement!;
-      final List<html.CanvasElement> list =
-          contentAfterReuse.querySelectorAll('canvas');
+      final DomElement contentAfterReuse = builder2.build().webOnlyRootElement!;
+      final List<DomCanvasElement> list =
+          contentAfterReuse.querySelectorAll('canvas').cast<DomCanvasElement>();
       expect(list[0].style.zIndex, '-1');
       expect(list[1].style.zIndex, '');
     });
@@ -265,10 +265,11 @@ void testMain() {
     builder.addPicture(ui.Offset.zero, picture1);
     builder.pop();
 
-    final html.Element content = builder.build().webOnlyRootElement!;
-    html.document.body!.append(content);
-    List<html.ImageElement> list = content.querySelectorAll('img');
-    for (final html.ImageElement image in list) {
+    final DomElement content = builder.build().webOnlyRootElement!;
+    domDocument.body!.append(content);
+    List<DomHTMLImageElement> list =
+        content.querySelectorAll('img').cast<DomHTMLImageElement>();
+    for (final DomHTMLImageElement image in list) {
       image.alt = 'marked';
     }
 
@@ -282,9 +283,9 @@ void testMain() {
     builder2.addPicture(ui.Offset.zero, picture2);
     builder2.pop();
 
-    final html.Element contentAfterReuse = builder2.build().webOnlyRootElement!;
-    list = contentAfterReuse.querySelectorAll('img');
-    for (final html.ImageElement image in list) {
+    final DomElement contentAfterReuse = builder2.build().webOnlyRootElement!;
+    list = contentAfterReuse.querySelectorAll('img').cast<DomHTMLImageElement>();
+    for (final DomHTMLImageElement image in list) {
       expect(image.alt, 'marked');
     }
     expect(list.length, 1);
@@ -307,7 +308,7 @@ void testMain() {
       builder.pushOffset(0, 0);
       builder.addPicture(ui.Offset.zero, picture);
       builder.pop();
-      final html.Element content = builder.build().webOnlyRootElement!;
+      final DomElement content = builder.build().webOnlyRootElement!;
       expect(content.querySelectorAll('flt-picture').single.children, isNotEmpty);
     }
 
@@ -319,7 +320,7 @@ void testMain() {
       builder.addPicture(ui.Offset.zero, picture);
       builder.pop();
       builder.pop();
-      final html.Element content = builder.build().webOnlyRootElement!;
+      final DomElement content = builder.build().webOnlyRootElement!;
       expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
       expect(findPictureSurfaceChild(clip)!.canvas, isNull);
     }
@@ -337,7 +338,7 @@ void testMain() {
     builder.pop();
     builder.pop();
     builder.pop();
-    final html.Element content = builder.build().webOnlyRootElement!;
+    final DomElement content = builder.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isNotEmpty);
   });
 
@@ -354,7 +355,7 @@ void testMain() {
     builder.pop();
     builder.pop();
     builder.pop();
-    final html.Element content = builder.build().webOnlyRootElement!;
+    final DomElement content = builder.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isNotEmpty);
   });
 
@@ -375,7 +376,7 @@ void testMain() {
     builder.pop();
     builder.pop();
     builder.pop();
-    final html.Element content = builder
+    final DomElement content = builder
         .build()
         .webOnlyRootElement!;
     expect(content
@@ -392,7 +393,7 @@ void testMain() {
     final PersistedOffset offset1 = builder1.pushOffset(0, 0) as PersistedOffset;
     builder1.addPicture(ui.Offset.zero, picture);
     builder1.pop();
-    final html.Element content1 = builder1.build().webOnlyRootElement!;
+    final DomElement content1 = builder1.build().webOnlyRootElement!;
     expect(content1.querySelectorAll('flt-picture').single.children, isNotEmpty);
     expect(findPictureSurfaceChild(offset1)!.canvas, isNotNull);
 
@@ -401,7 +402,7 @@ void testMain() {
     final PersistedOffset offset2 = builder2.pushOffset(-10000, -10000, oldLayer: offset1) as PersistedOffset;
     builder2.addPicture(ui.Offset.zero, picture);
     builder2.pop();
-    final html.Element content = builder2.build().webOnlyRootElement!;
+    final DomElement content = builder2.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
     expect(findPictureSurfaceChild(offset2)!.canvas, isNull);
   });
@@ -416,7 +417,7 @@ void testMain() {
     builder1.addPicture(ui.Offset.zero, picture);
     builder1.pop();
     builder1.pop();
-    final html.Element content1 = builder1.build().webOnlyRootElement!;
+    final DomElement content1 = builder1.build().webOnlyRootElement!;
     expect(content1.querySelectorAll('flt-picture').single.children, isNotEmpty);
     expect(findPictureSurfaceChild(subOffset1)!.canvas, isNotNull);
 
@@ -429,7 +430,7 @@ void testMain() {
     // the clipped area. We should see the canvas being released.
     builder2.addRetained(subOffset1);
     builder2.pop();
-    final html.Element content = builder2.build().webOnlyRootElement!;
+    final DomElement content = builder2.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
     expect(findPictureSurfaceChild(subOffset1)!.canvas, isNull);
   });
@@ -450,7 +451,7 @@ void testMain() {
     builder.pop();
 
     // Expect as many layers as we pushed (not popped).
-    final html.Element content = builder.build().webOnlyRootElement!;
+    final DomElement content = builder.build().webOnlyRootElement!;
     expect(content.querySelectorAll('flt-offset'), hasLength(5));
   });
 
@@ -514,10 +515,10 @@ void testMain() {
         renderedLayers[char] = pushChild(builder, char, oldLayer: renderedLayers[char]);
       }
       final SurfaceScene scene = builder.build();
-      final List<html.Element> pTags = scene.webOnlyRootElement!.querySelectorAll('flt-paragraph');
+      final List<DomElement> pTags = scene.webOnlyRootElement!.querySelectorAll('flt-paragraph');
       expect(pTags, hasLength(string.length));
       expect(
-        scene.webOnlyRootElement!.querySelectorAll('flt-paragraph').map((html.Element p) => p.innerText).join(''),
+        scene.webOnlyRootElement!.querySelectorAll('flt-paragraph').map((DomElement p) => p.innerText).join(''),
         string,
       );
       renderedLayers.removeWhere((String key, ui.EngineLayer value) => !string.contains(key));
@@ -591,8 +592,8 @@ void testMain() {
     builder.addPicture(ui.Offset.zero, picture1);
     builder.pop();
 
-    final html.Element content = builder.build().webOnlyRootElement!;
-    final html.CanvasElement canvas = content.querySelector('canvas')! as html.CanvasElement;
+    final DomElement content = builder.build().webOnlyRootElement!;
+    final DomCanvasElement canvas = content.querySelector('canvas')! as DomCanvasElement;
     final int unscaledWidth = canvas.width!;
     final int unscaledHeight = canvas.height!;
 
@@ -608,8 +609,8 @@ void testMain() {
     builder2.pop();
     builder2.pop();
 
-    final html.Element contentAfterScale = builder2.build().webOnlyRootElement!;
-    final html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas')! as html.CanvasElement;
+    final DomElement contentAfterScale = builder2.build().webOnlyRootElement!;
+    final DomCanvasElement canvas2 = contentAfterScale.querySelector('canvas')! as DomCanvasElement;
     // Although we are drawing same picture, due to scaling the new canvas
     // should have fewer pixels.
     expect(canvas2.width! < unscaledWidth, isTrue);
@@ -623,8 +624,8 @@ void testMain() {
     builder.addPicture(ui.Offset.zero, picture1);
     builder.pop();
 
-    final html.Element content = builder.build().webOnlyRootElement!;
-    final html.CanvasElement canvas = content.querySelector('canvas')! as html.CanvasElement;
+    final DomElement content = builder.build().webOnlyRootElement!;
+    final DomCanvasElement canvas = content.querySelector('canvas')! as DomCanvasElement;
     final int unscaledWidth = canvas.width!;
     final int unscaledHeight = canvas.height!;
 
@@ -640,8 +641,8 @@ void testMain() {
     builder2.pop();
     builder2.pop();
 
-    final html.Element contentAfterScale = builder2.build().webOnlyRootElement!;
-    final html.CanvasElement canvas2 = contentAfterScale.querySelector('canvas')! as html.CanvasElement;
+    final DomElement contentAfterScale = builder2.build().webOnlyRootElement!;
+    final DomCanvasElement canvas2 = contentAfterScale.querySelector('canvas')! as DomCanvasElement;
     // Although we are drawing same picture, due to scaling the new canvas
     // should have more pixels.
     expect(canvas2.width! > unscaledWidth, isTrue);
@@ -667,7 +668,7 @@ void testMain() {
     builder2.addPicture(ui.Offset.zero, _drawEmptyPicture());
     builder2.pop();
 
-    final html.Element contentAfterReuse = builder2.build().webOnlyRootElement!;
+    final DomElement contentAfterReuse = builder2.build().webOnlyRootElement!;
     expect(contentAfterReuse, isNotNull);
 
     final SurfaceSceneBuilder builder3 = SurfaceSceneBuilder();
@@ -678,7 +679,7 @@ void testMain() {
     builder3.addPicture(ui.Offset.zero, _drawEmptyPicture());
     builder3.pop();
     // This build will crash if canvas gets recycled twice.
-    final html.Element contentAfterReuse2 = builder3.build().webOnlyRootElement!;
+    final DomElement contentAfterReuse2 = builder3.build().webOnlyRootElement!;
     expect(contentAfterReuse2, isNotNull);
   });
 }

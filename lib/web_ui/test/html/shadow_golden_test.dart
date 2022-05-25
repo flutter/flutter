@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -156,8 +154,8 @@ Future<void> testMain() async {
 
       builder.pop();
 
-      final html.Element sceneElement = builder.build().webOnlyRootElement!;
-      html.document.body!.append(sceneElement);
+      final DomElement sceneElement = builder.build().webOnlyRootElement!;
+      domDocument.body!.append(sceneElement);
 
       await matchGoldenFile(
         'shadows.png',

@@ -698,8 +698,8 @@ Future<void> testMain() async {
       sb.pop();
     }
 
-    final html.Element sceneElement = sb.build().webOnlyRootElement!;
-    html.document.body!.append(sceneElement);
+    final DomElement sceneElement = sb.build().webOnlyRootElement!;
+    domDocument.body!.append(sceneElement);
     try {
       await matchGoldenFile(
         'paint_spread_bounds.png',
