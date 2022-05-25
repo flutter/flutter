@@ -1316,12 +1316,13 @@ void main() {
       final SliverGeometry geometry = target.geometry!;
       expect(target.parent, isA<RenderSliverOverlapAbsorber>());
       expect(geometry.visible, visible);
-      if (extentGreaterThan)
+      if (extentGreaterThan) {
         expect(geometry.paintExtent, greaterThan(paintExtent));
-      else if (extentLessThan)
+      } else if (extentLessThan) {
         expect(geometry.paintExtent, lessThan(paintExtent));
-      else
+      } else {
         expect(geometry.paintExtent, paintExtent);
+      }
       return geometry.paintExtent;
     }
 
@@ -2328,8 +2329,9 @@ void main() {
       await tester.pumpWidget(buildTest(controller: controller));
 
       controller.addListener(() {
-        if (controller.position.userScrollDirection != ScrollDirection.idle)
+        if (controller.position.userScrollDirection != ScrollDirection.idle) {
           lastUserScrollingDirection = controller.position.userScrollDirection;
+        }
       });
 
       await tester.drag(find.byType(NestedScrollView), const Offset(0.0, -20.0), touchSlopY: 0.0);

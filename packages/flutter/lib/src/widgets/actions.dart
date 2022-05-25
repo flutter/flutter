@@ -1499,8 +1499,9 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   @override
   bool isEnabled(PrioritizedIntents intent) {
     final FocusNode? focus = primaryFocus;
-    if  (focus == null || focus.context == null)
+    if  (focus == null || focus.context == null) {
       return false;
+    }
     for (final Intent candidateIntent in intent.orderedIntents) {
       final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
         focus.context!,

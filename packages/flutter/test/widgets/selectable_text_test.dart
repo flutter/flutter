@@ -1641,10 +1641,11 @@ void main() {
 
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.setData')
+      if (methodCall.method == 'Clipboard.setData') {
         clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
-      else if (methodCall.method == 'Clipboard.getData')
+      } else if (methodCall.method == 'Clipboard.getData') {
         return <String, dynamic>{'text': clipboardContent};
+      }
       return null;
     });
     const String testValue = 'a big house\njumped over a mouse';

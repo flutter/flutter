@@ -1030,8 +1030,9 @@ class RenderSelectionSpy extends RenderProxyBox
     ),
   );
   set value(SelectionGeometry other) {
-    if (other == _value)
+    if (other == _value) {
       return;
+    }
     _value = other;
     for (final VoidCallback callback in listeners) {
       callback();

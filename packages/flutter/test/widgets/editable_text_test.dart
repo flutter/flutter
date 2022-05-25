@@ -27,16 +27,18 @@ class _MatchesMethodCall extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is MethodCall && item.method == name)
+    if (item is MethodCall && item.method == name) {
       return arguments?.matches(item.arguments, matchState) ?? true;
+    }
     return false;
   }
 
   @override
   Description describe(Description description) {
     final Description newDescription = description.add('has method name: ').addDescriptionOf(name);
-    if (arguments != null)
-        newDescription.add(' with arguments: ').addDescriptionOf(arguments);
+    if (arguments != null) {
+      newDescription.add(' with arguments: ').addDescriptionOf(arguments);
+    }
     return newDescription;
   }
 }
@@ -2054,8 +2056,9 @@ void main() {
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
           onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
-            if (cause != null)
+            if (cause != null) {
               selectionCause = cause;
+            }
           },
         ),
       ),
@@ -2098,8 +2101,9 @@ void main() {
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
           onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
-            if (cause != null)
+            if (cause != null) {
               selectionCause = cause;
+            }
           },
         ),
       ),
@@ -2832,18 +2836,21 @@ void main() {
         PaintPattern evaluate() {
           if (expectVisible) {
             return paints..something(((Symbol method, List<dynamic> arguments) {
-              if (method != #drawRect)
+              if (method != #drawRect) {
                 return false;
+              }
               final Paint paint = arguments[1] as Paint;
               return paint.color == rectColor;
             }));
           } else {
             return paints..everything(((Symbol method, List<dynamic> arguments) {
-              if (method != #drawRect)
+              if (method != #drawRect) {
                 return true;
+              }
               final Paint paint = arguments[1] as Paint;
-              if (paint.color != rectColor)
+              if (paint.color != rectColor) {
                 return true;
+              }
               throw 'Expected: autocorrection rect not visible, found: ${arguments[0]}';
             }));
           }
@@ -5086,24 +5093,30 @@ void main() {
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
 
-      if (expectedLeftVisibleBefore)
+      if (expectedLeftVisibleBefore) {
         expect(left.opacity.value, equals(1.0));
-      if (expectedRightVisibleBefore)
+      }
+      if (expectedRightVisibleBefore) {
         expect(right.opacity.value, equals(1.0));
+      }
 
       await tester.pump(SelectionOverlay.fadeDuration ~/ 2);
 
-      if (expectedLeftVisible != expectedLeftVisibleBefore)
+      if (expectedLeftVisible != expectedLeftVisibleBefore) {
         expect(left.opacity.value, equals(0.5));
-      if (expectedRightVisible != expectedRightVisibleBefore)
+      }
+      if (expectedRightVisible != expectedRightVisibleBefore) {
         expect(right.opacity.value, equals(0.5));
+      }
 
       await tester.pump(SelectionOverlay.fadeDuration ~/ 2);
 
-      if (expectedLeftVisible)
+      if (expectedLeftVisible) {
         expect(left.opacity.value, equals(1.0));
-      if (expectedRightVisible)
+      }
+      if (expectedRightVisible) {
         expect(right.opacity.value, equals(1.0));
+      }
 
       expectedLeftVisibleBefore = expectedLeftVisible;
       expectedRightVisibleBefore = expectedRightVisible;
@@ -7789,24 +7802,30 @@ void main() {
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
 
-      if (expectedLeftVisibleBefore)
+      if (expectedLeftVisibleBefore) {
         expect(left.opacity.value, equals(1.0));
-      if (expectedRightVisibleBefore)
+      }
+      if (expectedRightVisibleBefore) {
         expect(right.opacity.value, equals(1.0));
+      }
 
       await tester.pump(SelectionOverlay.fadeDuration ~/ 2);
 
-      if (expectedLeftVisible != expectedLeftVisibleBefore)
+      if (expectedLeftVisible != expectedLeftVisibleBefore) {
         expect(left.opacity.value, equals(0.5));
-      if (expectedRightVisible != expectedRightVisibleBefore)
+      }
+      if (expectedRightVisible != expectedRightVisibleBefore) {
         expect(right.opacity.value, equals(0.5));
+      }
 
       await tester.pump(SelectionOverlay.fadeDuration ~/ 2);
 
-      if (expectedLeftVisible)
+      if (expectedLeftVisible) {
         expect(left.opacity.value, equals(1.0));
-      if (expectedRightVisible)
+      }
+      if (expectedRightVisible) {
         expect(right.opacity.value, equals(1.0));
+      }
 
       expectedLeftVisibleBefore = expectedLeftVisible;
       expectedRightVisibleBefore = expectedRightVisible;
@@ -8291,8 +8310,9 @@ void main() {
     );
 
     controller.addListener(() {
-      if (!controller.text.endsWith('listener'))
+      if (!controller.text.endsWith('listener')) {
         controller.text += ' listener';
+      }
     });
 
     testWidgets('input from text input plugin', (WidgetTester tester) async {

@@ -358,8 +358,9 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   RouteInformation? get currentConfiguration {
-    if (reportConfiguration)
+    if (reportConfiguration) {
       return routeInformation;
+    }
     return null;
   }
 
@@ -371,8 +372,9 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   Future<bool> popRoute() {
-    if (onPopRoute != null)
+    if (onPopRoute != null) {
       return onPopRoute!();
+    }
     return SynchronousFuture<bool>(true);
   }
 
