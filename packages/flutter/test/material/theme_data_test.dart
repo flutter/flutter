@@ -6,6 +6,62 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+@immutable
+class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
+  const MyThemeExtensionA({
+    required this.color1,
+    required this.color2,
+  });
+
+  final Color? color1;
+  final Color? color2;
+
+  @override
+  MyThemeExtensionA copyWith({Color? color1, Color? color2}) {
+    return MyThemeExtensionA(
+      color1: color1 ?? this.color1,
+      color2: color2 ?? this.color2,
+    );
+  }
+
+  @override
+  MyThemeExtensionA lerp(ThemeExtension<MyThemeExtensionA>? other, double t) {
+    if (other is! MyThemeExtensionA) {
+      return this;
+    }
+    return MyThemeExtensionA(
+      color1: Color.lerp(color1, other.color1, t),
+      color2: Color.lerp(color2, other.color2, t),
+    );
+  }
+}
+
+@immutable
+class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
+  const MyThemeExtensionB({
+    required this.textStyle,
+  });
+
+  final TextStyle? textStyle;
+
+  @override
+  MyThemeExtensionB copyWith({Color? color, TextStyle? textStyle}) {
+    return MyThemeExtensionB(
+      textStyle: textStyle ?? this.textStyle,
+    );
+  }
+
+  @override
+  MyThemeExtensionB lerp(ThemeExtension<MyThemeExtensionB>? other, double t) {
+    if (other is! MyThemeExtensionB) {
+      return this;
+    }
+    return MyThemeExtensionB(
+      textStyle: TextStyle.lerp(textStyle, other.textStyle, t),
+    );
+  }
+}
+
 void main() {
   test('Theme data control test', () {
     final ThemeData dark = ThemeData.dark();
@@ -268,6 +324,43 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
+  testWidgets('splashFactory is InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    // Basic check that this theme is in fact using material 3.
+    expect(theme.useMaterial3, true);
+
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.android:
+        if (kIsWeb) {
+          expect(theme.splashFactory, equals(InkRipple.splashFactory));
+        } else {
+          expect(theme.splashFactory, equals(InkSparkle.splashFactory));
+        }
+        break;
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(theme.splashFactory, equals(InkRipple.splashFactory));
+     }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(theme.splashFactory, equals(InkSplash.splashFactory));
+    }
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('VisualDensity.adaptivePlatformDensity returns adaptive values', (WidgetTester tester) async {
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
@@ -338,6 +431,136 @@ void main() {
     expect(contracted.minHeight, equals(0));
     expect(expanded.maxWidth, equals(double.infinity));
     expect(expanded.maxHeight, equals(double.infinity));
+  });
+
+  group('Theme extensions', () {
+    const Key containerKey = Key('container');
+
+    testWidgets('can be obtained', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            extensions: const <ThemeExtension<dynamic>>{
+              MyThemeExtensionA(
+                color1: Colors.black,
+                color2: Colors.amber,
+              ),
+              MyThemeExtensionB(
+                textStyle: TextStyle(fontSize: 50),
+              )
+            },
+          ),
+          home: Container(key: containerKey),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(
+        tester.element(find.byKey(containerKey)),
+      );
+
+      expect(theme.extension<MyThemeExtensionA>()!.color1, Colors.black);
+      expect(theme.extension<MyThemeExtensionA>()!.color2, Colors.amber);
+      expect(theme.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 50));
+    });
+
+    testWidgets('can use copyWith', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            extensions: <ThemeExtension<dynamic>>{
+              const MyThemeExtensionA(
+                color1: Colors.black,
+                color2: Colors.amber,
+              ).copyWith(color1: Colors.blue),
+            },
+          ),
+          home: Container(key: containerKey),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(
+        tester.element(find.byKey(containerKey)),
+      );
+
+      expect(theme.extension<MyThemeExtensionA>()!.color1, Colors.blue);
+      expect(theme.extension<MyThemeExtensionA>()!.color2, Colors.amber);
+    });
+
+    testWidgets('can lerp', (WidgetTester tester) async {
+      const MyThemeExtensionA extensionA1 = MyThemeExtensionA(
+        color1: Colors.black,
+        color2: Colors.amber,
+      );
+      const MyThemeExtensionA extensionA2 = MyThemeExtensionA(
+        color1: Colors.white,
+        color2: Colors.blue,
+      );
+      const MyThemeExtensionB extensionB1 = MyThemeExtensionB(
+        textStyle: TextStyle(fontSize: 50),
+      );
+      const MyThemeExtensionB extensionB2 = MyThemeExtensionB(
+        textStyle: TextStyle(fontSize: 100),
+      );
+
+      // Both ThemeDatas include both extensions
+      ThemeData lerped = ThemeData.lerp(
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>[
+            extensionA1,
+            extensionB1,
+          ],
+        ),
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA2,
+            extensionB2,
+          },
+        ),
+        0.5,
+      );
+
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
+
+      // Missing from 2nd ThemeData
+      lerped = ThemeData.lerp(
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA1,
+            extensionB1,
+          },
+        ),
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionB2,
+          },
+        ),
+        0.5,
+      );
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, Colors.black); // Not lerped
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, Colors.amber); // Not lerped
+      expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 75));
+
+      // Missing from 1st ThemeData
+      lerped = ThemeData.lerp(
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA1,
+          },
+        ),
+        ThemeData(
+          extensions: const <ThemeExtension<dynamic>>{
+            extensionA2,
+            extensionB2,
+          },
+        ),
+        0.5,
+      );
+      expect(lerped.extension<MyThemeExtensionA>()!.color1, const Color(0xff7f7f7f));
+      expect(lerped.extension<MyThemeExtensionA>()!.color2, const Color(0xff90ab7d));
+      expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 100)); // Not lerped
+    });
   });
 
   test('copyWith, ==, hashCode basics', () {
@@ -430,6 +653,7 @@ void main() {
       sliderTheme: sliderTheme,
       tabBarTheme: const TabBarTheme(labelColor: Colors.black),
       tooltipTheme: const TooltipThemeData(height: 100),
+      expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       cardTheme: const CardTheme(color: Colors.black),
       chipTheme: chipTheme,
       platform: TargetPlatform.iOS,
@@ -468,6 +692,7 @@ void main() {
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
       androidOverscrollIndicator: null,
+      extensions: const <Object, ThemeExtension<dynamic>>{},
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -529,6 +754,7 @@ void main() {
       sliderTheme: otherSliderTheme,
       tabBarTheme: const TabBarTheme(labelColor: Colors.white),
       tooltipTheme: const TooltipThemeData(height: 100),
+      expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       cardTheme: const CardTheme(color: Colors.white),
       chipTheme: otherChipTheme,
       platform: TargetPlatform.android,
@@ -567,6 +793,9 @@ void main() {
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
+      extensions: const <Object, ThemeExtension<dynamic>>{
+        MyThemeExtensionB: MyThemeExtensionB(textStyle: TextStyle()),
+      },
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -610,6 +839,7 @@ void main() {
       sliderTheme: otherTheme.sliderTheme,
       tabBarTheme: otherTheme.tabBarTheme,
       tooltipTheme: otherTheme.tooltipTheme,
+      expansionTileTheme: otherTheme.expansionTileTheme,
       cardTheme: otherTheme.cardTheme,
       chipTheme: otherTheme.chipTheme,
       platform: otherTheme.platform,
@@ -645,6 +875,7 @@ void main() {
       drawerTheme: otherTheme.drawerTheme,
       listTileTheme: otherTheme.listTileTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
+      extensions: otherTheme.extensions.values,
     );
 
     expect(themeDataCopy.brightness, equals(otherTheme.brightness));
@@ -687,6 +918,7 @@ void main() {
     expect(themeDataCopy.sliderTheme, equals(otherTheme.sliderTheme));
     expect(themeDataCopy.tabBarTheme, equals(otherTheme.tabBarTheme));
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
+    expect(themeDataCopy.expansionTileTheme, equals(otherTheme.expansionTileTheme));
     expect(themeDataCopy.cardTheme, equals(otherTheme.cardTheme));
     expect(themeDataCopy.chipTheme, equals(otherTheme.chipTheme));
     expect(themeDataCopy.platform, equals(otherTheme.platform));
@@ -722,6 +954,7 @@ void main() {
     expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
     expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
+    expect(themeDataCopy.extensions, equals(otherTheme.extensions));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -766,9 +999,9 @@ void main() {
     // List of properties must match the properties in ThemeData.hashCode()
     final Set<String> expectedPropertyNames = <String>{
       // GENERAL CONFIGURATION
-      'androidOverscrollIndicator',
       'applyElevationOverlayColor',
       'cupertinoOverrideTheme',
+      'extensions',
       'inputDecorationTheme',
       'materialTapTargetSize',
       'pageTransitionsTheme',
@@ -841,6 +1074,7 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
+      'expansionTileTheme',
       // DEPRECATED (newest deprecations at the bottom)
       'useTextSelectionTheme',
       'textSelectionColor',
@@ -853,6 +1087,7 @@ void main() {
       'buttonColor',
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
+      'androidOverscrollIndicator',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();

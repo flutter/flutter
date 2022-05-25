@@ -116,17 +116,15 @@ class BottomSheetThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      elevation,
-      modalBackgroundColor,
-      modalElevation,
-      shape,
-      clipBehavior,
-      constraints,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    elevation,
+    modalBackgroundColor,
+    modalElevation,
+    shape,
+    clipBehavior,
+    constraints,
+  );
 
   @override
   bool operator ==(Object other) {

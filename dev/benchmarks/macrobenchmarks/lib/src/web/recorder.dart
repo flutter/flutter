@@ -262,7 +262,7 @@ abstract class SceneBuilderRecorder extends Recorder {
     final Completer<Profile> profileCompleter = Completer<Profile>();
     _profile = Profile(name: name);
 
-    window.onBeginFrame = (_) {
+    PlatformDispatcher.instance.onBeginFrame = (_) {
       try {
         startMeasureFrame(profile!);
         onBeginFrame();
@@ -271,7 +271,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    window.onDrawFrame = () {
+    PlatformDispatcher.instance.onDrawFrame = () {
       try {
         _profile!.record('drawFrameDuration', () {
           final SceneBuilder sceneBuilder = SceneBuilder();
@@ -286,7 +286,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         endMeasureFrame();
 
         if (shouldContinue()) {
-          window.scheduleFrame();
+          PlatformDispatcher.instance.scheduleFrame();
         } else {
           profileCompleter.complete(_profile);
         }
@@ -295,7 +295,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    window.scheduleFrame();
+    PlatformDispatcher.instance.scheduleFrame();
     return profileCompleter.future;
   }
 }
@@ -403,7 +403,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     profile!.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
 
     if (shouldContinue()) {
-      window.scheduleFrame();
+      PlatformDispatcher.instance.scheduleFrame();
     } else {
       for (final VoidCallback fn in _didStopCallbacks)
         fn();
@@ -1056,7 +1056,7 @@ double _computeAverage(String label, Iterable<double> values) {
 ///
 /// See also:
 ///
-/// * https://en.wikipedia.org/wiki/Standard_deviation
+///  * <https://en.wikipedia.org/wiki/Standard_deviation>
 double _computeStandardDeviationForPopulation(String label, Iterable<double> population) {
   if (population.isEmpty) {
     throw StateError('$label: attempted to compute the standard deviation of empty population.');
@@ -1108,12 +1108,32 @@ class _RecordingWidgetsBinding extends BindingBase
         SemanticsBinding,
         RendererBinding,
         WidgetsBinding {
-  /// Makes an instance of [_RecordingWidgetsBinding] the current binding.
+
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The singleton instance of this object.
+  ///
+  /// Provides access to the features exposed by this class. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [_RecordingWidgetsBinding.ensureInitialized].
+  static _RecordingWidgetsBinding get instance => BindingBase.checkInstance(_instance);
+  static _RecordingWidgetsBinding? _instance;
+
+  /// Returns an instance of the [_RecordingWidgetsBinding], creating and
+  /// initializing it if necessary.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
   static _RecordingWidgetsBinding ensureInitialized() {
-    if (WidgetsBinding.instance == null) {
+    if (_instance == null) {
       _RecordingWidgetsBinding();
     }
-    return WidgetsBinding.instance! as _RecordingWidgetsBinding;
+    return instance;
   }
 
   FrameRecorder? _recorder;

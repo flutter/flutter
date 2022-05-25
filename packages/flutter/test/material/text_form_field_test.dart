@@ -102,6 +102,94 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
+  testWidgets('the desktop cut/copy/paste buttons are disabled for read-only obscured form fields', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              readOnly: true,
+              obscureText: true,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(find.byType(CupertinoButton), findsNothing);
+    const TextSelection invalidSelection = TextSelection(baseOffset: -1, extentOffset: -1);
+    expect(controller.selection, invalidSelection);
+
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+
+    // Right clicking shows the menu.
+    final TestGesture gesture = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.selection, invalidSelection);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.byType(CupertinoButton), findsNothing);
+  },
+    variant: TargetPlatformVariant.desktop(),
+    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+  );
+
+  testWidgets('the desktop cut/copy buttons are disabled for obscured form fields', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              obscureText: true,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(find.byType(CupertinoButton), findsNothing);
+    const TextSelection invalidSelection = TextSelection(baseOffset: -1, extentOffset: -1);
+    expect(controller.selection, invalidSelection);
+
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+
+    // Right clicking shows the menu.
+    final TestGesture gesture = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Paste'), findsOneWidget);
+  },
+    variant: TargetPlatformVariant.desktop(),
+    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+  );
+
   testWidgets('TextFormField accepts TextField.noMaxLength as value to maxLength parameter', (WidgetTester tester) async {
     bool asserted;
     try {
@@ -255,14 +343,14 @@ void main() {
   });
 
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
-    bool _called = false;
+    bool called = false;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
             child: TextFormField(
-              onFieldSubmitted: (String value) { _called = true; },
+              onFieldSubmitted: (String value) { called = true; },
             ),
           ),
         ),
@@ -272,19 +360,19 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(_called, true);
+    expect(called, true);
   });
 
   testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
-    late String _value;
+    late String value;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
             child: TextFormField(
-              onChanged: (String value) {
-                _value = value;
+              onChanged: (String v) {
+                value = v;
               },
             ),
           ),
@@ -294,11 +382,11 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Soup');
     await tester.pump();
-    expect(_value, 'Soup');
+    expect(value, 'Soup');
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -307,7 +395,7 @@ void main() {
             child: TextFormField(
               autovalidateMode: AutovalidateMode.always,
               validator: (String? value) {
-                _validateCalled++;
+                validateCalled++;
                 return null;
               },
             ),
@@ -316,14 +404,14 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(validateCalled, 2);
   });
 
   testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -333,7 +421,7 @@ void main() {
               enabled: true,
               autovalidateMode: AutovalidateMode.always,
               validator: (String? value) {
-                _validateCalled += 1;
+                validateCalled += 1;
                 return null;
               },
             ),
@@ -342,10 +430,10 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(validateCalled, 2);
   });
 
 
@@ -581,7 +669,7 @@ void main() {
   });
 
   testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
-    bool _called = false;
+    bool called = false;
 
     late FormFieldState<String> state;
 
@@ -591,7 +679,7 @@ void main() {
           child: Center(
             child: TextFormField(
               onChanged: (String value) {
-                _called = true;
+                called = true;
                 expect(value, state.value);
               },
             ),
@@ -604,7 +692,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Soup');
 
-    expect(_called, true);
+    expect(called, true);
   });
 
   testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
@@ -625,7 +713,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -634,7 +722,7 @@ void main() {
             body: TextFormField(
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (String? value) {
-                _validateCalled++;
+                validateCalled++;
                 return null;
               },
             ),
@@ -643,10 +731,10 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 0);
+    expect(validateCalled, 0);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
   });
 
   testWidgets('textSelectionControls is passed to super', (WidgetTester tester) async {
@@ -729,4 +817,69 @@ void main() {
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.scrollController, scrollController);
   });
+
+  testWidgets('TextFormField changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextFormField(
+              mouseCursor: SystemMouseCursors.grab,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Center, which is within the area
+    final Offset center = tester.getCenter(find.byType(TextFormField));
+    // Top left, which is also within the area
+    final Offset edge = tester.getTopLeft(find.byType(TextFormField)) + const Offset(1, 1);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: center);
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextFormField(),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    await gesture.moveTo(edge);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    await gesture.moveTo(center);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextFormField(
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(edge);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(center);
+  });
+
 }

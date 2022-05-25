@@ -73,6 +73,8 @@ class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('getOffsetForCaret control test', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),

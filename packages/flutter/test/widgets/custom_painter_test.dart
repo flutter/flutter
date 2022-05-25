@@ -753,7 +753,7 @@ class _DiffTester {
     ));
     expect(semanticsTester, hasSemantics(createExpectations(from), ignoreId: true));
 
-    SemanticsNode root = RendererBinding.instance!.renderView.debugSemantics!;
+    SemanticsNode root = RendererBinding.instance.renderView.debugSemantics!;
     final Map<Key, int> idAssignments = <Key, int>{};
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
@@ -771,7 +771,7 @@ class _DiffTester {
     await tester.pumpAndSettle();
     expect(semanticsTester, hasSemantics(createExpectations(to), ignoreId: true));
 
-    root = RendererBinding.instance!.renderView.debugSemantics!;
+    root = RendererBinding.instance.renderView.debugSemantics!;
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
         if (node.key != null && idAssignments[node.key] != null) {

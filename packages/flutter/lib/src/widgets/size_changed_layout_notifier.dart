@@ -28,7 +28,10 @@ import 'notification_listener.dart';
 ///
 ///  * [SizeChangedLayoutNotifier], which sends this notification.
 ///  * [LayoutChangedNotification], of which this is a subclass.
-class SizeChangedLayoutNotification extends LayoutChangedNotification { }
+class SizeChangedLayoutNotification extends LayoutChangedNotification {
+  /// Create a new [SizeChangedLayoutNotification].
+  const SizeChangedLayoutNotification();
+}
 
 /// A widget that automatically dispatches a [SizeChangedLayoutNotification]
 /// when the layout dimensions of its child change.
@@ -61,7 +64,7 @@ class SizeChangedLayoutNotifier extends SingleChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSizeChangedWithCallback(
       onLayoutChangedCallback: () {
-        SizeChangedLayoutNotification().dispatch(context);
+        const SizeChangedLayoutNotification().dispatch(context);
       },
     );
   }

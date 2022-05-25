@@ -319,13 +319,12 @@ class SimDevice {
 
 class IOSSimulator extends Device {
   IOSSimulator(
-    String id, {
+    super.id, {
       required this.name,
       required this.simulatorCategory,
       required SimControl simControl,
     }) : _simControl = simControl,
          super(
-           id,
            category: Category.mobile,
            platformType: PlatformType.ios,
            ephemeral: true,
@@ -473,7 +472,8 @@ class IOSSimulator extends Device {
         if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
         if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
         if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
-        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}'
+        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
+        if (route != null) '--route=$route'
       ],
     ];
 
@@ -757,8 +757,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   // Match the log prefix (in order to shorten it):
-  // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-  // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+  // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
+  // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
   static final RegExp _mapRegex = RegExp(r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---

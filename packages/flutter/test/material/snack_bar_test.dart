@@ -6,6 +6,8 @@
 // machines.
 @Tags(<String>['reduced-test-set'])
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart' show FlutterExceptionHandler;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -2557,6 +2559,38 @@ void main() {
       'Width can only be used with floating behavior. SnackBarBehavior.fixed '
       'was set by default.',
     );
+  });
+
+  testWidgets('Snackbar by default clips BackdropFilter', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/98205
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: const Scaffold(),
+        floatingActionButton: FloatingActionButton(onPressed: () {}),
+      ),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
+      find.byType(ScaffoldMessenger),
+    );
+    scaffoldMessengerState.showSnackBar(SnackBar(
+      backgroundColor: Colors.transparent,
+      content: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: 20.0,
+          sigmaY: 20.0,
+        ),
+        child: const Text('I am a snack bar.'),
+      ),
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+      behavior: SnackBarBehavior.fixed,
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('I am a snack bar.'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('snack_bar.goldenTest.backdropFilter.png'));
   });
 }
 

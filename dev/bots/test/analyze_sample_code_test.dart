@@ -22,9 +22,9 @@ void main() {
     final List<String> stdoutLines = process.stdout.toString().split('\n');
     final List<String> stderrLines = process.stderr.toString().split('\n');
     expect(process.exitCode, isNot(equals(0)));
-    expect(stderrLines, containsAll(<String>[
+    expect(stderrLines, containsAll(<Object>[
       'In sample starting at dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:125:    child: Text(title),',
-      ">>> error: The final variable 'title' can't be read because it is potentially unassigned at this point (read_potentially_unassigned_final)",
+      matches(RegExp(r">>> error: The final variable 'title' can't be read because (it is|it's) potentially unassigned at this point \(read_potentially_unassigned_final\)")),
       'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:30:9: new Opacity(',
       '>>> info: Unnecessary new keyword (unnecessary_new)',
       'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:62:9: new Opacity(',

@@ -115,7 +115,7 @@ void main() {
     Logger: () => BufferLogger.test(),
   });
 
-  testUsingContext('TestCompiler updates generated_main.dart', () async {
+  testUsingContext('TestCompiler updates dart_plugin_registrant.dart', () async {
     final Directory fakeDartPlugin = fileSystem.directory('a_plugin');
       fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: foo
@@ -152,12 +152,12 @@ environment:
     final File generatedMain = fileSystem
       .directory('.dart_tool')
       .childDirectory('flutter_build')
-      .childFile('generated_main.dart');
+      .childFile('dart_plugin_registrant.dart');
 
     expect(generatedMain, exists);
     expect(
-      generatedMain.readAsLinesSync(),
-      contains("import 'test/foo.dart' as entrypoint;")
+      generatedMain.readAsStringSync(),
+      contains('APlugin.registerWith();')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

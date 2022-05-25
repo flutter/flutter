@@ -111,7 +111,6 @@ void main() {
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
         'TreeShakeIcons': 'false',
-        'baseHref': null,
       });
     }),
   });

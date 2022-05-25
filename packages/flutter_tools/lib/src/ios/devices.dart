@@ -145,7 +145,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 }
 
 class IOSDevice extends Device {
-  IOSDevice(String id, {
+  IOSDevice(super.id, {
     required FileSystem fileSystem,
     required this.name,
     required this.cpuArchitecture,
@@ -165,7 +165,6 @@ class IOSDevice extends Device {
       _logger = logger,
       _platform = platform,
         super(
-          id,
           category: Category.mobile,
           platformType: PlatformType.ios,
           ephemeral: true,
@@ -371,7 +370,9 @@ class IOSDevice extends Device {
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
+      if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+      if (debuggingOptions.enableImpeller) '--enable-impeller',
     ];
 
     final Status installStatus = _logger.startProgress(
@@ -437,12 +438,12 @@ class IOSDevice extends Device {
       final Uri? localUri = await observatoryDiscovery?.uri;
       timer.cancel();
       if (localUri == null) {
-        iosDeployDebugger?.detach();
+        await iosDeployDebugger?.stopAndDumpBacktrace();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
     } on ProcessException catch (e) {
-      iosDeployDebugger?.detach();
+      await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {
@@ -646,14 +647,25 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Logging from the dart code has no prefixing metadata.
   final RegExp _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
 
-  late final StreamController<String> _linesController = StreamController<String>.broadcast(
+  @visibleForTesting
+  late final StreamController<String> linesController = StreamController<String>.broadcast(
     onListen: _listenToSysLog,
     onCancel: dispose,
   );
+
+  // Sometimes (race condition?) we try to send a log after the controller has
+  // been closed. See https://github.com/flutter/flutter/issues/99021 for more
+  // context.
+  void _addToLinesController(String message) {
+    if (!linesController.isClosed) {
+      linesController.add(message);
+    }
+  }
+
   final List<StreamSubscription<void>> _loggingSubscriptions = <StreamSubscription<void>>[];
 
   @override
-  Stream<String> get logLines => _linesController.stream;
+  Stream<String> get logLines => linesController.stream;
 
   @override
   FlutterVmService? get connectedVMService => _connectedVMService;
@@ -693,7 +705,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       }
       final String message = processVmServiceMessage(event);
       if (message.isNotEmpty) {
-        _linesController.add(message);
+        _addToLinesController(message);
       }
     }
 
@@ -716,9 +728,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
     // Add the debugger logs to the controller created on initialization.
     _loggingSubscriptions.add(debugger.logLines.listen(
-      (String line) => _linesController.add(_debuggerLineHandler(line)),
-      onError: _linesController.addError,
-      onDone: _linesController.close,
+      (String line) => _addToLinesController(_debuggerLineHandler(line)),
+      onError: linesController.addError,
+      onDone: linesController.close,
       cancelOnError: true,
     ));
   }
@@ -736,8 +748,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {
-        if (_linesController.hasListener) {
-          _linesController.close();
+        if (linesController.hasListener) {
+          linesController.close();
         }
       });
       assert(idevicesyslogProcess == null);
@@ -760,7 +772,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     return (String line) {
       if (printing) {
         if (!_anyLineRegex.hasMatch(line)) {
-          _linesController.add(decodeSyslog(line));
+          _addToLinesController(decodeSyslog(line));
           return;
         }
 
@@ -772,7 +784,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       if (match != null) {
         final String logLine = line.substring(match.end);
         // Only display the log line after the initial device and executable information.
-        _linesController.add(decodeSyslog(logLine));
+        _addToLinesController(decodeSyslog(logLine));
 
         printing = true;
       }

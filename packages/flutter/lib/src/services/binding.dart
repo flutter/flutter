@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -42,7 +41,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   /// The current [ServicesBinding], if one has been created.
-  static ServicesBinding? get instance => _instance;
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static ServicesBinding get instance => BindingBase.checkInstance(_instance);
   static ServicesBinding? _instance;
 
   /// The global singleton instance of [HardwareKeyboard], which can be used to
@@ -58,7 +61,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void _initKeyboard() {
     _keyboard = HardwareKeyboard();
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
-    window.onKeyData = _keyEventManager.handleKeyData;
+    platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
     SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
   }
 
@@ -172,9 +175,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   // This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
-    final String _licenseSeparator = '\n${'-' * 80}\n';
+    final String licenseSeparator = '\n${'-' * 80}\n';
     final List<LicenseEntry> result = <LicenseEntry>[];
-    final List<String> licenses = rawLicenses.split(_licenseSeparator);
+    final List<String> licenses = rawLicenses.split(licenseSeparator);
     for (final String license in licenses) {
       final int split = license.indexOf('\n\n');
       if (split >= 0) {
@@ -222,11 +225,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // App life cycle
 
   /// Initializes the [lifecycleState] with the
-  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState].
+  /// [dart:ui.PlatformDispatcher.initialLifecycleState].
   ///
   /// Once the [lifecycleState] is populated through any means (including this
   /// method), this method will do nothing. This is because the
-  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState] may already be
+  /// [dart:ui.PlatformDispatcher.initialLifecycleState] may already be
   /// stale and it no longer makes sense to use the initial state at dart vm
   /// startup as the current state anymore.
   ///
@@ -237,7 +240,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (lifecycleState != null) {
       return;
     }
-    final AppLifecycleState? state = _parseAppLifecycleMessage(window.initialLifecycleState);
+    final AppLifecycleState? state = _parseAppLifecycleMessage(platformDispatcher.initialLifecycleState);
     if (state != null) {
       handleAppLifecycleStateChanged(state);
     }
