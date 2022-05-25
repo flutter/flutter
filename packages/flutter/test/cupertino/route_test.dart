@@ -986,9 +986,13 @@ void main() {
           }
           final Rect rect = arguments[0] as Rect;
           final Color paintColor = (arguments[1] as Paint).color;
+          // _CupertinoEdgeShadowDecoration draws the shadows with a series of
+          // differently colored 1px-wide rects. Skip rects that aren't being
+          // drawn by the _CupertinoEdgeShadowDecoration.
           if (rect.top != 0 || rect.width != 1.0 || rect.height != 600) {
             return true;
           }
+          // Skip calls for rects until the one with the given position offset
           if ((rect.left - dx).abs() >= 1) {
             return true;
           }
