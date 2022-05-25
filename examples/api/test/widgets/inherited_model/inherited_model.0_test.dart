@@ -8,24 +8,27 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Rebuild widget using InheritedModel', (WidgetTester tester) async {
-    Color fooColor;
-
-    BoxDecoration? getDecoration() {
-      return tester.widget<AnimatedContainer>(
-        find.widgetWithText(AnimatedContainer, 'Foo'),
-      ).decoration as BoxDecoration?;
-    }
-
     await tester.pumpWidget(
       const example.InheritedModelApp(),
     );
 
-    BoxDecoration? decoration = getDecoration();
-    fooColor = decoration!.color!;
+    BoxDecoration? decoration = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer).first,
+    ).decoration as BoxDecoration?;
+    expect(decoration!.color, Colors.blue);
 
-    await tester.tap(find.text('Resize Foo'));
+    await tester.tap(find.text('Update background'));
     await tester.pumpAndSettle();
-    decoration = getDecoration();
-    expect(fooColor, isNot(decoration!.color));
+    decoration = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer).first,
+    ).decoration as BoxDecoration?;
+    expect(decoration!.color, Colors.red);
+
+    double? size = tester.widget<FlutterLogo>(find.byType(FlutterLogo)).size;
+    expect(size, 100.0);
+    await tester.tap(find.text('Resize Logo'));
+    await tester.pumpAndSettle();
+    size = tester.widget<FlutterLogo>(find.byType(FlutterLogo)).size;
+    expect(size, 200.0);
   });
 }
