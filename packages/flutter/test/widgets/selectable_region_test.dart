@@ -88,7 +88,7 @@ void main() {
           ),
         ),
       );
-      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(spy))); // at the 'a'
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(spy)));
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
