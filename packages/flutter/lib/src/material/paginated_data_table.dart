@@ -103,8 +103,9 @@ class PaginatedDataTable extends StatefulWidget {
        assert(rowsPerPage != null),
        assert(rowsPerPage > 0),
        assert(() {
-         if (onRowsPerPageChanged != null)
+         if (onRowsPerPageChanged != null) {
            assert(availableRowsPerPage != null && availableRowsPerPage.contains(rowsPerPage));
+         }
          return true;
        }()),
        assert(source != null),
@@ -304,8 +305,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       _firstRowIndex = (rowIndex ~/ rowsPerPage) * rowsPerPage;
     });
     if ((widget.onPageChanged != null) &&
-        (oldFirstRowIndex != _firstRowIndex))
+        (oldFirstRowIndex != _firstRowIndex)) {
       widget.onPageChanged!(_firstRowIndex);
+    }
   }
 
   DataRow _getBlankRowFor(int index) {

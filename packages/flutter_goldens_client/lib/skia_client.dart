@@ -83,8 +83,9 @@ class SkiaGoldClient {
   /// Used by the [FlutterPostSubmitFileComparator] and the
   /// [FlutterPreSubmitFileComparator].
   Future<void> auth() async {
-    if (await clientIsAuthorized())
+    if (await clientIsAuthorized()) {
       return;
+    }
     final List<String> authCommand = <String>[
       _goldctl,
       'auth',
@@ -124,8 +125,9 @@ class SkiaGoldClient {
   /// [FlutterPostSubmitFileComparator].
   Future<void> imgtestInit() async {
     // This client has already been intialized
-    if (_initialized)
+    if (_initialized) {
       return;
+    }
 
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
@@ -234,8 +236,9 @@ class SkiaGoldClient {
   /// [FlutterPreSubmitFileComparator].
   Future<void> tryjobInit() async {
     // This client has already been initialized
-    if (_tryjobInitialized)
+    if (_tryjobInitialized) {
       return;
+    }
 
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
@@ -385,8 +388,9 @@ class SkiaGoldClient {
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
         final dynamic jsonResponse = json.decode(rawResponse);
-        if (jsonResponse is! Map<String, dynamic>)
+        if (jsonResponse is! Map<String, dynamic>) {
           throw const FormatException('Skia gold expectations do not match expected format.');
+        }
         expectation = jsonResponse['digest'] as String?;
       } on FormatException catch (error) {
         // Ideally we'd use something like package:test's printOnError, but best reliabilty

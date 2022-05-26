@@ -1105,10 +1105,12 @@ class ContainerLayer extends Layer {
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     for (Layer? child = lastChild; child != null; child = child.previousSibling) {
       final bool isAbsorbed = child.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
-      if (isAbsorbed)
+      if (isAbsorbed) {
         return true;
-      if (onlyFirst && result.entries.isNotEmpty)
+      }
+      if (onlyFirst && result.entries.isNotEmpty) {
         return isAbsorbed;
+      }
     }
     return false;
   }
@@ -1155,15 +1157,17 @@ class ContainerLayer extends Layer {
     assert(child._parentHandle.layer == null);
     assert(() {
       Layer node = this;
-      while (node.parent != null)
+      while (node.parent != null) {
         node = node.parent!;
+      }
       assert(node != child); // indicates we are about to create a cycle
       return true;
     }());
     adoptChild(child);
     child._previousSibling = lastChild;
-    if (lastChild != null)
+    if (lastChild != null) {
       lastChild!._nextSibling = child;
+    }
     _lastChild = child;
     _firstChild ??= child;
     child._parentHandle.layer = child;
@@ -1280,8 +1284,9 @@ class ContainerLayer extends Layer {
   /// Returns the descendants of this layer in depth first order.
   @visibleForTesting
   List<Layer> depthFirstIterateChildren() {
-    if (firstChild == null)
+    if (firstChild == null) {
       return <Layer>[];
+    }
     final List<Layer> children = <Layer>[];
     Layer? child = firstChild;
     while(child != null) {
@@ -1297,14 +1302,16 @@ class ContainerLayer extends Layer {
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    if (firstChild == null)
+    if (firstChild == null) {
       return children;
+    }
     Layer? child = firstChild;
     int count = 1;
     while (true) {
       children.add(child!.toDiagnosticsNode(name: 'child $count'));
-      if (child == lastChild)
+      if (child == lastChild) {
         break;
+      }
       count += 1;
       child = child.nextSibling;
     }
@@ -1476,8 +1483,9 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (!clipRect!.contains(localPosition))
+    if (!clipRect!.contains(localPosition)) {
       return false;
+    }
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
@@ -1500,8 +1508,9 @@ class ClipRectLayer extends ContainerLayer {
       engineLayer = null;
     }
     addChildrenToScene(builder);
-    if (enabled)
+    if (enabled) {
       builder.pop();
+    }
   }
 
   @override
@@ -1562,8 +1571,9 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (!clipRRect!.contains(localPosition))
+    if (!clipRRect!.contains(localPosition)) {
       return false;
+    }
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
@@ -1586,8 +1596,9 @@ class ClipRRectLayer extends ContainerLayer {
       engineLayer = null;
     }
     addChildrenToScene(builder);
-    if (enabled)
+    if (enabled) {
       builder.pop();
+    }
   }
 
   @override
@@ -1648,8 +1659,9 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (!clipPath!.contains(localPosition))
+    if (!clipPath!.contains(localPosition)) {
       return false;
+    }
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
@@ -1672,8 +1684,9 @@ class ClipPathLayer extends ContainerLayer {
       engineLayer = null;
     }
     addChildrenToScene(builder);
-    if (enabled)
+    if (enabled) {
       builder.pop();
+    }
   }
 
   @override
@@ -1794,8 +1807,9 @@ class TransformLayer extends OffsetLayer {
   set transform(Matrix4? value) {
     assert(value != null);
     assert(value!.storage.every((double component) => component.isFinite));
-    if (value == _transform)
+    if (value == _transform) {
       return;
+    }
     _transform = value;
     _inverseDirty = true;
     markNeedsAddToScene();
@@ -1828,8 +1842,9 @@ class TransformLayer extends OffsetLayer {
       );
       _inverseDirty = false;
     }
-    if (_invertedTransform == null)
+    if (_invertedTransform == null) {
       return null;
+    }
 
     return MatrixUtils.transformPoint(_invertedTransform!, localPosition);
   }
@@ -1837,8 +1852,9 @@ class TransformLayer extends OffsetLayer {
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     final Offset? transformedOffset = _transformOffset(localPosition);
-    if (transformedOffset == null)
+    if (transformedOffset == null) {
       return false;
+    }
     return super.findAnnotations<S>(result, transformedOffset, onlyFirst: onlyFirst);
   }
 
@@ -2206,8 +2222,9 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (!clipPath!.contains(localPosition))
+    if (!clipPath!.contains(localPosition)) {
       return false;
+    }
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
@@ -2237,8 +2254,9 @@ class PhysicalModelLayer extends ContainerLayer {
       engineLayer = null;
     }
     addChildrenToScene(builder);
-    if (enabled)
+    if (enabled) {
       builder.pop();
+    }
   }
 
   @override
@@ -2300,8 +2318,9 @@ class LayerLink {
   void _debugScheduleLeadersCleanUpCheck() {
     assert(_debugPreviousLeaders != null);
     assert(() {
-      if (_debugLeaderCheckScheduled)
+      if (_debugLeaderCheckScheduled) {
         return true;
+      }
       _debugLeaderCheckScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _debugLeaderCheckScheduled = false;
@@ -2397,14 +2416,16 @@ class LeaderLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(offset != null);
-    if (offset != Offset.zero)
+    if (offset != Offset.zero) {
       engineLayer = builder.pushTransform(
         Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
+    }
     addChildrenToScene(builder);
-    if (offset != Offset.zero)
+    if (offset != Offset.zero) {
       builder.pop();
+    }
   }
 
   /// Applies the transform that would be applied when compositing the given
@@ -2416,8 +2437,9 @@ class LeaderLayer extends ContainerLayer {
   /// children.
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
-    if (offset != Offset.zero)
+    if (offset != Offset.zero) {
       transform.translate(offset.dx, offset.dy);
+    }
   }
 
   @override
@@ -2516,8 +2538,9 @@ class FollowerLayer extends ContainerLayer {
       _invertedTransform = Matrix4.tryInvert(getLastTransform()!);
       _inverseDirty = false;
     }
-    if (_invertedTransform == null)
+    if (_invertedTransform == null) {
       return null;
+    }
     final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform!.transform(vector);
     return Offset(result[0] - linkedOffset!.dx, result[1] - linkedOffset!.dy);
@@ -2545,8 +2568,9 @@ class FollowerLayer extends ContainerLayer {
   ///
   /// This method returns a new [Matrix4] instance each time it is invoked.
   Matrix4? getLastTransform() {
-    if (_lastTransform == null)
+    if (_lastTransform == null) {
       return null;
+    }
     final Matrix4 result = Matrix4.translationValues(-_lastOffset!.dx, -_lastOffset!.dy, 0.0);
     result.multiply(_lastTransform!);
     return result;
@@ -2563,8 +2587,9 @@ class FollowerLayer extends ContainerLayer {
     final Matrix4 result = Matrix4.identity();
     // Apply each layer to the matrix in turn, starting from the last layer,
     // and providing the previous layer as the child.
-    for (int index = layers.length - 1; index > 0; index -= 1)
+    for (int index = layers.length - 1; index > 0; index -= 1) {
       layers[index]?.applyTransform(layers[index - 1], result);
+    }
     return result;
   }
 
@@ -2581,11 +2606,13 @@ class FollowerLayer extends ContainerLayer {
     List<ContainerLayer?> ancestorsB,
   ) {
     // No common ancestor found.
-    if (a == null || b == null)
+    if (a == null || b == null) {
       return null;
+    }
 
-    if (identical(a, b))
+    if (identical(a, b)) {
       return a;
+    }
 
     if (a.depth < b.depth) {
       ancestorsB.add(b.parent);
@@ -2634,8 +2661,9 @@ class FollowerLayer extends ContainerLayer {
     _lastTransform = null;
     final LeaderLayer? leader = _link.leader;
     // Check to see if we are linked.
-    if (leader == null)
+    if (leader == null) {
       return;
+    }
     // If we're linked, check the link is valid.
     assert(
       leader.owner == owner,
@@ -2849,8 +2877,9 @@ class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     bool isAbsorbed = super.findAnnotations(result, localPosition, onlyFirst: onlyFirst);
-    if (result.entries.isNotEmpty && onlyFirst)
+    if (result.entries.isNotEmpty && onlyFirst) {
       return isAbsorbed;
+    }
     if (size != null && !(offset & size!).contains(localPosition)) {
       return isAbsorbed;
     }

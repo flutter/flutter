@@ -101,6 +101,46 @@ class _StateDependentMouseCursor extends MaterialStateMouseCursor {
 }
 
 void main() {
+  testWidgets('The initial value should respect the discrete value', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.20;
+    final List<Offset> log = <Offset>[];
+    final LoggingThumbShape loggingThumb = LoggingThumbShape(log);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
+              return Material(
+                child: Center(
+                  child: SliderTheme(
+                    data: sliderTheme,
+                    child: Slider(
+                      key: sliderKey,
+                      value: value,
+                      divisions: 4,
+                      onChanged: (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(value, equals(0.20));
+    expect(log.length, 1);
+    expect(log[0], const Offset(212.0, 300.0));
+  });
+
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
@@ -2884,8 +2924,9 @@ void main() {
 
     late RRect activeTrackRRect;
     expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRRect)
+      if (method != #drawRRect) {
         return false;
+      }
       activeTrackRRect = arguments[0] as RRect;
       return true;
     }));

@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -19,31 +18,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/context.dart' hide testLogger;
 import '../src/fake_vm_services.dart';
-
-final Map<String, Object> vm = <String, dynamic>{
-  'type': 'VM',
-  'name': 'vm',
-  'architectureBits': 64,
-  'targetCPU': 'x64',
-  'hostCPU': '      Intel(R) Xeon(R) CPU    E5-1650 v2 @ 3.50GHz',
-  'version': '2.1.0-dev.7.1.flutter-45f9462398 (Fri Oct 19 19:27:56 2018 +0000) on "linux_x64"',
-  '_profilerMode': 'Dart',
-  '_nativeZoneMemoryUsage': 0,
-  'pid': 103707,
-  'startTime': 1540426121876,
-  '_embedder': 'Flutter',
-  '_maxRSS': 312614912,
-  '_currentRSS': 33091584,
-  'isolates': <dynamic>[
-    <String, dynamic>{
-      'type': '@Isolate',
-      'fixedId': true,
-      'id': 'isolates/242098474',
-      'name': 'main.dart:main()',
-      'number': 242098474,
-    },
-  ],
-};
 
 const String kExtensionName = 'ext.flutter.test.interestingExtension';
 
@@ -86,8 +60,6 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
     ],
   },
 );
-
-typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Object>);
 
 void main() {
   testWithoutContext('VmService registers reloadSources', () async {
@@ -879,11 +851,6 @@ class MockVMService extends Fake implements vm_service.VmService {
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device { }
-
-class FakeFlutterVersion extends Fake implements FlutterVersion {
-  @override
-  Map<String, Object> toJson() => const <String, Object>{'Fake': 'Version'};
-}
 
 /// A [WebSocketConnector] that always throws an [io.SocketException].
 Future<io.WebSocket> failingWebSocketConnector(

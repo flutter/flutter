@@ -202,8 +202,9 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   final Map<bool, bool> _accepted = <bool, bool>{false: true, true: true};
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.notificationPredicate(notification))
+    if (!widget.notificationPredicate(notification)) {
       return false;
+    }
 
     // Update the paint offset with the current scroll position. This makes
     // sure that the glow effect correctly scrolls in line with the current
@@ -358,8 +359,9 @@ class _GlowController extends ChangeNotifier {
   Color _color;
   set color(Color value) {
     assert(color != null);
-    if (color == value)
+    if (color == value) {
       return;
+    }
     _color = value;
     notifyListeners();
   }
@@ -368,8 +370,9 @@ class _GlowController extends ChangeNotifier {
   Axis _axis;
   set axis(Axis value) {
     assert(axis != null);
-    if (axis == value)
+    if (axis == value) {
       return;
+    }
     _axis = value;
     notifyListeners();
   }
@@ -459,13 +462,15 @@ class _GlowController extends ChangeNotifier {
   }
 
   void scrollEnd() {
-    if (_state == _GlowState.pull)
+    if (_state == _GlowState.pull) {
       _recede(_recedeTime);
+    }
   }
 
   void _changePhase(AnimationStatus status) {
-    if (status != AnimationStatus.completed)
+    if (status != AnimationStatus.completed) {
       return;
+    }
     switch (_state) {
       case _GlowState.absorb:
         _recede(_recedeTime);
@@ -481,8 +486,9 @@ class _GlowController extends ChangeNotifier {
   }
 
   void _recede(Duration duration) {
-    if (_state == _GlowState.recede || _state == _GlowState.idle)
+    if (_state == _GlowState.recede || _state == _GlowState.idle) {
       return;
+    }
     _pullRecedeTimer?.cancel();
     _pullRecedeTimer = null;
     _glowOpacityTween.begin = _glowOpacity.value;
@@ -509,8 +515,9 @@ class _GlowController extends ChangeNotifier {
   }
 
   void paint(Canvas canvas, Size size) {
-    if (_glowOpacity.value == 0.0)
+    if (_glowOpacity.value == 0.0) {
       return;
+    }
     final double baseGlowScale = size.width > size.height ? size.height / size.width : 1.0;
     final double radius = size.width * 3.0 / 2.0;
     final double height = math.min(size.height, size.width * _widthToHeightFactor);
@@ -556,8 +563,9 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
   static const double piOver2 = math.pi / 2.0;
 
   void _paintSide(Canvas canvas, Size size, _GlowController? controller, AxisDirection axisDirection, GrowthDirection growthDirection) {
-    if (controller == null)
+    if (controller == null) {
       return;
+    }
     switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
       case AxisDirection.up:
         controller.paint(canvas, size);
@@ -690,8 +698,9 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
   bool _accepted = true;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.notificationPredicate(notification))
+    if (!widget.notificationPredicate(notification)) {
       return false;
+    }
 
     if (notification is OverscrollNotification) {
       _lastOverscrollNotification = notification;
@@ -878,13 +887,15 @@ class _StretchController extends ChangeNotifier {
   }
 
   void scrollEnd() {
-    if (_state == _StretchState.pull)
+    if (_state == _StretchState.pull) {
       _recede(_stretchDuration);
+    }
   }
 
   void _changePhase(AnimationStatus status) {
-    if (status != AnimationStatus.completed)
+    if (status != AnimationStatus.completed) {
       return;
+    }
     switch (_state) {
       case _StretchState.absorb:
         _recede(_stretchDuration);
@@ -900,8 +911,9 @@ class _StretchController extends ChangeNotifier {
   }
 
   void _recede(Duration duration) {
-    if (_state == _StretchState.recede || _state == _StretchState.idle)
+    if (_state == _StretchState.recede || _state == _StretchState.idle) {
       return;
+    }
     _stretchSizeTween.begin = _stretchSize.value;
     _stretchSizeTween.end = 0.0;
     _stretchController.duration = duration;

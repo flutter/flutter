@@ -225,20 +225,23 @@ class ChangeNotifier implements Listenable {
       final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(_count, null);
 
       // Listeners before the index are at the same place.
-      for (int i = 0; i < index; i++)
+      for (int i = 0; i < index; i++) {
         newListeners[i] = _listeners[i];
+      }
 
       // Listeners after the index move towards the start of the list.
-      for (int i = index; i < _count; i++)
+      for (int i = index; i < _count; i++) {
         newListeners[i] = _listeners[i + 1];
+      }
 
       _listeners = newListeners;
     } else {
       // When there are more listeners than half the length of the list, we only
       // shift our listeners, so that we avoid to reallocate memory for the
       // whole list.
-      for (int i = index; i < _count; i++)
+      for (int i = index; i < _count; i++) {
         _listeners[i] = _listeners[i + 1];
+      }
       _listeners[_count] = null;
     }
   }
@@ -319,8 +322,9 @@ class ChangeNotifier implements Listenable {
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     assert(debugAssertNotDisposed());
-    if (_count == 0)
+    if (_count == 0) {
       return;
+    }
 
     // To make sure that listeners removed during this iteration are not called,
     // we set them to null, but we don't shrink the list right away.
@@ -439,8 +443,9 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   T get value => _value;
   T _value;
   set value(T newValue) {
-    if (_value == newValue)
+    if (_value == newValue) {
       return;
+    }
     _value = newValue;
     notifyListeners();
   }
