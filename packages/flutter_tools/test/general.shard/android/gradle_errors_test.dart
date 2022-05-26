@@ -363,6 +363,11 @@ Execution failed for task ':app:mergeDexDebug'.
       );
       expect(testLogger.statusText,
         contains(
+          'See https://docs.flutter.dev/deployment/android#enabling-multidex-support for more information.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
           'Your `android/app/src/main/AndroidManifest.xml` does not contain'
         )
       );
