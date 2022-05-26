@@ -1934,6 +1934,17 @@ targets:
     scheduler: luci
     bringup: true
 
+  - name: Linux_android list_text_layout_impeller_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: list_text_layout_impeller_perf__e2e_summary
+    scheduler: luci
+    bringup: true
+
   - name: Linux_android new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
