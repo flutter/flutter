@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "impeller/base/allocation.h"
 #include "impeller/base/comparable.h"
 #include "impeller/base/validation.h"
 
@@ -314,6 +315,30 @@ void ProcTableGLES::PopDebugGroup() const {
     return;
   }
   PopDebugGroupKHR();
+}
+
+std::string ProcTableGLES::GetProgramInfoLogString(GLuint program) const {
+  GLint length = 0;
+  GetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+  if (length <= 0) {
+    return "";
+  }
+
+  length = std::min<GLint>(length, 1024);
+  Allocation allocation;
+  if (!allocation.Truncate(length, false)) {
+    return "";
+  }
+  GetProgramInfoLog(program,  // program
+                    length,   // max length
+                    &length,  // length written (excluding NULL terminator)
+                    reinterpret_cast<GLchar*>(allocation.GetBuffer())  // buffer
+  );
+  if (length <= 0) {
+    return "";
+  }
+  return std::string{reinterpret_cast<const char*>(allocation.GetBuffer()),
+                     static_cast<size_t>(length)};
 }
 
 }  // namespace impeller

@@ -159,7 +159,8 @@ static bool LinkProgram(
   gl.GetProgramiv(*program, GL_LINK_STATUS, &link_status);
 
   if (link_status != GL_TRUE) {
-    VALIDATION_LOG << "Could not link shader program.";
+    VALIDATION_LOG << "Could not link shader program: "
+                   << gl.GetProgramInfoLogString(*program);
     return false;
   }
   return true;

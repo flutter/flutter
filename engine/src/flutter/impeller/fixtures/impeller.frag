@@ -5,11 +5,11 @@
 uniform samplerCube cube_map;
 uniform sampler2D blue_noise;
 
-uniform FrameInfo {
+uniform FragInfo {
   vec2 texture_size;
   float time;
 }
-frame_info;
+frag_info;
 
 in vec2 v_screen_position;
 out vec4 frag_color;
@@ -90,9 +90,9 @@ float CuboidDistance(vec3 sample_position, vec3 cuboid_size) {
 ///
 
 float GlassBox(vec3 pos) {
-  mat3 basis = RotateEuler(vec3(frame_info.time * 0.21, frame_info.time * 0.24,
-                                frame_info.time * 0.17));
-  vec3 glass_box_pos = pos + vec3(0, -4.5 + sin(frame_info.time), 0.0);
+  mat3 basis = RotateEuler(vec3(frag_info.time * 0.21, frag_info.time * 0.24,
+                                frag_info.time * 0.17));
+  vec3 glass_box_pos = pos + vec3(0, -4.5 + sin(frag_info.time), 0.0);
   return CuboidDistance(basis * glass_box_pos, vec3(1, 1, 1)) - 3.0;
 }
 
@@ -106,16 +106,16 @@ vec2 FlutterLogoField(vec3 pos) {
   // right amount to avoid overstepping errors.
   const float kFieldScale = kHalfSqrtTwo * 1.0 / 1.3;
 
-  vec3 r = vec3(sin(frame_info.time * 1.137) / 7.0,        //
-                sin(frame_info.time * 1.398 + 0.7) / 8.0,  //
-                sin(frame_info.time * 0.873 + 0.3) / 5.0);
+  vec3 r = vec3(sin(frag_info.time * 1.137) / 7.0,        //
+                sin(frag_info.time * 1.398 + 0.7) / 8.0,  //
+                sin(frag_info.time * 0.873 + 0.3) / 5.0);
   // This homegrown rotation matrix isn't perfect, but it's fine for the < PI/2
   // rotation being applied to the logo.
   mat3 logo_basis = mat3(cos(r.z) * cos(r.y), sin(r.z), -sin(r.y),   //
                          -sin(r.z), cos(r.z) * cos(r.x), -sin(r.x),  //
                          sin(r.y), sin(r.x), cos(r.x) * cos(r.y));
   vec3 logo_pos =
-      logo_basis * pos + vec3(-1.0, -4.0 + sin(frame_info.time), 0.0);
+      logo_basis * pos + vec3(-1.0, -4.0 + sin(frag_info.time), 0.0);
 
   // Bottom prism.
 
@@ -179,7 +179,7 @@ vec2 InnerGlassBoxField(vec3 pos) {
 vec2 ImpellerField(vec3 pos) {
   float xz_dist = length(pos.xz);
   float impeller = min(0.5, xz_dist / 3.0) *
-                   sin(xz_dist * 2.0 - mod(frame_info.time, kPi) * 30.0 +
+                   sin(xz_dist * 2.0 - mod(frag_info.time, kPi) * 30.0 +
                        atan(pos.z, pos.x) * 6.0) *
                    1.5;
   float impeller_side = xz_dist / 2.0 - 4.0;
@@ -349,7 +349,7 @@ vec4 SceneColor(vec3 ray_position,
   }
   float glow_factor = float(steps_taken) / float(kMaxSteps);
   vec4 glow_color =
-      mix(kGlowColor, kGlowColor2, sin(frame_info.time / 3.0) * 0.5 + 0.5);
+      mix(kGlowColor, kGlowColor2, sin(frag_info.time / 3.0) * 0.5 + 0.5);
   return mix(result_color, glow_color, glow_factor * kGlowBlend);
 }
 
@@ -402,7 +402,7 @@ vec4 CombinedColor(vec3 ray_position, vec3 ray_direction, vec4 ray_noise) {
 
 vec3 GetFragDirection(vec2 uv, vec3 cam_forward) {
   vec2 lens_uv =
-      (uv - 0.5 * frame_info.texture_size) / frame_info.texture_size.xx;
+      (uv - 0.5 * frag_info.texture_size) / frag_info.texture_size.xx;
   vec3 cam_right = cross(cam_forward, vec3(0, 1, 0));
   vec3 cam_up = cross(cam_forward, cam_right);
 
@@ -412,7 +412,7 @@ vec3 GetFragDirection(vec2 uv, vec3 cam_forward) {
 }
 
 void main() {
-  float cam_time = frame_info.time / 2.0;
+  float cam_time = frag_info.time / 2.0;
   vec3 cam_position =
       vec3(-sin(cam_time + 0.2) * 6.25, -cos(cam_time + 0.3) * 2.9 + 1.0,
            -cos(cam_time - 0.1) * 5.4) *
@@ -425,7 +425,7 @@ void main() {
 
   for (int i = 0; i < kRaysPerFrag; i++) {
     vec4 ray_noise = BlueNoiseWithRandomOffset(
-        v_screen_position, float(i) + mod(frame_info.time, 10.0));
+        v_screen_position, float(i) + mod(frag_info.time, 10.0));
     // The rays should be starting from a flat position on the lens, but just
     // jittering them around in a 3d box looks good enough.
     vec3 ray_start = cam_position + ray_noise.xyz * kApertureSize;
