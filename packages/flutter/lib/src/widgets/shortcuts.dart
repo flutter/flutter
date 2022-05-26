@@ -651,7 +651,6 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   ShortcutManager({
     Map<ShortcutActivator, Intent> shortcuts = const <ShortcutActivator, Intent>{},
     this.modal = false,
-    this.locked = false,
   })  : assert(shortcuts != null),
         _shortcuts = shortcuts;
 
@@ -668,13 +667,6 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// [KeyEventResult.ignored].
   final bool modal;
 
-  /// If this [ShortcutManager] was created by a [Shortcuts] widget, then the
-  /// list of shortcuts will be locked, and can't be changed.
-  ///
-  /// If the [shortcuts] setter is called when the manager is locked, it will
-  /// assert in debug mode.
-  final bool locked;
-
   /// Returns the shortcut map.
   ///
   /// When the map is changed, listeners to this manager will be notified.
@@ -684,15 +676,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{};
   set shortcuts(Map<ShortcutActivator, Intent> value) {
     assert(value != null);
-    assert(!locked, 'This $ShortcutManager is locked, meaning that it was probably '
-        'created by a Shortcuts widget, instead of being passed in to Shortcuts.manager, '
-        'and the shortcuts cannot be modified. If you want to check a manager to see its '
-        'locked status, check ShortcutManager.locked');
-    _setShortcuts(value);
-  }
-
-  void _setShortcuts(Map<ShortcutActivator, Intent> value) {
-      if (!mapEquals<ShortcutActivator, Intent>(_shortcuts, value)) {
+    if (!mapEquals<ShortcutActivator, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       _indexedShortcutsCache = null;
       notifyListeners();
@@ -903,52 +887,6 @@ class Shortcuts extends StatefulWidget {
   /// unnecessarily with large default shortcut maps.
   final String? debugLabel;
 
-  /// Returns the [ShortcutManager] that most tightly encloses the given
-  /// [BuildContext].
-  ///
-  /// If no [Shortcuts] widget encloses the context given, will assert in debug
-  /// mode and throw an exception in release mode.
-  ///
-  /// See also:
-  ///
-  ///  * [maybeOf], which is similar to this function, but will return null if
-  ///    it doesn't find a [Shortcuts] ancestor.
-  static ShortcutManager of(BuildContext context) {
-    assert(context != null);
-    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
-    assert(() {
-      if (inherited == null) {
-        throw FlutterError(
-          'Unable to find a $Shortcuts widget in the context.\n'
-              '$Shortcuts.of() was called with a context that does not contain a '
-              '$Shortcuts widget.\n'
-              'No $Shortcuts ancestor could be found starting from the context that was '
-              'passed to $Shortcuts.of().\n'
-              'The context used was:\n'
-              '  $context',
-        );
-      }
-      return true;
-    }());
-    return inherited!.manager;
-  }
-
-  /// Returns the [ShortcutManager] that most tightly encloses the given
-  /// [BuildContext].
-  ///
-  /// If no [Shortcuts] widget encloses the context given, will return null.
-  ///
-  /// See also:
-  ///
-  ///  * [of], which is similar to this function, but returns a non-nullable
-  ///    result, and will throw an exception if it doesn't find a [Shortcuts]
-  ///    ancestor.
-  static ShortcutManager? maybeOf(BuildContext context) {
-    assert(context != null);
-    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
-    return inherited?.manager;
-  }
-
   @override
   State<Shortcuts> createState() => _ShortcutsState();
 
@@ -974,8 +912,8 @@ class _ShortcutsState extends State<Shortcuts> {
   void initState() {
     super.initState();
     if (widget.manager == null) {
-      _internalManager = ShortcutManager(locked: true);
-      _internalManager!._setShortcuts(widget.shortcuts);
+      _internalManager = ShortcutManager();
+      _internalManager!.shortcuts = widget.shortcuts;
     }
   }
 
@@ -990,7 +928,7 @@ class _ShortcutsState extends State<Shortcuts> {
         _internalManager ??= ShortcutManager();
       }
     }
-    _internalManager?._setShortcuts(widget.shortcuts);
+    _internalManager?.shortcuts = widget.shortcuts;
   }
 
   KeyEventResult _handleOnKey(FocusNode node, RawKeyEvent event) {
@@ -1006,26 +944,8 @@ class _ShortcutsState extends State<Shortcuts> {
       debugLabel: '$Shortcuts',
       canRequestFocus: false,
       onKey: _handleOnKey,
-      child: _ShortcutsMarker(
-        manager: manager,
-        child: widget.child,
-      ),
+      child: widget.child,
     );
-  }
-}
-
-class _ShortcutsMarker extends InheritedWidget {
-  const _ShortcutsMarker({
-    required this.manager,
-    required super.child,
-  })  : assert(manager != null),
-        assert(child != null);
-
-  final ShortcutManager manager;
-
-  @override
-  bool updateShouldNotify(_ShortcutsMarker oldWidget) {
-    return manager != oldWidget.manager;
   }
 }
 
@@ -1357,7 +1277,7 @@ class ShortcutRegistrar extends StatefulWidget {
 
 class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   final ShortcutRegistry registry = ShortcutRegistry();
-  final ShortcutManager manager = ShortcutManager(locked: true);
+  final ShortcutManager manager = ShortcutManager();
 
   @override
   void initState() {
@@ -1368,7 +1288,7 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   void _shortcutsChanged() {
     // This shouldn't need to update the widget, and avoids calling setState
     // during build phase.
-    manager._setShortcuts(registry.shortcuts);
+    manager.shortcuts = registry.shortcuts;
   }
 
   @override
