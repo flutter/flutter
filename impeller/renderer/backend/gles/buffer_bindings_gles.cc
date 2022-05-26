@@ -157,11 +157,11 @@ bool BufferBindingsGLES::BindUniformData(
     }
   }
 
-  if (!BindTextures(gl, vertex_bindings)) {
+  if (!BindTextures(gl, vertex_bindings, ShaderStage::kVertex)) {
     return false;
   }
 
-  if (!BindTextures(gl, fragment_bindings)) {
+  if (!BindTextures(gl, fragment_bindings, ShaderStage::kFragment)) {
     return false;
   }
 
@@ -276,7 +276,8 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
 }
 
 bool BufferBindingsGLES::BindTextures(const ProcTableGLES& gl,
-                                      const Bindings& bindings) const {
+                                      const Bindings& bindings,
+                                      ShaderStage stage) const {
   size_t active_index = 0;
   for (const auto& texture : bindings.textures) {
     const auto& texture_gles = TextureGLES::Cast(*texture.second.resource);
@@ -295,12 +296,12 @@ bool BufferBindingsGLES::BindTextures(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Set the active texture unit.
     ///
-    const auto texture_index = GL_TEXTURE0 + active_index;
-    if (texture_index >= GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) {
-      VALIDATION_LOG << "Active texture index was out of bounds.";
+    if (active_index >= gl.GetCapabilities()->GetMaxTextureUnits(stage)) {
+      VALIDATION_LOG << "Texture units specified exceed the capabilities for "
+                        "this shader stage.";
       return false;
     }
-    gl.ActiveTexture(texture_index);
+    gl.ActiveTexture(GL_TEXTURE0 + active_index);
 
     //--------------------------------------------------------------------------
     /// Bind the texture.

@@ -22,6 +22,8 @@ class DescriptionGLES {
 
   bool IsValid() const;
 
+  bool IsES() const;
+
   std::string GetString() const;
 
   bool HasExtension(const std::string& ext) const;

@@ -21,6 +21,8 @@ impeller_component("gles") {
     "allocator_gles.h",
     "buffer_bindings_gles.cc",
     "buffer_bindings_gles.h",
+    "capabilities_gles.cc",
+    "capabilities_gles.h",
     "command_buffer_gles.cc",
     "command_buffer_gles.h",
     "context_gles.cc",
