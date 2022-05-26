@@ -16,41 +16,20 @@ void main() {
 }
 
 enum MenuSelection {
-  edit,
-  cut,
-  copy,
-  paste,
-  file,
-  open,
-  quit,
-  save,
-  saveAs,
+  edit('Edit'),
+  cut('Cut'),
+  copy('Copy'),
+  paste('Paste'),
+  file('File'),
+  open('Open'),
+  quit('Quit'),
+  save('Save'),
+  saveAs('Save As...');
+
+  const MenuSelection(this.label);
+  final String label;
 }
 
-String getLabel(MenuSelection selection) {
-  // Use a switch so that the analyzer will warn us if we aren't handling a
-  // case.
-  switch (selection) {
-    case MenuSelection.edit:
-      return 'Edit';
-    case MenuSelection.cut:
-      return 'Cut';
-    case MenuSelection.copy:
-      return 'Copy';
-    case MenuSelection.paste:
-      return 'Paste';
-    case MenuSelection.file:
-      return 'File';
-    case MenuSelection.open:
-      return 'Open';
-    case MenuSelection.quit:
-      return 'Quit';
-    case MenuSelection.save:
-      return 'Save';
-    case MenuSelection.saveAs:
-      return 'Save As...';
-  }
-}
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -83,13 +62,13 @@ class _HomeState extends State<Home> {
           enabled: enabled,
           menus: <MenuItem>[
             MenuBarMenu(
-              label: getLabel(MenuSelection.file),
+              label: MenuSelection.file.label,
               menus: <MenuItem>[
                 if (hasAbout) const PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.about),
                 MenuItemGroup(
                   members: <MenuItem>[
                     MenuBarItem(
-                      label: getLabel(MenuSelection.open),
+                      label: MenuSelection.open.label,
                       shortcut: SingleActivator(
                         LogicalKeyboardKey.keyO,
                         control: control,
@@ -100,7 +79,7 @@ class _HomeState extends State<Home> {
                       },
                     ),
                     MenuBarItem(
-                      label: getLabel(MenuSelection.save),
+                      label: MenuSelection.save.label,
                       shortcut: SingleActivator(
                         LogicalKeyboardKey.keyS,
                         control: control,
@@ -111,7 +90,7 @@ class _HomeState extends State<Home> {
                       },
                     ),
                     MenuBarItem(
-                      label: getLabel(MenuSelection.saveAs),
+                      label: MenuSelection.saveAs.label,
                       shortcut: SingleActivator(
                         LogicalKeyboardKey.keyS,
                         shift: true,
@@ -128,10 +107,10 @@ class _HomeState extends State<Home> {
               ],
             ),
             MenuBarMenu(
-              label: getLabel(MenuSelection.edit),
+              label: MenuSelection.edit.label,
               menus: <MenuItem>[
                 MenuBarItem(
-                  label: getLabel(MenuSelection.cut),
+                  label: MenuSelection.cut.label,
                   shortcut: SingleActivator(
                     LogicalKeyboardKey.keyX,
                     control: control,
@@ -140,7 +119,7 @@ class _HomeState extends State<Home> {
                   onSelected: () => _onSelected(MenuSelection.cut),
                 ),
                 MenuBarItem(
-                  label: getLabel(MenuSelection.copy),
+                  label: MenuSelection.copy.label,
                   shortcut: SingleActivator(
                     LogicalKeyboardKey.keyC,
                     control: control,
@@ -149,7 +128,7 @@ class _HomeState extends State<Home> {
                   onSelected: () => _onSelected(MenuSelection.copy),
                 ),
                 MenuBarItem(
-                  label: getLabel(MenuSelection.paste),
+                  label: MenuSelection.paste.label,
                   shortcut: SingleActivator(
                     LogicalKeyboardKey.keyV,
                     control: control,
