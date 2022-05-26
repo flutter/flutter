@@ -27,6 +27,8 @@ impeller_shaders("entity_shaders") {
     "shaders/solid_stroke.vert",
     "shaders/texture_fill.frag",
     "shaders/texture_fill.vert",
+    "shaders/vertices.vert",
+    "shaders/vertices.frag",
   ]
 }
 
@@ -66,6 +68,8 @@ impeller_component("entity") {
     "contents/text_contents.h",
     "contents/texture_contents.cc",
     "contents/texture_contents.h",
+    "contents/vertices_contents.cc",
+    "contents/vertices_contents.h",
     "entity.cc",
     "entity.h",
     "entity_pass.cc",

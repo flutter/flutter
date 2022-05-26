@@ -168,6 +168,7 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<SolidStrokePipeline>(*context_);
   glyph_atlas_pipelines_[{}] =
       CreateDefaultPipeline<GlyphAtlasPipeline>(*context_);
+  vertices_pipelines_[{}] = CreateDefaultPipeline<VerticesPipeline>(*context_);
 
   // Pipelines that are variants of the base pipelines with custom descriptors.
   // TODO(98684): Rework this API to allow fetching the descriptor without
