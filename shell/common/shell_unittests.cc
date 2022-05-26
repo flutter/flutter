@@ -1217,6 +1217,55 @@ TEST_F(ShellTest,
   DestroyShell(std::move(shell), std::move(task_runners));
 }
 
+TEST_F(ShellTest, GetUsedThisFrameShouldBeSetBeforeEndFrame) {
+  auto settings = CreateSettingsForFixture();
+  fml::AutoResetWaitableEvent end_frame_latch;
+  std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
+  bool used_this_frame = true;
+  auto end_frame_callback =
+      [&](bool should_resubmit_frame,
+          fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+        end_frame_latch.Signal();
+        // We expect `used_this_frame` to be false.
+        used_this_frame = external_view_embedder->GetUsedThisFrame();
+      };
+  external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
+      end_frame_callback, PostPrerollResult::kSuccess, true);
+  auto shell = CreateShell(std::move(settings), GetTaskRunnersForFixture(),
+                           false, external_view_embedder);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  LayerTreeBuilder builder = [&](std::shared_ptr<ContainerLayer> root) {
+    SkPictureRecorder recorder;
+    SkCanvas* recording_canvas =
+        recorder.beginRecording(SkRect::MakeXYWH(0, 0, 80, 80));
+    recording_canvas->drawRect(SkRect::MakeXYWH(0, 0, 80, 80),
+                               SkPaint(SkColor4f::FromColor(SK_ColorRED)));
+    auto sk_picture = recorder.finishRecordingAsPicture();
+    fml::RefPtr<SkiaUnrefQueue> queue = fml::MakeRefCounted<SkiaUnrefQueue>(
+        this->GetCurrentTaskRunner(), fml::TimeDelta::Zero());
+    auto picture_layer = std::make_shared<PictureLayer>(
+        SkPoint::Make(10, 10),
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
+    root->Add(picture_layer);
+  };
+  PumpOneFrame(shell.get(), 100, 100, builder);
+  end_frame_latch.Wait();
+  ASSERT_FALSE(used_this_frame);
+
+  // Validate the platform view can be recreated and destroyed again
+  ValidateShell(shell.get());
+
+  DestroyShell(std::move(shell));
+}
+
 // TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
 // TODO(https://github.com/flutter/flutter/issues/66056): Deflake on all other
 // platforms
