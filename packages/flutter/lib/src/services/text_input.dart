@@ -769,18 +769,23 @@ class TextEditingValue {
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
+    final String text = encoded['text'] as String;
+    final TextSelection selection = TextSelection(
+      baseOffset: encoded['selectionBase'] as int? ?? -1,
+      extentOffset: encoded['selectionExtent'] as int? ?? -1,
+      affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
+      isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
+    );
+    final TextRange composing = TextRange(
+      start: encoded['composingBase'] as int? ?? -1,
+      end: encoded['composingExtent'] as int? ?? -1,
+    );
+    assert(_verifyRange(selection, text));
+    assert(_verifyRange(composing, text));
     return TextEditingValue(
-      text: encoded['text'] as String,
-      selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int? ?? -1,
-        extentOffset: encoded['selectionExtent'] as int? ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
-      ),
-      composing: TextRange(
-        start: encoded['composingBase'] as int? ?? -1,
-        end: encoded['composingExtent'] as int? ?? -1,
-      ),
+      text: text,
+      selection: selection,
+      composing: composing,
     );
   }
 
@@ -885,21 +890,28 @@ class TextEditingValue {
       return originalIndex + replacedLength - removedLength;
     }
 
-    return TextEditingValue(
-      text: newText,
-      selection: TextSelection(
+    final TextSelection adjustedSelection = TextSelection(
         baseOffset: adjustIndex(selection.baseOffset),
         extentOffset: adjustIndex(selection.extentOffset),
-      ),
-      composing: TextRange(
+      );
+    final TextRange adjustedComposing = TextRange(
         start: adjustIndex(composing.start),
         end: adjustIndex(composing.end),
-      ),
+      );
+    assert(_verifyRange(adjustedSelection, newText));
+    assert(_verifyRange(adjustedComposing, newText));
+    return TextEditingValue(
+      text: newText,
+      selection: adjustedSelection,
+      composing: adjustedComposing,
     );
   }
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
+    print('Text ${text.length} se $selection co $composing');
+    assert(_verifyRange(selection, text));
+    assert(_verifyRange(composing, text));
     return <String, dynamic>{
       'text': text,
       'selectionBase': selection.baseOffset,
@@ -931,6 +943,20 @@ class TextEditingValue {
     selection.hashCode,
     composing.hashCode,
   );
+
+  // Verify that the given range is within the text.
+  //
+  // This can't be perform during constructors, so perform this wherever else
+  // possible.
+  static bool _verifyRange(TextRange range, String text) {
+    if (range == TextRange.empty)
+      return true;
+    assert(range.start >= 0 && range.start <= text.length,
+        'Range start ${range.start} is out of text of length ${text.length}');
+    assert(range.end >= 0 && range.end <= text.length,
+        'Range end ${range.end} is out of text of length ${text.length}');
+    return true;
+  }
 }
 
 /// Indicates what triggered the change in selected text (including changes to
@@ -1614,7 +1640,10 @@ class TextInput {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _channel.invokeMethod<void>(
       'TextInput.setClient',
-      <dynamic>[ connection._id, configuration.toJson() ],
+      <dynamic>[
+        connection._id,
+        _loudToJson<TextInputConfiguration>(configuration.toJson, configuration),
+      ],
     );
     _currentConnection = connection;
     _currentConfiguration = configuration;
@@ -1822,7 +1851,7 @@ class TextInput {
     assert(configuration != null);
     _channel.invokeMethod<void>(
       'TextInput.updateConfig',
-      configuration.toJson(),
+      _loudToJson<TextInputConfiguration>(configuration.toJson, configuration),
     );
   }
 
@@ -1830,7 +1859,7 @@ class TextInput {
     assert(value != null);
     _channel.invokeMethod<void>(
       'TextInput.setEditingState',
-      value.toJSON(),
+      _loudToJson<TextEditingValue>(value.toJSON, value)
     );
   }
 
@@ -1945,5 +1974,23 @@ class TextInput {
   /// Unregisters a [ScribbleClient] with [elementIdentifier].
   static void unregisterScribbleElement(String elementIdentifier) {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
+  }
+
+  // Invokes `toJson` and report errors if any.
+  static Map<String, dynamic> _loudToJson<T>(ValueGetter<Map<String, dynamic>> toJson, T value) {
+    try {
+      return toJson();
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: ErrorDescription('while converting to JSON'),
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsProperty<T>('object', value, style: DiagnosticsTreeStyle.errorProperty),
+        ],
+      ));
+      rethrow;
+    }
   }
 }
