@@ -780,6 +780,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         child: Actions(
           actions: _actions,
           child: Focus(
+            includeSemantics: false,
             focusNode: widget.focusNode,
             child: SelectionContainer(
               registrar: this,
