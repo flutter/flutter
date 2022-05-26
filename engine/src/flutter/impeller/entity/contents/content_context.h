@@ -31,6 +31,8 @@
 #include "impeller/entity/solid_stroke.vert.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
+#include "impeller/entity/vertices.frag.h"
+#include "impeller/entity/vertices.vert.h"
 #include "impeller/renderer/formats.h"
 
 namespace impeller {
@@ -54,6 +56,8 @@ using SolidStrokePipeline =
     PipelineT<SolidStrokeVertexShader, SolidStrokeFragmentShader>;
 using GlyphAtlasPipeline =
     PipelineT<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
+using VerticesPipeline =
+    PipelineT<VerticesVertexShader, VerticesFragmentShader>;
 // Instead of requiring new shaders for clips, the solid fill stages are used
 // to redirect writing to the stencil instead of color attachments.
 using ClipPipeline = PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
@@ -145,6 +149,11 @@ class ContentContext {
     return GetPipeline(glyph_atlas_pipelines_, opts);
   }
 
+  std::shared_ptr<Pipeline> GetVerticesPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(vertices_pipelines_, opts);
+  }
+
   std::shared_ptr<Context> GetContext() const;
 
   using SubpassCallback =
@@ -178,6 +187,7 @@ class ContentContext {
   mutable Variants<SolidStrokePipeline> solid_stroke_pipelines_;
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
+  mutable Variants<VerticesPipeline> vertices_pipelines_;
 
   template <class TypedPipeline>
   std::shared_ptr<Pipeline> GetPipeline(Variants<TypedPipeline>& container,
