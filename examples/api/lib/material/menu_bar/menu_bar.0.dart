@@ -13,13 +13,16 @@ import 'package:flutter/services.dart';
 void main() => runApp(const SampleApp());
 
 enum MenuSelection {
-  about,
-  showMessage,
-  colorMenu,
-  colorRed,
-  colorGreen,
-  colorBlue,
-  quit,
+  about('About'),
+  showMessage('ShowMessage'),
+  colorMenu('Color Menu'),
+  colorRed('Red'),
+  colorGreen('Green'),
+  colorBlue('Blue'),
+  quit('Quit');
+
+  const MenuSelection(this.label);
+  final String label;
 }
 
 class SampleApp extends StatelessWidget {
@@ -103,7 +106,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
               label: 'Test App',
               menus: <MenuItem>[
                 MenuBarItem(
-                  label: 'About',
+                  label: MenuSelection.about.label,
                   onSelected: () => _activate(MenuSelection.about),
                 ),
                 MenuBarItem(

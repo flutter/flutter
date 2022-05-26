@@ -5,29 +5,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const List<String> mainMenu = <String>[
-  'Menu 1',
-  'Menu 2',
-  'Menu 3',
-  'Menu 4',
-];
+enum TestMenu {
+  mainMenu1('Menu 1'),
+  mainMenu2('Menu 2'),
+  mainMenu3('Menu 3'),
+  mainMenu4('Menu 4'),
+  subMenu1('Sub Menu 1'),
+  subMenu2('Sub Menu 2'),
+  subMenu3('Sub Menu 3'),
+  subMenu4('Sub Menu 4'),
+  subMenu5('Sub Menu 5'),
+  subMenu6('Sub Menu 6'),
+  subMenu7('Sub Menu 7'),
+  subMenu8('Sub Menu 8'),
+  subSubMenu1('Sub Sub Menu 1'),
+  subSubMenu2('Sub Sub Menu 2'),
+  subSubMenu3('Sub Sub Menu 3');
 
-const List<String> subMenu = <String>[
-  'Sub Menu 1',
-  'Sub Menu 2',
-  'Sub Menu 3',
-  'Sub Menu 4',
-  'Sub Menu 5',
-  'Sub Menu 6',
-  'Sub Menu 7',
-  'Sub',
-];
-
-const List<String> subSubMenu = <String>[
-  'Sub Sub Menu 1',
-  'Sub Sub Menu 2',
-  'Sub Sub Menu 3',
-];
+  const TestMenu(this.label);
+  final String label;
+}
 
 void main() {
   debugFocusChanges = false;
@@ -53,16 +50,16 @@ class _HomeState extends State<Home> {
   bool addItem = false;
   bool checked = false;
 
-  void _itemSelected(String item) {
-    debugPrint('App: Selected item $item');
+  void _itemSelected(TestMenu item) {
+    debugPrint('App: Selected item ${item.label}');
   }
 
-  void _openItem(String item) {
-    debugPrint('App: Opened item $item');
+  void _openItem(TestMenu item) {
+    debugPrint('App: Opened item ${item.label}');
   }
 
-  void _closeItem(String item) {
-    debugPrint('App: Closed item $item');
+  void _closeItem(TestMenu item) {
+    debugPrint('App: Closed item ${item.label}');
   }
 
   @override
@@ -86,87 +83,87 @@ class _HomeState extends State<Home> {
                 controller: controller,
                 menus: <MenuItem>[
                   MenuBarMenu(
-                    label: mainMenu[0],
+                    label: TestMenu.mainMenu1.label,
                     onOpen: () {
-                      _openItem(mainMenu[0]);
+                      _openItem(TestMenu.mainMenu1);
                     },
                     onClose: () {
-                      _closeItem(mainMenu[0]);
+                      _closeItem(TestMenu.mainMenu1);
                     },
                     menus: <MenuItem>[
                       MenuBarItem(
-                          label: subMenu[0],
+                          label: TestMenu.subMenu1.label,
                           shortcut: const SingleActivator(
-                            LogicalKeyboardKey.escape,
+                            LogicalKeyboardKey.keyB,
                             control: true,
                           ),
                           leadingIcon:
                               checked ? const Icon(Icons.check_box) : const Icon(Icons.check_box_outline_blank),
                           trailingIcon: const Icon(Icons.assessment),
                           onSelected: () {
-                            _itemSelected(subMenu[0]);
+                            _itemSelected(TestMenu.subMenu1);
                             setState(() {
                               checked = !checked;
                             });
                           }),
                       MenuBarItem(
-                        label: subMenu[1],
-                        leadingIcon: const Icon(Icons.check_box),
+                        label: TestMenu.subMenu2.label,
+                        leadingIcon: const Icon(Icons.send),
                         trailingIcon: const Icon(Icons.mail),
                         onSelected: () {
-                          _itemSelected(subMenu[1]);
+                          _itemSelected(TestMenu.subMenu2);
                         },
                       ),
                     ],
                   ),
                   MenuBarMenu(
-                    label: mainMenu[1],
+                    label: TestMenu.mainMenu2.label,
                     onOpen: () {
-                      _openItem(mainMenu[1]);
+                      _openItem(TestMenu.mainMenu2);
                     },
                     onClose: () {
-                      _closeItem(mainMenu[1]);
+                      _closeItem(TestMenu.mainMenu2);
                     },
                     menus: <MenuItem>[
                       MenuBarItem(
-                        label: subMenu[2],
+                        label: TestMenu.subMenu3.label,
                         shortcut: const SingleActivator(
                           LogicalKeyboardKey.enter,
                           control: true,
                         ),
                         onSelected: () {
-                          _itemSelected(subMenu[2]);
+                          _itemSelected(TestMenu.subMenu3);
                         },
                       ),
                     ],
                   ),
                   MenuBarMenu(
-                    label: mainMenu[2],
+                    label: TestMenu.mainMenu3.label,
                     onOpen: () {
-                      _openItem(mainMenu[2]);
+                      _openItem(TestMenu.mainMenu3);
                     },
                     onClose: () {
-                      _closeItem(mainMenu[2]);
+                      _closeItem(TestMenu.mainMenu3);
                     },
                     menus: <MenuItem>[
                       PlatformMenuItemGroup(members: <MenuItem>[
                         MenuBarItem(
-                          label: subMenu[3],
+                          label: TestMenu.subMenu4.label,
                           shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
                           onSelectedIntent: const ActivateIntent(),
                         ),
                       ]),
                       MenuBarMenu(
-                        label: subMenu[4],
+                        label: TestMenu.subMenu5.label,
                         onOpen: () {
-                          _openItem(subMenu[4]);
+                          _openItem(TestMenu.subMenu5);
                         },
                         onClose: () {
-                          _closeItem(subMenu[4]);
+                          _closeItem(TestMenu.subMenu5);
                         },
                         menus: <MenuItem>[
                           MenuBarItem(
-                            label: subSubMenu[0],
+                            label: TestMenu.subSubMenu1.label,
                             shortcut: addItem
                                 ? const SingleActivator(
                                     LogicalKeyboardKey.f11,
@@ -177,53 +174,53 @@ class _HomeState extends State<Home> {
                                     control: true,
                                   ),
                             onSelected: () {
-                              _itemSelected(subSubMenu[0]);
+                              _itemSelected(TestMenu.subSubMenu1);
                             },
                           ),
                           MenuBarItem(
-                            label: subSubMenu[1],
+                            label: TestMenu.subSubMenu2.label,
                             onSelected: () {
-                              _itemSelected(subSubMenu[1]);
+                              _itemSelected(TestMenu.subSubMenu2);
                             },
                           ),
                           if (addItem)
                             MenuBarItem(
-                              label: subSubMenu[2],
+                              label: TestMenu.subSubMenu3.label,
                               onSelected: () {
-                                _itemSelected(subSubMenu[2]);
+                                _itemSelected(TestMenu.subSubMenu3);
                               },
                             ),
                         ],
                       ),
                       MenuBarItem(
-                        label: subMenu[5],
+                        label: TestMenu.subMenu6.label,
                         shortcut: const SingleActivator(
                           LogicalKeyboardKey.tab,
                           control: true,
                         ),
                       ),
                       MenuBarItem(
-                        label: subMenu[6],
+                        label: TestMenu.subMenu7.label,
                         onSelected: () {},
                       ),
                       MenuBarItem(
-                        label: subMenu[6],
+                        label: TestMenu.subMenu7.label,
                         onSelected: () {},
                       ),
                       MenuBarItem(
-                        label: subMenu[6],
+                        label: TestMenu.subMenu7.label,
                         onSelected: () {},
                       ),
                       MenuBarItem(
-                        label: subMenu[6],
+                        label: TestMenu.subMenu7.label,
                         onSelected: () {},
                       ),
                       MenuBarItem(
-                        label: subMenu[7],
+                        label: TestMenu.subMenu8.label,
                         onSelected: () {},
                       ),
                       MenuBarItem(
-                        label: subMenu[7],
+                        label: TestMenu.subMenu8.label,
                         onSelected: () {},
                       ),
                     ],
