@@ -859,7 +859,7 @@ class SemanticsHandle {
 ///    compositing bits. During this phase, each render object learns whether
 ///    any of its children require compositing. This information is used during
 ///    the painting phase when selecting how to implement visual effects such as
-///    clipping. If a render object has a composited child, its needs to use a
+///    clipping. If a render object has a composited child, it needs to use a
 ///    [Layer] to create the clip in order for the clip to apply to the
 ///    composited child (which will be painted into its own [Layer]).
 /// 3. [flushPaint] visits any render objects that need to paint. During this
