@@ -5,6 +5,7 @@
 #pragma once
 
 #include <functional>
+#include <string>
 #include <vector>
 
 #include "flutter/fml/logging.h"
@@ -123,6 +124,7 @@ struct GLProc {
   PROC(GetFloatv);                           \
   PROC(GetFramebufferAttachmentParameteriv); \
   PROC(GetIntegerv);                         \
+  PROC(GetProgramInfoLog);                   \
   PROC(GetProgramiv);                        \
   PROC(GetShaderInfoLog);                    \
   PROC(GetShaderiv);                         \
@@ -190,6 +192,8 @@ class ProcTableGLES {
   const DescriptionGLES* GetDescription() const;
 
   std::string DescribeCurrentFramebuffer() const;
+
+  std::string GetProgramInfoLogString(GLuint program) const;
 
   bool IsCurrentFramebufferComplete() const;
 

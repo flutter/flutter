@@ -338,12 +338,7 @@ TEST_P(RendererTest, CanRenderInstanced) {
 }
 #endif  // IMPELLER_ENABLE_METAL
 
-#if IMPELLER_ENABLE_METAL
 TEST_P(RendererTest, TheImpeller) {
-  if (GetBackend() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_(
-        "The shader fails to link in the GLES backend for some reason.");
-  }
   using VS = ImpellerVertexShader;
   using FS = ImpellerFragmentShader;
 
@@ -391,11 +386,11 @@ TEST_P(RendererTest, TheImpeller) {
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(vs_uniform));
 
-    FS::FrameInfo fs_uniform;
+    FS::FragInfo fs_uniform;
     fs_uniform.texture_size = Point(size);
     fs_uniform.time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
-    FS::BindFrameInfo(cmd,
-                      pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
+    FS::BindFragInfo(cmd,
+                     pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
     FS::BindBlueNoise(cmd, blue_noise, noise_sampler);
     FS::BindCubeMap(cmd, cube_map, cube_map_sampler);
 
@@ -404,7 +399,6 @@ TEST_P(RendererTest, TheImpeller) {
   };
   OpenPlaygroundHere(callback);
 }
-#endif
 
 }  // namespace testing
 }  // namespace impeller
