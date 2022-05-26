@@ -558,7 +558,8 @@ class SystemChrome {
   /// it can be hit-tested by the framework. On every frame, the framework will
   /// hit-test and select the annotated region it finds under the status and
   /// navigation bar and synthesize them into a single style. This can be used
-  /// to configure the system styles when an app bar is not used.
+  /// to configure the system styles when an app bar is not used. When an app
+  /// bar is used an annotated region is automatically created.
   ///
   /// {@tool sample}
   /// The following example creates a widget that changes the status bar color
