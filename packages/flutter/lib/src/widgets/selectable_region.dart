@@ -984,7 +984,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
 
-  /// The amount of additional pixel added to the selection handle drawable
+  /// The number of additional pixels added to the selection handle drawable
   /// area.
   ///
   /// Selection handles that are outside of the drawable area will be hidden.
@@ -1318,12 +1318,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     LayerLink? effectiveStartHandle = _startHandleLayer;
     LayerLink? effectiveEndHandle = _endHandleLayer;
     if (effectiveStartHandle != null || effectiveEndHandle != null) {
-      final Rect drawableArea = Rect.fromLTWH(
-        0 - _kSelectionHandleDrawableAreaPadding,
-        0 - _kSelectionHandleDrawableAreaPadding,
-        containerSize.width + 2 * _kSelectionHandleDrawableAreaPadding,
-        containerSize.height + 2 * _kSelectionHandleDrawableAreaPadding,
-      );
+      final Rect drawableArea = Rect
+        .fromLTWH(0, 0, containerSize.width, containerSize.height)
+        .inflate(_kSelectionHandleDrawableAreaPadding);
       final bool hideStartHandle = value.startSelectionPoint == null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
       final bool hideEndHandle = value.endSelectionPoint == null || !drawableArea.contains(value.endSelectionPoint!.localPosition);
       effectiveStartHandle = hideStartHandle ? null : _startHandleLayer;
