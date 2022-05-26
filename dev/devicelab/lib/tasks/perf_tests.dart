@@ -418,6 +418,13 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createListTextLayoutPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/list_text_layout_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createsScrollSmoothnessPerfTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/complex_layout';
