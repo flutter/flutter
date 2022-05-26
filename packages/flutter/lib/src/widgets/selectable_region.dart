@@ -234,8 +234,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       widget.focusNode.addListener(_handleFocusChanged);
-      if (widget.focusNode.hasFocus != oldWidget.focusNode.hasFocus)
+      if (widget.focusNode.hasFocus != oldWidget.focusNode.hasFocus) {
         _handleFocusChanged();
+      }
     }
   }
 
@@ -356,14 +357,16 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     // happen if the the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
     // the drag is lifted before the scheduled selection update is run.
-    if (_scheduledSelectionEndEdgeUpdate || !_userDraggingSelectionEnd)
+    if (_scheduledSelectionEndEdgeUpdate || !_userDraggingSelectionEnd) {
       return;
+    }
     if (_selectable?.dispatchSelectionEvent(
         SelectionEdgeUpdateEvent.forEnd(globalPosition: _selectionEndPosition!)) == SelectionResult.pending) {
       _scheduledSelectionEndEdgeUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        if (!_scheduledSelectionEndEdgeUpdate)
+        if (!_scheduledSelectionEndEdgeUpdate) {
           return;
+        }
         _scheduledSelectionEndEdgeUpdate = false;
         _triggerSelectionEndEdgeUpdate();
       });
@@ -390,14 +393,16 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     // happen if the the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
     // the drag is lifted before the scheduled selection update is run.
-    if (_scheduledSelectionStartEdgeUpdate || !_userDraggingSelectionStart)
+    if (_scheduledSelectionStartEdgeUpdate || !_userDraggingSelectionStart) {
       return;
+    }
     if (_selectable?.dispatchSelectionEvent(
         SelectionEdgeUpdateEvent.forStart(globalPosition: _selectionStartPosition!)) == SelectionResult.pending) {
       _scheduledSelectionStartEdgeUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        if (!_scheduledSelectionStartEdgeUpdate)
+        if (!_scheduledSelectionStartEdgeUpdate) {
           return;
+        }
         _scheduledSelectionStartEdgeUpdate = false;
         _triggerSelectionStartEdgeUpdate();
       });
@@ -443,8 +448,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _createSelectionOverlay() {
     assert(_hasSelectionOverlayGeometry);
-    if (_selectionOverlay != null)
+    if (_selectionOverlay != null) {
       return;
+    }
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
     late List<TextSelectionPoint> points;
@@ -485,8 +491,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   }
 
   void _updateSelectionOverlay() {
-    if (_selectionOverlay == null)
+    if (_selectionOverlay == null) {
       return;
+    }
     assert(_hasSelectionOverlayGeometry);
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
@@ -522,8 +529,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return true;
     }
 
-    if (!_hasSelectionOverlayGeometry)
+    if (!_hasSelectionOverlayGeometry) {
       return false;
+    }
 
     _createSelectionOverlay();
     _selectionOverlay!.showHandles();
@@ -539,18 +547,21 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
   bool _showToolbar({Offset? location}) {
-    if (!_hasSelectionOverlayGeometry && _selectionOverlay == null)
+    if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
       return false;
+    }
 
     // Web is using native dom elements to enable clipboard functionality of the
     // toolbar: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this
     // we should not show a Flutter toolbar for the editable text elements.
-    if (kIsWeb)
+    if (kIsWeb) {
       return false;
+    }
 
-    if (_selectionOverlay == null)
+    if (_selectionOverlay == null) {
       _createSelectionOverlay();
+    }
 
     _selectionOverlay!.toolbarLocation = location;
     _selectionOverlay!.showToolbar();
@@ -792,8 +803,9 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
-    if (callingAction != null)
+    if (callingAction != null) {
       return callingAction!.invoke(intent);
+    }
     return invokeAction(intent, context);
   }
 }
@@ -866,10 +878,12 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     final SelectionResult result = super.handleSelectWord(event);
-    if (currentSelectionStartIndex != -1)
+    if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
-    if (currentSelectionEndIndex != -1)
+    }
+    if (currentSelectionEndIndex != -1) {
       _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    }
     _updateLastEdgeEventsFromGeometries();
     return result;
   }
@@ -1023,8 +1037,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (!_scheduledSelectableUpdate) {
       _scheduledSelectableUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        if (!_scheduledSelectableUpdate)
+        if (!_scheduledSelectableUpdate) {
           return;
+        }
         _scheduledSelectableUpdate = false;
         _updateSelectables();
       });
@@ -1141,8 +1156,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       Rect.fromLTWH(0, 0, b.size.width, b.size.height),
     );
     final int result = _compareVertically(rectA, rectB);
-    if (result != 0)
+    if (result != 0) {
       return result;
+    }
     return _compareHorizontally(rectA, rectB);
   }
 
@@ -1156,8 +1172,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         (b.top - a.top < precisionErrorTolerance && b.bottom - a.bottom > - precisionErrorTolerance)) {
       return 0;
     }
-    if ((a.top - b.top).abs() > precisionErrorTolerance)
+    if ((a.top - b.top).abs() > precisionErrorTolerance) {
       return a.top > b.top ? 1 : -1;
+    }
     return a.bottom > b.bottom ? 1 : -1;
   }
 
@@ -1174,8 +1191,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       // b encloses a.
       return 1;
     }
-    if ((a.left - b.left).abs() > precisionErrorTolerance)
+    if ((a.left - b.left).abs() > precisionErrorTolerance) {
       return a.left > b.left ? 1 : -1;
+    }
     return a.right > b.right ? 1 : -1;
   }
 
@@ -1183,8 +1201,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     // Geometries of selectable children may change multiple times when handling
     // selection events. Ignore these updates since the selection geometry of
     // this delegate will be updated after handling the selection events.
-    if (_isHandlingSelectionEvent)
+    if (_isHandlingSelectionEvent) {
       return;
+    }
     _updateSelectionGeometry();
   }
 
@@ -1284,8 +1303,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   @override
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
-    if (_startHandleLayer == startHandle && _endHandleLayer == endHandle)
+    if (_startHandleLayer == startHandle && _endHandleLayer == endHandle) {
       return;
+    }
     _startHandleLayer = startHandle;
     _endHandleLayer = endHandle;
     _updateHandleLayersAndOwners();
@@ -1347,11 +1367,13 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     final List<SelectedContent> selections = <SelectedContent>[];
     for (final Selectable selectable in selectables) {
       final SelectedContent? data = selectable.getSelectedContent();
-      if (data != null)
+      if (data != null) {
         selections.add(data);
+      }
     }
-    if (selections.isEmpty)
+    if (selections.isEmpty) {
       return null;
+    }
     final StringBuffer buffer = StringBuffer();
     for (final SelectedContent selection in selections) {
       buffer.write(selection.plainText);

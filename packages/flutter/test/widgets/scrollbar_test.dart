@@ -272,10 +272,11 @@ void main() {
 
     for (final ScrollbarOrientation scrollbarOrientation in ScrollbarOrientation.values) {
       final AxisDirection axisDirection;
-      if (scrollbarOrientation == ScrollbarOrientation.left || scrollbarOrientation == ScrollbarOrientation.right)
+      if (scrollbarOrientation == ScrollbarOrientation.left || scrollbarOrientation == ScrollbarOrientation.right) {
         axisDirection = AxisDirection.down;
-      else
+      } else {
         axisDirection = AxisDirection.right;
+      }
 
       painter = _buildPainter(
         scrollMetrics: startingMetrics,

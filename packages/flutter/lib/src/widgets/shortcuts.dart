@@ -285,8 +285,9 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
-    if (event is! RawKeyDownEvent)
+    if (event is! RawKeyDownEvent) {
       return false;
+    }
     final Set<LogicalKeyboardKey> collapsedRequired = LogicalKeyboardKey.collapseSynonyms(keys);
     final Set<LogicalKeyboardKey> collapsedPressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
     final bool keysEqual = collapsedRequired.difference(collapsedPressed).isEmpty

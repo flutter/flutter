@@ -102,8 +102,9 @@ void main() {
     await tester.drag(find.text('Arkansas'), const Offset(0.0, -200.0));
     await tester.pump();
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i) {
       expect(find.text(kStates[i]), findsNothing);
+    }
 
     for (int i = 4; i < 12; ++i) {
       await tester.tap(find.text(kStates[i]));

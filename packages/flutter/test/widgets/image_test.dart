@@ -1180,8 +1180,9 @@ void main() {
         image: imageProvider,
         loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
           chunkEvents.add(loadingProgress);
-          if (loadingProgress == null)
+          if (loadingProgress == null) {
             return child;
+          }
           return Directionality(
             textDirection: TextDirection.ltr,
             child: Text('loading ${loadingProgress.cumulativeBytesLoaded} / ${loadingProgress.expectedTotalBytes}'),
