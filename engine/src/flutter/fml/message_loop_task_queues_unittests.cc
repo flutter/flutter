@@ -41,10 +41,9 @@ TEST(MessageLoopTaskQueue, RegisterOneTask) {
 
   auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
   auto queue_id = task_queue->CreateTaskQueue();
-  task_queue->SetWakeable(queue_id,
-                          new TestWakeable([&time](fml::TimePoint wake_time) {
-                            ASSERT_TRUE(wake_time == time);
-                          }));
+  auto wakeable = std::make_unique<TestWakeable>(
+      [&time](fml::TimePoint wake_time) { ASSERT_TRUE(wake_time == time); });
+  task_queue->SetWakeable(queue_id, wakeable.get());
 
   task_queue->RegisterTask(
       queue_id, [] {}, time);
@@ -266,9 +265,9 @@ TEST(MessageLoopTaskQueue, WakeUpIndependentOfTime) {
   auto queue_id = task_queue->CreateTaskQueue();
 
   int num_wakes = 0;
-  task_queue->SetWakeable(
-      queue_id, new TestWakeable(
-                    [&num_wakes](fml::TimePoint wake_time) { ++num_wakes; }));
+  auto wakeable = std::make_unique<TestWakeable>(
+      [&num_wakes](fml::TimePoint wake_time) { ++num_wakes; });
+  task_queue->SetWakeable(queue_id, wakeable.get());
 
   task_queue->RegisterTask(
       queue_id, []() {}, ChronoTicksSinceEpoch());
@@ -285,11 +284,13 @@ TEST(MessageLoopTaskQueue, WokenUpWithNewerTime) {
 
   fml::TimePoint expected = fml::TimePoint::Max();
 
-  task_queue->SetWakeable(
-      queue_id, new TestWakeable([&latch, &expected](fml::TimePoint wake_time) {
+  auto wakeable = std::make_unique<TestWakeable>(
+      [&latch, &expected](fml::TimePoint wake_time) {
         ASSERT_TRUE(wake_time == expected);
         latch.CountDown();
-      }));
+      });
+
+  task_queue->SetWakeable(queue_id, wakeable.get());
 
   task_queue->RegisterTask(
       queue_id, []() {}, fml::TimePoint::Max());
@@ -418,16 +419,15 @@ TEST(MessageLoopTaskQueue, RegisterTaskWakesUpOwnerQueue) {
 
   std::vector<fml::TimePoint> wakes;
 
-  task_queue->SetWakeable(platform_queue,
-                          new TestWakeable([&wakes](fml::TimePoint wake_time) {
-                            wakes.push_back(wake_time);
-                          }));
+  auto wakeable1 = std::make_unique<TestWakeable>(
+      [&wakes](fml::TimePoint wake_time) { wakes.push_back(wake_time); });
+  auto wakeable2 = std::make_unique<TestWakeable>([](fml::TimePoint wake_time) {
+    // The raster queue is owned by the platform queue.
+    ASSERT_FALSE(true);
+  });
 
-  task_queue->SetWakeable(raster_queue,
-                          new TestWakeable([](fml::TimePoint wake_time) {
-                            // The raster queue is owned by the platform queue.
-                            ASSERT_FALSE(true);
-                          }));
+  task_queue->SetWakeable(platform_queue, wakeable1.get());
+  task_queue->SetWakeable(raster_queue, wakeable2.get());
 
   auto time1 = ChronoTicksSinceEpoch() + fml::TimeDelta::FromMilliseconds(1);
   auto time2 = ChronoTicksSinceEpoch() + fml::TimeDelta::FromMilliseconds(2);
