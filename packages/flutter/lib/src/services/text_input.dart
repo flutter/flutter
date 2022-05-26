@@ -909,7 +909,6 @@ class TextEditingValue {
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
-    print('Text ${text.length} se $selection co $composing');
     assert(_verifyRange(selection, text));
     assert(_verifyRange(composing, text));
     return <String, dynamic>{
@@ -1561,7 +1560,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
-    _channel.setMethodCallHandler(_handleTextInputInvocation);
+    _channel.setMethodCallHandler(_loudlyhandleTextInputInvocation);
   }
 
   /// Set the [MethodChannel] used to communicate with the system's text input
@@ -1573,7 +1572,7 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel = newChannel..setMethodCallHandler(_instance._handleTextInputInvocation);
+      _instance._channel = newChannel..setMethodCallHandler(_instance._loudlyhandleTextInputInvocation);
       return true;
     }());
   }
@@ -1642,7 +1641,7 @@ class TextInput {
       'TextInput.setClient',
       <dynamic>[
         connection._id,
-        _loudToJson<TextInputConfiguration>(configuration.toJson, configuration),
+        configuration.toJson(),
       ],
     );
     _currentConnection = connection;
@@ -1685,6 +1684,23 @@ class TextInput {
 
   /// Returns true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
+
+  Future<dynamic> _loudlyhandleTextInputInvocation(MethodCall call) async {
+    try {
+      return await _handleTextInputInvocation(call);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: ErrorDescription('during method call ${call.method}'),
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsProperty<MethodCall>('call', call, style: DiagnosticsTreeStyle.errorProperty),
+        ],
+      ));
+      rethrow;
+    }
+  }
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
@@ -1851,7 +1867,7 @@ class TextInput {
     assert(configuration != null);
     _channel.invokeMethod<void>(
       'TextInput.updateConfig',
-      _loudToJson<TextInputConfiguration>(configuration.toJson, configuration),
+      configuration.toJson(),
     );
   }
 
@@ -1859,7 +1875,7 @@ class TextInput {
     assert(value != null);
     _channel.invokeMethod<void>(
       'TextInput.setEditingState',
-      _loudToJson<TextEditingValue>(value.toJSON, value)
+      value.toJSON(),
     );
   }
 
@@ -1976,21 +1992,4 @@ class TextInput {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
   }
 
-  // Invokes `toJson` and report errors if any.
-  static Map<String, dynamic> _loudToJson<T>(ValueGetter<Map<String, dynamic>> toJson, T value) {
-    try {
-      return toJson();
-    } catch (exception, stack) {
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'services library',
-        context: ErrorDescription('while converting to JSON'),
-        informationCollector: () => <DiagnosticsNode>[
-          DiagnosticsProperty<T>('object', value, style: DiagnosticsTreeStyle.errorProperty),
-        ],
-      ));
-      rethrow;
-    }
-  }
 }

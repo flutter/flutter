@@ -6,6 +6,7 @@
 import 'dart:convert' show jsonDecode;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -209,6 +210,34 @@ void main() {
           },
         ),
       ]);
+    });
+
+    test('Invalid TextRange fails loudly when being converted to JSON', () async {
+      final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
+      FlutterError.onError = (FlutterErrorDetails details) {
+        record.add(details);
+      };
+
+      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'TextInputClient.updateEditingState',
+        'args': <dynamic>[-1, <String, dynamic>{
+          'text': '1',
+          'selectionBase': 2,
+          'selectionExtent': 3,
+        }],
+      });
+
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+      expect(record.length, 1);
+      expect(record[0].exception.toString(), endsWith("'range.start >= 0 && range.start <= text.length': Range start 2 is out of text of length 1"));
     });
   });
 
