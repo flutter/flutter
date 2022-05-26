@@ -121,45 +121,51 @@ void main() {
         ),
       );
 
-      expect(semantics, hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          label: 'Line one',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: 'Line two',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.isButton,
-                            SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
-                          label: 'Button',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Line one',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Line two',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'Button',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+          ignoreId: true,
         ),
-        ignoreRect: true,
-        ignoreTransform: true,
-        ignoreId: true,
-      ),
-    );
+      );
 
       semantics.dispose();
     });
