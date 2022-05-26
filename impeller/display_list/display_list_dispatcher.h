@@ -174,7 +174,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
 
   // |flutter::Dispatcher|
   void drawVertices(const flutter::DlVertices* vertices,
-                    flutter::DlBlendMode mode) override;
+                    flutter::DlBlendMode dl_mode) override;
 
   // |flutter::Dispatcher|
   void drawImage(const sk_sp<flutter::DlImage> image,

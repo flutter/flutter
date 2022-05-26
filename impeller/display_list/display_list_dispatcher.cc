@@ -14,6 +14,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
+#include "impeller/geometry/vertices.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "third_party/skia/include/core/SkColor.h"
 
@@ -490,6 +491,53 @@ static Path ToPath(const SkRRect& rrect) {
       .TakePath();
 }
 
+static Vertices ToVertices(const flutter::DlVertices* vertices) {
+  std::vector<Point> points;
+  std::vector<uint16_t> indices;
+  std::vector<Color> colors;
+  for (int i = 0; i < vertices->vertex_count(); i++) {
+    auto point = vertices->vertices()[i];
+    points.push_back(Point(point.x(), point.y()));
+  }
+  for (int i = 0; i < vertices->index_count(); i++) {
+    auto index = vertices->indices()[i];
+    indices.push_back(index);
+  }
+
+  auto* dl_colors = vertices->colors();
+  if (dl_colors != nullptr) {
+    auto color_length = vertices->index_count() > 0 ? vertices->index_count()
+                                                    : vertices->vertex_count();
+    for (int i = 0; i < color_length; i++) {
+      auto dl_color = dl_colors[i];
+      colors.push_back({
+          dl_color.getRedF(),
+          dl_color.getGreenF(),
+          dl_color.getBlueF(),
+          dl_color.getAlphaF(),
+      });
+    }
+  }
+  VertexMode mode;
+  switch (vertices->mode()) {
+    case flutter::DlVertexMode::kTriangles:
+      mode = VertexMode::kTriangle;
+      break;
+    case flutter::DlVertexMode::kTriangleStrip:
+      mode = VertexMode::kTriangleStrip;
+      break;
+    case flutter::DlVertexMode::kTriangleFan:
+      FML_DLOG(ERROR) << "Unimplemented vertex mode TriangleFan in "
+                      << __FUNCTION__;
+      mode = VertexMode::kTriangle;
+      break;
+  }
+
+  auto bounds = vertices->bounds();
+  return Vertices(std::move(points), std::move(indices), std::move(colors),
+                  mode, ToRect(bounds));
+}
+
 // |flutter::Dispatcher|
 void DisplayListDispatcher::clipRRect(const SkRRect& rrect,
                                       SkClipOp clip_op,
@@ -592,9 +640,12 @@ void DisplayListDispatcher::drawSkVertices(const sk_sp<SkVertices> vertices,
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawVertices(const flutter::DlVertices* vertices,
-                                         flutter::DlBlendMode mode) {
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
+                                         flutter::DlBlendMode dl_mode) {
+  if (auto mode = ToBlendMode(dl_mode); mode.has_value()) {
+    canvas_.DrawVertices(ToVertices(vertices), mode.value(), paint_);
+  } else {
+    FML_DLOG(ERROR) << "Unimplemented blend mode in " << __FUNCTION__;
+  }
 }
 
 // |flutter::Dispatcher|

@@ -10,6 +10,7 @@
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
+#include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass.h"
 #include "impeller/entity/entity_pass_delegate.h"
@@ -949,6 +950,23 @@ TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
     ASSERT_TRUE(actual.has_value());
     ASSERT_RECT_NEAR(actual.value(), expected);
   }
+}
+
+TEST_P(EntityTest, DrawVerticesSolidColorTrianglesWithoutIndex) {
+  std::vector<Point> points = {Point(0, 0), Point(0, 1), Point(1, 0)};
+  std::vector<uint16_t> indexes;
+  std::vector<Color> colors = {Color::White(), Color::White(), Color::White()};
+
+  Vertices vertices = Vertices(points, indexes, colors, VertexMode::kTriangle,
+                               Rect(0, 0, 4, 4));
+
+  std::shared_ptr<VerticesContents> contents =
+      std::make_shared<VerticesContents>(vertices);
+  contents->SetColor(Color::White());
+  Entity e;
+  e.SetContents(contents);
+
+  ASSERT_TRUE(OpenPlaygroundHere(e));
 }
 
 }  // namespace testing
