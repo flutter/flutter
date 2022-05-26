@@ -417,7 +417,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
     assert(_selectionDelegate.value.startSelectionPoint != null);
-    _selectionStartHandleDragPosition = _selectionDelegate.value.startSelectionPoint!.localPosition;
+    final Offset localPosition = _selectionDelegate.value.startSelectionPoint!.localPosition;
+    final Matrix4 globalTransform = _selectable!.getTransformTo(null);
+    _selectionStartHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
@@ -430,7 +432,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     assert(_selectionDelegate.value.endSelectionPoint != null);
-    _selectionEndHandleDragPosition = _selectionDelegate.value.endSelectionPoint!.localPosition;
+    final Offset localPosition = _selectionDelegate.value.endSelectionPoint!.localPosition;
+    final Matrix4 globalTransform = _selectable!.getTransformTo(null);
+    _selectionEndHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
@@ -980,6 +984,19 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
 
+  /// The amount of additional pixel added to the selection handle drawable
+  /// area.
+  ///
+  /// Selection handles that are outside of the drawable area will be hidden.
+  /// That logic prevents handles that get scrolled off the viewport from being
+  /// drawn on the screen.
+  ///
+  /// The drawable area = current rectangle of [SelectionContainer] +
+  /// _kSelectionHandleDrawableAreaPadding on each side.
+  ///
+  /// This was an eyeballed value to create smooth user experiences.
+  static const double _kSelectionHandleDrawableAreaPadding = 5.0;
+
   /// The current selectable that contains the selection end edge.
   @protected
   int currentSelectionEndIndex = -1;
@@ -1301,9 +1318,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     LayerLink? effectiveStartHandle = _startHandleLayer;
     LayerLink? effectiveEndHandle = _endHandleLayer;
     if (effectiveStartHandle != null || effectiveEndHandle != null) {
-      final Rect boxRect = Rect.fromLTWH(0, 0, containerSize.width, containerSize.height);
-      final bool hideStartHandle = value.startSelectionPoint == null || !boxRect.contains(value.startSelectionPoint!.localPosition);
-      final bool hideEndHandle = value.endSelectionPoint == null || !boxRect.contains(value.endSelectionPoint!.localPosition);
+      final Rect drawableArea = Rect.fromLTWH(
+        0 - _kSelectionHandleDrawableAreaPadding,
+        0 - _kSelectionHandleDrawableAreaPadding,
+        containerSize.width + 2 * _kSelectionHandleDrawableAreaPadding,
+        containerSize.height + 2 * _kSelectionHandleDrawableAreaPadding,
+      );
+      final bool hideStartHandle = value.startSelectionPoint == null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
+      final bool hideEndHandle = value.endSelectionPoint == null || !drawableArea.contains(value.endSelectionPoint!.localPosition);
       effectiveStartHandle = hideStartHandle ? null : _startHandleLayer;
       effectiveEndHandle = hideEndHandle ? null : _endHandleLayer;
     }
