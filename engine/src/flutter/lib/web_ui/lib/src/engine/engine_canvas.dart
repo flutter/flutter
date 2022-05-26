@@ -5,7 +5,6 @@
 // For member documentation see https://api.flutter.dev/flutter/dart-ui/Canvas-class.html
 // ignore_for_file: public_member_api_docs
 
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
@@ -269,7 +268,7 @@ DomElement drawParagraphElement(
 
   if (transform != null) {
     setElementTransform(
-      paragraphElement as html.Element,
+      paragraphElement,
       transformWithOffset(transform, offset).storage,
     );
   }
