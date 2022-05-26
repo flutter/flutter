@@ -437,7 +437,7 @@ class HotRunner extends ResidentRunner {
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
       enableDevTools: enableDevTools,
-      needsFullRestart: false
+      needsFullRestart: false,
     );
   }
 
