@@ -11,6 +11,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/backend/gles/description_gles.h"
 #include "impeller/renderer/backend/gles/gles.h"
 
@@ -191,6 +192,8 @@ class ProcTableGLES {
 
   const DescriptionGLES* GetDescription() const;
 
+  const CapabilitiesGLES* GetCapabilities() const;
+
   std::string DescribeCurrentFramebuffer() const;
 
   std::string GetProgramInfoLogString(GLuint program) const;
@@ -208,6 +211,7 @@ class ProcTableGLES {
  private:
   bool is_valid_ = false;
   std::unique_ptr<DescriptionGLES> description_;
+  std::unique_ptr<CapabilitiesGLES> capabilities_;
   GLint debug_label_max_length_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ProcTableGLES);

@@ -596,6 +596,8 @@ FILE: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/buffer_bindings_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/buffer_bindings_gles.h
+FILE: ../../../flutter/impeller/renderer/backend/gles/capabilities_gles.cc
+FILE: ../../../flutter/impeller/renderer/backend/gles/capabilities_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/command_buffer_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/command_buffer_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/context_gles.cc

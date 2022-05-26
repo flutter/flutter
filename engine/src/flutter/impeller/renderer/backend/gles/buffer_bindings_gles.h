@@ -59,7 +59,9 @@ class BufferBindingsGLES {
                          Allocator& transients_allocator,
                          const BufferResource& buffer) const;
 
-  bool BindTextures(const ProcTableGLES& gl, const Bindings& bindings) const;
+  bool BindTextures(const ProcTableGLES& gl,
+                    const Bindings& bindings,
+                    ShaderStage stage) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(BufferBindingsGLES);
 };
