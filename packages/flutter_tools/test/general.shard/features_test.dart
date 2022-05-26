@@ -90,15 +90,13 @@ void main() {
     testWithoutContext('Flutter macOS desktop help string', () {
       expect(flutterMacOSDesktopFeature.generateHelpMessage(),
       'Enable or disable support for desktop on macOS. '
-      'This setting will take effect on the master, beta, and stable channels. '
-      'Newer beta versions are available on the beta channel.');
+      'This setting will take effect on the master, beta, and stable channels.');
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
       'Enable or disable support for desktop on Linux. '
-      'This setting will take effect on the master, beta, and stable channels. '
-      'Newer beta versions are available on the beta channel.');
+      'This setting will take effect on the master, beta, and stable channels.');
     });
 
     testWithoutContext('Flutter Windows desktop help string', () {
@@ -367,36 +365,24 @@ void main() {
       expect(featureFlags.isWindowsEnabled, true);
     });
 
-    // Windows UWP desktop
+    for (final Feature feature in <Feature>[
+      flutterWindowsDesktopFeature,
+      flutterMacOSDesktopFeature,
+      flutterLinuxDesktopFeature,
+    ]) {
+      test('${feature.name} available and enabled by default on master', () {
+        expect(feature.master.enabledByDefault, true);
+        expect(feature.master.available, true);
+      });
+      test('${feature.name} available and enabled by default on beta', () {
+        expect(feature.beta.enabledByDefault, true);
+        expect(feature.beta.available, true);
+      });
+      test('${feature.name} available and enabled by default on stable', () {
+        expect(feature.stable.enabledByDefault, true);
+        expect(feature.stable.available, true);
+      });
+    }
 
-    testWithoutContext('Flutter Windows UWP desktop off by default on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-
-      expect(featureFlags.isWindowsUwpEnabled, false);
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop enabled with config on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      testConfig.setValue('enable-windows-uwp-desktop', true);
-
-      expect(featureFlags.isWindowsUwpEnabled, true);
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop config includes removal warning', () {
-      expect(windowsUwpEmbedding.extraHelpText, contains('Windows UWP support is obsolete and will be removed'));
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop off by default on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-
-      expect(featureFlags.isWindowsUwpEnabled, false);
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop not enabled with config on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      testConfig.setValue('enable-windows-uwp-desktop', true);
-
-      expect(featureFlags.isWindowsUwpEnabled, false);
-    });
   });
 }
