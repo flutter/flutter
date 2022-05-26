@@ -133,9 +133,10 @@ class OutlinedButton extends ButtonStyleButton {
   /// )
   /// ```
   static ButtonStyle styleFrom({
-    Color? primary,
-    Color? onSurface,
+    Color? foregroundColor,
     Color? backgroundColor,
+    Color? disabledForegroundColor,
+    Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
     double? elevation,
@@ -154,21 +155,36 @@ class OutlinedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    @Deprecated(
+      'Use foregroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? primary,
+    @Deprecated(
+      'Use disabledForegroundColor and disabledForegroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? onSurface,
   }) {
-    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
+    final Color? foreground = foregroundColor ?? primary;
+    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
       ? null
-      : _OutlinedButtonDefaultForeground(primary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor = (primary == null)
+      : _OutlinedButtonDefaultColor(foreground, disabledForeground);
+    final MaterialStateProperty<Color?>? backgroundColorProp = (backgroundColor == null && disabledBackgroundColor == null)
       ? null
-      : _OutlinedButtonDefaultOverlay(primary);
+      : _OutlinedButtonDefaultColor(backgroundColor, disabledBackgroundColor);
+    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
+      ? null
+      : _OutlinedButtonDefaultOverlay(foreground);
     final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _OutlinedButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
-      foregroundColor: foregroundColor,
-      backgroundColor: ButtonStyleButton.allOrNull<Color>(backgroundColor),
+      foregroundColor: foregroundColorProp,
+      backgroundColor: backgroundColorProp,
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
@@ -290,9 +306,10 @@ class OutlinedButton extends ButtonStyleButton {
     return Theme.of(context).useMaterial3
       ? _TokenDefaultsM3(context)
       : styleFrom(
-          primary: colorScheme.primary,
-          onSurface: colorScheme.onSurface,
+          foregroundColor: colorScheme.primary,
+          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
           shadowColor: theme.shadowColor,
           elevation: 0,
           textStyle: theme.textTheme.button,
@@ -330,34 +347,34 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
 }
 
 @immutable
-class _OutlinedButtonDefaultForeground extends MaterialStateProperty<Color?>  with Diagnosticable {
-  _OutlinedButtonDefaultForeground(this.primary, this.onSurface);
+class _OutlinedButtonDefaultColor extends MaterialStateProperty<Color?>  with Diagnosticable {
+  _OutlinedButtonDefaultColor(this.color, this.disabled);
 
-  final Color? primary;
-  final Color? onSurface;
+  final Color? color;
+  final Color? disabled;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return onSurface?.withOpacity(0.38);
+      return disabled;
     }
-    return primary;
+    return color;
   }
 }
 
 @immutable
 class _OutlinedButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
-  _OutlinedButtonDefaultOverlay(this.primary);
+  _OutlinedButtonDefaultOverlay(this.foreground);
 
-  final Color primary;
+  final Color foreground;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.hovered)) {
-      return primary.withOpacity(0.04);
+      return foreground.withOpacity(0.04);
     }
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-      return primary.withOpacity(0.12);
+      return foreground.withOpacity(0.12);
     }
     return null;
   }

@@ -141,9 +141,10 @@ class TextButton extends ButtonStyleButton {
   /// )
   /// ```
   static ButtonStyle styleFrom({
-    Color? primary,
-    Color? onSurface,
+    Color? foregroundColor,
     Color? backgroundColor,
+    Color? disabledForegroundColor,
+    Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
     double? elevation,
@@ -162,21 +163,36 @@ class TextButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    @Deprecated(
+      'Use foregroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? primary,
+    @Deprecated(
+      'Use disabledForegroundColor and disabledForegroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? onSurface,
   }) {
-    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
-      ? null
-      : _TextButtonDefaultForeground(primary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor = (primary == null)
-      ? null
-      : _TextButtonDefaultOverlay(primary);
+    final Color? foreground = foregroundColor ?? primary;
+    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
+        ? null
+        : _TextButtonDefaultColor(foreground, disabledForeground);
+    final MaterialStateProperty<Color?>? backgroundColorProp = (backgroundColor == null && disabledBackgroundColor == null)
+        ? null
+        : _TextButtonDefaultColor(backgroundColor, disabledBackgroundColor);
+    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
+        ? null
+        : _TextButtonDefaultOverlay(foreground);
     final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
-      backgroundColor: ButtonStyleButton.allOrNull<Color>(backgroundColor),
-      foregroundColor: foregroundColor,
+      foregroundColor: foregroundColorProp,
+      backgroundColor: backgroundColorProp,
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
@@ -311,9 +327,10 @@ class TextButton extends ButtonStyleButton {
     return Theme.of(context).useMaterial3
       ? _TokenDefaultsM3(context)
       : styleFrom(
-          primary: colorScheme.primary,
-          onSurface: colorScheme.onSurface,
+          foregroundColor: colorScheme.primary,
+          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
           shadowColor: theme.shadowColor,
           elevation: 0,
           textStyle: theme.textTheme.button,
@@ -350,23 +367,23 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
 }
 
 @immutable
-class _TextButtonDefaultForeground extends MaterialStateProperty<Color?> {
-  _TextButtonDefaultForeground(this.primary, this.onSurface);
+class _TextButtonDefaultColor extends MaterialStateProperty<Color?> {
+  _TextButtonDefaultColor(this.color, this.disabled);
 
-  final Color? primary;
-  final Color? onSurface;
+  final Color? color;
+  final Color? disabled;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return onSurface?.withOpacity(0.38);
+      return disabled;
     }
-    return primary;
+    return color;
   }
 
   @override
   String toString() {
-    return '{disabled: ${onSurface?.withOpacity(0.38)}, otherwise: $primary}';
+    return '{disabled: $disabled, otherwise: $color}';
   }
 }
 

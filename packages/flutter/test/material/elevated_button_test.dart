@@ -1600,6 +1600,30 @@ void main() {
     );
   });
 
+  testWidgets('ElevatedButton.styleFrom can be used to set foreground and background colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.purple,
+            ),
+            onPressed: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(ElevatedButton),
+      matching: find.byType(Material),
+    ));
+    expect(material.color, Colors.purple);
+    expect(material.textStyle!.color, Colors.white);
+  });
+
   testWidgets('ElevatedButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
