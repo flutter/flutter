@@ -740,7 +740,7 @@ class _CupertinoBackGestureController<T> {
     //
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
-    const Curve animationCurve = Curves.easeOut;
+    const Curve animationCurve = Cubic(0.2, 1.0, 0.75, 1.0);
     final bool animateForward;
 
     // If the user releases the page before mid screen with sufficient velocity,
