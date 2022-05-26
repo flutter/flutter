@@ -1991,5 +1991,4 @@ class TextInput {
   static void unregisterScribbleElement(String elementIdentifier) {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
   }
-
 }
