@@ -259,9 +259,8 @@ static void im_preedit_start_cb(FlTextInputPlugin* self) {
       fl_text_input_plugin_get_instance_private(self));
   priv->text_model->BeginComposing();
 
-  // Set the top-level window used for system input method windows.
-  GdkWindow* window =
-      gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(priv->view)));
+  // Set the native window used for system input method windows.
+  GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(priv->view));
   gtk_im_context_set_client_window(priv->im_context, window);
 }
 
@@ -420,9 +419,8 @@ static FlMethodResponse* show(FlTextInputPlugin* self) {
     return hide(self);
   }
 
-  // Set the top-level window used for system input method windows.
-  GdkWindow* window =
-      gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(priv->view)));
+  // Set the native window used for system input method windows.
+  GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(priv->view));
   gtk_im_context_set_client_window(priv->im_context, window);
 
   gtk_im_context_focus_in(priv->im_context);
@@ -483,7 +481,7 @@ static FlMethodResponse* clear_client(FlTextInputPlugin* self) {
 // over the text input channel: updates to the composing rect (cursor rect when
 // not in IME composing mode) and updates to the matrix transform from local
 // coordinates to Flutter root coordinates. This function is called after each
-// of these updates. It transforms the composing rect to GTK window coordinates
+// of these updates. It transforms the composing rect to GDK window coordinates
 // and notifies GTK of the updated cursor position.
 static void update_im_cursor_position(FlTextInputPlugin* self) {
   FlTextInputPluginPrivate* priv = static_cast<FlTextInputPluginPrivate*>(
@@ -503,14 +501,9 @@ static void update_im_cursor_position(FlTextInputPlugin* self) {
            priv->composing_rect.y * priv->editabletext_transform[1][1] +
            priv->editabletext_transform[3][1] + priv->composing_rect.height;
 
-  // Transform from Flutter view coordinates to GTK window coordinates.
-  GdkRectangle preedit_rect;
-  gtk_widget_translate_coordinates(
-      GTK_WIDGET(priv->view), gtk_widget_get_toplevel(GTK_WIDGET(priv->view)),
-      x, y, &preedit_rect.x, &preedit_rect.y);
-
   // Set the cursor location in window coordinates so that GTK can position any
   // system input method windows.
+  GdkRectangle preedit_rect = {x, y, 0, 0};
   gtk_im_context_set_cursor_location(priv->im_context, &preedit_rect);
 }
 
