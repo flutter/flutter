@@ -125,6 +125,7 @@ class FilterChip extends StatelessWidget
     this.focusNode,
     this.autofocus = false,
     this.backgroundColor,
+    this.surfaceTintColor,
     this.padding,
     this.visualDensity,
     this.materialTapTargetSize,
@@ -173,6 +174,8 @@ class FilterChip extends StatelessWidget
   final bool autofocus;
   @override
   final Color? backgroundColor;
+  @override
+  final Color? surfaceTintColor;
   @override
   final EdgeInsetsGeometry? padding;
   @override

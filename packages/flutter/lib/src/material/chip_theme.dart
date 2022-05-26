@@ -179,6 +179,7 @@ class ChipThemeData with Diagnosticable {
   /// create intermediate themes based on two themes.
   const ChipThemeData({
     this.backgroundColor,
+    this.surfaceTintColor,
     this.deleteIconColor,
     this.disabledColor,
     this.selectedColor,
@@ -274,6 +275,14 @@ class ChipThemeData with Diagnosticable {
   /// This property applies to [ActionChip], [Chip], [ChoiceChip],
   /// [FilterChip], [InputChip], [RawChip].
   final Color? backgroundColor;
+
+  /// Overrides the default for [ChipAttributes.surfaceTintColor]
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
+  ///
+  /// See [Material.surfaceTintColor] for more details.
+  final Color? surfaceTintColor;
 
   /// Overrides the default for [DeletableChipAttributes.deleteIconColor].
   ///
@@ -419,6 +428,7 @@ class ChipThemeData with Diagnosticable {
   /// new values.
   ChipThemeData copyWith({
     Color? backgroundColor,
+    Color? surfaceTintColor,
     Color? deleteIconColor,
     Color? disabledColor,
     Color? selectedColor,
@@ -439,6 +449,7 @@ class ChipThemeData with Diagnosticable {
   }) {
     return ChipThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       deleteIconColor: deleteIconColor ?? this.deleteIconColor,
       disabledColor: disabledColor ?? this.disabledColor,
       selectedColor: selectedColor ?? this.selectedColor,
@@ -471,6 +482,7 @@ class ChipThemeData with Diagnosticable {
     }
     return ChipThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
       disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
       selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
@@ -516,6 +528,7 @@ class ChipThemeData with Diagnosticable {
   @override
   int get hashCode => Object.hash(
     backgroundColor,
+    surfaceTintColor,
     deleteIconColor,
     disabledColor,
     selectedColor,
@@ -545,6 +558,7 @@ class ChipThemeData with Diagnosticable {
     }
     return other is ChipThemeData
         && other.backgroundColor == backgroundColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.deleteIconColor == deleteIconColor
         && other.disabledColor == disabledColor
         && other.selectedColor == selectedColor
@@ -568,6 +582,7 @@ class ChipThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));

@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'chip_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -142,6 +143,15 @@ abstract class ChipAttributes {
   ///
   /// The default is light grey.
   Color? get backgroundColor;
+
+  /// The color used as an overlay on [backgroundColor] to indicate elevation.
+  ///
+  /// If null, [ChipThemeData.surfaceTintColor] is used. If that
+  /// is also null, the default value is [ColorScheme.surfaceTint].
+  ///
+  /// See [Material.surfaceTintColor] for more details on how this
+  /// overlay is applied.
+  Color? get surfaceTintColor;
 
   /// The padding between the contents of the chip and the outside [shape].
   ///
@@ -570,6 +580,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.focusNode,
     this.autofocus = false,
     this.backgroundColor,
+    this.surfaceTintColor,
     this.padding,
     this.visualDensity,
     this.materialTapTargetSize,
@@ -605,6 +616,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final bool autofocus;
   @override
   final Color? backgroundColor;
+  @override
+  final Color? surfaceTintColor;
   @override
   final EdgeInsetsGeometry? padding;
   @override
@@ -733,6 +746,7 @@ class RawChip extends StatefulWidget
     this.focusNode,
     this.autofocus = false,
     this.backgroundColor,
+    this.surfaceTintColor,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -798,6 +812,8 @@ class RawChip extends StatefulWidget
   final bool autofocus;
   @override
   final Color? backgroundColor;
+  @override
+  final Color? surfaceTintColor;
   @override
   final EdgeInsetsGeometry? padding;
   @override
@@ -974,11 +990,14 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   OutlinedBorder _getShape(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
     final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, materialStates)
       ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates)
-      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipDefaults.side, materialStates);
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(
+        theme.useMaterial3 ? (!widget.selected && widget.elevation == null ? chipDefaults.side : null) : chipDefaults.side,
+        materialStates,
+      );
     final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, materialStates)
       ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, materialStates)
       ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipDefaults.shape, materialStates)
-      ?? const StadiumBorder();
+      ?? chipDefaults.shape!;
     return resolvedShape.copyWith(side: resolvedSide);
   }
 
@@ -1101,55 +1120,41 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
 
-    /// The chip at text scale 1 starts with 8px on each side and as text scaling
-    /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
-    /// Once the widget has a text scaling of 2 or higher than the label padding
-    /// remains 4px.
-    final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
-      const EdgeInsets.symmetric(horizontal: 8.0),
-      const EdgeInsets.symmetric(horizontal: 4.0),
-      clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
-    )!;
-
     final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);
+    final ChipThemeData defaults = theme.useMaterial3
+      ? _TokenDefaultsM3(context, widget.elevation != null)
+      : _M2Defaults(context);
     final Brightness brightness = chipTheme.brightness ?? theme.brightness;
-    final ChipThemeData chipDefaults = ChipThemeData.fromDefaults(
-      brightness: brightness,
-      secondaryColor: brightness == Brightness.dark ? Colors.tealAccent[200]! : theme.primaryColor,
-      labelStyle: theme.textTheme.bodyText1!,
-    );
     final TextDirection? textDirection = Directionality.maybeOf(context);
-    final OutlinedBorder resolvedShape = _getShape(theme, chipTheme, chipDefaults);
+    final OutlinedBorder resolvedShape = _getShape(theme, chipTheme, defaults);
 
     final double elevation = widget.elevation
       ?? chipTheme.elevation
-      ?? chipDefaults.elevation!;
+      ?? defaults.elevation!;
     final double pressElevation = widget.pressElevation
       ?? chipTheme.pressElevation
-      ?? chipDefaults.pressElevation!;
+      ?? defaults.pressElevation!;
     final Color shadowColor = widget.shadowColor
       ?? chipTheme.shadowColor
-      ?? chipDefaults.shadowColor!;
+      ?? defaults.shadowColor!;
     final Color selectedShadowColor = widget.selectedShadowColor
       ?? chipTheme.selectedShadowColor
-      ?? chipDefaults.selectedShadowColor!;
+      ?? defaults.shadowColor!;
     final Color? checkmarkColor = widget.checkmarkColor
       ?? chipTheme.checkmarkColor
-      ?? chipDefaults.checkmarkColor;
+      ?? defaults.checkmarkColor;
     final bool showCheckmark = widget.showCheckmark
       ?? chipTheme.showCheckmark
-      ?? chipDefaults.showCheckmark!;
+      ?? defaults.showCheckmark!;
     final EdgeInsetsGeometry padding = widget.padding
       ?? chipTheme.padding
-      ?? chipDefaults.padding!;
-    // Widget's label style is merged with this below.
+      ?? defaults.padding!;
     final TextStyle labelStyle = chipTheme.labelStyle
-      ?? chipDefaults.labelStyle!;
+      ?? defaults.labelStyle!;
     final EdgeInsetsGeometry labelPadding = widget.labelPadding
       ?? chipTheme.labelPadding
-      ?? chipDefaults.labelPadding
-      ?? defaultLabelPadding;
+      ?? defaults.labelPadding!;
 
     final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
@@ -1158,6 +1163,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
       shadowColor: widget.selected ? selectedShadowColor : shadowColor,
+      surfaceTintColor: widget.surfaceTintColor ?? chipTheme.surfaceTintColor ?? defaults.surfaceTintColor,
       animationDuration: pressedAnimationDuration,
       shape: resolvedShape,
       clipBehavior: widget.clipBehavior,
@@ -1177,7 +1183,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
             return Container(
               decoration: ShapeDecoration(
                 shape: resolvedShape,
-                color: _getBackgroundColor(theme, chipTheme, chipDefaults),
+                color: _getBackgroundColor(theme, chipTheme, defaults),
               ),
               child: child,
             );
@@ -1203,7 +1209,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
                 deleteIcon: AnimatedSwitcher(
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
-                  child: _buildDeleteIcon(context, theme, chipTheme, chipDefaults),
+                  child: _buildDeleteIcon(context, theme, chipTheme, defaults),
                 ),
                 brightness: brightness,
                 padding: padding.resolve(textDirection),
@@ -2121,3 +2127,133 @@ bool _hitIsOnDeleteIcon({
       return adjustedPosition.dx <= accessibleDeleteButtonWidth;
   }
 }
+
+// Generate a ChipThemeData that represents the M2 default values.
+// This was generated by hand from the previous hand coded defaults
+// for M2. It uses get method overrides instead of properties to
+// avoid computing values that we may not need upfront.
+
+// These are Material Design 2 defaults, and are used to derive
+// component Colors (with opacity) from base colors.
+const int _backgroundAlpha = 0x1f; // 12%
+const int _deleteIconAlpha = 0xde; // 87%
+const int _disabledAlpha = 0x0c; // 38% * 12% = 5%
+const int _selectAlpha = 0x3d; // 12% + 12% = 24%
+const int _textLabelAlpha = 0xde; // 87%
+class _M2Defaults extends ChipThemeData {
+  _M2Defaults(this.context)
+    : _theme = Theme.of(context),
+      _colors = Theme.of(context).colorScheme,
+      _chipPrimaryColor = Theme.of(context).brightness == Brightness.light
+        ? Colors.black
+        : Colors.white,
+      super(
+        elevation: 0.0,
+        pressElevation: 8.0,
+        shape: const StadiumBorder(),
+        showCheckmark: true,
+      );
+
+  final BuildContext context;
+  final ThemeData _theme;
+  final ColorScheme _colors;
+  final Color _chipPrimaryColor;
+
+  @override
+  TextStyle? get labelStyle => _theme.textTheme.bodyText1!.copyWith(
+    color: _chipPrimaryColor.withAlpha(_textLabelAlpha),
+  );
+
+  @override
+  Color? get backgroundColor => _chipPrimaryColor.withAlpha(_backgroundAlpha);
+
+  @override
+  Color? get shadowColor => _colors.shadow;
+
+  @override
+  Color? get selectedColor => _chipPrimaryColor.withAlpha(_selectAlpha);
+
+  @override
+  Color? get disabledColor => _chipPrimaryColor.withAlpha(_disabledAlpha);
+
+  @override
+  Color? get deleteIconColor => _chipPrimaryColor.withAlpha(_deleteIconAlpha);
+
+  @override
+  EdgeInsetsGeometry? get padding => const EdgeInsets.all(4.0);
+
+  /// The chip at text scale 1 starts with 8px on each side and as text scaling
+  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
+  /// Once the widget has a text scaling of 2 or higher than the label padding
+  /// remains 4px.
+  @override
+  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
+    const EdgeInsets.symmetric(horizontal: 8.0),
+    const EdgeInsets.symmetric(horizontal: 4.0),
+    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+  )!;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES
+
+// Generated code to the end of this file. Do not edit by hand.
+// These defaults are generated from the Material Design Token
+// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Generated version v0_101
+class _TokenDefaultsM3 extends ChipThemeData {
+  const _TokenDefaultsM3(this.context, bool elevated)
+    : super(
+        elevation: 0.0,
+        pressElevation: elevated
+          ? 1.0
+          : 0.0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
+        showCheckmark: true,
+      );
+
+  final BuildContext context;
+
+  @override
+  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+
+  @override
+  Color? get backgroundColor => const Color(0x00000000);
+
+  @override
+  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
+
+  @override
+  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color? get selectedColor => Theme.of(context).colorScheme.secondaryContainer;
+
+  @override
+  Color? get checkmarkColor => Theme.of(context).colorScheme.onSecondaryContainer;
+
+  @override
+  Color? get disabledColor => Theme.of(context).colorScheme.onSurface;
+
+  @override
+  Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
+
+  @override
+  BorderSide? get side => BorderSide(color: Theme.of(context).colorScheme.outline);
+
+  @override
+  EdgeInsetsGeometry? get padding => const EdgeInsets.all(4.0);
+
+  /// The chip at text scale 1 starts with 8px on each side and as text scaling
+  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
+  /// Once the widget has a text scaling of 2 or higher than the label padding
+  /// remains 4px.
+  @override
+  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
+    const EdgeInsets.symmetric(horizontal: 8.0),
+    const EdgeInsets.symmetric(horizontal: 4.0),
+    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+  )!;
+}
+
+// END GENERATED TOKEN PROPERTIES

@@ -20,6 +20,7 @@ import 'dart:io';
 import 'package:gen_defaults/app_bar_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
+import 'package:gen_defaults/chip_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
@@ -101,6 +102,7 @@ Future<void> main(List<String> args) async {
   ButtonTemplate('md.comp.outlined-button', '$materialLib/outlined_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.text-button', '$materialLib/text_button.dart', tokens).updateFile();
   CardTemplate('$materialLib/card.dart', tokens).updateFile();
+  ChipTemplate('$materialLib/chip.dart', tokens).updateFile();
   DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
   IconButtonTemplate('$materialLib/icon_button.dart', tokens).updateFile();

@@ -27,13 +27,51 @@ Material getMaterial(WidgetTester tester) {
   );
 }
 
-DefaultTextStyle getLabelStyle(WidgetTester tester) {
+DefaultTextStyle getDefaultTextStyle(WidgetTester tester) {
   return tester.widget(
     find.descendant(
       of: find.byType(RawChip),
       matching: find.byType(DefaultTextStyle),
     ).last,
   );
+}
+
+DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
+  return tester.widget(
+    find.ancestor(
+      of: find.text(labelText),
+      matching: find.byType(DefaultTextStyle),
+    ).first,
+  );
+}
+
+/// Adds the basic requirements for a Chip.
+Widget wrapForChip({
+  required Widget child,
+  TextDirection textDirection = TextDirection.ltr,
+  double textScaleFactor = 1.0,
+  Brightness brightness = Brightness.light,
+}) {
+  return MaterialApp(
+    theme: ThemeData(brightness: brightness),
+    home: Directionality(
+      textDirection: textDirection,
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScaleFactor),
+        child: Material(child: child),
+      ),
+    ),
+  );
+}
+
+IconThemeData getIconData(WidgetTester tester) {
+  final IconTheme iconTheme = tester.firstWidget(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(IconTheme),
+    ),
+  );
+  return iconTheme.data;
 }
 
 void main() {
@@ -45,6 +83,7 @@ void main() {
   test('ChipThemeData defaults', () {
     const ChipThemeData themeData = ChipThemeData();
     expect(themeData.backgroundColor, null);
+    expect(themeData.surfaceTintColor, null);
     expect(themeData.deleteIconColor, null);
     expect(themeData.disabledColor, null);
     expect(themeData.selectedColor, null);
@@ -80,14 +119,15 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ChipThemeData(
       backgroundColor: Color(0xfffffff0),
-      deleteIconColor: Color(0xfffffff1),
-      disabledColor: Color(0xfffffff2),
-      selectedColor: Color(0xfffffff3),
-      secondarySelectedColor: Color(0xfffffff4),
-      shadowColor: Color(0xfffffff5),
-      selectedShadowColor: Color(0xfffffff6),
+      surfaceTintColor: Color(0xfffffff1),
+      deleteIconColor: Color(0xfffffff2),
+      disabledColor: Color(0xfffffff3),
+      selectedColor: Color(0xfffffff4),
+      secondarySelectedColor: Color(0xfffffff5),
+      shadowColor: Color(0xfffffff6),
+      selectedShadowColor: Color(0xfffffff7),
       showCheckmark: true,
-      checkmarkColor: Color(0xfffffff7),
+      checkmarkColor: Color(0xfffffff8),
       labelPadding: EdgeInsets.all(1),
       padding: EdgeInsets.all(2),
       side: BorderSide(width: 10),
@@ -106,14 +146,15 @@ void main() {
 
     expect(description, <String>[
       'backgroundColor: Color(0xfffffff0)',
-      'deleteIconColor: Color(0xfffffff1)',
-      'disabledColor: Color(0xfffffff2)',
-      'selectedColor: Color(0xfffffff3)',
-      'secondarySelectedColor: Color(0xfffffff4)',
-      'shadowColor: Color(0xfffffff5)',
-      'selectedShadowColor: Color(0xfffffff6)',
+      'surfaceTintColor: Color(0xfffffff1)',
+      'deleteIconColor: Color(0xfffffff2)',
+      'disabledColor: Color(0xfffffff3)',
+      'selectedColor: Color(0xfffffff4)',
+      'secondarySelectedColor: Color(0xfffffff5)',
+      'shadowColor: Color(0xfffffff6)',
+      'selectedShadowColor: Color(0xfffffff7)',
       'showCheckmark: true',
-      'checkMarkColor: Color(0xfffffff7)',
+      'checkMarkColor: Color(0xfffffff8)',
       'labelPadding: EdgeInsets.all(1.0)',
       'padding: EdgeInsets.all(2.0)',
       'side: BorderSide(Color(0xff000000), 10.0, BorderStyle.solid)',
@@ -160,7 +201,7 @@ void main() {
     expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
     expect(getMaterial(tester).shape, chipTheme.shape);
-    expect(getLabelStyle(tester).style.fontSize, 32);
+    expect(getDefaultTextStyle(tester).style.fontSize, 32);
   });
 
   testWidgets('Chip uses ChipTheme', (WidgetTester tester) async {
@@ -213,7 +254,7 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
     expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(getMaterial(tester).shape, chipTheme.shape);
-    expect(getLabelStyle(tester).style.fontSize, 32);
+    expect(getDefaultTextStyle(tester).style.fontSize, 32);
   });
 
   testWidgets('Chip uses constructor parameters', (WidgetTester tester) async {
@@ -265,58 +306,29 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
     expect(getMaterial(tester).elevation, elevation);
     expect(getMaterial(tester).shape, shape);
-    expect(getLabelStyle(tester).style.fontSize, 32);
+    expect(getDefaultTextStyle(tester).style.fontSize, 32);
   });
 
   testWidgets('ChipTheme.fromDefaults', (WidgetTester tester) async {
-    const TextStyle labelStyle = TextStyle();
     ChipThemeData chipTheme = ChipThemeData.fromDefaults(
       brightness: Brightness.light,
       secondaryColor: Colors.red,
-      labelStyle: labelStyle,
+      labelStyle: const TextStyle(),
     );
-    expect(chipTheme.backgroundColor, Colors.black.withAlpha(0x1f));
-    expect(chipTheme.deleteIconColor, Colors.black.withAlpha(0xde));
-    expect(chipTheme.disabledColor, Colors.black.withAlpha(0x0c));
-    expect(chipTheme.selectedColor, Colors.black.withAlpha(0x3d));
-    expect(chipTheme.secondarySelectedColor, Colors.red.withAlpha(0x3d));
-    expect(chipTheme.shadowColor, Colors.black);
-    expect(chipTheme.selectedShadowColor, Colors.black);
-    expect(chipTheme.showCheckmark, true);
-    expect(chipTheme.checkmarkColor, null);
-    expect(chipTheme.labelPadding, null);
-    expect(chipTheme.padding, const EdgeInsets.all(4.0));
-    expect(chipTheme.side, null);
-    expect(chipTheme.shape, null);
-    expect(chipTheme.labelStyle, labelStyle.copyWith(color: Colors.black.withAlpha(0xde)));
-    expect(chipTheme.secondaryLabelStyle, labelStyle.copyWith(color: Colors.red.withAlpha(0xde)));
-    expect(chipTheme.brightness, Brightness.light);
-    expect(chipTheme.elevation, 0.0);
-    expect(chipTheme.pressElevation, 8.0);
+    expect(chipTheme.backgroundColor, equals(Colors.black.withAlpha(0x1f)));
+    expect(chipTheme.selectedColor, equals(Colors.black.withAlpha(0x3d)));
+    expect(chipTheme.secondarySelectedColor, equals(Colors.red.withAlpha(0x3d)));
+    expect(chipTheme.deleteIconColor, equals(Colors.black.withAlpha(0xde)));
 
     chipTheme = ChipThemeData.fromDefaults(
       brightness: Brightness.dark,
       secondaryColor: Colors.tealAccent[200]!,
       labelStyle: const TextStyle(),
     );
-    expect(chipTheme.backgroundColor, Colors.white.withAlpha(0x1f));
-    expect(chipTheme.deleteIconColor, Colors.white.withAlpha(0xde));
-    expect(chipTheme.disabledColor, Colors.white.withAlpha(0x0c));
-    expect(chipTheme.selectedColor, Colors.white.withAlpha(0x3d));
-    expect(chipTheme.secondarySelectedColor, Colors.tealAccent[200]!.withAlpha(0x3d));
-    expect(chipTheme.shadowColor, Colors.black);
-    expect(chipTheme.selectedShadowColor, Colors.black);
-    expect(chipTheme.showCheckmark, true);
-    expect(chipTheme.checkmarkColor, null);
-    expect(chipTheme.labelPadding, null);
-    expect(chipTheme.padding, const EdgeInsets.all(4.0));
-    expect(chipTheme.side, null);
-    expect(chipTheme.shape, null);
-    expect(chipTheme.labelStyle, labelStyle.copyWith(color: Colors.white.withAlpha(0xde)));
-    expect(chipTheme.secondaryLabelStyle, labelStyle.copyWith(color: Colors.tealAccent[200]!.withAlpha(0xde)));
-    expect(chipTheme.brightness, Brightness.dark);
-    expect(chipTheme.elevation, 0.0);
-    expect(chipTheme.pressElevation, 8.0);
+    expect(chipTheme.backgroundColor, equals(Colors.white.withAlpha(0x1f)));
+    expect(chipTheme.selectedColor, equals(Colors.white.withAlpha(0x3d)));
+    expect(chipTheme.secondarySelectedColor, equals(Colors.tealAccent[200]!.withAlpha(0x3d)));
+    expect(chipTheme.deleteIconColor, equals(Colors.white.withAlpha(0xde)));
   });
 
 
@@ -396,7 +408,6 @@ void main() {
       pressElevation: 4.0,
       shadowColor: Colors.black,
       selectedShadowColor: Colors.black,
-      showCheckmark: false,
       checkmarkColor: Colors.black,
     );
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
@@ -412,7 +423,6 @@ void main() {
       pressElevation: 10.0,
       shadowColor: Colors.white,
       selectedShadowColor: Colors.white,
-      showCheckmark: true,
       checkmarkColor: Colors.white,
     );
 
@@ -425,7 +435,6 @@ void main() {
     expect(lerp.secondarySelectedColor, equals(middleGrey.withAlpha(0x3d)));
     expect(lerp.shadowColor, equals(middleGrey));
     expect(lerp.selectedShadowColor, equals(middleGrey));
-    expect(lerp.showCheckmark, equals(true));
     expect(lerp.labelPadding, equals(const EdgeInsets.all(4.0)));
     expect(lerp.padding, equals(const EdgeInsets.all(3.0)));
     expect(lerp.side!.color, equals(middleGrey));
@@ -447,7 +456,6 @@ void main() {
     expect(lerpANull25.secondarySelectedColor, equals(Colors.white.withAlpha(0x0f)));
     expect(lerpANull25.shadowColor, equals(Colors.white.withAlpha(0x40)));
     expect(lerpANull25.selectedShadowColor, equals(Colors.white.withAlpha(0x40)));
-    expect(lerpANull25.showCheckmark, equals(true));
     expect(lerpANull25.labelPadding, equals(const EdgeInsets.only(top: 2.0, bottom: 2.0)));
     expect(lerpANull25.padding, equals(const EdgeInsets.all(0.5)));
     expect(lerpANull25.side!.color, equals(Colors.white.withAlpha(0x3f)));
@@ -467,7 +475,6 @@ void main() {
     expect(lerpANull75.secondarySelectedColor, equals(Colors.white.withAlpha(0x2e)));
     expect(lerpANull75.shadowColor, equals(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.selectedShadowColor, equals(Colors.white.withAlpha(0xbf)));
-    expect(lerpANull75.showCheckmark, equals(true));
     expect(lerpANull75.labelPadding, equals(const EdgeInsets.only(top: 6.0, bottom: 6.0)));
     expect(lerpANull75.padding, equals(const EdgeInsets.all(1.5)));
     expect(lerpANull75.side!.color, equals(Colors.white.withAlpha(0xbf)));
@@ -487,7 +494,6 @@ void main() {
     expect(lerpBNull25.secondarySelectedColor, equals(Colors.black.withAlpha(0x2e)));
     expect(lerpBNull25.shadowColor, equals(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.selectedShadowColor, equals(Colors.black.withAlpha(0xbf)));
-    expect(lerpBNull25.showCheckmark, equals(false));
     expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, right: 6.0)));
     expect(lerpBNull25.padding, equals(const EdgeInsets.all(3.0)));
     expect(lerpBNull25.side!.color, equals(Colors.black.withAlpha(0x3f)));
@@ -507,7 +513,6 @@ void main() {
     expect(lerpBNull75.secondarySelectedColor, equals(Colors.black.withAlpha(0x0f)));
     expect(lerpBNull75.shadowColor, equals(Colors.black.withAlpha(0x40)));
     expect(lerpBNull75.selectedShadowColor, equals(Colors.black.withAlpha(0x40)));
-    expect(lerpBNull75.showCheckmark, equals(true));
     expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, right: 2.0)));
     expect(lerpBNull75.padding, equals(const EdgeInsets.all(1.0)));
     expect(lerpBNull75.side!.color, equals(Colors.black.withAlpha(0xbf)));
@@ -736,6 +741,390 @@ void main() {
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
     expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
+  });
+
+  testWidgets('Chip defaults', (WidgetTester tester) async {
+    late TextTheme textTheme;
+    final ThemeData theme = ThemeData();
+
+    Widget buildFrame(Brightness brightness) {
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness, useMaterial3: true),
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                textTheme = Theme.of(context).textTheme;
+                return RawChip(
+                  avatar: const CircleAvatar(child: Text('A')),
+                  label: const Text('Chip A'),
+                  onDeleted: () { },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Brightness.light));
+    expect(getMaterialBox(tester), paints..path(color: const Color(0x00000000)));
+    expect(tester.getSize(find.byType(RawChip)), const Size(159.0, 48.0));
+    expect(getMaterial(tester).color, null);
+    expect(getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(getMaterial(tester).elevation, 0);
+    expect(
+      getMaterial(tester).shape,
+      RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(
+          Radius.circular(8.0),
+        ),
+        side: BorderSide(
+          color: theme.colorScheme.outline),
+      ),
+    );
+    expect(getIconData(tester).color?.value, 0xffffffff);
+    expect(getIconData(tester).opacity, null);
+    expect(getIconData(tester).size, null);
+
+    TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
+    expect(labelStyle.color?.value, 0xdd000000);
+    expect(labelStyle.fontFamily, textTheme.labelLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.labelLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.labelLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.labelLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.labelLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.labelLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.labelLarge?.height);
+    expect(labelStyle.inherit, textTheme.labelLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.labelLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.labelLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.labelLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.labelLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.labelLarge?.wordSpacing);
+
+    await tester.pumpWidget(buildFrame(Brightness.dark));
+    await tester.pumpAndSettle(); // Theme transition animation
+    expect(getMaterialBox(tester), paints..path(color: const Color(0x00000000)));
+    expect(tester.getSize(find.byType(RawChip)), const Size(159.0, 48.0));
+    expect(getMaterial(tester).color, null);
+    expect(getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(getMaterial(tester).elevation, 0);
+    expect(
+      getMaterial(tester).shape,
+      RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(
+          Radius.circular(8.0),
+        ),
+        side: BorderSide(
+          color: theme.colorScheme.outline),
+      ),
+    );
+    expect(getIconData(tester).color?.value, 0xffffffff);
+    expect(getIconData(tester).opacity, null);
+    expect(getIconData(tester).size, null);
+
+    labelStyle = getLabelStyle(tester, 'Chip A').style;
+    expect(labelStyle.color?.value, 0xffffffff);
+    expect(labelStyle.fontFamily, textTheme.labelLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.labelLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.labelLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.labelLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.labelLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.labelLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.labelLarge?.height);
+    expect(labelStyle.inherit, textTheme.labelLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.labelLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.labelLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.labelLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.labelLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.labelLarge?.wordSpacing);
+  });
+
+  testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+    );
+    final ChipThemeData defaultChipTheme = ChipThemeData.fromDefaults(
+      brightness: themeData.brightness,
+      secondaryColor: Colors.blue,
+      labelStyle: themeData.textTheme.bodyText1!,
+    );
+    bool value = false;
+    Widget buildApp({
+      ChipThemeData? chipTheme,
+      Widget? avatar,
+      Widget? deleteIcon,
+      bool isSelectable = true,
+      bool isPressable = false,
+      bool isDeletable = true,
+      bool showCheckmark = true,
+    }) {
+      chipTheme ??= defaultChipTheme;
+      return wrapForChip(
+        child: Theme(
+          data: themeData,
+          child: ChipTheme(
+            data: chipTheme,
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return RawChip(
+                showCheckmark: showCheckmark,
+                onDeleted: isDeletable ? () { } : null,
+                avatar: avatar,
+                deleteIcon: deleteIcon,
+                isEnabled: isSelectable || isPressable,
+                shape: chipTheme?.shape,
+                selected: isSelectable && value,
+                label: Text('$value'),
+                onSelected: isSelectable
+                  ? (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
+                onPressed: isPressable
+                  ? () {
+                      setState(() {
+                        value = true;
+                      });
+                    }
+                  : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+
+    RenderBox materialBox = getMaterialBox(tester);
+    IconThemeData iconData = getIconData(tester);
+    DefaultTextStyle labelStyle = getLabelStyle(tester, 'false');
+
+    // Check default theme for enabled widget.
+    expect(materialBox, paints..path(color: defaultChipTheme.backgroundColor));
+    expect(iconData.color, equals(const Color(0xde000000)));
+    expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+    await tester.tap(find.byType(RawChip));
+    await tester.pumpAndSettle();
+    materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..path(color: defaultChipTheme.selectedColor));
+    await tester.tap(find.byType(RawChip));
+    await tester.pumpAndSettle();
+
+    // Check default theme with disabled widget.
+    await tester.pumpWidget(buildApp(isSelectable: false));
+    await tester.pumpAndSettle();
+    materialBox = getMaterialBox(tester);
+    labelStyle = getLabelStyle(tester, 'false');
+    expect(materialBox, paints..path(color: defaultChipTheme.disabledColor));
+    expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+
+    // Apply a custom theme.
+    const Color customColor1 = Color(0xcafefeed);
+    const Color customColor2 = Color(0xdeadbeef);
+    const Color customColor3 = Color(0xbeefcafe);
+    const Color customColor4 = Color(0xaddedabe);
+    final ChipThemeData customTheme = defaultChipTheme.copyWith(
+      brightness: Brightness.dark,
+      backgroundColor: customColor1,
+      disabledColor: customColor2,
+      selectedColor: customColor3,
+      deleteIconColor: customColor4,
+    );
+    await tester.pumpWidget(buildApp(chipTheme: customTheme));
+    await tester.pumpAndSettle();
+    materialBox = getMaterialBox(tester);
+    iconData = getIconData(tester);
+    labelStyle = getLabelStyle(tester, 'false');
+
+    // Check custom theme for enabled widget.
+    expect(materialBox, paints..path(color: customTheme.backgroundColor));
+    expect(iconData.color, equals(customTheme.deleteIconColor));
+    expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+    await tester.tap(find.byType(RawChip));
+    await tester.pumpAndSettle();
+    materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..path(color: customTheme.selectedColor));
+    await tester.tap(find.byType(RawChip));
+    await tester.pumpAndSettle();
+
+    // Check custom theme with disabled widget.
+    await tester.pumpWidget(buildApp(
+      chipTheme: customTheme,
+      isSelectable: false,
+    ));
+    await tester.pumpAndSettle();
+    materialBox = getMaterialBox(tester);
+    labelStyle = getLabelStyle(tester, 'false');
+    expect(materialBox, paints..path(color: customTheme.disabledColor));
+    expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+  });
+
+  testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.red,
+    );
+    final ChipThemeData chipTheme = theme.chipTheme;
+
+    Widget buildChip(ChipThemeData data) {
+      return wrapForChip(
+        child: Theme(
+          data: theme,
+          child: const InputChip(
+            label: Text('Label'),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(chipTheme));
+
+    final RenderBox materialBox = tester.firstRenderObject<RenderBox>(
+      find.descendant(
+        of: find.byType(RawChip),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+
+    expect(materialBox, paints..path(color: chipTheme.disabledColor));
+  });
+
+  testWidgets('Chip defers to theme, if shape and side resolves to null', (WidgetTester tester) async {
+    const OutlinedBorder themeShape = StadiumBorder();
+    const OutlinedBorder selectedShape = RoundedRectangleBorder();
+    const BorderSide themeBorderSide = BorderSide(color: Color(0x00000001));
+    const BorderSide selectedBorderSide = BorderSide(color: Color(0x00000002));
+
+    OutlinedBorder? getShape(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return selectedShape;
+      }
+      return null;
+    }
+
+    BorderSide? getBorderSide(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return selectedBorderSide;
+      }
+      return null;
+    }
+
+    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ThemeData.light().chipTheme.copyWith(
+            shape: themeShape,
+            side: themeBorderSide,
+          ),
+        ),
+        home: Scaffold(
+          body: ChoiceChip(
+            selected: selected,
+            label: const Text('Chip'),
+            shape: _MaterialStateOutlinedBorder(getShape),
+            side: _MaterialStateBorderSide(getBorderSide),
+            onSelected: enabled ? (_) {} : null,
+          ),
+        ),
+      );
+    }
+
+    // Default, not disabled. Defer to theme.
+    await tester.pumpWidget(chipWidget());
+    expect(getMaterial(tester).shape, isA<StadiumBorder>());
+    expect(find.byType(RawChip), paints..rrect(color: themeBorderSide.color));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
+    expect(find.byType(RawChip), paints..drrect(color: selectedBorderSide.color));
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('Chip defaults', (WidgetTester tester) async {
+      late TextTheme textTheme;
+
+      Widget buildFrame(Brightness brightness) {
+        return MaterialApp(
+          theme: ThemeData(brightness: brightness),
+          home: Scaffold(
+            body: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  textTheme = Theme.of(context).textTheme;
+                  return Chip(
+                    avatar: const CircleAvatar(child: Text('A')),
+                    label: const Text('Chip A'),
+                    onDeleted: () { },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(Brightness.light));
+      expect(getMaterialBox(tester), paints..path(color: const Color(0x1f000000)));
+      expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
+      expect(getMaterial(tester).color, null);
+      expect(getMaterial(tester).elevation, 0);
+      expect(getMaterial(tester).shape, const StadiumBorder());
+      expect(getIconData(tester).color?.value, 0xffffffff);
+      expect(getIconData(tester).opacity, null);
+      expect(getIconData(tester).size, null);
+
+      TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
+      expect(labelStyle.color?.value, 0xde000000);
+      expect(labelStyle.fontFamily, textTheme.bodyText1?.fontFamily);
+      expect(labelStyle.fontFamilyFallback, textTheme.bodyText1?.fontFamilyFallback);
+      expect(labelStyle.fontFeatures, textTheme.bodyText1?.fontFeatures);
+      expect(labelStyle.fontSize, textTheme.bodyText1?.fontSize);
+      expect(labelStyle.fontStyle, textTheme.bodyText1?.fontStyle);
+      expect(labelStyle.fontWeight, textTheme.bodyText1?.fontWeight);
+      expect(labelStyle.height, textTheme.bodyText1?.height);
+      expect(labelStyle.inherit, textTheme.bodyText1?.inherit);
+      expect(labelStyle.leadingDistribution, textTheme.bodyText1?.leadingDistribution);
+      expect(labelStyle.letterSpacing, textTheme.bodyText1?.letterSpacing);
+      expect(labelStyle.overflow, textTheme.bodyText1?.overflow);
+      expect(labelStyle.textBaseline, textTheme.bodyText1?.textBaseline);
+      expect(labelStyle.wordSpacing, textTheme.bodyText1?.wordSpacing);
+
+      await tester.pumpWidget(buildFrame(Brightness.dark));
+      await tester.pumpAndSettle(); // Theme transition animation
+      expect(getMaterialBox(tester), paints..path(color: const Color(0x1fffffff)));
+      expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
+      expect(getMaterial(tester).color, null);
+      expect(getMaterial(tester).elevation, 0);
+      expect(getMaterial(tester).shape, const StadiumBorder());
+      expect(getIconData(tester).color?.value, 0xffffffff);
+      expect(getIconData(tester).opacity, null);
+      expect(getIconData(tester).size, null);
+
+      labelStyle = getLabelStyle(tester, 'Chip A').style;
+      expect(labelStyle.color?.value, 0xdeffffff);
+      expect(labelStyle.fontFamily, textTheme.bodyText1?.fontFamily);
+      expect(labelStyle.fontFamilyFallback, textTheme.bodyText1?.fontFamilyFallback);
+      expect(labelStyle.fontFeatures, textTheme.bodyText1?.fontFeatures);
+      expect(labelStyle.fontSize, textTheme.bodyText1?.fontSize);
+      expect(labelStyle.fontStyle, textTheme.bodyText1?.fontStyle);
+      expect(labelStyle.fontWeight, textTheme.bodyText1?.fontWeight);
+      expect(labelStyle.height, textTheme.bodyText1?.height);
+      expect(labelStyle.inherit, textTheme.bodyText1?.inherit);
+      expect(labelStyle.leadingDistribution, textTheme.bodyText1?.leadingDistribution);
+      expect(labelStyle.letterSpacing, textTheme.bodyText1?.letterSpacing);
+      expect(labelStyle.overflow, textTheme.bodyText1?.overflow);
+      expect(labelStyle.textBaseline, textTheme.bodyText1?.textBaseline);
+      expect(labelStyle.wordSpacing, textTheme.bodyText1?.wordSpacing);
+    });
   });
 }
 
