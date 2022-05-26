@@ -1740,7 +1740,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
               actions: widget.actions ?? WidgetsApp.defaultActions,
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
-                child: child,
+                child: ShortcutRegistrar(
+                  child: child,
+                ),
               ),
             ),
           ),

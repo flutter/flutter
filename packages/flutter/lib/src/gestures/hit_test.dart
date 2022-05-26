@@ -268,10 +268,11 @@ class HitTestResult {
   ///    function pair in more details.
   @protected
   void popTransform() {
-    if (_localTransforms.isNotEmpty)
+    if (_localTransforms.isNotEmpty) {
       _localTransforms.removeLast();
-    else
+    } else {
       _transforms.removeLast();
+    }
     assert(_transforms.isNotEmpty);
   }
 

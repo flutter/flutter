@@ -1647,6 +1647,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   AnimationController? _floatingCursorResetController;
 
+  Orientation? _lastOrientation;
+
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
@@ -1851,6 +1853,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _cursorTimer = null;
       }
     }
+
+    if (defaultTargetPlatform != TargetPlatform.iOS && defaultTargetPlatform != TargetPlatform.android) {
+      return;
+    }
+
+    // Hide the text selection toolbar on mobile when orientation changes.
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    if (_lastOrientation == null) {
+      _lastOrientation = orientation;
+      return;
+    }
+    if (orientation != _lastOrientation) {
+      _lastOrientation = orientation;
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        hideToolbar(false);
+      }
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        hideToolbar();
+      }
+    }
   }
 
   @override
@@ -1932,6 +1954,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     WidgetsBinding.instance.removeObserver(this);
     _clipboardStatus?.removeListener(_onChangedClipboardStatus);
     _clipboardStatus?.dispose();
+    _cursorVisibilityNotifier.dispose();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }

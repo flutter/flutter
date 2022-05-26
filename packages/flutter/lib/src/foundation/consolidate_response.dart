@@ -54,8 +54,9 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   final _OutputBuffer output = _OutputBuffer();
   ByteConversionSink sink = output;
   int? expectedContentLength = response.contentLength;
-  if (expectedContentLength == -1)
+  if (expectedContentLength == -1) {
     expectedContentLength = null;
+  }
   switch (response.compressionState) {
     case HttpClientResponseCompressionState.compressed:
       if (autoUncompress) {

@@ -637,13 +637,15 @@ class _ActivatorIntentPair with Diagnosticable {
   }
 }
 
-/// A manager of keyboard shortcut bindings.
-///
-/// A `ShortcutManager` is obtained by calling [Shortcuts.of] on the context of
-/// the widget that you want to find a manager for.
+/// A manager of keyboard shortcut bindings used by [Shortcuts] to handle key
+/// events.
 ///
 /// The manager may be listened to (with [addListener]/[removeListener]) for
 /// change notifications when the shortcuts change.
+///
+/// Typically, a [Shortcuts] widget supplies its own manager, but in uncommon
+/// cases where overriding the usual shortcut manager behavior is desired, a
+/// subclassed [ShortcutManager] may be supplied.
 class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// Constructs a [ShortcutManager].
   ShortcutManager({
@@ -774,6 +776,10 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
+/// See the article on [Using Actions and
+/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// for a detailed explanation.
+///
 /// {@tool dartpad}
 /// Here, we will use the [Shortcuts] and [Actions] widgets to add and subtract
 /// from a counter. When the child widget has keyboard focus, and a user presses
@@ -811,35 +817,61 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 ///  * [Action], a class for defining an invocation of a user action.
 ///  * [CallbackAction], a class for creating an action from a callback.
 class Shortcuts extends StatefulWidget {
-  /// Creates a const [Shortcuts] widget.
+  /// Creates a const [Shortcuts] widget that owns the map of shortcuts and
+  /// creates its own manager.
+  ///
+  /// When using this constructor, [manager] will return null.
   ///
   /// The [child] and [shortcuts] arguments are required.
+  ///
+  /// See also:
+  ///
+  ///  * [Shortcuts.manager], a constructor that uses a [ShortcutManager] to
+  ///    manage the shortcuts list instead.
   const Shortcuts({
     super.key,
-    this.manager,
-    required this.shortcuts,
+    required Map<ShortcutActivator, Intent> shortcuts,
     required this.child,
     this.debugLabel,
-  }) : assert(shortcuts != null),
+  }) : _shortcuts = shortcuts,
+       manager = null,
+       assert(shortcuts != null),
+       assert(child != null);
+
+  /// Creates a const [Shortcuts] widget that uses the [manager] to
+  /// manage the map of shortcuts.
+  ///
+  /// If this constructor is used, [shortcuts] will return the contents of
+  /// [ShortcutManager.shortcuts].
+  ///
+  /// The [child] and [manager] arguments are required.
+  const Shortcuts.manager({
+    super.key,
+    required ShortcutManager this.manager,
+    required this.child,
+    this.debugLabel,
+  }) : _shortcuts = const <ShortcutActivator, Intent>{},
+       assert(manager != null),
        assert(child != null);
 
   /// The [ShortcutManager] that will manage the mapping between key
   /// combinations and [Action]s.
   ///
-  /// If not specified, uses a default-constructed [ShortcutManager].
-  ///
-  /// This manager will be given new [shortcuts] to manage whenever the
-  /// [shortcuts] change materially.
+  /// If this widget was created with [Shortcuts.manager], then
+  /// [ShortcutManager.shortcuts] will be used as the source for shortcuts. If
+  /// the unnamed constructor is used, this manager will be null, and a
+  /// default-constructed `ShortcutsManager` will be used.
   final ShortcutManager? manager;
 
   /// {@template flutter.widgets.shortcuts.shortcuts}
-  /// The map of shortcuts that the [ShortcutManager] will be given to manage.
-  ///
-  /// For performance reasons, it is recommended that a pre-built map is passed
-  /// in here (e.g. a final variable from your widget class) instead of defining
-  /// it inline in the build function.
+  /// The map of shortcuts that describes the mapping between a key sequence
+  /// defined by a [ShortcutActivator] and the [Intent] that will be emitted
+  /// when that key sequence is pressed.
   /// {@endtemplate}
-  final Map<ShortcutActivator, Intent> shortcuts;
+  Map<ShortcutActivator, Intent> get shortcuts {
+    return manager == null ? _shortcuts : manager!.shortcuts;
+  }
+  final Map<ShortcutActivator, Intent> _shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
   ///
@@ -854,52 +886,6 @@ class Shortcuts extends StatefulWidget {
   /// This allows simplifying the diagnostic output to avoid cluttering it
   /// unnecessarily with large default shortcut maps.
   final String? debugLabel;
-
-  /// Returns the [ShortcutManager] that most tightly encloses the given
-  /// [BuildContext].
-  ///
-  /// If no [Shortcuts] widget encloses the context given, will assert in debug
-  /// mode and throw an exception in release mode.
-  ///
-  /// See also:
-  ///
-  ///  * [maybeOf], which is similar to this function, but will return null if
-  ///    it doesn't find a [Shortcuts] ancestor.
-  static ShortcutManager of(BuildContext context) {
-    assert(context != null);
-    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
-    assert(() {
-      if (inherited == null) {
-        throw FlutterError(
-          'Unable to find a $Shortcuts widget in the context.\n'
-          '$Shortcuts.of() was called with a context that does not contain a '
-          '$Shortcuts widget.\n'
-          'No $Shortcuts ancestor could be found starting from the context that was '
-          'passed to $Shortcuts.of().\n'
-          'The context used was:\n'
-          '  $context',
-        );
-      }
-      return true;
-    }());
-    return inherited!.manager;
-  }
-
-  /// Returns the [ShortcutManager] that most tightly encloses the given
-  /// [BuildContext].
-  ///
-  /// If no [Shortcuts] widget encloses the context given, will return null.
-  ///
-  /// See also:
-  ///
-  ///  * [of], which is similar to this function, but returns a non-nullable
-  ///    result, and will throw an exception if it doesn't find a [Shortcuts]
-  ///    ancestor.
-  static ShortcutManager? maybeOf(BuildContext context) {
-    assert(context != null);
-    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
-    return inherited?.manager;
-  }
 
   @override
   State<Shortcuts> createState() => _ShortcutsState();
@@ -927,8 +913,8 @@ class _ShortcutsState extends State<Shortcuts> {
     super.initState();
     if (widget.manager == null) {
       _internalManager = ShortcutManager();
+      _internalManager!.shortcuts = widget.shortcuts;
     }
-    manager.shortcuts = widget.shortcuts;
   }
 
   @override
@@ -942,7 +928,7 @@ class _ShortcutsState extends State<Shortcuts> {
         _internalManager ??= ShortcutManager();
       }
     }
-    manager.shortcuts = widget.shortcuts;
+    _internalManager?.shortcuts = widget.shortcuts;
   }
 
   KeyEventResult _handleOnKey(FocusNode node, RawKeyEvent event) {
@@ -1332,8 +1318,7 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
 
   @override
   Widget build(BuildContext context) {
-    return Shortcuts(
-      shortcuts: registry.shortcuts,
+    return Shortcuts.manager(
       manager: manager,
       child: _ShortcutRegistrarMarker(
         registry: registry,
