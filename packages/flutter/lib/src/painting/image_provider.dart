@@ -693,7 +693,25 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       return true;
     }());
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode),
+      codec: _loadAsync(key, decode, null),
+      scale: key.scale,
+      debugLabel: key.name,
+      informationCollector: collector,
+    );
+  }
+
+  @override
+  ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
+    InformationCollector? collector;
+    assert(() {
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
+      ];
+      return true;
+    }());
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key, null, decode),
       scale: key.scale,
       debugLabel: key.name,
       informationCollector: collector,
@@ -705,12 +723,28 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ///
   /// This function is used by [load].
   @protected
-  Future<ui.Codec> _loadAsync(AssetBundleImageKey key, DecoderBufferCallback decode) async {
-    ui.ImmutableBuffer? data;
+  Future<ui.Codec> _loadAsync(AssetBundleImageKey key, DecoderBufferCallback? decode, DecoderCallback? decodeDepreacted) async {
+    if (decode != null) {
+      ui.ImmutableBuffer? buffer;
+      // Hot reload/restart could change whether an asset bundle or key in a
+      // bundle are available, or if it is a network backed bundle.
+      try {
+        buffer = await key.bundle.loadBuffer(key.name);
+      } on FlutterError {
+        PaintingBinding.instance.imageCache.evict(key);
+        rethrow;
+      }
+      if (buffer == null) {
+        PaintingBinding.instance.imageCache.evict(key);
+        throw StateError('Unable to read data');
+      }
+      return decode(buffer);
+    }
+    ByteData data;
     // Hot reload/restart could change whether an asset bundle or key in a
     // bundle are available, or if it is a network backed bundle.
     try {
-      data = await key.bundle.loadBuffer(key.name);
+      data = await key.bundle.load(key.name);
     } on FlutterError {
       PaintingBinding.instance.imageCache.evict(key);
       rethrow;
@@ -719,7 +753,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('Unable to read data');
     }
-    return decode(data);
+    return decodeDepreacted!(data.buffer.asUint8List());
   }
 }
 
@@ -801,6 +835,23 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
     }
     return provider;
+  }
+
+  @override
+  ImageStreamCompleter load(ResizeImageKey key, DecoderCallback decode) {
+    Future<ui.Codec> decodeResize(Uint8List buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+      assert(
+        cacheWidth == null && cacheHeight == null && allowUpscaling == null,
+        'ResizeImage cannot be composed with another ImageProvider that applies '
+        'cacheWidth, cacheHeight, or allowUpscaling.',
+      );
+      return decode(buffer, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
+    }
+    final ImageStreamCompleter completer = imageProvider.load(key._providerCacheKey, decodeResize);
+    if (!kReleaseMode) {
+      completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
+    }
+    return completer;
   }
 
   @override
@@ -915,9 +966,9 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  ImageStreamCompleter loadBuffer(FileImage key, DecoderBufferCallback decode) {
+  ImageStreamCompleter load(FileImage key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode),
+      codec: _loadAsync(key, null, decode),
       scale: key.scale,
       debugLabel: key.file.path,
       informationCollector: () => <DiagnosticsNode>[
@@ -926,19 +977,32 @@ class FileImage extends ImageProvider<FileImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback decode) async {
+  @override
+  ImageStreamCompleter loadBuffer(FileImage key, DecoderBufferCallback decode) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key, decode, null),
+      scale: key.scale,
+      debugLabel: key.file.path,
+      informationCollector: () => <DiagnosticsNode>[
+        ErrorDescription('Path: ${file.path}'),
+      ],
+    );
+  }
+
+  Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback? decode, DecoderCallback? decodeDeprecated) async {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
-    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
 
-    return decode(buffer);
+    if (decode != null) {
+      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+    }
+    return decodeDeprecated!(bytes);
   }
 
   @override
@@ -1003,18 +1067,30 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  ImageStreamCompleter loadBuffer(MemoryImage key, DecoderBufferCallback decode) {
+  ImageStreamCompleter load(MemoryImage key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode),
+      codec: _loadAsync(key, null, decode),
       scale: key.scale,
       debugLabel: 'MemoryImage(${describeIdentity(key.bytes)})',
     );
   }
 
-  Future<ui.Codec> _loadAsync(MemoryImage key, DecoderBufferCallback decode) async {
+  @override
+  ImageStreamCompleter loadBuffer(MemoryImage key, DecoderBufferCallback decode) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key, decode, null),
+      scale: key.scale,
+      debugLabel: 'MemoryImage(${describeIdentity(key.bytes)})',
+    );
+  }
+
+  Future<ui.Codec> _loadAsync(MemoryImage key, DecoderBufferCallback? decode, DecoderCallback? decodeDepreacted) async {
     assert(key == this);
-    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-    return decode(buffer);
+    if (decode != null) {
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      return decode(buffer);
+    }
+    return decodeDepreacted!(bytes);
   }
 
   @override
