@@ -2131,7 +2131,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_floatingCursorResetController!.isCompleted) {
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
       if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset) {
-        // The cause is technicallv the force cursor, but the cause is listed as tap as the desired functionality is the same.
+        // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
         _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), SelectionChangedCause.forcePress);
       }
       _startCaretRect = null;
