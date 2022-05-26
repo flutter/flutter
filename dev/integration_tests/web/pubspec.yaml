@@ -8,6 +8,7 @@ flutter:
   assets:
     - lib/a.dart
     - lib/b.dart
+  uses-material-design: true
 
 dependencies:
   flutter:

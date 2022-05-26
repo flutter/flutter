@@ -378,8 +378,9 @@ class _HeroState extends State<Hero> {
   // This method can be safely called even when this [Hero] is currently not in
   // a flight.
   void endFlight({ bool keepPlaceholder = false }) {
-    if (keepPlaceholder || _placeholderSize == null)
+    if (keepPlaceholder || _placeholderSize == null) {
       return;
+    }
 
     _placeholderSize = null;
     if (mounted) {
@@ -590,8 +591,9 @@ class _HeroFlight {
       return;
     }
 
-    if (_scheduledPerformAnimationUpdate)
+    if (_scheduledPerformAnimationUpdate) {
       return;
+    }
 
     // The `navigator` must be non-null here, or the first if clause above would
     // have returned from this method.
@@ -730,10 +732,11 @@ class _HeroFlight {
       );
       shuttle = null;
 
-      if (newManifest.type == HeroFlightDirection.pop)
+      if (newManifest.type == HeroFlightDirection.pop) {
         _proxyAnimation.parent = ReverseAnimation(newManifest.animation);
-      else
+      } else {
         _proxyAnimation.parent = newManifest.animation;
+      }
 
       manifest.fromHero.endFlight(keepPlaceholder: true);
       manifest.toHero.endFlight(keepPlaceholder: true);
@@ -796,8 +799,9 @@ class HeroController extends NavigatorObserver {
     assert(route != null);
     // Don't trigger another flight when a pop is committed as a user gesture
     // back swipe is snapped.
-    if (!navigator!.userGestureInProgress)
+    if (!navigator!.userGestureInProgress) {
       _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
+    }
   }
 
   @override
@@ -818,8 +822,9 @@ class HeroController extends NavigatorObserver {
 
   @override
   void didStopUserGesture() {
-    if (navigator!.userGestureInProgress)
+    if (navigator!.userGestureInProgress) {
       return;
+    }
 
     // When the user gesture ends, if the user horizontal drag gesture initiated
     // the flight (i.e. the back swipe) didn't move towards the pop direction at
@@ -908,8 +913,9 @@ class HeroController extends NavigatorObserver {
     // callback was called, then don't actually start a transition, and we don'
     // t have to worry about any Hero widget we might have hidden in a previous
     // flight, or ongoing flights.
-    if (navigator == null || overlay == null)
+    if (navigator == null || overlay == null) {
       return;
+    }
 
     final RenderObject? navigatorRenderObject = navigator.context.findRenderObject();
 
@@ -975,8 +981,9 @@ class HeroController extends NavigatorObserver {
     // This can happen in a route pop transition when a fromHero is no longer
     // mounted, or kept alive by the [KeepAlive] mechanism but no longer visible.
     // TODO(LongCatIsLooong): resume aborted flights: https://github.com/flutter/flutter/issues/72947
-    for (final _HeroState toHero in toHeroes.values)
+    for (final _HeroState toHero in toHeroes.values) {
       toHero.endFlight();
+    }
   }
 
   void _handleFlightEnded(_HeroFlight flight) {

@@ -25,7 +25,7 @@ platform_properties:
         [
           {"dependency": "curl"}
         ]
-      os: Debian
+      os: Ubuntu
       device_type: none
   linux_android:
     properties:
@@ -129,6 +129,19 @@ targets:
         ["framework","hostonly"]
       validation: analyze
       validation_name: Analyze
+
+  - name: Linux android views
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/99001
+    recipe: flutter/android_views
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "android_virtual_device", "version": "31"}
+        ]
+      tags: >
+        ["framework","hostonly"]
+    timeout: 60
 
   - name: Linux build_tests_1_2
     recipe: flutter/flutter_drone
@@ -1911,7 +1924,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android new_gallery__crane_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/102232
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3337,7 +3349,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios large_image_changer_perf_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/101059
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

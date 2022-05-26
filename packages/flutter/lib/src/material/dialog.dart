@@ -611,7 +611,7 @@ class AlertDialog extends StatelessWidget {
       ),
     );
 
-    if (label != null)
+    if (label != null) {
       dialogChild = Semantics(
         scopesRoute: true,
         explicitChildNodes: true,
@@ -619,6 +619,7 @@ class AlertDialog extends StatelessWidget {
         label: label,
         child: dialogChild,
       );
+    }
 
     return Dialog(
       backgroundColor: backgroundColor,
@@ -947,7 +948,7 @@ class SimpleDialog extends StatelessWidget {
       ),
     );
 
-    if (label != null)
+    if (label != null) {
       dialogChild = Semantics(
         scopesRoute: true,
         explicitChildNodes: true,
@@ -955,6 +956,7 @@ class SimpleDialog extends StatelessWidget {
         label: label,
         child: dialogChild,
       );
+    }
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,

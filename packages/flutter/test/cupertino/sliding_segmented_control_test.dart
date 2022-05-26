@@ -25,8 +25,9 @@ Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = 
   // Using dynamic to access private class in test.
   // ignore: avoid_dynamic_calls
   final Rect local = renderSegmentedControl.currentThumbRect as Rect;
-  if (!useGlobalCoordinate)
+  if (!useGlobalCoordinate) {
     return local;
+  }
 
   final RenderBox segmentedControl = renderSegmentedControl as RenderBox;
   return local.shift(segmentedControl.localToGlobal(Offset.zero));

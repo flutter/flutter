@@ -26,8 +26,9 @@ mixin AnimationLazyListenerMixin {
   @protected
   void didRegisterListener() {
     assert(_listenerCounter >= 0);
-    if (_listenerCounter == 0)
+    if (_listenerCounter == 0) {
       didStartListening();
+    }
     _listenerCounter += 1;
   }
 
@@ -41,8 +42,9 @@ mixin AnimationLazyListenerMixin {
   void didUnregisterListener() {
     assert(_listenerCounter >= 1);
     _listenerCounter -= 1;
-    if (_listenerCounter == 0)
+    if (_listenerCounter == 0) {
       didStopListening();
+    }
   }
 
   /// Called when the number of listeners changes from zero to one.
@@ -151,8 +153,9 @@ mixin AnimationLocalListenersMixin {
         return true;
       }());
       try {
-        if (_listeners.contains(listener))
+        if (_listeners.contains(listener)) {
           listener();
+        }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -229,8 +232,9 @@ mixin AnimationLocalStatusListenersMixin {
     final List<AnimationStatusListener> localListeners = _statusListeners.toList(growable: false);
     for (final AnimationStatusListener listener in localListeners) {
       try {
-        if (_statusListeners.contains(listener))
+        if (_statusListeners.contains(listener)) {
           listener(status);
+        }
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
