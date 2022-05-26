@@ -874,13 +874,7 @@ class TextEditingValue {
     final String newText = text.replaceRange(replacementRange.start, replacementRange.end, replacementString);
 
     if (replacementRange.end - replacementRange.start == replacementString.length) {
-      return copyWith(
-        text: newText,
-        selection: selection.copyWith(
-          baseOffset: replacementRange.end,
-          extentOffset: replacementRange.end,
-        ),
-      );
+      return copyWith(text: newText);
     }
 
     int adjustIndex(int originalIndex) {
