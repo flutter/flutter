@@ -148,6 +148,7 @@ class PlatformException implements Exception {
   ///
   /// On Android this field is populated when an exception is thrown in the method call handler,
   /// as shown in the following example:
+  ///
   /// ```kotlin
   /// import androidx.annotation.NonNull
   /// import io.flutter.embedding.android.FlutterActivity
@@ -169,6 +170,7 @@ class PlatformException implements Exception {
   /// It is also populated on Android if the method channel result is not serializable.
   /// If the result is not serializable, an exception gets thrown during the serialization process.
   /// This can be seen in the following example:
+  ///
   /// ```kotlin
   /// import androidx.annotation.NonNull
   /// import io.flutter.embedding.android.FlutterActivity
@@ -186,6 +188,7 @@ class PlatformException implements Exception {
   ///   }
   /// }
   /// ```
+  ///
   /// In the cases described above, the content of [stacktrace] will be the unprocessed output of calling `toString()` on the exception.
   final String? stacktrace;
 
