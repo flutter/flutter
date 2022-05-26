@@ -9,6 +9,18 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
+namespace {
+class ImModuleEnv : public ::testing::Environment {
+ public:
+  void SetUp() override {
+    setenv("GTK_IM_MODULE", "gtk-im-context-simple", true);
+  }
+};
+
+testing::Environment* const env =
+    testing::AddGlobalTestEnvironment(new ImModuleEnv);
+}  // namespace
+
 static uint8_t hex_digit_to_int(char value) {
   if (value >= '0' && value <= '9') {
     return value - '0';

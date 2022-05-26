@@ -708,6 +708,10 @@ static void fl_text_input_plugin_init(FlTextInputPlugin* self) {
 
   priv->client_id = kClientIdUnset;
   priv->im_context = gtk_im_multicontext_new();
+  // On Wayland, this call sets up the input method so it can be enabled
+  // immediately when required. Without it, on-screen keyboard's don't come up
+  // the first time a text field is focused.
+  gtk_im_context_focus_out(priv->im_context);
   priv->input_type = FL_TEXT_INPUT_TYPE_TEXT;
   g_signal_connect_object(priv->im_context, "preedit-start",
                           G_CALLBACK(im_preedit_start_cb), self,
