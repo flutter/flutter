@@ -10,6 +10,7 @@ A top level harness to run all unit-tests in a specific engine build.
 
 import argparse
 import glob
+import multiprocessing
 import os
 import re
 import subprocess
@@ -105,6 +106,28 @@ def FindExecutablePath(path):
   raise Exception('Executable %s does not exist!' % path)
 
 
+def BuildEngineExecutableCommand(build_dir, executable_name, flags=[], coverage=False):
+  unstripped_exe = os.path.join(build_dir, 'exe.unstripped', executable_name)
+  # We cannot run the unstripped binaries directly when coverage is enabled.
+  if IsLinux() and os.path.exists(unstripped_exe) and not coverage:
+    # Use unstripped executables in order to get better symbolized crash
+    # stack traces on Linux.
+    executable = unstripped_exe
+  else:
+    executable = FindExecutablePath(os.path.join(build_dir, executable_name))
+
+  coverage_script = os.path.join(buildroot_dir, 'flutter', 'build', 'generate_coverage.py')
+
+  if coverage:
+    coverage_flags = ['-t', executable, '-o', os.path.join(build_dir, 'coverage', executable_name), '-f', 'html']
+    updated_flags = ['--args=%s' % ' '.join(flags)]
+    test_command = [ coverage_script ] + coverage_flags + updated_flags
+  else:
+    test_command = [ executable ] + flags
+
+  return test_command
+
+
 def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
                         cwd=buildroot_dir, forbidden_output=[], expect_failure=False, coverage=False,
                         extra_env={}):
@@ -115,26 +138,17 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
   unstripped_exe = os.path.join(build_dir, 'exe.unstripped', executable_name)
   # We cannot run the unstripped binaries directly when coverage is enabled.
   if IsLinux() and os.path.exists(unstripped_exe) and not coverage:
-    # Use unstripped executables in order to get better symbolized crash
-    # stack traces on Linux.
-    executable = unstripped_exe
     # Some tests depend on the EGL/GLES libraries placed in the build directory.
     env = os.environ.copy()
     env['LD_LIBRARY_PATH'] = os.path.join(build_dir, 'lib.unstripped')
   else:
-    executable = FindExecutablePath(os.path.join(build_dir, executable_name))
     env = None
-
-  coverage_script = os.path.join(buildroot_dir, 'flutter', 'build', 'generate_coverage.py')
 
   print('Running %s in %s' % (executable_name, cwd))
 
-  if coverage:
-    coverage_flags = ['-t', executable, '-o', os.path.join(build_dir, 'coverage', executable_name), '-f', 'html']
-    updated_flags = ['--args=%s' % ' '.join(flags)]
-    test_command = [ coverage_script ] + coverage_flags + updated_flags
-  else:
-    test_command = [ executable ] + flags
+  test_command = BuildEngineExecutableCommand(
+    build_dir, executable_name, flags=flags, coverage=coverage,
+  )
 
   if not env:
     env = os.environ.copy()
@@ -160,6 +174,36 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
       ])
       os.unlink(core_path)
     raise
+
+
+class EngineExecutableTask(object):
+  def __init__(self, build_dir, executable_name, filter, flags=[],
+               cwd=buildroot_dir, forbidden_output=[], expect_failure=False,
+               coverage=False, extra_env={}):
+    self.build_dir = build_dir
+    self.executable_name = executable_name
+    self.filter = filter
+    self.flags = flags
+    self.cwd = cwd
+    self.forbidden_output = forbidden_output
+    self.expect_failure = expect_failure
+    self.coverage = coverage
+    self.extra_env = extra_env
+
+  def __call__(self, *args):
+    RunEngineExecutable(
+      self.build_dir, self.executable_name, self.filter, flags=self.flags,
+      cwd=self.cwd, forbidden_output=self.forbidden_output,
+      expect_failure=self.expect_failure, coverage=self.coverage,
+      extra_env=self.extra_env,
+    )
+
+  def __str__(self):
+    command = BuildEngineExecutableCommand(
+      self.build_dir, self.executable_name, flags=self.flags,
+      coverage=self.coverage
+    )
+    return " ".join(command)
 
 
 def RunCCTests(build_dir, filter, coverage, capture_core_dump):
@@ -266,8 +310,9 @@ def RunEngineBenchmarks(build_dir, filter):
     RunEngineExecutable(build_dir, 'txt_benchmarks', filter, icu_flags)
 
 
-def RunDartTest(build_dir, test_packages, dart_file, verbose_dart_snapshot, multithreaded,
-                enable_observatory=False, expect_failure=False, alternative_tester=False):
+def GatherDartTest(build_dir, test_packages, dart_file, verbose_dart_snapshot,
+                   multithreaded, enable_observatory=False,
+                   expect_failure=False, alternative_tester=False):
   kernel_file_name = os.path.basename(dart_file) + '.dill'
   kernel_file_output = os.path.join(build_dir, 'gen', kernel_file_name)
   error_message = "%s doesn't exist. Please run the build that populates %s" % (
@@ -302,8 +347,10 @@ def RunDartTest(build_dir, test_packages, dart_file, verbose_dart_snapshot, mult
     tester_name = 'flutter_tester_fractional_translation'
   print("Running test '%s' using '%s' (%s)" % (kernel_file_name, tester_name, threading))
   forbidden_output = [] if 'unopt' in build_dir or expect_failure else ['[ERROR']
-  RunEngineExecutable(build_dir, tester_name, None, command_args,
-                      forbidden_output=forbidden_output, expect_failure=expect_failure)
+  return EngineExecutableTask(
+    build_dir, tester_name, None, command_args,
+    forbidden_output=forbidden_output, expect_failure=expect_failure,
+  )
 
 
 def EnsureDebugUnoptSkyPackagesAreBuilt():
@@ -417,7 +464,8 @@ def RunObjcTests(ios_variant='ios_debug_sim_unopt', test_filter=None):
     command[0] = command[0] + " -only-testing:%s" % test_filter
   RunCmd(command, cwd=ios_unit_test_dir, shell=True)
 
-def RunDartTests(build_dir, filter, verbose_dart_snapshot):
+
+def GatherDartTests(build_dir, filter, verbose_dart_snapshot):
   dart_tests_dir = os.path.join(buildroot_dir, 'flutter', 'testing', 'dart',)
 
   # This one is a bit messy. The pubspec.yaml at flutter/testing/dart/pubspec.yaml
@@ -441,31 +489,31 @@ def RunDartTests(build_dir, filter, verbose_dart_snapshot):
   if 'release' not in build_dir:
     for dart_test_file in dart_observatory_tests:
       if filter is not None and os.path.basename(dart_test_file) not in filter:
-        print("Skipping %s due to filter." % dart_test_file)
+        print("Skipping '%s' due to filter." % dart_test_file)
       else:
-        print("Testing dart file %s with observatory enabled" % dart_test_file)
-        RunDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, True, True)
-        RunDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, False, True)
+        print("Gathering dart test '%s' with observatory enabled" % dart_test_file)
+        yield GatherDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, True, True)
+        yield GatherDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, False, True)
         # Smoke test with tester variant that has no raster cache and enabled fractional translation
-        RunDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, False, True, True)
+        yield GatherDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, False, True, True)
 
   for dart_test_file in dart_tests:
     if filter is not None and os.path.basename(dart_test_file) not in filter:
-      print("Skipping %s due to filter." % dart_test_file)
+      print("Skipping '%s' due to filter." % dart_test_file)
     else:
-      print("Testing dart file %s" % dart_test_file)
-      RunDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, True)
-      RunDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, False)
+      print("Gathering dart test '%s'" % dart_test_file)
+      yield GatherDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, True)
+      yield GatherDartTest(build_dir, test_packages, dart_test_file, verbose_dart_snapshot, False)
 
 
-def RunDartSmokeTest(build_dir, verbose_dart_snapshot):
+def GatherDartSmokeTest(build_dir, verbose_dart_snapshot):
   smoke_test = os.path.join(buildroot_dir, "flutter", "testing", "smoke_test_failure", "fail_test.dart")
   test_packages = os.path.join(buildroot_dir, "flutter", "testing", "smoke_test_failure", ".packages")
-  RunDartTest(build_dir, test_packages, smoke_test, verbose_dart_snapshot, True, expect_failure=True)
-  RunDartTest(build_dir, test_packages, smoke_test, verbose_dart_snapshot, False, expect_failure=True)
+  yield GatherDartTest(build_dir, test_packages, smoke_test, verbose_dart_snapshot, True, expect_failure=True)
+  yield GatherDartTest(build_dir, test_packages, smoke_test, verbose_dart_snapshot, False, expect_failure=True)
 
 
-def RunFrontEndServerTests(build_dir):
+def GatherFrontEndServerTests(build_dir):
   test_dir = os.path.join(buildroot_dir, 'flutter', 'flutter_frontend_server')
   dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
   for dart_test_file in dart_tests:
@@ -475,7 +523,7 @@ def RunFrontEndServerTests(build_dir):
       build_dir,
       os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot'),
       os.path.join(build_dir, 'flutter_patched_sdk')]
-    RunEngineExecutable(
+    yield EngineExecutableTask(
       build_dir,
       os.path.join('dart-sdk', 'bin', 'dart'),
       None,
@@ -483,14 +531,14 @@ def RunFrontEndServerTests(build_dir):
       cwd=test_dir)
 
 
-def RunConstFinderTests(build_dir):
+def GatherConstFinderTests(build_dir):
   test_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'const_finder', 'test')
   opts = [
     '--disable-dart-dev',
     os.path.join(test_dir, 'const_finder_test.dart'),
     os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot'),
     os.path.join(build_dir, 'flutter_patched_sdk')]
-  RunEngineExecutable(
+  yield EngineExecutableTask(
     build_dir,
     os.path.join('dart-sdk', 'bin', 'dart'),
     None,
@@ -498,14 +546,14 @@ def RunConstFinderTests(build_dir):
     cwd=test_dir)
 
 
-def RunLitetestTests(build_dir):
+def GatherLitetestTests(build_dir):
   test_dir = os.path.join(buildroot_dir, 'flutter', 'testing', 'litetest')
   dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
   for dart_test_file in dart_tests:
     opts = [
       '--disable-dart-dev',
       dart_test_file]
-    RunEngineExecutable(
+    yield EngineExecutableTask(
       build_dir,
       os.path.join('dart-sdk', 'bin', 'dart'),
       None,
@@ -528,14 +576,14 @@ def RunBenchmarkTests(build_dir):
       cwd=test_dir)
 
 
-def RunGithooksTests(build_dir):
+def GatherGithooksTests(build_dir):
   test_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'githooks')
   dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
   for dart_test_file in dart_tests:
     opts = [
       '--disable-dart-dev',
       dart_test_file]
-    RunEngineExecutable(
+    yield EngineExecutableTask(
       build_dir,
       os.path.join('dart-sdk', 'bin', 'dart'),
       None,
@@ -543,7 +591,7 @@ def RunGithooksTests(build_dir):
       cwd=test_dir)
 
 
-def RunClangTidyTests(build_dir):
+def GatherClangTidyTests(build_dir):
   test_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'clang_tidy')
   dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
   for dart_test_file in dart_tests:
@@ -552,7 +600,7 @@ def RunClangTidyTests(build_dir):
       dart_test_file,
       os.path.join(build_dir, 'compile_commands.json'),
       os.path.join(buildroot_dir, 'flutter')]
-    RunEngineExecutable(
+    yield EngineExecutableTask(
       build_dir,
       os.path.join('dart-sdk', 'bin', 'dart'),
       None,
@@ -560,7 +608,7 @@ def RunClangTidyTests(build_dir):
       cwd=test_dir)
 
 
-def RunApiConsistencyTests(build_dir):
+def GatherApiConsistencyTests(build_dir):
   test_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'api_check')
   dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
   for dart_test_file in dart_tests:
@@ -568,13 +616,44 @@ def RunApiConsistencyTests(build_dir):
       '--disable-dart-dev',
       dart_test_file,
       os.path.join(buildroot_dir, 'flutter')]
-    RunEngineExecutable(
+    yield EngineExecutableTask(
       build_dir,
       os.path.join('dart-sdk', 'bin', 'dart'),
       None,
       flags=opts,
       cwd=test_dir)
 
+
+def RunEngineTasksInParallel(tasks):
+  # Work around a bug in Python.
+  #
+  # The multiprocessing package relies on the win32 WaitForMultipleObjects()
+  # call, which supports waiting on a maximum of MAXIMUM_WAIT_OBJECTS (defined
+  # by Windows to be 64) handles, processes in this case. To avoid hitting
+  # this, we limit ourselves to 60 handles (since there are a couple extra
+  # processes launched for the queue reader and thread wakeup reader).
+  #
+  # See: https://bugs.python.org/issue26903
+  max_processes = multiprocessing.cpu_count()
+  if sys.platform.startswith(('cygwin', 'win')) and max_processes > 60:
+    max_processes = 60
+
+  pool = multiprocessing.Pool(processes=max_processes)
+  async_results = [
+    (t, pool.apply_async(t, ())) for t in tasks
+  ]
+  failures = []
+  for task, async_result in async_results:
+    try:
+      async_result.get()
+    except Exception as exn:
+      failures += [(task, exn)]
+
+  if len(failures) > 0:
+    print("The following commands failed:")
+    for task, exn in failures:
+      print("%s\n" % str(task))
+    raise Exception()
 
 def main():
   parser = argparse.ArgumentParser()
@@ -639,14 +718,15 @@ def main():
   if 'dart' in types:
     assert not IsWindows(), "Dart tests can't be run on windows. https://github.com/flutter/flutter/issues/36301."
     dart_filter = args.dart_filter.split(',') if args.dart_filter else None
-    RunDartSmokeTest(build_dir, args.verbose_dart_snapshot)
-    RunLitetestTests(build_dir)
-    RunGithooksTests(build_dir)
-    RunClangTidyTests(build_dir)
-    RunApiConsistencyTests(build_dir)
-    RunDartTests(build_dir, dart_filter, args.verbose_dart_snapshot)
-    RunConstFinderTests(build_dir)
-    RunFrontEndServerTests(build_dir)
+    tasks = list(GatherDartSmokeTest(build_dir, args.verbose_dart_snapshot))
+    tasks += list(GatherLitetestTests(build_dir))
+    tasks += list(GatherGithooksTests(build_dir))
+    tasks += list(GatherClangTidyTests(build_dir))
+    tasks += list(GatherApiConsistencyTests(build_dir))
+    tasks += list(GatherConstFinderTests(build_dir))
+    tasks += list(GatherFrontEndServerTests(build_dir))
+    tasks += list(GatherDartTests(build_dir, dart_filter, args.verbose_dart_snapshot))
+    RunEngineTasksInParallel(tasks)
 
   if 'java' in types:
     assert not IsWindows(), "Android engine files can't be compiled on Windows."
