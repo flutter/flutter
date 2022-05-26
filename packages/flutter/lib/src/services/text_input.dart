@@ -891,13 +891,13 @@ class TextEditingValue {
     }
 
     final TextSelection adjustedSelection = TextSelection(
-        baseOffset: adjustIndex(selection.baseOffset),
-        extentOffset: adjustIndex(selection.extentOffset),
-      );
+      baseOffset: adjustIndex(selection.baseOffset),
+      extentOffset: adjustIndex(selection.extentOffset),
+    );
     final TextRange adjustedComposing = TextRange(
-        start: adjustIndex(composing.start),
-        end: adjustIndex(composing.end),
-      );
+      start: adjustIndex(composing.start),
+      end: adjustIndex(composing.end),
+    );
     assert(_verifyRange(adjustedSelection, newText));
     assert(_verifyRange(adjustedComposing, newText));
     return TextEditingValue(
