@@ -3056,7 +3056,7 @@ TEST_F(EmbedderTest, FrameInfoContainsValidWidthAndHeight) {
   auto engine = builder.LaunchEngine();
 
   // Send a window metrics events so frames may be scheduled.
-  FlutterWindowMetricsEvent event = {};
+  static FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   event.width = 1024;
   event.height = 600;
@@ -3065,7 +3065,7 @@ TEST_F(EmbedderTest, FrameInfoContainsValidWidthAndHeight) {
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
 
-  fml::CountDownLatch frame_latch(10);
+  static fml::CountDownLatch frame_latch(10);
 
   context.AddNativeCallback("SignalNativeTest",
                             CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
@@ -3073,7 +3073,7 @@ TEST_F(EmbedderTest, FrameInfoContainsValidWidthAndHeight) {
                             }));
 
   static_cast<EmbedderTestContextGL&>(context).SetGLGetFBOCallback(
-      [&event, &frame_latch](FlutterFrameInfo frame_info) {
+      [](FlutterFrameInfo frame_info) {
         // width and height are rotated by 90 deg
         ASSERT_EQ(frame_info.size.width, event.height);
         ASSERT_EQ(frame_info.size.height, event.width);
@@ -3130,7 +3130,7 @@ TEST_F(EmbedderTest, PresentInfoContainsValidFBOId) {
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
 
-  fml::CountDownLatch frame_latch(10);
+  static fml::CountDownLatch frame_latch(10);
 
   context.AddNativeCallback("SignalNativeTest",
                             CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
@@ -3140,7 +3140,7 @@ TEST_F(EmbedderTest, PresentInfoContainsValidFBOId) {
   const uint32_t window_fbo_id =
       static_cast<EmbedderTestContextGL&>(context).GetWindowFBOId();
   static_cast<EmbedderTestContextGL&>(context).SetGLPresentCallback(
-      [window_fbo_id = window_fbo_id, &frame_latch](uint32_t fbo_id) {
+      [window_fbo_id = window_fbo_id](uint32_t fbo_id) {
         ASSERT_EQ(fbo_id, window_fbo_id);
 
         frame_latch.CountDown();
