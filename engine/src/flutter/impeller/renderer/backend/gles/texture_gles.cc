@@ -51,7 +51,18 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
       type_(GetTextureTypeFromDescriptor(GetTextureDescriptor())),
       handle_(reactor_->CreateHandle(ToHandleType(type_))),
       is_wrapped_(is_wrapped) {
+  // Ensure the texture descriptor itself is valid.
   if (!GetTextureDescriptor().IsValid()) {
+    VALIDATION_LOG << "Invalid texture descriptor.";
+    return;
+  }
+  // Ensure the texture doesn't exceed device capabilities.
+  const auto tex_size = GetTextureDescriptor().size;
+  const auto max_size =
+      reactor_->GetProcTable().GetCapabilities()->max_texture_size;
+  if (tex_size.Max(max_size) != max_size) {
+    VALIDATION_LOG << "Texture of size " << tex_size
+                   << " would exceed max supported size of " << max_size << ".";
     return;
   }
   is_valid_ = true;

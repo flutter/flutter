@@ -137,6 +137,10 @@ std::string DescriptionGLES::GetString() const {
   return stream.str();
 }
 
+bool DescriptionGLES::IsES() const {
+  return is_es_;
+}
+
 bool DescriptionGLES::HasExtension(const std::string& ext) const {
   return extensions_.find(ext) != extensions_.end();
 }

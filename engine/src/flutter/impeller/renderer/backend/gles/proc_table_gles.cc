@@ -109,6 +109,8 @@ ProcTableGLES::ProcTableGLES(Resolver resolver) {
     DiscardFramebufferEXT.Reset();
   }
 
+  capabilities_ = std::make_unique<CapabilitiesGLES>(*this);
+
   is_valid_ = true;
 }
 
@@ -128,6 +130,10 @@ void ProcTableGLES::ShaderSourceMapping(GLuint shader,
 
 const DescriptionGLES* ProcTableGLES::GetDescription() const {
   return description_.get();
+}
+
+const CapabilitiesGLES* ProcTableGLES::GetCapabilities() const {
+  return capabilities_.get();
 }
 
 static const char* FramebufferStatusToString(GLenum status) {
