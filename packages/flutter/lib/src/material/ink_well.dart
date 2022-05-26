@@ -1028,7 +1028,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     widget.onFocusChange?.call(hasFocus);
   }
 
-  void _handleTapDown(TapDownDetails details) {
+  void handleTapDown(TapDownDetails details) {
     if (_anyChildInkResponsePressed) {
       return;
     }
