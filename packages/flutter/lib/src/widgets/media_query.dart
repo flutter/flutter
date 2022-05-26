@@ -436,8 +436,9 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom))
+    if (!(removeLeft || removeTop || removeRight || removeBottom)) {
       return this;
+    }
     return copyWith(
       padding: padding.copyWith(
         left: removeLeft ? 0.0 : null,
@@ -473,8 +474,9 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom))
+    if (!(removeLeft || removeTop || removeRight || removeBottom)) {
       return this;
+    }
     return copyWith(
       viewPadding: viewPadding.copyWith(
         left: removeLeft ? math.max(0.0, viewPadding.left - viewInsets.left) : null,
@@ -510,8 +512,9 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom))
+    if (!(removeLeft || removeTop || removeRight || removeBottom)) {
       return this;
+    }
     return copyWith(
       padding: padding.copyWith(
         left: removeLeft ? 0.0 : null,
@@ -548,8 +551,9 @@ class MediaQueryData {
     assert(subScreen.left >= 0.0 && subScreen.top >= 0.0 &&
         subScreen.right <= size.width && subScreen.bottom <= size.height,
         "'subScreen' argument cannot be outside the bounds of the screen");
-    if (subScreen.size == size && subScreen.topLeft == Offset.zero)
+    if (subScreen.size == size && subScreen.topLeft == Offset.zero) {
       return this;
+    }
     final double rightInset = size.width - subScreen.right;
     final double bottomInset = size.height - subScreen.bottom;
     return copyWith(
@@ -579,8 +583,9 @@ class MediaQueryData {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is MediaQueryData
         && other.size == size
         && other.devicePixelRatio == devicePixelRatio

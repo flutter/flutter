@@ -103,24 +103,27 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   void _handleFocusChanged() {
-    if (widget.focusNode.hasFocus)
+    if (widget.focusNode.hasFocus) {
       _attachKeyboardIfDetached();
-    else
+    } else {
       _detachKeyboardIfAttached();
+    }
   }
 
   bool _listening = false;
 
   void _attachKeyboardIfDetached() {
-    if (_listening)
+    if (_listening) {
       return;
+    }
     RawKeyboard.instance.addListener(_handleRawKeyEvent);
     _listening = true;
   }
 
   void _detachKeyboardIfAttached() {
-    if (!_listening)
+    if (!_listening) {
       return;
+    }
     RawKeyboard.instance.removeListener(_handleRawKeyEvent);
     _listening = false;
   }
