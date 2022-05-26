@@ -79,7 +79,7 @@ String matrix4ToCssTransform(Matrix4 matrix) {
 /// Applies a transform to the [element].
 ///
 /// See [float64ListToCssTransform] for details on how the CSS value is chosen.
-void setElementTransform(html.Element element, Float32List matrix4) {
+void setElementTransform(DomElement element, Float32List matrix4) {
   element.style
     ..transformOrigin = '0 0 0'
     ..transform = float64ListToCssTransform(matrix4);

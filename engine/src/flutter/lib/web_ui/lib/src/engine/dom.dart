@@ -242,6 +242,12 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   set backgroundImage(String value) =>
       setProperty('background-image', value, '');
   set border(String value) => setProperty('border', value, '');
+  set mixBlendMode(String value) => setProperty('mix-blend-mode', value, '');
+  set backgroundSize(String value) =>
+      setProperty('background-size', value, '');
+  set backgroundBlendMode(String value) =>
+      setProperty('background-blend-mode', value, '');
+  set transformStyle(String value) => setProperty('transform-style', value, '');
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -288,6 +294,10 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get padding => getPropertyValue('padding');
   String get backgroundImage => getPropertyValue('background-image');
   String get border => getPropertyValue('border');
+  String get mixBlendMode => getPropertyValue('mix-blend-mode');
+  String get backgroundSize => getPropertyValue('background-size');
+  String get backgroundBlendMode => getPropertyValue('background-blend-mode');
+  String get transformStyle => getPropertyValue('transform-style');
 
   external String getPropertyValue(String property);
   void setProperty(String propertyName, String value, [String? priority]) {
