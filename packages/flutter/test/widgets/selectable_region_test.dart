@@ -1044,7 +1044,7 @@ void main() {
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
   });
 
-  testWidgets('toolbar hidden on mobile when orientation changes', (WidgetTester tester) async {
+  testWidgets('toolbar is hidden on mobile when orientation changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
