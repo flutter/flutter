@@ -123,4 +123,9 @@ std::shared_ptr<CommandBuffer> ContextGLES::CreateTransferCommandBuffer()
   return CreateRenderCommandBuffer();
 }
 
+// |Context|
+bool ContextGLES::HasThreadingRestrictions() const {
+  return true;
+}
+
 }  // namespace impeller

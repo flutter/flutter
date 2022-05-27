@@ -46,6 +46,8 @@ class Context {
   virtual std::shared_ptr<CommandBuffer> CreateTransferCommandBuffer()
       const = 0;
 
+  virtual bool HasThreadingRestrictions() const;
+
  protected:
   Context();
 

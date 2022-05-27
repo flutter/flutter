@@ -69,6 +69,9 @@ class ContextGLES final : public Context,
   // |Context|
   std::shared_ptr<CommandBuffer> CreateTransferCommandBuffer() const override;
 
+  // |Context|
+  bool HasThreadingRestrictions() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ContextGLES);
 };
 
