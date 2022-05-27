@@ -11,7 +11,7 @@
 namespace flutter::testing {
 
 TEST(FlutterGLCompositorTest, TestPresent) {
-  id mockViewController = CreateMockViewController(nil);
+  id mockViewController = CreateMockViewController();
 
   std::unique_ptr<flutter::FlutterGLCompositor> macos_compositor =
       std::make_unique<FlutterGLCompositor>(mockViewController, nullptr);

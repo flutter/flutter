@@ -11,8 +11,7 @@
 
 namespace flutter::testing {
 
-// Returns a mock FlutterViewController that is able to work in environments
-// without a real pasteboard.
-id CreateMockViewController(NSString* pasteboardString);
+// Returns a mock FlutterViewController.
+id CreateMockViewController();
 
-}
+}  // namespace flutter::testing
