@@ -477,7 +477,7 @@ class FlutterValidator extends DoctorValidator {
       frameworkVersion = version.frameworkVersion;
 
       messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel));
-      messages.add(_getFlutterUpstreamMessage(version, gitUrl));
+      messages.add(_getFlutterUpstreamMessage(version));
       if (gitUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterGitUrl(gitUrl)));
       }
@@ -542,20 +542,24 @@ class FlutterValidator extends DoctorValidator {
     return ValidationMessage(flutterVersionMessage);
   }
 
-  ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version, String? gitUrl) {
+  ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
     final String? repositoryUrl = version.repositoryUrl;
     final VersionCheckError? upstreamValidationError = VersionUpstreamValidator(version: version, platform: _platform).run();
 
-    if (repositoryUrl == null) {
-      return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown'));
-    }
     if (upstreamValidationError != null) {
-      if (gitUrl != null) {
-        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlEnvMismatch(repositoryUrl));
+      final String errorMessage = upstreamValidationError.message;
+      if(errorMessage.contains('could not determine the remote upstream which is being tracked')) {
+        // This will be true only if repositoryUrl is null
+        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown'));
       }
-      return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlNonStandard(repositoryUrl));
+      if (errorMessage.contains('Flutter SDK is tracking a non-standard remote')) {
+        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlNonStandard(repositoryUrl!));
+      }
+      if (errorMessage.contains('Either remove "FLUTTER_GIT_URL" from the environment or set it to')){
+        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlEnvMismatch(repositoryUrl!));
+      }
     }
-    return ValidationMessage(_userMessages.flutterUpstreamRepositoryUrl(repositoryUrl));
+    return ValidationMessage(_userMessages.flutterUpstreamRepositoryUrl(repositoryUrl!));
   }
 
   bool _genSnapshotRuns(String genSnapshotPath) {
