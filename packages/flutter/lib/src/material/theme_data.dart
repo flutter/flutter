@@ -1147,7 +1147,12 @@ class ThemeData with Diagnosticable {
   /// all uses of it. Everything will use the Material 3 look and feel at
   /// that point.
   ///
-  /// This flag affects components and styles.
+  /// This flag affects styles and components.
+  /// 
+  /// ## Styles
+  ///   * [Color](https://m3.material.io/styles/color/the-color-system): [ColorScheme], [Material]
+  ///   * [Shape](https://m3.material.io/styles/shape): in components below
+  ///   * [Typography](https://m3.material.io/styles/typography): `typography` (see table below)
   ///
   /// ## Components
   ///   * [Common buttons](https://m3.material.io/components/buttons): [TextButton], [OutlinedButton], [ElevatedButton]
@@ -1160,10 +1165,6 @@ class ThemeData with Diagnosticable {
   ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
   ///   * [Top app bar](https://m3.material.io/components/top-app-bar): [AppBar]
   ///
-  /// ## Styles
-  ///   * [Color](https://m3.material.io/styles/color/the-color-system): [ColorScheme], [Material]
-  ///   * [Shape](https://m3.material.io/styles/shape)
-  ///   * [Typography](https://m3.material.io/styles/typography): `typography` (see table below)
   ///
   /// In addition, this flag enables features introduced in Android 12.
   ///   * Stretch overscroll: [MaterialScrollBehavior]
