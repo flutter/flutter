@@ -106,7 +106,7 @@ def FindExecutablePath(path):
   raise Exception('Executable %s does not exist!' % path)
 
 
-def BuildEngineExecutableCommand(build_dir, executable_name, flags=[], coverage=False):
+def BuildEngineExecutableCommand(build_dir, executable_name, flags=[], coverage=False, gtest=False):
   unstripped_exe = os.path.join(build_dir, 'exe.unstripped', executable_name)
   # We cannot run the unstripped binaries directly when coverage is enabled.
   if IsLinux() and os.path.exists(unstripped_exe) and not coverage:
@@ -124,13 +124,16 @@ def BuildEngineExecutableCommand(build_dir, executable_name, flags=[], coverage=
     test_command = [ coverage_script ] + coverage_flags + updated_flags
   else:
     test_command = [ executable ] + flags
+    if gtest:
+      gtest_parallel = os.path.join(buildroot_dir, 'third_party', 'gtest-parallel', 'gtest-parallel')
+      test_command = ['python', gtest_parallel] + test_command
 
   return test_command
 
 
 def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
                         cwd=buildroot_dir, forbidden_output=[], expect_failure=False, coverage=False,
-                        extra_env={}):
+                        extra_env={}, gtest=False):
   if filter is not None and executable_name not in filter:
     print('Skipping %s due to filter.' % executable_name)
     return
@@ -147,7 +150,7 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[],
   print('Running %s in %s' % (executable_name, cwd))
 
   test_command = BuildEngineExecutableCommand(
-    build_dir, executable_name, flags=flags, coverage=coverage,
+    build_dir, executable_name, flags=flags, coverage=coverage, gtest=gtest,
   )
 
   if not env:
@@ -218,80 +221,87 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
     "--gtest_shuffle",
   ]
 
-  RunEngineExecutable(build_dir, 'client_wrapper_glfw_unittests', filter, shuffle_flags, coverage=coverage)
+  repeat_flags = [
+    "--repeat=2",
+  ]
 
-  RunEngineExecutable(build_dir, 'common_cpp_core_unittests', filter, shuffle_flags, coverage=coverage)
+  def make_test(name, flags=repeat_flags, extra_env={}):
+    return (name, flags, extra_env)
 
-  RunEngineExecutable(build_dir, 'common_cpp_unittests', filter, shuffle_flags, coverage=coverage)
+  unittests = [
+    make_test('client_wrapper_glfw_unittests'),
+    make_test('client_wrapper_unittests'),
+    make_test('common_cpp_core_unittests'),
+    make_test('common_cpp_unittests'),
+    make_test('dart_plugin_registrant_unittests'),
+    make_test('display_list_rendertests'),
+    make_test('display_list_unittests'),
+    make_test('embedder_proctable_unittests'),
+    make_test('embedder_unittests'),
+    make_test('fml_unittests', flags=[ fml_unittests_filter ] + repeat_flags),
+    make_test('no_dart_plugin_registrant_unittests'),
+    make_test('runtime_unittests'),
+    make_test('testing_unittests'),
+    make_test('tonic_unittests'),
+    # The image release unit test can take a while on slow machines.
+    make_test('ui_unittests', flags=repeat_flags + ['--timeout=90']),
+  ]
 
-  RunEngineExecutable(build_dir, 'client_wrapper_unittests', filter, shuffle_flags, coverage=coverage)
-
-  RunEngineExecutable(build_dir, 'embedder_unittests', filter, shuffle_flags, coverage=coverage)
-
-  RunEngineExecutable(build_dir, 'embedder_proctable_unittests', filter, shuffle_flags, coverage=coverage)
+  if not IsWindows():
+    unittests += [
+      # https://github.com/google/googletest/issues/2490
+      make_test('android_external_view_embedder_unittests'),
+      make_test('jni_unittests'),
+      make_test('platform_view_android_delegate_unittests'),
+      # https://github.com/flutter/flutter/issues/36295
+      make_test('shell_unittests'),
+    ]
 
   if IsWindows():
-    RunEngineExecutable(build_dir, 'flutter_windows_unittests', filter, shuffle_flags, coverage=coverage)
+    unittests += [
+      # The accessibility library only supports Mac and Windows.
+      make_test('accessibility_unittests'),
+      make_test('client_wrapper_windows_unittests'),
+      make_test('flutter_windows_unittests'),
+    ]
 
-    RunEngineExecutable(build_dir, 'client_wrapper_windows_unittests', filter, shuffle_flags, coverage=coverage)
+  # These unit-tests are Objective-C and can only run on Darwin.
+  if IsMac():
+    unittests += [
+      # The accessibility library only supports Mac and Windows.
+      make_test('accessibility_unittests'),
+      make_test('flutter_channels_unittests'),
+    ]
 
-  flow_flags = ['--gtest_filter=-PerformanceOverlayLayer.Gold']
   if IsLinux():
     flow_flags = [
       '--golden-dir=%s' % golden_dir,
       '--font-file=%s' % roboto_font_path,
     ]
-  RunEngineExecutable(build_dir, 'flow_unittests', filter, flow_flags + shuffle_flags, coverage=coverage)
-
-  RunEngineExecutable(build_dir, 'fml_unittests', filter, [ fml_unittests_filter ] + shuffle_flags)
-
-  RunEngineExecutable(build_dir, 'display_list_unittests', filter, shuffle_flags)
-
-  RunEngineExecutable(build_dir, 'display_list_rendertests', filter, shuffle_flags)
-
-  RunEngineExecutable(build_dir, 'runtime_unittests', filter, shuffle_flags, coverage=coverage)
-
-  RunEngineExecutable(build_dir, 'tonic_unittests', filter, shuffle_flags, coverage=coverage)
-
-  RunEngineExecutable(build_dir, 'no_dart_plugin_registrant_unittests', filter, shuffle_flags, coverage=coverage)
-
-  RunEngineExecutable(build_dir, 'dart_plugin_registrant_unittests', filter, shuffle_flags, coverage=coverage)
-
-  if not IsWindows():
-    # https://github.com/flutter/flutter/issues/36295
-    RunEngineExecutable(build_dir, 'shell_unittests', filter, shuffle_flags, coverage=coverage)
-    # https://github.com/google/googletest/issues/2490
-    RunEngineExecutable(build_dir, 'android_external_view_embedder_unittests', filter, shuffle_flags, coverage=coverage)
-    RunEngineExecutable(build_dir, 'jni_unittests', filter, shuffle_flags, coverage=coverage)
-    RunEngineExecutable(build_dir, 'platform_view_android_delegate_unittests', filter, shuffle_flags, coverage=coverage)
-
-  # The image release unit test can take a while on slow machines.
-  RunEngineExecutable(build_dir, 'ui_unittests', filter, shuffle_flags + ['--timeout=90'], coverage=coverage)
-
-  RunEngineExecutable(build_dir, 'testing_unittests', filter, shuffle_flags, coverage=coverage)
-
-  # The accessibility library only supports Mac and Windows.
-  if IsMac() or IsWindows():
-    RunEngineExecutable(build_dir, 'accessibility_unittests', filter, shuffle_flags, coverage=coverage)
-
-  # These unit-tests are Objective-C and can only run on Darwin.
-  if IsMac():
-    RunEngineExecutable(build_dir, 'flutter_channels_unittests', filter, shuffle_flags, coverage=coverage)
-    RunEngineExecutable(build_dir, 'flutter_desktop_darwin_unittests', filter, shuffle_flags, coverage=coverage)
-
-  # https://github.com/flutter/flutter/issues/36296
-  if IsLinux():
     icu_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
-    RunEngineExecutable(build_dir, 'txt_unittests', filter, icu_flags + shuffle_flags, coverage=coverage)
+    unittests += [
+      make_test('flow_unittests', flags=repeat_flags + ['--'] + flow_flags),
+      make_test('flutter_glfw_unittests'),
+      make_test('flutter_linux_unittests', extra_env={'G_DEBUG': 'fatal-criticals'}),
+      # https://github.com/flutter/flutter/issues/36296
+      make_test('txt_unittests', flags=repeat_flags + ['--'] + icu_flags),
+    ]
+  else:
+    flow_flags = ['--gtest_filter=-PerformanceOverlayLayer.Gold']
+    unittests += [
+      make_test('flow_unittests', flags=repeat_flags + flow_flags),
+    ]
 
-  if IsLinux():
-    gtk_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
-    RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, shuffle_flags, coverage=coverage,
-                        extra_env={'G_DEBUG': 'fatal-criticals'})
-    RunEngineExecutable(build_dir, 'flutter_glfw_unittests', filter, shuffle_flags, coverage=coverage)
+  for test, flags, extra_env in unittests:
+    RunEngineExecutable(build_dir, test, filter, flags, coverage=coverage,
+                        extra_env=extra_env, gtest=True)
 
-  # Impeller tests are only supported on macOS for now.
   if IsMac():
+    # flutter_desktop_darwin_unittests uses global state that isn't handled
+    # correctly by gtest-parallel.
+    # https://github.com/flutter/flutter/issues/104789
+    RunEngineExecutable(build_dir, 'flutter_desktop_darwin_unittests', filter, shuffle_flags, coverage=coverage)
+    # Impeller tests are only supported on macOS for now.
     RunEngineExecutable(build_dir, 'impeller_unittests', filter, shuffle_flags, coverage=coverage)
 
 
