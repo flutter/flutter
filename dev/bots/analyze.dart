@@ -208,7 +208,7 @@ Future<void> run(List<String> arguments) async {
 
 FeatureSet _parsingFeatureSet() => FeatureSet.fromEnableFlags2(
     sdkLanguageVersion: Version.parse('2.17.0-0'),
-    flags: <String>['super-parameters']);
+    flags: <String>['super-parameters', 'enhanced-enums']);
 
 _Line _getLine(ParseStringResult parseResult, int offset) {
   final int lineNumber =
