@@ -10,44 +10,45 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const SampleApp());
+void main() => runApp(const MenuBarApp());
 
 enum MenuSelection {
   about('About'),
-  showMessage('ShowMessage'),
+  showMessage('Show Message'),
+  hideMessage('Hide Message'),
   colorMenu('Color Menu'),
-  colorRed('Red'),
-  colorGreen('Green'),
-  colorBlue('Blue'),
+  colorRed('Red Background'),
+  colorGreen('Green Background'),
+  colorBlue('Blue Background'),
   quit('Quit');
 
   const MenuSelection(this.label);
   final String label;
 }
 
-class SampleApp extends StatelessWidget {
-  const SampleApp({super.key});
+class MenuBarApp extends StatelessWidget {
+  const MenuBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'MenuBar Sample',
-      home: Scaffold(body: MyMenuBarApp()),
+      home: Scaffold(body: MyMenuBar()),
     );
   }
 }
 
-class MyMenuBarApp extends StatefulWidget {
-  const MyMenuBarApp({super.key});
+class MyMenuBar extends StatefulWidget {
+  const MyMenuBar({super.key});
 
   @override
-  State<MyMenuBarApp> createState() => _MyMenuBarAppState();
+  State<MyMenuBar> createState() => _MyMenuBarState();
 }
 
-class _MyMenuBarAppState extends State<MyMenuBarApp> {
-  bool get showMessage => _showMessage;
+class _MyMenuBarState extends State<MyMenuBar> {
+  bool get showingMessage => _showMessage;
   bool _showMessage = false;
-  set showMessage(bool value) {
+  set showingMessage(bool value) {
     if (_showMessage != value) {
       setState(() {
         _showMessage = value;
@@ -75,7 +76,10 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
         );
         break;
       case MenuSelection.showMessage:
-        showMessage = !showMessage;
+        showingMessage = true;
+        break;
+      case MenuSelection.hideMessage:
+        showingMessage = false;
         break;
       case MenuSelection.quit:
         exit(0);
@@ -101,17 +105,15 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
           menus: <PlatformMenu>[
             MenuBarMenu(
               autofocus: true,
-              label: 'Test App',
+              label: 'Menu App',
               menus: <MenuItem>[
                 MenuBarItem(
                   label: MenuSelection.about.label,
                   onSelected: () => _activate(MenuSelection.about),
                 ),
                 MenuBarItem(
-                  label: showMessage ? 'Hide Message' : 'Show Message',
-                  onSelected: () {
-                    showMessage = !showMessage;
-                  },
+                  label: showingMessage ? MenuSelection.hideMessage.label : MenuSelection.showMessage.label,
+                  onSelected: () => _activate(showingMessage ? MenuSelection.hideMessage : MenuSelection.showMessage),
                 ),
                 MenuBarMenu(
                   label: 'Background Color',
@@ -119,18 +121,18 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                     MenuItemGroup(members: <MenuItem>[
                       MenuBarItem(
                         onSelected: () => _activate(MenuSelection.colorRed),
-                        label: 'Red Background',
+                        label: MenuSelection.colorRed.label,
                         shortcut: const SingleActivator(LogicalKeyboardKey.keyR, control: true),
                       ),
                       MenuBarItem(
                         onSelected: () => _activate(MenuSelection.colorGreen),
-                        label: 'Green Background',
+                        label: MenuSelection.colorGreen.label,
                         shortcut: const SingleActivator(LogicalKeyboardKey.keyG, control: true),
                       ),
                     ]),
                     MenuBarItem(
                       onSelected: () => _activate(MenuSelection.colorBlue),
-                      label: 'Blue Background',
+                      label: MenuSelection.colorBlue.label,
                       shortcut: const SingleActivator(LogicalKeyboardKey.keyB, control: true),
                     ),
                   ],
@@ -139,7 +141,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                 if (!kIsWeb)
                   MenuBarItem(
                     onSelected: () => _activate(MenuSelection.quit),
-                    label: 'Quit',
+                    label: MenuSelection.quit.label,
                   ),
               ],
             ),
@@ -149,7 +151,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
           child: Container(
             alignment: Alignment.center,
             color: backgroundColor,
-            child: Text(showMessage ? 'Message' : 'Application Body'),
+            child: Text(showingMessage ? '"Talk less. Smile more." - A. Burr' : 'Application Body'),
           ),
         ),
       ],
