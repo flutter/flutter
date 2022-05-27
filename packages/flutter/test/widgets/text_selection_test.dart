@@ -80,19 +80,14 @@ void main() {
       selectionEnabled: selectionEnabled,
     );
 
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(delegate: delegate);
+
     await tester.pumpWidget(
       MaterialApp(
-        home: Builder(
-          builder: (BuildContext context) {
-            final TextSelectionGestureDetectorBuilder provider =
-                TextSelectionGestureDetectorBuilder(
-                  delegate: delegate,
-                );
-            return provider.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: FakeEditableText(key: editableTextKey),
-            );
-          },
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: FakeEditableText(key: editableTextKey),
         ),
       ),
     );
@@ -1320,6 +1315,10 @@ void main() {
 
     final ScrollController scrollController = ScrollController();
     const double kLineHeight = 14.0;
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(
+          delegate: delegate,
+        );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1328,28 +1327,20 @@ void main() {
           height: kLineHeight * 4,
           child: SingleChildScrollView(
             controller: scrollController,
-            child: Builder(
-              builder: (BuildContext context) {
-                final TextSelectionGestureDetectorBuilder provider =
-                    TextSelectionGestureDetectorBuilder(
-                      delegate: delegate,
-                    );
-                return provider.buildGestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  child: EditableText(
-                    key: editableTextKey,
-                    controller: controller,
-                    focusNode: FocusNode(),
-                    backgroundCursorColor: Colors.white,
-                    cursorColor: Colors.white,
-                    style: const TextStyle(),
-                    selectionControls: materialTextSelectionControls,
-                    // EditableText will expand to the full 8 line height and will
-                    // not scroll itself.
-                    maxLines: null,
-                  ),
-                );
-              },
+            child: provider.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: EditableText(
+                key: editableTextKey,
+                controller: controller,
+                focusNode: FocusNode(),
+                backgroundCursorColor: Colors.white,
+                cursorColor: Colors.white,
+                style: const TextStyle(),
+                selectionControls: materialTextSelectionControls,
+                // EditableText will expand to the full 8 line height and will
+                // not scroll itself.
+                maxLines: null,
+              ),
             ),
           ),
         ),
