@@ -1726,6 +1726,7 @@ class TextSelectionGestureDetectorBuilder {
     _dragStartScrollOffset = scrollableState == null
         ? 0.0
         : scrollableState.position.pixels;
+    print('justin dragstart $_dragStartScrollOffset');
 
     _dragStartViewportOffset = renderEditable.offset.pixels;
   }
@@ -1761,6 +1762,8 @@ class TextSelectionGestureDetectorBuilder {
         0.0,
         currentScrollDy - _dragStartScrollOffset,
       );
+      //print('justin dragupdate this number bounces: $currentScrollDy');
+      print('justin dragupdate this number bounces: $currentScrollDy');
       return renderEditable.selectPositionAt(
         from: startDetails.globalPosition - editableOffset - scrollableOffset,
         to: updateDetails.globalPosition,

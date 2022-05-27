@@ -2605,6 +2605,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
 
+      print('justin scroll it to show ${targetOffset.rect}');
       if (withAnimation) {
         _scrollController.animateTo(
           targetOffset.offset,
@@ -2987,6 +2988,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ? _value.selection != value.selection
       : _value != value;
     if (shouldShowCaret) {
+      print('justin userUpdaetTeext, is this what scrolls?');
       _scheduleShowCaretOnScreen(withAnimation: true);
     }
 
@@ -3006,6 +3008,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void bringIntoView(TextPosition position) {
+    print('justin bringinttoview');
     final Rect localRect = renderEditable.getLocalRectForCaret(position);
     final RevealedOffset targetOffset = _getOffsetToRevealCaret(localRect);
 

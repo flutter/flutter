@@ -1346,6 +1346,7 @@ void main() {
         ),
       ),
     );
+    print('justin start test');
 
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, -1);
@@ -1362,6 +1363,8 @@ void main() {
     final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
     addTearDown(gesture.removePointer);
     await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, (controller.text.length / 2).floor()));
+    await tester.pump();
     await gesture.moveTo(textOffsetToPosition(tester, controller.text.length));
     await tester.pump();
     await gesture.up();
@@ -1370,6 +1373,7 @@ void main() {
     expect(controller.selection.isCollapsed, isFalse);
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, controller.text.length);
+    // TODO(justinmc): This fails... I think its trying ot animate to top and not bototm? Is this related to the other issue on Github for this?
     expect(scrollController.position.pixels, kLineHeight* 8);
   });
   // TODO(justinmc): This test should work on all platforms, right?
