@@ -176,6 +176,21 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, CanDrawWithOddPathWinding) {
+  flutter::DisplayListBuilder builder;
+  builder.setColor(SK_ColorRED);
+  builder.setStyle(flutter::DlDrawStyle::kFill);
+
+  builder.translate(300, 300);
+  SkPath path;
+  path.setFillType(SkPathFillType::kEvenOdd);
+  path.addCircle(0, 0, 100);
+  path.addCircle(0, 0, 50);
+  builder.drawPath(path);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
   flutter::DisplayListBuilder builder;
