@@ -59,8 +59,8 @@ import 'framework.dart';
 /// class ABModel extends InheritedModel<String> {
 ///   ABModel({ this.a, this.b, Widget child }) : super(child: child);
 ///
-///   final int a;
-///   final int b;
+///   final int? a;
+///   final int? b;
 ///
 ///   @override
 ///   bool updateShouldNotify(ABModel old) {
