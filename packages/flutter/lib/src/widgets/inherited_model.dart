@@ -25,7 +25,6 @@ import 'framework.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ml5uefGgkaA}
 ///
-/// {@tool snippet}
 /// Widgets create a dependency on an [InheritedModel] with a static method:
 /// [InheritedModel.inheritFrom]. This method's `context` parameter
 /// defines the subtree that will be rebuilt when the model changes.
@@ -34,15 +33,12 @@ import 'framework.dart';
 ///
 /// ```dart
 /// class MyModel extends InheritedModel<String> {
-///   const MyModel({super.key, required super.child});
-///
 ///   // ...
 ///   static MyModel? of(BuildContext context, String aspect) {
 ///     return InheritedModel.inheritFrom<MyModel>(context, aspect: aspect);
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// Calling `MyModel.of(context, 'foo')` means that `context` should only
 /// be rebuilt when the `foo` aspect of `MyModel` changes. If the aspect
