@@ -6,14 +6,14 @@
 
 #pragma mark - Basic message channel
 
-static NSString* const FlutterChannelBuffersChannel = @"dev.flutter/channel-buffers";
+static NSString* const kFlutterChannelBuffersChannel = @"dev.flutter/channel-buffers";
 
 static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenger,
                                 NSString* channel,
                                 NSInteger newSize) {
   NSString* messageString = [NSString stringWithFormat:@"resize\r%@\r%@", channel, @(newSize)];
   NSData* message = [messageString dataUsingEncoding:NSUTF8StringEncoding];
-  [binaryMessenger sendOnChannel:FlutterChannelBuffersChannel message:message];
+  [binaryMessenger sendOnChannel:kFlutterChannelBuffersChannel message:message];
 }
 
 static FlutterBinaryMessengerConnection SetMessageHandler(
