@@ -10,4 +10,8 @@ Context::~Context() = default;
 
 Context::Context() = default;
 
+bool Context::HasThreadingRestrictions() const {
+  return false;
+}
+
 }  // namespace impeller

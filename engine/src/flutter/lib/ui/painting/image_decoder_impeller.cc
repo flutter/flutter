@@ -53,15 +53,11 @@ static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
   return std::nullopt;
 }
 
-static sk_sp<DlImage> DecompressAndUploadTexture(
-    std::shared_ptr<impeller::Context> context,
-    ImageDescriptor* descriptor,
-    SkISize target_size,
-    std::string label) {
-  TRACE_EVENT0("flutter", __FUNCTION__);
-
-  if (!context || !descriptor) {
-    FML_DLOG(ERROR) << "Invalid context or descriptor.";
+static std::shared_ptr<SkBitmap> DecompressTexture(ImageDescriptor* descriptor,
+                                                   SkISize target_size) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+  if (!descriptor) {
+    FML_DLOG(ERROR) << "Invalid descriptor.";
     return nullptr;
   }
 
@@ -84,15 +80,31 @@ static sk_sp<DlImage> DecompressAndUploadTexture(
     return nullptr;
   }
 
-  SkBitmap bitmap;
-  if (!bitmap.tryAllocPixels(image_info)) {
+  auto bitmap = std::make_shared<SkBitmap>();
+  if (!bitmap->tryAllocPixels(image_info)) {
     FML_DLOG(ERROR)
         << "Could not allocate intermediate for image decompression.";
     return nullptr;
   }
 
-  if (!descriptor->get_pixels(bitmap.pixmap())) {
+  if (!descriptor->get_pixels(bitmap->pixmap())) {
     FML_DLOG(ERROR) << "Could not decompress image.";
+    return nullptr;
+  }
+
+  return bitmap;
+}
+
+static sk_sp<DlImage> UploadTexture(std::shared_ptr<impeller::Context> context,
+                                    std::shared_ptr<SkBitmap> bitmap) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+  if (!context || !bitmap) {
+    return nullptr;
+  }
+  const auto image_info = bitmap->info();
+  const auto pixel_format = ToPixelFormat(image_info.colorType());
+  if (!pixel_format) {
+    FML_DLOG(ERROR) << "Pixel format unsupported by Impeller.";
     return nullptr;
   }
 
@@ -108,13 +120,13 @@ static sk_sp<DlImage> DecompressAndUploadTexture(
   }
 
   if (!texture->SetContents(
-          reinterpret_cast<const uint8_t*>(bitmap.getAddr(0, 0)),
+          reinterpret_cast<const uint8_t*>(bitmap->getAddr(0, 0)),
           texture_descriptor.GetByteSizeOfBaseMipLevel())) {
     FML_DLOG(ERROR) << "Could not copy contents into Impeller texture.";
     return nullptr;
   }
 
-  texture->SetLabel(label.c_str());
+  texture->SetLabel(impeller::SPrintF("ui.Image(%p)", texture.get()).c_str());
 
   return impeller::DlImageImpeller::Make(std::move(texture));
 }
@@ -123,30 +135,47 @@ static sk_sp<DlImage> DecompressAndUploadTexture(
 void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
                                   uint32_t target_width,
                                   uint32_t target_height,
-                                  const ImageResult& result) {
+                                  const ImageResult& p_result) {
   FML_DCHECK(descriptor);
-  FML_DCHECK(result);
+  FML_DCHECK(p_result);
 
+  // Wrap the result callback so that it can be invoked from any thread.
   auto raw_descriptor = descriptor.get();
   raw_descriptor->AddRef();
-  concurrent_task_runner_->PostTask(
-      [raw_descriptor,                                             //
-       context = context_.get(),                                   //
-       target_size = SkISize::Make(target_width, target_height),   //
-       label = impeller::SPrintF("ui.Image %zu", label_count_++),  //
-       ui_runner = runners_.GetUITaskRunner(),                     //
-       result                                                      //
-  ]() {
-        auto image = DecompressAndUploadTexture(context,         //
-                                                raw_descriptor,  //
-                                                target_size,     //
-                                                label            //
-        );
+  ImageResult result = [p_result,                               //
+                        raw_descriptor,                         //
+                        ui_runner = runners_.GetUITaskRunner()  //
+  ](auto image) {
+    ui_runner->PostTask([raw_descriptor, p_result, image]() {
+      raw_descriptor->Release();
+      p_result(std::move(image));
+    });
+  };
 
-        ui_runner->PostTask([raw_descriptor, image, result]() {
-          raw_descriptor->Release();
-          result(image);
-        });
+  concurrent_task_runner_->PostTask(
+      [raw_descriptor,                                            //
+       context = context_.get(),                                  //
+       target_size = SkISize::Make(target_width, target_height),  //
+       io_runner = runners_.GetIOTaskRunner(),                    //
+       result                                                     //
+  ]() {
+        // Always decompress on the concurrent runner.
+        auto bitmap = DecompressTexture(raw_descriptor, target_size);
+        if (!bitmap) {
+          result(nullptr);
+          return;
+        }
+        auto upload_texture_and_invoke_result = [result, context, bitmap]() {
+          result(UploadTexture(context, bitmap));
+        };
+        // Depending on whether the context has threading restrictions, stay on
+        // the concurrent runner to perform texture upload or move to an IO
+        // runner.
+        if (context->HasThreadingRestrictions()) {
+          io_runner->PostTask(upload_texture_and_invoke_result);
+        } else {
+          upload_texture_and_invoke_result();
+        }
       });
 }
 
