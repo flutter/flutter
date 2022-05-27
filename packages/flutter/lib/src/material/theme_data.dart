@@ -1133,53 +1133,61 @@ class ThemeData with Diagnosticable {
 
   /// A temporary flag used to opt-in to Material 3 features.
   ///
-  /// If true, then components that have been migrated to Material 3 will
+  /// If true, then widgets that have been migrated to Material 3 will
   /// use new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
-  /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
-  /// some properties will get special defaults. However, just copying a [ThemeData]
-  /// with [useMaterial3] set to true will not change any of these properties in the
-  /// resulting [ThemeData]. These properties are:
-  /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
-  ///
-  /// | Property        | Material 3 default           | Fallback default          |
-  /// | :-------------- | :--------------------------- | :------------------------ |
-  /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
-  /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
-  ///
-  /// \* if and only if the target platform is Android and the app is not
-  /// running on the web, otherwise it will fallback to [InkRipple].
-  ///
   /// During the migration to Material 3, turning this on may yield
-  /// inconsistent look and feel in your app. Some components will be migrated
-  /// before others and typography changes will be coming in stages.
+  /// inconsistent look and feel in your app as some widgets are migrated
+  /// while others have yet to be.
   ///
-  /// [useMaterial3] defaults to false. After all the migrated components
+  /// Defaults to false. After all the migrated widgets
   /// have landed on stable, we will change this to be true by default. After
   /// that change has landed on stable, we will deprecate this flag and remove
   /// all uses of it. Everything will use the Material 3 look and feel at
   /// that point.
   ///
-  /// Components that have been migrated to Material 3 are:
+  /// This flag affects components and styles.
   ///
-  ///   * [AlertDialog]
-  ///   * [AppBar]
-  ///   * [Card]
-  ///   * [Dialog]
-  ///   * [ElevatedButton]
-  ///   * [FloatingActionButton]
-  ///   * [Material]
-  ///   * [NavigationBar] (new, replacing [BottomNavigationBar])
-  ///   * [NavigationRail]
-  ///   * [OutlinedButton]
-  ///   * [StretchingOverscrollIndicator], replacing the
-  ///     [GlowingOverscrollIndicator]
-  ///   * [TextButton]
+  /// ## Components
+  ///   * [Common buttons](https://m3.material.io/components/buttons): [TextButton], [OutlinedButton], [ElevatedButton]
+  ///   * [FAB](https://m3.material.io/components/floating-action-button): [FloatingActionButton]
+  ///   * [Extended FAB](https://m3.material.io/components/extended-fab): [FloatingActionButton.extended]
+  ///   * [Cards](https://m3.material.io/components/cards): [Card]
+  ///   * [Dialogs](https://m3.material.io/components/dialogs): [Dialog], [AlertDialog]
+  ///   * Lists: [ListTile]
+  ///   * [Navigation bar](https://m3.material.io/components/navigation-bar): [NavigationBar] (new, replacing [BottomNavigationBar])
+  ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
+  ///   * [Top app bar](https://m3.material.io/components/top-app-bar): [AppBar]
+  ///
+  /// ## Styles
+  ///   * [Color](https://m3.material.io/styles/color/the-color-system): [ColorScheme], [Material]
+  ///   * [Shape](https://m3.material.io/styles/shape)
+  ///   * [Typography](https://m3.material.io/styles/typography): `typography` (see table below)
+  ///
+  /// In addition, this flag enables features introduced in Android 12.
+  ///   * Stretch overscroll: [MaterialScrollBehavior]
+  ///   * Ripple: `splashFactory` (see table below)
+  ///
+  /// ## Defaults
+  /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
+  /// some properties will get updated defaults:
+  /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
+  ///
+  /// | Property        | Material 3 default           | Material 2 default        |
+  /// | :-------------- | :--------------------------- | :------------------------ |
+  /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
+  /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
+  ///
+  /// \* if the target platform is Android and the app is not
+  /// running on the web, otherwise it will fallback to [InkRipple].
+  ///
+  /// Please note that [ThemeData.copyWith] with [useMaterial3] set to true will
+  /// not change any of these properties in the resulting [ThemeData].
   ///
   /// See also:
   ///
-  ///   * [Material Design 3](https://m3.material.io/).
+  ///   * [Material 3 specification](https://m3.material.io/).
   final bool useMaterial3;
 
   /// The density value for specifying the compactness of various UI components.
