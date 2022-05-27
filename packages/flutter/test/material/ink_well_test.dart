@@ -1513,4 +1513,47 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
   });
+
+  testWidgets('InkWell dispose statesController', (WidgetTester tester) async {
+    int tapCount = 0;
+    Widget buildFrame(MaterialStatesController? statesController) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: InkWell(
+              statesController: statesController,
+              onTap: () { tapCount += 1; },
+              child: const Text('inkwell'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final MaterialStatesController controller = MaterialStatesController();
+    int pressedCount = 0;
+    controller.addListener(() {
+      if (controller.value.contains(MaterialState.pressed)) {
+        pressedCount += 1;
+      }
+    });
+
+    await tester.pumpWidget(buildFrame(controller));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 1);
+    expect(pressedCount, 1);
+
+    await tester.pumpWidget(buildFrame(null));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 2);
+    expect(pressedCount, 1);
+
+    await tester.pumpWidget(buildFrame(controller));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 3);
+    expect(pressedCount, 2);
+  });
 }

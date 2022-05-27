@@ -71,6 +71,7 @@ class ElevatedButton extends ButtonStyleButton {
     super.focusNode,
     super.autofocus = false,
     super.clipBehavior = Clip.none,
+    super.statesController,
     required super.child,
   });
 
