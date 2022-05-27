@@ -16,23 +16,7 @@ namespace flutter {
 
 static constexpr const char* kVsyncFlowName = "VsyncFlow";
 
-#if defined(OS_FUCHSIA)
-//  ________  _________  ________  ________
-// |\   ____\|\___   ___\\   __  \|\   __  \
-// \ \  \___|\|___ \  \_\ \  \|\  \ \  \|\  \
-//  \ \_____  \   \ \  \ \ \  \\\  \ \   ____\
-//   \|____|\  \   \ \  \ \ \  \\\  \ \  \___|
-//     ____\_\  \   \ \__\ \ \_______\ \__\
-//    |\_________\   \|__|  \|_______|\|__|
-//    \|_________|
-//
-// Fuchsia benchmarks depend on this trace event's name.  Please do not change
-// it without checking that the changes are compatible with Fuchsia benchmarks
-// first!
-static constexpr const char* kVsyncTraceName = "vsync callback";
-#else
 static constexpr const char* kVsyncTraceName = "VsyncProcessCallback";
-#endif
 
 VsyncWaiter::VsyncWaiter(TaskRunners task_runners)
     : task_runners_(std::move(task_runners)) {}
