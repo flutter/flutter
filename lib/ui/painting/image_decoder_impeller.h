@@ -34,7 +34,6 @@ class ImageDecoderImpeller final : public ImageDecoder {
  private:
   using FutureContext = std::shared_future<std::shared_ptr<impeller::Context>>;
   FutureContext context_;
-  size_t label_count_ = 1u;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageDecoderImpeller);
 };
