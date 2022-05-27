@@ -1183,6 +1183,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    bool needsFullRestart = true,
   });
 
   @override
