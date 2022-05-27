@@ -45,6 +45,11 @@
 @property(nonatomic, readonly, nonnull) NSString* executableName;
 
 /**
+ * This just returns the NSPasteboard so that it can be mocked in the tests.
+ */
+@property(nonatomic, readonly, nonnull) NSPasteboard* pasteboard;
+
+/**
  * Informs the engine that the associated view controller's view size has changed.
  */
 - (void)updateWindowMetrics;

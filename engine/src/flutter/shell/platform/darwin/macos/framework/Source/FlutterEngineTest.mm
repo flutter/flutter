@@ -520,6 +520,42 @@ TEST_F(FlutterEngineTest, MessengerCleanupConnectionWorks) {
   EXPECT_EQ(record, 21);
 }
 
+TEST(FlutterEngine, HasStringsWhenPasteboardEmpty) {
+  id engineMock = CreateMockFlutterEngine(nil);
+
+  // Call hasStrings and expect it to be false.
+  __block bool calledAfterClear = false;
+  __block bool valueAfterClear;
+  FlutterResult resultAfterClear = ^(id result) {
+    calledAfterClear = true;
+    NSNumber* valueNumber = [result valueForKey:@"value"];
+    valueAfterClear = [valueNumber boolValue];
+  };
+  FlutterMethodCall* methodCallAfterClear =
+      [FlutterMethodCall methodCallWithMethodName:@"Clipboard.hasStrings" arguments:nil];
+  [engineMock handleMethodCall:methodCallAfterClear result:resultAfterClear];
+  EXPECT_TRUE(calledAfterClear);
+  EXPECT_FALSE(valueAfterClear);
+}
+
+TEST(FlutterEngine, HasStringsWhenPasteboardFull) {
+  id engineMock = CreateMockFlutterEngine(@"some string");
+
+  // Call hasStrings and expect it to be true.
+  __block bool called = false;
+  __block bool value;
+  FlutterResult result = ^(id result) {
+    called = true;
+    NSNumber* valueNumber = [result valueForKey:@"value"];
+    value = [valueNumber boolValue];
+  };
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"Clipboard.hasStrings" arguments:nil];
+  [engineMock handleMethodCall:methodCall result:result];
+  EXPECT_TRUE(called);
+  EXPECT_TRUE(value);
+}
+
 }  // namespace flutter::testing
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)

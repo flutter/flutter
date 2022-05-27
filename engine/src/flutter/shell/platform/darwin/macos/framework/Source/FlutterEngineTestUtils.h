@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 
+#import <OCMock/OCMock.h>
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "gtest/gtest.h"
 
@@ -30,5 +31,9 @@ class FlutterEngineTest : public ::testing::Test {
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEngineTest);
 };
+
+// Returns a mock FlutterEngine that is able to work in environments
+// without a real pasteboard.
+id CreateMockFlutterEngine(NSString* pasteboardString);
 
 }  // namespace flutter::testing
