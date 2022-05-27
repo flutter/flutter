@@ -13,12 +13,12 @@
 namespace flutter {
 
 // Native mac notifications fired. These notifications are not publicly documented.
-static NSString* const AccessibilityLoadCompleteNotification = @"AXLoadComplete";
-static NSString* const AccessibilityInvalidStatusChangedNotification = @"AXInvalidStatusChanged";
-static NSString* const AccessibilityLiveRegionCreatedNotification = @"AXLiveRegionCreated";
-static NSString* const AccessibilityLiveRegionChangedNotification = @"AXLiveRegionChanged";
-static NSString* const AccessibilityExpandedChanged = @"AXExpandedChanged";
-static NSString* const AccessibilityMenuItemSelectedNotification = @"AXMenuItemSelected";
+static NSString* const kAccessibilityLoadCompleteNotification = @"AXLoadComplete";
+static NSString* const kAccessibilityInvalidStatusChangedNotification = @"AXInvalidStatusChanged";
+static NSString* const kAccessibilityLiveRegionCreatedNotification = @"AXLiveRegionCreated";
+static NSString* const kAccessibilityLiveRegionChangedNotification = @"AXLiveRegionChanged";
+static NSString* const kAccessibilityExpandedChanged = @"AXExpandedChanged";
+static NSString* const kAccessibilityMenuItemSelectedNotification = @"AXMenuItemSelected";
 
 AccessibilityBridgeMacDelegate::AccessibilityBridgeMacDelegate(
     __weak FlutterEngine* flutter_engine,
@@ -81,14 +81,14 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
       break;
     case ui::AXEventGenerator::Event::LOAD_COMPLETE:
       events.push_back({
-          .name = AccessibilityLoadCompleteNotification,
+          .name = kAccessibilityLoadCompleteNotification,
           .target = native_node,
           .user_info = nil,
       });
       break;
     case ui::AXEventGenerator::Event::INVALID_STATUS_CHANGED:
       events.push_back({
-          .name = AccessibilityInvalidStatusChangedNotification,
+          .name = kAccessibilityInvalidStatusChangedNotification,
           .target = native_node,
           .user_info = nil,
       });
@@ -197,14 +197,14 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
     }
     case ui::AXEventGenerator::Event::LIVE_REGION_CREATED:
       events.push_back({
-          .name = AccessibilityLiveRegionCreatedNotification,
+          .name = kAccessibilityLiveRegionCreatedNotification,
           .target = native_node,
           .user_info = nil,
       });
       break;
     case ui::AXEventGenerator::Event::ALERT: {
       events.push_back({
-          .name = AccessibilityLiveRegionCreatedNotification,
+          .name = kAccessibilityLiveRegionCreatedNotification,
           .target = native_node,
           .user_info = nil,
       });
@@ -242,7 +242,7 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
       }
       // Uses native VoiceOver support for live regions.
       events.push_back({
-          .name = AccessibilityLiveRegionChangedNotification,
+          .name = kAccessibilityLiveRegionChangedNotification,
           .target = native_node,
           .user_info = nil,
       });
@@ -261,7 +261,7 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
           ax_node.data().role == ax::mojom::Role::kTreeItem) {
         mac_notification = NSAccessibilityRowExpandedNotification;
       } else {
-        mac_notification = AccessibilityExpandedChanged;
+        mac_notification = kAccessibilityExpandedChanged;
       }
       events.push_back({
           .name = mac_notification,
@@ -276,7 +276,7 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
           ax_node.data().role == ax::mojom::Role::kTreeItem) {
         mac_notification = NSAccessibilityRowCollapsedNotification;
       } else {
-        mac_notification = AccessibilityExpandedChanged;
+        mac_notification = kAccessibilityExpandedChanged;
       }
       events.push_back({
           .name = mac_notification,
@@ -287,7 +287,7 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
     }
     case ui::AXEventGenerator::Event::MENU_ITEM_SELECTED:
       events.push_back({
-          .name = AccessibilityMenuItemSelectedNotification,
+          .name = kAccessibilityMenuItemSelectedNotification,
           .target = native_node,
           .user_info = nil,
       });
