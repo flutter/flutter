@@ -39,11 +39,6 @@ const String singleEsMessageArbFileString = '''
 {
   "title": "Título"
 }''';
-const String twoEsMessageArbFileString = '''
-{
-  "title": "Título",
-  "subtitle": "Subtitular"
-}''';
 const String singleZhMessageArbFileString = '''
 {
   "title": "标题"
@@ -789,7 +784,6 @@ void main() {
       expect(fs.file('/lib/l10n/bar_en.dart').readAsStringSync(), '''
 HEADER
 
-
 import 'bar.dart';
 
 /// The translations for English (`en`).
@@ -838,6 +832,65 @@ flutter:
               'flutter: generate flag turned on.',
         ),
       );
+    });
+
+    testWithoutContext('blank lines generated nicely', () async {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      // Test without headers.
+      generateLocalizations(
+        fileSystem: fs,
+        options: LocalizationOptions(
+          arbDirectory: Uri.directory(defaultL10nPathString),
+          outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
+          useSyntheticPackage: false,
+        ),
+        logger: BufferLogger.test(),
+        projectDir: fs.currentDirectory,
+        dependenciesDir: fs.currentDirectory,
+      );
+
+      expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
+import 'app_localizations.dart';
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get title => 'Title';
+}
+''');
+
+    // Test with headers.
+    generateLocalizations(
+      fileSystem: fs,
+      options: LocalizationOptions(
+        header: 'HEADER',
+        arbDirectory: Uri.directory(defaultL10nPathString),
+        outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
+        useSyntheticPackage: false,
+      ),
+      logger: BufferLogger.test(),
+      projectDir: fs.currentDirectory,
+      dependenciesDir: fs.currentDirectory,
+    );
+
+    expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
+HEADER
+
+import 'app_localizations.dart';
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get title => 'Title';
+}
+''');
     });
   });
 

@@ -236,7 +236,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -249,7 +248,7 @@ void main() {
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2');
-    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 5));
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
     expect(find.byType(CupertinoButton), findsNothing);
 
     // Paste it at the end.
@@ -432,6 +431,63 @@ void main() {
       expect(state.widget.cursorColor, cursorColor);
     },
   );
+
+  testWidgets('Text field drops selection color when losing focus', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103341.
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    final TextEditingController controller1 = TextEditingController();
+    const Color selectionColor = Colors.orange;
+    const Color cursorColor = Colors.red;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: DefaultSelectionStyle(
+            selectionColor: selectionColor,
+            cursorColor: cursorColor,
+            child: Column(
+              children: <Widget>[
+                CupertinoTextField(
+                  key: key1,
+                  controller: controller1,
+                ),
+                CupertinoTextField(key: key2),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const TextSelection selection = TextSelection(baseOffset: 0, extentOffset: 4);
+    final EditableTextState state1 = tester.state<EditableTextState>(find.byType(EditableText).first);
+    final EditableTextState state2 = tester.state<EditableTextState>(find.byType(EditableText).last);
+
+    await tester.tap(find.byKey(key1));
+    await tester.enterText(find.byKey(key1), 'abcd');
+    await tester.pump();
+
+    await tester.tap(find.byKey(key2));
+    await tester.enterText(find.byKey(key2), 'dcba');
+    await tester.pump();
+
+    // Focus and selection is active on first TextField, so the second TextFields
+    // selectionColor should be dropped.
+    await tester.tap(find.byKey(key1));
+    controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+    expect(controller1.selection, selection);
+    expect(state1.widget.selectionColor, selectionColor);
+    expect(state2.widget.selectionColor, null);
+
+    // Focus and selection is active on second TextField, so the first TextFields
+    // selectionColor should be dropped.
+    await tester.tap(find.byKey(key2));
+    await tester.pump();
+    expect(state1.widget.selectionColor, null);
+    expect(state2.widget.selectionColor, selectionColor);
+  });
 
   testWidgets(
     'multi-lined text fields are intrinsically taller no-strut',
@@ -2105,7 +2161,6 @@ void main() {
       pointer: 7,
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     expect(controller.value.selection, isNotNull);
@@ -2840,7 +2895,7 @@ void main() {
     // The selection doesn't move beyond the left handle. There's always at
     // least 1 char selected.
     expect(controller.selection.extentOffset, 5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -2870,7 +2925,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -2911,7 +2965,6 @@ void main() {
 
     // Drag from 'c' to 'g'.
     final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
@@ -3062,7 +3115,6 @@ void main() {
         textFieldPos,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(seconds: 2));
       await gesture.up();
       await tester.pump();
@@ -3096,7 +3148,6 @@ void main() {
         textEndPos,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -3514,7 +3565,7 @@ void main() {
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('when CupertinoTextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
@@ -5163,7 +5214,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
@@ -5260,7 +5310,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
@@ -5357,7 +5406,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 8);
@@ -5454,7 +5502,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 8);
@@ -5552,7 +5599,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -5606,4 +5652,156 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
+
+  group('Right click focus', () {
+    testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/103228
+      final FocusNode focusNode1 = FocusNode();
+      final FocusNode focusNode2 = FocusNode();
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Column(
+            children: <Widget>[
+              CupertinoTextField(
+                key: key1,
+                focusNode: focusNode1,
+              ),
+              CupertinoTextField(
+                key: key2,
+                focusNode: focusNode2,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Interact with the field to establish the input connection.
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key1)),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key2)),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isTrue);
+
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key1)),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+    });
+
+    testWidgets('Can right click to focus on previously selected word on Apple platforms', (WidgetTester tester) async {
+      final FocusNode focusNode1 = FocusNode();
+      final FocusNode focusNode2 = FocusNode();
+      final TextEditingController controller = TextEditingController(
+        text: 'first second',
+      );
+      final UniqueKey key1 = UniqueKey();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              CupertinoTextField(
+                key: key1,
+                controller: controller,
+                focusNode: focusNode1,
+              ),
+              Focus(
+                focusNode: focusNode2,
+                child: const Text('focusable'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Interact with the field to establish the input connection.
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key1)),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+
+      // Select the second word.
+      controller.selection = const TextSelection(
+        baseOffset: 6,
+        extentOffset: 12,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.isCollapsed, isFalse);
+      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.extentOffset, 12);
+
+      // Unfocus the first field.
+      focusNode2.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isTrue);
+
+      // Right click the second word in the first field, which is still selected
+      // even though the selection is not visible.
+      await tester.tapAt(
+        textOffsetToPosition(tester, 8),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.extentOffset, 12);
+
+      // Select everything.
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 12,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 12);
+
+      // Unfocus the first field.
+      focusNode2.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Right click the first word in the first field.
+      await tester.tapAt(
+        textOffsetToPosition(tester, 2),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 5);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  });
 }

@@ -322,10 +322,12 @@ class Typography with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Typography
         && other.black == black
         && other.white == white
@@ -729,7 +731,7 @@ class Typography with Diagnosticable {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _M3Typography {
   _M3Typography._();
 

@@ -9,51 +9,39 @@ import 'package:flutter/material.dart';
 void main() => runApp(const HeroApp());
 
 class HeroApp extends StatelessWidget {
-  const HeroApp({Key? key}) : super(key: key);
+  const HeroApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Hero Sample')),
-        body: const Center(
-          child: HeroExample(),
-        ),
-      ),
+    return const MaterialApp(
+      home: HeroExample(),
     );
   }
 }
 
 class HeroExample extends StatelessWidget {
-  const HeroExample({Key? key}) : super(key: key);
+  const HeroExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(
-          height: 20.0,
-        ),
-        ListTile(
-          leading: Hero(
-            tag: 'hero-rectangle',
-            child: _box(const Size(50, 50)),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Hero Sample')),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const SizedBox(height: 20.0),
+          ListTile(
+            leading: const Hero(
+              tag: 'hero-rectangle',
+              child: BoxWidget(size: Size(50.0, 50.0)),
+            ),
+            onTap: () => _gotoDetailsPage(context),
+            title: const Text(
+              'Tap on the icon to view hero animation transition.',
+            ),
           ),
-          onTap: () => _gotoDetailsPage(context),
-          title: const Text(
-            'Tap on the icon to view hero animation transition.',
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _box(Size size) {
-    return Container(
-      width: size.width,
-      height: size.height,
-      color: Colors.blue,
+        ],
+      ),
     );
   }
 
@@ -63,18 +51,28 @@ class HeroExample extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Second Page'),
         ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Hero(
-                tag: 'hero-rectangle',
-                child: _box(const Size(200, 200)),
-              ),
-            ],
+        body: const Center(
+          child: Hero(
+            tag: 'hero-rectangle',
+            child: BoxWidget(size: Size(200.0, 200.0)),
           ),
         ),
       ),
     ));
+  }
+}
+
+class BoxWidget extends StatelessWidget {
+  const BoxWidget({super.key, required this.size});
+
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size.width,
+      height: size.height,
+      color: Colors.blue,
+    );
   }
 }

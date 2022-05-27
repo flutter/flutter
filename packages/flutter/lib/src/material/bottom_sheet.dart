@@ -219,8 +219,9 @@ class _BottomSheetState extends State<BottomSheet> {
       "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
-    if (_dismissUnderway)
+    if (_dismissUnderway) {
       return;
+    }
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
@@ -230,8 +231,9 @@ class _BottomSheetState extends State<BottomSheet> {
       "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
-    if (_dismissUnderway)
+    if (_dismissUnderway) {
       return;
+    }
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
@@ -242,8 +244,9 @@ class _BottomSheetState extends State<BottomSheet> {
         isClosing = true;
       }
     } else if (widget.animationController!.value < _closeProgressThreshold) {
-      if (widget.animationController!.value > 0.0)
+      if (widget.animationController!.value > 0.0) {
         widget.animationController!.fling(velocity: -1.0);
+      }
       isClosing = true;
     } else {
       widget.animationController!.forward();

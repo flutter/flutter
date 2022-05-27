@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const ScrollMetricsDemo());
 
 class ScrollMetricsDemo extends StatefulWidget {
-  const ScrollMetricsDemo({Key? key}) : super(key: key);
+  const ScrollMetricsDemo({super.key});
 
   @override
   State<ScrollMetricsDemo> createState() => ScrollMetricsDemoState();

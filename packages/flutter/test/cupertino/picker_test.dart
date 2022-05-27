@@ -425,7 +425,7 @@ void main() {
   });
 
   testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
-    Widget _buildCupertinoPicker(Brightness brightness) {
+    Widget buildCupertinoPicker(Brightness brightness) {
       return MaterialApp(
         theme: ThemeData(brightness: brightness),
         home: Align(
@@ -450,14 +450,14 @@ void main() {
     }
 
     // CupertinoPicker with light theme.
-    await tester.pumpWidget(_buildCupertinoPicker(Brightness.light));
+    await tester.pumpWidget(buildCupertinoPicker(Brightness.light));
     RenderParagraph paragraph = tester.renderObject(find.text('1'));
     expect(paragraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoPicker with dark theme.
-    await tester.pumpWidget(_buildCupertinoPicker(Brightness.dark));
+    await tester.pumpWidget(buildCupertinoPicker(Brightness.dark));
     paragraph = tester.renderObject(find.text('1'));
     expect(paragraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.

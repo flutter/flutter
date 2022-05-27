@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -217,16 +218,13 @@ enum NavigationDestinationLabelBehavior {
   onlyShowSelected,
 }
 
-/// Destination Widget for displaying Icons + labels in the Material 3
-/// Navigation Bars through [NavigationBar.destinations].
+/// A Material 3 [NavigationBar] destination.
 ///
-/// The destination this widget creates will look something like this:
-/// =======
-/// |
-/// |  ☆  <-- [icon] (or [selectedIcon])
-/// | text <-- [label]
-/// |
-/// =======
+/// Displays a label below an icon. Use with [NavigationBar.destinations].
+///
+/// See also:
+///
+///  * [NavigationBar], for an interactive code sample.
 class NavigationDestination extends StatelessWidget {
   /// Creates a navigation bar destination with an icon and a label, to be used
   /// in the [NavigationBar.destinations].
@@ -921,7 +919,7 @@ class _ClampTextScaleFactor extends StatelessWidget {
   Widget build(BuildContext context) {
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
-        textScaleFactor: MediaQuery.of(context).textScaleFactor.clamp(
+        textScaleFactor: clampDouble(MediaQuery.of(context).textScaleFactor,
           0.0,
           upperLimit,
         ),
@@ -1196,7 +1194,7 @@ class _Defaults extends NavigationBarThemeData {
   @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.all(IconThemeData(
+    return MaterialStatePropertyAll<IconThemeData>(IconThemeData(
       size: 24,
       color: _colors.onSurface,
     ));
@@ -1204,7 +1202,7 @@ class _Defaults extends NavigationBarThemeData {
 
   @override Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStateProperty.all(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
+  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES
@@ -1213,7 +1211,7 @@ class _Defaults extends NavigationBarThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _TokenDefaultsM3 extends NavigationBarThemeData {
   _TokenDefaultsM3(this.context)
       : super(

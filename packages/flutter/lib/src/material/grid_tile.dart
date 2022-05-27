@@ -44,8 +44,9 @@ class GridTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (header == null && footer == null)
+    if (header == null && footer == null) {
       return child;
+    }
 
     return Stack(
       children: <Widget>[

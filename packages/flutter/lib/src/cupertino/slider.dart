@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -358,21 +359,24 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double _value;
   set value(double newValue) {
     assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
-    if (newValue == _value)
+    if (newValue == _value) {
       return;
+    }
     _value = newValue;
-    if (divisions != null)
+    if (divisions != null) {
       _position.animateTo(newValue, curve: Curves.fastOutSlowIn);
-    else
+    } else {
       _position.value = newValue;
+    }
     markNeedsSemanticsUpdate();
   }
 
   int? get divisions => _divisions;
   int? _divisions;
   set divisions(int? value) {
-    if (value == _divisions)
+    if (value == _divisions) {
       return;
+    }
     _divisions = value;
     markNeedsPaint();
   }
@@ -380,8 +384,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   Color get activeColor => _activeColor;
   Color _activeColor;
   set activeColor(Color value) {
-    if (value == _activeColor)
+    if (value == _activeColor) {
       return;
+    }
     _activeColor = value;
     markNeedsPaint();
   }
@@ -389,8 +394,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   Color get thumbColor => _thumbColor;
   Color _thumbColor;
   set thumbColor(Color value) {
-    if (value == _thumbColor)
+    if (value == _thumbColor) {
       return;
+    }
     _thumbColor = value;
     markNeedsPaint();
   }
@@ -398,8 +404,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   Color get trackColor => _trackColor;
   Color _trackColor;
   set trackColor(Color value) {
-    if (value == _trackColor)
+    if (value == _trackColor) {
       return;
+    }
     _trackColor = value;
     markNeedsPaint();
   }
@@ -407,12 +414,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   ValueChanged<double>? get onChanged => _onChanged;
   ValueChanged<double>? _onChanged;
   set onChanged(ValueChanged<double>? value) {
-    if (value == _onChanged)
+    if (value == _onChanged) {
       return;
+    }
     final bool wasInteractive = isInteractive;
     _onChanged = value;
-    if (wasInteractive != isInteractive)
+    if (wasInteractive != isInteractive) {
       markNeedsSemanticsUpdate();
+    }
   }
 
   ValueChanged<double>? onChangeStart;
@@ -422,8 +431,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsPaint();
   }
@@ -434,9 +444,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double _currentDragValue = 0.0;
 
   double get _discretizedCurrentDragValue {
-    double dragValue = _currentDragValue.clamp(0.0, 1.0);
-    if (divisions != null)
+    double dragValue = clampDouble(_currentDragValue, 0.0, 1.0);
+    if (divisions != null) {
       dragValue = (dragValue * divisions!).round() / divisions!;
+    }
     return dragValue;
   }
 
@@ -498,8 +509,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (event is PointerDownEvent && isInteractive)
+    if (event is PointerDownEvent && isInteractive) {
       _drag.addPointer(event);
+    }
   }
 
   @override
@@ -554,20 +566,22 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
       config.value = '${(value * 100).round()}%';
-      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.increasedValue = '${(clampDouble(value + _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${(clampDouble(value - _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
     }
   }
 
   double get _semanticActionUnit => divisions != null ? 1.0 / divisions! : _kAdjustmentUnit;
 
   void _increaseAction() {
-    if (isInteractive)
-      onChanged!((value + _semanticActionUnit).clamp(0.0, 1.0));
+    if (isInteractive) {
+      onChanged!(clampDouble(value + _semanticActionUnit, 0.0, 1.0));
+    }
   }
 
   void _decreaseAction() {
-    if (isInteractive)
-      onChanged!((value - _semanticActionUnit).clamp(0.0, 1.0));
+    if (isInteractive) {
+      onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0));
+    }
   }
 }

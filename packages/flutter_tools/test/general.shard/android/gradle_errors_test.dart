@@ -36,6 +36,7 @@ void main() {
           incompatibleKotlinVersionHandler,
           minCompileSdkVersionHandler,
           jvm11RequiredHandler,
+          outdatedGradleHandler,
         ])
       );
     });
@@ -358,6 +359,11 @@ Execution failed for task ':app:mergeDexDebug'.
       expect(testLogger.statusText,
         contains(
           'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'See https://docs.flutter.dev/deployment/android#enabling-multidex-support for more information.'
         )
       );
       expect(testLogger.statusText,
@@ -877,6 +883,10 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         incompatibleKotlinVersionHandler.test('Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.5.1, expected version is 1.1.15.'),
         isTrue,
       );
+      expect(
+        incompatibleKotlinVersionHandler.test("class 'kotlin.Unit' was compiled with an incompatible version of Kotlin."),
+        isTrue,
+      );
     });
 
     testUsingContext('suggestion', () async {
@@ -894,6 +904,51 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
           '│ update /android/build.gradle:                                                                │\n'
           "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
           '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Bump Gradle', () {
+    const String errorMessage = '''
+A problem occurred evaluating project ':app'.
+> Failed to apply plugin [id 'kotlin-android']
+   > The current Gradle version 4.10.2 is not compatible with the Kotlin Gradle plugin. Please use Gradle 6.1.1 or newer, or the previous version of the Kotlin plugin.
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        outdatedGradleHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await outdatedGradleHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project needs to upgrade Gradle and the Android Gradle plugin.          │\n'
+          '│                                                                                  │\n'
+          '│ To fix this issue, replace the following content:                                │\n'
+          '│ /android/build.gradle:                                                           │\n'
+          "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
+          "│     + classpath 'com.android.tools.build:gradle:7.1.2'                           │\n"
+          '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
+          '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
+          '│     + https://services.gradle.org/distributions/gradle-7.4-all.zip               │\n'
+          '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{

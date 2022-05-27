@@ -11,7 +11,6 @@ import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';

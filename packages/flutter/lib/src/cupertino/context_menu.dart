@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
 import 'package:flutter/scheduler.dart';
@@ -47,10 +48,11 @@ typedef _ContextMenuPreviewBuilderChildless = Widget Function(
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
   final RenderBox renderBoxContainer = globalKey.currentContext!.findRenderObject()! as RenderBox;
-  final Offset containerOffset = renderBoxContainer.localToGlobal(
+  return Rect.fromPoints(renderBoxContainer.localToGlobal(
     renderBoxContainer.paintBounds.topLeft,
-  );
-  return containerOffset & renderBoxContainer.paintBounds.size;
+  ), renderBoxContainer.localToGlobal(
+    renderBoxContainer.paintBounds.bottomRight
+  ));
 }
 
 // The context menu arranges itself slightly differently based on the location
@@ -90,7 +92,7 @@ enum _ContextMenuLocation {
 ///
 /// See also:
 ///
-///  * [Apple's HIG for Context Menus](https://developer.apple.com/design/human-interface-guidelines/ios/controls/context-menus/)
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/context-menus/>
 class CupertinoContextMenu extends StatefulWidget {
   /// Create a context menu.
   ///
@@ -957,7 +959,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       _moveAnimation = Tween<Offset>(
         begin: Offset.zero,
         end: Offset(
-          endX.clamp(-_kPadding, _kPadding),
+          clampDouble(endX, -_kPadding, _kPadding),
           endY,
         ),
       ).animate(
