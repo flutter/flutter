@@ -11,6 +11,8 @@
 --------------------------------------------------------------------------------
 ```
 
+![Impeller](docs/assets/showcase.png)
+
 ⚠️ Impeller is a Prototype and Work-In-Progress. Proceed with caution. ⚠️
 
 Impeller is a rendering runtime for Flutter with the following objectives:
@@ -148,7 +150,7 @@ states of completion:
   necessary. It is possible for callers to perform reflection at runtime but
   there are no Impeller components that do this currently.
 
-![Shader Compilation Pipeline](docs/shader_pipeline.png)
+![Shader Compilation Pipeline](docs/assets/shader_pipeline.png)
 
 ## Try Impeller in Flutter
 
@@ -172,3 +174,9 @@ To your `AndroidManifest.xml` file, add under the `<application>` tag:
     android:name="io.flutter.embedding.android.EnableImpeller"
     android:value="true" />
 ```
+
+## Documentation & References
+
+* [Learning to Read GPU Frame Captures.](docs/read_frame_captures.md)
+* [How to Enable Metal Validation for Command Line Apps.](docs/metal_validation.md)
+* [How to Setup Xcode for GPU Frame Captures with Metal.](docs/xcode_frame_capture.md)
