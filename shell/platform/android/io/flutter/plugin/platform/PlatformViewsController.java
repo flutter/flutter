@@ -222,7 +222,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           layoutParams.topMargin = physicalTop;
           layoutParams.leftMargin = physicalLeft;
           wrapperView.setLayoutParams(layoutParams);
-          wrapperView.setLayoutDirection(request.direction);
 
           final View view = platformView.getView();
           if (view == null) {
@@ -232,6 +231,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             throw new IllegalStateException(
                 "The Android view returned from PlatformView#getView() was already added to a parent view.");
           }
+          view.setLayoutParams(new FrameLayout.LayoutParams(physicalWidth, physicalHeight));
+          view.setLayoutDirection(request.direction);
           wrapperView.addView(view);
           wrapperView.setOnDescendantFocusChangeListener(
               (v, hasFocus) -> {
@@ -301,8 +302,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         public PlatformViewsChannel.PlatformViewBufferSize resize(
             @NonNull PlatformViewsChannel.PlatformViewResizeRequest request) {
           final int viewId = request.viewId;
+          final PlatformView platformView = platformViews.get(viewId);
           final PlatformViewWrapper view = viewWrappers.get(viewId);
-          if (view == null) {
+          if (platformView == null || view == null) {
             Log.e(TAG, "Resizing unknown platform view with id: " + viewId);
             return null;
           }
@@ -321,12 +323,18 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             view.setBufferSize(newWidth, newHeight);
           }
 
-          final FrameLayout.LayoutParams layoutParams =
-              (FrameLayout.LayoutParams) view.getLayoutParams();
-          layoutParams.width = newWidth;
-          layoutParams.height = newHeight;
-          view.setLayoutParams(layoutParams);
+          final ViewGroup.LayoutParams viewWrapperLayoutParams = view.getLayoutParams();
+          viewWrapperLayoutParams.width = newWidth;
+          viewWrapperLayoutParams.height = newHeight;
+          view.setLayoutParams(viewWrapperLayoutParams);
 
+          final View embeddedView = platformView.getView();
+          if (embeddedView != null) {
+            final ViewGroup.LayoutParams embeddedViewLayoutParams = embeddedView.getLayoutParams();
+            embeddedViewLayoutParams.width = newWidth;
+            embeddedViewLayoutParams.height = newHeight;
+            embeddedView.setLayoutParams(embeddedViewLayoutParams);
+          }
           return new PlatformViewsChannel.PlatformViewBufferSize(
               toLogicalPixels(view.getBufferWidth()), toLogicalPixels(view.getBufferHeight()));
         }
