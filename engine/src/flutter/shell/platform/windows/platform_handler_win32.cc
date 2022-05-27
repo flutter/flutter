@@ -191,12 +191,15 @@ std::unique_ptr<PlatformHandler> PlatformHandler::Create(
 PlatformHandlerWin32::PlatformHandlerWin32(
     BinaryMessenger* messenger,
     FlutterWindowsView* view,
-    std::unique_ptr<ScopedClipboardInterface> clipboard)
+    std::optional<std::function<std::unique_ptr<ScopedClipboardInterface>()>>
+        scoped_clipboard_provider)
     : PlatformHandler(messenger), view_(view) {
-  if (clipboard == nullptr) {
-    clipboard_ = std::make_unique<ScopedClipboard>();
+  if (scoped_clipboard_provider.has_value()) {
+    scoped_clipboard_provider_ = scoped_clipboard_provider.value();
   } else {
-    clipboard_ = std::move(clipboard);
+    scoped_clipboard_provider_ = []() {
+      return std::make_unique<ScopedClipboard>();
+    };
   }
 }
 
@@ -205,18 +208,21 @@ PlatformHandlerWin32::~PlatformHandlerWin32() = default;
 void PlatformHandlerWin32::GetPlainText(
     std::unique_ptr<MethodResult<rapidjson::Document>> result,
     std::string_view key) {
-  int open_result = clipboard_->Open(std::get<HWND>(*view_->GetRenderTarget()));
+  std::unique_ptr<ScopedClipboardInterface> clipboard =
+      scoped_clipboard_provider_();
+
+  int open_result = clipboard->Open(std::get<HWND>(*view_->GetRenderTarget()));
   if (open_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(open_result);
     result->Error(kClipboardError, "Unable to open clipboard", error_code);
     return;
   }
-  if (!clipboard_->HasString()) {
+  if (!clipboard->HasString()) {
     result->Success(rapidjson::Document());
     return;
   }
-  std::variant<std::wstring, int> get_string_result = clipboard_->GetString();
+  std::variant<std::wstring, int> get_string_result = clipboard->GetString();
   if (std::holds_alternative<int>(get_string_result)) {
     rapidjson::Document error_code;
     error_code.SetInt(std::get<int>(get_string_result));
@@ -238,8 +244,11 @@ void PlatformHandlerWin32::GetPlainText(
 
 void PlatformHandlerWin32::GetHasStrings(
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+  std::unique_ptr<ScopedClipboardInterface> clipboard =
+      scoped_clipboard_provider_();
+
   bool hasStrings;
-  int open_result = clipboard_->Open(std::get<HWND>(*view_->GetRenderTarget()));
+  int open_result = clipboard->Open(std::get<HWND>(*view_->GetRenderTarget()));
   if (open_result != kErrorSuccess) {
     // Swallow errors of type ERROR_ACCESS_DENIED. These happen when the app is
     // not in the foreground and GetHasStrings is irrelevant.
@@ -252,7 +261,7 @@ void PlatformHandlerWin32::GetHasStrings(
     }
     hasStrings = false;
   } else {
-    hasStrings = clipboard_->HasString();
+    hasStrings = clipboard->HasString();
   }
 
   rapidjson::Document document;
@@ -266,14 +275,17 @@ void PlatformHandlerWin32::GetHasStrings(
 void PlatformHandlerWin32::SetPlainText(
     const std::string& text,
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
-  int open_result = clipboard_->Open(std::get<HWND>(*view_->GetRenderTarget()));
+  std::unique_ptr<ScopedClipboardInterface> clipboard =
+      scoped_clipboard_provider_();
+
+  int open_result = clipboard->Open(std::get<HWND>(*view_->GetRenderTarget()));
   if (open_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(open_result);
     result->Error(kClipboardError, "Unable to open clipboard", error_code);
     return;
   }
-  int set_result = clipboard_->SetString(fml::Utf8ToWideString(text));
+  int set_result = clipboard->SetString(fml::Utf8ToWideString(text));
   if (set_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(set_result);
