@@ -257,7 +257,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -327,7 +326,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(textColor(), hoverColor);
@@ -395,7 +393,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(iconColor(), hoverColor);
@@ -447,7 +444,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
     await tester.pumpAndSettle();
 
@@ -492,11 +488,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: TextButton(
-            style: ButtonStyle(
+            style: const ButtonStyle(
               // Specifying minimumSize to mimic the original minimumSize for
               // RaisedButton so that the semantics tree's rect and transform
               // match the original version of this test.
-              minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+              minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
             ),
             onPressed: () { },
             child: const Text('ABC'),
@@ -735,7 +731,6 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
     await tester.pumpAndSettle();
     expect(hovering, isTrue);
@@ -787,7 +782,6 @@ void main() {
     await tester.pumpWidget(buildFrame(enabled: true));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
     await tester.pumpAndSettle();
@@ -1474,7 +1468,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 

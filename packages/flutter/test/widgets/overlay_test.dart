@@ -1020,14 +1020,13 @@ void main() {
   });
 
   testWidgets('Overlay can set and update clipBehavior', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
-              builder: (BuildContext context) => Container(),
+              builder: (BuildContext context) => Positioned(left: 2000, right: 2500, child: Container()),
             ),
           ],
         ),
@@ -1035,9 +1034,9 @@ void main() {
     );
 
     // By default, clipBehavior should be Clip.hardEdge
-    final dynamic renderObject = tester.renderObject(find.byType(Overlay));
+    final RenderObject renderObject = tester.renderObject(find.byType(Overlay));
     // ignore: avoid_dynamic_calls
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    expect((renderObject as dynamic).clipBehavior, equals(Clip.hardEdge));
 
     for (final Clip clip in Clip.values) {
       await tester.pumpWidget(
@@ -1053,8 +1052,27 @@ void main() {
           ),
         ),
       );
+
       // ignore: avoid_dynamic_calls
-      expect(renderObject.clipBehavior, clip);
+      expect((renderObject as dynamic).clipBehavior, clip);
+      bool visited = false;
+      renderObject.visitChildren((RenderObject child) {
+        visited = true;
+        switch(clip) {
+          case Clip.none:
+            expect(renderObject.describeApproximatePaintClip(child), null);
+            break;
+          case Clip.hardEdge:
+          case Clip.antiAlias:
+          case Clip.antiAliasWithSaveLayer:
+            expect(
+              renderObject.describeApproximatePaintClip(child),
+              const Rect.fromLTRB(0, 0, 800, 600),
+            );
+            break;
+        }
+      });
+      expect(visited, true);
     }
   });
 

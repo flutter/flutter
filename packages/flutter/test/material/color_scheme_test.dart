@@ -199,6 +199,76 @@ void main() {
     expect(scheme.brightness, Brightness.light);
   });
 
+  test('copyWith overrides given colors', () {
+    final ColorScheme scheme = const ColorScheme.light().copyWith(
+        brightness: Brightness.dark,
+        primary: const Color(0x00000001),
+        onPrimary: const Color(0x00000002),
+        primaryContainer: const Color(0x00000003),
+        onPrimaryContainer: const Color(0x00000004),
+        secondary: const Color(0x00000005),
+        onSecondary: const Color(0x00000006),
+        secondaryContainer: const Color(0x00000007),
+        onSecondaryContainer: const Color(0x00000008),
+        tertiary: const Color(0x00000009),
+        onTertiary: const Color(0x0000000A),
+        tertiaryContainer: const Color(0x0000000B),
+        onTertiaryContainer: const Color(0x0000000C),
+        error: const Color(0x0000000D),
+        onError: const Color(0x0000000E),
+        errorContainer: const Color(0x0000000F),
+        onErrorContainer: const Color(0x00000010),
+        background: const Color(0x00000011),
+        onBackground: const Color(0x00000012),
+        surface: const Color(0x00000013),
+        onSurface: const Color(0x00000014),
+        surfaceVariant: const Color(0x00000015),
+        onSurfaceVariant: const Color(0x00000016),
+        outline: const Color(0x00000017),
+        shadow: const Color(0x00000018),
+        inverseSurface: const Color(0x00000019),
+        onInverseSurface: const Color(0x0000001A),
+        inversePrimary: const Color(0x0000001B),
+        surfaceTint: const Color(0x0000001C),
+
+        primaryVariant: const Color(0x0000001D),
+        secondaryVariant: const Color(0x0000001F),
+    );
+
+    expect(scheme.brightness, Brightness.dark);
+    expect(scheme.primary, const Color(0x00000001));
+    expect(scheme.onPrimary, const Color(0x00000002));
+    expect(scheme.primaryContainer, const Color(0x00000003));
+    expect(scheme.onPrimaryContainer, const Color(0x00000004));
+    expect(scheme.secondary, const Color(0x00000005));
+    expect(scheme.onSecondary, const Color(0x00000006));
+    expect(scheme.secondaryContainer, const Color(0x00000007));
+    expect(scheme.onSecondaryContainer, const Color(0x00000008));
+    expect(scheme.tertiary, const Color(0x00000009));
+    expect(scheme.onTertiary, const Color(0x0000000A));
+    expect(scheme.tertiaryContainer, const Color(0x0000000B));
+    expect(scheme.onTertiaryContainer, const Color(0x0000000C));
+    expect(scheme.error, const Color(0x0000000D));
+    expect(scheme.onError, const Color(0x0000000E));
+    expect(scheme.errorContainer, const Color(0x0000000F));
+    expect(scheme.onErrorContainer, const Color(0x00000010));
+    expect(scheme.background, const Color(0x00000011));
+    expect(scheme.onBackground, const Color(0x00000012));
+    expect(scheme.surface, const Color(0x00000013));
+    expect(scheme.onSurface, const Color(0x00000014));
+    expect(scheme.surfaceVariant, const Color(0x00000015));
+    expect(scheme.onSurfaceVariant, const Color(0x00000016));
+    expect(scheme.outline, const Color(0x00000017));
+    expect(scheme.shadow, const Color(0x00000018));
+    expect(scheme.inverseSurface, const Color(0x00000019));
+    expect(scheme.onInverseSurface, const Color(0x0000001A));
+    expect(scheme.inversePrimary, const Color(0x0000001B));
+    expect(scheme.surfaceTint, const Color(0x0000001C));
+
+    expect(scheme.primaryVariant, const Color(0x0000001D));
+    expect(scheme.secondaryVariant, const Color(0x0000001F));
+  });
+
   test('can generate a dark scheme from a seed color', () {
     final ColorScheme scheme = ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark);
     expect(scheme.primary, const Color(0xff9ccaff));
