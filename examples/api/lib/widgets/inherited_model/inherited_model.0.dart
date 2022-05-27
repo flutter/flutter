@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 
-enum Logo { backgroundColor, size }
+enum LogoAspect { backgroundColor, large }
 
 void main() => runApp(const InheritedModelApp());
 
@@ -21,33 +21,37 @@ class InheritedModelApp extends StatelessWidget {
   }
 }
 
-class LogoModel extends InheritedModel<Logo> {
+class LogoModel extends InheritedModel<LogoAspect> {
   const LogoModel({
     super.key,
     this.backgroundColor,
-    this.logoSize,
+    this.large,
     required super.child,
   });
 
   final Color? backgroundColor;
-  final double? logoSize;
+  final bool? large;
 
-  static LogoModel? of(BuildContext context, Logo aspect) {
-    return InheritedModel.inheritFrom<LogoModel>(context, aspect: aspect);
+  static Color? backgroundColorOf(BuildContext context) {
+    return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.backgroundColor)?.backgroundColor;
+  }
+
+  static bool sizeOf(BuildContext context) {
+    return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.large)?.large ?? false;
   }
 
   @override
   bool updateShouldNotify(LogoModel oldWidget) {
     return backgroundColor != oldWidget.backgroundColor ||
-      logoSize != oldWidget.logoSize;
+      large != oldWidget.large;
   }
 
   @override
-  bool updateShouldNotifyDependent(LogoModel oldWidget, Set<Logo> dependencies) {
-    if (backgroundColor != oldWidget.backgroundColor && dependencies.contains(Logo.backgroundColor)) {
+  bool updateShouldNotifyDependent(LogoModel oldWidget, Set<LogoAspect> dependencies) {
+    if (backgroundColor != oldWidget.backgroundColor && dependencies.contains(LogoAspect.backgroundColor)) {
       return true;
     }
-    if (logoSize != oldWidget.logoSize && dependencies.contains(Logo.size)) {
+    if (large != oldWidget.large && dependencies.contains(LogoAspect.large)) {
       return true;
     }
     return false;
@@ -62,7 +66,7 @@ class InheritedModelExample extends StatefulWidget {
 }
 
 class _InheritedModelExampleState extends State<InheritedModelExample> {
-  double size = 100.0;
+  bool large = false;
   Color color = Colors.blue;
 
   @override
@@ -75,7 +79,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
           Center(
             child: LogoModel(
               backgroundColor: color,
-              logoSize: size,
+              large: large,
               child: const BackgroundWidget(
                 child: LogoWidget(),
               ),
@@ -93,7 +97,11 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
                     ),
                   );
                   setState(() {
-                    color = color == Colors.blue ? Colors.red : Colors.blue;
+                    if (color == Colors.blue){
+                      color = Colors.red;
+                    } else {
+                      color = Colors.blue;
+                    }
                   });
                 },
                 child: const Text('Update background'),
@@ -107,7 +115,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
                     ),
                   );
                   setState(() {
-                    size = size == 100.0 ? 200.0 : 100.0;
+                    large = !large;
                   });
                 },
                 child: const Text('Resize Logo'),
@@ -127,7 +135,7 @@ class BackgroundWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = LogoModel.of(context, Logo.backgroundColor)!.backgroundColor!;
+    final Color color = LogoModel.backgroundColorOf(context)!;
 
     return AnimatedContainer(
       padding: const EdgeInsets.all(12.0),
@@ -144,14 +152,14 @@ class LogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double size = LogoModel.of(context, Logo.size)!.logoSize!;
+    final bool largeLogo = LogoModel.sizeOf(context);
 
     return AnimatedContainer(
       padding: const EdgeInsets.all(20.0),
       duration: const Duration(seconds: 2),
       curve: Curves.fastLinearToSlowEaseIn,
       alignment: Alignment.center,
-      child: FlutterLogo(size: size),
+      child: FlutterLogo(size: largeLogo ? 200.0 : 100.0),
     );
   }
 }

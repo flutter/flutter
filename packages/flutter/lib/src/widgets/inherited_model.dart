@@ -88,8 +88,8 @@ import 'framework.dart';
 ///
 /// {@tool dartpad}
 /// This example shows how to implement [InheritedModel] to rebuild a
-/// widget based on a qualified dependence. When tapped on "Resize Logo" button
-/// only the logo widget is rebuilt while background widget remains unaffected.
+/// widget based on a qualified dependence. When tapped on the "Resize Logo" button
+/// only the logo widget is rebuilt while the background widget remains unaffected.
 ///
 /// ** See code in examples/api/lib/widgets/inherited_model/inherited_model.0.dart **
 /// {@end-tool}
