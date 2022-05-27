@@ -77,6 +77,33 @@ void main() {
     FileSystem: () => fileSystem,
   });
 
+  testUsingContext('pub get on target directory', () async {
+    fileSystem.currentDirectory.childDirectory('target').createSync();
+    final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
+    targetDirectory.childFile('pubspec.yaml').createSync();
+    targetDirectory.childFile('.flutter-plugins').createSync();
+    targetDirectory.childFile('.flutter-plugins-dependencies').createSync();
+    targetDirectory.childFile('.packages').writeAsBytesSync(<int>[0]);
+    targetDirectory.childFile('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[0]);
+
+    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    await commandRunner.run(<String>['get', targetDirectory.path]);
+
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
+  }, overrides: <Type, Generator>{
+    Pub: () => FakePubTargetDirectory(fileSystem),
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
   testUsingContext("pub get skips example directory if it doesn't contain a pubspec.yaml", () async {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
@@ -117,6 +144,33 @@ class FakePub extends Fake implements Pub {
     bool printProgress = true,
   }) async {
     fileSystem.currentDirectory
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+  }
+}
+
+class FakePubTargetDirectory extends Fake implements Pub {
+  FakePubTargetDirectory(this.fileSystem);
+
+  final FileSystem fileSystem;
+
+  @override
+  Future<void> get({
+    @required PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
+  }) async {
+    fileSystem.currentDirectory
+      .childDirectory('target')
       .childDirectory('.dart_tool')
       .childFile('package_config.json')
       ..createSync(recursive: true)
