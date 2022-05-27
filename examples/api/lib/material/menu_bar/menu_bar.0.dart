@@ -28,12 +28,10 @@ enum MenuSelection {
 class SampleApp extends StatelessWidget {
   const SampleApp({super.key});
 
-  static const String _title = 'MenuBar Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
+      title: 'MenuBar Sample',
       home: Scaffold(body: MyMenuBarApp()),
     );
   }
@@ -72,7 +70,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
       case MenuSelection.about:
         showAboutDialog(
           context: context,
-          applicationName: 'MenuBar Test',
+          applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
         break;
@@ -110,17 +108,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                   onSelected: () => _activate(MenuSelection.about),
                 ),
                 MenuBarItem(
-                  // Add a builder so that that call to MenuBarController.of will be using
-                  // the correct context.
-                  leadingIcon: Builder(builder: (BuildContext context) {
-                    return Checkbox(
-                      value: _showMessage,
-                      onChanged: (bool? value) {
-                        showMessage = value ?? false;
-                      },
-                    );
-                  }),
-                  label: 'Show Message',
+                  label: showMessage ? 'Hide Message' : 'Show Message',
                   onSelected: () {
                     showMessage = !showMessage;
                   },
@@ -161,7 +149,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
           child: Container(
             alignment: Alignment.center,
             color: backgroundColor,
-            child: Text(_showMessage ? 'Message' : 'Application Body'),
+            child: Text(showMessage ? 'Message' : 'Application Body'),
           ),
         ),
       ],
