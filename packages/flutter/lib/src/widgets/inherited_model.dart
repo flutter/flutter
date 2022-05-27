@@ -34,6 +34,8 @@ import 'framework.dart';
 ///
 /// ```dart
 /// class MyModel extends InheritedModel<String> {
+///   const InheritedModelExample({ super.key });
+///
 ///   // ...
 ///   static MyModel? of(BuildContext context, String aspect) {
 ///     return InheritedModel.inheritFrom<MyModel>(context, aspect: aspect);
@@ -57,20 +59,25 @@ import 'framework.dart';
 ///
 /// ```dart
 /// class ABModel extends InheritedModel<String> {
-///   ABModel({ this.a, this.b, super.child }) ;
+///   const ABModel({
+///    super.key,
+///    this.a,
+///    this.b,
+///    required super.child,
+///   });
 ///
 ///   final int? a;
 ///   final int? b;
 ///
 ///   @override
-///   bool updateShouldNotify(ABModel old) {
-///     return a != old.a || b != old.b;
+///   bool updateShouldNotify(ABModel oldWidget) {
+///     return a != oldWidget.a || b != oldWidget.b;
 ///   }
 ///
 ///   @override
-///   bool updateShouldNotifyDependent(ABModel old, Set<String> aspects) {
-///     return (a != old.a && aspects.contains('a'))
-///         || (b != old.b && aspects.contains('b'))
+///   bool updateShouldNotifyDependent(ABModel oldWidget, Set<String> dependencies) {
+///     return (a != oldWidget.a && dependencies.contains('a'))
+///       || (b != oldWidget.b && dependencies.contains('b'))
 ///   }
 ///
 ///   // ...
