@@ -77,7 +77,7 @@ import 'framework.dart';
 ///   @override
 ///   bool updateShouldNotifyDependent(ABModel oldWidget, Set<String> dependencies) {
 ///     return (a != oldWidget.a && dependencies.contains('a'))
-///       || (b != oldWidget.b && dependencies.contains('b'))
+///       || (b != oldWidget.b && dependencies.contains('b'));
 ///   }
 ///
 ///   // ...
