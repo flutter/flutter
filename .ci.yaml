@@ -54,7 +54,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: x86
-      xcode: 13a233
+      xcode: 13f17a
   mac_android:
     properties:
       dependencies: >-
@@ -87,7 +87,7 @@ platform_properties:
       os: Mac-12
       cpu: x86
       device_os: iOS-15.1
-      xcode: 13a233
+      xcode: 13f17a
   mac_arm64_ios:
     properties:
       dependencies: >-
@@ -99,7 +99,7 @@ platform_properties:
       os: Mac-12
       cpu: arm64
       device_os: iOS-15.1
-      xcode: 13a233
+      xcode: 13f17a
   windows:
     properties:
       dependencies: >-
