@@ -1434,8 +1434,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// If this is never called, then the actions are not filtered. If the list of
   /// actions to filter changes, it must be called again.
   void replaceSemanticsActions(Set<SemanticsAction> actions) {
-    if (widget.excludeFromSemantics)
+    if (widget.excludeFromSemantics) {
       return;
+    }
 
     final RenderSemanticsGestureHandler? semanticsGestureHandler = context.findRenderObject() as RenderSemanticsGestureHandler?;
     assert(() {
@@ -1453,8 +1454,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   @override
   void dispose() {
-    for (final GestureRecognizer recognizer in _recognizers!.values)
+    for (final GestureRecognizer recognizer in _recognizers!.values) {
       recognizer.dispose();
+    }
     _recognizers = null;
     super.dispose();
   }
@@ -1472,15 +1474,17 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       gestures[type]!.initializer(_recognizers![type]!);
     }
     for (final Type type in oldRecognizers.keys) {
-      if (!_recognizers!.containsKey(type))
+      if (!_recognizers!.containsKey(type)) {
         oldRecognizers[type]!.dispose();
+      }
     }
   }
 
   void _handlePointerDown(PointerDownEvent event) {
     assert(_recognizers != null);
-    for (final GestureRecognizer recognizer in _recognizers!.values)
+    for (final GestureRecognizer recognizer in _recognizers!.values) {
       recognizer.addPointer(event);
+    }
   }
 
   void _handlePointerPanZoomStart(PointerPanZoomStartEvent event) {
@@ -1611,8 +1615,9 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
 
   GestureTapCallback? _getTapHandler(Map<Type, GestureRecognizer> recognizers) {
     final TapGestureRecognizer? tap = recognizers[TapGestureRecognizer] as TapGestureRecognizer?;
-    if (tap == null)
+    if (tap == null) {
       return null;
+    }
 
     return () {
       assert(tap != null);
@@ -1624,8 +1629,9 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
 
   GestureLongPressCallback? _getLongPressHandler(Map<Type, GestureRecognizer> recognizers) {
     final LongPressGestureRecognizer? longPress = recognizers[LongPressGestureRecognizer] as LongPressGestureRecognizer?;
-    if (longPress == null)
+    if (longPress == null) {
       return null;
+    }
 
     return () {
       longPress.onLongPressDown?.call(const LongPressDownDetails());
@@ -1658,13 +1664,16 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
         pan.onEnd?.call(DragEndDetails());
       };
 
-    if (horizontalHandler == null && panHandler == null)
+    if (horizontalHandler == null && panHandler == null) {
       return null;
+    }
     return (DragUpdateDetails details) {
-      if (horizontalHandler != null)
+      if (horizontalHandler != null) {
         horizontalHandler(details);
-      if (panHandler != null)
+      }
+      if (panHandler != null) {
         panHandler(details);
+      }
     };
   }
 
@@ -1690,13 +1699,16 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
         pan.onEnd?.call(DragEndDetails());
       };
 
-    if (verticalHandler == null && panHandler == null)
+    if (verticalHandler == null && panHandler == null) {
       return null;
+    }
     return (DragUpdateDetails details) {
-      if (verticalHandler != null)
+      if (verticalHandler != null) {
         verticalHandler(details);
-      if (panHandler != null)
+      }
+      if (panHandler != null) {
         panHandler(details);
+      }
     };
   }
 }

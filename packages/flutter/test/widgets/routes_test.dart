@@ -65,8 +65,9 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   bool didPop(String? result) {
     log('didPop $result');
     bool returnValue;
-    if (returnValue = super.didPop(result))
+    if (returnValue = super.didPop(result)) {
       navigator!.finalizeRoute(this);
+    }
     return returnValue;
   }
 
@@ -951,10 +952,11 @@ void main() {
             return PageRouteBuilder<void>(
               settings: settings,
               pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                if (settings.name == '/')
+                if (settings.name == '/') {
                   secondaryAnimationOfRouteOne = secondaryAnimation;
-                else
+                } else {
                   primaryAnimationOfRouteTwo = animation;
+                }
                 return const Text('Page');
               },
             );

@@ -707,8 +707,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     overlay.insert(_overlayEntry!);
 
     for (final _ReorderableItemState childItem in _items.values) {
-      if (childItem == item || !childItem.mounted)
+      if (childItem == item || !childItem.mounted) {
         continue;
+      }
       childItem.updateForGap(_insertIndex!, _dragInfo!.itemExtent, false, _reverse);
     }
     return _dragInfo;
@@ -784,8 +785,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   void _handleScrollableAutoScrolled() {
-    if (_dragInfo == null)
+    if (_dragInfo == null) {
       return;
+    }
     _dragUpdateItems();
     // Continue scrolling if the drag is still in progress.
     _autoScroller?.startAutoScrollIfNecessary(_dragTargetRect);
@@ -800,8 +802,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
     for (final _ReorderableItemState item in _items.values) {
-      if (item.index == _dragIndex! || !item.mounted)
+      if (item.index == _dragIndex! || !item.mounted) {
         continue;
+      }
 
       Rect geometry = item.targetGeometry();
       if (!_dragStartTransitionComplete && _dragIndex! <= item.index) {
@@ -862,8 +865,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     if (newIndex != _insertIndex) {
       _insertIndex = newIndex;
       for (final _ReorderableItemState item in _items.values) {
-        if (item.index == _dragIndex! || !item.mounted)
+        if (item.index == _dragIndex! || !item.mounted) {
           continue;
+        }
         item.updateForGap(newIndex, gapExtent, true, _reverse);
       }
     }
@@ -1386,8 +1390,9 @@ class _ReorderableItemGlobalKey extends GlobalObjectKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _ReorderableItemGlobalKey
         && other.subKey == subKey
         && other.index == index
