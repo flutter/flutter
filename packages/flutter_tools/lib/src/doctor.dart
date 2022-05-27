@@ -550,7 +550,7 @@ class FlutterValidator extends DoctorValidator {
     // VersionUpstreamValidator can produce an error if repositoryUrl is null
     if (upstreamValidationError != null) {
       final String errorMessage = upstreamValidationError.message;
-      if(errorMessage.contains('could not determine the remote upstream which is being tracked')) {
+      if (errorMessage.contains('could not determine the remote upstream which is being tracked')) {
         return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown'));
       }
       // At this point, repositoryUrl must not be null
