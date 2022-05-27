@@ -3196,17 +3196,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final String text = _value.text;
     final TextSelection selection = _value.selection;
     final bool atEnd = selection.baseOffset == text.length;
-    final CharacterRange transposing = CharacterRange.at(
-      text,
-      0,
-      selection.baseOffset,
-    );
+    final CharacterRange transposing = CharacterRange.at(text, selection.baseOffset);
     if (atEnd) {
-      transposing.dropFirst(transposing.currentCharacters.length - 2);
+      transposing.moveBack(2);
     } else {
-      transposing
-        ..dropFirst(transposing.currentCharacters.length - 1)
-        ..expandNext();
+      transposing..moveBack()..expandNext();
     }
     assert(transposing.currentCharacters.length == 2);
 

@@ -12425,26 +12425,28 @@ void main() {
         await ctrlT(tester, platform);
         expect(controller.selection.isCollapsed, isTrue);
         expect(controller.selection.baseOffset, 0);
+        expect(controller.text, '👨‍👩‍👦😆');
 
         controller.selection = const TextSelection(
-          baseOffset: 1,
-          extentOffset: 4,
+          baseOffset: 8,
+          extentOffset: 10,
         );
         await tester.pump();
         expect(controller.selection.isCollapsed, isFalse);
-        expect(controller.selection.baseOffset, 1);
-        expect(controller.selection.extentOffset, 4);
+        expect(controller.selection.baseOffset, 8);
+        expect(controller.selection.extentOffset, 10);
 
         // ctrl-T does nothing when the selection isn't collapsed.
         await ctrlT(tester, platform);
         expect(controller.selection.isCollapsed, isFalse);
-        expect(controller.selection.baseOffset, 1);
-        expect(controller.selection.extentOffset, 4);
+        expect(controller.selection.baseOffset, 8);
+        expect(controller.selection.extentOffset, 10);
+        expect(controller.text, '👨‍👩‍👦😆');
 
-        controller.selection = const TextSelection.collapsed(offset: 2);
+        controller.selection = const TextSelection.collapsed(offset: 8);
         await tester.pump();
         expect(controller.selection.isCollapsed, isTrue);
-        expect(controller.selection.baseOffset, 2);
+        expect(controller.selection.baseOffset, 8);
 
         // ctrl-T swaps the previous and next characters when they exist.
         await ctrlT(tester, platform);
