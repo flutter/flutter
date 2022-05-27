@@ -14,9 +14,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
@@ -26,14 +24,6 @@
 namespace {
 using flutter::KeyboardLayoutNotifier;
 using flutter::LayoutClue;
-
-/// Clipboard plain text format.
-constexpr char kTextPlainFormat[] = "text/plain";
-
-/// The private notification for voice over.
-static NSString* const kEnhancedUserInterfaceNotification =
-    @"NSApplicationDidChangeAccessibilityEnhancedUserInterfaceNotification";
-static NSString* const kEnhancedUserInterfaceKey = @"AXEnhancedUserInterface";
 
 // Use different device ID for mouse and pan/zoom events, since we can't differentiate the actual
 // device (mouse v.s. trackpad).
@@ -209,11 +199,6 @@ NSData* currentKeyboardLayoutData() {
 - (void)configureTrackingArea;
 
 /**
- * Creates and registers plugins used by this view controller.
- */
-- (void)addInternalPlugins;
-
-/**
  * Creates and registers keyboard related components.
  */
 - (void)initializeKeyboard;
@@ -235,51 +220,8 @@ NSData* currentKeyboardLayoutData() {
  */
 - (void)dispatchMouseEvent:(nonnull NSEvent*)event phase:(FlutterPointerPhase)phase;
 
-/**
- * Initializes the KVO for user settings and passes the initial user settings to the engine.
- */
-- (void)sendInitialSettings;
-
-/**
- * Responds to updates in the user settings and passes this data to the engine.
- */
-- (void)onSettingsChanged:(NSNotification*)notification;
-
-/**
- * Responds to updates in accessibility.
- */
-- (void)onAccessibilityStatusChanged:(NSNotification*)notification;
-
 // TODO
 - (void)onKeyboardLayoutChanged;
-
-/**
- * Handles messages received from the Flutter engine on the _*Channel channels.
- */
-- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
-
-/**
- * Plays a system sound. |soundType| specifies which system sound to play. Valid
- * values can be found in the SystemSoundType enum in the services SDK package.
- */
-- (void)playSystemSound:(NSString*)soundType;
-
-/**
- * Reads the data from the clipboard. |format| specifies the media type of the
- * data to obtain.
- */
-- (NSDictionary*)getClipboardData:(NSString*)format;
-
-/**
- * Clears contents and writes new data into clipboard. |data| is a dictionary where
- * the keys are the type of data, and tervalue the data to be stored.
- */
-- (void)setClipboardData:(NSDictionary*)data;
-
-/**
- * Returns true iff the clipboard contains nonempty string data.
- */
-- (BOOL)clipboardHasStrings;
 
 @end
 
@@ -325,12 +267,6 @@ void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
 @implementation FlutterViewController {
   // The project to run in this controller's engine.
   FlutterDartProject* _project;
-
-  // A message channel for sending user settings to the flutter engine.
-  FlutterBasicMessageChannel* _settingsChannel;
-
-  // A method channel for miscellaneous platform functionality.
-  FlutterMethodChannel* _platformChannel;
 }
 
 @dynamic view;
@@ -346,16 +282,6 @@ static void CommonInit(FlutterViewController* controller) {
   }
   controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
   controller->_textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:controller];
-  NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-  // macOS fires this private message when VoiceOver turns on or off.
-  [center addObserver:controller
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:kEnhancedUserInterfaceNotification
-               object:nil];
-  [center addObserver:controller
-             selector:@selector(applicationWillTerminate:)
-                 name:NSApplicationWillTerminateNotification
-               object:nil];
   // macOS fires this message when changing IMEs.
   CFNotificationCenterRef cfCenter = CFNotificationCenterGetDistributedCenter();
   __weak FlutterViewController* weakSelf = controller;
@@ -480,17 +406,12 @@ static void CommonInit(FlutterViewController* controller) {
 #pragma mark - Private methods
 
 - (BOOL)launchEngine {
-  // Register internal plugins before starting the engine.
-  [self addInternalPlugins];
+  [self initializeKeyboard];
 
   _engine.viewController = self;
   if (![_engine runWithEntrypoint:nil]) {
     return NO;
   }
-  // Send the initial user settings such as brightness and text scale factor
-  // to the engine.
-  // TODO(stuartmorgan): Move this logic to FlutterEngine.
-  [self sendInitialSettings];
   return YES;
 }
 
@@ -552,27 +473,11 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)initializeKeyboard {
+  // TODO(goderbauer): Seperate keyboard/textinput stuff into ViewController specific and Engine
+  // global parts. Move the global parts to FlutterEngine.
   __weak FlutterViewController* weakSelf = self;
   _textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:weakSelf];
   _keyboardManager = [[FlutterKeyboardManager alloc] initWithViewDelegate:weakSelf];
-}
-
-- (void)addInternalPlugins {
-  __weak FlutterViewController* weakSelf = self;
-  [FlutterMouseCursorPlugin registerWithRegistrar:[self registrarForPlugin:@"mousecursor"]];
-  [FlutterMenuPlugin registerWithRegistrar:[self registrarForPlugin:@"menu"]];
-  [self initializeKeyboard];
-  _settingsChannel =
-      [FlutterBasicMessageChannel messageChannelWithName:@"flutter/settings"
-                                         binaryMessenger:_engine.binaryMessenger
-                                                   codec:[FlutterJSONMessageCodec sharedInstance]];
-  _platformChannel =
-      [FlutterMethodChannel methodChannelWithName:@"flutter/platform"
-                                  binaryMessenger:_engine.binaryMessenger
-                                            codec:[FlutterJSONMethodCodec sharedInstance]];
-  [_platformChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
-    [weakSelf handleMethodCall:call result:result];
-  }];
 }
 
 - (void)dispatchMouseEvent:(nonnull NSEvent*)event {
@@ -723,18 +628,7 @@ static void CommonInit(FlutterViewController* controller) {
   }
 }
 
-- (void)applicationWillTerminate:(NSNotification*)notification {
-  if (!_engine) {
-    return;
-  }
-  [_engine shutDownEngine];
-}
-
-- (void)onAccessibilityStatusChanged:(NSNotification*)notification {
-  if (!_engine) {
-    return;
-  }
-  BOOL enabled = [notification.userInfo[kEnhancedUserInterfaceKey] boolValue];
+- (void)onAccessibilityStatusChanged:(BOOL)enabled {
   if (!enabled && self.viewLoaded && [_textInputPlugin isFirstResponder]) {
     // The client (i.e. the FlutterTextField) of the textInputPlugin is a sibling
     // of the FlutterView. macOS will pick the ancestor to be the next responder
@@ -747,19 +641,6 @@ static void CommonInit(FlutterViewController* controller) {
     // manually pick the next responder.
     [self.view.window makeFirstResponder:_flutterView];
   }
-  _engine.semanticsEnabled = [notification.userInfo[kEnhancedUserInterfaceKey] boolValue];
-}
-
-- (void)onSettingsChanged:(NSNotification*)notification {
-  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/32015.
-  NSString* brightness =
-      [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"];
-  [_settingsChannel sendMessage:@{
-    @"platformBrightness" : [brightness isEqualToString:@"Dark"] ? @"dark" : @"light",
-    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/32006.
-    @"textScaleFactor" : @1.0,
-    @"alwaysUse24HourFormat" : @false
-  }];
 }
 
 - (void)onKeyboardLayoutChanged {
@@ -767,67 +648,6 @@ static void CommonInit(FlutterViewController* controller) {
   if (_keyboardLayoutNotifier != nil) {
     _keyboardLayoutNotifier();
   }
-}
-
-- (void)sendInitialSettings {
-  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/32015.
-  [[NSDistributedNotificationCenter defaultCenter]
-      addObserver:self
-         selector:@selector(onSettingsChanged:)
-             name:@"AppleInterfaceThemeChangedNotification"
-           object:nil];
-  [self onSettingsChanged:nil];
-}
-
-- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([call.method isEqualToString:@"SystemNavigator.pop"]) {
-    [NSApp terminate:self];
-    result(nil);
-  } else if ([call.method isEqualToString:@"SystemSound.play"]) {
-    [self playSystemSound:call.arguments];
-    result(nil);
-  } else if ([call.method isEqualToString:@"Clipboard.getData"]) {
-    result([self getClipboardData:call.arguments]);
-  } else if ([call.method isEqualToString:@"Clipboard.setData"]) {
-    [self setClipboardData:call.arguments];
-    result(nil);
-  } else if ([call.method isEqualToString:@"Clipboard.hasStrings"]) {
-    result(@{@"value" : @([self clipboardHasStrings])});
-  } else {
-    result(FlutterMethodNotImplemented);
-  }
-}
-
-- (void)playSystemSound:(NSString*)soundType {
-  if ([soundType isEqualToString:@"SystemSoundType.alert"]) {
-    NSBeep();
-  }
-}
-
-- (NSDictionary*)getClipboardData:(NSString*)format {
-  NSPasteboard* pasteboard = self.pasteboard;
-  if ([format isEqualToString:@(kTextPlainFormat)]) {
-    NSString* stringInPasteboard = [pasteboard stringForType:NSPasteboardTypeString];
-    return stringInPasteboard == nil ? nil : @{@"text" : stringInPasteboard};
-  }
-  return nil;
-}
-
-- (void)setClipboardData:(NSDictionary*)data {
-  NSPasteboard* pasteboard = self.pasteboard;
-  NSString* text = data[@"text"];
-  [pasteboard clearContents];
-  if (text && ![text isEqual:[NSNull null]]) {
-    [pasteboard setString:text forType:NSPasteboardTypeString];
-  }
-}
-
-- (BOOL)clipboardHasStrings {
-  return [self.pasteboard stringForType:NSPasteboardTypeString].length > 0;
-}
-
-- (NSPasteboard*)pasteboard {
-  return [NSPasteboard generalPasteboard];
 }
 
 #pragma mark - FlutterViewReshapeListener

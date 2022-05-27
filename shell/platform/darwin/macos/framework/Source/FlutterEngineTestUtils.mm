@@ -5,6 +5,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 
 #include "flutter/testing/testing.h"
 
@@ -36,6 +37,29 @@ void FlutterEngineTest::IsolateCreateCallback(void* user_data) {
 
 void FlutterEngineTest::AddNativeCallback(const char* name, Dart_NativeFunction function) {
   native_resolver_->AddNativeCallback({name}, function);
+}
+
+id CreateMockFlutterEngine(NSString* pasteboardString) {
+  {
+    NSString* fixtures = @(testing::GetFixturesPath());
+    FlutterDartProject* project = [[FlutterDartProject alloc]
+        initWithAssetsPath:fixtures
+               ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                        project:project
+                                         allowHeadlessExecution:true];
+
+    // Mock pasteboard so that this test will work in environments without a
+    // real pasteboard.
+    id pasteboardMock = OCMClassMock([NSPasteboard class]);
+    OCMExpect([pasteboardMock stringForType:[OCMArg any]]).andDo(^(NSInvocation* invocation) {
+      NSString* returnValue = pasteboardString.length > 0 ? pasteboardString : nil;
+      [invocation setReturnValue:&returnValue];
+    });
+    id engineMock = OCMPartialMock(engine);
+    OCMStub([engineMock pasteboard]).andReturn(pasteboardMock);
+    return engineMock;
+  }
 }
 
 }  // namespace flutter::testing
