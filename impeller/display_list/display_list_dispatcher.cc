@@ -12,6 +12,7 @@
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vertices.h"
@@ -490,8 +491,23 @@ static Path ToPath(const SkPath& path) {
         break;
     }
   } while (verb != SkPath::Verb::kDone_Verb);
-  // TODO: Convert fill types.
-  return builder.TakePath();
+
+  FillType fill_type;
+  switch (path.getFillType()) {
+    case SkPathFillType::kWinding:
+      fill_type = FillType::kNonZero;
+      break;
+    case SkPathFillType::kEvenOdd:
+      fill_type = FillType::kOdd;
+      break;
+    case SkPathFillType::kInverseWinding:
+    case SkPathFillType::kInverseEvenOdd:
+      // TODO(104848): Support the inverse winding modes.
+      UNIMPLEMENTED;
+      fill_type = FillType::kNonZero;
+      break;
+  }
+  return builder.TakePath(fill_type);
 }
 
 static Path ToPath(const SkRRect& rrect) {
@@ -558,7 +574,7 @@ void DisplayListDispatcher::clipRRect(const SkRRect& rrect,
 void DisplayListDispatcher::clipPath(const SkPath& path,
                                      SkClipOp clip_op,
                                      bool is_aa) {
-  canvas_.ClipPath(ToPath(path));
+  canvas_.ClipPath(ToPath(path), ToClipOperation(clip_op));
 }
 
 // |flutter::Dispatcher|
