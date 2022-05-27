@@ -572,15 +572,17 @@ abstract class OutlinedBorder extends ShapeBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a == null)
+    if (a == null) {
       return scale(t);
+    }
     return null;
   }
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b == null)
+    if (b == null) {
       return scale(1.0 - t);
+    }
     return null;
   }
 
@@ -595,10 +597,12 @@ abstract class OutlinedBorder extends ShapeBorder {
   static OutlinedBorder? lerp(OutlinedBorder? a, OutlinedBorder? b, double t) {
     assert(t != null);
     ShapeBorder? result;
-    if (b != null)
+    if (b != null) {
       result = b.lerpFrom(a, t);
-    if (result == null && a != null)
+    }
+    if (result == null && a != null) {
       result = a.lerpTo(b, t);
+    }
     return result as OutlinedBorder? ?? (t < 0.5 ? a : b);
   }
 }
