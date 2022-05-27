@@ -64,6 +64,75 @@ void main() {
     expect(find.text('Next'), findsOneWidget);
   });
 
+  testWidgets('PopupMenuButton calls onOpened callback when the menu is opened', (WidgetTester tester) async {
+    int opens = 0;
+    late BuildContext popupContext;
+    final Key noItemsKey = UniqueKey();
+    final Key noCallbackKey = UniqueKey();
+    final Key withCallbackKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<int>(
+                key: noItemsKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[];
+                },
+                onOpened: () => opens++,
+              ),
+              PopupMenuButton<int>(
+                key: noCallbackKey,
+                itemBuilder: (BuildContext context) {
+                  popupContext = context;
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+              PopupMenuButton<int>(
+                key: withCallbackKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me, too!'),
+                    ),
+                  ];
+                },
+                onOpened: () => opens++,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Make sure callback is not called when the menu is not shown
+    await tester.tap(find.byKey(noItemsKey));
+    await tester.pump();
+    expect(opens, equals(0));
+
+    // Make sure everything works if no callback is provided
+    await tester.tap(find.byKey(noCallbackKey));
+    await tester.pump();
+    expect(opens, equals(0));
+
+    // Close the opened menu
+    Navigator.of(popupContext).pop();
+    await tester.pump();
+
+    // Make sure callback is called when the button is tapped
+    await tester.tap(find.byKey(withCallbackKey));
+    await tester.pump();
+    expect(opens, equals(1));
+  });
+
   testWidgets('PopupMenuButton calls onCanceled callback when an item is not selected', (WidgetTester tester) async {
     int cancels = 0;
     late BuildContext popupContext;
@@ -130,9 +199,10 @@ void main() {
     expect(cancels, equals(2));
   });
 
-  testWidgets('disabled PopupMenuButton will not call itemBuilder, onSelected or onCanceled', (WidgetTester tester) async {
+  testWidgets('disabled PopupMenuButton will not call itemBuilder, onOpened, onSelected or onCanceled', (WidgetTester tester) async {
     final GlobalKey popupButtonKey = GlobalKey();
     bool itemBuilderCalled = false;
+    bool onOpenedCalled = false;
     bool onSelectedCalled = false;
     bool onCanceledCalled = false;
 
@@ -158,6 +228,7 @@ void main() {
                         ),
                       ];
                     },
+                    onOpened: ()=> onOpenedCalled = true,
                     onSelected: (int selected) => onSelectedCalled = true,
                     onCanceled: () => onCanceledCalled = true,
                   ),
@@ -177,6 +248,7 @@ void main() {
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onSelectedCalled, isFalse);
 
     // Try to bring up the popup menu and tap outside it to cancel the menu
@@ -185,6 +257,7 @@ void main() {
     await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onCanceledCalled, isFalse);
 
     // Test again, with directional navigation mode and after focusing the button.
@@ -198,6 +271,7 @@ void main() {
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onSelectedCalled, isFalse);
 
     // Try to bring up the popup menu and tap outside it to cancel the menu
@@ -206,6 +280,7 @@ void main() {
     await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onCanceledCalled, isFalse);
   });
 
@@ -213,6 +288,7 @@ void main() {
     final Key popupButtonKey = UniqueKey();
     final GlobalKey childKey = GlobalKey();
     bool itemBuilderCalled = false;
+    bool onOpenedCalled = false;
     bool onSelectedCalled = false;
 
     await tester.pumpWidget(
@@ -233,6 +309,7 @@ void main() {
                     ),
                   ];
                 },
+                onOpened: () => onOpenedCalled = true,
                 onSelected: (int selected) => onSelectedCalled = true,
               ),
             ],
@@ -245,6 +322,7 @@ void main() {
 
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onSelectedCalled, isFalse);
   });
 
