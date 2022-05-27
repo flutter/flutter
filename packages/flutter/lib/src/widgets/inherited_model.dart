@@ -57,7 +57,7 @@ import 'framework.dart';
 ///
 /// ```dart
 /// class ABModel extends InheritedModel<String> {
-///   ABModel({ this.a, this.b, Widget child }) : super(child: child);
+///   ABModel({ this.a, this.b, super.child }) ;
 ///
 ///   final int? a;
 ///   final int? b;
