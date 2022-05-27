@@ -1,4 +1,4 @@
-Signature: d859d1be20be1de35aaef2bd6fa54bf0
+Signature: ed8cfbd8c9f2b674911005991786572a
 
 UNUSED LICENSES:
 
@@ -10000,7 +10000,9 @@ FILE: ../../../third_party/dart/runtime/vm/heap/gc_shared.h
 FILE: ../../../third_party/dart/runtime/vm/instructions.cc
 FILE: ../../../third_party/dart/runtime/vm/os_thread_absl.cc
 FILE: ../../../third_party/dart/runtime/vm/os_thread_absl.h
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/js_names.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/runtime_metrics.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_util_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/synced/embedded_names.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/finalizer_patch.dart
