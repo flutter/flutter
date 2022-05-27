@@ -7,14 +7,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 
 import 'binding.dart';
-import 'deprecated.dart';
 
 /// Ensure the appropriate test binding is initialized.
 TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
