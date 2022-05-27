@@ -16,6 +16,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'media_query.dart';
 import 'overlay.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
@@ -212,6 +213,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   bool get _hasSelectionOverlayGeometry => _selectionDelegate.value.startSelectionPoint != null
                                         || _selectionDelegate.value.endSelectionPoint != null;
 
+  Orientation? _lastOrientation;
+
   @override
   void initState() {
     super.initState();
@@ -226,6 +229,33 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return;
+    }
+
+    // Hide the text selection toolbar on mobile when orientation changes.
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    if (_lastOrientation == null) {
+      _lastOrientation = orientation;
+      return;
+    }
+    if (orientation != _lastOrientation) {
+      _lastOrientation = orientation;
+      hideToolbar(defaultTargetPlatform == TargetPlatform.android);
+    }
   }
 
   @override
@@ -699,7 +729,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   void hideToolbar([bool hideHandles = true]) {
     _selectionOverlay?.hideToolbar();
     if (hideHandles) {
-      _selectionOverlay?.hideToolbar();
+      _selectionOverlay?.hideHandles();
     }
   }
 

@@ -1043,6 +1043,46 @@ void main() {
       expect(clipboardData['text'], 'thank');
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
   });
+
+  testWidgets('toolbar hidden on mobile when orientation changes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    await tester.pumpAndSettle();
+    // Text selection toolbar has appeared.
+    expect(find.text('Copy'), findsOneWidget);
+
+    // Hide the toolbar by changing orientation.
+    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Copy'), findsNothing);
+
+    // Handles should be hidden as well on Android
+    expect(
+      find.descendant(
+        of: find.byType(CompositedTransformFollower),
+        matching: find.byType(Padding),
+      ),
+      defaultTargetPlatform == TargetPlatform.android ? findsNothing : findsNWidgets(2),
+    );
+  },
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+  );
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
