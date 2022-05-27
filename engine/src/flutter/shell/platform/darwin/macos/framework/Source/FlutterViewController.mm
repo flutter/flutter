@@ -220,7 +220,12 @@ NSData* currentKeyboardLayoutData() {
  */
 - (void)dispatchMouseEvent:(nonnull NSEvent*)event phase:(FlutterPointerPhase)phase;
 
-// TODO
+/**
+ * Called when the active keyboard input source changes.
+ *
+ * Input sources may be simple keyboard layouts, or more complex input methods involving an IME,
+ * such as Chinese, Japanese, and Korean.
+ */
 - (void)onKeyboardLayoutChanged;
 
 @end
