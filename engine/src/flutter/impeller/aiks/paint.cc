@@ -43,16 +43,9 @@ std::shared_ptr<Contents> Paint::WithFilters(
     std::optional<bool> is_solid_color) const {
   bool is_solid_color_val = is_solid_color.value_or(!contents);
 
-  if (mask_blur.has_value()) {
-    if (is_solid_color_val) {
-      input = FilterContents::MakeGaussianBlur(
-          FilterInput::Make(input), mask_blur->sigma, mask_blur->sigma,
-          mask_blur->blur_style);
-    } else {
-      input = FilterContents::MakeBorderMaskBlur(
-          FilterInput::Make(input), mask_blur->sigma, mask_blur->sigma,
-          mask_blur->blur_style);
-    }
+  if (mask_filter.has_value()) {
+    const MaskFilterProc& filter = mask_filter.value();
+    input = filter(FilterInput::Make(input), is_solid_color_val);
   }
 
   return input;

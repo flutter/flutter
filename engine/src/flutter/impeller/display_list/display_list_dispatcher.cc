@@ -276,14 +276,23 @@ static FilterContents::BlurStyle ToBlurStyle(SkBlurStyle blur_style) {
 void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
   // Needs https://github.com/flutter/flutter/issues/95434
   if (filter == nullptr) {
-    paint_.mask_blur = std::nullopt;
+    paint_.mask_filter = std::nullopt;
     return;
   }
   switch (filter->type()) {
     case flutter::DlMaskFilterType::kBlur: {
       auto blur = filter->asBlur();
-      paint_.mask_blur = {.blur_style = ToBlurStyle(blur->style()),
-                          .sigma = FilterContents::Sigma(blur->sigma())};
+
+      auto style = ToBlurStyle(blur->style());
+      auto sigma = FilterContents::Sigma(blur->sigma());
+
+      paint_.mask_filter = [style, sigma](FilterInput::Ref input,
+                                          bool is_solid_color) {
+        if (is_solid_color) {
+          return FilterContents::MakeGaussianBlur(input, sigma, sigma, style);
+        }
+        return FilterContents::MakeBorderMaskBlur(input, sigma, sigma, style);
+      };
       break;
     }
     case flutter::DlMaskFilterType::kUnknown:

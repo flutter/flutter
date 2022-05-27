@@ -16,12 +16,11 @@
 
 namespace impeller {
 
-struct MaskBlur {
-  FilterContents::BlurStyle blur_style;
-  FilterContents::Sigma sigma;
-};
-
 struct Paint {
+  using MaskFilterProc =
+      std::function<std::shared_ptr<FilterContents>(FilterInput::Ref,
+                                                    bool is_solid_color)>;
+
   enum class Style {
     kFill,
     kStroke,
@@ -36,7 +35,8 @@ struct Paint {
   Scalar stroke_miter = 4.0;
   Style style = Style::kFill;
   Entity::BlendMode blend_mode = Entity::BlendMode::kSourceOver;
-  std::optional<MaskBlur> mask_blur;
+
+  std::optional<MaskFilterProc> mask_filter;
 
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.
