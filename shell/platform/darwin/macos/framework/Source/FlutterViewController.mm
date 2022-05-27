@@ -24,16 +24,16 @@
 #import "flutter/shell/platform/embedder/embedder.h"
 
 namespace {
-using flutter::LayoutClue;
 using flutter::KeyboardLayoutNotifier;
+using flutter::LayoutClue;
 
 /// Clipboard plain text format.
 constexpr char kTextPlainFormat[] = "text/plain";
 
 /// The private notification for voice over.
-static NSString* const EnhancedUserInterfaceNotification =
+static NSString* const kEnhancedUserInterfaceNotification =
     @"NSApplicationDidChangeAccessibilityEnhancedUserInterfaceNotification";
-static NSString* const EnhancedUserInterfaceKey = @"AXEnhancedUserInterface";
+static NSString* const kEnhancedUserInterfaceKey = @"AXEnhancedUserInterface";
 
 // Use different device ID for mouse and pan/zoom events, since we can't differentiate the actual
 // device (mouse v.s. trackpad).
@@ -350,7 +350,7 @@ static void CommonInit(FlutterViewController* controller) {
   // macOS fires this private message when VoiceOver turns on or off.
   [center addObserver:controller
              selector:@selector(onAccessibilityStatusChanged:)
-                 name:EnhancedUserInterfaceNotification
+                 name:kEnhancedUserInterfaceNotification
                object:nil];
   [center addObserver:controller
              selector:@selector(applicationWillTerminate:)
@@ -734,7 +734,7 @@ static void CommonInit(FlutterViewController* controller) {
   if (!_engine) {
     return;
   }
-  BOOL enabled = [notification.userInfo[EnhancedUserInterfaceKey] boolValue];
+  BOOL enabled = [notification.userInfo[kEnhancedUserInterfaceKey] boolValue];
   if (!enabled && self.viewLoaded && [_textInputPlugin isFirstResponder]) {
     // The client (i.e. the FlutterTextField) of the textInputPlugin is a sibling
     // of the FlutterView. macOS will pick the ancestor to be the next responder
@@ -747,7 +747,7 @@ static void CommonInit(FlutterViewController* controller) {
     // manually pick the next responder.
     [self.view.window makeFirstResponder:_flutterView];
   }
-  _engine.semanticsEnabled = [notification.userInfo[EnhancedUserInterfaceKey] boolValue];
+  _engine.semanticsEnabled = [notification.userInfo[kEnhancedUserInterfaceKey] boolValue];
 }
 
 - (void)onSettingsChanged:(NSNotification*)notification {
