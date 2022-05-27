@@ -1141,11 +1141,11 @@ class ThemeData with Diagnosticable {
   /// inconsistent look and feel in your app as some widgets are migrated
   /// while others have yet to be.
   ///
-  /// Defaults to false. After all the migrated widgets
-  /// have landed on stable, we will change this to be true by default. After
-  /// that change has landed on stable, we will deprecate this flag and remove
-  /// all uses of it. Everything will use the Material 3 look and feel at
-  /// that point.
+  /// Defaults to false. When the Material 3 specification is deemed complete
+  /// and all widgets are migrated on stable, we will change this flag to be
+  /// true by default. After that change has landed on stable, we will deprecate
+  /// this flag and remove all uses of it. At that point, the `material` library
+  /// will aim to only support Material 3.
   ///
   /// This flag affects styles and components.
   /// 
