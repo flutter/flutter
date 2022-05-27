@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -150,11 +151,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     final double rightMargin = mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding;
 
     final Offset anchorAboveAdjusted = Offset(
-      (anchorAbove.dx - localAdjustment.dx - contentPaddingAdjustment.dx).clamp(leftMargin, rightMargin),
+      clampDouble(anchorAbove.dx - localAdjustment.dx - contentPaddingAdjustment.dx, leftMargin, rightMargin),
       anchorAbove.dy - localAdjustment.dy - contentPaddingAdjustment.dy,
     );
     final Offset anchorBelowAdjusted = Offset(
-      (anchorBelow.dx - localAdjustment.dx + contentPaddingAdjustment.dx).clamp(leftMargin, rightMargin),
+      clampDouble(anchorBelow.dx - localAdjustment.dx + contentPaddingAdjustment.dx, leftMargin, rightMargin),
       anchorBelow.dy - localAdjustment.dy + contentPaddingAdjustment.dy,
     );
 
