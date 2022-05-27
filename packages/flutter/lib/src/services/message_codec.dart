@@ -146,7 +146,7 @@ class PlatformException implements Exception {
   /// }
   /// ```
   ///
-  /// On Android this field is populated when an exception is thrown in the method call handler,
+  /// On Android this field is populated when a `RuntimeException` or a subclass of it is thrown in the method call handler,
   /// as shown in the following example:
   ///
   /// ```kotlin
