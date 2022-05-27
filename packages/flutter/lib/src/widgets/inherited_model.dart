@@ -34,7 +34,6 @@ import 'framework.dart';
 ///
 /// ```dart
 /// class MyModel extends InheritedModel<String> {
-///   const InheritedModelExample({ super.key });
 ///
 ///   // ...
 ///   static MyModel? of(BuildContext context, String aspect) {
