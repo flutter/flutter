@@ -1148,7 +1148,7 @@ class ThemeData with Diagnosticable {
   /// will aim to only support Material 3.
   ///
   /// This flag affects styles and components.
-  /// 
+  ///
   /// ## Styles
   ///   * [Color](https://m3.material.io/styles/color/the-color-system): [ColorScheme], [Material]
   ///   * [Shape](https://m3.material.io/styles/shape) (see components below)
