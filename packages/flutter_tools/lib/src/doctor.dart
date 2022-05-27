@@ -534,8 +534,9 @@ class FlutterValidator extends DoctorValidator {
     final String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
 
     // The tool sets the channel as "unknown", if the tracking branch isn't a
-    // git remote, and sets the frameworkVersion as  "0.0.0-unknown" if "git
-    // describe" on HEAD doesn't produce an expected format to be parsed.
+    // git remote, and sets the frameworkVersion as "0.0.0-unknown" if "git
+    // describe" on HEAD doesn't produce an expected format to be parsed for the
+    // frameworkVersion.
     if (versionChannel == 'unknown' || frameworkVersion == '0.0.0-unknown') {
       return ValidationMessage.hint(flutterVersionMessage);
     }
@@ -546,12 +547,13 @@ class FlutterValidator extends DoctorValidator {
     final String? repositoryUrl = version.repositoryUrl;
     final VersionCheckError? upstreamValidationError = VersionUpstreamValidator(version: version, platform: _platform).run();
 
+    // VersionUpstreamValidator can produce an error if repositoryUrl is null
     if (upstreamValidationError != null) {
       final String errorMessage = upstreamValidationError.message;
       if(errorMessage.contains('could not determine the remote upstream which is being tracked')) {
-        // This will be true only if repositoryUrl is null
         return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown'));
       }
+      // At this point, repositoryUrl must not be null
       if (errorMessage.contains('Flutter SDK is tracking a non-standard remote')) {
         return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrlNonStandard(repositoryUrl!));
       }
