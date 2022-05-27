@@ -1225,9 +1225,9 @@ TEST_F(ShellTest, GetUsedThisFrameShouldBeSetBeforeEndFrame) {
   auto end_frame_callback =
       [&](bool should_resubmit_frame,
           fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-        end_frame_latch.Signal();
         // We expect `used_this_frame` to be false.
         used_this_frame = external_view_embedder->GetUsedThisFrame();
+        end_frame_latch.Signal();
       };
   external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
       end_frame_callback, PostPrerollResult::kSuccess, true);
