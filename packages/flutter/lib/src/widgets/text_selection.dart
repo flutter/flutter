@@ -1285,12 +1285,7 @@ class TextSelectionGestureDetectorBuilder {
   /// The [delegate] must not be null.
   TextSelectionGestureDetectorBuilder({
     required this.delegate,
-    required this.context,
   }) : assert(delegate != null);
-
-  // TODO(justinmc): Double check documentation.
-  /// The [BuildContext] where the [TextSelectionGestureDetector] will be built.
-  final BuildContext context;
 
   /// The delegate for this [TextSelectionGestureDetectorBuilder].
   ///
@@ -1724,7 +1719,10 @@ class TextSelectionGestureDetectorBuilder {
       );
     }
 
-    final ScrollableState? scrollableState = Scrollable.of(context);
+    final ScrollableState? scrollableState =
+        delegate.editableTextKey.currentContext == null
+            ? null
+            : Scrollable.of(delegate.editableTextKey.currentContext!);
     _dragStartScrollOffset = scrollableState == null
         ? 0.0
         : scrollableState.position.pixels;
@@ -1752,7 +1750,10 @@ class TextSelectionGestureDetectorBuilder {
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-      final ScrollableState? scrollableState = Scrollable.of(context);
+      final ScrollableState? scrollableState =
+          delegate.editableTextKey.currentContext == null
+              ? null
+              : Scrollable.of(delegate.editableTextKey.currentContext!);
       final double currentScrollDy = scrollableState == null
           ? 0.0
           : scrollableState.position.pixels;

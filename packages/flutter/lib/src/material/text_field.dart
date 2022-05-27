@@ -39,7 +39,6 @@ typedef InputCounterWidgetBuilder = Widget? Function(
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({
     required _TextFieldState state,
-    required super.context,
   }) : _state = state,
        super(delegate: state);
 
@@ -924,7 +923,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(context: context, state: this);
+    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
     if (widget.controller == null) {
       _createLocalController();
     }

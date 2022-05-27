@@ -49,7 +49,6 @@ class _TextSpanEditingController extends TextEditingController {
 class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _SelectableTextSelectionGestureDetectorBuilder({
     required _SelectableTextState state,
-    required super.context,
   }) : _state = state,
        super(delegate: state);
 
@@ -484,7 +483,6 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   void initState() {
     super.initState();
     _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(
-      context: context,
       state: this,
     );
     _controller = _TextSpanEditingController(

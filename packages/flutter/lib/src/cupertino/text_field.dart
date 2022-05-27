@@ -94,7 +94,6 @@ enum OverlayVisibilityMode {
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
     required _CupertinoTextFieldState state,
-    required super.context,
   }) : _state = state,
        super(delegate: state);
 
@@ -856,7 +855,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   void initState() {
     super.initState();
     _selectionGestureDetectorBuilder = _CupertinoTextFieldSelectionGestureDetectorBuilder(
-      context: context,
       state: this,
     );
     if (widget.controller == null) {

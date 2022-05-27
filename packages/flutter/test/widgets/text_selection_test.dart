@@ -86,7 +86,6 @@ void main() {
           builder: (BuildContext context) {
             final TextSelectionGestureDetectorBuilder provider =
                 TextSelectionGestureDetectorBuilder(
-                  context: context,
                   delegate: delegate,
                 );
             return provider.buildGestureDetector(
@@ -1333,7 +1332,6 @@ void main() {
               builder: (BuildContext context) {
                 final TextSelectionGestureDetectorBuilder provider =
                     TextSelectionGestureDetectorBuilder(
-                      context: context,
                       delegate: delegate,
                     );
                 return provider.buildGestureDetector(
