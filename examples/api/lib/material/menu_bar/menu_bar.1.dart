@@ -31,35 +31,40 @@ enum MenuSelection {
 }
 
 
-class Home extends StatefulWidget {
+class Home extends StatelessWidget {
   const Home({super.key});
 
-  @override
-  State<Home> createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  bool isPlatformMenu = false;
-  TextDirection textDirection = TextDirection.ltr;
-  bool enabled = true;
-  bool checked = false;
-
   void _onSelected(MenuSelection item) {
-    debugPrint('Activated ${item.name}');
+    debugPrint('Selected ${item.name}');
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-    final bool meta = isMacOS;
-    final bool control = !meta;
+    // Because the platforms have different modifier conventions, we need to
+    // select whether we want Ctrl or Meta for the modifier key on our
+    // shortcuts.
+    final bool isAppleOS;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        isAppleOS = false;
+        break;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        isAppleOS = true;
+        break;
+    }
+    final bool meta = isAppleOS;
+    final bool control = !isAppleOS;
+
     final bool hasAbout = PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.about);
     final bool hasQuit = PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.quit);
 
     return Column(
       children: <Widget>[
         MenuBar.adaptive(
-          enabled: enabled,
           menus: <MenuItem>[
             MenuBarMenu(
               label: MenuSelection.file.label,

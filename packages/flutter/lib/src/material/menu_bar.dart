@@ -276,15 +276,13 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
 /// A controller that allows control of a [MenuBar].
 ///
 /// Normally, it's not necessary to create a `MenuBarController` to use a
-/// [MenuBar], but if you need to be able to close any open menus with the
-/// [closeAll] method in response to an event, you can create one and pass it to
+/// [MenuBar], but if an open menu needs to be closed with the [closeAll] method
+/// in response to an event, a `MenuBarController` can be created and passed to
 /// the [MenuBar].
 ///
-/// If the place you wish to close all the menus (for instance, when a control
-/// in one of the icons is selected), you can call [closeAll] on the controller
-/// to do so. If the control is a descendant of the [MenuBar], you don't need to
-/// create a `MenuBarController`, since the [MenuBar] will create one
-/// automatically. You can retrieve it with the [MenuBarController.of] method.
+/// If the control is a descendant of the [MenuBar], a `MenuBarController`
+/// doesn't need to be created, since the [MenuBar] will create one
+/// automatically. It can be retrieved with the [MenuBarController.of] method.
 abstract class MenuBarController with ChangeNotifier {
   /// A factory that constructs a [MenuBarController] for use with a [MenuBar].
   factory MenuBarController() => _MenuBarController();
@@ -314,25 +312,23 @@ abstract class MenuBarController with ChangeNotifier {
   /// A testing method used to provide access to a testing description of the
   /// currently open menu for tests.
   ///
-  /// Only meant to be called by tests.
+  /// Only meant to be called by tests. Will return null in release mode.
   @visibleForTesting
-  String? get testingCurrentItem;
+  String? get debugCurrentItem;
 
   /// A testing method used to provide access to a testing description of the
   /// currently focused menu item for tests.
   ///
-  /// Only meant to be called by tests.
+  /// Only meant to be called by tests. Will return null in release mode.
   @visibleForTesting
-  String? get testingFocusedItem;
+  String? get debugFocusedItem;
 }
 
 /// A private implementation of [MenuBarController], so that we can have a
 /// separate API for the [MenuBar] internals to use. This is the class that gets
 /// instantiated when the [MenuBarController] factory constructor is called.
 class _MenuBarController extends MenuBarController with Diagnosticable {
-  _MenuBarController()
-      : _menuBarContext = null,
-        super._();
+  _MenuBarController() : super._();
 
   // The root of the menu node tree.
   _MenuNode root = _MenuNode(item: const PlatformMenu(label: 'root', menus: <MenuItem>[]));
@@ -344,9 +340,8 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
   // or its attributes have changed, and its dependents need updating.
   int menuSerial = 0;
 
-  // The map of focus nodes to menus. The reverse map of the
-  // _registeredFocusNodes. This is used to look up which menu node goes with
-  // which focus node when finding the currently focused menu node.
+  // The map of focus nodes to menus. This is used to look up which menu node
+  // goes with which focus node when finding the currently focused menu node.
   final Map<FocusNode, _MenuNode> _focusNodes = <FocusNode, _MenuNode>{};
 
   // The render boxes of all the MenuBarMenus that are displaying menu items.
@@ -699,19 +694,27 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
   }
 
   @override
-  String? get testingCurrentItem {
-    if (openMenu == null) {
-      return null;
-    }
-    return openMenus.map<String>((_MenuNode node) => node.toStringShort()).join(' > ');
+  String? get debugCurrentItem {
+    String? result;
+    assert((){
+      if (openMenu != null) {
+        result = openMenus.map<String>((_MenuNode node) => node.toStringShort()).join(' > ');
+      }
+      return true;
+    }());
+    return result;
   }
 
   @override
-  String? get testingFocusedItem {
-    if (primaryFocus?.context == null) {
-      return null;
-    }
-    return _focusNodes[primaryFocus]?.toStringShort();
+  String? get debugFocusedItem {
+    String? result;
+    assert((){
+      if (primaryFocus?.context != null) {
+        result = _focusNodes[primaryFocus]?.toStringShort();
+      }
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -943,7 +946,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       return false;
     }
     if (focusedItem.parent == controller.root) {
-      // If you press up on a top level menu, then close all the menus.
+      // Pressing on a top level menu closes all the menus.
       controller.openMenu = null;
       return true;
     }
@@ -954,7 +957,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     if (previousFocusable != null) {
       controller.openMenu = previousFocusable;
     } else if (focusedItem.parent?.parent == controller.root) {
-      // If you press up on a next-to-top level menu, then move to the parent.
+      // Pressing on a next-to-top level menu, moves to the parent.
       controller.openMenu = focusedItem.parent;
     }
     return true;
@@ -1127,7 +1130,7 @@ abstract class _MenuBarItemDefaults extends StatefulWidget implements PlatformMe
 ///
 /// {@tool sample}
 /// This example shows a [MenuBar] that contains a simple menu for a desktop
-/// application.  It is set up to be adaptive, so that on macOS it will use the
+/// application. It is set up to be adaptive, so that on macOS it will use the
 /// system menu bar, and on other systems will use a Material [MenuBar].
 ///
 /// On macOS, it will add the "About" and "Quit" system-provided menu items.
@@ -1216,8 +1219,8 @@ class MenuBar extends PlatformMenuBar {
 
   /// An optional controller that allows outside control of the menu bar.
   ///
-  /// Setting this controller will allow you to close any open menus from
-  /// outside of the menu bar using [MenuBarController.closeAll].
+  /// Setting this controller will allow closing of any open menus from outside
+  /// of the menu bar using [MenuBarController.closeAll].
   ///
   /// If a controller is not set, the widget will create its own controller
   /// internally.
@@ -2409,8 +2412,7 @@ class _MenuBarItemLabel extends StatelessWidget {
 /// This helper class is typically used by the [MenuBarItem] class to display a
 /// label for its assigned shortcut.
 ///
-/// Call [getShortcutLabel] with the [ShortcutActivator] you wish to get a label
-/// for.
+/// Call [getShortcutLabel] with the [ShortcutActivator] to get a label for it.
 ///
 /// For instance, calling [getShortcutLabel] with `SingleActivator(trigger:
 /// LogicalKeyboardKey.keyA, control: true)` would return "⌃ A" on macOS, "Ctrl

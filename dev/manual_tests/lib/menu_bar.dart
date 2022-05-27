@@ -42,13 +42,12 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  late MenuBarController controller;
-  bool isPlatformMenu = false;
-  VisualDensity density = VisualDensity.standard;
-  TextDirection textDirection = TextDirection.ltr;
-  bool enabled = true;
-  bool addItem = false;
-  bool checked = false;
+  final MenuBarController _controller = MenuBarController();
+  VisualDensity _density = VisualDensity.standard;
+  TextDirection _textDirection = TextDirection.ltr;
+  bool _enabled = true;
+  bool _addItem = false;
+  bool _checked = false;
 
   void _itemSelected(TestMenu item) {
     debugPrint('App: Selected item ${item.label}');
@@ -63,24 +62,18 @@ class _HomeState extends State<Home> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    controller = MenuBarController();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Directionality(
-      textDirection: textDirection,
+      textDirection: _textDirection,
       child: Builder(builder: (BuildContext context) {
         return Theme(
-          data: theme.copyWith(visualDensity: density),
+          data: theme.copyWith(visualDensity: _density),
           child: Column(
             children: <Widget>[
               MenuBar(
-                enabled: enabled,
-                controller: controller,
+                enabled: _enabled,
+                controller: _controller,
                 menus: <MenuItem>[
                   MenuBarMenu(
                     label: TestMenu.mainMenu1.label,
@@ -92,20 +85,20 @@ class _HomeState extends State<Home> {
                     },
                     menus: <MenuItem>[
                       MenuBarItem(
-                          label: TestMenu.subMenu1.label,
-                          shortcut: const SingleActivator(
-                            LogicalKeyboardKey.keyB,
-                            control: true,
-                          ),
-                          leadingIcon:
-                              checked ? const Icon(Icons.check_box) : const Icon(Icons.check_box_outline_blank),
-                          trailingIcon: const Icon(Icons.assessment),
-                          onSelected: () {
-                            _itemSelected(TestMenu.subMenu1);
-                            setState(() {
-                              checked = !checked;
-                            });
-                          }),
+                        label: TestMenu.subMenu1.label,
+                        shortcut: const SingleActivator(
+                          LogicalKeyboardKey.keyB,
+                          control: true,
+                        ),
+                        leadingIcon: _checked ? const Icon(Icons.check_box) : const Icon(Icons.check_box_outline_blank),
+                        trailingIcon: const Icon(Icons.assessment),
+                        onSelected: () {
+                          _itemSelected(TestMenu.subMenu1);
+                          setState(() {
+                            _checked = !_checked;
+                          });
+                        },
+                      ),
                       MenuBarItem(
                         label: TestMenu.subMenu2.label,
                         leadingIcon: const Icon(Icons.send),
@@ -164,7 +157,7 @@ class _HomeState extends State<Home> {
                         menus: <MenuItem>[
                           MenuBarItem(
                             label: TestMenu.subSubMenu1.label,
-                            shortcut: addItem
+                            shortcut: _addItem
                                 ? const SingleActivator(
                                     LogicalKeyboardKey.f11,
                                     control: true,
@@ -183,7 +176,7 @@ class _HomeState extends State<Home> {
                               _itemSelected(TestMenu.subSubMenu2);
                             },
                           ),
-                          if (addItem)
+                          if (_addItem)
                             MenuBarItem(
                               label: TestMenu.subSubMenu3.label,
                               onSelected: () {
@@ -208,18 +201,6 @@ class _HomeState extends State<Home> {
                         onSelected: () {},
                       ),
                       MenuBarItem(
-                        label: TestMenu.subMenu7.label,
-                        onSelected: () {},
-                      ),
-                      MenuBarItem(
-                        label: TestMenu.subMenu7.label,
-                        onSelected: () {},
-                      ),
-                      MenuBarItem(
-                        label: TestMenu.subMenu8.label,
-                        onSelected: () {},
-                      ),
-                      MenuBarItem(
                         label: TestMenu.subMenu8.label,
                         onSelected: () {},
                       ),
@@ -229,28 +210,28 @@ class _HomeState extends State<Home> {
               ),
               Expanded(
                 child: _Controls(
-                  density: density,
-                  enabled: enabled,
-                  addItem: addItem,
-                  textDirection: textDirection,
+                  density: _density,
+                  enabled: _enabled,
+                  addItem: _addItem,
+                  textDirection: _textDirection,
                   onDensityChanged: (VisualDensity value) {
                     setState(() {
-                      density = value;
+                      _density = value;
                     });
                   },
                   onTextDirectionChanged: (TextDirection value) {
                     setState(() {
-                      textDirection = value;
+                      _textDirection = value;
                     });
                   },
                   onEnabledChanged: (bool value) {
                     setState(() {
-                      enabled = value;
+                      _enabled = value;
                     });
                   },
                   onAddItemChanged: (bool value) {
                     setState(() {
-                      addItem = value;
+                      _addItem = value;
                     });
                   },
                 ),
@@ -297,13 +278,14 @@ class _Controls extends StatelessWidget {
               children: <Widget>[
                 Text('Horizontal Density: ${density.horizontal.toStringAsFixed(1)}'),
                 Slider(
-                    value: density.horizontal,
-                    max: 4,
-                    min: -4,
-                    divisions: 12,
-                    onChanged: (double value) {
-                      onDensityChanged(VisualDensity(horizontal: value, vertical: density.vertical));
-                    }),
+                  value: density.horizontal,
+                  max: 4,
+                  min: -4,
+                  divisions: 12,
+                  onChanged: (double value) {
+                    onDensityChanged(VisualDensity(horizontal: value, vertical: density.vertical));
+                  },
+                ),
               ],
             ),
           ),
@@ -314,13 +296,14 @@ class _Controls extends StatelessWidget {
               children: <Widget>[
                 Text('Vertical Density: ${density.vertical.toStringAsFixed(1)}'),
                 Slider(
-                    value: density.vertical,
-                    max: 4,
-                    min: -4,
-                    divisions: 12,
-                    onChanged: (double value) {
-                      onDensityChanged(VisualDensity(horizontal: density.horizontal, vertical: value));
-                    }),
+                  value: density.vertical,
+                  max: 4,
+                  min: -4,
+                  divisions: 12,
+                  onChanged: (double value) {
+                    onDensityChanged(VisualDensity(horizontal: density.horizontal, vertical: value));
+                  },
+                ),
               ],
             ),
           ),

@@ -20,7 +20,7 @@ void main() {
   final List<TestMenu> closed = <TestMenu>[];
 
   void collectPath() {
-    openPath = controller.testingCurrentItem;
+    openPath = controller.debugCurrentItem;
   }
 
   void onSelected(TestMenu item) {
@@ -39,7 +39,7 @@ void main() {
   }
 
   void handleFocusChange() {
-    focusedMenu = controller.testingFocusedItem;
+    focusedMenu = controller.debugFocusedItem;
   }
 
   setUp(() {
@@ -50,7 +50,7 @@ void main() {
     closed.clear();
     controller = MenuBarController();
     collectPath();
-    focusedMenu = controller.testingFocusedItem;
+    focusedMenu = controller.debugFocusedItem;
   });
 
   tearDown(() {
@@ -96,12 +96,6 @@ void main() {
   Material getMenuBarMaterial(WidgetTester tester) {
     return tester.widget<Material>(
       find.descendant(of: findMenuTopLevelBar(), matching: find.byType(Material)).first,
-    );
-  }
-
-  Material getSubMenuMaterial(WidgetTester tester) {
-    return tester.widget<Material>(
-      find.descendant(of: findMenuBarMenu(), matching: find.byType(Material)).first,
     );
   }
 

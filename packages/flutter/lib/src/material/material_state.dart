@@ -715,8 +715,8 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 
   @override
   String toString() {
-    if (value is double || value is double?) {
-      return 'MaterialStatePropertyAll(${debugFormatDouble(value as double?)})';
+    if (value is double) {
+      return 'MaterialStatePropertyAll(${debugFormatDouble(value as double)})';
     } else {
       return 'MaterialStatePropertyAll($value)';
     }
