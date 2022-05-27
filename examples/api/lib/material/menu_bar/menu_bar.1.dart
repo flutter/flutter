@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 void main() {
   runApp(const MaterialApp(
     title: 'Adaptive Menu Sample',
-    home: Material(child: Home()),
+    home: Material(child: MenuApp()),
   ));
 }
 
@@ -31,8 +31,8 @@ enum MenuSelection {
 }
 
 
-class Home extends StatelessWidget {
-  const Home({super.key});
+class MenuApp extends StatelessWidget {
+  const MenuApp({super.key});
 
   void _onSelected(MenuSelection item) {
     debugPrint('Selected ${item.name}');
