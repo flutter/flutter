@@ -1151,7 +1151,7 @@ class ThemeData with Diagnosticable {
   /// 
   /// ## Styles
   ///   * [Color](https://m3.material.io/styles/color/the-color-system): [ColorScheme], [Material]
-  ///   * [Shape](https://m3.material.io/styles/shape): in components below
+  ///   * [Shape](https://m3.material.io/styles/shape) (see components below)
   ///   * [Typography](https://m3.material.io/styles/typography): `typography` (see table below)
   ///
   /// ## Components
