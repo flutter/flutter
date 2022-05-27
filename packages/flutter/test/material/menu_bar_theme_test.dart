@@ -6,122 +6,186 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('defaults are used when no theme is specified.', (WidgetTester tester) async {
+  late MenuBarController controller;
+  void onSelected(TestMenu item) {}
 
+  setUp(() {
+    controller = MenuBarController();
   });
+
+  tearDown(() {
+    controller.closeAll();
+  });
+
+  Finder findMenuBarMenu() {
+    return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuBarMenuList');
+  }
+
+  Finder findMenuTopLevelBar() {
+    return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuBarTopLevelBar');
+  }
+
+  Material getMenuBarMaterial(WidgetTester tester) {
+    return tester.widget<Material>(
+      find.descendant(of: findMenuTopLevelBar(), matching: find.byType(Material)).first,
+    );
+  }
+
+  Material getSubMenuMaterial(WidgetTester tester) {
+    return tester.widget<Material>(
+      find.descendant(of: findMenuBarMenu(), matching: find.byType(Material)).first,
+    );
+  }
+
+  testWidgets('theme is honored', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(builder: (BuildContext context) {
+            return MenuBarTheme(
+              data: MenuBarTheme.of(context).copyWith(
+                barBackgroundColor: MaterialStateProperty.all<Color?>(Colors.green),
+                itemTextStyle: MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.titleMedium),
+                barElevation: MaterialStateProperty.all<double?>(20.0),
+                barHeight: 52.0,
+                menuBackgroundColor: MaterialStateProperty.all<Color?>(Colors.red),
+                menuElevation: MaterialStateProperty.all<double?>(15.0),
+                menuShape: MaterialStateProperty.all<ShapeBorder?>(const StadiumBorder()),
+                menuPadding: const EdgeInsets.all(10.0),
+              ),
+              child: Column(
+                children: <Widget>[
+                  MenuBar(
+                    menus: createTestMenus(onSelected: onSelected),
+                  ),
+                  const Expanded(child: Placeholder()),
+                ],
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+
+    // Open a test menu.
+    await tester.tap(find.text(TestMenu.mainMenu1.label));
+    await tester.pump();
+    expect(tester.getRect(findMenuTopLevelBar()), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 52.0)));
+    final Material menuBarMaterial = getMenuBarMaterial(tester);
+    expect(menuBarMaterial.elevation, equals(20));
+    expect(menuBarMaterial.color, equals(Colors.green));
+
+    final Material subMenuMaterial = getSubMenuMaterial(tester);
+    expect(tester.getRect(findMenuBarMenu()), equals(const Rect.fromLTRB(136.0, 50.0, 440.0, 230.0)));
+    expect(subMenuMaterial.elevation, equals(15));
+    expect(subMenuMaterial.color, equals(Colors.red));
+  });
+  /// TODO(gspencergoog): add more tests...
 }
 
-const List<String> mainMenu = <String>[
-  'Menu 0',
-  'Menu 1',
-  'Menu 2',
-];
+enum TestMenu {
+  mainMenu0('Menu 0'),
+  mainMenu1('Menu 1'),
+  mainMenu2('Menu 2'),
+  subMenu00('Sub Menu 00'),
+  subMenu10('Sub Menu 10'),
+  subMenu11('Sub Menu 11'),
+  subMenu12('Sub Menu 12'),
+  subMenu20('Sub Menu 20'),
+  subSubMenu100('Sub Sub Menu 100'),
+  subSubMenu101('Sub Sub Menu 101'),
+  subSubMenu102('Sub Sub Menu 102'),
+  subSubMenu103('Sub Sub Menu 103');
 
-const List<String> subMenu0 = <String>[
-  'Sub Menu 00',
-];
-
-const List<String> subMenu1 = <String>[
-  'Sub Menu 10',
-  'Sub Menu 11',
-  'Sub Menu 12',
-];
-
-const List<String> subSubMenu10 = <String>[
-  'Sub Sub Menu 100',
-  'Sub Sub Menu 101',
-  'Sub Sub Menu 102',
-  'Sub Sub Menu 103',
-];
-
-const List<String> subMenu2 = <String>[
-  'Sub Menu 20',
-];
+  const TestMenu(this.label);
+  final String label;
+}
 
 List<MenuItem> createTestMenus({
-  void Function(String)? onSelected,
-  void Function(String)? onOpen,
-  void Function(String)? onClose,
-  Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
+  void Function(TestMenu)? onSelected,
+  void Function(TestMenu)? onOpen,
+  void Function(TestMenu)? onClose,
+  Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
   bool includeStandard = false,
 }) {
   final List<MenuItem> result = <MenuItem>[
     MenuBarMenu(
-      label: mainMenu[0],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[0]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[0]) : null,
+      label: TestMenu.mainMenu0.label,
+      onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
+      onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,
       menus: <MenuItem>[
         MenuBarItem(
-          label: subMenu0[0],
-          onSelected: onSelected != null ? () => onSelected(subMenu0[0]) : null,
-          shortcut: shortcuts[subMenu0[0]],
+          label: TestMenu.subMenu00.label,
+          onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu00) : null,
+          shortcut: shortcuts[TestMenu.subMenu00],
         ),
       ],
     ),
     MenuBarMenu(
-      label: mainMenu[1],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[1]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[1]) : null,
+      label: TestMenu.mainMenu1.label,
+      onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu1) : null,
+      onClose: onClose != null ? () => onClose(TestMenu.mainMenu1) : null,
       menus: <MenuItem>[
         MenuItemGroup(
           members: <MenuItem>[
             MenuBarItem(
-              label: subMenu1[0],
-              onSelected: onSelected != null ? () => onSelected(subMenu1[0]) : null,
-              shortcut: shortcuts[subMenu1[0]],
+              label: TestMenu.subMenu10.label,
+              onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu10) : null,
+              shortcut: shortcuts[TestMenu.subMenu10],
             ),
           ],
         ),
         MenuBarMenu(
-          label: subMenu1[1],
-          onOpen: onOpen != null ? () => onOpen(subMenu1[1]) : null,
-          onClose: onClose != null ? () => onClose(subMenu1[1]) : null,
+          label: TestMenu.subMenu11.label,
+          onOpen: onOpen != null ? () => onOpen(TestMenu.subMenu11) : null,
+          onClose: onClose != null ? () => onClose(TestMenu.subMenu11) : null,
           menus: <MenuItem>[
             MenuItemGroup(
               members: <MenuItem>[
                 MenuBarItem(
-                  label: subSubMenu10[0],
-                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[0]) : null,
-                  shortcut: shortcuts[subSubMenu10[0]],
+                  label: TestMenu.subSubMenu100.label,
+                  onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu100) : null,
+                  shortcut: shortcuts[TestMenu.subSubMenu100],
                 ),
               ],
             ),
             MenuBarItem(
-              label: subSubMenu10[1],
-              onSelected: onSelected != null ? () => onSelected(subSubMenu10[1]) : null,
-              shortcut: shortcuts[subSubMenu10[1]],
+              label: TestMenu.subSubMenu101.label,
+              onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu101) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu101],
             ),
             MenuBarItem(
-              label: subSubMenu10[2],
-              onSelected: onSelected != null ? () => onSelected(subSubMenu10[2]) : null,
-              shortcut: shortcuts[subSubMenu10[2]],
+              label: TestMenu.subSubMenu102.label,
+              onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu102) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu102],
             ),
             MenuBarItem(
-              label: subSubMenu10[3],
-              onSelected: onSelected != null ? () => onSelected(subSubMenu10[3]) : null,
-              shortcut: shortcuts[subSubMenu10[3]],
+              label: TestMenu.subSubMenu103.label,
+              onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu103) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu103],
             ),
           ],
         ),
         MenuBarItem(
-          label: subMenu1[2],
-          onSelected: onSelected != null ? () => onSelected(subMenu1[2]) : null,
-          shortcut: shortcuts[subMenu1[2]],
+          label: TestMenu.subMenu12.label,
+          onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu12) : null,
+          shortcut: shortcuts[TestMenu.subMenu12],
         ),
       ],
     ),
     MenuBarMenu(
-      label: mainMenu[2],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[2]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[2]) : null,
+      label: TestMenu.mainMenu2.label,
+      onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu2) : null,
+      onClose: onClose != null ? () => onClose(TestMenu.mainMenu2) : null,
       menus: <MenuItem>[
         MenuBarItem(
           // Always disabled.
-          label: subMenu2[0],
-          shortcut: shortcuts[subMenu2[0]],
+          label: TestMenu.subMenu20.label,
+          shortcut: shortcuts[TestMenu.subMenu20],
         ),
       ],
     ),
   ];
   return result;
 }
+

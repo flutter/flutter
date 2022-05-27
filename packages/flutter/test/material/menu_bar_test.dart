@@ -15,25 +15,25 @@ void main() {
   late MenuBarController controller;
   String? openPath;
   String? focusedMenu;
-  final List<String> selected = <String>[];
-  final List<String> opened = <String>[];
-  final List<String> closed = <String>[];
+  final List<TestMenu> selected = <TestMenu>[];
+  final List<TestMenu> opened = <TestMenu>[];
+  final List<TestMenu> closed = <TestMenu>[];
 
   void collectPath() {
     openPath = controller.testingCurrentItem;
   }
 
-  void onSelected(String item) {
+  void onSelected(TestMenu item) {
     selected.add(item);
     collectPath();
   }
 
-  void onOpen(String item) {
+  void onOpen(TestMenu item) {
     opened.add(item);
     collectPath();
   }
 
-  void onClose(String item) {
+  void onClose(TestMenu item) {
     closed.add(item);
     collectPath();
   }
@@ -122,41 +122,41 @@ void main() {
         ),
       );
 
-      expect(find.text(mainMenu[0]), findsOneWidget);
-      expect(find.text(mainMenu[1]), findsOneWidget);
-      expect(find.text(mainMenu[2]), findsOneWidget);
-      expect(find.text(subMenu1[0]), findsNothing);
-      expect(find.text(subSubMenu10[0]), findsNothing);
+      expect(find.text(TestMenu.mainMenu0.label), findsOneWidget);
+      expect(find.text(TestMenu.mainMenu1.label), findsOneWidget);
+      expect(find.text(TestMenu.mainMenu2.label), findsOneWidget);
+      expect(find.text(TestMenu.subMenu10.label), findsNothing);
+      expect(find.text(TestMenu.subSubMenu100.label), findsNothing);
       expect(opened, isEmpty);
 
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
-      expect(find.text(mainMenu[0]), findsOneWidget);
-      expect(find.text(mainMenu[1]), findsOneWidget);
-      expect(find.text(mainMenu[2]), findsOneWidget);
-      expect(find.text(subMenu1[0]), findsOneWidget);
-      expect(find.text(subMenu1[1]), findsOneWidget);
-      expect(find.text(subMenu1[2]), findsOneWidget);
-      expect(find.text(subSubMenu10[0]), findsNothing);
-      expect(find.text(subSubMenu10[1]), findsNothing);
-      expect(find.text(subSubMenu10[2]), findsNothing);
-      expect(opened.last, equals(mainMenu[1]));
+      expect(find.text(TestMenu.mainMenu0.label), findsOneWidget);
+      expect(find.text(TestMenu.mainMenu1.label), findsOneWidget);
+      expect(find.text(TestMenu.mainMenu2.label), findsOneWidget);
+      expect(find.text(TestMenu.subMenu10.label), findsOneWidget);
+      expect(find.text(TestMenu.subMenu11.label), findsOneWidget);
+      expect(find.text(TestMenu.subMenu12.label), findsOneWidget);
+      expect(find.text(TestMenu.subSubMenu100.label), findsNothing);
+      expect(find.text(TestMenu.subSubMenu101.label), findsNothing);
+      expect(find.text(TestMenu.subSubMenu102.label), findsNothing);
+      expect(opened.last, equals(TestMenu.mainMenu1));
       opened.clear();
 
-      await tester.tap(find.text(subMenu1[1]));
+      await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
 
-      expect(find.text(mainMenu[0]), findsOneWidget);
-      expect(find.text(mainMenu[1]), findsOneWidget);
-      expect(find.text(mainMenu[2]), findsOneWidget);
-      expect(find.text(subMenu1[0]), findsOneWidget);
-      expect(find.text(subMenu1[1]), findsOneWidget);
-      expect(find.text(subMenu1[2]), findsOneWidget);
-      expect(find.text(subSubMenu10[0]), findsOneWidget);
-      expect(find.text(subSubMenu10[1]), findsOneWidget);
-      expect(find.text(subSubMenu10[2]), findsOneWidget);
-      expect(opened.last, equals(subMenu1[1]));
+      expect(find.text(TestMenu.mainMenu0.label), findsOneWidget);
+      expect(find.text(TestMenu.mainMenu1.label), findsOneWidget);
+      expect(find.text(TestMenu.mainMenu2.label), findsOneWidget);
+      expect(find.text(TestMenu.subMenu10.label), findsOneWidget);
+      expect(find.text(TestMenu.subMenu11.label), findsOneWidget);
+      expect(find.text(TestMenu.subMenu12.label), findsOneWidget);
+      expect(find.text(TestMenu.subSubMenu100.label), findsOneWidget);
+      expect(find.text(TestMenu.subSubMenu101.label), findsOneWidget);
+      expect(find.text(TestMenu.subSubMenu102.label), findsOneWidget);
+      expect(opened.last, equals(TestMenu.subMenu11));
     });
     testWidgets('geometry', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -178,17 +178,17 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTWH(0, 0, 800, 48)));
 
       // Open and make sure things are the right size.
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTWH(0, 0, 800, 48)));
-      expect(tester.getRect(find.text(subMenu1[0])), equals(const Rect.fromLTRB(148.0, 73.0, 302.0, 87.0)));
-      expect(tester.getRect(find.ancestor(of: find.text(subMenu1[0]), matching: findMenuBarMenu())),
+      expect(tester.getRect(find.text(TestMenu.subMenu10.label)), equals(const Rect.fromLTRB(148.0, 73.0, 302.0, 87.0)));
+      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
           equals(const Rect.fromLTRB(124.0, 48.0, 386.0, 224.0)));
       expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(124.0, 104.0, 386.0, 120.0)));
 
       // Close and make sure it goes back where it was.
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTWH(0, 0, 800, 48)));
@@ -216,49 +216,6 @@ void main() {
       expect(material.elevation, equals(10));
       expect(material.color, equals(Colors.red));
     });
-    testWidgets('theme is honored', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Builder(builder: (BuildContext context) {
-              return MenuBarTheme(
-                data: MenuBarTheme.of(context).copyWith(
-                  barBackgroundColor: MaterialStateProperty.all<Color?>(Colors.green),
-                  itemTextStyle: MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.titleMedium),
-                  barElevation: MaterialStateProperty.all<double?>(20.0),
-                  barHeight: 52.0,
-                  menuBackgroundColor: MaterialStateProperty.all<Color?>(Colors.red),
-                  menuElevation: MaterialStateProperty.all<double?>(15.0),
-                  menuShape: MaterialStateProperty.all<ShapeBorder?>(const StadiumBorder()),
-                  menuPadding: const EdgeInsets.all(10.0),
-                ),
-                child: Column(
-                  children: <Widget>[
-                    MenuBar(
-                      menus: createTestMenus(onSelected: onSelected),
-                    ),
-                    const Expanded(child: Placeholder()),
-                  ],
-                ),
-              );
-            }),
-          ),
-        ),
-      );
-
-      // Open a test menu.
-      await tester.tap(find.text(mainMenu[1]));
-      await tester.pump();
-      expect(tester.getRect(findMenuTopLevelBar()), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 52.0)));
-      final Material menuBarMaterial = getMenuBarMaterial(tester);
-      expect(menuBarMaterial.elevation, equals(20));
-      expect(menuBarMaterial.color, equals(Colors.green));
-
-      final Material subMenuMaterial = getSubMenuMaterial(tester);
-      expect(tester.getRect(findMenuBarMenu()), equals(const Rect.fromLTRB(136.0, 50.0, 440.0, 230.0)));
-      expect(subMenuMaterial.elevation, equals(15));
-      expect(subMenuMaterial.color, equals(Colors.red));
-    });
     testWidgets('open and close works', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -275,39 +232,39 @@ void main() {
       expect(opened, isEmpty);
       expect(closed, isEmpty);
 
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
-      expect(opened, equals(<String>[mainMenu[1]]));
+      expect(opened, equals(<TestMenu>[TestMenu.mainMenu1]));
       expect(closed, isEmpty);
       opened.clear();
       closed.clear();
 
-      await tester.tap(find.text(subMenu1[1]));
+      await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
 
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
-      expect(opened, equals(<String>[subMenu1[1]]));
+      expect(opened, equals(<TestMenu>[TestMenu.subMenu11]));
       expect(closed, isEmpty);
       opened.clear();
       closed.clear();
 
-      await tester.tap(find.text(subMenu1[1]));
+      await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
 
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
       expect(opened, isEmpty);
-      expect(closed, equals(<String>[subMenu1[1]]));
+      expect(closed, equals(<TestMenu>[TestMenu.subMenu11]));
       opened.clear();
       closed.clear();
 
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pump();
 
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 0)'));
-      expect(opened, equals(<String>[mainMenu[0]]));
-      expect(closed, equals(<String>[mainMenu[1]]));
+      expect(opened, equals(<TestMenu>[TestMenu.mainMenu0]));
+      expect(closed, equals(<TestMenu>[TestMenu.mainMenu1]));
     });
     testWidgets('select works', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -324,23 +281,23 @@ void main() {
       expect(openPath, isNull);
       expect(openPath, isNull);
 
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
-      await tester.tap(find.text(subMenu1[1]));
+      await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
 
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
-      await tester.tap(find.text(subSubMenu10[0]));
+      await tester.tap(find.text(TestMenu.subSubMenu100.label));
       await tester.pump();
 
-      expect(selected, equals(<String>[subSubMenu10[0]]));
+      expect(selected, equals(<TestMenu>[TestMenu.subSubMenu100]));
 
       // Selecting a non-submenu item should close all the menus.
       expect(openPath, isNull);
-      expect(find.text(subSubMenu10[0]), findsNothing);
-      expect(find.text(subMenu1[1]), findsNothing);
+      expect(find.text(TestMenu.subSubMenu100.label), findsNothing);
+      expect(find.text(TestMenu.subMenu11.label), findsNothing);
     });
     testWidgets('diagnostics toStringDeep', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -351,14 +308,14 @@ void main() {
               menus: <MenuItem>[
                 MenuBarMenu(
                   shape: MaterialStateProperty.all<ShapeBorder?>(const RoundedRectangleBorder()),
-                  label: mainMenu[0],
+                  label: TestMenu.mainMenu0.label,
                   elevation: MaterialStateProperty.all<double?>(10.0),
                   backgroundColor: MaterialStateProperty.all(Colors.red),
                   menus: <MenuItem>[
                     MenuItemGroup(
                       members: <MenuItem>[
                         MenuBarItem(
-                          label: subMenu0[0],
+                          label: TestMenu.subMenu00.label,
                           semanticLabel: 'semanticLabel',
                         ),
                       ],
@@ -371,7 +328,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pump();
 
       final MenuBar menuBar = tester.widget(find.byType(MenuBar));
@@ -441,8 +398,8 @@ void main() {
                     onSelected: onSelected,
                     onOpen: onOpen,
                     onClose: onClose,
-                    shortcuts: <String, MenuSerializableShortcut>{
-                      subSubMenu10[0]: const SingleActivator(
+                    shortcuts: <TestMenu, MenuSerializableShortcut>{
+                      TestMenu.subSubMenu100: const SingleActivator(
                         LogicalKeyboardKey.keyA,
                         control: true,
                       ),
@@ -463,7 +420,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
@@ -471,7 +428,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
 
-      expect(selected, equals(<String>[subSubMenu10[0]]));
+      expect(selected, equals(<TestMenu>[TestMenu.subSubMenu100]));
 
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
@@ -493,9 +450,9 @@ void main() {
                 onSelected: onSelected,
                 onOpen: onOpen,
                 onClose: onClose,
-                shortcuts: <String, MenuSerializableShortcut>{
-                  subSubMenu10[0]: duplicateActivator,
-                  subSubMenu10[1]: duplicateActivator,
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu100: duplicateActivator,
+                  TestMenu.subSubMenu101: duplicateActivator,
                 },
               ),
             ),
@@ -528,15 +485,15 @@ void main() {
               controller: controller,
               menus: <MenuItem>[
                 MenuBarMenu(
-                  label: mainMenu[0],
+                  label: TestMenu.mainMenu0.label,
                   menus: <MenuItem>[
                     MenuBarItem(
-                      label: subMenu1[0],
+                      label: TestMenu.subMenu10.label,
                       onSelected: sameCallback,
                       shortcut: sameShortcut,
                     ),
                     MenuBarItem(
-                      label: subMenu1[1],
+                      label: TestMenu.subMenu11.label,
                       onSelected: sameCallback,
                       shortcut: sameShortcut,
                     ),
@@ -574,7 +531,7 @@ void main() {
       listenForFocusChanges();
 
       // Have to open a menu initially to start things going.
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pumpAndSettle();
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -672,7 +629,7 @@ void main() {
       listenForFocusChanges();
 
       // Have to open a menu initially to start things going.
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pumpAndSettle();
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -790,7 +747,7 @@ void main() {
       listenForFocusChanges();
 
       // Have to open a menu initially to start things going.
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pumpAndSettle();
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
@@ -905,46 +862,46 @@ void main() {
       listenForFocusChanges();
 
       // Hovering when the menu is not yet open does nothing.
-      await hoverOver(tester, find.text(mainMenu[0]));
+      await hoverOver(tester, find.text(TestMenu.mainMenu0.label));
       await tester.pump();
       expect(focusedMenu, isNull);
       expect(openPath, isNull);
 
       // Have to open a menu initially to start things going.
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pumpAndSettle();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 0)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 0)'));
 
       // Hovering when the menu is already  open does nothing.
-      await hoverOver(tester, find.text(mainMenu[0]));
+      await hoverOver(tester, find.text(TestMenu.mainMenu0.label));
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 0)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 0)'));
 
       // Hovering over the other main menu items opens them now.
-      await hoverOver(tester, find.text(mainMenu[2]));
+      await hoverOver(tester, find.text(TestMenu.mainMenu2.label));
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 2)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 2)'));
 
-      await hoverOver(tester, find.text(mainMenu[1]));
+      await hoverOver(tester, find.text(TestMenu.mainMenu1.label));
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
 
       // Hovering over the menu items focuses them.
-      await hoverOver(tester, find.text(subMenu1[0]));
+      await hoverOver(tester, find.text(TestMenu.subMenu10.label));
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 10)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
 
-      await hoverOver(tester, find.text(subMenu1[1]));
+      await hoverOver(tester, find.text(TestMenu.subMenu11.label));
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Sub Menu 11)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
-      await hoverOver(tester, find.text(subSubMenu10[0]));
+      await hoverOver(tester, find.text(TestMenu.subSubMenu100.label));
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 100)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
@@ -963,8 +920,8 @@ void main() {
                     onSelected: onSelected,
                     onOpen: onOpen,
                     onClose: onClose,
-                    shortcuts: <String, MenuSerializableShortcut>{
-                      subSubMenu10[0]: const SingleActivator(
+                    shortcuts: <TestMenu, MenuSerializableShortcut>{
+                      TestMenu.subSubMenu100: const SingleActivator(
                         LogicalKeyboardKey.keyA,
                         control: true,
                       )
@@ -991,18 +948,18 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
 
       // The menu should handle shortcuts.
-      expect(selected, equals(<String>[subSubMenu10[0]]));
+      expect(selected, equals(<TestMenu>[TestMenu.subSubMenu100]));
       expect(closed, isEmpty);
       expect(opened, isEmpty);
       selected.clear();
 
       // Open a menu initially.
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
-      await tester.tap(find.text(subMenu1[1]));
+      await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
-      expect(opened, equals(<String>[mainMenu[1], subMenu1[1]]));
+      expect(opened, equals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       opened.clear();
       expect(closed, isEmpty);
       expect(selected, isEmpty);
@@ -1021,8 +978,8 @@ void main() {
                     onSelected: onSelected,
                     onOpen: onOpen,
                     onClose: onClose,
-                    shortcuts: <String, MenuSerializableShortcut>{
-                      subSubMenu10[0]: const SingleActivator(
+                    shortcuts: <TestMenu, MenuSerializableShortcut>{
+                      TestMenu.subSubMenu100: const SingleActivator(
                         LogicalKeyboardKey.keyA,
                         control: true,
                       )
@@ -1046,12 +1003,12 @@ void main() {
 
       // The menu should go away,
       expect(openPath, isNull);
-      expect(closed, equals(<String>[mainMenu[1], subMenu1[1]]));
+      expect(closed, equals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       closed.clear();
       expect(opened, isEmpty);
       expect(selected, isEmpty);
 
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
       // The menu should not respond to the tap.
@@ -1076,8 +1033,8 @@ void main() {
                     onSelected: onSelected,
                     onOpen: onOpen,
                     onClose: onClose,
-                    shortcuts: <String, MenuSerializableShortcut>{
-                      subSubMenu10[0]: const SingleActivator(
+                    shortcuts: <TestMenu, MenuSerializableShortcut>{
+                      TestMenu.subSubMenu100: const SingleActivator(
                         LogicalKeyboardKey.keyA,
                         control: true,
                       )
@@ -1104,18 +1061,18 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
 
       // The menu should now handle shortcuts.
-      expect(selected, equals(<String>[subSubMenu10[0]]));
+      expect(selected, equals(<TestMenu>[TestMenu.subSubMenu100]));
 
       // The menu should again accept taps.
-      await tester.tap(find.text(mainMenu[2]));
+      await tester.tap(find.text(TestMenu.mainMenu2.label));
       await tester.pump();
 
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 2)'));
       expect(closed, isEmpty);
-      expect(opened, equals(<String>[mainMenu[2]]));
+      expect(opened, equals(<TestMenu>[TestMenu.mainMenu2]));
       // Item disabled by its parameter should still be disabled.
       final TextButton button =
-          tester.widget(find.ancestor(of: find.text(subMenu2[0]), matching: find.byType(TextButton)));
+          tester.widget(find.ancestor(of: find.text(TestMenu.subMenu20.label), matching: find.byType(TextButton)));
       expect(button.onPressed, isNull);
       expect(button.onHover, isNull);
       closed.clear();
@@ -1130,8 +1087,8 @@ void main() {
                 onSelected: onSelected,
                 onOpen: onOpen,
                 onClose: onClose,
-                shortcuts: <String, MenuSerializableShortcut>{
-                  subSubMenu10[0]: const SingleActivator(
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu100: const SingleActivator(
                     LogicalKeyboardKey.keyA,
                     control: true,
                   )
@@ -1143,12 +1100,12 @@ void main() {
       );
 
       // Open a menu initially.
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
-      await tester.tap(find.text(subMenu1[1]));
+      await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
-      expect(opened, equals(<String>[mainMenu[1], subMenu1[1]]));
+      expect(opened, equals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       opened.clear();
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
@@ -1158,7 +1115,7 @@ void main() {
 
       // The menu should go away,
       expect(openPath, isNull);
-      expect(closed, equals(<String>[mainMenu[1], subMenu1[1]]));
+      expect(closed, equals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       expect(opened, isEmpty);
     });
   });
@@ -1171,11 +1128,11 @@ void main() {
             child: MenuBar(
               controller: controller,
               menus: createTestMenus(
-                shortcuts: <String, MenuSerializableShortcut>{
-                  subSubMenu10[0]: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
-                  subSubMenu10[1]: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
-                  subSubMenu10[2]: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
-                  subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu100: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
+                  TestMenu.subSubMenu101: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
+                  TestMenu.subSubMenu102: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
+                  TestMenu.subSubMenu103: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
                 },
               ),
             ),
@@ -1184,10 +1141,10 @@ void main() {
       );
 
       // Open a menu initially.
-      await tester.tap(find.text(mainMenu[1]));
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
-      await tester.tap(find.text(subMenu1[1]));
+      await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
 
       Text mnemonic0;
@@ -1199,50 +1156,49 @@ void main() {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
-          mnemonic0 = tester.widget(findMnemonic(subSubMenu10[0]));
+          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
           expect(mnemonic0.data, equals('Ctrl A'));
-          mnemonic1 = tester.widget(findMnemonic(subSubMenu10[1]));
+          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
           expect(mnemonic1.data, equals('⇧ B'));
-          mnemonic2 = tester.widget(findMnemonic(subSubMenu10[2]));
+          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
           expect(mnemonic2.data, equals('Alt C'));
-          mnemonic3 = tester.widget(findMnemonic(subSubMenu10[3]));
+          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu103.label));
           expect(mnemonic3.data, equals('Meta D'));
           break;
         case TargetPlatform.windows:
-          mnemonic0 = tester.widget(findMnemonic(subSubMenu10[0]));
+          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
           expect(mnemonic0.data, equals('Ctrl A'));
-          mnemonic1 = tester.widget(findMnemonic(subSubMenu10[1]));
+          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
           expect(mnemonic1.data, equals('⇧ B'));
-          mnemonic2 = tester.widget(findMnemonic(subSubMenu10[2]));
+          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
           expect(mnemonic2.data, equals('Alt C'));
-          mnemonic3 = tester.widget(findMnemonic(subSubMenu10[3]));
+          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu103.label));
           expect(mnemonic3.data, equals('Win D'));
           break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          mnemonic0 = tester.widget(findMnemonic(subSubMenu10[0]));
+          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
           expect(mnemonic0.data, equals('⌃ A'));
-          mnemonic1 = tester.widget(findMnemonic(subSubMenu10[1]));
+          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
           expect(mnemonic1.data, equals('⇧ B'));
-          mnemonic2 = tester.widget(findMnemonic(subSubMenu10[2]));
+          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
           expect(mnemonic2.data, equals('⌥ C'));
-          mnemonic3 = tester.widget(findMnemonic(subSubMenu10[3]));
+          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu103.label));
           expect(mnemonic3.data, equals('⌘ D'));
           break;
       }
 
-      debugPrint('Updating tree');
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: MenuBar(
               controller: controller,
               menus: createTestMenus(
-                shortcuts: <String, MenuSerializableShortcut>{
-                  subSubMenu10[0]: const SingleActivator(LogicalKeyboardKey.arrowRight),
-                  subSubMenu10[1]: const SingleActivator(LogicalKeyboardKey.arrowLeft),
-                  subSubMenu10[2]: const SingleActivator(LogicalKeyboardKey.arrowUp),
-                  subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.arrowDown),
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu100: const SingleActivator(LogicalKeyboardKey.arrowRight),
+                  TestMenu.subSubMenu101: const SingleActivator(LogicalKeyboardKey.arrowLeft),
+                  TestMenu.subSubMenu102: const SingleActivator(LogicalKeyboardKey.arrowUp),
+                  TestMenu.subSubMenu103: const SingleActivator(LogicalKeyboardKey.arrowDown),
                 },
               ),
             ),
@@ -1250,15 +1206,14 @@ void main() {
         ),
       );
       await tester.pump();
-      debugPrint('Should be rebuilt now');
 
-      mnemonic0 = tester.widget(findMnemonic(subSubMenu10[0]));
+      mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
       expect(mnemonic0.data, equals('→'));
-      mnemonic1 = tester.widget(findMnemonic(subSubMenu10[1]));
+      mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
       expect(mnemonic1.data, equals('←'));
-      mnemonic2 = tester.widget(findMnemonic(subSubMenu10[2]));
+      mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
       expect(mnemonic2.data, equals('↑'));
-      mnemonic3 = tester.widget(findMnemonic(subSubMenu10[3]));
+      mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu103.label));
       expect(mnemonic3.data, equals('↓'));
 
       // Try some weirder ones.
@@ -1268,10 +1223,10 @@ void main() {
             child: MenuBar(
               controller: controller,
               menus: createTestMenus(
-                shortcuts: <String, MenuSerializableShortcut>{
-                  subSubMenu10[0]: const SingleActivator(LogicalKeyboardKey.escape),
-                  subSubMenu10[1]: const SingleActivator(LogicalKeyboardKey.fn),
-                  subSubMenu10[2]: const SingleActivator(LogicalKeyboardKey.enter),
+                shortcuts: <TestMenu, MenuSerializableShortcut>{
+                  TestMenu.subSubMenu100: const SingleActivator(LogicalKeyboardKey.escape),
+                  TestMenu.subSubMenu101: const SingleActivator(LogicalKeyboardKey.fn),
+                  TestMenu.subSubMenu102: const SingleActivator(LogicalKeyboardKey.enter),
                 },
               ),
             ),
@@ -1280,11 +1235,11 @@ void main() {
       );
       await tester.pump();
 
-      mnemonic0 = tester.widget(findMnemonic(subSubMenu10[0]));
+      mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
       expect(mnemonic0.data, equals('Esc'));
-      mnemonic1 = tester.widget(findMnemonic(subSubMenu10[1]));
+      mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
       expect(mnemonic1.data, equals('Fn'));
-      mnemonic2 = tester.widget(findMnemonic(subSubMenu10[2]));
+      mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
       expect(mnemonic2.data, equals('↵'));
     }, variant: TargetPlatformVariant.all());
 
@@ -1297,11 +1252,11 @@ void main() {
               controller: controller,
               menus: <MenuItem>[
                 MenuBarMenu(
-                  label: mainMenu[0],
+                  label: TestMenu.mainMenu0.label,
                   menus: <MenuItem>[
                     MenuBarItem(
                       leadingIcon: const Text('leadingIcon'),
-                      label: subMenu0[0],
+                      label: TestMenu.subMenu00.label,
                     ),
                   ],
                 ),
@@ -1311,7 +1266,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pump();
 
       expect(find.text('leadingIcon'), findsOneWidget);
@@ -1325,10 +1280,10 @@ void main() {
               controller: controller,
               menus: <MenuItem>[
                 MenuBarMenu(
-                  label: mainMenu[0],
+                  label: TestMenu.mainMenu0.label,
                   menus: <MenuItem>[
                     MenuBarItem(
-                      label: subMenu0[0],
+                      label: TestMenu.subMenu00.label,
                       trailingIcon: const Text('trailingIcon'),
                     ),
                   ],
@@ -1339,7 +1294,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pump();
 
       expect(find.text('trailingIcon'), findsOneWidget);
@@ -1353,14 +1308,14 @@ void main() {
               menus: <MenuItem>[
                 MenuBarMenu(
                   shape: MaterialStateProperty.all<ShapeBorder?>(const RoundedRectangleBorder()),
-                  label: mainMenu[0],
+                  label: TestMenu.mainMenu0.label,
                   elevation: MaterialStateProperty.all<double?>(10.0),
                   backgroundColor: MaterialStateProperty.all(Colors.red),
                   menus: <MenuItem>[
                     MenuItemGroup(
                       members: <MenuItem>[
                         MenuBarItem(
-                          label: subMenu0[0],
+                          label: TestMenu.subMenu00.label,
                           semanticLabel: 'semanticLabel',
                         ),
                       ],
@@ -1373,7 +1328,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pump();
 
       final MenuBarMenu submenu = tester.widget(find.byType(MenuBarMenu));
@@ -1436,14 +1391,14 @@ void main() {
               controller: controller,
               menus: <MenuItem>[
                 MenuBarMenu(
-                  label: mainMenu[0],
+                  label: TestMenu.mainMenu0.label,
                   menus: <MenuItem>[
                     MenuBarItem(
-                      label: subMenu1[0],
+                      label: TestMenu.subMenu10.label,
                       shortcut: allModifiers,
                     ),
                     MenuBarItem(
-                      label: subMenu1[1],
+                      label: TestMenu.subMenu11.label,
                       shortcut: charShortcuts,
                     ),
                   ],
@@ -1453,7 +1408,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text(mainMenu[0]));
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pump();
 
       expect(find.text(allExpected), findsOneWidget);
@@ -1462,114 +1417,105 @@ void main() {
   });
 }
 
-const List<String> mainMenu = <String>[
-  'Menu 0',
-  'Menu 1',
-  'Menu 2',
-];
+enum TestMenu {
+  mainMenu0('Menu 0'),
+  mainMenu1('Menu 1'),
+  mainMenu2('Menu 2'),
+  subMenu00('Sub Menu 00'),
+  subMenu10('Sub Menu 10'),
+  subMenu11('Sub Menu 11'),
+  subMenu12('Sub Menu 12'),
+  subMenu20('Sub Menu 20'),
+  subSubMenu100('Sub Sub Menu 100'),
+  subSubMenu101('Sub Sub Menu 101'),
+  subSubMenu102('Sub Sub Menu 102'),
+  subSubMenu103('Sub Sub Menu 103');
 
-const List<String> subMenu0 = <String>[
-  'Sub Menu 00',
-];
-
-const List<String> subMenu1 = <String>[
-  'Sub Menu 10',
-  'Sub Menu 11',
-  'Sub Menu 12',
-];
-
-const List<String> subSubMenu10 = <String>[
-  'Sub Sub Menu 100',
-  'Sub Sub Menu 101',
-  'Sub Sub Menu 102',
-  'Sub Sub Menu 103',
-];
-
-const List<String> subMenu2 = <String>[
-  'Sub Menu 20',
-];
+  const TestMenu(this.label);
+  final String label;
+}
 
 List<MenuItem> createTestMenus({
-  void Function(String)? onSelected,
-  void Function(String)? onOpen,
-  void Function(String)? onClose,
-  Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
+  void Function(TestMenu)? onSelected,
+  void Function(TestMenu)? onOpen,
+  void Function(TestMenu)? onClose,
+  Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
   bool includeStandard = false,
 }) {
   final List<MenuItem> result = <MenuItem>[
     MenuBarMenu(
-      label: mainMenu[0],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[0]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[0]) : null,
+      label: TestMenu.mainMenu0.label,
+      onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
+      onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,
       menus: <MenuItem>[
         MenuBarItem(
-          label: subMenu0[0],
-          onSelected: onSelected != null ? () => onSelected(subMenu0[0]) : null,
-          shortcut: shortcuts[subMenu0[0]],
+          label: TestMenu.subMenu00.label,
+          onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu00) : null,
+          shortcut: shortcuts[TestMenu.subMenu00],
         ),
       ],
     ),
     MenuBarMenu(
-      label: mainMenu[1],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[1]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[1]) : null,
+      label: TestMenu.mainMenu1.label,
+      onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu1) : null,
+      onClose: onClose != null ? () => onClose(TestMenu.mainMenu1) : null,
       menus: <MenuItem>[
         MenuItemGroup(
           members: <MenuItem>[
             MenuBarItem(
-              label: subMenu1[0],
-              onSelected: onSelected != null ? () => onSelected(subMenu1[0]) : null,
-              shortcut: shortcuts[subMenu1[0]],
+              label: TestMenu.subMenu10.label,
+              onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu10) : null,
+              shortcut: shortcuts[TestMenu.subMenu10],
             ),
           ],
         ),
         MenuBarMenu(
-          label: subMenu1[1],
-          onOpen: onOpen != null ? () => onOpen(subMenu1[1]) : null,
-          onClose: onClose != null ? () => onClose(subMenu1[1]) : null,
+          label: TestMenu.subMenu11.label,
+          onOpen: onOpen != null ? () => onOpen(TestMenu.subMenu11) : null,
+          onClose: onClose != null ? () => onClose(TestMenu.subMenu11) : null,
           menus: <MenuItem>[
             MenuItemGroup(
               members: <MenuItem>[
                 MenuBarItem(
-                  label: subSubMenu10[0],
-                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[0]) : null,
-                  shortcut: shortcuts[subSubMenu10[0]],
+                  label: TestMenu.subSubMenu100.label,
+                  onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu100) : null,
+                  shortcut: shortcuts[TestMenu.subSubMenu100],
                 ),
               ],
             ),
             MenuBarItem(
-              label: subSubMenu10[1],
-              onSelected: onSelected != null ? () => onSelected(subSubMenu10[1]) : null,
-              shortcut: shortcuts[subSubMenu10[1]],
+              label: TestMenu.subSubMenu101.label,
+              onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu101) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu101],
             ),
             MenuBarItem(
-              label: subSubMenu10[2],
-              onSelected: onSelected != null ? () => onSelected(subSubMenu10[2]) : null,
-              shortcut: shortcuts[subSubMenu10[2]],
+              label: TestMenu.subSubMenu102.label,
+              onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu102) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu102],
             ),
             MenuBarItem(
-              label: subSubMenu10[3],
-              onSelected: onSelected != null ? () => onSelected(subSubMenu10[3]) : null,
-              shortcut: shortcuts[subSubMenu10[3]],
+              label: TestMenu.subSubMenu103.label,
+              onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu103) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu103],
             ),
           ],
         ),
         MenuBarItem(
-          label: subMenu1[2],
-          onSelected: onSelected != null ? () => onSelected(subMenu1[2]) : null,
-          shortcut: shortcuts[subMenu1[2]],
+          label: TestMenu.subMenu12.label,
+          onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu12) : null,
+          shortcut: shortcuts[TestMenu.subMenu12],
         ),
       ],
     ),
     MenuBarMenu(
-      label: mainMenu[2],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[2]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[2]) : null,
+      label: TestMenu.mainMenu2.label,
+      onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu2) : null,
+      onClose: onClose != null ? () => onClose(TestMenu.mainMenu2) : null,
       menus: <MenuItem>[
         MenuBarItem(
           // Always disabled.
-          label: subMenu2[0],
-          shortcut: shortcuts[subMenu2[0]],
+          label: TestMenu.subMenu20.label,
+          shortcut: shortcuts[TestMenu.subMenu20],
         ),
       ],
     ),
