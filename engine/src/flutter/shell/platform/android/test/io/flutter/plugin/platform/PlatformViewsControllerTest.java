@@ -17,6 +17,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewParent;
+import android.widget.FrameLayout;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterImageView;
@@ -41,10 +42,12 @@ import io.flutter.view.TextureRegistry;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -147,6 +150,65 @@ public class PlatformViewsControllerTest {
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
     verify(viewFactory, times(1)).create(any(), eq(platformViewId), any());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createPlatformViewMessage__setsAndroidViewLayoutDirection() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+    platformViewsController.setSoftwareRendering(true);
+
+    int platformViewId = 0;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+
+    View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    attach(jni, platformViewsController);
+
+    // Simulate create call from the framework.
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+    verify(androidView, times(1)).setLayoutDirection(0);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createPlatformViewMessage__setsAndroidViewSize() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+    platformViewsController.setSoftwareRendering(true);
+
+    int platformViewId = 0;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+
+    View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    attach(jni, platformViewsController);
+
+    // Simulate create call from the framework.
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    ArgumentCaptor<FrameLayout.LayoutParams> layoutParamsCaptor =
+        ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
+    verify(androidView, times(2)).setLayoutParams(layoutParamsCaptor.capture());
+
+    List<FrameLayout.LayoutParams> capturedLayoutParams = layoutParamsCaptor.getAllValues();
+    assertEquals(capturedLayoutParams.get(0).width, 1);
+    assertEquals(capturedLayoutParams.get(0).height, 1);
   }
 
   @Test
@@ -299,6 +361,43 @@ public class PlatformViewsControllerTest {
     // successfully, otherwise it will be much more than 2 due to the reply message contains
     // an error message wrapped with exception detail information.
     assertEquals(ShadowFlutterJNI.getResponses().get(0).limit(), 2);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void resizeAndroidView() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+    platformViewsController.setSoftwareRendering(true);
+
+    int platformViewId = 0;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    attach(jni, platformViewsController);
+
+    // Simulate create call from the framework.
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    reset(androidView);
+    when(androidView.getLayoutParams()).thenReturn(new FrameLayout.LayoutParams(0, 0));
+
+    // Simulate a resize call from the framework.
+    resize(jni, platformViewsController, platformViewId, 10.0, 20.0);
+
+    ArgumentCaptor<FrameLayout.LayoutParams> layoutParamsCaptor =
+        ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
+    verify(androidView, times(1)).setLayoutParams(layoutParamsCaptor.capture());
+
+    assertEquals(layoutParamsCaptor.getValue().width, 10);
+    assertEquals(layoutParamsCaptor.getValue().height, 20);
   }
 
   @Test
@@ -822,16 +921,15 @@ public class PlatformViewsControllerTest {
       int platformViewId,
       String viewType,
       boolean hybrid) {
-    final Map<String, Object> platformViewCreateArguments = new HashMap<>();
-    platformViewCreateArguments.put("hybrid", hybrid);
-    platformViewCreateArguments.put("id", platformViewId);
-    platformViewCreateArguments.put("viewType", viewType);
-    platformViewCreateArguments.put("direction", 0);
-    platformViewCreateArguments.put("width", 1.0);
-    platformViewCreateArguments.put("height", 1.0);
+    final Map<String, Object> args = new HashMap<>();
+    args.put("hybrid", hybrid);
+    args.put("id", platformViewId);
+    args.put("viewType", viewType);
+    args.put("direction", 0);
+    args.put("width", 1.0);
+    args.put("height", 1.0);
 
-    final MethodCall platformCreateMethodCall =
-        new MethodCall("create", platformViewCreateArguments);
+    final MethodCall platformCreateMethodCall = new MethodCall("create", args);
 
     jni.handlePlatformMessage(
         "flutter/platform_views",
@@ -845,16 +943,35 @@ public class PlatformViewsControllerTest {
       PlatformViewsController platformViewsController,
       int platformViewId,
       int direction) {
-    final Map<String, Object> platformViewCreateArguments = new HashMap<>();
-    platformViewCreateArguments.put("id", platformViewId);
-    platformViewCreateArguments.put("direction", direction);
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    args.put("direction", direction);
 
-    final MethodCall platformCreateMethodCall =
-        new MethodCall("setDirection", platformViewCreateArguments);
+    final MethodCall platformSetDirectionMethodCall = new MethodCall("setDirection", args);
 
     jni.handlePlatformMessage(
         "flutter/platform_views",
-        encodeMethodCall(platformCreateMethodCall),
+        encodeMethodCall(platformSetDirectionMethodCall),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+  }
+
+  private static void resize(
+      FlutterJNI jni,
+      PlatformViewsController platformViewsController,
+      int platformViewId,
+      double width,
+      double height) {
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    args.put("width", width);
+    args.put("height", height);
+
+    final MethodCall platformResizeMethodCall = new MethodCall("resize", args);
+
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(platformResizeMethodCall),
         /*replyId=*/ 0,
         /*messageData=*/ 0);
   }
@@ -862,12 +979,11 @@ public class PlatformViewsControllerTest {
   private static void disposePlatformView(
       FlutterJNI jni, PlatformViewsController platformViewsController, int platformViewId) {
 
-    final Map<String, Object> platformViewDisposeArguments = new HashMap<>();
-    platformViewDisposeArguments.put("hybrid", true);
-    platformViewDisposeArguments.put("id", platformViewId);
+    final Map<String, Object> args = new HashMap<>();
+    args.put("hybrid", true);
+    args.put("id", platformViewId);
 
-    final MethodCall platformDisposeMethodCall =
-        new MethodCall("dispose", platformViewDisposeArguments);
+    final MethodCall platformDisposeMethodCall = new MethodCall("dispose", args);
 
     jni.handlePlatformMessage(
         "flutter/platform_views",
