@@ -19,6 +19,20 @@
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 
+@implementation UIView (FirstResponder)
+- (BOOL)flt_hasFirstResponderInViewHierarchySubtree {
+  if (self.isFirstResponder) {
+    return YES;
+  }
+  for (UIView* subview in self.subviews) {
+    if (subview.flt_hasFirstResponderInViewHierarchySubtree) {
+      return YES;
+    }
+  }
+  return NO;
+}
+@end
+
 namespace flutter {
 
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewLayerPool::GetLayer(
@@ -326,6 +340,15 @@ UIView* FlutterPlatformViewsController::GetPlatformViewByID(int view_id) {
     return nil;
   }
   return [touch_interceptors_[view_id].get() embeddedView];
+}
+
+long FlutterPlatformViewsController::FindFirstResponderPlatformViewId() {
+  for (auto const& [id, root_view] : root_views_) {
+    if ((UIView*)(root_view.get()).flt_hasFirstResponderInViewHierarchySubtree) {
+      return id;
+    }
+  }
+  return -1;
 }
 
 std::vector<SkCanvas*> FlutterPlatformViewsController::GetCurrentCanvases() {
