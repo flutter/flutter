@@ -29,7 +29,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
-extern NSString* _Nonnull const FlutterEngineWillDealloc;
+extern NSString* _Nonnull const kFlutterEngineWillDealloc;
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
 

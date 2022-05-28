@@ -15,10 +15,10 @@
 
 #include <gmodule.h>
 
-static constexpr uint32_t BUFFER_WIDTH = 4u;
-static constexpr uint32_t BUFFER_HEIGHT = 4u;
-static constexpr uint32_t REAL_BUFFER_WIDTH = 2u;
-static constexpr uint32_t REAL_BUFFER_HEIGHT = 2u;
+static constexpr uint32_t kBufferWidth = 4u;
+static constexpr uint32_t kBufferHeight = 4u;
+static constexpr uint32_t kRealBufferWidth = 2u;
+static constexpr uint32_t kRealBufferHeight = 2u;
 
 G_DECLARE_FINAL_TYPE(FlTestRegistrarTexture,
                      fl_test_registrar_texture,
@@ -43,12 +43,12 @@ static gboolean fl_test_registrar_texture_populate(FlTextureGL* texture,
                                                    GError** error) {
   EXPECT_TRUE(FL_IS_TEST_REGISTRAR_TEXTURE(texture));
 
-  EXPECT_EQ(*width, BUFFER_WIDTH);
-  EXPECT_EQ(*height, BUFFER_HEIGHT);
+  EXPECT_EQ(*width, kBufferWidth);
+  EXPECT_EQ(*height, kBufferHeight);
   *target = GL_TEXTURE_2D;
   *format = GL_R8;
-  *width = REAL_BUFFER_WIDTH;
-  *height = REAL_BUFFER_HEIGHT;
+  *width = kRealBufferWidth;
+  *height = kRealBufferHeight;
 
   return TRUE;
 }

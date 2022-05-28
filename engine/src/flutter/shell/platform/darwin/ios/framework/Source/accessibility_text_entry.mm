@@ -7,7 +7,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h"
 
-static const UIAccessibilityTraits UIAccessibilityTraitUndocumentedEmptyLine = 0x800000000000;
+static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 0x800000000000;
 
 @implementation FlutterInactiveTextInput {
 }
@@ -313,7 +313,7 @@ static const UIAccessibilityTraits UIAccessibilityTraitUndocumentedEmptyLine = 0
   // We remove an undocumented flag to get rid of a bug where single-tapping
   // a text input field incorrectly says "empty line".
   // See also: https://github.com/flutter/flutter/issues/52487
-  return results & (~UIAccessibilityTraitUndocumentedEmptyLine);
+  return results & (~kUIAccessibilityTraitUndocumentedEmptyLine);
 }
 
 #pragma mark - UITextInput overrides

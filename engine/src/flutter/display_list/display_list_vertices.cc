@@ -117,7 +117,7 @@ DlVertices::DlVertices(DlVertexMode mode,
       offset += bytes;
       return ret;
     } else {
-      return size_t(0);
+      return static_cast<size_t>(0);
     }
   };
 
@@ -158,7 +158,7 @@ DlVertices::DlVertices(DlVertexMode mode,
       offset += bytes;
       return ret;
     } else {
-      return size_t(0);
+      return static_cast<size_t>(0);
     }
   };
 

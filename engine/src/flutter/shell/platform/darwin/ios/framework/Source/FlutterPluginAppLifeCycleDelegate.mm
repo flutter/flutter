@@ -12,7 +12,7 @@
 
 static const char* kCallbackCacheSubDir = "Library/Caches/";
 
-static const SEL selectorsHandledByPlugins[] = {
+static const SEL kSelectorsHandledByPlugins[] = {
     @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:),
     @selector(application:performFetchWithCompletionHandler:)};
 
@@ -76,7 +76,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 }
 
 - (BOOL)isSelectorAddedDynamically:(SEL)selector {
-  for (const SEL& aSelector : selectorsHandledByPlugins) {
+  for (const SEL& aSelector : kSelectorsHandledByPlugins) {
     if (selector == aSelector) {
       return YES;
     }

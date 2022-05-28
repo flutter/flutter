@@ -66,9 +66,9 @@ JsonMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
 
 std::unique_ptr<std::vector<uint8_t>> JsonMethodCodec::EncodeMethodCallInternal(
     const MethodCall<rapidjson::Document>& method_call) const {
-  // TODO: Consider revisiting the codec APIs to avoid the need to copy
-  // everything when doing encoding (e.g., by having a version that takes
-  // owership of the object to encode, so that it can be moved instead).
+  // TODO(stuartmorgan): Consider revisiting the codec APIs to avoid the need
+  // to copy everything when doing encoding (e.g., by having a version that
+  // takes owership of the object to encode, so that it can be moved instead).
   rapidjson::Document message(rapidjson::kObjectType);
   auto& allocator = message.GetAllocator();
   rapidjson::Value name(method_call.method_name(), allocator);

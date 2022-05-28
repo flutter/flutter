@@ -40,7 +40,7 @@ struct SwitchDesc {
 #if FLUTTER_RELEASE
 
 // clang-format off
-static const std::string gAllowedDartFlags[] = {
+static const std::string kAllowedDartFlags[] = {
     "--enable-isolate-groups",
     "--no-enable-isolate-groups",
     "--lazy_async_stacks",
@@ -50,7 +50,7 @@ static const std::string gAllowedDartFlags[] = {
 #else
 
 // clang-format off
-static const std::string gAllowedDartFlags[] = {
+static const std::string kAllowedDartFlags[] = {
     "--enable-isolate-groups",
     "--no-enable-isolate-groups",
     "--enable_mirrors",
@@ -167,8 +167,8 @@ static std::vector<std::string> ParseCommaDelimited(const std::string& input) {
 }
 
 static bool IsAllowedDartVMFlag(const std::string& flag) {
-  for (uint32_t i = 0; i < fml::size(gAllowedDartFlags); ++i) {
-    const std::string& allowed = gAllowedDartFlags[i];
+  for (uint32_t i = 0; i < fml::size(kAllowedDartFlags); ++i) {
+    const std::string& allowed = kAllowedDartFlags[i];
     // Check that the prefix of the flag matches one of the allowed flags. This
     // is to handle cases where flags take arguments, such as in
     // "--max_profile_depth 1".

@@ -67,10 +67,15 @@ static void IOSPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& confi
   }
 }
 
+#pragma mark - Public exported constants
+
 NSString* const FlutterDefaultDartEntrypoint = nil;
 NSString* const FlutterDefaultInitialRoute = nil;
-NSString* const FlutterEngineWillDealloc = @"FlutterEngineWillDealloc";
-NSString* const FlutterKeyDataChannel = @"flutter/keydata";
+
+#pragma mark - Internal constants
+
+NSString* const kFlutterEngineWillDealloc = @"FlutterEngineWillDealloc";
+NSString* const kFlutterKeyDataChannel = @"flutter/keydata";
 static constexpr int kNumProfilerSamplesPerSec = 5;
 
 @interface FlutterEngineRegistrar : NSObject <FlutterPluginRegistrar>
@@ -233,7 +238,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     }
   }];
 
-  [[NSNotificationCenter defaultCenter] postNotificationName:FlutterEngineWillDealloc
+  [[NSNotificationCenter defaultCenter] postNotificationName:kFlutterEngineWillDealloc
                                                       object:self
                                                     userInfo:nil];
 
@@ -352,7 +357,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     callback(handled, userData);
   };
 
-  [self sendOnChannel:FlutterKeyDataChannel message:message binaryReply:response];
+  [self sendOnChannel:kFlutterKeyDataChannel message:message binaryReply:response];
 }
 
 - (void)ensureSemanticsEnabled {

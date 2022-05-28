@@ -20,7 +20,7 @@
 namespace flutter {
 
 // clang-format off
-constexpr float invert_color_matrix[20] = {
+constexpr float kInvertColorMatrix[20] = {
   -1.0,    0,    0, 1.0, 0,
      0, -1.0,    0, 1.0, 0,
      0,    0, -1.0, 1.0, 0,
@@ -97,7 +97,7 @@ sk_sp<SkColorFilter> SkPaintDispatchHelper::makeColorFilter() const {
     return color_filter_ ? color_filter_->skia_object() : nullptr;
   }
   sk_sp<SkColorFilter> invert_filter =
-      SkColorFilters::Matrix(invert_color_matrix);
+      SkColorFilters::Matrix(kInvertColorMatrix);
   if (color_filter_) {
     invert_filter = invert_filter->makeComposed(color_filter_->skia_object());
   }

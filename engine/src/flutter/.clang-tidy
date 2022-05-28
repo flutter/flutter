@@ -2,6 +2,7 @@
 Checks: "google-*,\
 clang-analyzer-*,\
 clang-diagnostic-*,\
+readability-identifier-naming,\
 -google-objc-global-variable-declaration,\
 -google-objc-avoid-throwing-exception,\
 -clang-analyzer-nullability.NullPassedToNonnull,\
@@ -15,6 +16,11 @@ clang-diagnostic-*,\
 # to prevent new warnings being introduced.
 # https://github.com/flutter/flutter/issues/93279
 WarningsAsErrors: "clang-analyzer-*,\
+readability-identifier-naming,\
 clang-diagnostic-*,\
 google-objc-*,\
 google-explicit-constructor"
+
+CheckOptions:
+  - key: readability-identifier-naming.GlobalConstantPrefix
+    value: k
