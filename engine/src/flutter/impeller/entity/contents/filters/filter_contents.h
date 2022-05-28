@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <variant>
 #include <vector>
 
@@ -80,8 +81,10 @@ class FilterContents : public Contents {
     };
   };
 
-  static std::shared_ptr<FilterContents> MakeBlend(Entity::BlendMode blend_mode,
-                                                   FilterInput::Vector inputs);
+  static std::shared_ptr<FilterContents> MakeBlend(
+      Entity::BlendMode blend_mode,
+      FilterInput::Vector inputs,
+      std::optional<Color> foreground_color = std::nullopt);
 
   static std::shared_ptr<FilterContents> MakeDirectionalGaussianBlur(
       FilterInput::Ref input,

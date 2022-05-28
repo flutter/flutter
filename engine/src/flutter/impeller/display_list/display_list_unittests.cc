@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "display_list/display_list_blend_mode.h"
+#include "display_list/display_list_color_filter.h"
 #include "gtest/gtest.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -217,6 +219,31 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
     builder.setMaskFilter(&filter);
     builder.drawTextBlob(
         SkTextBlob::MakeFromString("Testing", CreateTestFont()), 220, 170);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DisplayListTest, CanDrawWithBlendColorFilter) {
+  auto texture = CreateTextureForFixture("embarcadero.jpg");
+  flutter::DisplayListBuilder builder;
+
+  // Pipeline blended image.
+  {
+    auto filter = flutter::DlBlendColorFilter(SK_ColorYELLOW,
+                                              flutter::DlBlendMode::kModulate);
+    builder.setColorFilter(&filter);
+    builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
+                      SkSamplingOptions{}, true);
+  }
+
+  // Advanced blended image.
+  {
+    auto filter =
+        flutter::DlBlendColorFilter(SK_ColorRED, flutter::DlBlendMode::kScreen);
+    builder.setColorFilter(&filter);
+    builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(250, 250),
+                      SkSamplingOptions{}, true);
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
