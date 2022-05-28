@@ -20,6 +20,8 @@ struct Paint {
   using MaskFilterProc =
       std::function<std::shared_ptr<FilterContents>(FilterInput::Ref,
                                                     bool is_solid_color)>;
+  using ColorFilterProc =
+      std::function<std::shared_ptr<FilterContents>(FilterInput::Ref)>;
 
   enum class Style {
     kFill,
@@ -37,6 +39,7 @@ struct Paint {
   Entity::BlendMode blend_mode = Entity::BlendMode::kSourceOver;
 
   std::optional<MaskFilterProc> mask_filter;
+  std::optional<ColorFilterProc> color_filter;
 
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.
