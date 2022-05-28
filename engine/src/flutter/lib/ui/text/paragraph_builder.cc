@@ -32,75 +32,75 @@ namespace {
 
 // TextStyle
 
-const int tsLeadingDistributionIndex = 0;
-const int tsColorIndex = 1;
-const int tsTextDecorationIndex = 2;
-const int tsTextDecorationColorIndex = 3;
-const int tsTextDecorationStyleIndex = 4;
-const int tsFontWeightIndex = 5;
-const int tsFontStyleIndex = 6;
-const int tsTextBaselineIndex = 7;
-const int tsTextDecorationThicknessIndex = 8;
-const int tsFontFamilyIndex = 9;
-const int tsFontSizeIndex = 10;
-const int tsLetterSpacingIndex = 11;
-const int tsWordSpacingIndex = 12;
-const int tsHeightIndex = 13;
-const int tsLocaleIndex = 14;
-const int tsBackgroundIndex = 15;
-const int tsForegroundIndex = 16;
-const int tsTextShadowsIndex = 17;
-const int tsFontFeaturesIndex = 18;
-const int tsFontVariationsIndex = 19;
+const int kTSLeadingDistributionIndex = 0;
+const int kTSColorIndex = 1;
+const int kTSTextDecorationIndex = 2;
+const int kTSTextDecorationColorIndex = 3;
+const int kTSTextDecorationStyleIndex = 4;
+const int kTSFontWeightIndex = 5;
+const int kTSFontStyleIndex = 6;
+const int kTSTextBaselineIndex = 7;
+const int kTSTextDecorationThicknessIndex = 8;
+const int kTSFontFamilyIndex = 9;
+const int kTSFontSizeIndex = 10;
+const int kTSLetterSpacingIndex = 11;
+const int kTSWordSpacingIndex = 12;
+const int kTSHeightIndex = 13;
+const int kTSLocaleIndex = 14;
+const int kTSBackgroundIndex = 15;
+const int kTSForegroundIndex = 16;
+const int kTSTextShadowsIndex = 17;
+const int kTSFontFeaturesIndex = 18;
+const int kTSFontVariationsIndex = 19;
 
-const int tsLeadingDistributionMask = 1 << tsLeadingDistributionIndex;
-const int tsColorMask = 1 << tsColorIndex;
-const int tsTextDecorationMask = 1 << tsTextDecorationIndex;
-const int tsTextDecorationColorMask = 1 << tsTextDecorationColorIndex;
-const int tsTextDecorationStyleMask = 1 << tsTextDecorationStyleIndex;
-const int tsTextDecorationThicknessMask = 1 << tsTextDecorationThicknessIndex;
-const int tsFontWeightMask = 1 << tsFontWeightIndex;
-const int tsFontStyleMask = 1 << tsFontStyleIndex;
-const int tsTextBaselineMask = 1 << tsTextBaselineIndex;
-const int tsFontFamilyMask = 1 << tsFontFamilyIndex;
-const int tsFontSizeMask = 1 << tsFontSizeIndex;
-const int tsLetterSpacingMask = 1 << tsLetterSpacingIndex;
-const int tsWordSpacingMask = 1 << tsWordSpacingIndex;
-const int tsHeightMask = 1 << tsHeightIndex;
-const int tsLocaleMask = 1 << tsLocaleIndex;
-const int tsBackgroundMask = 1 << tsBackgroundIndex;
-const int tsForegroundMask = 1 << tsForegroundIndex;
-const int tsTextShadowsMask = 1 << tsTextShadowsIndex;
-const int tsFontFeaturesMask = 1 << tsFontFeaturesIndex;
-const int tsFontVariationsMask = 1 << tsFontVariationsIndex;
+const int kTSLeadingDistributionMask = 1 << kTSLeadingDistributionIndex;
+const int kTSColorMask = 1 << kTSColorIndex;
+const int kTSTextDecorationMask = 1 << kTSTextDecorationIndex;
+const int kTSTextDecorationColorMask = 1 << kTSTextDecorationColorIndex;
+const int kTSTextDecorationStyleMask = 1 << kTSTextDecorationStyleIndex;
+const int kTSTextDecorationThicknessMask = 1 << kTSTextDecorationThicknessIndex;
+const int kTSFontWeightMask = 1 << kTSFontWeightIndex;
+const int kTSFontStyleMask = 1 << kTSFontStyleIndex;
+const int kTSTextBaselineMask = 1 << kTSTextBaselineIndex;
+const int kTSFontFamilyMask = 1 << kTSFontFamilyIndex;
+const int kTSFontSizeMask = 1 << kTSFontSizeIndex;
+const int kTSLetterSpacingMask = 1 << kTSLetterSpacingIndex;
+const int kTSWordSpacingMask = 1 << kTSWordSpacingIndex;
+const int kTSHeightMask = 1 << kTSHeightIndex;
+const int kTSLocaleMask = 1 << kTSLocaleIndex;
+const int kTSBackgroundMask = 1 << kTSBackgroundIndex;
+const int kTSForegroundMask = 1 << kTSForegroundIndex;
+const int kTSTextShadowsMask = 1 << kTSTextShadowsIndex;
+const int kTSFontFeaturesMask = 1 << kTSFontFeaturesIndex;
+const int kTSFontVariationsMask = 1 << kTSFontVariationsIndex;
 
 // ParagraphStyle
 
-const int psTextAlignIndex = 1;
-const int psTextDirectionIndex = 2;
-const int psFontWeightIndex = 3;
-const int psFontStyleIndex = 4;
-const int psMaxLinesIndex = 5;
-const int psTextHeightBehaviorIndex = 6;
-const int psFontFamilyIndex = 7;
-const int psFontSizeIndex = 8;
-const int psHeightIndex = 9;
-const int psStrutStyleIndex = 10;
-const int psEllipsisIndex = 11;
-const int psLocaleIndex = 12;
+const int kPSTextAlignIndex = 1;
+const int kPSTextDirectionIndex = 2;
+const int kPSFontWeightIndex = 3;
+const int kPSFontStyleIndex = 4;
+const int kPSMaxLinesIndex = 5;
+const int kPSTextHeightBehaviorIndex = 6;
+const int kPSFontFamilyIndex = 7;
+const int kPSFontSizeIndex = 8;
+const int kPSHeightIndex = 9;
+const int kPSStrutStyleIndex = 10;
+const int kPSEllipsisIndex = 11;
+const int kPSLocaleIndex = 12;
 
-const int psTextAlignMask = 1 << psTextAlignIndex;
-const int psTextDirectionMask = 1 << psTextDirectionIndex;
-const int psFontWeightMask = 1 << psFontWeightIndex;
-const int psFontStyleMask = 1 << psFontStyleIndex;
-const int psMaxLinesMask = 1 << psMaxLinesIndex;
-const int psFontFamilyMask = 1 << psFontFamilyIndex;
-const int psFontSizeMask = 1 << psFontSizeIndex;
-const int psHeightMask = 1 << psHeightIndex;
-const int psTextHeightBehaviorMask = 1 << psTextHeightBehaviorIndex;
-const int psStrutStyleMask = 1 << psStrutStyleIndex;
-const int psEllipsisMask = 1 << psEllipsisIndex;
-const int psLocaleMask = 1 << psLocaleIndex;
+const int kPSTextAlignMask = 1 << kPSTextAlignIndex;
+const int kPSTextDirectionMask = 1 << kPSTextDirectionIndex;
+const int kPSFontWeightMask = 1 << kPSFontWeightIndex;
+const int kPSFontStyleMask = 1 << kPSFontStyleIndex;
+const int kPSMaxLinesMask = 1 << kPSMaxLinesIndex;
+const int kPSFontFamilyMask = 1 << kPSFontFamilyIndex;
+const int kPSFontSizeMask = 1 << kPSFontSizeIndex;
+const int kPSHeightMask = 1 << kPSHeightIndex;
+const int kPSTextHeightBehaviorMask = 1 << kPSTextHeightBehaviorIndex;
+const int kPSStrutStyleMask = 1 << kPSStrutStyleIndex;
+const int kPSEllipsisMask = 1 << kPSEllipsisIndex;
+const int kPSLocaleMask = 1 << kPSLocaleIndex;
 
 // TextShadows decoding
 
@@ -121,23 +121,23 @@ constexpr uint32_t kBytesPerFontVariation = 8;
 constexpr uint32_t kFontVariationTagLength = 4;
 
 // Strut decoding
-const int sFontWeightIndex = 0;
-const int sFontStyleIndex = 1;
-const int sFontFamilyIndex = 2;
-const int sLeadingDistributionIndex = 3;
-const int sFontSizeIndex = 4;
-const int sHeightIndex = 5;
-const int sLeadingIndex = 6;
-const int sForceStrutHeightIndex = 7;
+const int kSFontWeightIndex = 0;
+const int kSFontStyleIndex = 1;
+const int kSFontFamilyIndex = 2;
+const int kSLeadingDistributionIndex = 3;
+const int kSFontSizeIndex = 4;
+const int kSHeightIndex = 5;
+const int kSLeadingIndex = 6;
+const int kSForceStrutHeightIndex = 7;
 
-const int sFontWeightMask = 1 << sFontWeightIndex;
-const int sFontStyleMask = 1 << sFontStyleIndex;
-const int sFontFamilyMask = 1 << sFontFamilyIndex;
-const int sLeadingDistributionMask = 1 << sLeadingDistributionIndex;
-const int sFontSizeMask = 1 << sFontSizeIndex;
-const int sHeightMask = 1 << sHeightIndex;
-const int sLeadingMask = 1 << sLeadingIndex;
-const int sForceStrutHeightMask = 1 << sForceStrutHeightIndex;
+const int kSFontWeightMask = 1 << kSFontWeightIndex;
+const int kSFontStyleMask = 1 << kSFontStyleIndex;
+const int kSFontFamilyMask = 1 << kSFontFamilyIndex;
+const int kSLeadingDistributionMask = 1 << kSLeadingDistributionIndex;
+const int kSFontSizeMask = 1 << kSFontSizeIndex;
+const int kSHeightMask = 1 << kSHeightIndex;
+const int kSLeadingMask = 1 << kSLeadingIndex;
+const int kSForceStrutHeightMask = 1 << kSForceStrutHeightIndex;
 
 }  // namespace
 
@@ -199,16 +199,16 @@ void decodeStrut(Dart_Handle strut_data,
   // any 32 bit ints. In addition, the order of decoding is the same order
   // as it is encoded, and the order is used to maintain consistency.
   size_t byte_count = 1;
-  if (mask & sFontWeightMask) {
+  if (mask & kSFontWeightMask) {
     paragraph_style.strut_font_weight =
         static_cast<txt::FontWeight>(uint8_data[byte_count++]);
   }
-  if (mask & sFontStyleMask) {
+  if (mask & kSFontStyleMask) {
     paragraph_style.strut_font_style =
         static_cast<txt::FontStyle>(uint8_data[byte_count++]);
   }
 
-  paragraph_style.strut_half_leading = mask & sLeadingDistributionMask;
+  paragraph_style.strut_half_leading = mask & kSLeadingDistributionMask;
 
   std::vector<float> float_data;
   float_data.resize((byte_data.length_in_bytes() - byte_count) / 4);
@@ -216,22 +216,22 @@ void decodeStrut(Dart_Handle strut_data,
          static_cast<const char*>(byte_data.data()) + byte_count,
          byte_data.length_in_bytes() - byte_count);
   size_t float_count = 0;
-  if (mask & sFontSizeMask) {
+  if (mask & kSFontSizeMask) {
     paragraph_style.strut_font_size = float_data[float_count++];
   }
-  if (mask & sHeightMask) {
+  if (mask & kSHeightMask) {
     paragraph_style.strut_height = float_data[float_count++];
     paragraph_style.strut_has_height_override = true;
   }
-  if (mask & sLeadingMask) {
+  if (mask & kSLeadingMask) {
     paragraph_style.strut_leading = float_data[float_count++];
   }
 
   // The boolean is stored as the last bit in the bitmask, as null
   // and false have the same behavior.
-  paragraph_style.force_strut_height = mask & sForceStrutHeightMask;
+  paragraph_style.force_strut_height = mask & kSForceStrutHeightMask;
 
-  if (mask & sFontFamilyMask) {
+  if (mask & kSFontFamilyMask) {
     paragraph_style.strut_font_families = strut_font_families;
   } else {
     // Provide an empty font name so that the platform default font will be
@@ -252,53 +252,54 @@ ParagraphBuilder::ParagraphBuilder(
   int32_t mask = encoded[0];
   txt::ParagraphStyle style;
 
-  if (mask & psTextAlignMask) {
-    style.text_align = txt::TextAlign(encoded[psTextAlignIndex]);
+  if (mask & kPSTextAlignMask) {
+    style.text_align = static_cast<txt::TextAlign>(encoded[kPSTextAlignIndex]);
   }
 
-  if (mask & psTextDirectionMask) {
-    style.text_direction = txt::TextDirection(encoded[psTextDirectionIndex]);
+  if (mask & kPSTextDirectionMask) {
+    style.text_direction =
+        static_cast<txt::TextDirection>(encoded[kPSTextDirectionIndex]);
   }
 
-  if (mask & psFontWeightMask) {
+  if (mask & kPSFontWeightMask) {
     style.font_weight =
-        static_cast<txt::FontWeight>(encoded[psFontWeightIndex]);
+        static_cast<txt::FontWeight>(encoded[kPSFontWeightIndex]);
   }
 
-  if (mask & psFontStyleMask) {
-    style.font_style = static_cast<txt::FontStyle>(encoded[psFontStyleIndex]);
+  if (mask & kPSFontStyleMask) {
+    style.font_style = static_cast<txt::FontStyle>(encoded[kPSFontStyleIndex]);
   }
 
-  if (mask & psFontFamilyMask) {
+  if (mask & kPSFontFamilyMask) {
     style.font_family = fontFamily;
   }
 
-  if (mask & psFontSizeMask) {
+  if (mask & kPSFontSizeMask) {
     style.font_size = fontSize;
   }
 
-  if (mask & psHeightMask) {
+  if (mask & kPSHeightMask) {
     style.height = height;
     style.has_height_override = true;
   }
 
-  if (mask & psTextHeightBehaviorMask) {
-    style.text_height_behavior = encoded[psTextHeightBehaviorIndex];
+  if (mask & kPSTextHeightBehaviorMask) {
+    style.text_height_behavior = encoded[kPSTextHeightBehaviorIndex];
   }
 
-  if (mask & psStrutStyleMask) {
+  if (mask & kPSStrutStyleMask) {
     decodeStrut(strutData, strutFontFamilies, style);
   }
 
-  if (mask & psMaxLinesMask) {
-    style.max_lines = encoded[psMaxLinesIndex];
+  if (mask & kPSMaxLinesMask) {
+    style.max_lines = encoded[kPSMaxLinesIndex];
   }
 
-  if (mask & psEllipsisMask) {
+  if (mask & kPSEllipsisMask) {
     style.ellipsis = ellipsis;
   }
 
-  if (mask & psLocaleMask) {
+  if (mask & kPSLocaleMask) {
     style.locale = locale;
   }
 
@@ -412,70 +413,71 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
   // explicitly given.
   txt::TextStyle style = m_paragraphBuilder->PeekStyle();
 
-  style.half_leading = mask & tsLeadingDistributionMask;
+  style.half_leading = mask & kTSLeadingDistributionMask;
   // Only change the style property from the previous value if a new explicitly
   // set value is available
-  if (mask & tsColorMask) {
-    style.color = encoded[tsColorIndex];
+  if (mask & kTSColorMask) {
+    style.color = encoded[kTSColorIndex];
   }
 
-  if (mask & tsTextDecorationMask) {
+  if (mask & kTSTextDecorationMask) {
     style.decoration =
-        static_cast<txt::TextDecoration>(encoded[tsTextDecorationIndex]);
+        static_cast<txt::TextDecoration>(encoded[kTSTextDecorationIndex]);
   }
 
-  if (mask & tsTextDecorationColorMask) {
-    style.decoration_color = encoded[tsTextDecorationColorIndex];
+  if (mask & kTSTextDecorationColorMask) {
+    style.decoration_color = encoded[kTSTextDecorationColorIndex];
   }
 
-  if (mask & tsTextDecorationStyleMask) {
+  if (mask & kTSTextDecorationStyleMask) {
     style.decoration_style = static_cast<txt::TextDecorationStyle>(
-        encoded[tsTextDecorationStyleIndex]);
+        encoded[kTSTextDecorationStyleIndex]);
   }
 
-  if (mask & tsTextDecorationThicknessMask) {
+  if (mask & kTSTextDecorationThicknessMask) {
     style.decoration_thickness_multiplier = decorationThickness;
   }
 
-  if (mask & tsTextBaselineMask) {
+  if (mask & kTSTextBaselineMask) {
     // TODO(abarth): Implement TextBaseline. The CSS version of this
     // property wasn't wired up either.
   }
 
-  if (mask & (tsFontWeightMask | tsFontStyleMask | tsFontSizeMask |
-              tsLetterSpacingMask | tsWordSpacingMask)) {
-    if (mask & tsFontWeightMask) {
+  if (mask & (kTSFontWeightMask | kTSFontStyleMask | kTSFontSizeMask |
+              kTSLetterSpacingMask | kTSWordSpacingMask)) {
+    if (mask & kTSFontWeightMask) {
       style.font_weight =
-          static_cast<txt::FontWeight>(encoded[tsFontWeightIndex]);
+          static_cast<txt::FontWeight>(encoded[kTSFontWeightIndex]);
     }
 
-    if (mask & tsFontStyleMask) {
-      style.font_style = static_cast<txt::FontStyle>(encoded[tsFontStyleIndex]);
+    if (mask & kTSFontStyleMask) {
+      style.font_style =
+          static_cast<txt::FontStyle>(encoded[kTSFontStyleIndex]);
     }
 
-    if (mask & tsFontSizeMask) {
+    if (mask & kTSFontSizeMask) {
       style.font_size = fontSize;
     }
 
-    if (mask & tsLetterSpacingMask) {
+    if (mask & kTSLetterSpacingMask) {
       style.letter_spacing = letterSpacing;
     }
 
-    if (mask & tsWordSpacingMask) {
+    if (mask & kTSWordSpacingMask) {
       style.word_spacing = wordSpacing;
     }
   }
 
-  if (mask & tsHeightMask) {
+  if (mask & kTSHeightMask) {
     style.height = height;
     style.has_height_override = true;
   }
 
-  if (mask & tsLocaleMask) {
+  if (mask & kTSLocaleMask) {
     style.locale = locale;
   }
 
-  if (mask & tsBackgroundMask) {
+  if (mask & kTSBackgroundMask) {
     Paint background(background_objects, background_data);
     if (background.isNotNull()) {
       SkPaint sk_paint;
@@ -484,7 +486,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
     }
   }
 
-  if (mask & tsForegroundMask) {
+  if (mask & kTSForegroundMask) {
     Paint foreground(foreground_objects, foreground_data);
     if (foreground.isNotNull()) {
       SkPaint sk_paint;
@@ -493,22 +495,22 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
     }
   }
 
-  if (mask & tsTextShadowsMask) {
+  if (mask & kTSTextShadowsMask) {
     decodeTextShadows(shadows_data, style.text_shadows);
   }
 
-  if (mask & tsFontFamilyMask) {
+  if (mask & kTSFontFamilyMask) {
     // The child style's font families override the parent's font families.
     // If the child's fonts are not available, then the font collection will
     // use the system fallback fonts (not the parent's fonts).
     style.font_families = fontFamilies;
   }
 
-  if (mask & tsFontFeaturesMask) {
+  if (mask & kTSFontFeaturesMask) {
     decodeFontFeatures(font_features_data, style.font_features);
   }
 
-  if (mask & tsFontVariationsMask) {
+  if (mask & kTSFontVariationsMask) {
     decodeFontVariations(font_variations_data, style.font_variations);
   }
 

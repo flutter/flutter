@@ -86,7 +86,7 @@
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center addObserver:self
              selector:@selector(onEngineWillBeDealloced:)
-                 name:FlutterEngineWillDealloc
+                 name:kFlutterEngineWillDealloc
                object:engine];
 
   return engine;

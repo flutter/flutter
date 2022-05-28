@@ -10,7 +10,7 @@
 namespace flutter {
 namespace testing {
 
-static const float matrix[20] = {
+static const float kMatrix[20] = {
     1,  2,  3,  4,  5,   //
     6,  7,  8,  9,  10,  //
     11, 12, 13, 14, 15,  //
@@ -49,14 +49,14 @@ TEST(DisplayListColorFilter, FromSkiaBlendFilter) {
 }
 
 TEST(DisplayListColorFilter, FromSkiaMatrixFilter) {
-  sk_sp<SkColorFilter> sk_filter = SkColorFilters::Matrix(matrix);
+  sk_sp<SkColorFilter> sk_filter = SkColorFilters::Matrix(kMatrix);
   std::shared_ptr<DlColorFilter> filter = DlColorFilter::From(sk_filter);
-  DlMatrixColorFilter dl_filter(matrix);
+  DlMatrixColorFilter dl_filter(kMatrix);
   ASSERT_EQ(filter->type(), DlColorFilterType::kMatrix);
   ASSERT_EQ(*filter->asMatrix(), dl_filter);
   const DlMatrixColorFilter* matrix_filter = filter->asMatrix();
   for (int i = 0; i < 20; i++) {
-    ASSERT_EQ((*matrix_filter)[i], matrix[i]);
+    ASSERT_EQ((*matrix_filter)[i], kMatrix[i]);
   }
 
   ASSERT_EQ(filter->asBlend(), nullptr);
@@ -137,24 +137,24 @@ TEST(DisplayListColorFilter, NopBlendShouldNotCrash) {
 }
 
 TEST(DisplayListColorFilter, MatrixConstructor) {
-  DlMatrixColorFilter filter(matrix);
+  DlMatrixColorFilter filter(kMatrix);
 }
 
 TEST(DisplayListColorFilter, MatrixShared) {
-  DlMatrixColorFilter filter(matrix);
+  DlMatrixColorFilter filter(kMatrix);
   ASSERT_NE(filter.shared().get(), &filter);
   ASSERT_EQ(*filter.shared(), filter);
 }
 
 TEST(DisplayListColorFilter, MatrixAsMatrix) {
-  DlMatrixColorFilter filter(matrix);
+  DlMatrixColorFilter filter(kMatrix);
   ASSERT_NE(filter.asMatrix(), nullptr);
   ASSERT_EQ(filter.asMatrix(), &filter);
 }
 
 TEST(DisplayListColorFilter, MatrixContents) {
   float matrix_[20];
-  memcpy(matrix_, matrix, sizeof(matrix_));
+  memcpy(matrix_, kMatrix, sizeof(matrix_));
   DlMatrixColorFilter filter(matrix_);
 
   // Test deref operator []
@@ -176,14 +176,14 @@ TEST(DisplayListColorFilter, MatrixContents) {
 }
 
 TEST(DisplayListColorFilter, MatrixEquals) {
-  DlMatrixColorFilter filter1(matrix);
-  DlMatrixColorFilter filter2(matrix);
+  DlMatrixColorFilter filter1(kMatrix);
+  DlMatrixColorFilter filter2(kMatrix);
   TestEquals(filter1, filter2);
 }
 
 TEST(DisplayListColorFilter, MatrixNotEquals) {
   float matrix_[20];
-  memcpy(matrix_, matrix, sizeof(matrix_));
+  memcpy(matrix_, kMatrix, sizeof(matrix_));
   DlMatrixColorFilter filter1(matrix_);
   matrix_[4] += 101;
   DlMatrixColorFilter filter2(matrix_);

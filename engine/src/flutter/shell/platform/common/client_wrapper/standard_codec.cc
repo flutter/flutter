@@ -98,7 +98,7 @@ EncodableValue StandardCodecSerializer::ReadValue(
 void StandardCodecSerializer::WriteValue(const EncodableValue& value,
                                          ByteStreamWriter* stream) const {
   stream->WriteByte(static_cast<uint8_t>(EncodedTypeForValue(value)));
-  // TODO: Consider replacing this this with a std::visitor.
+  // TODO(cbracken): Consider replacing this this with std::visit.
   switch (value.index()) {
     case 0:
     case 1:

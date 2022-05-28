@@ -55,7 +55,7 @@ constexpr double kStrokeMiterLimitDefault = 4.0;
 
 // A color matrix which inverts colors.
 // clang-format off
-constexpr float invert_colors[20] = {
+constexpr float kInvertColors[20] = {
   -1.0,    0,    0, 1.0, 0,
      0, -1.0,    0, 1.0, 0,
      0,    0, -1.0, 1.0, 0,
@@ -156,7 +156,7 @@ const SkPaint* Paint::paint(SkPaint& paint) const {
   }
 
   if (uint_data[kInvertColorIndex]) {
-    sk_sp<SkColorFilter> invert_filter = SkColorFilters::Matrix(invert_colors);
+    sk_sp<SkColorFilter> invert_filter = SkColorFilters::Matrix(kInvertColors);
     sk_sp<SkColorFilter> current_filter = paint.refColorFilter();
     if (current_filter) {
       invert_filter = invert_filter->makeComposed(current_filter);

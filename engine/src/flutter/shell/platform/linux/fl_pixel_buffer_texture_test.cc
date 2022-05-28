@@ -12,10 +12,10 @@
 
 #include <epoxy/gl.h>
 
-static constexpr uint32_t BUFFER_WIDTH = 4u;
-static constexpr uint32_t BUFFER_HEIGHT = 4u;
-static constexpr uint32_t REAL_BUFFER_WIDTH = 2u;
-static constexpr uint32_t REAL_BUFFER_HEIGHT = 2u;
+static constexpr uint32_t kBufferWidth = 4u;
+static constexpr uint32_t kBufferHeight = 4u;
+static constexpr uint32_t kRealBufferWidth = 2u;
+static constexpr uint32_t kRealBufferHeight = 2u;
 
 G_DECLARE_FINAL_TYPE(FlTestPixelBufferTexture,
                      fl_test_pixel_buffer_texture,
@@ -44,11 +44,11 @@ static gboolean fl_test_pixel_buffer_texture_copy_pixels(
   static const uint8_t buffer[] = {0x0a, 0x1a, 0x2a, 0x3a, 0x4a, 0x5a,
                                    0x6a, 0x7a, 0x8a, 0x9a, 0xaa, 0xba,
                                    0xca, 0xda, 0xea, 0xfa};
-  EXPECT_EQ(*width, BUFFER_WIDTH);
-  EXPECT_EQ(*height, BUFFER_HEIGHT);
+  EXPECT_EQ(*width, kBufferWidth);
+  EXPECT_EQ(*height, kBufferHeight);
   *out_buffer = buffer;
-  *width = REAL_BUFFER_WIDTH;
-  *height = REAL_BUFFER_HEIGHT;
+  *width = kRealBufferWidth;
+  *height = kRealBufferHeight;
 
   return TRUE;
 }
@@ -81,8 +81,8 @@ TEST(FlPixelBufferTextureTest, PopulateTexture) {
   FlutterOpenGLTexture opengl_texture = {0};
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_pixel_buffer_texture_populate(
-      texture, BUFFER_WIDTH, BUFFER_HEIGHT, &opengl_texture, &error));
+      texture, kBufferWidth, kBufferHeight, &opengl_texture, &error));
   EXPECT_EQ(error, nullptr);
-  EXPECT_EQ(opengl_texture.width, REAL_BUFFER_WIDTH);
-  EXPECT_EQ(opengl_texture.height, REAL_BUFFER_HEIGHT);
+  EXPECT_EQ(opengl_texture.width, kRealBufferWidth);
+  EXPECT_EQ(opengl_texture.height, kRealBufferHeight);
 }

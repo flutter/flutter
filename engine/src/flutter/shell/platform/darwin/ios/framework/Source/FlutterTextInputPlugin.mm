@@ -10,8 +10,8 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
 
-static const char _kTextAffinityDownstream[] = "TextAffinity.downstream";
-static const char _kTextAffinityUpstream[] = "TextAffinity.upstream";
+static const char kTextAffinityDownstream[] = "TextAffinity.downstream";
+static const char kTextAffinityUpstream[] = "TextAffinity.upstream";
 // A delay before enabling the accessibility of FlutterTextInputView after
 // it is activated.
 static constexpr double kUITextInputAccessibilityEnablingDelaySeconds = 0.5;
@@ -744,7 +744,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   if (self) {
     _textInputPlugin = textInputPlugin.weakPtr;
     _textInputClient = 0;
-    _selectionAffinity = _kTextAffinityUpstream;
+    _selectionAffinity = kTextAffinityUpstream;
 
     // UITextInput
     _text = [[NSMutableString alloc] init];
@@ -952,9 +952,9 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 
     [self setSelectedTextRangeLocal:[FlutterTextRange rangeWithNSRange:selectedRange]];
 
-    _selectionAffinity = _kTextAffinityDownstream;
-    if ([state[@"selectionAffinity"] isEqualToString:@(_kTextAffinityUpstream)]) {
-      _selectionAffinity = _kTextAffinityUpstream;
+    _selectionAffinity = kTextAffinityDownstream;
+    if ([state[@"selectionAffinity"] isEqualToString:@(kTextAffinityUpstream)]) {
+      _selectionAffinity = kTextAffinityUpstream;
     }
     [self.inputDelegate selectionDidChange:self];
   }
@@ -1848,7 +1848,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   [self resetScribbleInteractionStatusIfEnding];
   self.selectionRects = copiedRects;
   [copiedRects release];
-  _selectionAffinity = _kTextAffinityDownstream;
+  _selectionAffinity = kTextAffinityDownstream;
   [self replaceRange:_selectedTextRange withText:text];
 }
 
@@ -1866,7 +1866,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 }
 
 - (void)deleteBackward {
-  _selectionAffinity = _kTextAffinityDownstream;
+  _selectionAffinity = kTextAffinityDownstream;
   _scribbleFocusStatus = FlutterScribbleFocusStatusUnfocused;
   [self resetScribbleInteractionStatusIfEnding];
 

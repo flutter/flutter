@@ -40,7 +40,7 @@ fml::RefPtr<ImageFilter> ImageFilter::Create() {
   return fml::MakeRefCounted<ImageFilter>();
 }
 
-static const std::array<SkSamplingOptions, 4> filter_qualities = {
+static const std::array<SkSamplingOptions, 4> kFilterQualities = {
     SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone),
     SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
     SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear),
@@ -49,12 +49,12 @@ static const std::array<SkSamplingOptions, 4> filter_qualities = {
 
 SkSamplingOptions ImageFilter::SamplingFromIndex(int filterQualityIndex) {
   if (filterQualityIndex < 0) {
-    return filter_qualities.front();
+    return kFilterQualities.front();
   } else if (static_cast<size_t>(filterQualityIndex) >=
-             filter_qualities.size()) {
-    return filter_qualities.back();
+             kFilterQualities.size()) {
+    return kFilterQualities.back();
   } else {
-    return filter_qualities[filterQualityIndex];
+    return kFilterQualities[filterQualityIndex];
   }
 }
 
