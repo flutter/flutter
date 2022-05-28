@@ -29,38 +29,44 @@ namespace impeller {
 
 std::shared_ptr<FilterContents> FilterContents::MakeBlend(
     Entity::BlendMode blend_mode,
-    FilterInput::Vector inputs) {
+    FilterInput::Vector inputs,
+    std::optional<Color> foreground_color) {
   if (blend_mode > Entity::BlendMode::kLastAdvancedBlendMode) {
     VALIDATION_LOG << "Invalid blend mode " << static_cast<int>(blend_mode)
                    << " passed to FilterContents::MakeBlend.";
     return nullptr;
   }
 
-  if (inputs.size() < 2 ||
+  size_t total_inputs = inputs.size() + (foreground_color.has_value() ? 1 : 0);
+  if (total_inputs < 2 ||
       blend_mode <= Entity::BlendMode::kLastPipelineBlendMode) {
     auto blend = std::make_shared<BlendFilterContents>();
     blend->SetInputs(inputs);
     blend->SetBlendMode(blend_mode);
+    blend->SetForegroundColor(foreground_color);
     return blend;
   }
 
-  if (blend_mode <= Entity::BlendMode::kLastAdvancedBlendMode) {
-    auto blend_input = inputs[0];
-    std::shared_ptr<BlendFilterContents> new_blend;
-    for (auto in_i = inputs.begin() + 1; in_i < inputs.end(); in_i++) {
-      new_blend = std::make_shared<BlendFilterContents>();
-      new_blend->SetInputs({blend_input, *in_i});
-      new_blend->SetBlendMode(blend_mode);
-      if (in_i < inputs.end() - 1) {
-        blend_input = FilterInput::Make(
-            std::static_pointer_cast<FilterContents>(new_blend));
-      }
+  auto blend_input = inputs[0];
+  std::shared_ptr<BlendFilterContents> new_blend;
+  for (auto in_i = inputs.begin() + 1; in_i < inputs.end(); in_i++) {
+    new_blend = std::make_shared<BlendFilterContents>();
+    new_blend->SetInputs({*in_i, blend_input});
+    new_blend->SetBlendMode(blend_mode);
+    if (in_i < inputs.end() - 1 || foreground_color.has_value()) {
+      blend_input = FilterInput::Make(
+          std::static_pointer_cast<FilterContents>(new_blend));
     }
-    // new_blend will always be assigned because inputs.size() >= 2.
-    return new_blend;
   }
 
-  FML_UNREACHABLE();
+  if (foreground_color.has_value()) {
+    new_blend = std::make_shared<BlendFilterContents>();
+    new_blend->SetInputs({blend_input});
+    new_blend->SetBlendMode(blend_mode);
+    new_blend->SetForegroundColor(foreground_color);
+  }
+
+  return new_blend;
 }
 
 std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(

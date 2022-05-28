@@ -8,11 +8,11 @@ impeller_shaders("entity_shaders") {
   name = "entity"
 
   shaders = [
-    "shaders/advanced_blend.vert",
-    "shaders/advanced_blend_colorburn.frag",
-    "shaders/advanced_blend_screen.frag",
-    "shaders/blend.frag",
-    "shaders/blend.vert",
+    "shaders/blending/advanced_blend.vert",
+    "shaders/blending/advanced_blend_colorburn.frag",
+    "shaders/blending/advanced_blend_screen.frag",
+    "shaders/blending/blend.frag",
+    "shaders/blending/blend.vert",
     "shaders/border_mask_blur.frag",
     "shaders/border_mask_blur.vert",
     "shaders/gaussian_blur.frag",
