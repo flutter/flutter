@@ -192,7 +192,7 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
   /// Returns all descendants of this node, recursively, in depth order.
   Iterable<_MenuNode> get descendants {
     Iterable<_MenuNode> visitChildren(_MenuNode node) {
-      return <_MenuNode>[ node, for (final _MenuNode child in node.children) ... visitChildren(child)];
+      return <_MenuNode>[node, for (final _MenuNode child in node.children) ...visitChildren(child)];
     }
 
     return visitChildren(this);
@@ -696,7 +696,7 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
   @override
   String? get debugCurrentItem {
     String? result;
-    assert((){
+    assert(() {
       if (openMenu != null) {
         result = openMenus.map<String>((_MenuNode node) => node.toStringShort()).join(' > ');
       }
@@ -708,7 +708,7 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
   @override
   String? get debugFocusedItem {
     String? result;
-    assert((){
+    assert(() {
       if (primaryFocus?.context != null) {
         result = _focusNodes[primaryFocus]?.toStringShort();
       }
@@ -1107,9 +1107,10 @@ abstract class _MenuBarItemDefaults extends StatefulWidget implements PlatformMe
 /// menu is open, the menu hierarchy can be navigated by hovering over the menu
 /// with the mouse.
 ///
-/// Menu items can have a [MenuBarItem.shortcut] assigned to them so that if the
-/// shortcut sequence is pressed, the menu item that shortcut will be selected.
-/// If multiple menu items have the same shortcut, they will all be selected.
+/// Menu items can have a [SingleActivator] or [CharacterActivator]  assigned to
+/// them as their [MenuBarItem.shortcut], so that if the shortcut key sequence
+/// is pressed, the menu item corresponding to that shortcut will be selected.
+/// Shortcuts must be unique in the ambient [ShortcutRegistry].
 ///
 /// Selecting a menu item causes the [MenuBarItem.onSelected] callback to be
 /// called.
@@ -1151,6 +1152,8 @@ abstract class _MenuBarItemDefaults extends StatefulWidget implements PlatformMe
 ///    the menu bar.
 ///  * [PlatformMenuBar], which creates a menu bar that is rendered by the host
 ///    platform instead of by Flutter (on macOS, for example).
+///  * [ShortcutRegistry], a registry of shortcuts that apply for the entire
+///    application, used by the `MenuBar` to register its shortcuts.
 class MenuBar extends PlatformMenuBar {
   /// Creates a const [MenuBar].
   const MenuBar({
@@ -1178,8 +1181,19 @@ class MenuBar extends PlatformMenuBar {
   }) : _isPlatformMenu = isPlatformMenu;
 
   /// Creates an adaptive [MenuBar] that renders using platform APIs with a
-  /// [PlatformMenuBar] on platforms that support it, and using Flutter
-  /// rendering on platforms that don't.
+  /// [PlatformMenuBar] on platforms that support it, currently only macOS, and
+  /// using Flutter rendering on platforms that don't (everywhere else).
+  ///
+  /// Some aspects of [MenuBar] are ignored when they are rendered by the
+  /// platform, such as any visual attributes (geometry, colors). Platform menus
+  /// also can't be closed with [MenuBarController.closeAll].
+  ///
+  /// See also:
+  ///
+  ///  * [PlatformMenuBar], which will configure platform provided menus on
+  ///    macOS only.
+  ///  * [PlatformMenuItem], which is the base class for [MenuBarItem], and
+  ///    shows which parameters are supported on platform provided menus.
   factory MenuBar.adaptive({
     Key? key,
     MenuBarController? controller,
@@ -1224,6 +1238,9 @@ class MenuBar extends PlatformMenuBar {
   ///
   /// If a controller is not set, the widget will create its own controller
   /// internally.
+  ///
+  /// Descendants of the [MenuBar] can access its [MenuBarController] using
+  /// [MenuBarController.of].
   final MenuBarController? controller;
 
   /// Whether or not this menu bar is enabled.
@@ -1247,7 +1264,7 @@ class MenuBar extends PlatformMenuBar {
   /// Defaults to the value of [MenuBarThemeData.barPadding] if not set.
   final EdgeInsets? padding;
 
-  /// The Material elevation the menu bar (if any).
+  /// The Material elevation of the menu bar (if any).
   ///
   /// Defaults to the [MenuBarThemeData.barElevation] value of the ambient
   /// [MenuBarTheme].
@@ -1287,7 +1304,7 @@ class MenuBar extends PlatformMenuBar {
 }
 
 class _MenuBarState extends State<MenuBar> {
-  late FocusNode focusNode;
+  final FocusNode focusNode = FocusNode(debugLabel: 'MenuBar');
   late Map<MenuSerializableShortcut, Intent> shortcuts;
   _MenuBarController? _controller;
   _MenuBarController get controller {
@@ -1303,27 +1320,35 @@ class _MenuBarState extends State<MenuBar> {
   @override
   void initState() {
     super.initState();
-    focusNode = FocusNode(debugLabel: 'MenuBar');
+    shortcuts = _getShortcuts();
     _updateController();
   }
 
   @override
   void dispose() {
     focusNode.dispose();
-    controller.disconnect();
-    // Only dispose of the controller if we created it in this state object.
-    _controller?.dispose();
+    if (!widget._isPlatformMenu) {
+      controller.disconnect();
+      // Only dispose of the controller if we created it in this state object.
+      _controller?.dispose();
+    }
     super.dispose();
   }
 
   void _updateController() {
-    shortcuts = _getShortcuts();
+    if (widget._isPlatformMenu) {
+      return;
+    }
     controller.update(context: context, topLevel: widget.menus, enabled: widget.enabled);
   }
 
   @override
   void didUpdateWidget(MenuBar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    shortcuts = _getShortcuts();
+    if (widget._isPlatformMenu) {
+      return;
+    }
     if (widget.controller != oldWidget.controller) {
       (oldWidget.controller as _MenuBarController?)?.disconnect();
     }
@@ -1334,10 +1359,12 @@ class _MenuBarState extends State<MenuBar> {
   }
 
   void _doSelect(Intent onSelected) {
-    if (controller.enabled) {
+    if (widget._isPlatformMenu || controller.enabled) {
       Actions.maybeInvoke(FocusManager.instance.primaryFocus!.context!, onSelected);
     }
-    controller.closeAll();
+    if (!widget._isPlatformMenu) {
+      controller.closeAll();
+    }
   }
 
   /// These are only used in debug mode to make sure there aren't any duplicate
@@ -1426,21 +1453,21 @@ class _MenuBarState extends State<MenuBar> {
     }
     final Set<MaterialState> state = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
     final MenuBarThemeData menuBarTheme = MenuBarTheme.of(context);
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (BuildContext context, Widget? ignoredChild) {
-        return _MenuBarControllerMarker(
-          controller: controller,
-          child: Actions(
-            actions: <Type, Action<Intent>>{
-              NextFocusIntent: _MenuNextFocusAction(controller: controller),
-              PreviousFocusIntent: _MenuPreviousFocusAction(controller: controller),
-              DirectionalFocusIntent: _MenuDirectionalFocusAction(
-                controller: controller,
-              ),
-              DismissIntent: _MenuDismissAction(controller: controller),
-            },
-            child: _ShortcutRegistration(
+    return _MenuBarControllerMarker(
+      controller: controller,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          NextFocusIntent: _MenuNextFocusAction(controller: controller),
+          PreviousFocusIntent: _MenuPreviousFocusAction(controller: controller),
+          DirectionalFocusIntent: _MenuDirectionalFocusAction(
+            controller: controller,
+          ),
+          DismissIntent: _MenuDismissAction(controller: controller),
+        },
+        child: AnimatedBuilder(
+          animation: controller,
+          builder: (BuildContext context, Widget? ignoredChild) {
+            return _ShortcutRegistration(
               shortcuts: controller.enabled ? shortcuts : const <MenuSerializableShortcut, Intent>{},
               child: ExcludeFocus(
                 excluding: !controller.enabled || !controller.menuIsOpen,
@@ -1470,10 +1497,10 @@ class _MenuBarState extends State<MenuBar> {
                   ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -1481,9 +1508,16 @@ class _MenuBarState extends State<MenuBar> {
 /// A menu item widget that displays a hierarchical cascading menu as part of a
 /// [MenuBar].
 ///
-/// This widget represents an entry in a [MenuBar]. It shows a label and an
-/// arrow indicating that it has a submenu, with an optional leading or trailing
-/// icon.
+/// This widget represents an entry in [MenuBar.menus] that has a submenu. Like
+/// the leaf [MenuBarItem], It shows a label with an optional leading or
+/// trailing icon.
+///
+/// If this [MenuBarMenu] appears at the top level (as the immediate child menu
+/// of a [MenuBar]), then the submenu will appear below the menu bar. Otherwise,
+/// the submenu will appear to one side, with the side depending on the
+/// [Directionality] of the widget tree (in RTL directionality, it will appear
+/// on the right, in LTR it will appear on the left). If it is not a top level
+/// menu, it will also include a small arrow indicating that there is a submenu.
 ///
 /// When activated (clicked, through keyboard navigation, or via hovering with
 /// a mouse), it will open a submenu containing the [menus].
@@ -1663,11 +1697,9 @@ class MenuBarMenu extends _MenuBarItemDefaults implements PlatformMenu {
 class _MenuBarMenuState extends State<MenuBarMenu> {
   _MenuNode? menu;
   _MenuBarController? controller;
-  bool registered = false;
-  Timer? hoverTimer;
-  Timer? clickBanTimer;
-  bool clickBan = false;
-  late FocusNode focusNode;
+  Timer? _clickBanTimer;
+  bool _clickBan = false;
+  late FocusNode _focusNode;
 
   bool get _isAnOpenMenu {
     return menu != null && controller!.isAnOpenMenu(menu!);
@@ -1676,26 +1708,28 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
   @override
   void initState() {
     super.initState();
-    focusNode = FocusNode(debugLabel: widget.label);
-    focusNode.addListener(_markDirty);
+    _focusNode = FocusNode(debugLabel: widget.label);
   }
 
   @override
   void dispose() {
-    focusNode.removeListener(_markDirty);
-    focusNode.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
-    _updateChangedState();
+    menu = _MenuNodeWrapper.of(context);
+    controller = MenuBarController.of(context) as _MenuBarController;
     super.didChangeDependencies();
   }
 
   @override
   void didUpdateWidget(MenuBarMenu oldWidget) {
-    _updateChangedState();
+    assert(() {
+      _focusNode.debugLabel = widget.label;
+      return true;
+    }());
     super.didUpdateWidget(oldWidget);
   }
 
@@ -1708,7 +1742,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
       labelWidget: widget.labelWidget,
       onSelected: enabled ? _maybeToggleShowMenu : null,
       onHover: enabled ? _handleMenuHover : null,
-      focusNode: focusNode,
+      focusNode: _focusNode,
       leadingIcon: widget.leadingIcon,
       trailingIcon: widget.trailingIcon,
       semanticLabel: widget.semanticLabel,
@@ -1722,19 +1756,10 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     );
   }
 
-  void _markDirty() {
-    setState(() {});
-  }
-
-  void _updateChangedState() {
-    menu = _MenuNodeWrapper.of(context);
-    controller = MenuBarController.of(context) as _MenuBarController;
-  }
-
   // Shows the submenu if there is one, and it wasn't visible. Hides the menu if
   // it was already visible.
   void _maybeToggleShowMenu() {
-    if (clickBan) {
+    if (_clickBan) {
       // If we just opened the menu because the user is hovering, then ignore
       // clicks for a bit.
       return;
@@ -1750,14 +1775,14 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
   // Called when the pointer is hovering over the menu button.
   void _handleMenuHover(bool hovering) {
     // Cancel any click ban in place if hover changes.
-    clickBanTimer?.cancel();
-    clickBanTimer = null;
-    clickBan = false;
+    _clickBanTimer?.cancel();
+    _clickBanTimer = null;
+    _clickBan = false;
 
     // Don't open the top level menu bar buttons on hover unless something else
     // is already open. This means that the user has to first open the menu bar
     // before hovering allows them to traverse it.
-    if (menu!.parent == controller!.root && controller!.openMenu == null) {
+    if (menu!.isTopLevel && controller!.openMenu == null) {
       return;
     }
 
@@ -1768,10 +1793,10 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
       // submenu, and sometimes clicks to open it just after the hover timer
       // has run out, causing the menu to open briefly, then immediately
       // close, which is surprising to the user.
-      clickBan = true;
-      clickBanTimer = Timer(_kMenuHoverClickBanDelay, () {
-        clickBan = false;
-        clickBanTimer = null;
+      _clickBan = true;
+      _clickBanTimer = Timer(_kMenuHoverClickBanDelay, () {
+        _clickBan = false;
+        _clickBanTimer = null;
       });
     }
   }
@@ -1950,7 +1975,9 @@ class _MenuBarItemState extends State<MenuBarItem> {
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode(debugLabel: 'MenuBarItem(${widget.label})');
+    if (widget.focusNode == null) {
+      _focusNode = FocusNode(debugLabel: 'MenuBarItem(${widget.label})');
+    }
   }
 
   @override
@@ -1975,7 +2002,8 @@ class _MenuBarItemState extends State<MenuBarItem> {
       _focusNode?.dispose();
       _focusNode = null;
     } else {
-      _focusNode ??= FocusNode(debugLabel: 'MenuBarItem(${widget.label})');
+      _focusNode ??= FocusNode();
+      _focusNode!.debugLabel = 'MenuBarItem(${widget.label})';
     }
     _updateMenuRegistration();
     super.didUpdateWidget(oldWidget);
@@ -1986,7 +2014,7 @@ class _MenuBarItemState extends State<MenuBarItem> {
     final MenuBarThemeData menuBarTheme = MenuBarTheme.of(context);
     final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(context);
     final Size densityAdjustedSize = const Size(64, 48) + Theme.of(context).visualDensity.baseSizeAdjustment;
-    MaterialStateProperty<EdgeInsets?> resolvedPadding;
+    final MaterialStateProperty<EdgeInsets?> resolvedPadding;
     if (widget._hasMenu && menu!.isTopLevel) {
       resolvedPadding =
           MaterialStateProperty.all<EdgeInsets?>(widget.padding ?? menuBarTheme.barPadding ?? defaultTheme.barPadding);
@@ -1997,10 +2025,8 @@ class _MenuBarItemState extends State<MenuBarItem> {
     return TextButton(
       style: (TextButtonTheme.of(context).style ?? const ButtonStyle()).copyWith(
         minimumSize: MaterialStateProperty.all<Size?>(densityAdjustedSize),
-        backgroundColor:
-            widget.backgroundColor ?? menuBarTheme.itemBackgroundColor ?? defaultTheme.itemBackgroundColor,
-        foregroundColor:
-            widget.foregroundColor ?? menuBarTheme.itemForegroundColor ?? defaultTheme.itemForegroundColor,
+        backgroundColor: widget.backgroundColor ?? menuBarTheme.itemBackgroundColor ?? defaultTheme.itemBackgroundColor,
+        foregroundColor: widget.foregroundColor ?? menuBarTheme.itemForegroundColor ?? defaultTheme.itemForegroundColor,
         overlayColor: widget.overlayColor ?? menuBarTheme.itemOverlayColor ?? defaultTheme.itemOverlayColor,
         padding: resolvedPadding,
         shape: widget.shape ?? menuBarTheme.itemShape ?? defaultTheme.itemShape,
@@ -2360,49 +2386,44 @@ class _MenuBarItemLabel extends StatelessWidget {
       _kLabelItemMinSpacing,
       _kLabelItemDefaultSpacing + density.horizontal * 2,
     );
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (BuildContext context, Widget? ignoredChild) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Row(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                if (leadingIcon != null) leadingIcon!,
-                Padding(
-                  padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
-                  child: label,
-                ),
-                if (trailingIcon != null)
-                  Padding(
-                    padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-                    child: trailingIcon,
-                  ),
-              ],
+            if (leadingIcon != null) leadingIcon!,
+            Padding(
+              padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+              child: label,
             ),
-            if (!isTopLevelItem) SizedBox(width: horizontalPadding),
-            if (shortcut != null && !isTopLevelItem)
+            if (trailingIcon != null)
               Padding(
                 padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-                child: Text(
-                  _LocalizedShortcutLabeler.instance.getShortcutLabel(
-                    shortcut!,
-                    MaterialLocalizations.of(context),
-                  ),
-                ),
-              ),
-            if (hasSubmenu && !isTopLevelItem)
-              Padding(
-                padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-                child: const Icon(
-                  Icons.arrow_right, // Automatically switches with text direction.
-                  size: _kDefaultSubmenuIconSize,
-                ),
+                child: trailingIcon,
               ),
           ],
-        );
-      },
+        ),
+        if (!isTopLevelItem) SizedBox(width: horizontalPadding),
+        if (shortcut != null && !isTopLevelItem)
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+            child: Text(
+              _LocalizedShortcutLabeler.instance.getShortcutLabel(
+                shortcut!,
+                MaterialLocalizations.of(context),
+              ),
+            ),
+          ),
+        if (hasSubmenu && !isTopLevelItem)
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+            child: const Icon(
+              Icons.arrow_right, // Automatically switches with text direction.
+              size: _kDefaultSubmenuIconSize,
+            ),
+          ),
+      ],
     );
   }
 }
