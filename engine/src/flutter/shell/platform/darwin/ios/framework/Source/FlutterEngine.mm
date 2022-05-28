@@ -991,6 +991,36 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                               arguments:@[ @(client) ]];
 }
 
+- (void)flutterTextInputViewDidResignFirstResponder:(FlutterTextInputView*)textInputView {
+  // Platform view's first responder detection logic:
+  //
+  // All text input widgets (e.g. EditableText) are backed by a dummy UITextInput view
+  // in the TextInputPlugin. When this dummy UITextInput view resigns first responder,
+  // check if any platform view becomes first responder. If any platform view becomes
+  // first responder, send a "viewFocused" channel message to inform the framework to un-focus
+  // the previously focused text input.
+  //
+  // Caveat:
+  // 1. This detection logic does not cover the scenario when a platform view becomes
+  // first responder without any flutter text input resigning its first responder status
+  // (e.g. user tapping on platform view first). For now it works fine because the TextInputPlugin
+  // does not track the focused platform view id (which is different from Android implementation).
+  //
+  // 2. This detection logic assumes that all text input widgets are backed by a dummy
+  // UITextInput view in the TextInputPlugin, which may not hold true in the future.
+
+  // Have to check in the next run loop, because iOS requests the previous first responder to
+  // resign before requesting the next view to become first responder.
+  dispatch_async(dispatch_get_main_queue(), ^(void) {
+    long platform_view_id = self.platformViewsController->FindFirstResponderPlatformViewId();
+    if (platform_view_id == -1) {
+      return;
+    }
+
+    [_platformViewsChannel.get() invokeMethod:@"viewFocused" arguments:@(platform_view_id)];
+  });
+}
+
 #pragma mark - Undo Manager Delegate
 
 - (void)flutterUndoManagerPlugin:(FlutterUndoManagerPlugin*)undoManagerPlugin
