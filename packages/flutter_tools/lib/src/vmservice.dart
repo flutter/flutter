@@ -277,7 +277,7 @@ Future<vm_service.VmService> setUpVmService(
   }
   
   final String version = (await vmService.getVersion()).toString();
-  final bool passGcEventsToApp = version != '[Version major: 3, minor: 56]';
+  final bool passGcEventsToApp = true; //version != '[Version major: 3, minor: 56]';
   if (passGcEventsToApp) {
     logger.printStatus('Started passing GC events to app $version.');
     vmService.onGCEvent.listen((vm_service.Event event) async {
@@ -288,7 +288,8 @@ Future<vm_service.VmService> setUpVmService(
         final bool newGC = event.json?.containsKey('new') == true;
         final bool oldGC = event.json?.containsKey('old') == true;
 
-        if (isolateName == 'main'){                   
+        if (isolateName == 'main'){  
+          
           await vmService.callServiceExtension(  
             'ext.app-gc-event',
             isolateId: isolateId,
