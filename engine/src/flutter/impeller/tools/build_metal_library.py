@@ -31,7 +31,7 @@ def Main():
                     help="The source file to compile. Can be specified multiple times.")
   parser.add_argument("--optimize", action="store_true", default=False,
                     help="If available optimizations must be applied to the compiled Metal sources.")
-  parser.add_argument("--platform", required=True, choices=["mac", "ios"],
+  parser.add_argument("--platform", required=True, choices=["mac", "ios", "ios-simulator"],
                     help="Select the platform.")
 
   args = parser.parse_args()
@@ -51,6 +51,11 @@ def Main():
     command += [
       "-sdk",
       "iphoneos",
+    ]
+  elif args.platform == "ios-simulator":
+    command += [
+      "-sdk",
+      "iphonesimulator",
     ]
 
   command += [

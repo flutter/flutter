@@ -140,7 +140,11 @@ template("metal_library") {
     }
 
     if (is_ios) {
-      args += [ "--platform=ios" ]
+      if (use_ios_simulator) {
+        args += [ "--platform=ios-simulator" ]
+      } else {
+        args += [ "--platform=ios" ]
+      }
     } else if (is_mac) {
       args += [ "--platform=mac" ]
     } else {
