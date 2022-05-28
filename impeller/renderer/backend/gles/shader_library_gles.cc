@@ -52,7 +52,8 @@ static std::string GLESShaderNameToShaderKeyName(const std::string& name,
 }
 
 ShaderLibraryGLES::ShaderLibraryGLES(
-    std::vector<std::shared_ptr<fml::Mapping>> shader_libraries) {
+    std::vector<std::shared_ptr<fml::Mapping>> shader_libraries)
+    : is_valid_(true) {
   ShaderFunctionMap functions;
   UniqueID library_id;
   auto iterator = [&functions, &library_id](auto type,           //
@@ -81,7 +82,6 @@ ShaderLibraryGLES::ShaderLibraryGLES(
   }
 
   functions_ = functions;
-  is_valid_ = true;
 }
 
 // |ShaderLibrary|

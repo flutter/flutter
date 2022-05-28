@@ -6,7 +6,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
-extern NSString* const FlutterEngineWillDealloc;
+extern NSString* const kFlutterEngineWillDealloc;
 
 @class FlutterBinaryMessengerRelay;
 

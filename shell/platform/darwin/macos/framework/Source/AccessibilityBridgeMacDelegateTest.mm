@@ -199,4 +199,4 @@ TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificat
   [engine shutDownEngine];
 }
 
-}  // flutter::testing
+}  // namespace flutter::testing

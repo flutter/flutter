@@ -227,7 +227,7 @@ FLUTTER_ASSERT_ARC
   id<NSObject> observer;
   @autoreleasepool {
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
-    observer = [center addObserverForName:FlutterEngineWillDealloc
+    observer = [center addObserverForName:kFlutterEngineWillDealloc
                                    object:engine
                                     queue:[NSOperationQueue mainQueue]
                                usingBlock:^(NSNotification* note) {

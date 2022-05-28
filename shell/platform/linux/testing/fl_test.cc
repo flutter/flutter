@@ -17,7 +17,7 @@ class ImModuleEnv : public ::testing::Environment {
   }
 };
 
-testing::Environment* const env =
+testing::Environment* const kEnv =
     testing::AddGlobalTestEnvironment(new ImModuleEnv);
 }  // namespace
 

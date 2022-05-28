@@ -13,7 +13,7 @@
 
 constexpr uint64_t kMicrosecondsPerMillisecond = 1000;
 
-static const FlutterKeyEvent empty_event{
+static const FlutterKeyEvent kEmptyEvent{
     .struct_size = sizeof(FlutterKeyEvent),
     .timestamp = 0,
     .type = kFlutterKeyEventTypeDown,
@@ -791,6 +791,6 @@ static void fl_key_embedder_responder_handle_event(
   fl_key_embedder_responder_handle_event_impl(
       responder, event, specified_logical_key, callback, user_data);
   if (!self->sent_any_events) {
-    self->send_key_event(&empty_event, nullptr, nullptr);
+    self->send_key_event(&kEmptyEvent, nullptr, nullptr);
   }
 }

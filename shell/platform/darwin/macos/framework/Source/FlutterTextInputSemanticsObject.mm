@@ -214,4 +214,4 @@ void FlutterTextPlatformNode::EnsureDetachedFromView() {
   [appkit_text_field_ removeFromSuperview];
 }
 
-}
+}  // namespace flutter
