@@ -39,6 +39,7 @@ const CGRect kSpacePanBounds = {{-2500, -2500}, {5000, 5000}};
 static NSString* const kShowMethod = @"TextInput.show";
 static NSString* const kHideMethod = @"TextInput.hide";
 static NSString* const kSetClientMethod = @"TextInput.setClient";
+static NSString* const kSetPlatformViewClientMethod = @"TextInput.setPlatformViewClient";
 static NSString* const kSetEditingStateMethod = @"TextInput.setEditingState";
 static NSString* const kClearClientMethod = @"TextInput.clearClient";
 static NSString* const kSetEditableSizeAndTransformMethod =
@@ -1075,6 +1076,14 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   return _textInputClient != 0;
 }
 
+- (BOOL)resignFirstResponder {
+  BOOL success = [super resignFirstResponder];
+  if (success) {
+    [self.textInputDelegate flutterTextInputViewDidResignFirstResponder:self];
+  }
+  return success;
+}
+
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
   // When scribble is available, the FlutterTextInputView will display the native toolbar unless
   // these text editing actions are disabled.
@@ -2071,6 +2080,10 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   } else if ([method isEqualToString:kSetClientMethod]) {
     [self setTextInputClient:[args[0] intValue] withConfiguration:args[1]];
     result(nil);
+  } else if ([method isEqualToString:kSetPlatformViewClientMethod]) {
+    // This method call has a `platformViewId` argument, but we do not need it for iOS for now.
+    [self setPlatformViewTextInputClient];
+    result(nil);
   } else if ([method isEqualToString:kSetEditingStateMethod]) {
     [self setTextInputEditingState:args];
     result(nil);
@@ -2185,6 +2198,16 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 
   [self cleanUpViewHierarchy:YES clearText:!saveEntries delayRemoval:NO];
   [self addToInputParentViewIfNeeded:_activeView];
+}
+
+- (void)setPlatformViewTextInputClient {
+  // No need to track the platformViewID (unlike in Android). When a platform view
+  // becomes the first responder, simply hide this dummy text input view (`_activeView`)
+  // for the previously focused widget.
+  [self removeEnableFlutterTextInputViewAccessibilityTimer];
+  _activeView.accessibilityEnabled = NO;
+  [_activeView removeFromSuperview];
+  [_inputHider removeFromSuperview];
 }
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
