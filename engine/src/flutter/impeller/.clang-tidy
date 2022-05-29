@@ -1,5 +1,11 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-*,google-*,readability-identifier-naming,-google-explicit-constructor,cppcoreguidelines-prefer-member-initializer,modernize-use-default-member-init'
+Checks: 'clang-diagnostic-*,\
+clang-analyzer-*,\
+google-*,\
+readability-identifier-naming,\
+-google-explicit-constructor,\
+modernize-use-default-member-init'
+
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
