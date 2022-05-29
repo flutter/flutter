@@ -1802,6 +1802,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 ///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
 ///    [RenderObject] that instead of having a single list of children organizes
 ///    its children in named slots.
+// ignore: must_be_immutable
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   ///
@@ -1821,6 +1822,8 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
       }
       return true;
     }()); // https://github.com/dart-lang/sdk/issues/29276
+
+    children = reversed ? children.reversed.toList() : children;
   }
 
   /// The widgets below this widget in the tree.
@@ -1880,12 +1883,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///   }
   /// }
   /// ```
-  final List<Widget> children;
-
-  // Each subwidget that want to use reversed needs to implement this for itself
-  // This could most likely be accomplished more conveniently.
-  // @override
-  // Widget get children => reversed ? super.children.reversed.toList() : super.children;
+  List<Widget> children;
 
   /// If the childrens order should be reversed.
   ///

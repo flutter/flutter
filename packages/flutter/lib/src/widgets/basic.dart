@@ -4464,9 +4464,6 @@ class Flex extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
-  @override
-  List<Widget> get children => reversed ? super.children.reversed.toList() : super.children;
-
   bool get _needTextDirection {
     assert(direction != null);
     switch (direction) {
