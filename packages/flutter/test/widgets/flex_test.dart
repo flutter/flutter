@@ -141,4 +141,37 @@ void main() {
     await tester.pumpWidget(Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
+
+  testWidgets('Successfully reverses children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Flex(
+        direction: Axis.vertical,
+        reversed: true,
+        children: <Widget>[
+          Container(
+            key: const Key('FlexChildKey1'),
+          ),
+          Container(
+            key: const Key('FlexChildKey2'),
+          ),
+          Container(
+            key: const Key('FlexChildKey3'),
+          ),
+        ],
+      ),
+    );
+
+    // Get the elements with "FlexChildKey" in their key
+    final List<String> widgetOrderList = <String>[];
+    for (final Widget element in tester.allWidgets) {
+      if (element.key.toString().contains('FlexChildKey')) {
+        widgetOrderList.add(element.key.toString());
+      }
+    }
+
+    expect(
+      widgetOrderList,
+      equals(<String>["[<'FlexChildKey3'>]", "[<'FlexChildKey2'>]", "[<'FlexChildKey1'>]"])
+    );
+  });
 }
