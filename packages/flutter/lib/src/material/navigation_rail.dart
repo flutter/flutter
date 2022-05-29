@@ -105,8 +105,8 @@ class NavigationRail extends StatefulWidget {
     this.minExtendedWidth,
     this.useIndicator,
     this.indicatorColor,
-    this.curve = Curves.fastOutSlowIn,
-    this.duration = const Duration(milliseconds: 250)
+    this.extendedAnimationCurve,
+    this.extendedAnimationDuration,
   }) :  assert(destinations != null && destinations.length >= 2),
         assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
@@ -305,15 +305,19 @@ class NavigationRail extends StatefulWidget {
   /// when [useIndicator] is true.
   final Color? indicatorColor;
 
-  /// The curve for animations of the [NavigationRail].
+  /// The animation curve that is used when extending and shrinking the
+  /// [NavigationRail].
   ///
-  /// The default animation is fastOutSlowIn
-  final Curve curve;
+  /// If `null`, defaults to [NavigationRailThemeData.extendedAnimationCurve].
+  /// If that is `null`, defaults to [Curves.fastOutSlowIn].
+  final Curve? extendedAnimationCurve;
 
-  /// The duration for animations of the [NavigationRail].
+  /// The animation duration that is used when extending and shrinking the
+  /// [NavigationRail].
   ///
-  /// The default duration is 250 milliseconds
-  final Duration duration;
+  /// If `null`, defaults to [NavigationRailThemeData.extendedAnimationDuration].
+  /// If that is `null`, defaults to [kThemeAnimationDuration].
+  final Duration? extendedAnimationDuration;
 
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
@@ -487,14 +491,15 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     if (widget.selectedIndex != null) {
       _destinationControllers[widget.selectedIndex!].value = 1.0;
     }
+    final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
     _extendedController = AnimationController(
-      duration: widget.duration,
+      duration: widget.extendedAnimationDuration ?? navigationRailTheme.extendedAnimationDuration ?? kThemeAnimationDuration,
       vsync: this,
       value: widget.extended ? 1.0 : 0.0,
     );
     _extendedAnimation = CurvedAnimation(
       parent: _extendedController,
-      curve: widget.curve,
+      curve: widget.extendedAnimationCurve ?? navigationRailTheme.extendedAnimationCurve ?? Curves.fastOutSlowIn,
     );
     _extendedController.addListener(() {
       _rebuild();
