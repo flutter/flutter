@@ -48,7 +48,6 @@ namespace dart_runner {
 namespace {
 
 constexpr char kTmpPath[] = "/tmp";
-constexpr char kTestCaseName[] = "dart_test_v2";
 
 constexpr zx::duration kIdleWaitDuration = zx::sec(2);
 constexpr zx::duration kIdleNotifyDuration = zx::msec(500);
@@ -116,8 +115,8 @@ DartTestComponentControllerV2::DartTestComponentControllerV2(
   // applications in tree currently, but the way we build the Flutter
   // application may change. We should avoid assuming the data path and let the
   // CML file specify this data path instead.
-  const std::string component_name = GetComponentNameFromUrl(url_);
-  data_path_ = "pkg/data/" + component_name;
+  test_component_name_ = GetComponentNameFromUrl(url_);
+  data_path_ = "pkg/data/" + test_component_name_;
 
   if (controller.is_valid()) {
     binding_.Bind(std::move(controller));
@@ -366,8 +365,10 @@ bool DartTestComponentControllerV2::CreateIsolate(
 DartTestComponentControllerV2::CaseIterator::CaseIterator(
     fidl::InterfaceRequest<fuchsia::test::CaseIterator> request,
     async_dispatcher_t* dispatcher,
+    std::string test_component_name,
     fit::function<void(CaseIterator*)> done_callback)
     : binding_(this, std::move(request), dispatcher),
+      test_component_name_(test_component_name),
       done_callback_(std::move(done_callback)) {}
 
 // |fuchsia::test::CaseIterator|
@@ -377,7 +378,7 @@ void DartTestComponentControllerV2::CaseIterator::GetNext(
   // test case. Flip flag once the one test case has been retrieved.
   if (first_case_) {
     fuchsia::test::Case test_case;
-    test_case.set_name(std::string(kTestCaseName));
+    test_case.set_name(test_component_name_);
     test_case.set_enabled(true);
     std::vector<fuchsia::test::Case> cases;
     cases.push_back(std::move(test_case));
@@ -409,11 +410,11 @@ DartTestComponentControllerV2::RemoveCaseInterator(
 // |fuchsia::test::Suite|
 void DartTestComponentControllerV2::GetTests(
     fidl::InterfaceRequest<fuchsia::test::CaseIterator> iterator) {
-  auto case_iterator =
-      std::make_unique<CaseIterator>(std::move(iterator), loop_->dispatcher(),
-                                     [this](CaseIterator* case_iterator) {
-                                       RemoveCaseInterator(case_iterator);
-                                     });
+  auto case_iterator = std::make_unique<CaseIterator>(
+      std::move(iterator), loop_->dispatcher(), test_component_name_,
+      [this](CaseIterator* case_iterator) {
+        RemoveCaseInterator(case_iterator);
+      });
   case_iterators_.emplace(case_iterator.get(), std::move(case_iterator));
 }
 
