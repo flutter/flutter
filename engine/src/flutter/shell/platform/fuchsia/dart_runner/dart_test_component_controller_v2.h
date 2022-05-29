@@ -96,6 +96,7 @@ class DartTestComponentControllerV2
    public:
     CaseIterator(fidl::InterfaceRequest<fuchsia::test::CaseIterator> request,
                  async_dispatcher_t* dispatcher,
+                 std::string test_component_name,
                  fit::function<void(CaseIterator*)> done_callback);
 
     void GetNext(GetNextCallback callback) override;
@@ -103,6 +104,7 @@ class DartTestComponentControllerV2
    private:
     bool first_case_ = true;
     fidl::Binding<fuchsia::test::CaseIterator> binding_;
+    std::string test_component_name_;
     fit::function<void(CaseIterator*)> done_callback_;
   };
 
@@ -117,6 +119,7 @@ class DartTestComponentControllerV2
   // |Suite|
 
   /// Exposes suite protocol on behalf of test component.
+  std::string test_component_name_;
   std::unique_ptr<sys::ComponentContext> suite_context_;
   fidl::BindingSet<fuchsia::test::Suite> suite_bindings_;
 
