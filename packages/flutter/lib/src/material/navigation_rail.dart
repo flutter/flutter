@@ -68,7 +68,7 @@ import 'theme.dart';
 class NavigationRail extends StatefulWidget {
   /// Creates a Material Design navigation rail.
   ///
-  /// The value of [destinations] must be a list of two or more
+  /// The value of [destinations] must be a list of zero or more
   /// [NavigationRailDestination] values.
   ///
   /// If [elevation] is specified, it must be non-negative.
@@ -164,7 +164,7 @@ class NavigationRail extends StatefulWidget {
   /// Defines the appearance of the button items that are arrayed within the
   /// navigation rail.
   ///
-  /// The value must be a list of two or more [NavigationRailDestination]
+  /// The value must be a list of zero or more [NavigationRailDestination]
   /// values.
   final List<NavigationRailDestination> destinations;
 
