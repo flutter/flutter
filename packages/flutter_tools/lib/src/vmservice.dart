@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:vm_service/vm_service.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -277,21 +278,22 @@ Future<vm_service.VmService> setUpVmService(
   }
   
   final String version = (await vmService.getVersion()).toString();
-  final bool passGcEventsToApp = true; //version != '[Version major: 3, minor: 56]';
+  final bool passGcEventsToApp = true; 
   if (passGcEventsToApp) {
     logger.printStatus('Started passing GC events to app $version.');
     vmService.onGCEvent.listen((vm_service.Event event) async {
       try {
         final String? isolateName = event.json?['isolate']?['name'];
         final String? isolateId = event.json?['isolate']?['id'];
+        final Isolate isolate = await vmService.getIsolate(isolateId!);
 
         final bool newGC = event.json?.containsKey('new') == true;
         final bool oldGC = event.json?.containsKey('old') == true;
+        const String method = 'ext.app-gc-event';
 
-        if (isolateName == 'main'){  
-          
+        if (isolateName == 'main' && isolate.extensionRPCs!.contains(method)){
           await vmService.callServiceExtension(  
-            'ext.app-gc-event',
+            method, 
             isolateId: isolateId,
             args:  <String, dynamic>{if (oldGC) 'old': true, if (newGC) 'new': true},
           );  
