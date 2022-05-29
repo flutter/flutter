@@ -4360,6 +4360,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
     super.children,
+    super.reversed,
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
        assert(mainAxisSize != null),
@@ -4462,6 +4463,9 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
+
+  @override
+  List<Widget> get children => reversed ? super.children.reversed.toList() : super.children;
 
   bool get _needTextDirection {
     assert(direction != null);

@@ -1807,7 +1807,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///
   /// The [children] argument must not be null and must not contain any null
   /// objects.
-  MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[] })
+  MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[], this.reversed = false })
     : assert(children != null) {
     assert(() {
       for (int index = 0; index < children.length; index++) {
@@ -1881,6 +1881,17 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// }
   /// ```
   final List<Widget> children;
+
+  // Each subwidget that want to use reversed needs to implement this for itself
+  // This could most likely be accomplished more conveniently.
+  // @override
+  // Widget get children => reversed ? super.children.reversed.toList() : super.children;
+
+  /// If the childrens order should be reversed. 
+  ///
+  /// This makes it possible to replicate the behavior of
+  /// `flex-direction: row-reverse` and `flex-direction: column-reverse` 
+  final bool reversed;
 
   @override
   MultiChildRenderObjectElement createElement() => MultiChildRenderObjectElement(this);
