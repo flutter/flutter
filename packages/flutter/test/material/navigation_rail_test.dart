@@ -158,6 +158,20 @@ void main() {
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, 80.0);
   });
+  
+  testWidgets('No destinations', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: null,
+        leading: FloatingActionButton(onPressed: () { }),
+        destinations: const <NavigationRailDestination>[],
+      ),
+    );
+
+    final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+    expect(leading.localToGlobal(Offset.zero), Offset((80 - leading.size.width) / 2, 8.0));
+  });
 
   testWidgets('Renders wider for a destination with a long label - [labelType]=all', (WidgetTester tester) async {
     await _pumpNavigationRail(
