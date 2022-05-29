@@ -160,7 +160,7 @@ void main() {
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, 80.0);
   });
-  
+
   testWidgets('No destinations', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
