@@ -35,6 +35,7 @@ class DialogTheme with Diagnosticable {
     this.titleTextStyle,
     this.contentTextStyle,
     this.actionsPadding,
+    this.iconColor,
   });
 
   /// Overrides the default value for [Dialog.backgroundColor].
@@ -59,6 +60,9 @@ class DialogTheme with Diagnosticable {
 
   /// Overrides the default value for [AlertDialog.actionsPadding].
   final EdgeInsetsGeometry? actionsPadding;
+
+  /// Used to configure the [IconTheme] for the [AlertDialog.icon] widget.
+  final Color? iconColor;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.

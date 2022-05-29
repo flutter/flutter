@@ -262,6 +262,8 @@ class AlertDialog extends StatelessWidget {
   /// properties. See the documentation of [titlePadding] for details.
   const AlertDialog({
     super.key,
+    this.icon,
+    this.iconColor,
     this.title,
     this.titlePadding,
     this.titleTextStyle,
@@ -286,8 +288,18 @@ class AlertDialog extends StatelessWidget {
   }) : assert(contentPadding != null),
        assert(clipBehavior != null);
 
+  /// The (optional) icon of the dialog is displayed at the top of the dialog.
+  ///
+  /// Typically, an [Icon] widget.
+  final Widget? icon;
+
+  /// Color for the [Icon] in the [icon] of this [AlertDialog].
+  ///
+  /// If null, [DialogTheme.iconColor] is used.
+  final Color? iconColor;
+
   /// The (optional) title of the dialog is displayed in a large font at the top
-  /// of the dialog.
+  /// of the dialog, below the (optional) [icon].
   ///
   /// Typically a [Text] widget.
   final Widget? title;
@@ -508,11 +520,25 @@ class AlertDialog extends StatelessWidget {
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
+    Widget? iconWidget;
     Widget? titleWidget;
     Widget? contentWidget;
     Widget? actionsWidget;
+
+    if (icon != null) {
+      iconWidget = Padding(
+        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
+        child: IconTheme(
+          data: IconThemeData(
+            color: iconColor ?? dialogTheme.iconColor,
+          ),
+          child: icon!,
+        ),
+      );
+    }
+
     if (title != null) {
-      final EdgeInsets defaultTitlePadding = EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
+      final EdgeInsets defaultTitlePadding = EdgeInsets.fromLTRB(24.0, icon == null ? 24.0 : 16.0, 24.0, content == null ? 20.0 : 0.0);
       final EdgeInsets effectiveTitlePadding = titlePadding?.resolve(textDirection) ?? defaultTitlePadding;
       titleWidget = Padding(
         padding: EdgeInsets.only(
@@ -523,6 +549,7 @@ class AlertDialog extends StatelessWidget {
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? defaults.titleTextStyle!,
+          textAlign: icon == null ? TextAlign.start : TextAlign.center,
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
@@ -580,6 +607,7 @@ class AlertDialog extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
+                  if (icon != null) iconWidget!,
                   if (title != null) titleWidget!,
                   if (content != null) contentWidget!,
                 ],
@@ -591,6 +619,7 @@ class AlertDialog extends StatelessWidget {
       ];
     } else {
       columnChildren = <Widget>[
+        if (icon != null) iconWidget!,
         if (title != null) titleWidget!,
         if (content != null) Flexible(child: contentWidget!),
         if (actions != null) actionsWidget!,
@@ -1240,6 +1269,9 @@ class _TokenDefaultsM3 extends DialogTheme {
 
   @override
   EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
+
+  @override
+  Color? get iconColor => _colors.secondary;
 }
 
 // END GENERATED TOKEN PROPERTIES
