@@ -1887,10 +1887,10 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   // @override
   // Widget get children => reversed ? super.children.reversed.toList() : super.children;
 
-  /// If the childrens order should be reversed. 
+  /// If the childrens order should be reversed.
   ///
   /// This makes it possible to replicate the behavior of
-  /// `flex-direction: row-reverse` and `flex-direction: column-reverse` 
+  /// `flex-direction: row-reverse` and `flex-direction: column-reverse`
   final bool reversed;
 
   @override
