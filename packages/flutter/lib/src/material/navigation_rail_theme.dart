@@ -48,6 +48,8 @@ class NavigationRailThemeData with Diagnosticable {
     this.indicatorColor,
     this.minWidth,
     this.minExtendedWidth,
+    this.extendedAnimationCurve,
+    this.extendedAnimationDuration,
   });
 
   /// Color to be used for the [NavigationRail]'s background.
@@ -96,6 +98,14 @@ class NavigationRailThemeData with Diagnosticable {
   /// is extended.
   final double? minExtendedWidth;
 
+  /// The animation curve that is used when extending and shrinking the
+  ///[NavigationRail]
+  final Curve? extendedAnimationCurve;
+
+  /// The animation duration that is used when extending and shrinking the
+  /// [NavigationRail].
+  final Duration? extendedAnimationDuration;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   NavigationRailThemeData copyWith({
@@ -111,6 +121,8 @@ class NavigationRailThemeData with Diagnosticable {
     Color? indicatorColor,
     double? minWidth,
     double? minExtendedWidth,
+    Curve? extendedAnimationCurve,
+    Duration? extendedAnimationDuration,
   }) {
     return NavigationRailThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -125,6 +137,8 @@ class NavigationRailThemeData with Diagnosticable {
       indicatorColor: indicatorColor ?? this.indicatorColor,
       minWidth: minWidth ?? this.minWidth,
       minExtendedWidth: minExtendedWidth ?? this.minExtendedWidth,
+      extendedAnimationCurve: extendedAnimationCurve ?? this.extendedAnimationCurve,
+      extendedAnimationDuration: extendedAnimationDuration ?? this.extendedAnimationDuration,
     );
   }
 
@@ -150,7 +164,12 @@ class NavigationRailThemeData with Diagnosticable {
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       minWidth: lerpDouble(a?.minWidth, b?.minWidth, t),
       minExtendedWidth: lerpDouble(a?.minExtendedWidth, b?.minExtendedWidth, t),
-
+      extendedAnimationCurve: t < 0.5 ? a?.extendedAnimationCurve : b?.extendedAnimationCurve,
+      extendedAnimationDuration: lerpDuration(
+        a?.extendedAnimationDuration ?? kThemeAnimationDuration,
+        b?.extendedAnimationDuration ?? kThemeAnimationDuration,
+        t
+      ),
     );
   }
 
@@ -168,6 +187,8 @@ class NavigationRailThemeData with Diagnosticable {
     indicatorColor,
     minWidth,
     minExtendedWidth,
+    extendedAnimationCurve,
+    extendedAnimationDuration,
   );
 
   @override
@@ -188,7 +209,9 @@ class NavigationRailThemeData with Diagnosticable {
         && other.useIndicator == useIndicator
         && other.indicatorColor == indicatorColor
         && other.minWidth == minWidth
-        && other.minExtendedWidth == minExtendedWidth;
+        && other.minExtendedWidth == minExtendedWidth
+        && other.extendedAnimationCurve == extendedAnimationCurve
+        && other.extendedAnimationDuration == extendedAnimationDuration;
   }
 
   @override
@@ -208,6 +231,8 @@ class NavigationRailThemeData with Diagnosticable {
     properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
     properties.add(DoubleProperty('minWidth', minWidth, defaultValue: defaultData.minWidth));
     properties.add(DoubleProperty('minExtendedWidth', minExtendedWidth, defaultValue: defaultData.minExtendedWidth));
+    properties.add(DiagnosticsProperty<Curve>('extendedAnimationCurve', extendedAnimationCurve, defaultValue: defaultData.extendedAnimationCurve));
+    properties.add(DiagnosticsProperty<Duration>('extendedAnimationDuration', extendedAnimationDuration, defaultValue: defaultData.extendedAnimationDuration));
   }
 }
 
