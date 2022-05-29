@@ -79,7 +79,8 @@ class NavigationRail extends StatefulWidget {
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],
-  /// [unselectedIconTheme], or [selectedIconTheme] are null, then their
+  /// [unselectedIconTheme], [selectedIconTheme], [extendedAnimationCurve] or
+  /// [extendedAnimationDuration] are null, then their
   /// [NavigationRailThemeData] values will be used. If the corresponding
   /// [NavigationRailThemeData] property is null, then the navigation rail
   /// defaults are used. See the individual properties for more information.
