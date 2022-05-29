@@ -99,7 +99,7 @@ class NavigationRailThemeData with Diagnosticable {
   final double? minExtendedWidth;
 
   /// The animation curve that is used when extending and shrinking the
-  ///[NavigationRail]
+  /// [NavigationRail].
   final Curve? extendedAnimationCurve;
 
   /// The animation duration that is used when extending and shrinking the
