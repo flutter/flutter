@@ -118,7 +118,7 @@ class NavigationRail extends StatefulWidget {
     this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
-  }) :  assert(destinations.length >= 2),
+  }) :  assert(destinations.length >= 0),
         assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
         assert(minWidth == null || minWidth > 0),
