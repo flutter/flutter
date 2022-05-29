@@ -390,6 +390,24 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   }
 
   @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
+    _extendedController = AnimationController(
+      duration: widget.extendedAnimationDuration ?? navigationRailTheme.extendedAnimationDuration ?? kThemeAnimationDuration,
+      vsync: this,
+      value: widget.extended ? 1.0 : 0.0,
+    );
+    _extendedAnimation = CurvedAnimation(
+      parent: _extendedController,
+      curve: widget.extendedAnimationCurve ?? navigationRailTheme.extendedAnimationCurve ?? Curves.fastOutSlowIn,
+    );
+    _extendedController.addListener(() {
+      _rebuild();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
     final NavigationRailThemeData defaults = Theme.of(context).useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
@@ -491,19 +509,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     if (widget.selectedIndex != null) {
       _destinationControllers[widget.selectedIndex!].value = 1.0;
     }
-    final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
-    _extendedController = AnimationController(
-      duration: widget.extendedAnimationDuration ?? navigationRailTheme.extendedAnimationDuration ?? kThemeAnimationDuration,
-      vsync: this,
-      value: widget.extended ? 1.0 : 0.0,
-    );
-    _extendedAnimation = CurvedAnimation(
-      parent: _extendedController,
-      curve: widget.extendedAnimationCurve ?? navigationRailTheme.extendedAnimationCurve ?? Curves.fastOutSlowIn,
-    );
-    _extendedController.addListener(() {
-      _rebuild();
-    });
   }
 
   void _resetState() {
