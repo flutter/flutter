@@ -1545,6 +1545,7 @@ void main() {
                     selectedIndex: 0,
                     destinations: _destinations(),
                     extended: extended,
+                    extendedAnimationDuration: const Duration(milliseconds: 200),
                   ),
                   const Expanded(
                     child: Text('body'),
@@ -1567,7 +1568,7 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(rail.size.width, equals(168.0));
+    expect(rail.size.width, closeTo(216.5, 1.0));
 
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(256.0));
@@ -1718,8 +1719,7 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(rail.size.width, equals(168.0));
-    expect(rail.localToGlobal(Offset.zero), equals(const Offset(632.0, 0.0)));
+    expect(rail.size.width, closeTo(216.5, 1.0));
 
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(256.0));
@@ -1871,7 +1871,7 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(rail.size.width, equals(303.0));
+    expect(rail.size.width, closeTo(425.9, 1.0));
 
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(526.0));
@@ -4038,10 +4038,10 @@ void main() {
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(rail.size.width, equals(164.0));
+      expect(rail.size.width, closeTo(214.7, 1.0));
 
       await tester.pumpAndSettle();
-      expect(rail.size.width, equals(256.0));
+      expect(rail.size.width, equals(256));
 
       // The first destination is 8 from the top because of the default vertical
       // padding at the to of the rail.
@@ -4181,8 +4181,7 @@ void main() {
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(rail.size.width, equals(164.0));
-      expect(rail.localToGlobal(Offset.zero), equals(const Offset(636.0, 0.0)));
+      expect(rail.size.width, closeTo(214.7, 1.0));
 
       await tester.pumpAndSettle();
       expect(rail.size.width, equals(256.0));
@@ -4335,7 +4334,7 @@ void main() {
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(rail.size.width, equals(328.0));
+      expect(rail.size.width, closeTo(469.1, 1.0));
 
       await tester.pumpAndSettle();
       expect(rail.size.width, equals(584.0));
@@ -4441,6 +4440,136 @@ void main() {
       // Expect that it has only extended by a small amount, or that the first
       // frame does not jump. This helps verify that it is a smooth animation.
       expect(tester.getSize(rail).width, closeTo(72.0, 1.0));
+    });
+
+    testWidgets('Animation duration can be changed', (WidgetTester tester) async {
+      bool extended = false;
+      late StateSetter stateSetter;
+      late Animation<double> animation;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              stateSetter = setState;
+              return Scaffold(
+                body: Row(
+                  children: <Widget>[
+                    NavigationRail(
+                      selectedIndex: 0,
+                      leading: Builder(
+                        builder: (BuildContext context) {
+                          animation = NavigationRail.extendedAnimation(context);
+                          return FloatingActionButton(onPressed: () { });
+                        },
+                      ),
+                      destinations: const <NavigationRailDestination>[
+                        NavigationRailDestination(
+                          icon: Icon(Icons.favorite_border),
+                          selectedIcon: Icon(Icons.favorite),
+                          label: Text('Abc'),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.bookmark_border),
+                          selectedIcon: Icon(Icons.bookmark),
+                          label: Text('Longer Label'),
+                        ),
+                      ],
+                      extended: extended,
+                      extendedAnimationDuration: const Duration(milliseconds: 10),
+                    ),
+                    const Expanded(
+                      child: Text('body'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final Finder rail = find.byType(NavigationRail);
+
+      // Before starting the animation, the rail has a width of 80.
+      expect(tester.getSize(rail).width, 80.0);
+
+      stateSetter(() {
+        extended = true;
+      });
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 11));
+      expect(animation.isCompleted, true);
+    });
+
+    testWidgets('Animation curve can be changed', (WidgetTester tester) async {
+      bool extended = false;
+      late StateSetter stateSetter;
+      late Animation<double> animation;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              stateSetter = setState;
+              return Scaffold(
+                body: Row(
+                  children: <Widget>[
+                    NavigationRail(
+                      selectedIndex: 0,
+                      leading: Builder(
+                        builder: (BuildContext context) {
+                          animation = NavigationRail.extendedAnimation(context);
+                          return FloatingActionButton(onPressed: () { });
+                        },
+                      ),
+                      destinations: const <NavigationRailDestination>[
+                        NavigationRailDestination(
+                          icon: Icon(Icons.favorite_border),
+                          selectedIcon: Icon(Icons.favorite),
+                          label: Text('Abc'),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.bookmark_border),
+                          selectedIcon: Icon(Icons.bookmark),
+                          label: Text('Longer Label'),
+                        ),
+                      ],
+                      extended: extended,
+                      extendedAnimationCurve: const Threshold(1),
+                    ),
+                    const Expanded(
+                      child: Text('body'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final Finder rail = find.byType(NavigationRail);
+
+      // Before starting the animation, the rail has a width of 80.
+      expect(tester.getSize(rail).width, 80.0);
+
+      stateSetter(() {
+        extended = true;
+      });
+      await tester.pump();
+      // Default value for animation is kThemeAnimationDuration
+      await tester.pump(Duration(milliseconds: kThemeAnimationDuration.inMilliseconds~/2));
+      expect(animation.status, AnimationStatus.forward);
+      // Expect that it has not started to extend.
+      expect(tester.getSize(rail).width, 80.0);
+      await tester.pumpAndSettle();
+      // Expect that it has finished to extend - this is to ensure that the
+      // animation played at all.
+      expect(animation.status, AnimationStatus.completed);
+      expect(tester.getSize(rail).width, greaterThan(80.0));
     });
 
     testWidgets('NavigationRailDestination adds circular indicator when no labels are present', (WidgetTester tester) async {
