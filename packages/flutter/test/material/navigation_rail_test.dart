@@ -1979,6 +1979,136 @@ void main() {
     expect(tester.getSize(rail).width, closeTo(80.0, 1.0));
   });
 
+  testWidgets('Animation duration can be changed', (WidgetTester tester) async {
+    bool extended = false;
+    late StateSetter stateSetter;
+    late Animation<double> animation;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    selectedIndex: 0,
+                    leading: Builder(
+                      builder: (BuildContext context) {
+                        animation = NavigationRail.extendedAnimation(context);
+                        return FloatingActionButton(onPressed: () { });
+                      },
+                    ),
+                    destinations: const <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: Icon(Icons.favorite_border),
+                        selectedIcon: Icon(Icons.favorite),
+                        label: Text('Abc'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.bookmark_border),
+                        selectedIcon: Icon(Icons.bookmark),
+                        label: Text('Longer Label'),
+                      ),
+                    ],
+                    extended: extended,
+                    extendedAnimationDuration: const Duration(milliseconds: 10),
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Finder rail = find.byType(NavigationRail);
+
+    // Before starting the animation, the rail has a width of 80.
+    expect(tester.getSize(rail).width, 80.0);
+
+    stateSetter(() {
+      extended = true;
+    });
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 11));
+    expect(animation.isCompleted, true);
+  });
+
+  testWidgets('Animation curve can be changed', (WidgetTester tester) async {
+    bool extended = false;
+    late StateSetter stateSetter;
+    late Animation<double> animation;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    selectedIndex: 0,
+                    leading: Builder(
+                      builder: (BuildContext context) {
+                        animation = NavigationRail.extendedAnimation(context);
+                        return FloatingActionButton(onPressed: () { });
+                      },
+                    ),
+                    destinations: const <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: Icon(Icons.favorite_border),
+                        selectedIcon: Icon(Icons.favorite),
+                        label: Text('Abc'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.bookmark_border),
+                        selectedIcon: Icon(Icons.bookmark),
+                        label: Text('Longer Label'),
+                      ),
+                    ],
+                    extended: extended,
+                    extendedAnimationCurve: const Threshold(1),
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Finder rail = find.byType(NavigationRail);
+
+    // Before starting the animation, the rail has a width of 80.
+    expect(tester.getSize(rail).width, 80.0);
+
+    stateSetter(() {
+      extended = true;
+    });
+    await tester.pump();
+    // Default value for animation is kThemeAnimationDuration
+    await tester.pump(Duration(milliseconds: kThemeAnimationDuration.inMilliseconds~/2));
+    expect(animation.status, AnimationStatus.forward);
+    // Expect that it has not started to extend.
+    expect(tester.getSize(rail).width, 80.0);
+    await tester.pumpAndSettle();
+    // Expect that it has finished to extend - this is to ensure that the
+    // animation played at all.
+    expect(animation.status, AnimationStatus.completed);
+    expect(tester.getSize(rail).width, greaterThan(80.0));
+  });
+
   testWidgets('Extended rail animation can be consumed', (WidgetTester tester) async {
     bool extended = false;
     late Animation<double> animation;
