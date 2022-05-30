@@ -8,7 +8,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 
 import 'card.dart';
-import 'constants.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
 import 'debug.dart';
@@ -71,12 +70,14 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
+    /// {@macro flutter.material.dataTable.dataRowHeight}
     @Deprecated(
-      'Use dataRowHeightSettings instead. '
-      'This feature was deprecated after v2.13.0-0.4.pre.',
+      'Use dataRowHeightStyle instead. '
+      'This feature was deprecated after v3.1.0.',
     )
-    this.dataRowHeight,
-    this.dataRowHeightSettings,
+    final double? dataRowHeight,
+    /// {@macro flutter.material.dataTable.dataRowHeightStyle}
+    DataRowHeightStyle? dataRowHeightStyle,
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
@@ -115,7 +116,8 @@ class PaginatedDataTable extends StatefulWidget {
        assert(!(controller != null && (primary ?? false)),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.',
-       );
+       ),
+       dataRowHeightStyle = dataRowHeightStyle ?? (dataRowHeight != null ? DataRowHeightStyle.fixed(height: dataRowHeight) : null);
 
   /// The table card's optional header.
   ///
@@ -157,23 +159,8 @@ class PaginatedDataTable extends StatefulWidget {
   /// See [DataTable.onSelectAll].
   final ValueSetter<bool?>? onSelectAll;
 
-  /// The height of each row (excluding the row that contains column headings).
-  ///
-  /// This value is optional and defaults to kMinInteractiveDimension if not
-  /// specified.
-  @Deprecated(
-    'Use dataRowHeightSettings instead. '
-    'This feature was deprecated after v2.13.0-0.4.pre.',
-  )
-  final double? dataRowHeight;
-
-  /// {@template flutter.material.dataTable.dataRowHeightSettings}
-  /// The height settings for [DataRow]s.
-  /// {@endtemplate}
-  ///
-  /// If null, [DataTableThemeData.dataRowHeightSettings] is used. This value
-  /// defaults to `DataRowHeight.fixed(`[kMinInteractiveDimension]`)`.
-  final DataTableRowHeight? dataRowHeightSettings;
+  /// {@macro flutter.material.dataTable.dataRowHeightStyle}
+  final DataRowHeightStyle? dataRowHeightStyle;
 
   /// The height of the heading row.
   ///
@@ -543,7 +530,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     // Make sure no decoration is set on the DataTable
                     // from the theme, as its already wrapped in a Card.
                     decoration: const BoxDecoration(),
-                    dataRowHeight: widget.dataRowHeight,
+                    dataRowHeightStyle: widget.dataRowHeightStyle,
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
                     checkboxHorizontalMargin: widget.checkboxHorizontalMargin,

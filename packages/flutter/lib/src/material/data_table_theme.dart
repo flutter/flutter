@@ -40,12 +40,12 @@ class DataTableThemeData with Diagnosticable {
     this.dataRowColor,
     /// {@macro flutter.material.dataTable.dataRowHeight}
     @Deprecated(
-      'Use dataRowHeightSettings instead. '
-      'This feature was deprecated after v2.13.0-0.4.pre.',
+      'Use dataRowHeightStyle instead. '
+      'This feature was deprecated after v3.1.0.',
     )
     double? dataRowHeight,
-    /// {@macro flutter.material.dataTable.dataRowHeightSettings}
-    DataTableRowHeight? dataRowHeightSettings,
+    /// {@macro flutter.material.dataTable.dataRowHeightStyle}
+    DataRowHeightStyle? dataRowHeightStyle,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
@@ -56,7 +56,7 @@ class DataTableThemeData with Diagnosticable {
     this.checkboxHorizontalMargin,
   }) :
     _dataRowHeight = dataRowHeight,
-    _dataRowHeightSettings = dataRowHeightSettings;
+    _dataRowHeightStyle = dataRowHeightStyle;
 
   /// {@macro flutter.material.dataTable.decoration}
   final Decoration? decoration;
@@ -66,11 +66,11 @@ class DataTableThemeData with Diagnosticable {
   final MaterialStateProperty<Color?>? dataRowColor;
 
   final double? _dataRowHeight;
-  final DataTableRowHeight? _dataRowHeightSettings;
+  final DataRowHeightStyle? _dataRowHeightStyle;
 
-  /// {@macro flutter.material.dataTable.dataRowHeightSettings}
-  DataTableRowHeight? get dataRowHeightSettings
-    => _dataRowHeightSettings ?? (_dataRowHeight != null ? DataTableRowHeight.fixed(height: _dataRowHeight) : null);
+  /// {@macro flutter.material.dataTable.dataRowHeightStyle}
+  DataRowHeightStyle? get dataRowHeightStyle
+    => _dataRowHeightStyle ?? (_dataRowHeight != null ? DataRowHeightStyle.fixed(height: _dataRowHeight!) : null);
 
   /// {@macro flutter.material.dataTable.dataTextStyle}
   final TextStyle? dataTextStyle;
@@ -103,11 +103,11 @@ class DataTableThemeData with Diagnosticable {
     Decoration? decoration,
     MaterialStateProperty<Color?>? dataRowColor,
     @Deprecated(
-      'Use dataRowHeightSettings instead. '
-      'This feature was deprecated after v2.13.0-0.4.pre.',
+      'Use dataRowHeightStyle instead. '
+      'This feature was deprecated after v3.1.0.',
     )
     double? dataRowHeight,
-    DataTableRowHeight? dataRowHeightSettings,
+    DataRowHeightStyle? dataRowHeightStyle,
     TextStyle? dataTextStyle,
     MaterialStateProperty<Color?>? headingRowColor,
     double? headingRowHeight,
@@ -120,7 +120,7 @@ class DataTableThemeData with Diagnosticable {
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
       dataRowColor: dataRowColor ?? this.dataRowColor,
-      dataRowHeightSettings: dataRowHeightSettings ?? (dataRowHeight != null ? DataTableRowHeight.fixed(height: dataRowHeight) : null) ?? this.dataRowHeightSettings,
+      dataRowHeightStyle: dataRowHeightStyle ?? (dataRowHeight != null ? DataRowHeightStyle.fixed(height: dataRowHeight) : null) ?? this.dataRowHeightStyle,
       dataTextStyle: dataTextStyle ?? this.dataTextStyle,
       headingRowColor: headingRowColor ?? this.headingRowColor,
       headingRowHeight: headingRowHeight ?? this.headingRowHeight,
@@ -142,7 +142,7 @@ class DataTableThemeData with Diagnosticable {
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
       dataRowColor: _lerpProperties<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
-      dataRowHeightSettings: _lerpDataTableRowHeight(a.dataRowHeightSettings, b.dataRowHeightSettings, t),
+      dataRowHeightStyle: _lerpDataRowHeightStyle(a.dataRowHeightStyle, b.dataRowHeightStyle, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
       headingRowColor: _lerpProperties<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
@@ -158,7 +158,7 @@ class DataTableThemeData with Diagnosticable {
   int get hashCode => Object.hash(
     decoration,
     dataRowColor,
-    dataRowHeightSettings,
+    dataRowHeightStyle,
     dataTextStyle,
     headingRowColor,
     headingRowHeight,
@@ -178,7 +178,7 @@ class DataTableThemeData with Diagnosticable {
     return other is DataTableThemeData
       && other.decoration == decoration
       && other.dataRowColor == dataRowColor
-      && other.dataRowHeightSettings == dataRowHeightSettings
+      && other.dataRowHeightStyle == dataRowHeightStyle
       && other.dataTextStyle == dataTextStyle
       && other.headingRowColor == headingRowColor
       && other.headingRowHeight == headingRowHeight
@@ -194,7 +194,7 @@ class DataTableThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<DataTableRowHeight>('dataRowHeightSettings', dataRowHeightSettings, defaultValue: null));
+    properties.add(DiagnosticsProperty<DataRowHeightStyle>('dataRowHeightStyle', dataRowHeightStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
@@ -212,13 +212,13 @@ class DataTableThemeData with Diagnosticable {
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 
-  /// Interpolate between two [DataTableRowHeight] instances.
-  static DataTableRowHeight? _lerpDataTableRowHeight(DataTableRowHeight? a, DataTableRowHeight? b, double t) {
+  /// Interpolate between two [DataRowHeightStyle] instances.
+  static DataRowHeightStyle? _lerpDataRowHeightStyle(DataRowHeightStyle? a, DataRowHeightStyle? b, double t) {
     if (a == null && b == null)
       return null;
     if (a?.fixedHeight != null || b?.fixedHeight != null)
-      return DataTableRowHeight.fixed(height: lerpDouble(a?.fixedHeight, b?.fixedHeight, t));
-    return DataTableRowHeight.contentBased(topBottomPadding: lerpDouble(a?.topBottomPadding, b?.topBottomPadding, t) ?? 0.0);
+      return DataRowHeightStyle.fixed(height: lerpDouble(a?.fixedHeight, b?.fixedHeight, t) ?? 0.0);
+    return DataRowHeightStyle.auto(verticalPadding: lerpDouble(a?.verticalPadding, b?.verticalPadding, t) ?? 0.0);
   }
 }
 

@@ -403,7 +403,8 @@ void main() {
     final TestDataSource source = TestDataSource();
 
     Widget buildCustomHeightPaginatedTable({
-      double dataRowHeight = 48.0,
+      double? dataRowHeight,
+      DataRowHeightStyle? dataRowHeightStyle,
       double headingRowHeight = 56.0,
     }) {
       return PaginatedDataTable(
@@ -422,6 +423,7 @@ void main() {
         ],
         dataRowHeight: dataRowHeight,
         headingRowHeight: headingRowHeight,
+        dataRowHeightStyle: dataRowHeightStyle,
       );
     }
 
@@ -478,6 +480,13 @@ void main() {
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Frozen yogurt (0)').first,
     ).size.height, 56.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomHeightPaginatedTable(dataRowHeightStyle: const DataRowHeightStyle.fixed(height: 10.0))),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Frozen yogurt (0)').first,
+    ).size.height, 10.0);
   });
 
   testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (WidgetTester tester) async {

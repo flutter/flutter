@@ -734,12 +734,12 @@ void main() {
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 56.0);
   });
 
-  testWidgets('DataTable custom dataRowHeightSettings', (WidgetTester tester) async {
+  testWidgets('DataTable custom dataRowHeightStyle', (WidgetTester tester) async {
     Widget buildCustomTable({
-      DataTableRowHeight? dataRowHeightSettings,
+      DataRowHeightStyle? dataRowHeightStyle,
     }) {
       return DataTable(
-        dataRowHeightSettings: dataRowHeightSettings,
+        dataRowHeightStyle: dataRowHeightStyle,
         columns: const <DataColumn>[
           DataColumn(
             label: Text('Name'),
@@ -776,27 +776,22 @@ void main() {
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(dataRowHeightSettings: const DataTableRowHeight.fixed())),
-    ));
-    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 48.0);
-
-    await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(dataRowHeightSettings: const DataTableRowHeight.fixed(height: 50.0))),
+      home: Material(child: buildCustomTable(dataRowHeightStyle: const DataRowHeightStyle.fixed(height: 50.0))),
     ));
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 50.0);
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(dataRowHeightSettings: const DataTableRowHeight.contentBased(topBottomPadding: 0.0))),
+      home: Material(child: buildCustomTable(dataRowHeightStyle: const DataRowHeightStyle.auto(verticalPadding: 0.0))),
     ));
     final double actualContainerHeightNoPadding = tester.getSize(findFirstContainerFor('Frozen yogurt')).height;
     expect(actualContainerHeightNoPadding, greaterThan(0.0));
 
-    const double topBottomPadding = 5.0;
+    const double verticalPadding = 5.0;
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(dataRowHeightSettings: const DataTableRowHeight.contentBased(topBottomPadding: topBottomPadding))),
+      home: Material(child: buildCustomTable(dataRowHeightStyle: const DataRowHeightStyle.auto(verticalPadding: verticalPadding))),
     ));
     final double actualContainerHeightWithPadding = tester.getSize(findFirstContainerFor('Frozen yogurt')).height;
-    expect(actualContainerHeightWithPadding, actualContainerHeightNoPadding + 2 * topBottomPadding);
+    expect(actualContainerHeightWithPadding, actualContainerHeightNoPadding + 2 * verticalPadding);
   });
 
   testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
