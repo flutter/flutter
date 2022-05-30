@@ -1150,21 +1150,20 @@ class ThemeData with Diagnosticable {
   /// This flag affects styles and components.
   ///
   /// ## Styles
-  ///   * [Color](https://m3.material.io/styles/color/the-color-system): [ColorScheme], [Material]
-  ///   * [Shape](https://m3.material.io/styles/shape) (see components below)
-  ///   * [Typography](https://m3.material.io/styles/typography): `typography` (see table below)
+  ///   * Color: [ColorScheme], [Material]
+  ///   * Shape: (see components below)
+  ///   * Typography: `typography` (see table below)
   ///
   /// ## Components
-  ///   * [Common buttons](https://m3.material.io/components/buttons): [TextButton], [OutlinedButton], [ElevatedButton]
-  ///   * [FAB](https://m3.material.io/components/floating-action-button): [FloatingActionButton]
-  ///   * [Extended FAB](https://m3.material.io/components/extended-fab): [FloatingActionButton.extended]
-  ///   * [Cards](https://m3.material.io/components/cards): [Card]
-  ///   * [Dialogs](https://m3.material.io/components/dialogs): [Dialog], [AlertDialog]
+  ///   * Common buttons: [TextButton], [OutlinedButton], [ElevatedButton]
+  ///   * FAB: [FloatingActionButton]
+  ///   * Extended FAB: [FloatingActionButton.extended]
+  ///   * Cards: [Card]
+  ///   * Dialogs: [Dialog], [AlertDialog]
   ///   * Lists: [ListTile]
-  ///   * [Navigation bar](https://m3.material.io/components/navigation-bar): [NavigationBar] (new, replacing [BottomNavigationBar])
+  ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
   ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
-  ///   * [Top app bar](https://m3.material.io/components/top-app-bar): [AppBar]
-  ///
+  ///   * Top app bar: [AppBar]
   ///
   /// In addition, this flag enables features introduced in Android 12.
   ///   * Stretch overscroll: [MaterialScrollBehavior]
