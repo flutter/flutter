@@ -1152,7 +1152,7 @@ class ThemeData with Diagnosticable {
   /// some properties will get updated defaults. Please note that
   /// [ThemeData.copyWith] with [useMaterial3] set to true will
   /// not change any of these properties in the resulting [ThemeData].
-  /// 
+  ///
   /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
   ///
   /// | Property        | Material 3 default           | Material 2 default        |
@@ -1162,9 +1162,9 @@ class ThemeData with Diagnosticable {
   ///
   /// \* if the target platform is Android and the app is not
   /// running on the web, otherwise it will fallback to [InkRipple].
-  /// 
+  ///
   /// ## Affected widgets
-  /// 
+  ///
   /// This flag affects styles and components.
   ///
   /// ### Styles
