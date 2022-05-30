@@ -1802,28 +1802,30 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 ///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
 ///    [RenderObject] that instead of having a single list of children organizes
 ///    its children in named slots.
-// ignore: must_be_immutable
+
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   ///
   /// The [children] argument must not be null and must not contain any null
   /// objects.
-  MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[], this.reversed = false })
-    : assert(children != null) {
-    assert(() {
-      for (int index = 0; index < children.length; index++) {
-        // TODO(a14n): remove this check to have a lot more const widget
-        if (children[index] == null) {
-          throw FlutterError(
-            "$runtimeType's children must not contain any null values, "
-            'but a null value was found at index $index',
-          );
-        }
-      }
-      return true;
-    }()); // https://github.com/dart-lang/sdk/issues/29276
-
-    children = reversed ? children.reversed.toList() : children;
+  MultiChildRenderObjectWidget({
+    super.key,
+    List<Widget> children = const <Widget>[],
+    this.reversed = false
+    }): children = reversed ? children.reversed.toList() : children,
+        assert(children != null) {
+        assert(() {
+          for (int index = 0; index < children.length; index++) {
+            // TODO(a14n): remove this check to have a lot more const widget
+            if (children[index] == null) {
+              throw FlutterError(
+                "$runtimeType's children must not contain any null values, "
+                'but a null value was found at index $index',
+              );
+            }
+          }
+          return true;
+        }()); // https://github.com/dart-lang/sdk/issues/29276
   }
 
   /// The widgets below this widget in the tree.
@@ -1883,7 +1885,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///   }
   /// }
   /// ```
-  List<Widget> children;
+  final List<Widget> children;
 
   /// If the childrens order should be reversed.
   ///
