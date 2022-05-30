@@ -502,27 +502,25 @@ class ChipThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      deleteIconColor,
-      disabledColor,
-      selectedColor,
-      secondarySelectedColor,
-      shadowColor,
-      selectedShadowColor,
-      checkmarkColor,
-      labelPadding,
-      padding,
-      side,
-      shape,
-      labelStyle,
-      secondaryLabelStyle,
-      brightness,
-      elevation,
-      pressElevation,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    deleteIconColor,
+    disabledColor,
+    selectedColor,
+    secondarySelectedColor,
+    shadowColor,
+    selectedShadowColor,
+    checkmarkColor,
+    labelPadding,
+    padding,
+    side,
+    shape,
+    labelStyle,
+    secondaryLabelStyle,
+    brightness,
+    elevation,
+    pressElevation,
+  );
 
   @override
   bool operator ==(Object other) {

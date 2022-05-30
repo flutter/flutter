@@ -1324,8 +1324,8 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///       mainAxisAlignment: MainAxisAlignment.center,
 ///       children: <Widget>[
 ///         ElevatedButton(
-///           child: const Text('Scale Logo'),
 ///           onPressed: _changeScale,
+///           child: const Text('Scale Logo'),
 ///         ),
 ///         Padding(
 ///           padding: const EdgeInsets.all(50),
@@ -1455,8 +1455,8 @@ class _AnimatedScaleState extends ImplicitlyAnimatedWidgetState<AnimatedScale> {
 ///       mainAxisAlignment: MainAxisAlignment.center,
 ///       children: <Widget>[
 ///         ElevatedButton(
-///           child: const Text('Rotate Logo'),
 ///           onPressed: _changeRotation,
+///           child: const Text('Rotate Logo'),
 ///         ),
 ///         Padding(
 ///           padding: const EdgeInsets.all(50),
@@ -1673,8 +1673,8 @@ class _AnimatedSlideState extends ImplicitlyAnimatedWidgetState<AnimatedSlide> {
 ///           child: const FlutterLogo(),
 ///         ),
 ///         ElevatedButton(
-///           child: const Text('Fade Logo'),
 ///           onPressed: _changeOpacity,
+///           child: const Text('Fade Logo'),
 ///         ),
 ///       ],
 ///     );

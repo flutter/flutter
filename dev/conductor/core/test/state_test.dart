@@ -18,7 +18,6 @@ void main() {
     final pb.ConductorState state = pb.ConductorState(
       releaseChannel: 'stable',
       releaseVersion: '2.3.4',
-      incrementLevel: 'z',
       engine: pb.Repository(
         candidateBranch: candidateBranch,
         upstream: pb.Remote(
@@ -60,8 +59,7 @@ void main() {
   },
   "logs": [
     "[status] hello world"
-  ],
-  "incrementLevel": "z"
+  ]
 }''';
     expect(serializedState, expectedString);
   });

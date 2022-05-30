@@ -14,7 +14,7 @@ import 'transformations_demo_inertial_motion.dart';
 @immutable
 class GestureTransformable extends StatefulWidget {
   const GestureTransformable({
-    Key? key,
+    super.key,
     // The child to perform the transformations on.
     required this.child,
     // The desired visible size of the widget and the area that is receptive to
@@ -75,8 +75,7 @@ class GestureTransformable extends StatefulWidget {
        assert(
          !reset || onResetEnd != null,
          'Must implement onResetEnd to use reset.',
-       ),
-       super(key: key);
+       );
 
   final Widget child;
   final Size size;

@@ -25,15 +25,18 @@ const String _kFlutterRootKey = 'FLUTTER_ROOT';
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
 /// works for the current test. _Which_ FlutterGoldenFileComparator is
 /// instantiated is based on the current testing environment.
-Future<void> testExecutable(FutureOr<void> Function() testMain) async {
+///
+/// When set, the `namePrefix` is prepended to the names of all gold images.
+Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePrefix}) async {
   const Platform platform = LocalPlatform();
   if (FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform)) {
-    goldenFileComparator = await FlutterPostSubmitFileComparator.fromDefaultComparator(platform);
+    goldenFileComparator = await FlutterPostSubmitFileComparator.fromDefaultComparator(platform, namePrefix: namePrefix);
   } else if (FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform)) {
-    goldenFileComparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(platform);
+    goldenFileComparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(platform, namePrefix: namePrefix);
   } else if (FlutterSkippingFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingFileComparator.fromDefaultComparator(
-      'Golden file testing is not executed on Cirrus, or LUCI environments outside of flutter/flutter.'
+      'Golden file testing is not executed on Cirrus, or LUCI environments outside of flutter/flutter.',
+        namePrefix: namePrefix
     );
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
@@ -91,6 +94,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     this.skiaClient, {
     this.fs = const LocalFileSystem(),
     this.platform = const LocalPlatform(),
+    this.namePrefix,
   });
 
   /// The directory to which golden file URIs will be resolved in [compare] and
@@ -108,6 +112,9 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// A wrapper for the [dart:io.Platform] API.
   @visibleForTesting
   final Platform platform;
+
+  /// The prefix that is added to all golden names.
+  final String? namePrefix;
 
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) async {
@@ -167,8 +174,18 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// Prepends the golden URL with the library name that encloses the current
   /// test.
   Uri _addPrefix(Uri golden) {
-    final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
-    return Uri.parse('$prefix.$golden');
+    // Ensure the Uri ends in .png as the SkiaClient expects
+    assert(
+      golden.toString().split('.').last == 'png',
+      'Golden files in the Flutter framework must end with the file extension '
+      '.png.'
+    );
+    return Uri.parse(<String>[
+      if (namePrefix != null)
+        namePrefix!,
+      basedir.pathSegments[basedir.pathSegments.length - 2],
+      golden.toString(),
+    ].join('.'));
   }
 }
 
@@ -195,16 +212,12 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
   /// The [fs] and [platform] parameters are useful in tests, where the default
   /// file system and platform can be replaced by mock instances.
   FlutterPostSubmitFileComparator(
-    final Uri basedir,
-    final SkiaGoldClient skiaClient, {
-    final FileSystem fs = const LocalFileSystem(),
-    final Platform platform = const LocalPlatform(),
-  }) : super(
-    basedir,
-    skiaClient,
-    fs: fs,
-    platform: platform,
-  );
+    super.basedir,
+    super.skiaClient, {
+    super.fs,
+    super.platform,
+    super.namePrefix,
+  });
 
   /// Creates a new [FlutterPostSubmitFileComparator] that mirrors the relative
   /// path resolution of the default [goldenFileComparator].
@@ -215,6 +228,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     final Platform platform, {
     SkiaGoldClient? goldens,
     LocalFileComparator? defaultComparator,
+    String? namePrefix,
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
@@ -227,7 +241,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.auth();
-    return FlutterPostSubmitFileComparator(baseDirectory.uri, goldens);
+    return FlutterPostSubmitFileComparator(baseDirectory.uri, goldens, namePrefix: namePrefix);
   }
 
   @override
@@ -273,16 +287,12 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// The [fs] and [platform] parameters are useful in tests, where the default
   /// file system and platform can be replaced by mock instances.
   FlutterPreSubmitFileComparator(
-    final Uri basedir,
-    final SkiaGoldClient skiaClient, {
-    final FileSystem fs = const LocalFileSystem(),
-    final Platform platform = const LocalPlatform(),
-  }) : super(
-    basedir,
-    skiaClient,
-    fs: fs,
-    platform: platform,
-  );
+    super.basedir,
+    super.skiaClient, {
+    super.fs,
+    super.platform,
+    super.namePrefix,
+  });
 
   /// Creates a new [FlutterPreSubmitFileComparator] that mirrors the
   /// relative path resolution of the default [goldenFileComparator].
@@ -294,6 +304,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     SkiaGoldClient? goldens,
     LocalFileComparator? defaultComparator,
     Directory? testBasedir,
+    String? namePrefix,
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
@@ -312,6 +323,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     return FlutterPreSubmitFileComparator(
       baseDirectory.uri,
       goldens, platform: platform,
+      namePrefix: namePrefix,
     );
   }
 
@@ -359,10 +371,11 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterSkippingFileComparator] that will skip tests that
   /// are not in the right environment for golden file testing.
   FlutterSkippingFileComparator(
-    final Uri basedir,
-    final SkiaGoldClient skiaClient,
-    this.reason,
-  ) : super(basedir, skiaClient);
+    super.basedir,
+    super.skiaClient,
+    this.reason, {
+    super.namePrefix,
+  });
 
   /// Describes the reason for using the [FlutterSkippingFileComparator].
   ///
@@ -374,12 +387,13 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   static FlutterSkippingFileComparator fromDefaultComparator(
     String reason, {
     LocalFileComparator? defaultComparator,
+    String? namePrefix,
   }) {
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
     const FileSystem fs = LocalFileSystem();
     final Uri basedir = defaultComparator.basedir;
     final SkiaGoldClient skiaClient = SkiaGoldClient(fs.directory(basedir));
-    return FlutterSkippingFileComparator(basedir, skiaClient, reason);
+    return FlutterSkippingFileComparator(basedir, skiaClient, reason, namePrefix: namePrefix);
   }
 
   @override
@@ -440,16 +454,11 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   /// The [fs] and [platform] parameters are useful in tests, where the default
   /// file system and platform can be replaced by mock instances.
   FlutterLocalFileComparator(
-    final Uri basedir,
-    final SkiaGoldClient skiaClient, {
-    final FileSystem fs = const LocalFileSystem(),
-    final Platform platform = const LocalPlatform(),
-  }) : super(
-    basedir,
-    skiaClient,
-    fs: fs,
-    platform: platform,
-  );
+    super.basedir,
+    super.skiaClient, {
+    super.fs,
+    super.platform,
+  });
 
   /// Creates a new [FlutterLocalFileComparator] that mirrors the
   /// relative path resolution of the default [goldenFileComparator].

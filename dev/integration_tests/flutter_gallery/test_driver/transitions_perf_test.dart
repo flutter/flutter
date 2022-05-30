@@ -13,7 +13,15 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 const FileSystem _fs = LocalFileSystem();
 
-const List<String> kSkippedDemos = <String>[];
+/// The demos we don't run as part of the integration test.
+///
+/// Demo names are formatted as 'DEMO_NAME@DEMO_CATEGORY' (see
+/// `demo_lists.dart` for more examples).
+const List<String> kSkippedDemos = <String>[
+  // This demo is flaky on CI due to hitting the network.
+  // See: https://github.com/flutter/flutter/issues/100497
+  'Video@Media',
+];
 
 // All of the gallery demos, identified as "title@category".
 //

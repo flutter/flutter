@@ -79,7 +79,21 @@ void main() {
         'App.framework',
       ));
 
-      expect(outputAppFramework.childFile('App'), exists);
+      final File outputAppFrameworkBinary = outputAppFramework.childFile('App');
+      final String archs = processManager.runSync(
+        <String>['file', outputAppFrameworkBinary.path],
+      ).stdout as String;
+
+      final bool containsX64 = archs.contains('Mach-O 64-bit dynamically linked shared library x86_64');
+      final bool containsArm = archs.contains('Mach-O 64-bit dynamically linked shared library arm64');
+      if (buildModeLower == 'debug') {
+        // Only build the architecture matching the machine running this test, not both.
+        expect(containsX64 ^ containsArm, isTrue, reason: 'Unexpected architecture $archs');
+      } else {
+        expect(containsX64, isTrue, reason: 'Unexpected architecture $archs');
+        expect(containsArm, isTrue, reason: 'Unexpected architecture $archs');
+      }
+
       expect(outputAppFramework.childLink('Resources'), exists);
 
       final File vmSnapshot = fileSystem.file(fileSystem.path.join(

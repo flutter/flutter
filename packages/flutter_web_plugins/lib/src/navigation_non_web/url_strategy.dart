@@ -92,8 +92,7 @@ class PathUrlStrategy extends HashUrlStrategy {
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
   /// interations.
-  PathUrlStrategy([PlatformLocation? _platformLocation])
-      : super(_platformLocation);
+  PathUrlStrategy([super.platformLocation]);
 
   @override
   String getPath() => '';

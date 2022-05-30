@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'scroll_notification.dart';
 
 export 'package:flutter/rendering.dart' show
   AxisDirection,
@@ -43,6 +44,8 @@ export 'package:flutter/rendering.dart' show
 ///    sliver context (the opposite of this widget).
 ///  * [ShrinkWrappingViewport], a variant of [Viewport] that shrink-wraps its
 ///    contents along the main axis.
+///  * [ViewportElementMixin], which should be mixed in to the [Element] type used
+///    by viewport-like widgets to correctly handle scroll notifications.
 class Viewport extends MultiChildRenderObjectWidget {
   /// Creates a widget that is bigger on the inside.
   ///
@@ -207,37 +210,79 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 }
 
-class _ViewportElement extends MultiChildRenderObjectElement {
+class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
   /// Creates an element that uses the given widget as its configuration.
   _ViewportElement(Viewport widget) : super(widget);
 
-  @override
-  Viewport get widget => super.widget as Viewport;
+  bool _doingMountOrUpdate = false;
+  int? _centerSlotIndex;
 
   @override
   RenderViewport get renderObject => super.renderObject as RenderViewport;
 
   @override
   void mount(Element? parent, Object? newSlot) {
+    assert(!_doingMountOrUpdate);
+    _doingMountOrUpdate = true;
     super.mount(parent, newSlot);
     _updateCenter();
+    assert(_doingMountOrUpdate);
+    _doingMountOrUpdate = false;
   }
 
   @override
   void update(MultiChildRenderObjectWidget newWidget) {
+    assert(!_doingMountOrUpdate);
+    _doingMountOrUpdate = true;
     super.update(newWidget);
     _updateCenter();
+    assert(_doingMountOrUpdate);
+    _doingMountOrUpdate = false;
   }
 
   void _updateCenter() {
     // TODO(ianh): cache the keys to make this faster
-    if (widget.center != null) {
-      renderObject.center = children.singleWhere(
-        (Element element) => element.widget.key == widget.center,
-      ).renderObject as RenderSliver?;
+    final Viewport viewport = widget as Viewport;
+    if (viewport.center != null) {
+      int elementIndex = 0;
+      for (final Element e in children) {
+        if (e.widget.key == viewport.center) {
+          renderObject.center = e.renderObject as RenderSliver?;
+          break;
+        }
+        elementIndex++;
+      }
+      assert(elementIndex < children.length);
+      _centerSlotIndex = elementIndex;
     } else if (children.isNotEmpty) {
       renderObject.center = children.first.renderObject as RenderSliver?;
+      _centerSlotIndex = 0;
     } else {
+      renderObject.center = null;
+      _centerSlotIndex = null;
+    }
+  }
+
+  @override
+  void insertRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
+    super.insertRenderObjectChild(child, slot);
+    // Once [mount]/[update] are done, the `renderObject.center` will be updated
+    // in [_updateCenter].
+    if (!_doingMountOrUpdate && slot.index == _centerSlotIndex) {
+      renderObject.center = child as RenderSliver?;
+    }
+  }
+
+  @override
+  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element?> oldSlot, IndexedSlot<Element?> newSlot) {
+    super.moveRenderObjectChild(child, oldSlot, newSlot);
+    assert(_doingMountOrUpdate);
+  }
+
+  @override
+  void removeRenderObjectChild(RenderObject child, Object? slot) {
+    super.removeRenderObjectChild(child, slot);
+    if (!_doingMountOrUpdate && renderObject.center == child) {
       renderObject.center = null;
     }
   }

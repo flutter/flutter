@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -321,21 +320,21 @@ class BoxDecoration extends Decoration {
         && other.borderRadius == borderRadius
         && listEquals<BoxShadow>(other.boxShadow, boxShadow)
         && other.gradient == gradient
+        && other.backgroundBlendMode == backgroundBlendMode
         && other.shape == shape;
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      image,
-      border,
-      borderRadius,
-      hashList(boxShadow),
-      gradient,
-      shape,
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    image,
+    border,
+    borderRadius,
+    boxShadow == null ? null : Object.hashAll(boxShadow!),
+    gradient,
+    backgroundBlendMode,
+    shape,
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -1189,8 +1189,8 @@ void main() {
   ]
 }
 ''');
-    // Start from an empty generated_main.dart file.
-    globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart').createSync(recursive: true);
+    // Start from an empty dart_plugin_registrant.dart file.
+    globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('dart_plugin_registrant.dart').createSync(recursive: true);
 
     await residentRunner.runSourceGenerators();
 
@@ -1267,9 +1267,9 @@ flutter:
 
     final File generatedMain = globals.fs.directory('.dart_tool')
         .childDirectory('flutter_build')
-        .childFile('generated_main.dart');
+        .childFile('dart_plugin_registrant.dart');
 
-    expect(generatedMain.readAsStringSync(), contains('custom_main.dart'));
+    expect(generatedMain.existsSync(), isTrue);
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
   }));
@@ -1882,6 +1882,30 @@ flutter:
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill, '/foo/bar.dill');
+    expect(residentCompiler.assumeInitializeFromDillUpToDate, false);
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+   testUsingContext('FlutterDevice passes assumeInitializeFromDillUpToDate parameter if specified', () async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final FakeDevice device = FakeDevice();
+
+    final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
+      device,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        extraFrontEndOptions: <String>[],
+        assumeInitializeFromDillUpToDate: true,
+      ),
+      target: null, platform: null,
+    )).generator as DefaultResidentCompiler;
+
+    expect(residentCompiler.assumeInitializeFromDillUpToDate, true);
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1892,11 +1916,12 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri, List<String> cachedUserTags}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
+      expect(cachedUserTags, isEmpty);
       throw FakeDartDevelopmentServiceException(message:
         'Existing VM service clients prevent DDS from taking control.',
       );
@@ -1939,11 +1964,12 @@ flutter:
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
     final Completer<void>done = Completer<void>();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) async {
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri, List<String> cachedUserTags}) async {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
       expect(ipv6, isTrue);
       expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
+      expect(cachedUserTags, isEmpty);
       done.complete();
       return null;
     };
@@ -1970,11 +1996,12 @@ flutter:
     // See https://github.com/flutter/flutter/issues/72385 for context.
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri, List<String> cachedUserTags}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
+      expect(cachedUserTags, isEmpty);
       throw FakeDartDevelopmentServiceException(message: 'No URI');
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
@@ -2142,8 +2169,8 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     success: true,
     invalidatedSourcesCount: 1,
   );
-  Object reportError;
-  Object runColdError;
+  Exception reportError;
+  Exception runColdError;
   int runHotCode = 0;
   int runColdCode = 0;
 
@@ -2202,6 +2229,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     int ddsPort,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
+    bool cacheStartupProfile = false,
     @required bool allowExistingDdsInstance,
     bool ipv6 = false,
   }) async { }
@@ -2244,6 +2272,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     bool enableDds = true,
+    bool cacheStartupProfile = false,
     bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     CompileExpression compileExpression,

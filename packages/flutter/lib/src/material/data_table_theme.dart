@@ -136,21 +136,19 @@ class DataTableThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      decoration,
-      dataRowColor,
-      dataRowHeight,
-      dataTextStyle,
-      headingRowColor,
-      headingRowHeight,
-      headingTextStyle,
-      horizontalMargin,
-      columnSpacing,
-      dividerThickness,
-      checkboxHorizontalMargin,
-    );
-  }
+  int get hashCode => Object.hash(
+    decoration,
+    dataRowColor,
+    dataRowHeight,
+    dataTextStyle,
+    headingRowColor,
+    headingRowHeight,
+    headingTextStyle,
+    horizontalMargin,
+    columnSpacing,
+    dividerThickness,
+    checkboxHorizontalMargin,
+  );
 
   @override
   bool operator ==(Object other) {

@@ -147,7 +147,7 @@ class UserMessages {
   String xcodeLocation(String location) => 'Xcode at $location';
 
   String xcodeOutdated(String requiredVersion) =>
-      'Flutter requires a minimum Xcode version of $requiredVersion.\n'
+      'Flutter requires Xcode $requiredVersion or higher.\n'
       'Download the latest version or update via the Mac App Store.';
 
   String xcodeRecommended(String recommendedVersion) =>
@@ -247,8 +247,8 @@ class UserMessages {
   String get flutterNoDevelopmentDevice =>
       "Unable to locate a development device; please run 'flutter doctor' "
       'for information about installing additional components.';
-  String flutterNoMatchingDevice(String deviceId) => 'No devices found with name or id '
-      "matching '$deviceId'";
+  String flutterNoMatchingDevice(String deviceId) => 'No supported devices found with name or id '
+      "matching '$deviceId'.";
   String get flutterNoDevicesFound => 'No devices found';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>

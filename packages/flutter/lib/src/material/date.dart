@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
 import 'material_localizations.dart';
@@ -241,7 +239,7 @@ class DateTimeRange {
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 
   @override
   String toString() => '$start - $end';

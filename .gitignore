@@ -102,6 +102,7 @@ unlinked_spec.ds
 
 # macOS
 **/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral
 
 # Coverage
 coverage/

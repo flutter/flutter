@@ -275,7 +275,7 @@ class BoardPoint {
   }
 
   @override
-  int get hashCode => hashValues(q, r);
+  int get hashCode => Object.hash(q, r);
 
   BoardPoint copyWithColor(Color nextColor) => BoardPoint(q, r, color: nextColor);
 

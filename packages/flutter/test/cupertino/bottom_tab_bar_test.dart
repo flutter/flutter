@@ -5,6 +5,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -567,5 +569,42 @@ Future<void> main() async {
     final BoxDecoration boxDecorationHiddenBorder =
         decoratedBoxHiddenBorder.decoration as BoxDecoration;
     expect(boxDecorationHiddenBorder.border, isNull);
+  });
+
+  testWidgets('Hovering over tab bar item updates cursor to clickable on Web', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(
+      tester,
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Center(
+          child: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.alarm),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.app_badge),
+                label: 'Tab 2',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset tabItem = tester.getCenter(find.text('Tab 1'));
+    await gesture.moveTo(tabItem);
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 }

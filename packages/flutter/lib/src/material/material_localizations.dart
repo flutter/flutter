@@ -96,10 +96,10 @@ abstract class MaterialLocalizations {
   /// The tooltip for the more button on an overflowing text selection menu.
   String get moreButtonTooltip;
 
-  /// The tooltip for the [MonthPicker]'s "next month" button.
+  /// The tooltip for the [CalendarDatePicker]'s "next month" button.
   String get nextMonthTooltip;
 
-  /// The tooltip for the [MonthPicker]'s "previous month" button.
+  /// The tooltip for the [CalendarDatePicker]'s "previous month" button.
   String get previousMonthTooltip;
 
   /// The tooltip for the [PaginatedDataTable]'s "first page" button.
@@ -496,6 +496,180 @@ abstract class MaterialLocalizations {
   /// The default semantics label for a [RefreshIndicator].
   String get refreshIndicatorSemanticLabel;
 
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.alt].
+  String get keyboardKeyAlt;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.altGraph].
+  String get keyboardKeyAltGraph;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.backspace].
+  String get keyboardKeyBackspace;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.capsLock].
+  String get keyboardKeyCapsLock;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.channelDown].
+  String get keyboardKeyChannelDown;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.channelUp].
+  String get keyboardKeyChannelUp;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.control].
+  String get keyboardKeyControl;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.delete].
+  String get keyboardKeyDelete;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.eisu].
+  String get keyboardKeyEisu;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.eject].
+  String get keyboardKeyEject;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.end].
+  String get keyboardKeyEnd;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.escape].
+  String get keyboardKeyEscape;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.fn].
+  String get keyboardKeyFn;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hangulMode].
+  String get keyboardKeyHangulMode;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hanjaMode].
+  String get keyboardKeyHanjaMode;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hankaku].
+  String get keyboardKeyHankaku;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hiragana].
+  String get keyboardKeyHiragana;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hiraganaKatakana].
+  String get keyboardKeyHiraganaKatakana;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.home].
+  String get keyboardKeyHome;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.insert].
+  String get keyboardKeyInsert;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.kanaMode].
+  String get keyboardKeyKanaMode;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.kanjiMode].
+  String get keyboardKeyKanjiMode;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.katakana].
+  String get keyboardKeyKatakana;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.meta].
+  String get keyboardKeyMeta;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.meta] on macOS.
+  String get keyboardKeyMetaMacOs;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.meta] on Windows.
+  String get keyboardKeyMetaWindows;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numLock].
+  String get keyboardKeyNumLock;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad1].
+  String get keyboardKeyNumpad1;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad2].
+  String get keyboardKeyNumpad2;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad3].
+  String get keyboardKeyNumpad3;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad4].
+  String get keyboardKeyNumpad4;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad5].
+  String get keyboardKeyNumpad5;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad6].
+  String get keyboardKeyNumpad6;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad7].
+  String get keyboardKeyNumpad7;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad8].
+  String get keyboardKeyNumpad8;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad9].
+  String get keyboardKeyNumpad9;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpad0].
+  String get keyboardKeyNumpad0;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadAdd].
+  String get keyboardKeyNumpadAdd;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadComma].
+  String get keyboardKeyNumpadComma;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadDecimal].
+  String get keyboardKeyNumpadDecimal;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadDivide].
+  String get keyboardKeyNumpadDivide;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadEnter].
+  String get keyboardKeyNumpadEnter;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadEqual].
+  String get keyboardKeyNumpadEqual;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadMultiply].
+  String get keyboardKeyNumpadMultiply;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadParenLeft].
+  String get keyboardKeyNumpadParenLeft;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadParenRight].
+  String get keyboardKeyNumpadParenRight;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.numpadSubtract].
+  String get keyboardKeyNumpadSubtract;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.pageDown].
+  String get keyboardKeyPageDown;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.pageUp].
+  String get keyboardKeyPageUp;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.power].
+  String get keyboardKeyPower;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.powerOff].
+  String get keyboardKeyPowerOff;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.printScreen].
+  String get keyboardKeyPrintScreen;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.romaji].
+  String get keyboardKeyRomaji;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.scrollLock].
+  String get keyboardKeyScrollLock;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.select].
+  String get keyboardKeySelect;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.space].
+  String get keyboardKeySpace;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.zenkaku].
+  String get keyboardKeyZenkaku;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.zenkakuHankaku].
+  String get keyboardKeyZenkakuHankaku;
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -640,7 +814,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
       case TimeOfDayFormat.frenchCanadian:
       case TimeOfDayFormat.H_colon_mm:
       case TimeOfDayFormat.HH_dot_mm:
-         throw AssertionError('$runtimeType does not support $format.');
+        throw AssertionError('$runtimeType does not support $format.');
     }
   }
 
@@ -929,7 +1103,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String licensesPackageDetailText(int licenseCount) {
-    assert (licenseCount >= 0);
+    assert(licenseCount >= 0);
     switch (licenseCount) {
       case 0:
         return 'No licenses.';
@@ -1085,4 +1259,178 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
         return '$remaining characters remaining';
     }
   }
+
+  @override
+  String get keyboardKeyAlt => 'Alt';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyBackspace => 'Backspace';
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps Lock';
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel Down';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel Up';
+
+  @override
+  String get keyboardKeyControl => 'Ctrl';
+
+  @override
+  String get keyboardKeyDelete => 'Del';
+
+  @override
+  String get keyboardKeyEisu => 'Eisū';
+
+  @override
+  String get keyboardKeyEject => 'Eject';
+
+  @override
+  String get keyboardKeyEnd => 'End';
+
+  @override
+  String get keyboardKeyEscape => 'Esc';
+
+  @override
+  String get keyboardKeyFn => 'Fn';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul Mode';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja Mode';
+
+  @override
+  String get keyboardKeyHankaku => 'Hankaku';
+
+  @override
+  String get keyboardKeyHiragana => 'Hiragana';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+
+  @override
+  String get keyboardKeyHome => 'Home';
+
+  @override
+  String get keyboardKeyInsert => 'Insert';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana Mode';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji Mode';
+
+  @override
+  String get keyboardKeyKatakana => 'Katakana';
+
+  @override
+  String get keyboardKeyMeta => 'Meta';
+
+  @override
+  String get keyboardKeyMetaMacOs => 'Command';
+
+  @override
+  String get keyboardKeyMetaWindows => 'Win';
+
+  @override
+  String get keyboardKeyNumLock => 'Num Lock';
+
+  @override
+  String get keyboardKeyNumpad1 => 'Num 1';
+
+  @override
+  String get keyboardKeyNumpad2 => 'Num 2';
+
+  @override
+  String get keyboardKeyNumpad3 => 'Num 3';
+
+  @override
+  String get keyboardKeyNumpad4 => 'Num 4';
+
+  @override
+  String get keyboardKeyNumpad5 => 'Num 5';
+
+  @override
+  String get keyboardKeyNumpad6 => 'Num 6';
+
+  @override
+  String get keyboardKeyNumpad7 => 'Num 7';
+
+  @override
+  String get keyboardKeyNumpad8 => 'Num 8';
+
+  @override
+  String get keyboardKeyNumpad9 => 'Num 9';
+
+  @override
+  String get keyboardKeyNumpad0 => 'Num 0';
+
+  @override
+  String get keyboardKeyNumpadAdd => 'Num +';
+
+  @override
+  String get keyboardKeyNumpadComma => 'Num ,';
+
+  @override
+  String get keyboardKeyNumpadDecimal => 'Num .';
+
+  @override
+  String get keyboardKeyNumpadDivide => 'Num /';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
+
+  @override
+  String get keyboardKeyNumpadEqual => 'Num =';
+
+  @override
+  String get keyboardKeyNumpadMultiply => 'Num *';
+
+  @override
+  String get keyboardKeyNumpadParenLeft => 'Num (';
+
+  @override
+  String get keyboardKeyNumpadParenRight => 'Num )';
+
+  @override
+  String get keyboardKeyNumpadSubtract => 'Num -';
+
+  @override
+  String get keyboardKeyPageDown => 'PgDown';
+
+  @override
+  String get keyboardKeyPageUp => 'PgUp';
+
+  @override
+  String get keyboardKeyPower => 'Power';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power Off';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print Screen';
+
+  @override
+  String get keyboardKeyRomaji => 'Romaji';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll Lock';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeySpace => 'Space';
+
+  @override
+  String get keyboardKeyZenkaku => 'Zenkaku';
+
+  @override
+  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 }

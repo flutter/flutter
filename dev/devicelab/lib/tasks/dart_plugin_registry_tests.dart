@@ -31,7 +31,7 @@ TaskFunction dartPluginRegistryTest({
             'io.flutter.devicelab',
             '--platforms',
             'macos',
-            'plugin_platform_implementation',
+            'aplugin_platform_implementation',
           ],
           environment: environment,
         );
@@ -39,9 +39,9 @@ TaskFunction dartPluginRegistryTest({
 
       final File pluginMain = File(path.join(
         tempDir.absolute.path,
-        'plugin_platform_implementation',
+        'aplugin_platform_implementation',
         'lib',
-        'plugin_platform_implementation.dart',
+        'aplugin_platform_implementation.dart',
       ));
       if (!pluginMain.existsSync()) {
         return TaskResult.failure('${pluginMain.path} does not exist');
@@ -49,9 +49,9 @@ TaskFunction dartPluginRegistryTest({
 
       // Patch plugin main dart file.
       await pluginMain.writeAsString('''
-class PluginPlatformInterfaceMacOS {
+class ApluginPlatformInterfaceMacOS {
   static void registerWith() {
-    print('PluginPlatformInterfaceMacOS.registerWith() was called');
+    print('ApluginPlatformInterfaceMacOS.registerWith() was called');
   }
 }
 ''', flush: true);
@@ -59,18 +59,18 @@ class PluginPlatformInterfaceMacOS {
       // Patch plugin main pubspec file.
       final File pluginImplPubspec = File(path.join(
         tempDir.absolute.path,
-        'plugin_platform_implementation',
+        'aplugin_platform_implementation',
         'pubspec.yaml',
       ));
       String pluginImplPubspecContent = await pluginImplPubspec.readAsString();
       pluginImplPubspecContent = pluginImplPubspecContent.replaceFirst(
-        '        pluginClass: PluginPlatformImplementationPlugin',
-        '        pluginClass: PluginPlatformImplementationPlugin\n'
-            '        dartPluginClass: PluginPlatformInterfaceMacOS\n',
+        '        pluginClass: ApluginPlatformImplementationPlugin',
+        '        pluginClass: ApluginPlatformImplementationPlugin\n'
+            '        dartPluginClass: ApluginPlatformInterfaceMacOS\n',
       );
       pluginImplPubspecContent = pluginImplPubspecContent.replaceFirst(
           '    platforms:\n',
-          '    implements: plugin_platform_interface\n'
+          '    implements: aplugin_platform_interface\n'
               '    platforms:\n');
       await pluginImplPubspec.writeAsString(pluginImplPubspecContent,
           flush: true);
@@ -85,28 +85,28 @@ class PluginPlatformInterfaceMacOS {
             'io.flutter.devicelab',
             '--platforms',
             'macos',
-            'plugin_platform_interface',
+            'aplugin_platform_interface',
           ],
           environment: environment,
         );
       });
       final File pluginInterfacePubspec = File(path.join(
         tempDir.absolute.path,
-        'plugin_platform_interface',
+        'aplugin_platform_interface',
         'pubspec.yaml',
       ));
       String pluginInterfacePubspecContent =
           await pluginInterfacePubspec.readAsString();
       pluginInterfacePubspecContent =
           pluginInterfacePubspecContent.replaceFirst(
-              '        pluginClass: PluginPlatformInterfacePlugin',
-              '        default_package: plugin_platform_implementation\n');
+              '        pluginClass: ApluginPlatformInterfacePlugin',
+              '        default_package: aplugin_platform_implementation\n');
       pluginInterfacePubspecContent =
           pluginInterfacePubspecContent.replaceFirst(
               'dependencies:',
               'dependencies:\n'
-                  '  plugin_platform_implementation:\n'
-                  '    path: ../plugin_platform_implementation\n');
+                  '  aplugin_platform_implementation:\n'
+                  '    path: ../aplugin_platform_implementation\n');
       await pluginInterfacePubspec.writeAsString(pluginInterfacePubspecContent,
           flush: true);
 
@@ -136,42 +136,78 @@ class PluginPlatformInterfaceMacOS {
       appPubspecContent = appPubspecContent.replaceFirst(
           'dependencies:',
           'dependencies:\n'
-              '  plugin_platform_interface:\n'
-              '    path: ../plugin_platform_interface\n');
+              '  aplugin_platform_interface:\n'
+              '    path: ../aplugin_platform_interface\n');
       await appPubspec.writeAsString(appPubspecContent, flush: true);
 
       section('Flutter run for macos');
 
+      late Process run;
       await inDirectory(path.join(tempDir.path, 'app'), () async {
-        final Process run = await startProcess(
+        run = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
           flutterCommandArgs('run', <String>['-d', 'macos', '-v']),
         );
-        Completer<void> registryExecutedCompleter = Completer<void>();
-        final StreamSubscription<void> subscription = run.stdout
-            .transform<String>(utf8.decoder)
-            .transform<String>(const LineSplitter())
-            .listen((String line) {
-          if (line.contains(
-              'PluginPlatformInterfaceMacOS.registerWith() was called')) {
+      });
+
+      Completer<void> registryExecutedCompleter = Completer<void>();
+      final StreamSubscription<void> stdoutSub = run.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          if (line.contains('ApluginPlatformInterfaceMacOS.registerWith() was called')) {
             registryExecutedCompleter.complete();
           }
           print('stdout: $line');
         });
 
-        section('Wait for registry execution');
-        await registryExecutedCompleter.future;
+      final StreamSubscription<void> stderrSub = run.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('stderr: $line');
+        });
 
-        // Hot restart.
-        run.stdin.write('R');
-        registryExecutedCompleter = Completer<void>();
+      final Future<void> stdoutDone = stdoutSub.asFuture<void>();
+      final Future<void> stderrDone = stderrSub.asFuture<void>();
 
-        section('Wait for registry execution after hot restart');
-        await registryExecutedCompleter.future;
+      Future<void> waitForStreams() {
+        return Future.wait<void>(<Future<void>>[stdoutDone, stderrDone]);
+      }
 
-        unawaited(subscription.cancel());
-        run.kill();
-      });
+      Future<void> waitOrExit(Future<void> future) async {
+        final dynamic result = await Future.any<dynamic>(
+          <Future<dynamic>>[
+            future,
+            run.exitCode,
+          ],
+        );
+        if (result is int) {
+          await waitForStreams();
+          throw 'process exited with code $result';
+        }
+      }
+
+      section('Wait for registry execution');
+      await waitOrExit(registryExecutedCompleter.future);
+
+      // Hot restart.
+      run.stdin.write('R');
+      await run.stdin.flush();
+      await run.stdin.close();
+
+      registryExecutedCompleter = Completer<void>();
+      section('Wait for registry execution after hot restart');
+      await waitOrExit(registryExecutedCompleter.future);
+
+      run.kill();
+
+      section('Wait for stdout/stderr streams');
+      await waitForStreams();
+
+      unawaited(stdoutSub.cancel());
+      unawaited(stderrSub.cancel());
+
       return TaskResult.success(null);
     } finally {
       rmTree(tempDir);
