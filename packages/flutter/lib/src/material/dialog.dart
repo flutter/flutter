@@ -257,9 +257,9 @@ class AlertDialog extends StatelessWidget {
   ///
   /// Typically used in conjunction with [showDialog].
   ///
-  /// The [contentPadding] must not be null. The [titlePadding] defaults to
-  /// null, which implies a default that depends on the values of the other
-  /// properties. See the documentation of [titlePadding] for details.
+  /// The [titlePadding] and [contentPadding] default to null, which implies a
+  /// default that depends on the values of the other properties. See the
+  /// documentation of [titlePadding] and [contentPadding] for details.
   const AlertDialog({
     super.key,
     this.icon,
@@ -268,7 +268,7 @@ class AlertDialog extends StatelessWidget {
     this.titlePadding,
     this.titleTextStyle,
     this.content,
-    this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+    this.contentPadding,
     this.contentTextStyle,
     this.actions,
     this.actionsPadding,
@@ -285,12 +285,11 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.scrollable = false,
-  }) : assert(contentPadding != null),
-       assert(clipBehavior != null);
+  }) : assert(clipBehavior != null);
 
-  /// The (optional) icon of the dialog is displayed at the top of the dialog.
+  /// An optional icon to display at the top of the dialog.
   ///
-  /// Typically, an [Icon] widget.
+  /// Typically, an [Icon] widget. Providing an icon centers the [title]'s text.
   final Widget? icon;
 
   /// Color for the [Icon] in the [icon] of this [AlertDialog].
@@ -331,13 +330,14 @@ class AlertDialog extends StatelessWidget {
   /// will not fit.
   final Widget? content;
 
+  // TODO(werainkhatri): how do i mention that 16dp will be used with M3?
   /// Padding around the content.
   ///
   /// If there is no content, no padding will be provided. Otherwise, padding of
   /// 20 pixels is provided above the content to separate the content from the
   /// title, and padding of 24 pixels is provided on the left, right, and bottom
   /// to separate the content from the other edges of the dialog.
-  final EdgeInsetsGeometry contentPadding;
+  final EdgeInsetsGeometry? contentPadding;
 
   /// Style for the text in the [content] of this [AlertDialog].
   ///
@@ -519,6 +519,7 @@ class AlertDialog extends StatelessWidget {
     // children.
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection? textDirection = Directionality.maybeOf(context);
+    const double m3ContentTopPadding = 16.0;
 
     Widget? iconWidget;
     Widget? titleWidget;
@@ -527,10 +528,10 @@ class AlertDialog extends StatelessWidget {
 
     if (icon != null) {
       iconWidget = Padding(
-        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
+        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 16.0),
         child: IconTheme(
           data: IconThemeData(
-            color: iconColor ?? dialogTheme.iconColor,
+            color: iconColor ?? dialogTheme.iconColor ?? defaults.iconColor,
           ),
           child: icon!,
         ),
@@ -538,7 +539,12 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (title != null) {
-      final EdgeInsets defaultTitlePadding = EdgeInsets.fromLTRB(24.0, icon == null ? 24.0 : 16.0, 24.0, content == null ? 20.0 : 0.0);
+      final EdgeInsets defaultTitlePadding = EdgeInsets.only(
+        left: 24.0,
+        top: icon == null ? 24.0 : 0.0,
+        right: 24.0,
+        bottom: content == null ? 20.0 : 0.0,
+      );
       final EdgeInsets effectiveTitlePadding = titlePadding?.resolve(textDirection) ?? defaultTitlePadding;
       titleWidget = Padding(
         padding: EdgeInsets.only(
@@ -562,7 +568,13 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (content != null) {
-      final EdgeInsets effectiveContentPadding = contentPadding.resolve(textDirection);
+      final EdgeInsets defaultContentPadding = EdgeInsets.only(
+        left: 24.0,
+        top: theme.useMaterial3 ? m3ContentTopPadding : 20.0,
+        right: 24.0,
+        bottom: 24.0,
+      );
+      final EdgeInsets effectiveContentPadding = contentPadding?.resolve(textDirection) ?? defaultContentPadding;
       contentWidget = Padding(
         padding: EdgeInsets.only(
           left: effectiveContentPadding.left * paddingScaleFactor,
