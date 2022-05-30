@@ -393,7 +393,7 @@ class DataTable extends StatelessWidget {
     /// {@endtemplate}
     @Deprecated(
       'Use dataRowHeightStyle instead. '
-      'This feature was deprecated after v3.1.0.',
+      'This feature was deprecated after 3.1.0-0.0.pre.',
     )
     double? dataRowHeight,
     /// {@macro flutter.material.dataTable.dataRowHeightStyle}
@@ -506,8 +506,8 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.dataTable.dataRowHeightStyle}
   /// The height settings of each row excluding the row that contains column headings.
   ///
-  /// If null, [DataTableThemeData.dataRowHeightStyle] is used. This value
-  /// defaults to `DataRowHeight.fixed(height: `[kMinInteractiveDimension]`)`.
+  /// If null, [DataTableThemeData.dataRowHeightStyle] is used.
+  /// Defaults to [DataRowHeight.fixed] with the height sets to [kMinInteractiveDimension].
   /// {@endtemplate}
   final DataRowHeightStyle? dataRowHeightStyle;
 

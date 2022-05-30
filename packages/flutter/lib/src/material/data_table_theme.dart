@@ -41,7 +41,7 @@ class DataTableThemeData with Diagnosticable {
     /// {@macro flutter.material.dataTable.dataRowHeight}
     @Deprecated(
       'Use dataRowHeightStyle instead. '
-      'This feature was deprecated after v3.1.0.',
+      'This feature was deprecated after 3.1.0-0.0.pre.',
     )
     double? dataRowHeight,
     /// {@macro flutter.material.dataTable.dataRowHeightStyle}
@@ -104,7 +104,7 @@ class DataTableThemeData with Diagnosticable {
     MaterialStateProperty<Color?>? dataRowColor,
     @Deprecated(
       'Use dataRowHeightStyle instead. '
-      'This feature was deprecated after v3.1.0.',
+      'This feature was deprecated after 3.1.0-0.0.pre.',
     )
     double? dataRowHeight,
     DataRowHeightStyle? dataRowHeightStyle,
