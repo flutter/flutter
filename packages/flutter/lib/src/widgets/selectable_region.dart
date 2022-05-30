@@ -16,6 +16,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'media_query.dart';
 import 'overlay.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
@@ -212,6 +213,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   bool get _hasSelectionOverlayGeometry => _selectionDelegate.value.startSelectionPoint != null
                                         || _selectionDelegate.value.endSelectionPoint != null;
 
+  Orientation? _lastOrientation;
+
   @override
   void initState() {
     super.initState();
@@ -226,6 +229,33 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return;
+    }
+
+    // Hide the text selection toolbar on mobile when orientation changes.
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    if (_lastOrientation == null) {
+      _lastOrientation = orientation;
+      return;
+    }
+    if (orientation != _lastOrientation) {
+      _lastOrientation = orientation;
+      hideToolbar(defaultTargetPlatform == TargetPlatform.android);
+    }
   }
 
   @override
@@ -422,7 +452,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
     assert(_selectionDelegate.value.startSelectionPoint != null);
-    _selectionStartHandleDragPosition = _selectionDelegate.value.startSelectionPoint!.localPosition;
+    final Offset localPosition = _selectionDelegate.value.startSelectionPoint!.localPosition;
+    final Matrix4 globalTransform = _selectable!.getTransformTo(null);
+    _selectionStartHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
@@ -435,7 +467,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     assert(_selectionDelegate.value.endSelectionPoint != null);
-    _selectionEndHandleDragPosition = _selectionDelegate.value.endSelectionPoint!.localPosition;
+    final Offset localPosition = _selectionDelegate.value.endSelectionPoint!.localPosition;
+    final Matrix4 globalTransform = _selectable!.getTransformTo(null);
+    _selectionEndHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
@@ -699,7 +733,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   void hideToolbar([bool hideHandles = true]) {
     _selectionOverlay?.hideToolbar();
     if (hideHandles) {
-      _selectionOverlay?.hideToolbar();
+      _selectionOverlay?.hideHandles();
     }
   }
 
@@ -780,6 +814,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         child: Actions(
           actions: _actions,
           child: Focus(
+            includeSemantics: false,
             focusNode: widget.focusNode,
             child: SelectionContainer(
               registrar: this,
@@ -993,6 +1028,19 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
+
+  /// The number of additional pixels added to the selection handle drawable
+  /// area.
+  ///
+  /// Selection handles that are outside of the drawable area will be hidden.
+  /// That logic prevents handles that get scrolled off the viewport from being
+  /// drawn on the screen.
+  ///
+  /// The drawable area = current rectangle of [SelectionContainer] +
+  /// _kSelectionHandleDrawableAreaPadding on each side.
+  ///
+  /// This was an eyeballed value to create smooth user experiences.
+  static const double _kSelectionHandleDrawableAreaPadding = 5.0;
 
   /// The current selectable that contains the selection end edge.
   @protected
@@ -1321,9 +1369,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     LayerLink? effectiveStartHandle = _startHandleLayer;
     LayerLink? effectiveEndHandle = _endHandleLayer;
     if (effectiveStartHandle != null || effectiveEndHandle != null) {
-      final Rect boxRect = Rect.fromLTWH(0, 0, containerSize.width, containerSize.height);
-      final bool hideStartHandle = value.startSelectionPoint == null || !boxRect.contains(value.startSelectionPoint!.localPosition);
-      final bool hideEndHandle = value.endSelectionPoint == null || !boxRect.contains(value.endSelectionPoint!.localPosition);
+      final Rect drawableArea = Rect
+        .fromLTWH(0, 0, containerSize.width, containerSize.height)
+        .inflate(_kSelectionHandleDrawableAreaPadding);
+      final bool hideStartHandle = value.startSelectionPoint == null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
+      final bool hideEndHandle = value.endSelectionPoint == null || !drawableArea.contains(value.endSelectionPoint!.localPosition);
       effectiveStartHandle = hideStartHandle ? null : _startHandleLayer;
       effectiveEndHandle = hideEndHandle ? null : _endHandleLayer;
     }

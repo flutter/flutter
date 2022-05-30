@@ -54,7 +54,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: x86
-      xcode: 13a233
+      xcode: 13f17a
   mac_android:
     properties:
       dependencies: >-
@@ -87,7 +87,7 @@ platform_properties:
       os: Mac-12
       cpu: x86
       device_os: iOS-15.1
-      xcode: 13a233
+      xcode: 13f17a
   mac_arm64_ios:
     properties:
       dependencies: >-
@@ -99,7 +99,7 @@ platform_properties:
       os: Mac-12
       cpu: arm64
       device_os: iOS-15.1
-      xcode: 13a233
+      xcode: 13f17a
   windows:
     properties:
       dependencies: >-
@@ -1922,6 +1922,28 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: multi_widget_construction_perf__e2e_summary
     scheduler: luci
+
+  - name: Linux_android list_text_layout_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: list_text_layout_perf__e2e_summary
+    scheduler: luci
+    bringup: true
+
+  - name: Linux_android list_text_layout_impeller_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: list_text_layout_impeller_perf__e2e_summary
+    scheduler: luci
+    bringup: true
 
   - name: Linux_android new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
@@ -4156,11 +4178,3 @@ targets:
         ["devicelab", "android", "windows"]
       task_name: windows_chrome_dev_mode
     scheduler: luci
-
-  - name: google_test
-    bringup: true
-    presubmit: false
-    scheduler: google_internal
-    properties:
-      tags: >
-          ["framework", "hostonly", "shard"]
