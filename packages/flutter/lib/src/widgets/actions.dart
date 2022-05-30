@@ -1451,7 +1451,10 @@ class ButtonActivateIntent extends Intent {
 abstract class ActivateAction extends Action<ActivateIntent> { }
 
 /// An [Intent] that selects the currently focused control.
-class SelectIntent extends Intent { }
+class SelectIntent extends Intent {
+  /// Creates an intent that selects the currently focused control.
+  const SelectIntent();
+}
 
 /// An action that selects the currently focused control.
 ///

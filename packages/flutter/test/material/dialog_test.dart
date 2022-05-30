@@ -2212,7 +2212,7 @@ void main() {
 
   testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         restorationScopeId: 'app',
         home: _RestorableDialogTestWidget(),
       ),
@@ -2294,6 +2294,8 @@ void main() {
 }
 
 class _RestorableDialogTestWidget extends StatelessWidget {
+  const _RestorableDialogTestWidget();
+
   static Route<Object?> _materialDialogBuilder(BuildContext context, Object? arguments) {
     return DialogRoute<void>(
       context: context,
