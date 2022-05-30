@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'constants.dart';
 import 'expand_icon.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
@@ -12,9 +11,10 @@ import 'mergeable_material.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
-const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
+// Fix for #5848. The size is the same as the Icon Button used in the header.
+const double _kPanelHeaderCollapsedHeight = 24 + 16 * 2;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
-    vertical: 64.0 - _kPanelHeaderCollapsedHeight,
+    vertical: 12,
 );
 
 class _SaltedKey<S, V> extends LocalKey {

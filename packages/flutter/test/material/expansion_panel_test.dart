@@ -1285,7 +1285,7 @@ void main() {
 
     // No padding applied to closed header
     RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
+    expect(box.size.height, equals(56.0)); // _kPanelHeaderCollapsedHeight
     expect(box.size.width, equals(736.0));
 
     // Now, expand the child panel.
@@ -1298,7 +1298,7 @@ void main() {
 
     // Padding is added to expanded header
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(80.0)); // _kPanelHeaderCollapsedHeight + 32.0 (double default padding)
+    expect(box.size.height, equals(80.0)); // _kPanelHeaderCollapsedHeight + 24.0 (double default padding)
     expect(box.size.width, equals(736.0));
   });
 
@@ -1323,7 +1323,7 @@ void main() {
 
     // No padding applied to closed header
     RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
+    expect(box.size.height, equals(56.0)); // _kPanelHeaderCollapsedHeight
     expect(box.size.width, equals(736.0));
 
     // Now, expand the child panel.
@@ -1336,7 +1336,7 @@ void main() {
 
     // Padding is added to expanded header
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(128.0)); // _kPanelHeaderCollapsedHeight + 80.0 (double padding)
+    expect(box.size.height, equals(136.0)); // _kPanelHeaderCollapsedHeight + 80.0 (double padding)
     expect(box.size.width, equals(736.0));
   });
 
