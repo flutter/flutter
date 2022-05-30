@@ -70,13 +70,11 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
-    /// {@macro flutter.material.dataTable.dataRowHeight}
     @Deprecated(
       'Use dataRowHeightStyle instead. '
-      'This feature was deprecated after 3.1.0-0.0.pre.',
+      'This feature was deprecated after v3.1.0-0.0.pre.',
     )
     final double? dataRowHeight,
-    /// {@macro flutter.material.dataTable.dataRowHeightStyle}
     DataRowHeightStyle? dataRowHeightStyle,
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,

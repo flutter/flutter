@@ -348,6 +348,7 @@ class DataCell {
 ///  * [DataColumn], which describes a column in the data table.
 ///  * [DataRow], which contains the data for a row in the data table.
 ///  * [DataCell], which contains the data for a single cell in the data table.
+///  * [DataRowHeightStyle], which contains height settings for data rows.
 ///  * [PaginatedDataTable], which shows part of the data in a data table and
 ///    provides controls for paging through the remainder of the data.
 ///  * <https://material.io/design/components/data-tables.html>
@@ -384,19 +385,11 @@ class DataTable extends StatelessWidget {
     this.onSelectAll,
     this.decoration,
     this.dataRowColor,
-    /// {@template flutter.material.dataTable.dataRowHeight}
-    /// The height of each row (excluding the row that contains column headings).
-    ///
-    /// If null, [DataTableThemeData.dataRowHeight] is used. This value defaults
-    /// to [kMinInteractiveDimension] to adhere to the Material Design
-    /// specifications.
-    /// {@endtemplate}
     @Deprecated(
       'Use dataRowHeightStyle instead. '
-      'This feature was deprecated after 3.1.0-0.0.pre.',
+      'This feature was deprecated after v3.1.0-0.0.pre.',
     )
     double? dataRowHeight,
-    /// {@macro flutter.material.dataTable.dataRowHeightStyle}
     DataRowHeightStyle? dataRowHeightStyle,
     this.dataTextStyle,
     this.headingRowColor,
@@ -507,7 +500,7 @@ class DataTable extends StatelessWidget {
   /// The height settings of each row excluding the row that contains column headings.
   ///
   /// If null, [DataTableThemeData.dataRowHeightStyle] is used.
-  /// Defaults to [DataRowHeight.fixed] with the height sets to [kMinInteractiveDimension].
+  /// Defaults to [DataRowHeightStyle.fixed] with the height sets to [kMinInteractiveDimension].
   /// {@endtemplate}
   final DataRowHeightStyle? dataRowHeightStyle;
 
