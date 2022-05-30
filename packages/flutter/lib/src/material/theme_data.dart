@@ -1147,14 +1147,32 @@ class ThemeData with Diagnosticable {
   /// this flag and remove all uses of it. At that point, the `material` library
   /// will aim to only support Material 3.
   ///
+  /// ## Defaults
+  /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
+  /// some properties will get updated defaults. Please note that
+  /// [ThemeData.copyWith] with [useMaterial3] set to true will
+  /// not change any of these properties in the resulting [ThemeData].
+  /// 
+  /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
+  ///
+  /// | Property        | Material 3 default           | Material 2 default        |
+  /// | :-------------- | :--------------------------- | :------------------------ |
+  /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
+  /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
+  ///
+  /// \* if the target platform is Android and the app is not
+  /// running on the web, otherwise it will fallback to [InkRipple].
+  /// 
+  /// ## Affected widgets
+  /// 
   /// This flag affects styles and components.
   ///
-  /// ## Styles
+  /// ### Styles
   ///   * Color: [ColorScheme], [Material]
   ///   * Shape: (see components below)
-  ///   * Typography: `typography` (see table below)
+  ///   * Typography: `typography` (see table above)
   ///
-  /// ## Components
+  /// ### Components
   ///   * Common buttons: [TextButton], [OutlinedButton], [ElevatedButton]
   ///   * FAB: [FloatingActionButton]
   ///   * Extended FAB: [FloatingActionButton.extended]
@@ -1167,23 +1185,7 @@ class ThemeData with Diagnosticable {
   ///
   /// In addition, this flag enables features introduced in Android 12.
   ///   * Stretch overscroll: [MaterialScrollBehavior]
-  ///   * Ripple: `splashFactory` (see table below)
-  ///
-  /// ## Defaults
-  /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
-  /// some properties will get updated defaults:
-  /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
-  ///
-  /// | Property        | Material 3 default           | Material 2 default        |
-  /// | :-------------- | :--------------------------- | :------------------------ |
-  /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
-  /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
-  ///
-  /// \* if the target platform is Android and the app is not
-  /// running on the web, otherwise it will fallback to [InkRipple].
-  ///
-  /// Please note that [ThemeData.copyWith] with [useMaterial3] set to true will
-  /// not change any of these properties in the resulting [ThemeData].
+  ///   * Ripple: `splashFactory` (see table above)
   ///
   /// See also:
   ///
