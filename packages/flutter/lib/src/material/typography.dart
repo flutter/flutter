@@ -158,7 +158,7 @@ class Typography with Diagnosticable {
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2021], [dense2021], and [tall2021].
-  /// 
+  ///
   /// See also:
   ///  * <https://m3.material.io/styles/typography>
   factory Typography.material2021({

@@ -236,7 +236,7 @@ class FloatingActionButton extends StatelessWidget {
   /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
   /// (if specified) must be non-negative.
-  /// 
+  ///
   /// See also:
   ///  * <https://m3.material.io/components/extended-fab>
   const FloatingActionButton.extended({
