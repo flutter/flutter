@@ -53,6 +53,7 @@ import 'theme.dart';
 ///  * [ListTile], to display icons and text in a card.
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.io/design/components/cards.html>
+///  * <https://m3.material.io/components/cards>
 class Card extends StatelessWidget {
   /// Creates a Material Design card.
   ///

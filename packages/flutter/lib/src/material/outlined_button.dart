@@ -62,6 +62,7 @@ import 'theme_data.dart';
 ///  * [ElevatedButton], a filled Material Design button with a shadow.
 ///  * [TextButton], a Material Design button without a shadow.
 ///  * <https://material.io/design/components/buttons.html>
+///  * <https://m3.material.io/components/buttons>
 class OutlinedButton extends ButtonStyleButton {
   /// Create an OutlinedButton.
   ///
