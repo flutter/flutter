@@ -1802,7 +1802,6 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 ///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
 ///    [RenderObject] that instead of having a single list of children organizes
 ///    its children in named slots.
-
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   ///
@@ -1814,19 +1813,19 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
     this.reversed = false
     }): children = reversed ? children.reversed.toList() : children,
         assert(children != null) {
-        assert(() {
-          for (int index = 0; index < children.length; index++) {
-            // TODO(a14n): remove this check to have a lot more const widget
-            if (children[index] == null) {
-              throw FlutterError(
-                "$runtimeType's children must not contain any null values, "
-                'but a null value was found at index $index',
-              );
+          assert(() {
+            for (int index = 0; index < children.length; index++) {
+              // TODO(a14n): remove this check to have a lot more const widget
+              if (children[index] == null) {
+                throw FlutterError(
+                  "$runtimeType's children must not contain any null values, "
+                  'but a null value was found at index $index',
+                );
+              }
             }
-          }
-          return true;
-        }()); // https://github.com/dart-lang/sdk/issues/29276
-  }
+            return true;
+          }()); // https://github.com/dart-lang/sdk/issues/29276
+        }
 
   /// The widgets below this widget in the tree.
   ///
