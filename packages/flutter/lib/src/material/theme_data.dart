@@ -2148,8 +2148,8 @@ class ThemeData with Diagnosticable {
       // GENERAL CONFIGURATION
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
-      hashList(extensions.keys),
-      hashList(extensions.values),
+      Object.hashAll(extensions.keys),
+      Object.hashAll(extensions.values),
       inputDecorationTheme,
       materialTapTargetSize,
       pageTransitionsTheme,
