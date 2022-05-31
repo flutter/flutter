@@ -76,7 +76,8 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
     cmd.BindVertices(vertex_buffer);
 
     VS::UniformBuffer uniforms;
-    uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+    uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   Matrix::MakeScale(GetContentScale());
     VS::BindUniformBuffer(cmd,
                           pass.GetTransientsBuffer().EmplaceUniform(uniforms));
 
@@ -158,6 +159,7 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
       for (size_t j = 0; j < 1; j++) {
         VS::UniformBuffer uniforms;
         uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                       Matrix::MakeScale(GetContentScale()) *
                        Matrix::MakeTranslation({i * 50.0f, j * 50.0f, 0.0f});
         VS::BindUniformBuffer(
             cmd, pass.GetTransientsBuffer().EmplaceUniform(uniforms));
@@ -324,7 +326,8 @@ TEST_P(RendererTest, CanRenderInstanced) {
 
   ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
     VS::FrameInfo frame_info;
-    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                     Matrix::MakeScale(GetContentScale());
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
     VS::BindInstanceInfo(

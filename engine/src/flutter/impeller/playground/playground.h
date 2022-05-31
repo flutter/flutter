@@ -44,6 +44,8 @@ class Playground : public ::testing::TestWithParam<PlaygroundBackend> {
 
   ISize GetWindowSize() const;
 
+  Point GetContentScale() const;
+
   std::shared_ptr<Context> GetContext() const;
 
   bool OpenPlaygroundHere(Renderer::RenderCallback render_callback);

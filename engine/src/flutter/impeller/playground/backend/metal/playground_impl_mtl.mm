@@ -84,7 +84,7 @@ std::shared_ptr<Context> PlaygroundImplMTL::GetContext() const {
 }
 
 // |PlaygroundImpl|
-PlaygroundImpl::WindowHandle PlaygroundImplMTL::GetWindowHandle() {
+PlaygroundImpl::WindowHandle PlaygroundImplMTL::GetWindowHandle() const {
   return handle_.get();
 }
 
@@ -96,9 +96,10 @@ std::unique_ptr<Surface> PlaygroundImplMTL::AcquireSurfaceFrame(
   }
 
   const auto layer_size = data_->metal_layer.bounds.size;
-  const auto layer_scale = data_->metal_layer.contentsScale;
-  data_->metal_layer.drawableSize = CGSizeMake(layer_size.width * layer_scale,
-                                               layer_size.height * layer_scale);
+  const auto scale = GetContentScale();
+  data_->metal_layer.drawableSize =
+      CGSizeMake(layer_size.width * scale.x, layer_size.height * scale.y);
+
   return SurfaceMTL::WrapCurrentMetalLayerDrawable(context, data_->metal_layer);
 }
 

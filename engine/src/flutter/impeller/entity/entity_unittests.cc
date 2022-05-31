@@ -105,6 +105,7 @@ TEST_P(EntityTest, EntityPassSubpassCoverageIsCorrect) {
 
 TEST_P(EntityTest, CanDrawRect) {
   Entity entity;
+  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
   entity.SetContents(SolidColorContents::Make(
       PathBuilder{}.AddRect({100, 100, 100, 100}).TakePath(), Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
@@ -121,6 +122,7 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
                   .TakePath();
 
   Entity entity;
+  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
   auto contents = std::make_unique<SolidStrokeContents>();
   contents->SetPath(std::move(path));
   contents->SetColor(Color::Red());
@@ -151,6 +153,7 @@ TEST_P(EntityTest, TriangleInsideASquare) {
                     .TakePath();
 
     Entity entity;
+    entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
     auto contents = std::make_unique<SolidStrokeContents>();
     contents->SetPath(std::move(path));
     contents->SetColor(Color::Red());
@@ -192,7 +195,8 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     }
     ImGui::End();
 
-    auto render_path = [width = width, &context, &pass](
+    auto world_matrix = Matrix::MakeScale(GetContentScale());
+    auto render_path = [width = width, &context, &pass, &world_matrix](
                            Path path, SolidStrokeContents::Cap cap,
                            SolidStrokeContents::Join join) {
       auto contents = std::make_unique<SolidStrokeContents>();
@@ -204,6 +208,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       contents->SetStrokeMiter(miter_limit);
 
       Entity entity;
+      entity.SetTransformation(world_matrix);
       entity.SetContents(std::move(contents));
 
       auto coverage = entity.GetCoverage();
@@ -314,6 +319,7 @@ TEST_P(EntityTest, CubicCurveTest) {
           .Close()
           .TakePath();
   Entity entity;
+  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
   entity.SetContents(SolidColorContents::Make(path, Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
@@ -541,6 +547,7 @@ TEST_P(EntityTest, CubicCurveAndOverlapTest) {
           .Close()
           .TakePath();
   Entity entity;
+  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
   entity.SetContents(SolidColorContents::Make(path, Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
@@ -643,8 +650,10 @@ TEST_P(EntityTest, BlendingModeOptions) {
       ImGui::SetNextWindowPos({200, 450});
     }
 
-    auto draw_rect = [&context, &pass](Rect rect, Color color,
-                                       Entity::BlendMode blend_mode) -> bool {
+    auto world_matrix = Matrix::MakeScale(GetContentScale());
+    auto draw_rect = [&context, &pass, &world_matrix](
+                         Rect rect, Color color,
+                         Entity::BlendMode blend_mode) -> bool {
       using VS = SolidFillPipeline::VertexShader;
       VertexBufferBuilder<VS::PerVertexData> vtx_builder;
       {
@@ -668,7 +677,8 @@ TEST_P(EntityTest, BlendingModeOptions) {
           vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
       VS::FrameInfo frame_info;
-      frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+      frame_info.mvp =
+          Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
       frame_info.color = color.Premultiply();
       VS::BindFrameInfo(cmd,
                         pass.GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -710,6 +720,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
 
 TEST_P(EntityTest, BezierCircleScaled) {
   Entity entity;
+  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
   auto path = PathBuilder{}
                   .MoveTo({97.325, 34.818})
                   .CubicCurveTo({98.50862885295136, 34.81812293973836},
@@ -751,7 +762,8 @@ TEST_P(EntityTest, Filters) {
         {fi_bridge, FilterInput::Make(blend0), fi_bridge, fi_bridge});
 
     Entity entity;
-    entity.SetTransformation(Matrix::MakeTranslation({500, 300}) *
+    entity.SetTransformation(Matrix::MakeScale(GetContentScale()) *
+                             Matrix::MakeTranslation({500, 300}) *
                              Matrix::MakeScale(Vector2{0.5, 0.5}));
     entity.SetContents(blend1);
     return entity.Render(context, pass);
@@ -823,7 +835,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
         blur_styles[selected_blur_style]);
 
     auto input_size = bridge->GetSize();
-    auto ctm = Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
+    auto ctm = Matrix::MakeScale(GetContentScale()) *
+               Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
                Matrix::MakeRotationZ(Radians(rotation)) *
                Matrix::MakeScale(Vector2(scale[0], scale[1])) *
                Matrix::MakeSkew(skew[0], skew[1]) *
@@ -964,6 +977,7 @@ TEST_P(EntityTest, DrawVerticesSolidColorTrianglesWithoutIndex) {
       std::make_shared<VerticesContents>(vertices);
   contents->SetColor(Color::White());
   Entity e;
+  e.SetTransformation(Matrix::MakeScale(GetContentScale()));
   e.SetContents(contents);
 
   ASSERT_TRUE(OpenPlaygroundHere(e));

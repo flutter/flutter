@@ -150,6 +150,10 @@ ISize Playground::GetWindowSize() const {
   return window_size_;
 }
 
+Point Playground::GetContentScale() const {
+  return impl_->GetContentScale();
+}
+
 void Playground::SetCursorPosition(Point pos) {
   cursor_position_ = pos;
 }

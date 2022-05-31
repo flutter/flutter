@@ -115,6 +115,9 @@ TEST_P(DisplayListTest, CanDrawArc) {
         Point(200, 200), Point(400, 400), 20, Color::White(), Color::White());
 
     flutter::DisplayListBuilder builder;
+
+    Vector2 scale = GetContentScale();
+    builder.scale(scale.x, scale.y);
     builder.setStyle(flutter::DlDrawStyle::kStroke);
     builder.setStrokeCap(flutter::DlStrokeCap::kRound);
     builder.setStrokeJoin(flutter::DlStrokeJoin::kMiter);

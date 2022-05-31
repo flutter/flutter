@@ -561,6 +561,7 @@ TEST_P(AiksTest, ColorWheel) {
     ImGui::End();
 
     Canvas canvas;
+    canvas.Scale(GetContentScale());
     Paint paint;
     // Default blend is kSourceOver.
     paint.color = Color::White();
@@ -653,6 +654,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
     ImGui::End();
 
     Canvas canvas;
+    canvas.Scale(GetContentScale());
     Paint paint;
 
     paint.color = Color::White();
