@@ -1092,7 +1092,7 @@ class ShortcutRegistry with ChangeNotifier {
   ///
   /// Returns a copy: modifying the returned map will have no effect.
   Map<ShortcutActivator, Intent> get shortcuts {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     return <ShortcutActivator, Intent>{
       for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> entry in _tokenShortcuts.entries)
         ...entry.value,
@@ -1123,7 +1123,7 @@ class ShortcutRegistry with ChangeNotifier {
   ///  * [ShortcutRegistryEntry.dispose], a function used to remove the set of
   ///    shortcuts associated with a particular entry.
   ShortcutRegistryEntry addAll(Map<ShortcutActivator, Intent> value) {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
     _tokenShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
@@ -1191,7 +1191,7 @@ class ShortcutRegistry with ChangeNotifier {
   // Replaces all the shortcuts associated with the given entry from this
   // registry.
   void _replaceAll(ShortcutRegistryEntry entry, Map<ShortcutActivator, Intent> value) {
-    assert(debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(_debugCheckTokenIsValid(entry));
     _tokenShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());

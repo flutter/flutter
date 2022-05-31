@@ -54,7 +54,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: x86
-      xcode: 13a233
+      xcode: 13f17a
   mac_android:
     properties:
       dependencies: >-
@@ -86,8 +86,8 @@ platform_properties:
         ]
       os: Mac-12
       cpu: x86
-      device_os: iOS-15
-      xcode: 13a233
+      device_os: iOS-15.1
+      xcode: 13f17a
   mac_arm64_ios:
     properties:
       dependencies: >-
@@ -98,8 +98,8 @@ platform_properties:
         ]
       os: Mac-12
       cpu: arm64
-      device_os: iOS-15
-      xcode: 13a233
+      device_os: iOS-15.1
+      xcode: 13f17a
   windows:
     properties:
       dependencies: >-
@@ -4178,11 +4178,3 @@ targets:
         ["devicelab", "android", "windows"]
       task_name: windows_chrome_dev_mode
     scheduler: luci
-
-  - name: google_test
-    bringup: true
-    presubmit: false
-    scheduler: google_internal
-    properties:
-      tags: >
-          ["framework", "hostonly", "shard"]
