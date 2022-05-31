@@ -5,6 +5,7 @@
 import 'dart:html' as html;
 
 import '../../engine.dart' show registerHotRestartListener;
+import '../dom.dart';
 import '../embedder.dart';
 
 // TODO(yjbanov): this is a hack we use to compute ideographic baseline; this
@@ -70,7 +71,7 @@ double _lastWidth = -1;
 /// This method assumes that the correct font has already been set on
 /// [_canvasContext].
 double measureSubstring(
-  html.CanvasRenderingContext2D _canvasContext,
+  DomCanvasRenderingContext2D _canvasContext,
   String text,
   int start,
   int end, {

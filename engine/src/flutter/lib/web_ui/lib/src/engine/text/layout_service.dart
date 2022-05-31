@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import 'canvas_paragraph.dart';
 import 'line_breaker.dart';
 import 'measurement.dart';
@@ -17,13 +17,13 @@ import 'text_direction.dart';
 
 /// Performs layout on a [CanvasParagraph].
 ///
-/// It uses a [html.CanvasElement] to measure text.
+/// It uses a [DomCanvasElement] to measure text.
 class TextLayoutService {
   TextLayoutService(this.paragraph);
 
   final CanvasParagraph paragraph;
 
-  final html.CanvasRenderingContext2D context = html.CanvasElement().context2D;
+  final DomCanvasRenderingContext2D context = createDomCanvasElement().context2D;
 
   // *** Results of layout *** //
 
@@ -1582,7 +1582,7 @@ class Spanometer {
   Spanometer(this.paragraph, this.context);
 
   final CanvasParagraph paragraph;
-  final html.CanvasRenderingContext2D context;
+  final DomCanvasRenderingContext2D context;
 
   static RulerHost _rulerHost = RulerHost();
 
