@@ -1053,7 +1053,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       );
        expect(testLogger.statusText, '');
     }, overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
       Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.empty(),
@@ -1079,7 +1078,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
         contains('Deleting foo/.gradle\n'),
       );
     }, overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
       Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.empty(),
@@ -1104,7 +1102,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
         contains('Deleting foo/.gradle\n'),
       );
     }, overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
       Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.empty(),
@@ -1127,7 +1124,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       );
       expect(testLogger.statusText, '');
     }, overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
       Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.empty(),
