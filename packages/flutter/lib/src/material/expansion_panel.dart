@@ -11,7 +11,8 @@ import 'mergeable_material.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
-// Fix for #5848. The size is the same as the Icon Button used in the header.
+// Fix for #5848. The height of the collasped header should be the same as the
+// height (24px icon size + 2 * 16px padding) Icon Button used in the header.
 const double _kPanelHeaderCollapsedHeight = 24 + 16 * 2;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
     vertical: 12,
