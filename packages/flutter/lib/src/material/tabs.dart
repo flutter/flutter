@@ -1147,18 +1147,29 @@ class _TabBarState extends State<TabBar> {
     );
   }
 
+  bool _debugScheduleCheckHasValidTabsCount() {
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      if (!mounted) {
+        return;
+      }
+      assert(() {
+        if (_controller!.length != widget.tabs.length) {
+          throw FlutterError(
+            "Controller's length property (${_controller!.length}) does not match the "
+            "number of tabs (${widget.tabs.length}) present in TabBar's tabs property.",
+          );
+        }
+        return true;
+      }());
+    });
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    assert(() {
-      if (_controller!.length != widget.tabs.length) {
-        throw FlutterError(
-          "Controller's length property (${_controller!.length}) does not match the "
-          "number of tabs (${widget.tabs.length}) present in TabBar's tabs property.",
-        );
-      }
-      return true;
-    }());
+    assert(_debugScheduleCheckHasValidTabsCount());
+
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
       return Container(
@@ -1550,17 +1561,28 @@ class _TabBarViewState extends State<TabBarView> {
     return false;
   }
 
+  bool _debugScheduleCheckHasValidChildrenCount() {
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      if (!mounted) {
+        return;
+      }
+      assert(() {
+        if (_controller!.length != widget.children.length) {
+          throw FlutterError(
+            "Controller's length property (${_controller!.length}) does not match the "
+            "number of children (${widget.children.length}) present in TabBarView's children property.",
+          );
+        }
+        return true;
+      }());
+    });
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    assert(() {
-      if (_controller!.length != widget.children.length) {
-        throw FlutterError(
-          "Controller's length property (${_controller!.length}) does not match the "
-          "number of tabs (${widget.children.length}) present in TabBar's tabs property.",
-        );
-      }
-      return true;
-    }());
+    assert(_debugScheduleCheckHasValidChildrenCount());
+
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: PageView(
