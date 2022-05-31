@@ -232,19 +232,19 @@ void GfxPlatformView::OnScenicEvent(
     const float pixel_ratio = *view_pixel_ratio_;
     const std::array<float, 2> logical_size = *view_logical_size_;
     SetViewportMetrics({
-        pixel_ratio,                    // device_pixel_ratio
-        logical_size[0] * pixel_ratio,  // physical_width
-        logical_size[1] * pixel_ratio,  // physical_height
-        0.0f,                           // physical_padding_top
-        0.0f,                           // physical_padding_right
-        0.0f,                           // physical_padding_bottom
-        0.0f,                           // physical_padding_left
-        0.0f,                           // physical_view_inset_top
-        0.0f,                           // physical_view_inset_right
-        0.0f,                           // physical_view_inset_bottom
-        0.0f,                           // physical_view_inset_left
-        0.0f,                           // p_physical_system_gesture_inset_top
-        0.0f,                           // p_physical_system_gesture_inset_right
+        pixel_ratio,                                // device_pixel_ratio
+        std::round(logical_size[0] * pixel_ratio),  // physical_width
+        std::round(logical_size[1] * pixel_ratio),  // physical_height
+        0.0f,                                       // physical_padding_top
+        0.0f,                                       // physical_padding_right
+        0.0f,                                       // physical_padding_bottom
+        0.0f,                                       // physical_padding_left
+        0.0f,                                       // physical_view_inset_top
+        0.0f,                                       // physical_view_inset_right
+        0.0f,  // physical_view_inset_bottom
+        0.0f,  // physical_view_inset_left
+        0.0f,  // p_physical_system_gesture_inset_top
+        0.0f,  // p_physical_system_gesture_inset_right
         0.0f,  // p_physical_system_gesture_inset_bottom
         0.0f,  // p_physical_system_gesture_inset_left,
         -1.0,  // p_physical_touch_slop,
