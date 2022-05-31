@@ -80,6 +80,7 @@ extension DomDocumentExtension on DomDocument {
 class DomHTMLDocument extends DomDocument {}
 
 extension DomHTMLDocumentExtension on DomHTMLDocument {
+  external DomFontFaceSet? get fonts;
   external DomHTMLHeadElement? get head;
   external DomHTMLBodyElement? get body;
 }
@@ -168,12 +169,14 @@ extension DomElementExtension on DomElement {
       js_util.getProperty<List<Object?>>(this, 'children').cast<DomElement>();
   external String get id;
   external set id(String id);
+  external set innerHtml(String? html);
   external String? get outerHTML;
   external set spellcheck(bool? value);
   external String get tagName;
   external DomCSSStyleDeclaration get style;
   external void append(DomNode node);
   external String? getAttribute(String attributeName);
+  external DomRect getBoundingClientRect();
   external void prepend(DomNode node);
   external DomElement? querySelector(String selectors);
   List<DomElement> querySelectorAll(String selectors) =>
@@ -189,65 +192,68 @@ extension DomElementExtension on DomElement {
 class DomCSSStyleDeclaration {}
 
 extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
-  set width(String value) => setProperty('width', value, '');
-  set height(String value) => setProperty('height', value, '');
-  set position(String value) => setProperty('position', value, '');
-  set clip(String value) => setProperty('clip', value, '');
-  set clipPath(String value) => setProperty('clip-path', value, '');
-  set transform(String value) => setProperty('transform', value, '');
+  set width(String value) => setProperty('width', value);
+  set height(String value) => setProperty('height', value);
+  set position(String value) => setProperty('position', value);
+  set clip(String value) => setProperty('clip', value);
+  set clipPath(String value) => setProperty('clip-path', value);
+  set transform(String value) => setProperty('transform', value);
   set transformOrigin(String value) =>
-      setProperty('transform-origin', value, '');
-  set opacity(String value) => setProperty('opacity', value, '');
-  set color(String value) => setProperty('color', value, '');
-  set top(String value) => setProperty('top', value, '');
-  set left(String value) => setProperty('left', value, '');
-  set right(String value) => setProperty('right', value, '');
-  set bottom(String value) => setProperty('bottom', value, '');
+      setProperty('transform-origin', value);
+  set opacity(String value) => setProperty('opacity', value);
+  set color(String value) => setProperty('color', value);
+  set top(String value) => setProperty('top', value);
+  set left(String value) => setProperty('left', value);
+  set right(String value) => setProperty('right', value);
+  set bottom(String value) => setProperty('bottom', value);
   set backgroundColor(String value) =>
-      setProperty('background-color', value, '');
-  set pointerEvents(String value) => setProperty('pointer-events', value, '');
-  set filter(String value) => setProperty('filter', value, '');
-  set zIndex(String value) => setProperty('z-index', value, '');
-  set whiteSpace(String value) => setProperty('white-space', value, '');
-  set lineHeight(String value) => setProperty('line-height', value, '');
-  set textStroke(String value) => setProperty('-webkit-text-stroke', value, '');
-  set fontSize(String value) => setProperty('font-size', value, '');
-  set fontWeight(String value) => setProperty('font-weight', value, '');
-  set fontStyle(String value) => setProperty('font-style', value, '');
-  set fontFamily(String value) => setProperty('font-family', value, '');
-  set letterSpacing(String value) => setProperty('letter-spacing', value, '');
-  set wordSpacing(String value) => setProperty('word-spacing', value, '');
-  set textShadow(String value) => setProperty('text-shadow', value, '');
-  set textDecoration(String value) => setProperty('text-decoration', value, '');
+      setProperty('background-color', value);
+  set pointerEvents(String value) => setProperty('pointer-events', value);
+  set filter(String value) => setProperty('filter', value);
+  set zIndex(String value) => setProperty('z-index', value);
+  set whiteSpace(String value) => setProperty('white-space', value);
+  set lineHeight(String value) => setProperty('line-height', value);
+  set textStroke(String value) => setProperty('-webkit-text-stroke', value);
+  set fontSize(String value) => setProperty('font-size', value);
+  set fontWeight(String value) => setProperty('font-weight', value);
+  set fontStyle(String value) => setProperty('font-style', value);
+  set fontFamily(String value) => setProperty('font-family', value);
+  set letterSpacing(String value) => setProperty('letter-spacing', value);
+  set wordSpacing(String value) => setProperty('word-spacing', value);
+  set textShadow(String value) => setProperty('text-shadow', value);
+  set textDecoration(String value) => setProperty('text-decoration', value);
   set textDecorationColor(String value) =>
-      setProperty('text-decoration-color', value, '');
+      setProperty('text-decoration-color', value);
   set fontFeatureSettings(String value) =>
-      setProperty('font-feature-settings', value, '');
+      setProperty('font-feature-settings', value);
   set fontVariationSettings(String value) =>
-      setProperty('font-variation-settings', value, '');
-  set visibility(String value) => setProperty('visibility', value, '');
-  set overflow(String value) => setProperty('overflow', value, '');
-  set boxShadow(String value) => setProperty('box-shadow', value, '');
+      setProperty('font-variation-settings', value);
+  set visibility(String value) => setProperty('visibility', value);
+  set overflow(String value) => setProperty('overflow', value);
+  set boxShadow(String value) => setProperty('box-shadow', value);
   set borderTopLeftRadius(String value) =>
-      setProperty('border-top-left-radius', value, '');
+      setProperty('border-top-left-radius', value);
   set borderTopRightRadius(String value) =>
-      setProperty('border-top-right-radius', value, '');
+      setProperty('border-top-right-radius', value);
   set borderBottomLeftRadius(String value) =>
-      setProperty('border-bottom-left-radius', value, '');
+      setProperty('border-bottom-left-radius', value);
   set borderBottomRightRadius(String value) =>
-      setProperty('border-bottom-right-radius', value, '');
-  set borderRadius(String value) => setProperty('border-radius', value, '');
-  set perspective(String value) => setProperty('perspective', value, '');
-  set padding(String value) => setProperty('padding', value, '');
+      setProperty('border-bottom-right-radius', value);
+  set borderRadius(String value) => setProperty('border-radius', value);
+  set perspective(String value) => setProperty('perspective', value);
+  set padding(String value) => setProperty('padding', value);
   set backgroundImage(String value) =>
-      setProperty('background-image', value, '');
-  set border(String value) => setProperty('border', value, '');
-  set mixBlendMode(String value) => setProperty('mix-blend-mode', value, '');
-  set backgroundSize(String value) =>
-      setProperty('background-size', value, '');
+      setProperty('background-image', value);
+  set border(String value) => setProperty('border', value);
+  set mixBlendMode(String value) => setProperty('mix-blend-mode', value);
+  set backgroundSize(String value) => setProperty('background-size', value);
   set backgroundBlendMode(String value) =>
-      setProperty('background-blend-mode', value, '');
-  set transformStyle(String value) => setProperty('transform-style', value, '');
+      setProperty('background-blend-mode', value);
+  set transformStyle(String value) => setProperty('transform-style', value);
+  set display(String value) => setProperty('display', value);
+  set flexDirection(String value) => setProperty('flex-direction', value);
+  set alignItems(String value) => setProperty('align-items', value);
+  set margin(String value) => setProperty('margin', value);
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -298,6 +304,10 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get backgroundSize => getPropertyValue('background-size');
   String get backgroundBlendMode => getPropertyValue('background-blend-mode');
   String get transformStyle => getPropertyValue('transform-style');
+  String get display => getPropertyValue('display');
+  String get flexDirection => getPropertyValue('flex-direction');
+  String get alignItems => getPropertyValue('align-items');
+  String get margin => getPropertyValue('margin');
 
   external String getPropertyValue(String property);
   void setProperty(String propertyName, String value, [String? priority]) {
@@ -312,6 +322,10 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
 @JS()
 @staticInterop
 class DomHTMLElement extends DomElement {}
+
+extension DomHTMLElementExtension on DomHTMLElement {
+  int get offsetWidth => js_util.getProperty<num>(this, 'offsetWidth') as int;
+}
 
 @JS()
 @staticInterop
@@ -368,6 +382,21 @@ class DomHTMLButtonElement extends DomHTMLElement {}
 
 DomHTMLButtonElement createDomHTMLButtonElement() =>
     domDocument.createElement('button') as DomHTMLButtonElement;
+
+@JS()
+@staticInterop
+class DomHTMLParagraphElement extends DomHTMLElement {}
+
+DomHTMLParagraphElement createDomHTMLParagraphElement() =>
+    domDocument.createElement('p') as DomHTMLParagraphElement;
+
+@JS()
+@staticInterop
+class DomHTMLStyleElement extends DomHTMLElement {}
+
+extension DomHTMLStyleElementExtension on DomHTMLStyleElement {
+  external set type(String? value);
+}
 
 @JS()
 @staticInterop
@@ -434,6 +463,7 @@ class DomCanvasRenderingContext2D {}
 extension DomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
   external Object? get fillStyle;
   external set fillStyle(Object? style);
+  external String get font;
   external set font(String value);
   external set lineWidth(num? value);
   external set strokeStyle(Object? value);
@@ -452,6 +482,7 @@ extension DomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
           <Object>[text, x, y, if (maxWidth != null) maxWidth]);
   external DomImageData getImageData(int x, int y, int sw, int sh);
   external void lineTo(num x, num y);
+  external DomTextMetrics measureText(String text);
   external void moveTo(num x, num y);
   external void save();
   external void stroke();
@@ -518,12 +549,65 @@ DomText createDomText(String data) => domDocument.createTextNode(data);
 
 @JS()
 @staticInterop
+class DomTextMetrics {}
+
+extension DomTextMetricsExtension on DomTextMetrics {
+  external num? get width;
+}
+
+@JS()
+@staticInterop
 class DomException {
   static const String notSupported = 'NotSupportedError';
 }
 
 extension DomExceptionExtension on DomException {
   external String get name;
+}
+
+@JS()
+@staticInterop
+class DomRectReadOnly {}
+
+extension DomRectReadOnlyExtension on DomRectReadOnly {
+  external num get x;
+  external num get y;
+  external num get width;
+  external num get height;
+  external num get top;
+  external num get right;
+  external num get bottom;
+  external num get left;
+}
+
+@JS()
+@staticInterop
+class DomRect extends DomRectReadOnly {}
+
+@JS()
+@staticInterop
+class DomFontFace {}
+
+DomFontFace createDomFontFace(String family, Object source,
+        [Map<Object?, Object?>? descriptors]) =>
+    domCallConstructorString('FontFace', <Object>[
+      family,
+      source,
+      if (descriptors != null) js_util.jsify(descriptors)
+    ])! as DomFontFace;
+
+extension DomFontFaceExtension on DomFontFace {
+  Future<DomFontFace> load() =>
+      js_util.promiseToFuture(js_util.callMethod(this, 'load', <Object>[]));
+}
+
+@JS()
+@staticInterop
+class DomFontFaceSet extends DomEventTarget {}
+
+extension DomFontFaceSetExtension on DomFontFaceSet {
+  external DomFontFaceSet? add(DomFontFace font);
+  external void clear();
 }
 
 extension DomResponseExtension on DomResponse {
