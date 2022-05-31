@@ -11,7 +11,8 @@ import 'dom.dart';
 class SVGElement extends DomElement {}
 
 SVGElement createSVGElement(String tag) =>
-    domDocument.createElementNS('http://www.w3.org/2000/svg', tag) as SVGElement;
+    domDocument.createElementNS('http://www.w3.org/2000/svg', tag)
+        as SVGElement;
 
 @JS()
 @staticInterop
