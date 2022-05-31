@@ -79,7 +79,7 @@ bool TextureGLES::IsValid() const {
 }
 
 // |Texture|
-void TextureGLES::SetLabel(const std::string_view& label) {
+void TextureGLES::SetLabel(std::string_view label) {
   reactor_->SetDebugLabel(handle_, std::string{label.data(), label.size()});
 }
 

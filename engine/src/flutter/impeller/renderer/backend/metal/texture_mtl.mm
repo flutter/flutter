@@ -26,7 +26,7 @@ TextureMTL::TextureMTL(TextureDescriptor p_desc, id<MTLTexture> texture)
 
 TextureMTL::~TextureMTL() = default;
 
-void TextureMTL::SetLabel(const std::string_view& label) {
+void TextureMTL::SetLabel(std::string_view label) {
   [texture_ setLabel:@(label.data())];
 }
 

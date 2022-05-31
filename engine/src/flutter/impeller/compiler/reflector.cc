@@ -304,7 +304,7 @@ static std::string ToString(CompilerBackend::Type type) {
 }
 
 std::shared_ptr<fml::Mapping> Reflector::InflateTemplate(
-    const std::string_view& tmpl) const {
+    std::string_view tmpl) const {
   inja::Environment env;
   env.set_trim_blocks(true);
   env.set_lstrip_blocks(true);

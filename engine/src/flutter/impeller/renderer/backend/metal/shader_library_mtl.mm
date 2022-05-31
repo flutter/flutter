@@ -24,7 +24,7 @@ bool ShaderLibraryMTL::IsValid() const {
 }
 
 std::shared_ptr<const ShaderFunction> ShaderLibraryMTL::GetFunction(
-    const std::string_view& name,
+    std::string_view name,
     ShaderStage stage) {
   if (!IsValid()) {
     return nullptr;

@@ -18,7 +18,7 @@ class Texture {
  public:
   virtual ~Texture();
 
-  virtual void SetLabel(const std::string_view& label) = 0;
+  virtual void SetLabel(std::string_view label) = 0;
 
   [[nodiscard]] bool SetContents(const uint8_t* contents,
                                  size_t length,

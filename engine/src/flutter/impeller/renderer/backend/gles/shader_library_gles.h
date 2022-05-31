@@ -30,9 +30,8 @@ class ShaderLibraryGLES final : public ShaderLibrary {
       std::vector<std::shared_ptr<fml::Mapping>> shader_libraries);
 
   // |ShaderLibrary|
-  std::shared_ptr<const ShaderFunction> GetFunction(
-      const std::string_view& name,
-      ShaderStage stage) override;
+  std::shared_ptr<const ShaderFunction> GetFunction(std::string_view name,
+                                                    ShaderStage stage) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibraryGLES);
 };

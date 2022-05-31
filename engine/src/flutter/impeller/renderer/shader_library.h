@@ -22,7 +22,7 @@ class ShaderLibrary {
   virtual bool IsValid() const = 0;
 
   virtual std::shared_ptr<const ShaderFunction> GetFunction(
-      const std::string_view& name,
+      std::string_view name,
       ShaderStage stage) = 0;
 
  protected:
