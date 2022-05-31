@@ -300,7 +300,6 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     // Eventually, the frame is submitted once this method returns `kSuccess`.
     // At that point, the raster tasks are handled on the platform thread.
     CancelFrame();
-    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
     return PostPrerollResult::kSkipAndRetryFrame;
   }
   // If the post preroll action is successful, we will display platform views in the current frame.
@@ -310,6 +309,14 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
   BeginCATransaction();
   raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
   return PostPrerollResult::kSuccess;
+}
+
+void FlutterPlatformViewsController::EndFrame(
+    bool should_resubmit_frame,
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+  if (should_resubmit_frame) {
+    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
+  }
 }
 
 void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
@@ -641,14 +648,18 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
   // This wrapper view masks the overlay view.
   overlay_view_wrapper.frame = CGRectMake(rect.x() / screenScale, rect.y() / screenScale,
                                           rect.width() / screenScale, rect.height() / screenScale);
-  // Set a unique view identifier, so the overlay wrapper can be identified in unit tests.
+  // Set a unique view identifier, so the overlay_view_wrapper can be identified in XCUITests.
   overlay_view_wrapper.accessibilityIdentifier =
       [NSString stringWithFormat:@"platform_view[%lld].overlay[%lld]", view_id, overlay_id];
 
   UIView* overlay_view = layer->overlay_view.get();
   // Set the size of the overlay view.
   // This size is equal to the device screen size.
-  overlay_view.frame = flutter_view_.get().bounds;
+  overlay_view.frame = [flutter_view_.get() convertRect:flutter_view_.get().bounds
+                                                 toView:overlay_view_wrapper];
+  // Set a unique view identifier, so the overlay_view can be identified in XCUITests.
+  overlay_view.accessibilityIdentifier =
+      [NSString stringWithFormat:@"platform_view[%lld].overlay_view[%lld]", view_id, overlay_id];
 
   std::unique_ptr<SurfaceFrame> frame = layer->surface->AcquireFrame(frame_size_);
   // If frame is null, AcquireFrame already printed out an error message.
@@ -657,9 +668,6 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
   }
   SkCanvas* overlay_canvas = frame->SkiaCanvas();
   overlay_canvas->clear(SK_ColorTRANSPARENT);
-  // Offset the picture since its absolute position on the scene is determined
-  // by the position of the overlay view.
-  overlay_canvas->translate(-rect.x(), -rect.y());
   overlay_canvas->drawPicture(picture);
 
   layer->did_submit_last_frame = frame->Submit();
