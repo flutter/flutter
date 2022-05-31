@@ -92,9 +92,7 @@ class CoverageCollector extends TestWatcher {
     _logMessage('($observatoryUri): collected coverage data; merging...');
     _addHitmap(await coverage.HitMap.parseJson(
       data['coverage'] as List<Map<String, dynamic>>,
-      // TODO(cbracken): https://github.com/flutter/flutter/issues/103830
-      // Replace with packagePath: packageDirectory
-      packagesPath: packagesPath, // ignore: deprecated_member_use
+      packagePath: packageDirectory,
       checkIgnoredLines: true,
     ));
     _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
@@ -137,9 +135,7 @@ class CoverageCollector extends TestWatcher {
     _logMessage('Merging coverage data...');
     _addHitmap(await coverage.HitMap.parseJson(
       data['coverage'] as List<Map<String, dynamic>>,
-      // TODO(cbracken): https://github.com/flutter/flutter/issues/103830
-      // Replace with packagePath: packageDirectory
-      packagesPath: packagesPath, // ignore: deprecated_member_use
+      packagePath: packageDirectory,
       checkIgnoredLines: true,
     ));
     _logMessage('Done merging coverage data into global coverage map.');
@@ -149,19 +145,16 @@ class CoverageCollector extends TestWatcher {
   ///
   /// This will not start any collection tasks. It us up to the caller of to
   /// call [collectCoverage] for each process first.
-  String finalizeCoverage({
+  Future<String> finalizeCoverage({
     String Function(Map<String, coverage.HitMap> hitmap) formatter,
     coverage.Resolver resolver,
     Directory coverageDirectory,
-  }) {
+  }) async {
     if (_globalHitmap == null) {
       return null;
     }
     if (formatter == null) {
-      // TODO(cbracken): https://github.com/flutter/flutter/issues/103830
-      // Replace with: resolver ??= await coverage.Resolver.create(packagesPath: packagesPath);
-      // ignore: deprecated_member_use
-      resolver ??= coverage.Resolver(packagesPath: packagesPath);
+      resolver ??= await coverage.Resolver.create(packagesPath: packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
           ? <String>[globals.fs.path.join(packagePath, 'lib')]
@@ -174,8 +167,8 @@ class CoverageCollector extends TestWatcher {
     return result;
   }
 
-  bool collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) {
-    final String coverageData = finalizeCoverage(
+  Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
+    final String coverageData = await finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
     _logMessage('coverage information collection complete');
