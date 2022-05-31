@@ -81,7 +81,7 @@ void main() {
     expect(subMenuMaterial.color, equals(Colors.red));
   });
 
-  testWidgets('Constructor parameters override theme', (WidgetTester tester) async {
+  testWidgets('Constructor parameters override theme parameters', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -136,7 +136,7 @@ void main() {
     final Material subMenuMaterial = getSubMenuMaterial(tester);
     expect(tester.getRect(findMenuBarMenu()), equals(const Rect.fromLTRB(136.0, 49.0, 448.0, 237.0)));
     expect(subMenuMaterial.elevation, equals(15));
-    expect(subMenuMaterial.color, equals(Colors.red));
+    expect(subMenuMaterial.color, equals(Colors.cyan));
   });
 }
 
