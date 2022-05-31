@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'package:async/async.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
@@ -143,8 +143,8 @@ class _SelectionTapStatus {
 
 }
 
-typedef ConsecutiveSelectionTapGestureTapDownCallback = void Function(TapDownDetails details, bool isDoubleTap);
-typedef ConsecutiveSelectionTapGestureTapUpCallback = void Function(TapUpDetails details, bool isDoubleTap);
+typedef ConsecutiveSelectionTapGestureTapDownCallback = void Function(TapDownDetails details, int tapCount);
+typedef ConsecutiveSelectionTapGestureTapUpCallback = void Function(TapUpDetails details, int tapCount);
 typedef ConsecutiveSelectionTapGestureSecondaryTapCallback = void Function(Offset lastSecondaryTapDownPosition);
 
 class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer {
@@ -344,12 +344,11 @@ class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer 
   GestureTapCancelCallback? onTertiaryTapCancel;
 
   // For consecutive tap
-  Timer? _doubleTapTimer;
+  RestartableTimer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
-  bool _isDoubleTap = false;
   int _tapCount = 0;
 
-  bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
+  bool _isWithinConsecutiveTapTolerance(Offset secondTapOffset) {
     assert(secondTapOffset != null);
     if (_lastTapOffset == null) {
       return false;
@@ -359,8 +358,8 @@ class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer 
     return difference.distance <= kDoubleTapSlop;
   }
 
-  void _doubleTapTimeout() {
-    _doubleTapTimer = null;
+  void _consecutiveTapTimeout() {
+    _consecutiveTapTimer = null;
     _lastTapOffset = null;
     _tapCount = 0;
   }
@@ -403,17 +402,20 @@ class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer 
       kind: getKindForPointer(down.pointer),
     );
 
-    if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
-      _doubleTapTimer!.cancel();
-      _doubleTapTimeout();
-      _isDoubleTap = true;
+    if (_lastTapOffset == null) {
       _tapCount += 1;
+      _lastTapOffset = details.globalPosition;
+    } else {
+      if (_consecutiveTapTimer != null && _isWithinConsecutiveTapTolerance(details.globalPosition)) {
+        _tapCount += 1;
+        _consecutiveTapTimer!.reset();
+      }
     }
 
     switch (down.buttons) {
       case kPrimaryButton:
         if (onTapDown != null)
-          invokeCallback<void>('onTapDown', () => onTapDown!(details, _isDoubleTap));
+          invokeCallback<void>('onTapDown', () => onTapDown!(details, _tapCount));
         break;
       case kSecondaryButton:
         if (onSecondaryTapDown != null)
@@ -439,7 +441,7 @@ class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer 
     switch (down.buttons) {
       case kPrimaryButton:
         if (onTapUp != null)
-          invokeCallback<void>('onTapUp', () => onTapUp!(details, _isDoubleTap ));
+          invokeCallback<void>('onTapUp', () => onTapUp!(details, _tapCount ));
         if (onTap != null)
           invokeCallback<void>('onTap', onTap!);
         break;
@@ -456,11 +458,10 @@ class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer 
       default:
     }
 
-    if (!_isDoubleTap) {
-      _lastTapOffset = details.globalPosition;
-      _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
+    if (_consecutiveTapTimer == null) {
+      _consecutiveTapTimer = RestartableTimer(kDoubleTapTimeout, _consecutiveTapTimeout);
     }
-    _isDoubleTap = false;
+
   }
 
   @protected

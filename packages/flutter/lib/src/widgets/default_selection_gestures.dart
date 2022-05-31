@@ -42,18 +42,18 @@ class DefaultSelectionGestures extends StatelessWidget {
           ..onSecondaryTapDown = (TapDownDetails details) {
             print('onSecondaryTapDown');
           }
-          ..onTapDown = (TapDownDetails details, bool isDoubleTap) {
-            print('onTapDown');
-            if (isDoubleTap) {
+          ..onTapDown = (TapDownDetails details, int tapCount) {
+            print('onTapDown , tapCount  $tapCount');
+            Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition, shiftPressed: _isShiftPressed));
+
+            if (tapCount == 2) {
               print('onDoubleTapDown');
               Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
             }
-
-            Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition, shiftPressed: _isShiftPressed));
           }
-          ..onTapUp = (TapUpDetails details, bool isDoubleTap) {
-            print('onTapUp');
-            if (isDoubleTap) return;
+          ..onTapUp = (TapUpDetails details, int tapCount) {
+            print('onTapUp , tapCount  $tapCount');
+            if (tapCount > 1) return;
             switch (details.kind) {
               case PointerDeviceKind.mouse:
               case PointerDeviceKind.stylus:
