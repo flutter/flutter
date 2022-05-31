@@ -99,7 +99,7 @@ void main() {
       commandPackagesAndroidEmbeddingVersion: 'v1',
     ));
   }, overrides: <Type, Generator>{
-    Pub: () => FakePubTargetDirectory(fileSystem),
+    Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
     FileSystem: () => fileSystem,
   });
@@ -143,34 +143,7 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    fileSystem.currentDirectory
-      .childDirectory('.dart_tool')
-      .childFile('package_config.json')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('{"configVersion":2,"packages":[]}');
-  }
-}
-
-class FakePubTargetDirectory extends Fake implements Pub {
-  FakePubTargetDirectory(this.fileSystem);
-
-  final FileSystem fileSystem;
-
-  @override
-  Future<void> get({
-    @required PubContext context,
-    String directory,
-    bool skipIfAbsent = false,
-    bool upgrade = false,
-    bool offline = false,
-    bool generateSyntheticPackage = false,
-    String flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
-  }) async {
-    fileSystem.currentDirectory
-      .childDirectory('target')
+    fileSystem.directory(directory)
       .childDirectory('.dart_tool')
       .childFile('package_config.json')
       ..createSync(recursive: true)
