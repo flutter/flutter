@@ -1,8 +1,10 @@
 # Enable Metal Validation without Xcode.
 
-To enable validation of all Metal calls without using Xcode, add the following to your rc file.
+To enable validation of all Metal calls without using Xcode, add the following
+to your rc file.
 
-These flags are not documented and have been reverse engineered from observing what Xcode does to enable these validation layers.
+These flags are not documented and have been reverse engineered from observing
+what Xcode does to enable these validation layers.
 
 
 ```
