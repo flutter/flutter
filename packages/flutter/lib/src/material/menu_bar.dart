@@ -115,12 +115,12 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
   bool get hasSubmenu => children.isNotEmpty;
 
   /// Returns true if this menu is a child of the (invisible) root menu item.
-  bool get isTopLevel => parent?.parent == null;
+  bool get isTopLevel => parent?.parent == null && !isRoot;
 
   /// Returns true if this menu is the (invisible) root of the menu item hierarchy.
   bool get isRoot => parent == null;
 
-  // Returns all the ancestors of this node, except for the root node.
+  /// Returns all the ancestors of this node, except for the root node.
   List<_MenuNode> get ancestors {
     final List<_MenuNode> result = <_MenuNode>[];
     if (parent == null) {
@@ -168,12 +168,11 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
       // The root has no next sibling.
       return null;
     }
-    final int thisIndex = parent!.children.indexOf(this);
+    final int thisIndex = parentIndex;
     if (parent!.children.length > thisIndex + 1) {
       return parent!.children[thisIndex + 1];
-    } else {
-      return null;
     }
+    return null;
   }
 
   /// Returns the previous sibling for this node.
@@ -181,12 +180,11 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
   /// If there is no previous sibling (i.e. this is the first of the parent's
   /// children), this returns null.
   _MenuNode? get previousSibling {
-    final int thisIndex = parent?.children.indexOf(this) ?? -1;
+    final int thisIndex = parentIndex;
     if (thisIndex > 0) {
       return parent!.children[thisIndex - 1];
-    } else {
-      return null;
     }
+    return null;
   }
 
   /// Returns all descendants of this node, recursively, in depth order.
@@ -208,10 +206,9 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
   /// in the [other]'s ancestors removed. Includes this node in the results.
   List<_MenuNode> ancestorDifference(_MenuNode? other) {
     final List<_MenuNode> myAncestors = <_MenuNode>[...ancestors, this];
-    final List<_MenuNode> otherAncestors = <_MenuNode>[
-      ...other?.ancestors ?? <_MenuNode>[],
-      if (other != null) other,
-    ];
+    final List<_MenuNode> otherAncestors = other == null
+        ? const <_MenuNode>[]
+        : <_MenuNode>[...other.ancestors, other];
     int skip = 0;
     for (; skip < myAncestors.length && skip < otherAncestors.length; skip += 1) {
       if (myAncestors[skip] != otherAncestors[skip]) {
@@ -331,14 +328,15 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
   _MenuBarController() : super._();
 
   // The root of the menu node tree.
-  _MenuNode root = _MenuNode(item: const PlatformMenu(label: 'root', menus: <MenuItem>[]));
+  final _MenuNode root = _MenuNode(item: const PlatformMenu(label: 'root', menus: <MenuItem>[]));
 
   // The serial number containing the number of times the menu hierarchy has
   // been updated.
   //
   // This is used to indicate to the [_MenuNodeWrapper] that the menu hierarchy
   // or its attributes have changed, and its dependents need updating.
-  int menuSerial = 0;
+  int get menuSerial => _menuSerial;
+  int _menuSerial = 0;
 
   // The map of focus nodes to menus. This is used to look up which menu node
   // goes with which focus node when finding the currently focused menu node.
@@ -414,10 +412,10 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
   }
 
   List<_MenuNode> get openMenus {
-    return <_MenuNode>[
-      ...openMenu?.ancestors ?? <_MenuNode>[],
-      if (openMenu != null) openMenu!,
-    ];
+    if (openMenu == null) {
+      return const <_MenuNode>[];
+    }
+    return <_MenuNode>[...openMenu!.ancestors, openMenu!];
   }
 
   _MenuNode? get openMenu => _openMenu;
@@ -433,8 +431,7 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
       // If we captured a focus before the click, then use that, otherwise use
       // the current primary focus.
       _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
-    }
-    if (value == null && _openMenu != null) {
+    } else if (value == null && _openMenu != null) {
       // Closing all menus, so restore the previous focus.
       _previousFocus?.requestFocus();
       _previousFocus = null;
@@ -467,10 +464,10 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
 
   // Creates or removes the overlay entry that contains the stack of all menus.
   void _manageOverlayEntry() {
-    if (openMenu?.topLevel != null) {
+    if (openMenu != null) {
       if (_overlayEntry == null) {
         _overlayEntry = OverlayEntry(builder: (BuildContext context) => _MenuStack(this));
-        Navigator.of(menuBarContext).overlay!.insert(_overlayEntry!);
+        Overlay.of(menuBarContext)?.insert(_overlayEntry!);
       }
     } else {
       _overlayEntry?.remove();
@@ -482,7 +479,7 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
     if (_disposed) {
       return;
     }
-    menuSerial += 1;
+    _menuSerial += 1;
     _overlayEntry?.markNeedsBuild();
     notifyListeners();
   }
@@ -503,13 +500,13 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
   }
 
   /// Called when updating a MenuBar widget so that the metadata about that menu
-  /// hierarchy and widget can be kept current.
+  /// hierarchy and widget can be connected to the correct context/widget.
   ///
-  /// The context is the MenuBar widget's element.
+  /// The context is the MenuBar's element.
   ///
   /// The topLevel is the list of menu items that are the top level children of
-  /// the MenuBar.
-  void update({
+  /// the [MenuBar].
+  void connect({
     required BuildContext context,
     required List<MenuItem> topLevel,
     required bool enabled,
@@ -531,8 +528,8 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
     });
   }
 
-  // Disconnects this controller from the menu bar, in preparation for disposal,
-  // or when the controller is being swapped out for another one.
+  /// Disconnects this controller from its menu bar, in preparation for
+  /// disposal, or when the controller is being swapped out for another one.
   void disconnect() {
     _menuBarContext = null;
     root.children.clear();
@@ -544,15 +541,6 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
       _listeningToPointerEvents = false;
     }
-  }
-
-  @override
-  void dispose() {
-    disconnect();
-    menuBarScope.dispose();
-    overlayScope.dispose();
-    super.dispose();
-    _disposed = true;
   }
 
   /// Closes the given menu, and any open descendant menus.
@@ -589,6 +577,15 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
     return _openMenu == menu || (_openMenu?.ancestors.contains(menu) ?? false);
   }
 
+  @override
+  void dispose() {
+    disconnect();
+    menuBarScope.dispose();
+    overlayScope.dispose();
+    super.dispose();
+    _disposed = true;
+  }
+
   // Handles any pointer events that occur in the app, checking them against
   // open menus to see if the menus should be closed or not.
   // This isn't called if no menus are open.
@@ -597,14 +594,18 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
       return;
     }
     bool isInsideMenu = false;
-    final List<RenderBox> renderBoxes = <RenderBox?>[
-      menuBarContext.findRenderObject() as RenderBox?,
+    final RenderBox? menuBarBox = menuBarContext.findRenderObject() as RenderBox?;
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      if (menuBarBox != null) menuBarBox,
       ..._menuRenderBoxes,
-    ].where((RenderBox? box) => box != null).cast<RenderBox>().toList();
+    ];
     for (final RenderBox renderBox in renderBoxes) {
       assert(renderBox.attached);
       isInsideMenu =
           renderBox.hitTest(BoxHitTestResult(), position: renderBox.globalToLocal(event.position)) || isInsideMenu;
+      if (isInsideMenu) {
+        break;
+      }
     }
     if (!isInsideMenu) {
       closeAll();
@@ -613,8 +614,8 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
     }
   }
 
-  /// Registers or updates the given menu in the menu controller whenever a menu
-  /// item widget is created or updated.
+  /// Registers the given menu in the menu controller whenever a menu item
+  /// widget is created or updated.
   void registerMenu({
     required BuildContext menuContext,
     required _MenuNode node,
@@ -771,15 +772,14 @@ class _MenuStack extends StatelessWidget {
               controller: controller,
               child: Stack(
                 children: <Widget>[
-                  if (controller.openMenus.isNotEmpty)
-                    ...controller.openMenus.where((_MenuNode node) => node.menuBuilder != null).map<Widget>(
-                      (_MenuNode node) {
-                        return Builder(
-                          key: ValueKey<_MenuNode>(node),
-                          builder: node.menuBuilder!,
-                        );
-                      },
-                    ),
+                  ...controller.openMenus.where((_MenuNode node) => node.menuBuilder != null).map<Widget>(
+                    (_MenuNode node) {
+                      return Builder(
+                        key: ValueKey<_MenuNode>(node),
+                        builder: node.menuBuilder!,
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -801,9 +801,8 @@ class _MenuDismissAction extends DismissAction {
   }
 
   @override
-  Object? invoke(DismissIntent intent) {
+  void invoke(DismissIntent intent) {
     controller.closeAll();
-    return null;
   }
 }
 
@@ -1038,14 +1037,8 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
 }
 
 /// Provides default implementation for [MenuItem] in a [StatefulWidget], to serve
-/// as a base class for the [MenuBarItem], [MenuItemGroup] and [MenuBarMenu] classes.
-abstract class _MenuBarItemDefaults extends StatefulWidget implements PlatformMenuItem {
-  const _MenuBarItemDefaults({
-    super.key,
-    required this.label,
-    this.labelWidget,
-  });
-
+/// as a mixin class for the [MenuBarItem] and [MenuBarMenu] classes.
+mixin _MenuBarItemDefaults implements PlatformMenuItem {
   /// A required label displayed on the entry for this item in the menu.
   ///
   /// This is rendered by default in a [Text] widget.
@@ -1054,11 +1047,11 @@ abstract class _MenuBarItemDefaults extends StatefulWidget implements PlatformMe
   ///
   /// This label is also used as the default [semanticLabel].
   @override
-  final String label;
+  String get label;
 
   /// An optional widget that will be displayed in place of the default [Text]
   /// widget containing the [label].
-  final Widget? labelWidget;
+  Widget? get labelWidget;
 
   @override
   MenuSerializableShortcut? get shortcut => null;
@@ -1067,9 +1060,6 @@ abstract class _MenuBarItemDefaults extends StatefulWidget implements PlatformMe
   /// button.
   ValueChanged<bool>? get onHover;
 
-  /// The list of top-level menu items to show in the [MenuBar].
-  ///
-  /// Each entry in this list will become a top level menu item.
   @override
   List<MenuItem> get menus => const <MenuItem>[];
 
@@ -1339,7 +1329,7 @@ class _MenuBarState extends State<MenuBar> {
     if (widget._isPlatformMenu) {
       return;
     }
-    controller.update(context: context, topLevel: widget.menus, enabled: widget.enabled);
+    controller.connect(context: context, topLevel: widget.menus, enabled: widget.enabled);
   }
 
   @override
@@ -1529,14 +1519,14 @@ class _MenuBarState extends State<MenuBar> {
 ///    Flutter-rendered widgets in a Material Design style.
 ///  * [PlatformMenuBar], a widget that renders similar menu bar items from a
 ///    [MenuBarItem] using platform-native APIs.
-class MenuBarMenu extends _MenuBarItemDefaults implements PlatformMenu {
+class MenuBarMenu extends StatefulWidget with _MenuBarItemDefaults implements PlatformMenu {
   /// Creates a const [MenuBarMenu].
   ///
   /// The [label] attribute is required.
   const MenuBarMenu({
     super.key,
-    required super.label,
-    super.labelWidget,
+    required this.label,
+    this.labelWidget,
     this.leadingIcon,
     this.trailingIcon,
     this.semanticLabel,
@@ -1559,6 +1549,12 @@ class MenuBarMenu extends _MenuBarItemDefaults implements PlatformMenu {
 
   /// An optional icon to display before the label text.
   final Widget? leadingIcon;
+
+  @override
+  final String label;
+
+  @override
+  final Widget? labelWidget;
 
   /// An optional icon to display after the label text.
   final Widget? trailingIcon;
@@ -1820,14 +1816,14 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
 ///    Flutter-rendered widgets in a Material Design style.
 ///  * [PlatformMenuBar], a class that renders similar menu bar items from a
 ///    [MenuBarItem] using platform-native APIs.
-class MenuBarItem extends _MenuBarItemDefaults {
+class MenuBarItem extends StatefulWidget with _MenuBarItemDefaults {
   /// Creates a const [MenuBarItem].
   ///
   /// The [label] attribute is required.
   const MenuBarItem({
     super.key,
-    required super.label,
-    super.labelWidget,
+    required this.label,
+    this.labelWidget,
     this.shortcut,
     this.onSelected,
     this.onSelectedIntent,
@@ -1852,8 +1848,8 @@ class MenuBarItem extends _MenuBarItemDefaults {
 
   // Used for MenuBarMenu's button, which has some slightly different behavior.
   const MenuBarItem._forMenu({
-    required super.label,
-    super.labelWidget,
+    required this.label,
+    this.labelWidget,
     this.onSelected,
     this.onHover,
     this.focusNode,
@@ -1877,6 +1873,13 @@ class MenuBarItem extends _MenuBarItemDefaults {
         _menuBackgroundColor = menuBackgroundColor,
         _menuShape = menuShape,
         _menuElevation = menuElevation;
+
+
+  @override
+  final String label;
+
+  @override
+  final Widget? labelWidget;
 
   @override
   final MenuSerializableShortcut? shortcut;
