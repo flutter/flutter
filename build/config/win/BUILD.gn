@@ -93,7 +93,8 @@ config("common_linker_setup") {
   # typically changes with each launch. This in turn means that breakpoints in
   # Chrome.dll don't stick from one launch to the next. For this reason, we
   # turn ASLR off in debug builds.
-  if (is_debug) {
+  # /DYNAMICBASE:NO isn't compatible with arm64.
+  if (is_debug && current_cpu != "arm64") {
     ldflags += [ "/DYNAMICBASE:NO" ]
   } else {
     ldflags += [ "/DYNAMICBASE" ]
