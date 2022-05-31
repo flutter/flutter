@@ -160,6 +160,9 @@ class FlutterPlatformViewsController {
 
   PostPrerollResult PostPrerollAction(fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger);
 
+  void EndFrame(bool should_resubmit_frame,
+                fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger);
+
   std::vector<SkCanvas*> GetCurrentCanvases();
 
   SkCanvas* CompositeEmbeddedView(int view_id);

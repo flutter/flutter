@@ -4,6 +4,8 @@
 
 #import <XCTest/XCTest.h>
 
+static const CGFloat kCompareAccuracy = 0.001;
+
 @interface UnobstructedPlatformViewTests : XCTestCase
 
 @end
@@ -60,6 +62,15 @@
   XCTAssertEqual(overlay.frame.origin.y, 150);
   XCTAssertEqual(overlay.frame.size.width, 50);
   XCTAssertEqual(overlay.frame.size.height, 50);
+
+  XCUIElement* overlayView = app.otherElements[@"platform_view[0].overlay_view[0]"];
+  XCTAssertTrue(overlayView.exists);
+  // Overlay should always be the same frame as the app.
+  XCTAssertEqualWithAccuracy(overlayView.frame.origin.x, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView.frame.origin.y, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView.frame.size.width, app.frame.size.width, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView.frame.size.height, app.frame.size.height,
+                             kCompareAccuracy);
 }
 
 // A is the layer above the platform view.
@@ -86,6 +97,15 @@
   XCTAssertEqual(overlay.frame.size.width, 50);
   // Half the height of the overlay.
   XCTAssertEqual(overlay.frame.size.height, 25);
+
+  XCUIElement* overlayView = app.otherElements[@"platform_view[0].overlay_view[0]"];
+  XCTAssertTrue(overlayView.exists);
+  // Overlay should always be the same frame as the app.
+  XCTAssertEqualWithAccuracy(overlayView.frame.origin.x, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView.frame.origin.y, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView.frame.size.width, app.frame.size.width, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView.frame.size.height, app.frame.size.height,
+                             kCompareAccuracy);
 }
 
 // A and B are the layers above the platform view.
@@ -149,6 +169,24 @@
   XCTAssertEqual(overlay2.frame.origin.y, 225);
   XCTAssertEqual(overlay2.frame.size.width, 50);
   XCTAssertEqual(overlay2.frame.size.height, 50);
+
+  XCUIElement* overlayView0 = app.otherElements[@"platform_view[0].overlay_view[0]"];
+  XCTAssertTrue(overlayView0.exists);
+  // Overlay should always be the same frame as the app.
+  XCTAssertEqualWithAccuracy(overlayView0.frame.origin.x, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView0.frame.origin.y, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView0.frame.size.width, app.frame.size.width, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView0.frame.size.height, app.frame.size.height,
+                             kCompareAccuracy);
+
+  XCUIElement* overlayView1 = app.otherElements[@"platform_view[0].overlay_view[0]"];
+  XCTAssertTrue(overlayView1.exists);
+  // Overlay should always be the same frame as the app.
+  XCTAssertEqualWithAccuracy(overlayView1.frame.origin.x, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView1.frame.origin.y, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView1.frame.size.width, app.frame.size.width, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView1.frame.size.height, app.frame.size.height,
+                             kCompareAccuracy);
 }
 
 // A is the layer, which z index is higher than the platform view.
@@ -179,6 +217,8 @@
 
   XCTAssertFalse(app.otherElements[@"platform_view[0].overlay[0]"].exists);
   XCTAssertFalse(app.otherElements[@"platform_view[1].overlay[0]"].exists);
+  XCTAssertFalse(app.otherElements[@"platform_view[0].overlay_view[0]"].exists);
+  XCTAssertFalse(app.otherElements[@"platform_view[1].overlay_view[0]"].exists);
 }
 
 // A is the layer above both platform view.
@@ -220,6 +260,24 @@
   XCTAssertEqual(overlay2.frame.origin.y, 25);
   XCTAssertEqual(overlay2.frame.size.width, 200);
   XCTAssertEqual(overlay2.frame.size.height, 250);
+
+  XCUIElement* overlayView0 = app.otherElements[@"platform_view[0].overlay_view[0]"];
+  XCTAssertTrue(overlayView0.exists);
+  // Overlay should always be the same frame as the app.
+  XCTAssertEqualWithAccuracy(overlayView0.frame.origin.x, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView0.frame.origin.y, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView0.frame.size.width, app.frame.size.width, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView0.frame.size.height, app.frame.size.height,
+                             kCompareAccuracy);
+
+  XCUIElement* overlayView1 = app.otherElements[@"platform_view[1].overlay_view[0]"];
+  XCTAssertTrue(overlayView1.exists);
+  // Overlay should always be the same frame as the app.
+  XCTAssertEqualWithAccuracy(overlayView1.frame.origin.x, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView1.frame.origin.y, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView1.frame.size.width, app.frame.size.width, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView1.frame.size.height, app.frame.size.height,
+                             kCompareAccuracy);
 }
 
 // More then two overlays are merged into a single layer.
@@ -246,6 +304,18 @@
   XCTAssertTrue(overlay.exists);
   XCTAssertFalse(app.otherElements[@"platform_view[0].overlay[1]"].exists);
   XCTAssertTrue(CGRectContainsRect(platform_view.frame, overlay.frame));
+
+  XCUIElement* overlayView0 = app.otherElements[@"platform_view[0].overlay_view[0]"];
+  XCTAssertTrue(overlayView0.exists);
+  // Overlay should always be the same frame as the app.
+  XCTAssertEqualWithAccuracy(overlayView0.frame.origin.x, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView0.frame.origin.y, app.frame.origin.x, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView0.frame.size.width, app.frame.size.width, kCompareAccuracy);
+  XCTAssertEqualWithAccuracy(overlayView0.frame.size.height, app.frame.size.height,
+                             kCompareAccuracy);
+
+  XCUIElement* overlayView1 = app.otherElements[@"platform_view[0].overlay_view[1]"];
+  XCTAssertFalse(overlayView1.exists);
 }
 
 @end
