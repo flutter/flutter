@@ -1183,6 +1183,8 @@ abstract class ResidentRunner extends ResidentHandlers {
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    /// The first time we do a run hot a full restart is not needed
+    /// (full dill already compiled) as opposed when doing attach
     bool needsFullRestart = true,
   });
 
