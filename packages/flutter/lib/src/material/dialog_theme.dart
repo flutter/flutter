@@ -48,11 +48,11 @@ class DialogTheme with Diagnosticable {
   /// Overrides the default value for [Dialog.alignment].
   final AlignmentGeometry? alignment;
 
-  /// Overrides the default value for [DefaultTextStyle] for [SimpleDialog.title] and 
+  /// Overrides the default value for [DefaultTextStyle] for [SimpleDialog.title] and
   /// [AlertDialog.title].
   final TextStyle? titleTextStyle;
 
-  /// Overrides the default value for [DefaultTextStyle] for [SimpleDialog.content] and 
+  /// Overrides the default value for [DefaultTextStyle] for [SimpleDialog.content] and
   /// [AlertDialog.content].
   final TextStyle? contentTextStyle;
 
