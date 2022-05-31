@@ -27,7 +27,7 @@ namespace impeller {
 ///               * Left-handed coordinate system. Positive rotation is
 ///                 clockwise about axis of rotation.
 ///               * Lower left corner is -1.0, -1.0.
-///               * Upper left corner is  1.0,  1.0.
+///               * Upper right corner is  1.0,  1.0.
 ///               * Visible z-space is from 0.0 to 1.0.
 ///                 * This is NOT the same as OpenGL! Be careful.
 ///               * NDC origin is at (0.0, 0.0, 0.5).
