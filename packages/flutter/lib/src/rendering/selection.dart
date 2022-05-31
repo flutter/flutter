@@ -523,7 +523,7 @@ class SelectionGeometry {
 
   @override
   int get hashCode {
-    return hashValues(
+    return Object.hash(
       startSelectionPoint,
       endSelectionPoint,
       status,
@@ -574,7 +574,7 @@ class SelectionPoint {
 
   @override
   int get hashCode {
-    return hashValues(
+    return Object.hash(
       localPosition,
       lineHeight,
       handleType,
