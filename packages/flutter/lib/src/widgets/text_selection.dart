@@ -2018,7 +2018,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       _lastTapOffset = details.globalPosition;
       _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
     }
-    _isDoubleTap = false;
+    _isDoubleTap = false; 
   }
 
   void _handleTapCancel() {

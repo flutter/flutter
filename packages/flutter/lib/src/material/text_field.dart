@@ -1222,71 +1222,71 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    // late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
-    //   ExpandSelectionToPositionIntent : TextEditingCallbackAction<ExpandSelectionToPositionIntent>(
-    //           (ExpandSelectionToPositionIntent intent) {
-    //         _editableText!.expandSelection(intent);
-    //       },
-    //       enabledPredicate: (ExpandSelectionToPositionIntent intent) {
-    //         return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
-    //       }
-    //   ),
-    //   ExtendSelectionToPositionIntent : TextEditingCallbackAction<ExtendSelectionToPositionIntent>(
-    //       (ExtendSelectionToPositionIntent intent) {
-    //         _editableText!.extendSelection(intent);
-    //       },
-    //       enabledPredicate: (ExtendSelectionToPositionIntent intent) {
-    //         return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
-    //       }
-    //   ),
-    //   KeyboardRequestIntent : TextEditingCallbackAction<KeyboardRequestIntent>(
-    //           (KeyboardRequestIntent intent) => _requestKeyboard(),
-    //   ),
-    //   SelectRangeIntent : TextEditingCallbackAction<SelectRangeIntent>(
-    //           (SelectRangeIntent intent) {
-    //         _editableText!.selectRange(intent);
-    //       },
-    //       enabledPredicate: (SelectRangeIntent intent) {
-    //         return widget.selectionEnabled;
-    //       }
-    //   ),
-    //   SelectWordEdgeIntent : TextEditingCallbackAction<SelectWordEdgeIntent>(
-    //           (SelectWordEdgeIntent intent) {
-    //         _editableText!.selectWordEdge(intent);
-    //       },
-    //       enabledPredicate: (SelectWordEdgeIntent intent) {
-    //         return widget.selectionEnabled;
-    //       }
-    //   ),
-    //   SelectTapPositionIntent : TextEditingCallbackAction<SelectTapPositionIntent>(
-    //           (SelectTapPositionIntent intent) {
-    //         _editableText!.selectPosition(intent);
-    //       },
-    //       enabledPredicate: (SelectTapPositionIntent intent) {
-    //         return widget.selectionEnabled;
-    //       }
-    //   ),
-    //   SelectionToolbarControlIntent : TextEditingCallbackAction<SelectionToolbarControlIntent>(
-    //           (SelectionToolbarControlIntent intent) {
-    //             if (intent.showSelectionToolbar != null) {
-    //               if (intent.showSelectionToolbar!) {
-    //                 _editableText!.showToolbar();
-    //               } else {
-    //                 _editableText!.hideToolbar();
-    //               }
-    //             }
-    //
-    //             if (intent.toggleSelectionToolbar != null) {
-    //               if (intent.toggleSelectionToolbar!) {
-    //                 _editableText!.toggleToolbar();
-    //               }
-    //             }
-    //       },
-    //       enabledPredicate: (SelectionToolbarControlIntent intent) {
-    //         return widget.selectionEnabled;
-    //       }
-    //   ),
-    // };
+    late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+      ExpandSelectionToPositionIntent : TextEditingCallbackAction<ExpandSelectionToPositionIntent>(
+              (ExpandSelectionToPositionIntent intent) {
+            _editableText!.expandSelection(intent);
+          },
+          enabledPredicate: (ExpandSelectionToPositionIntent intent) {
+            return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
+          }
+      ),
+      ExtendSelectionToPositionIntent : TextEditingCallbackAction<ExtendSelectionToPositionIntent>(
+          (ExtendSelectionToPositionIntent intent) {
+            _editableText!.extendSelection(intent);
+          },
+          enabledPredicate: (ExtendSelectionToPositionIntent intent) {
+            return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
+          }
+      ),
+      KeyboardRequestIntent : TextEditingCallbackAction<KeyboardRequestIntent>(
+              (KeyboardRequestIntent intent) => _requestKeyboard(),
+      ),
+      SelectRangeIntent : TextEditingCallbackAction<SelectRangeIntent>(
+              (SelectRangeIntent intent) {
+            _editableText!.selectRange(intent);
+          },
+          enabledPredicate: (SelectRangeIntent intent) {
+            return widget.selectionEnabled;
+          }
+      ),
+      SelectWordEdgeIntent : TextEditingCallbackAction<SelectWordEdgeIntent>(
+              (SelectWordEdgeIntent intent) {
+            _editableText!.selectWordEdge(intent);
+          },
+          enabledPredicate: (SelectWordEdgeIntent intent) {
+            return widget.selectionEnabled;
+          }
+      ),
+      SelectTapPositionIntent : TextEditingCallbackAction<SelectTapPositionIntent>(
+              (SelectTapPositionIntent intent) {
+            _editableText!.selectPosition(intent);
+          },
+          enabledPredicate: (SelectTapPositionIntent intent) {
+            return widget.selectionEnabled;
+          }
+      ),
+      SelectionToolbarControlIntent : TextEditingCallbackAction<SelectionToolbarControlIntent>(
+              (SelectionToolbarControlIntent intent) {
+                if (intent.showSelectionToolbar != null) {
+                  if (intent.showSelectionToolbar!) {
+                    _editableText!.showToolbar();
+                  } else {
+                    _editableText!.hideToolbar();
+                  }
+                }
+
+                if (intent.toggleSelectionToolbar != null) {
+                  if (intent.toggleSelectionToolbar!) {
+                    _editableText!.toggleToolbar();
+                  }
+                }
+          },
+          enabledPredicate: (SelectionToolbarControlIntent intent) {
+            return widget.selectionEnabled;
+          }
+      ),
+    };
 
     return FocusTrapArea(
       focusNode: focusNode,
@@ -1294,8 +1294,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursor: effectiveMouseCursor,
         onEnter: (PointerEnterEvent event) => _handleHover(true),
         onExit: (PointerExitEvent event) => _handleHover(false),
-        // child: Actions(
-        //   actions: _actions,
+        child: Actions(
+          actions: _actions,
           child: IgnorePointer(
             ignoring: !_isEnabled,
             child: AnimatedBuilder(
@@ -1319,7 +1319,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
               ),
             ),
           ),
-        // ),
+        ),
       ),
     );
   }

@@ -23,9 +23,9 @@ class DefaultSelectionGestures extends StatelessWidget {
     }.contains);
   }
 
-  static final ContextGestureRecognizerFactoryWithHandlers<TapGestureRecognizer> _iOSMacTapGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-          (BuildContext context) => TapGestureRecognizer(debugOwner: context),
-          (TapGestureRecognizer instance, BuildContext context) {
+  static final ContextGestureRecognizerFactoryWithHandlers<SelectionConsecutiveTapGestureRecognizer> _iOSMacTapGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<SelectionConsecutiveTapGestureRecognizer>(
+          (BuildContext context) => SelectionConsecutiveTapGestureRecognizer(debugOwner: context),
+          (SelectionConsecutiveTapGestureRecognizer instance, BuildContext context) {
         instance
           ..onSecondaryTapUp = (TapUpDetails details) {
             print('onSecondaryTapUp');
@@ -35,16 +35,25 @@ class DefaultSelectionGestures extends StatelessWidget {
           }
           ..onSecondaryTap = () {
             print('onSecondaryTap');
+            // Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: position));
+            // Actions.invoke(context, SelectionToolbarControlIntent.hide);
+            // Actions.invoke(context, SelectionToolbarControlIntent.show);
           }
           ..onSecondaryTapDown = (TapDownDetails details) {
             print('onSecondaryTapDown');
           }
-          ..onTapDown = (TapDownDetails details) {
+          ..onTapDown = (TapDownDetails details, bool isDoubleTap) {
             print('onTapDown');
+            if (isDoubleTap) {
+              print('onDoubleTapDown');
+              Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+            }
+
             Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition, shiftPressed: _isShiftPressed));
           }
-          ..onTapUp = (TapUpDetails details) {
+          ..onTapUp = (TapUpDetails details, bool isDoubleTap) {
             print('onTapUp');
+            if (isDoubleTap) return;
             switch (details.kind) {
               case PointerDeviceKind.mouse:
               case PointerDeviceKind.stylus:
@@ -79,7 +88,7 @@ class DefaultSelectionGestures extends StatelessWidget {
               }
               ..onUpdate = (DragUpdateDetails details) {
                 print('onDragUpdate');
-                Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: true));
+                Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: true));
               }
               ..onEnd = (DragEndDetails details) {
                 print('onDragEnd');
