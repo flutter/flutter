@@ -586,6 +586,7 @@ FILE: ../../../flutter/impeller/entity/shaders/solid_stroke.frag
 FILE: ../../../flutter/impeller/entity/shaders/solid_stroke.vert
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.vert
+FILE: ../../../flutter/impeller/entity/shaders/utils.sl.h
 FILE: ../../../flutter/impeller/entity/shaders/vertices.frag
 FILE: ../../../flutter/impeller/entity/shaders/vertices.vert
 FILE: ../../../flutter/impeller/geometry/color.cc

@@ -19,7 +19,11 @@ bool Texture::SetContents(const uint8_t* contents,
     VALIDATION_LOG << "Invalid slice for texture.";
     return false;
   }
-  return OnSetContents(contents, length, slice);
+  if (!OnSetContents(contents, length, slice)) {
+    return false;
+  }
+  intent_ = TextureIntent::kUploadFromHost;
+  return true;
 }
 
 bool Texture::SetContents(std::shared_ptr<const fml::Mapping> mapping,
@@ -28,12 +32,14 @@ bool Texture::SetContents(std::shared_ptr<const fml::Mapping> mapping,
     VALIDATION_LOG << "Invalid slice for texture.";
     return false;
   }
-
   if (!mapping) {
     return false;
   }
-
-  return OnSetContents(std::move(mapping), slice);
+  if (!OnSetContents(std::move(mapping), slice)) {
+    return false;
+  }
+  intent_ = TextureIntent::kUploadFromHost;
+  return true;
 }
 
 const TextureDescriptor& Texture::GetTextureDescriptor() const {
@@ -49,6 +55,14 @@ bool Texture::IsSliceValid(size_t slice) const {
       return slice <= 5;
   }
   FML_UNREACHABLE();
+}
+
+TextureIntent Texture::GetIntent() const {
+  return intent_;
+}
+
+Scalar Texture::GetYCoordScale() const {
+  return 1.0;
 }
 
 }  // namespace impeller
