@@ -9,35 +9,37 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
-import 'environment.dart';
-
 const String _kGoldctlKey = 'GOLDCTL';
+const String _kPresubmitEnvName = 'GOLD_TRYJOB';
+const String _kLuciEnvName = 'LUCI_CONTEXT';
 
 const String _skiaGoldHost = 'https://flutter-engine-gold.skia.org';
 const String _instance = 'flutter-engine';
 
-/// The percentage of accepted pixels to be wrong.
-///
-/// This should be a double between 0.0 and 1.0. A value of 0.0 means we don't
-/// accept any pixel to be different. A value of 1.0 means we accept 100% of
-/// pixels to be different.
-const double kMaxDifferentPixelsRate = 0.1;
+/// Whether the Skia Gold client is available and can be used in this
+/// environment.
+bool get isSkiaGoldClientAvailable => Platform.environment.containsKey(_kGoldctlKey);
+
+/// Returns true if the current environment is a LUCI builder.
+bool get isLuciEnv => Platform.environment.containsKey(_kLuciEnvName);
+
+/// Whether the current task is run during a presubmit check.
+bool get _isPresubmit => isLuciEnv && isSkiaGoldClientAvailable && Platform.environment.containsKey(_kPresubmitEnvName);
+
+/// Whether the current task is run during a postsubmit check.
+bool get _isPostsubmit => isLuciEnv && isSkiaGoldClientAvailable && !Platform.environment.containsKey(_kPresubmitEnvName);
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
   /// Creates a [SkiaGoldClient] with the given [workDirectory].
   ///
-  /// The [browserName] parameter is the name of the browser that generated the
-  /// screenshots.
-  SkiaGoldClient(this.workDirectory, { required this.browserName });
+  /// [dimensions] allows to add attributes about the environment
+  /// used to generate the screenshots.
+  SkiaGoldClient(this.workDirectory, { this.dimensions });
 
-  /// Whether the Skia Gold client is available and can be used in this
-  /// environment.
-  static bool get isAvailable => Platform.environment.containsKey(_kGoldctlKey);
-
-  /// The name of the browser running the tests.
-  final String browserName;
+  /// Allows to add attributes about the environment used to generate the screenshots.
+  final Map<String, String>? dimensions;
 
   /// A controller for launching sub-processes.
   final ProcessManager process = const LocalProcessManager();
@@ -73,7 +75,7 @@ class SkiaGoldClient {
   /// The path to the local [Directory] where the `goldctl` tool is hosted.
   String get _goldctl {
     assert(
-      isAvailable,
+      isSkiaGoldClientAvailable,
       'Trying to use `goldctl` in an environment where it is not available',
     );
     return Platform.environment[_kGoldctlKey]!;
@@ -168,17 +170,54 @@ class SkiaGoldClient {
   /// Executes the `imgtest add` command in the `goldctl` tool.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
+  /// backend, the `add` argument uploads the current image test.
+  ///
+  /// Throws an exception for try jobs that failed to pass the pixel comparison.
+  ///
+  /// The [testName] and [goldenFile] parameters reference the current
+  /// comparison being evaluated.
+  ///
+  /// [pixelColorDelta] defines maximum acceptable difference in RGB channels of each pixel,
+  /// such that:
+  ///
+  /// ```
+  /// abs(r(image) - r(golden)) + abs(g(image) - g(golden)) + abs(b(image) - b(golden)) <= pixelDeltaThreshold
+  /// ```
+  ///
+  /// [differentPixelsRate] is the fraction of accepted pixels to be wrong in the range [0.0, 1.0].
+  /// Defaults to 0.1. A value of 0.1 means that 10% of the pixels are allowed to change.
+  Future<void> addImg(
+    String testName,
+    File goldenFile, {
+    double differentPixelsRate = 0.1,
+    int pixelColorDelta = 0,
+    required int screenshotSize,
+  }) async {
+    assert(_isPresubmit || _isPostsubmit);
+
+    if (_isPresubmit) {
+      await _tryjobAdd(testName, goldenFile, screenshotSize, pixelColorDelta, differentPixelsRate);
+    }
+    if (_isPostsubmit) {
+      await _imgtestAdd(testName, goldenFile, screenshotSize, pixelColorDelta, differentPixelsRate);
+    }
+  }
+
+  /// Executes the `imgtest add` command in the `goldctl` tool.
+  ///
+  /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `add` argument uploads the current image test. A response is
   /// returned from the invocation of this command that indicates a pass or fail
   /// result.
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated.
-  Future<bool> imgtestAdd(
+  Future<void> _imgtestAdd(
     String testName,
     File goldenFile,
     int screenshotSize,
-    bool isCanvaskitTest,
+    int pixelDeltaThreshold,
+    double maxDifferentPixelsRate,
   ) async {
     await _imgtestInit();
 
@@ -188,7 +227,7 @@ class SkiaGoldClient {
       '--work-dir', _tempPath,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
-      ..._getMatchingArguments(testName, screenshotSize, isCanvaskitTest),
+      ..._getMatchingArguments(testName, screenshotSize, pixelDeltaThreshold, maxDifferentPixelsRate),
     ];
 
     final ProcessResult result = await _runCommand(imgtestCommand);
@@ -200,8 +239,6 @@ class SkiaGoldClient {
       print('goldctl imgtest add stdout: ${result.stdout}');
       print('goldctl imgtest add stderr: ${result.stderr}');
     }
-
-    return true;
   }
 
   /// Executes the `imgtest init` command in the `goldctl` tool for tryjobs.
@@ -268,11 +305,12 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated.
-  Future<void> tryjobAdd(
+  Future<void> _tryjobAdd(
     String testName,
     File goldenFile,
     int screenshotSize,
-    bool isCanvaskitTest,
+    int pixelDeltaThreshold,
+    double differentPixelsRate,
   ) async {
     await _tryjobInit();
 
@@ -282,7 +320,7 @@ class SkiaGoldClient {
       '--work-dir', _tempPath,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
-      ..._getMatchingArguments(testName, screenshotSize, isCanvaskitTest),
+      ..._getMatchingArguments(testName, screenshotSize, pixelDeltaThreshold, differentPixelsRate),
     ];
 
     final ProcessResult result = await _runCommand(tryjobCommand);
@@ -306,7 +344,8 @@ class SkiaGoldClient {
   List<String> _getMatchingArguments(
     String testName,
     int screenshotSize,
-    bool isCanvaskitTest,
+    int pixelDeltaThreshold,
+    double differentPixelsRate,
   ) {
     // The algorithm to be used when matching images. The available options are:
     // - "fuzzy": Allows for customizing the thresholds of pixel differences.
@@ -318,22 +357,7 @@ class SkiaGoldClient {
     // baseline. It's okay for this to be a slightly high number like 10% of the
     // image size because those wrong pixels are constrained by
     // `pixelDeltaThreshold` below.
-    final int maxDifferentPixels = (screenshotSize * kMaxDifferentPixelsRate).toInt();
-
-    // The maximum acceptable difference in RGB channels of each pixel.
-    //
-    // ```
-    // abs(r(image) - r(golden)) + abs(g(image) - g(golden)) + abs(b(image) - b(golden)) <= pixelDeltaThreshold
-    // ```
-    final String pixelDeltaThreshold;
-    if (isCanvaskitTest) {
-      pixelDeltaThreshold = '21';
-    } else if (browserName == 'ios-safari') {
-      pixelDeltaThreshold = '15';
-    } else {
-      pixelDeltaThreshold = '3';
-    }
-
+    final int maxDifferentPixels = (screenshotSize * differentPixelsRate).toInt();
     return <String>[
       '--add-test-optional-key', 'image_matching_algorithm:$algorithm',
       '--add-test-optional-key', 'fuzzy_max_different_pixels:$maxDifferentPixels',
@@ -396,19 +420,15 @@ class SkiaGoldClient {
 
   /// Returns the current commit hash of the engine repository.
   Future<String> _getCurrentCommit() async {
-    final Directory webUiRoot = environment.webUiRootDir;
-    if (!webUiRoot.existsSync()) {
-      throw Exception('Web Engine root could not be found: $webUiRoot\n');
-    } else {
-      final ProcessResult revParse = await process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: webUiRoot.path,
-      );
-      if (revParse.exitCode != 0) {
-        throw Exception('Current commit of Web Engine can not be found.');
-      }
-      return (revParse.stdout as String).trim();
+    final File currentScript = File.fromUri(Platform.script);
+    final ProcessResult revParse = await process.run(
+      <String>['git', 'rev-parse', 'HEAD'],
+      workingDirectory: currentScript.path,
+    );
+    if (revParse.exitCode != 0) {
+      throw Exception('Current commit of the engine can not be found from path ${currentScript.path}.');
     }
+    return (revParse.stdout as String).trim();
   }
 
   /// Returns a Map of key value pairs used to uniquely identify the
@@ -417,11 +437,14 @@ class SkiaGoldClient {
   /// Currently, the only key value pairs being tracked are the platform and
   /// browser the image was rendered on.
   Map<String, dynamic> _getKeys() {
-    return <String, dynamic>{
-      'Browser': browserName,
+    final Map<String, dynamic> initialKeys = <String, dynamic>{
       'CI': 'luci',
       'Platform': Platform.operatingSystem,
     };
+    if (dimensions != null) {
+      initialKeys.addAll(dimensions!);
+    }
+    return initialKeys;
   }
 
   /// Same as [_getKeys] but encodes it in a JSON string.
