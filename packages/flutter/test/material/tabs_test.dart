@@ -4618,7 +4618,7 @@ void main() {
     gesture.removePointer();
   });
 
-  testWidgets('Do not crash if the controller and TabBarView are updated at different phase(build and layout) of the same frame', (WidgetTester tester) async {
+  testWidgets('Do not crash if the controller and TabBarView are updated at different phases(build and layout) of the same frame', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104994.
     List<String> tabTextContent = <String>[];
 
