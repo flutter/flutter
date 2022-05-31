@@ -368,7 +368,7 @@ class DisplayFeature {
   }
 
   @override
-  int get hashCode => hashValues(bounds, type, state);
+  int get hashCode => Object.hash(bounds, type, state);
 
   @override
   String toString() {
@@ -523,7 +523,7 @@ class Locale {
   }
 
   @override
-  int get hashCode => hashValues(languageCode, scriptCode, countryCode);
+  int get hashCode => Object.hash(languageCode, scriptCode, countryCode);
 
   @override
   String toString() => _rawToString('_');

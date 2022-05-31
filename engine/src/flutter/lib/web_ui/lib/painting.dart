@@ -383,7 +383,7 @@ class MaskFilter {
   }
 
   @override
-  int get hashCode => hashValues(_style, _sigma);
+  int get hashCode => Object.hash(_style, _sigma);
 
   @override
   String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
@@ -734,7 +734,7 @@ class Shadow {
   }
 
   @override
-  int get hashCode => hashValues(color, offset, blurRadius);
+  int get hashCode => Object.hash(color, offset, blurRadius);
 
   @override
   String toString() => 'TextShadow($color, $offset, $blurRadius)';

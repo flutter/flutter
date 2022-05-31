@@ -319,7 +319,7 @@ class PathRef {
   }
 
   @override
-  int get hashCode => ui.hashValues(fSegmentMask,
+  int get hashCode => Object.hash(fSegmentMask,
       fPoints, _conicWeights, _fVerbs);
 
   bool equals(PathRef ref) {
