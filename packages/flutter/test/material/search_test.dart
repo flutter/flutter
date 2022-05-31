@@ -895,7 +895,7 @@ void main() {
       results: selectedResults,
     ));
 
-    // Open search
+    // Open search.
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
