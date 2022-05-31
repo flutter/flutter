@@ -726,7 +726,7 @@ class _BlurEngineImageFilter extends EngineImageFilter {
   }
 
   @override
-  int get hashCode => ui.hashValues(sigmaX, sigmaY, tileMode);
+  int get hashCode => Object.hash(sigmaX, sigmaY, tileMode);
 
   @override
   String toString() {
@@ -756,7 +756,7 @@ class _MatrixEngineImageFilter extends EngineImageFilter {
   }
 
   @override
-  int get hashCode => ui.hashValues(ui.hashList(webMatrix), filterQuality);
+  int get hashCode => Object.hash(Object.hashAll(webMatrix), filterQuality);
 
   @override
   String toString() {

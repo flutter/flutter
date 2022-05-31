@@ -6,7 +6,6 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart';
 
 import 'line_breaker_test_helper.dart';
 import 'line_breaker_test_raw_data.dart';
@@ -310,7 +309,7 @@ class Line {
   final LineBreakType breakType;
 
   @override
-  int get hashCode => hashValues(text, breakType);
+  int get hashCode => Object.hash(text, breakType);
 
   @override
   bool operator ==(Object other) {

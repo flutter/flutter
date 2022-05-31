@@ -9,7 +9,6 @@ import 'dart:js_util' as js_util;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart';
 
 import '../spy.dart';
 
@@ -138,7 +137,7 @@ class BenchmarkDatapoint {
   final num value;
 
   @override
-  int get hashCode => hashValues(name, value);
+  int get hashCode => Object.hash(name, value);
 
   @override
   bool operator ==(Object other) {

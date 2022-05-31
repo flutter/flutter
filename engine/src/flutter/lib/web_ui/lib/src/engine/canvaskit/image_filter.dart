@@ -124,7 +124,7 @@ class _CkBlurImageFilter extends CkImageFilter {
   }
 
   @override
-  int get hashCode => ui.hashValues(sigmaX, sigmaY, tileMode);
+  int get hashCode => Object.hash(sigmaX, sigmaY, tileMode);
 
   @override
   String toString() {
@@ -161,7 +161,7 @@ class _CkMatrixImageFilter extends CkImageFilter {
   }
 
   @override
-  int get hashCode => ui.hashValues(filterQuality, ui.hashList(matrix));
+  int get hashCode => Object.hash(filterQuality, Object.hashAll(matrix));
 
   @override
   String toString() => 'ImageFilter.matrix($matrix, $filterQuality)';

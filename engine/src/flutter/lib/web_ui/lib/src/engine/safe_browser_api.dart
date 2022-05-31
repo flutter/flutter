@@ -162,7 +162,7 @@ num? parseFontSize(html.Element element) {
   if (hasJsProperty(element, 'computedStyleMap')) {
     // Use the newer `computedStyleMap` API available on some browsers.
     final Object? computedStyleMap =
-        js_util.callMethod<Object?>(element, 'computedStyleMap', <Object?>[]);
+        js_util.callMethod<Object?>(element, 'computedStyleMap', const <Object?>[]);
     if (computedStyleMap is Object) {
       final Object? fontSizeObject =
           js_util.callMethod<Object?>(computedStyleMap, 'get', <Object?>['font-size']);

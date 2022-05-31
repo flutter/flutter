@@ -730,7 +730,7 @@ class EditingState {
   bool get isValid => baseOffset! >= 0 && extentOffset! >= 0;
 
   @override
-  int get hashCode => ui.hashValues(text, baseOffset, extentOffset);
+  int get hashCode => Object.hash(text, baseOffset, extentOffset);
 
   @override
   bool operator ==(Object other) {

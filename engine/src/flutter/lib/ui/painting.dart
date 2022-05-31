@@ -3009,7 +3009,7 @@ class MaskFilter {
   }
 
   @override
-  int get hashCode => hashValues(_style, _sigma);
+  int get hashCode => Object.hash(_style, _sigma);
 
   @override
   String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
@@ -3168,7 +3168,7 @@ class ColorFilter implements ImageFilter {
   }
 
   @override
-  int get hashCode => hashValues(_color, _blendMode, hashList(_matrix), _type);
+  int get hashCode => Object.hash(_color, _blendMode, _matrix == null ? null : Object.hashAll(_matrix!), _type);
 
   @override
   String get _shortDescription {
@@ -3342,7 +3342,7 @@ class _MatrixImageFilter implements ImageFilter {
   }
 
   @override
-  int get hashCode => hashValues(filterQuality, hashList(data));
+  int get hashCode => Object.hash(filterQuality, Object.hashAll(data));
 }
 
 class _GaussianBlurImageFilter implements ImageFilter {
@@ -3383,7 +3383,7 @@ class _GaussianBlurImageFilter implements ImageFilter {
   }
 
   @override
-  int get hashCode => hashValues(sigmaX, sigmaY);
+  int get hashCode => Object.hash(sigmaX, sigmaY);
 }
 
 class _DilateImageFilter implements ImageFilter {
@@ -3412,7 +3412,7 @@ class _DilateImageFilter implements ImageFilter {
   }
 
   @override
-  int get hashCode => hashValues(radiusX, radiusY);
+  int get hashCode => Object.hash(radiusX, radiusY);
 }
 
 class _ErodeImageFilter implements ImageFilter {
@@ -3471,7 +3471,7 @@ class _ComposeImageFilter implements ImageFilter {
   }
 
   @override
-  int get hashCode => hashValues(innerFilter, outerFilter);
+  int get hashCode => Object.hash(innerFilter, outerFilter);
 }
 
 /// An [ImageFilter] that is backed by a native SkImageFilter.
@@ -4048,7 +4048,7 @@ class _FragmentShader extends Shader {
   }
 
   @override
-  int get hashCode => hashValues(_builder, hashList(_floatUniforms), hashList(_samplerUniforms));
+  int get hashCode => Object.hash(_builder, Object.hashAll(_floatUniforms), Object.hashAll(_samplerUniforms));
 }
 
 /// Defines how a list of points is interpreted when drawing a set of triangles.
@@ -5508,7 +5508,7 @@ class Shadow {
   }
 
   @override
-  int get hashCode => hashValues(color, offset, blurRadius);
+  int get hashCode => Object.hash(color, offset, blurRadius);
 
   // Serialize [shadows] into ByteData. The format is a single uint_32_t at
   // the beginning indicating the number of shadows, followed by _kBytesPerShadow

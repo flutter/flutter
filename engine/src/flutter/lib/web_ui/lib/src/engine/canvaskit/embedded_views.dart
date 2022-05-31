@@ -807,7 +807,7 @@ class EmbeddedViewParams {
   }
 
   @override
-  int get hashCode => ui.hashValues(offset, size, mutators);
+  int get hashCode => Object.hash(offset, size, mutators);
 }
 
 enum MutatorType {
@@ -885,7 +885,7 @@ class Mutator {
   }
 
   @override
-  int get hashCode => ui.hashValues(type, rect, rrect, path, matrix, alpha);
+  int get hashCode => Object.hash(type, rect, rrect, path, matrix, alpha);
 }
 
 /// A stack of mutators that can be applied to an embedded view.
@@ -931,7 +931,7 @@ class MutatorsStack extends Iterable<Mutator> {
   }
 
   @override
-  int get hashCode => ui.hashList(_mutators);
+  int get hashCode => Object.hashAll(_mutators);
 
   @override
   Iterator<Mutator> get iterator => _mutators.reversed.iterator;

@@ -504,7 +504,7 @@ class CkStrutStyle implements ui.StrutStyle {
   }
 
   @override
-  int get hashCode => ui.hashValues(
+  int get hashCode => Object.hash(
         _fontFamily,
         _fontFamilyFallback,
         _fontSize,

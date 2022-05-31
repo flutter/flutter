@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:ui/ui.dart' as ui;
-
 import '../dom.dart';
 import '../font_change_util.dart';
 import '../platform_dispatcher.dart';
@@ -602,7 +600,7 @@ class CodeunitRange {
   }
 
   @override
-  int get hashCode => ui.hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 
   @override
   String toString() => '[$start, $end]';
@@ -988,9 +986,8 @@ class NotoDownloader {
     if (assertionsEnabled) {
       _debugActiveDownloadCount += 1;
     }
-    final Future<String> result = httpFetch(url).then(
-        (DomResponse response) =>
-            response.text().then<String>((dynamic x) => x as String));
+    final Future<String> result = httpFetch(url).then((DomResponse response) =>
+        response.text().then<String>((dynamic x) => x as String));
     if (assertionsEnabled) {
       result.whenComplete(() {
         _debugActiveDownloadCount -= 1;

@@ -255,7 +255,7 @@ class GestureSettings {
   }
 
   @override
-  int get hashCode => hashValues(physicalTouchSlop, physicalDoubleTapSlop);
+  int get hashCode => Object.hash(physicalTouchSlop, physicalDoubleTapSlop);
 
   @override
   String toString() => 'GestureSettings(physicalTouchSlop: $physicalTouchSlop, physicalDoubleTapSlop: $physicalDoubleTapSlop)';

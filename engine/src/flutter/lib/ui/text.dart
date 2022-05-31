@@ -927,7 +927,7 @@ class FontFeature {
   }
 
   @override
-  int get hashCode => hashValues(feature, value);
+  int get hashCode => Object.hash(feature, value);
 
   @override
   String toString() => "FontFeature('$feature', $value)";
@@ -988,7 +988,7 @@ class FontVariation {
   }
 
   @override
-  int get hashCode => hashValues(axis, value);
+  int get hashCode => Object.hash(axis, value);
 
   @override
   String toString() => "FontVariation('$axis', $value)";
@@ -1236,7 +1236,7 @@ class TextHeightBehavior {
 
   @override
   int get hashCode {
-    return hashValues(
+    return Object.hash(
       applyHeightToFirstAscent,
       applyHeightToLastDescent,
       leadingDistribution.index,
@@ -1540,7 +1540,23 @@ class TextStyle {
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded), _leadingDistribution, _fontFamily, _fontFamilyFallback, _fontSize, _letterSpacing, _wordSpacing, _height, _locale, _background, _foreground, hashList(_shadows), _decorationThickness, hashList(_fontFeatures), hashList(_fontVariations));
+  int get hashCode => Object.hash(
+    Object.hashAll(_encoded),
+    _leadingDistribution,
+    _fontFamily,
+    _fontFamilyFallback,
+    _fontSize,
+    _letterSpacing,
+    _wordSpacing,
+    _height,
+    _locale,
+    _background,
+    _foreground,
+    _shadows == null ? null : Object.hashAll(_shadows!),
+    _decorationThickness,
+    _fontFeatures == null ? null : Object.hashAll(_fontFeatures!),
+    _fontVariations == null ? null : Object.hashAll(_fontVariations!),
+  );
 
   @override
   String toString() {
@@ -1785,7 +1801,7 @@ class ParagraphStyle {
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _height, _ellipsis, _locale, _leadingDistribution);
+  int get hashCode => Object.hash(Object.hashAll(_encoded), _fontFamily, _fontSize, _height, _ellipsis, _locale, _leadingDistribution);
 
   @override
   String toString() {
@@ -1979,7 +1995,7 @@ class StrutStyle {
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded.buffer.asInt8List()), _fontFamily, _leadingDistribution);
+  int get hashCode => Object.hash(Object.hashAll(_encoded.buffer.asInt8List()), _fontFamily, _leadingDistribution);
 
 }
 
@@ -2145,7 +2161,7 @@ class TextBox {
   }
 
   @override
-  int get hashCode => hashValues(left, top, right, bottom, direction);
+  int get hashCode => Object.hash(left, top, right, bottom, direction);
 
   @override
   String toString() => 'TextBox.fromLTRBD(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)}, $direction)';
@@ -2252,7 +2268,7 @@ class TextPosition {
   }
 
   @override
-  int get hashCode => hashValues(offset, affinity);
+  int get hashCode => Object.hash(offset, affinity);
 
   @override
   String toString() {
@@ -2336,7 +2352,7 @@ class TextRange {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     start.hashCode,
     end.hashCode,
   );
@@ -2619,7 +2635,7 @@ class LineMetrics {
   }
 
   @override
-  int get hashCode => hashValues(hardBreak, ascent, descent, unscaledAscent, height, width, left, baseline, lineNumber);
+  int get hashCode => Object.hash(hardBreak, ascent, descent, unscaledAscent, height, width, left, baseline, lineNumber);
 
   @override
   String toString() {
