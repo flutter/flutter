@@ -28,6 +28,8 @@ class MyApp extends StatelessWidget {
 }
 
 class ListTileCursor extends MaterialStateMouseCursor {
+  const ListTileCursor();
+
   @override
   MouseCursor resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
@@ -45,8 +47,8 @@ class MyStatelessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Disabled ListTile'),
+    return const ListTile(
+      title: Text('Disabled ListTile'),
       enabled: false,
       mouseCursor: ListTileCursor(),
     );
