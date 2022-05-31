@@ -402,12 +402,23 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
   set enabled(bool value) {
     if (_enabled != value) {
       _enabled = value;
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      void closeAndMarkDirty() {
         if (!_enabled) {
           closeAll();
         }
         _markMenuDirty();
-      });
+      }
+
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+        // If we're in the middle of a build, we need to mark dirty in a post
+        // frame callback, since this function will often be called by a part of
+        // the tree that isn't in the overlay, but calling this would request that
+        // the overlay be rebuilt.
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) => closeAndMarkDirty());
+      } else {
+        // If we're not in the middle of a build, we can just call it right away.
+        closeAndMarkDirty();
+      }
     }
   }
 
@@ -520,12 +531,18 @@ class _MenuBarController extends MenuBarController with Diagnosticable {
 
     this.enabled = enabled;
 
-    // Need to mark dirty in a post frame callback, since this update might
-    // updated part of the tree that isn't in the overlay, but calling this
-    // would request that the overlay be rebuilt.
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      // If we're in the middle of a build, we need to mark dirty in a post
+      // frame callback, since this function will often be called by a part of
+      // the tree that isn't in the overlay, but calling this would request that
+      // the overlay be rebuilt.
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        _markMenuDirty();
+      });
+    } else {
+      // If we're not in the middle of a build, we can just mark dirty right away.
       _markMenuDirty();
-    });
+    }
   }
 
   /// Disconnects this controller from its menu bar, in preparation for
@@ -1940,7 +1957,7 @@ class MenuBarItem extends StatefulWidget with _MenuBarItemDefaults {
   // The padding around the edges of a submenu. Passed in from the MenuBarMenu
   // so that it can be given during registration with the controller.
   final EdgeInsets? _menuPadding;
-  
+
   // The background color of the submenu, when _hasMenu is true.
   final MaterialStateProperty<Color?>? _menuBackgroundColor;
 
