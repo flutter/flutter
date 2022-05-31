@@ -62,7 +62,7 @@ class TextureGLES final : public Texture,
               bool is_wrapped);
 
   // |Texture|
-  void SetLabel(const std::string_view& label) override;
+  void SetLabel(std::string_view label) override;
 
   // |Texture|
   bool OnSetContents(const uint8_t* contents,

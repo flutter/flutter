@@ -39,9 +39,8 @@ class ShaderLibraryMTL final : public ShaderLibrary {
   ShaderLibraryMTL(NSArray<id<MTLLibrary>>* libraries);
 
   // |ShaderLibrary|
-  std::shared_ptr<const ShaderFunction> GetFunction(
-      const std::string_view& name,
-      ShaderStage stage) override;
+  std::shared_ptr<const ShaderFunction> GetFunction(std::string_view name,
+                                                    ShaderStage stage) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibraryMTL);
 };

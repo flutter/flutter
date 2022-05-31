@@ -18,7 +18,7 @@ struct ShaderKey {
   std::string name;
   ShaderStage stage = ShaderStage::kUnknown;
 
-  ShaderKey(const std::string_view& p_name, ShaderStage p_stage)
+  ShaderKey(std::string_view p_name, ShaderStage p_stage)
       : name({p_name.data(), p_name.size()}), stage(p_stage) {}
 
   struct Hash {

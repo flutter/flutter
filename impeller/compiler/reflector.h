@@ -91,8 +91,7 @@ class Reflector {
 
   std::shared_ptr<fml::Mapping> GenerateReflectionCC() const;
 
-  std::shared_ptr<fml::Mapping> InflateTemplate(
-      const std::string_view& tmpl) const;
+  std::shared_ptr<fml::Mapping> InflateTemplate(std::string_view tmpl) const;
 
   std::optional<nlohmann::json::object_t> ReflectResource(
       const spirv_cross::Resource& resource) const;
