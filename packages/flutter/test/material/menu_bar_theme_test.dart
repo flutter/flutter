@@ -80,7 +80,64 @@ void main() {
     expect(subMenuMaterial.elevation, equals(15));
     expect(subMenuMaterial.color, equals(Colors.red));
   });
-  /// TODO(gspencergoog): add more tests...
+
+  testWidgets('Constructor parameters override theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(builder: (BuildContext context) {
+            return MenuBarTheme(
+              data: MenuBarTheme.of(context).copyWith(
+                barBackgroundColor: MaterialStateProperty.all<Color?>(Colors.green),
+                itemTextStyle: MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.titleMedium),
+                barElevation: MaterialStateProperty.all<double?>(20.0),
+                barHeight: 52.0,
+                menuBackgroundColor: MaterialStateProperty.all<Color?>(Colors.red),
+                menuElevation: MaterialStateProperty.all<double?>(15.0),
+                menuShape: MaterialStateProperty.all<ShapeBorder?>(const StadiumBorder()),
+                menuPadding: const EdgeInsets.all(10.0),
+              ),
+              child: Column(
+                children: <Widget>[
+                  MenuBar(
+                    menus: createTestMenus(
+                      onSelected: onSelected,
+                      menuBackground: Colors.cyan,
+                      menuElevation: 18.0,
+                      menuPadding: const EdgeInsets.all(14.0),
+                      itemBackground: Colors.amber,
+                      itemForeground: Colors.grey,
+                      itemOverlay: Colors.blueGrey,
+                      itemPadding: const EdgeInsets.all(11.0),
+                    ),
+                    backgroundColor: MaterialStateProperty.all<Color?>(Colors.blue),
+                    height: 50.0,
+                    elevation: MaterialStateProperty.all<double?>(10.0),
+                    padding: const EdgeInsets.all(12.0),
+                  ),
+                  const Expanded(child: Placeholder()),
+                ],
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+
+    // Open a test menu.
+    await tester.tap(find.text(TestMenu.mainMenu1.label));
+    await tester.pump();
+
+    expect(tester.getRect(findMenuTopLevelBar()), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    final Material menuBarMaterial = getMenuBarMaterial(tester);
+    expect(menuBarMaterial.elevation, equals(10.0));
+    expect(menuBarMaterial.color, equals(Colors.blue));
+
+    final Material subMenuMaterial = getSubMenuMaterial(tester);
+    expect(tester.getRect(findMenuBarMenu()), equals(const Rect.fromLTRB(136.0, 49.0, 448.0, 237.0)));
+    expect(subMenuMaterial.elevation, equals(15));
+    expect(subMenuMaterial.color, equals(Colors.red));
+  });
 }
 
 enum TestMenu {
@@ -107,6 +164,13 @@ List<MenuItem> createTestMenus({
   void Function(TestMenu)? onClose,
   Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
   bool includeStandard = false,
+  Color? itemOverlay,
+  Color? itemBackground,
+  Color? itemForeground,
+  EdgeInsets? itemPadding,
+  Color? menuBackground,
+  EdgeInsets? menuPadding,
+  double? menuElevation,
 }) {
   final List<MenuItem> result = <MenuItem>[
     MenuBarMenu(
@@ -125,6 +189,9 @@ List<MenuItem> createTestMenus({
       label: TestMenu.mainMenu1.label,
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu1) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu1) : null,
+      padding: menuPadding,
+      backgroundColor: menuBackground != null ? MaterialStatePropertyAll<Color?>(menuBackground) : null,
+      elevation: menuElevation != null ? MaterialStatePropertyAll<double?>(menuElevation) : null,
       menus: <MenuItem>[
         MenuItemGroup(
           members: <MenuItem>[
@@ -132,6 +199,10 @@ List<MenuItem> createTestMenus({
               label: TestMenu.subMenu10.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu10) : null,
               shortcut: shortcuts[TestMenu.subMenu10],
+              padding: itemPadding,
+              foregroundColor: itemForeground != null ? MaterialStatePropertyAll<Color?>(itemForeground) : null,
+              backgroundColor: itemBackground != null ? MaterialStatePropertyAll<Color?>(itemBackground) : null,
+              overlayColor: itemOverlay != null ? MaterialStatePropertyAll<Color?>(itemOverlay) : null,
             ),
           ],
         ),
