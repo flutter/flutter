@@ -1790,7 +1790,7 @@ void main() {
   });
 
   testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
-    await tester.pumpWidget(_TestPostRouteCancel());
+    await tester.pumpWidget(const _TestPostRouteCancel());
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.down(tester.getCenter(find.text('PointerCancelEvents: 0')));
@@ -1861,7 +1861,7 @@ void main() {
 
   testWidgets('CupertinoModalPopupRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         restorationScopeId: 'app',
         home: _RestorableModalTestWidget(),
       ),
@@ -2249,6 +2249,8 @@ Widget buildNavigator({
 // Holding the 'Hold' button at the moment of popping will force the navigator to
 // cancel the down event, increasing the Home counter by 1.
 class _TestPostRouteCancel extends StatefulWidget {
+  const _TestPostRouteCancel();
+
   @override
   State<StatefulWidget> createState() => _TestPostRouteCancelState();
 }
@@ -2308,6 +2310,8 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
 }
 
 class _RestorableModalTestWidget extends StatelessWidget {
+  const _RestorableModalTestWidget();
+
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {

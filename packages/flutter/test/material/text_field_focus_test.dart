@@ -15,7 +15,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Navigator(
-            pages: <Page<void>>[_APage(), _BPage()],
+            pages: const <Page<void>>[_APage(), _BPage()],
             onPopPage: (Route<dynamic> route, dynamic result) {
               return false;
             },
@@ -551,6 +551,8 @@ void main() {
 }
 
 class _APage extends Page<void> {
+  const _APage();
+
   @override
   Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
     settings: this,
@@ -559,6 +561,8 @@ class _APage extends Page<void> {
 }
 
 class _BPage extends Page<void> {
+  const _BPage();
+
   @override
   Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
     settings: this,
