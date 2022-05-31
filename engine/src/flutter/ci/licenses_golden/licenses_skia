@@ -1,4 +1,4 @@
-Signature: e5e7526f4f4034bb18a1a2933b4e8124
+Signature: 8f88b1f8181320619371879bf896d381
 
 UNUSED LICENSES:
 
@@ -802,6 +802,7 @@ FILE: ../../../third_party/skia/go.sum
 FILE: ../../../third_party/skia/go_repositories.bzl
 FILE: ../../../third_party/skia/include/BUILD.bazel
 FILE: ../../../third_party/skia/include/android/BUILD.bazel
+FILE: ../../../third_party/skia/include/c/BUILD.bazel
 FILE: ../../../third_party/skia/include/codec/BUILD.bazel
 FILE: ../../../third_party/skia/include/config/BUILD.bazel
 FILE: ../../../third_party/skia/include/core/BUILD.bazel
@@ -809,10 +810,15 @@ FILE: ../../../third_party/skia/include/docs/BUILD.bazel
 FILE: ../../../third_party/skia/include/effects/BUILD.bazel
 FILE: ../../../third_party/skia/include/encode/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/d3d/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/dawn/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/gl/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/gl/egl/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/gl/glx/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/graphite/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/graphite/mtl/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/mock/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/mtl/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/vk/BUILD.bazel
 FILE: ../../../third_party/skia/include/pathops/BUILD.bazel
 FILE: ../../../third_party/skia/include/ports/BUILD.bazel
@@ -823,6 +829,7 @@ FILE: ../../../third_party/skia/include/private/gpu/ganesh/BUILD.bazel
 FILE: ../../../third_party/skia/include/sksl/BUILD.bazel
 FILE: ../../../third_party/skia/include/svg/BUILD.bazel
 FILE: ../../../third_party/skia/include/utils/BUILD.bazel
+FILE: ../../../third_party/skia/include/utils/mac/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_linux/VERSION
@@ -1260,23 +1267,32 @@ FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
 FILE: ../../../third_party/skia/src/BUILD.bazel
 FILE: ../../../third_party/skia/src/android/BUILD.bazel
+FILE: ../../../third_party/skia/src/c/BUILD.bazel
 FILE: ../../../third_party/skia/src/codec/BUILD.bazel
 FILE: ../../../third_party/skia/src/core/BUILD.bazel
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/effects/BUILD.bazel
 FILE: ../../../third_party/skia/src/effects/imagefilters/BUILD.bazel
+FILE: ../../../third_party/skia/src/fonts/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/ganesh/d3d/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/effects/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/geometry/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/ganesh/gl/android/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/builders/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/ganesh/gl/egl/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/glx/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/ganesh/gl/iOS/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/ganesh/gl/mac/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/webgl/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/ganesh/gl/win/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/glsl/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/gradients/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/mock/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/ganesh/mtl/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/BUILD.bazel
@@ -1286,8 +1302,10 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/vk/BUILD.bazel
 FILE: ../../../third_party/skia/src/image/BUILD.bazel
 FILE: ../../../third_party/skia/src/images/BUILD.bazel
+FILE: ../../../third_party/skia/src/lazy/BUILD.bazel
 FILE: ../../../third_party/skia/src/opts/BUILD.bazel
 FILE: ../../../third_party/skia/src/pathops/BUILD.bazel
+FILE: ../../../third_party/skia/src/pdf/BUILD.bazel
 FILE: ../../../third_party/skia/src/ports/BUILD.bazel
 FILE: ../../../third_party/skia/src/ports/SkTLS_pthread.cpp
 FILE: ../../../third_party/skia/src/ports/SkTLS_win.cpp
@@ -1322,6 +1340,8 @@ FILE: ../../../third_party/skia/src/sksl/tracing/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/transform/BUILD.bazel
 FILE: ../../../third_party/skia/src/text/gpu/BUILD.bazel
 FILE: ../../../third_party/skia/src/utils/BUILD.bazel
+FILE: ../../../third_party/skia/src/xml/BUILD.bazel
+FILE: ../../../third_party/skia/src/xps/BUILD.bazel
 FILE: ../../../third_party/skia/third_party/BUILD.bazel
 FILE: ../../../third_party/skia/toolchain/BUILD.bazel
 FILE: ../../../third_party/skia/toolchain/download_linux_amd64_toolchain.bzl
