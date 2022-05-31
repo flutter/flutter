@@ -33,6 +33,10 @@ class Texture {
 
   const TextureDescriptor& GetTextureDescriptor() const;
 
+  TextureIntent GetIntent() const;
+
+  virtual Scalar GetYCoordScale() const;
+
  protected:
   Texture(TextureDescriptor desc);
 
@@ -45,6 +49,7 @@ class Texture {
       size_t slice) = 0;
 
  private:
+  TextureIntent intent_ = TextureIntent::kRenderToTexture;
   const TextureDescriptor desc_;
 
   bool IsSliceValid(size_t slice) const;
