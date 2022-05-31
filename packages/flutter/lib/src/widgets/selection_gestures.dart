@@ -148,7 +148,7 @@ typedef ConsecutiveSelectionTapGestureTapUpCallback = void Function(TapUpDetails
 typedef ConsecutiveSelectionTapGestureSecondaryTapCallback = void Function(Offset lastSecondaryTapDownPosition);
 
 class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer {
-  /// Creates a tap gesture recognizer.
+  /// Creates a consecutive tap gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   SelectionConsecutiveTapGestureRecognizer({ super.debugOwner, super.supportedDevices });

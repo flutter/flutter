@@ -29,18 +29,15 @@ class DefaultSelectionGestures extends StatelessWidget {
         instance
           ..onSecondaryTapUp = (TapUpDetails details) {
             print('onSecondaryTapUp');
-            Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
-            Actions.invoke(context, SelectionToolbarControlIntent.hide);
-            Actions.invoke(context, SelectionToolbarControlIntent.show);
           }
           ..onSecondaryTap = () {
             print('onSecondaryTap');
-            // Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: position));
-            // Actions.invoke(context, SelectionToolbarControlIntent.hide);
-            // Actions.invoke(context, SelectionToolbarControlIntent.show);
           }
           ..onSecondaryTapDown = (TapDownDetails details) {
             print('onSecondaryTapDown');
+            Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+            Actions.invoke(context, SelectionToolbarControlIntent.hide);
+            Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
           }
           ..onTapDown = (TapDownDetails details, int tapCount) {
             print('onTapDown , tapCount  $tapCount');
