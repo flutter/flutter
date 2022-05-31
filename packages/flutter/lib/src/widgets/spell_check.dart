@@ -5,84 +5,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/services/platform_channel.dart';
-import 'package:flutter/src/services/system_channels.dart';
+import 'package:flutter/services.dart'
+    show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///                            START OF PR #1.1                              ///
 ////////////////////////////////////////////////////////////////////////////////
-
-/// A data structure representing a range of misspelled text and the suggested
-/// replacements for this range. For example, one [SuggestionSpan] of the
-/// [List<SuggestionSpan>] suggestions of the [SpellCheckResults] corresponding
-/// to "Hello, wrold!" may be:
-/// ```dart
-/// SuggestionSpan(7, 11, List<String>.from["word, world, old"])
-/// ```
-@immutable
-class SuggestionSpan {
-  /// Creates a span representing a misspelled range of text and the replacements
-  /// suggested by a spell checker.
-  ///
-  /// The [startIndex], [endIndex], and replacement [suggestions] must all not
-  /// be null.
-  const SuggestionSpan(this.startIndex, this.endIndex, this.suggestions)
-      : assert(startIndex != null),
-        assert(endIndex != null),
-        assert(suggestions != null);
-
-  /// The start index of the misspelled range of text.
-  final int startIndex;
-
-  /// The end index of the misspelled range of text, inclusive.
-  final int endIndex;
-
-  /// The alternate suggestions for misspelled range of text.
-  final List<String> suggestions;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other))
-        return true;
-    return other is SuggestionSpan &&
-        other.startIndex == startIndex &&
-        other.endIndex == endIndex &&
-        listEquals<String>(other.suggestions, suggestions);
-  }
-
-  @override
-  int get hashCode => Object.hash(startIndex, endIndex, hashList(suggestions));
-}
-
-/// A data structure grouping together the [SuggestionSpan]s and related text of
-/// results returned by a spell checker.
-@immutable
-class SpellCheckResults {
-  /// Creates results based off those received by spell checking some text input.
-  const SpellCheckResults(this.spellCheckedText, this.suggestionSpans);
-
-  /// The text that the [suggestionSpans] correspond to.
-  final String spellCheckedText;
-
-  /// The spell check results of the [spellCheckedText].
-  /// See also:
-  ///
-  ///  * [SuggestionSpan], the ranges of misspelled text and corresponding
-  ///    replacement suggestions.
-  final List<SuggestionSpan> suggestionSpans;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other))
-        return true;
-    return other is SpellCheckResults &&
-        other.spellCheckedText == spellCheckedText &&
-        listEquals<SuggestionSpan>(other.suggestionSpans, suggestionSpans);
-  }
-
-  @override
-  int get hashCode => Object.hash(spellCheckedText, hashList(suggestionSpans));
-}
 
 /// Controls how spell check is performed for text input.
 ///
@@ -116,13 +44,6 @@ class SpellCheckConfiguration {
   static SpellCheckConfiguration disabled = SpellCheckConfiguration();
 }
 
-/// Determines how spell check results are received for text input.
-abstract class SpellCheckService {
-  /// Facilitates a spell check request.
-  Future<SpellCheckResults?> fetchSpellCheckSuggestions(
-      Locale locale, String text);
-}
-
 /// Determines how misspelled words are indicated in text input and how
 /// replacement suggestions for misspelled words are displayed via menu.
 mixin SpellCheckSuggestionsHandler {
@@ -148,48 +69,7 @@ mixin SpellCheckSuggestionsHandler {
 ///                             END OF PR #1.1                               ///
 ////////////////////////////////////////////////////////////////////////////////
 
-class DefaultSpellCheckService implements SpellCheckService {
-  late MethodChannel spellCheckChannel;
-
-  DefaultSpellCheckService() {
-    spellCheckChannel = SystemChannels.spellCheck;
-  }
-
-  @override
-  Future<SpellCheckResults?> fetchSpellCheckSuggestions(
-      Locale locale, String text) async {
-    assert(locale != null);
-    assert(text != null);
-
-    final List<dynamic> rawResults;
-
-    try {
-      rawResults = await spellCheckChannel.invokeMethod(
-        'SpellCheck.initiateSpellCheck',
-        <String>[locale.toLanguageTag(), text],
-      );
-    } catch (e) {
-      // Spell check request canceled due to ongoing request.
-      return null;
-    }
-
-    List<String> results = rawResults.cast<String>();
-
-    String resultsText = results.removeAt(0);
-    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
-
-    results.forEach((String result) {
-      List<String> resultParsed = result.split(".");
-      suggestionSpans.add(SuggestionSpan(int.parse(resultParsed[0]),
-          int.parse(resultParsed[1]), resultParsed[2].split("\n")));
-    });
-
-    return SpellCheckResults(resultsText, suggestionSpans);
-  }
-}
-
-class DefaultSpellCheckSuggestionsHandler
-    with SpellCheckSuggestionsHandler {
+class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   int scssSpans_consumed_index = 0;
   int text_consumed_index = 0;
 
@@ -396,232 +276,93 @@ class DefaultSpellCheckSuggestionsHandler
       return TextSpan(
           style: style,
           children: buildSubtreesWithMisspelledWordsIndicated(
+              correctedSpellCheckResults, value, style, misspelledStyle, true));
+    } else {
+      return TextSpan(
+          style: style,
+          children: buildSubtreesWithMisspelledWordsIndicated(
               correctedSpellCheckResults,
-              value.text,
+              value,
               style,
               misspelledStyle,
               false));
-    } else {
-      return TextSpan(
-        style: style,
-        children: <TextSpan>[
-          TextSpan(
-              children: buildSubtreesWithMisspelledWordsIndicated(
-                  correctedSpellCheckResults,
-                  value.composing.textBefore(value.text),
-                  style,
-                  misspelledStyle,
-                  false)),
-          TextSpan(
-              children: buildSubtreesWithMisspelledWordsIndicated(
-                  correctedSpellCheckResults,
-                  value.composing.textInside(value.text),
-                  style,
-                  misspelledStyle,
-                  true)),
-          TextSpan(
-              children: buildSubtreesWithMisspelledWordsIndicated(
-                  correctedSpellCheckResults,
-                  value.composing.textAfter(value.text),
-                  style,
-                  misspelledStyle,
-                  false)),
-        ],
-      );
     }
   }
-
-//TODO(camillesimon): Replace method of building TextSpan tree in three parts with method of building in one part. Attempt started below.
-//   @override
-//   TextSpan buildTextSpanWithSpellCheckSuggestions(
-//       List<SuggestionSpan>? spellCheckResults,
-//       TextEditingValue value, TextStyle? style, bool composingWithinCurrentTextRange) {
-
-//       TextStyle misspelledStyle;
-
-//       switch(platform) {
-//           case TargetPlatform.android:
-//           default:
-//             misspelledStyle = TextStyle(decoration: TextDecoration.underline,
-//                             decorationColor: Colors.red,
-//                             decorationStyle: TextDecorationStyle.wavy);
-//             break;
-//       }
-
-//     return TextSpan(
-//         style: style,
-//         children: buildSubtreesWithMisspelledWordsIndicated(spellCheckResults ?? <SuggestionSpan>[], value, style, misspelledStyle, composingWithinCurrentTextRange));
-//     }
-
-//     /// Helper method for building TextSpan trees.
-//     List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(List<SuggestionSpan> spellCheckSuggestions, TextEditingValue value, TextStyle? style, TextStyle misspelledStyle, bool whatever) {
-//       List<TextSpan> tsTreeChildren = <TextSpan>[];
-//       String text = value.text;
-//       int textLength= text.length;
-//       int text_pointer = 0;
-//       int scss_pointer = 0;
-//       bool isComposing;
-//       bool remainingResults = scss_pointer < spellCheckSuggestions.length;
-
-//       bool composingWithinCurrentTextRange = false;
-
-//       TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline)) ?? TextStyle(decoration: TextDecoration.underline);
-//       TextStyle misspelledJointStyle = overrideTextSpanStyle(style, misspelledStyle);
-
-//       SuggestionSpan currScssSpan = spellCheckSuggestions[scss_pointer];
-
-//         // while (i) the text is not totally consumed or (ii) the suggestsion are not totally consumed
-//         while (text_pointer < textLength || remainingResults) {
-//             int end_index;
-//             if (scss_pointer < spellCheckSuggestions.length) {
-//                 currScssSpan = spellCheckSuggestions[scss_pointer];
-//             } else {
-//                 remainingResults = false;
-//             }
-
-//             // we either ignore composing entirely to maintain tree integrity or check if where we are in the text is within the composing region
-//             // isComposing = composingWithinCurrentTextRange ? false : (text_pointer == value.composing.startIndex);
-//             // print(value.composing.startIndex);
-//             isComposing = (text_pointer == value.composing.startIndex);
-
-//             // print("BUILDING: ${composingWithinCurrentTextRange} + ${text.substring(text_pointer)}");
-
-//             // we are in composing region...
-//             if (isComposing) {
-//                 // and are misspelled (meaning results remain) -- we want to draw current word (text_pointer : value.composing.endIndex) with underline and advance scss_pointer
-//                 if (remainingResults && text_pointer == currScssSpan.startIndex) {
-//                     end_index = value.composing.endIndex;
-//                     tsTreeChildren.add(TextSpan(style: composingStyle,
-//                             text: text.substring(text_pointer, end_index)));
-//                     text_pointer = end_index;
-//                     scss_pointer += 1;
-//                 }
-//                 // and not misspelled -- we want to draw current word (text_pointer : value.composing.endIndex) with underline and not advance scss_pointer
-//                 else {
-//                     end_index = value.composing.endIndex;
-//                     tsTreeChildren.add(TextSpan(style: composingStyle,
-//                             text: text.substring(text_pointer, end_index)));
-//                     text_pointer = end_index;
-//                 }
-//             }
-//             // we are not in composing region but results remain...
-//             else if (remainingResults) {
-//                 // and are misspelled -- we want to draw current word (text_pointer : currScssSpan.endIndex) [MAY HAVE TO ADD FIX HERE] and advance scss_pointer
-//                 if (text_pointer == currScssSpan.startIndex) {
-//                     end_index = currScssSpan.endIndex + 1;
-//                     tsTreeChildren.add(TextSpan(style: misspelledJointStyle,
-//                             text: text.substring(text_pointer, end_index)));
-//                     text_pointer = end_index;
-//                     scss_pointer += 1;
-//                 }
-//                 // and not misspelled -- we want to draw as per usual until we reach (i) the start of the composing region or (ii) the start of the next spell check result
-//                 else {
-//                     if (!composingWithinCurrentTextRange) {
-//                         end_index = value.composing.startIndex >= text_pointer ? ((currScssSpan.startIndex >= value.composing.startIndex) ? value.composing.startIndex : currScssSpan.startIndex) : currScssSpan.startIndex;
-//                     } else {
-//                         end_index = currScssSpan.startIndex;
-//                     }
-
-//                     tsTreeChildren.add(TextSpan(style: style,
-//                                                 text: text.substring(text_pointer, end_index)));
-//                     text_pointer = end_index;
-//                 }
-
-//             }
-//             // we are not in composing region and no results remain...
-//             else {
-//                 if (!composingWithinCurrentTextRange) {
-//                 end_index = (value.composing.startIndex >= text_pointer) ? value.composing.startIndex : textLength;
-//                 } else {
-//                 end_index = textLength;
-//                 }
-//                 tsTreeChildren.add(TextSpan(style: style,
-//                                             text: text.substring(text_pointer, end_index)));
-//                 text_pointer = end_index;
-//             }
-//         }
-
-//         return tsTreeChildren;
-//   }
 
   /// Helper method for building TextSpan trees.
   List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(
       List<SuggestionSpan> spellCheckSuggestions,
-      String text,
+      TextEditingValue value,
       TextStyle? style,
       TextStyle misspelledStyle,
-      bool isComposing) {
+      bool composingWithinCurrentTextRange) {
     List<TextSpan> tsTreeChildren = <TextSpan>[];
     int text_pointer = 0;
 
+    String text = value.text;
+    TextRange composingRegion = value.composing; // here
     TextStyle composingStyle =
         style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
             TextStyle(decoration: TextDecoration.underline);
     TextStyle misspelledJointStyle =
         overrideTextSpanStyle(style, misspelledStyle);
 
-    if (scssSpans_consumed_index < spellCheckSuggestions.length) {
-      int scss_pointer = scssSpans_consumed_index;
+    int scss_pointer = 0;
+
+    while (text_pointer < text.length &&
+        scss_pointer < spellCheckSuggestions.length) {
+      int end_index;
+      bool isComposing;
       SuggestionSpan currScssSpan = spellCheckSuggestions[scss_pointer];
-      int span_pointer = currScssSpan.startIndex;
 
-      // while (i) the text is not totally consumed, (ii) the suggestsion are not totally consumed, (iii) there is a suggestion within the range of the text
-      while (text_pointer < text.length &&
-          scss_pointer < spellCheckSuggestions.length &&
-          (currScssSpan.startIndex - text_consumed_index) < text.length) {
-        int end_index;
-        currScssSpan = spellCheckSuggestions[scss_pointer];
-
-        // if the next suggestion is further down the line than the current words
-        if ((currScssSpan.startIndex - text_consumed_index) > text_pointer) {
-          end_index =
-              (currScssSpan.startIndex - text_consumed_index) < text.length
-                  ? (currScssSpan.startIndex - text_consumed_index)
-                  : text.length;
-          tsTreeChildren.add(TextSpan(
-              style: isComposing ? composingStyle : style,
-              text: text.substring(text_pointer, end_index)));
-          text_pointer = end_index;
-        }
-        // if the next suggestion is where the current word is
-        else {
-          //   print((currScssSpan.endIndex - text_consumed_index + 1) < text.length);
-          // print(currScssSpan.startIndex);
-          // print(text_consumed_index);
-          end_index =
-              (currScssSpan.endIndex - text_consumed_index + 1) < text.length
-                  ? (currScssSpan.endIndex - text_consumed_index + 1)
-                  : text.length;
-          //   print(end_index);
-          tsTreeChildren.add(TextSpan(
-              style: isComposing ? composingStyle : misspelledJointStyle,
-              text: text.substring(
-                  (currScssSpan.startIndex - text_consumed_index), end_index)));
-
-          text_pointer = end_index;
-          scss_pointer += 1;
-        }
-      }
-
-      text_consumed_index = text_pointer + text_consumed_index;
-
-      // Add remaining text if there is any
-      if (text_pointer < text.length) {
+      if (currScssSpan.startIndex > text_pointer) {
+        end_index = currScssSpan.startIndex < text.length
+            ? currScssSpan.startIndex
+            : text.length;
+        isComposing = text_pointer >= composingRegion.start &&
+            end_index <= composingRegion.end &&
+            !composingWithinCurrentTextRange;
         tsTreeChildren.add(TextSpan(
             style: isComposing ? composingStyle : style,
-            text: text.substring(text_pointer, text.length)));
-        text_consumed_index = text.length + text_consumed_index;
+            text: text.substring(text_pointer, end_index)));
+        text_pointer = end_index;
+      } else {
+        end_index = currScssSpan.endIndex + 1 < text.length
+            ? (currScssSpan.endIndex + 1)
+            : text.length;
+        isComposing = text_pointer >= composingRegion.start &&
+            end_index <= composingRegion.end &&
+            !composingWithinCurrentTextRange;
+        print(
+            "ELSE: |${text.substring(currScssSpan.startIndex, end_index)}|, ${isComposing}");
+        tsTreeChildren.add(TextSpan(
+            style: isComposing ? composingStyle : misspelledJointStyle,
+            text: text.substring(currScssSpan.startIndex, end_index)));
+
+        text_pointer = end_index;
+        scss_pointer += 1;
       }
-      scssSpans_consumed_index = scss_pointer;
-      //   print("IF CASE ${tsTreeChildren}");
-      return tsTreeChildren;
-    } else {
-      text_consumed_index = text.length;
-      //   print("ELSE CASE: ${ <TextSpan>[TextSpan(text: text, style: isComposing ? composingStyle : style)]}");
-      return <TextSpan>[
-        TextSpan(text: text, style: isComposing ? composingStyle : style)
-      ];
     }
+
+    if (text_pointer < text.length) {
+      if (text_pointer < composingRegion.start &&
+          !composingWithinCurrentTextRange) {
+        tsTreeChildren.add(TextSpan(
+            style: style,
+            text: text.substring(text_pointer, composingRegion.start)));
+        tsTreeChildren.add(TextSpan(
+            style: composingStyle,
+            text: text.substring(composingRegion.start, composingRegion.end)));
+        tsTreeChildren.add(TextSpan(
+            style: style,
+            text: text.substring(composingRegion.end, text.length)));
+      } else {
+        tsTreeChildren.add(TextSpan(
+            style: style, text: text.substring(text_pointer, text.length)));
+      }
+    }
+
+    return tsTreeChildren;
   }
 
   /// Responsible for defining the behavior of overriding/merging
