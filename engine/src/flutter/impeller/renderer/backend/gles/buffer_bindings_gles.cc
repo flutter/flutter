@@ -64,7 +64,7 @@ static std::string NormalizeUniformKey(const std::string& key) {
     if (ch == '_') {
       continue;
     }
-    stream << static_cast<char>(std::toupper(ch));
+    stream << static_cast<char>(toupper(ch));
   }
   return stream.str();
 }

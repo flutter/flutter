@@ -52,14 +52,14 @@ bool VerticesContents::Render(const ContentContext& renderer,
   VertexMode mode = vertices_.GetMode();
 
   if (indices.size() == 0) {
-    for (uint i = 0; i < points.size(); i += 1) {
+    for (size_t i = 0; i < points.size(); i += 1) {
       VS::PerVertexData data;
       data.point = points[i];
       data.vertex_color = color_;
       vertex_builder.AppendVertex(data);
     }
   } else {
-    for (uint i = 0; i < indices.size(); i += 1) {
+    for (size_t i = 0; i < indices.size(); i += 1) {
       VS::PerVertexData data;
       data.point = points[indices[i]];
       data.vertex_color = color_;
