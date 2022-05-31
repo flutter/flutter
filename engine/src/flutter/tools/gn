@@ -116,6 +116,8 @@ def can_use_prebuilt_dart(args):
     prebuilt = 'linux-%s' % args.linux_cpu
   elif args.target_os == 'mac' and args.mac_cpu in ['x64', 'arm64']:
     prebuilt = 'macos-%s' % args.mac_cpu
+  elif args.target_os == 'win' and args.windows_cpu in ['x64', 'arm64']:
+    prebuilt = 'windows-%s' % args.windows_cpu
 
   prebuilts_dir = None
   if prebuilt != None:

@@ -111,7 +111,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '6c00bc8d3d3c80e07e58c1f91d255dcefc420641',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'f582982073b6f04b7a70bc284bac8fafa6c0a846',
 
    # Fuchsia compatibility
    #
@@ -399,6 +399,16 @@ deps = {
     'packages': [
       {
         'package': 'flutter/dart-sdk/windows-amd64',
+        'version': 'git_revision:'+Var('dart_revision')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "win"'
+  },
+  'src/flutter/prebuilts/windows-arm64/dart-sdk': {
+    'packages': [
+      {
+        'package': 'flutter/dart-sdk/windows-arm64',
         'version': 'git_revision:'+Var('dart_revision')
       }
     ],
