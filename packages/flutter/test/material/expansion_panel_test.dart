@@ -1302,6 +1302,54 @@ void main() {
     expect(box.size.width, equals(736.0));
   });
 
+  // Regression test for #5848
+  testWidgets('The AnimatedContainer and IconButton have the same height so that animations are smooth', (WidgetTester tester) async {
+    const Key firstPanelKey = Key('firstPanelKey');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          child: SimpleExpansionPanelListTestWidget(
+            firstPanelKey: firstPanelKey,
+            canTapOnHeader: true,
+          ),
+        ),
+      ),
+    );
+
+    // The panel is closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    // No padding applied to closed header
+    final RenderBox boxOfContainer = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    final RenderBox boxOfIconButton = tester.renderObject(find.byType(IconButton).first);
+    expect(boxOfContainer.size.height, equals(boxOfIconButton.size.height));
+  });
+
+  testWidgets("The AnimatedContainer's height is at least kMinInteractiveDimension", (WidgetTester tester) async {
+    const Key firstPanelKey = Key('firstPanelKey');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          child: SimpleExpansionPanelListTestWidget(
+            firstPanelKey: firstPanelKey,
+            canTapOnHeader: true,
+          ),
+        ),
+      ),
+    );
+
+    // The panel is closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    // No padding applied to closed header
+    final RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    expect(box.size.height, greaterThanOrEqualTo(kMinInteractiveDimension));
+  });
+
   testWidgets('Correct custom header padding', (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
 
