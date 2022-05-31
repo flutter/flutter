@@ -237,7 +237,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -251,7 +250,7 @@ void main() {
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2');
-    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 5));
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
     expect(find.byType(CupertinoButton), findsNothing);
 
     // Paste it at the end.
@@ -360,7 +359,7 @@ void main() {
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2');
-    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 5));
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
     expect(find.byType(CupertinoButton), findsNothing);
 
     // Paste it at the end.
@@ -1627,7 +1626,6 @@ void main() {
     final int eIndex = testValue.indexOf('e');
     final Offset ePos = textOffsetToPosition(tester, eIndex);
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
@@ -1925,7 +1923,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -1963,7 +1960,6 @@ void main() {
 
     // Drag from 'c' to 'g'.
     final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
@@ -2011,7 +2007,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(gPos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(ePos);
     await tester.pump();
@@ -2044,7 +2039,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -5157,11 +5151,12 @@ void main() {
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.setData')
+        if (methodCall.method == 'Clipboard.setData') {
           // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
-        else if (methodCall.method == 'Clipboard.getData')
+        } else if (methodCall.method == 'Clipboard.getData') {
           return <String, dynamic>{'text': clipboardContent};
+        }
         return null;
       });
 
@@ -5233,8 +5228,9 @@ void main() {
     const String clipboardContent = 'I love Flutter!';
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.getData')
+        if (methodCall.method == 'Clipboard.getData') {
           return <String, dynamic>{'text': clipboardContent};
+        }
         return null;
       });
 
@@ -5282,11 +5278,12 @@ void main() {
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.setData')
+        if (methodCall.method == 'Clipboard.setData') {
           // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
-        else if (methodCall.method == 'Clipboard.getData')
+        } else if (methodCall.method == 'Clipboard.getData') {
           return <String, dynamic>{'text': clipboardContent};
+        }
         return null;
       });
 
@@ -7096,7 +7093,6 @@ void main() {
         pointer: 1,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await gesture.up();
 
       // Cursor at tap position, not at word edge.
@@ -7970,7 +7966,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(textOffsetToPosition(tester, 56));
     // To the edge of the screen basically.
@@ -8114,7 +8109,6 @@ void main() {
     final TestGesture gesture =
         await tester.startGesture(textOffsetToPosition(tester, 19));
     // TODO(justinmc): Make sure you've got all things torn down.
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 500));
     expect(
       controller.selection,
@@ -8268,7 +8262,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
 
     // Still hasn't scrolled.
     expect(
@@ -8431,7 +8424,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
@@ -8561,8 +8553,7 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
-      await tester.pump();
+        await tester.pump();
       await gesture.up();
       await tester.pump(const Duration(milliseconds: 50));
       expect(
@@ -8772,7 +8763,6 @@ void main() {
       pointer: 7,
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     expect(controller.value.selection, isNotNull);
@@ -9595,7 +9585,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
       await tester.pump();
@@ -9628,7 +9617,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(seconds: 2));
       await gesture.up();
       await tester.pump();
@@ -9661,7 +9649,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -9695,7 +9682,6 @@ void main() {
       topLeft + const Offset(0.0, 5.0),
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 50));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -10198,7 +10184,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: center);
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -10272,7 +10257,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -10372,7 +10356,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -10954,7 +10937,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
@@ -11051,7 +11033,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
@@ -11148,7 +11129,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 8);
@@ -11245,7 +11225,6 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 8);
@@ -11343,7 +11322,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -11400,57 +11378,158 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/pull/103228
-    final FocusNode focusNode1 = FocusNode();
-    final FocusNode focusNode2 = FocusNode();
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              TextField(
-                key: key1,
-                focusNode: focusNode1,
-              ),
-              TextField(
-                key: key2,
-                focusNode: focusNode2,
-              ),
-            ],
+  group('Right click focus', () {
+    testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/103228
+      final FocusNode focusNode1 = FocusNode();
+      final FocusNode focusNode2 = FocusNode();
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  key: key1,
+                  focusNode: focusNode1,
+                ),
+                TextField(
+                  key: key2,
+                  focusNode: focusNode2,
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Interact with the field to establish the input connection.
-    await tester.tapAt(
-      tester.getCenter(find.byKey(key1)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
+      // Interact with the field to establish the input connection.
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key1)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
 
-    expect(focusNode1.hasFocus, isTrue);
-    expect(focusNode2.hasFocus, isFalse);
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
 
-    await tester.tapAt(
-      tester.getCenter(find.byKey(key2)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key2)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
 
-    expect(focusNode1.hasFocus, isFalse);
-    expect(focusNode2.hasFocus, isTrue);
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isTrue);
 
-    await tester.tapAt(
-      tester.getCenter(find.byKey(key1)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key1)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
 
-    expect(focusNode1.hasFocus, isTrue);
-    expect(focusNode2.hasFocus, isFalse);
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+    });
+
+    testWidgets('Can right click to focus on previously selected word on Apple platforms', (WidgetTester tester) async {
+      final FocusNode focusNode1 = FocusNode();
+      final FocusNode focusNode2 = FocusNode();
+      final TextEditingController controller = TextEditingController(
+        text: 'first second',
+      );
+      final UniqueKey key1 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  key: key1,
+                  controller: controller,
+                  focusNode: focusNode1,
+                ),
+                Focus(
+                  focusNode: focusNode2,
+                  child: const Text('focusable'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Interact with the field to establish the input connection.
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key1)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+
+      // Select the second word.
+      controller.selection = const TextSelection(
+        baseOffset: 6,
+        extentOffset: 12,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.isCollapsed, isFalse);
+      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.extentOffset, 12);
+
+      // Unfocus the first field.
+      focusNode2.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isTrue);
+
+      // Right click the second word in the first field, which is still selected
+      // even though the selection is not visible.
+      await tester.tapAt(
+        textOffsetToPosition(tester, 8),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.extentOffset, 12);
+
+      // Select everything.
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 12,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 12);
+
+      // Unfocus the first field.
+      focusNode2.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Right click the first word in the first field.
+      await tester.tapAt(
+        textOffsetToPosition(tester, 2),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 5);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 }

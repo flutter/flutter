@@ -63,6 +63,54 @@ void main() {
     );
   }
 
+  testWidgets('Do not crash when replacing scroll position during the drag', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/89681
+    bool showScrollbars = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.2,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (BuildContext context, ScrollController scrollController) {
+                showScrollbars = !showScrollbars;
+                // Change the scroll behavior will trigger scroll position replace.
+                final ScrollBehavior behavior = const ScrollBehavior().copyWith(scrollbars: showScrollbars);
+                return ScrollConfiguration(
+                  behavior: behavior,
+                  child: ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    controller: scrollController,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemCount: 100,
+                    itemBuilder: (_, int index) => SizedBox(
+                      height: 100,
+                      child: ColoredBox(
+                        color: Colors.primaries[index % Colors.primaries.length],
+                        child: Text('Item $index'),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('Item 1'), const Offset(0, 200), 350);
+    await tester.pumpAndSettle();
+
+    // Go without throw.
+  });
+
   testWidgets('Scrolls correct amount when maxChildSize < 1.0', (WidgetTester tester) async {
     const Key key = ValueKey<String>('container');
     await tester.pumpWidget(boilerplateWidget(

@@ -1194,7 +1194,7 @@ class _Defaults extends NavigationBarThemeData {
   @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.all(IconThemeData(
+    return MaterialStatePropertyAll<IconThemeData>(IconThemeData(
       size: 24,
       color: _colors.onSurface,
     ));
@@ -1202,7 +1202,7 @@ class _Defaults extends NavigationBarThemeData {
 
   @override Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStateProperty.all(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
+  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES

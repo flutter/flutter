@@ -60,6 +60,8 @@
 /dev/devicelab/bin/tasks/image_list_reported_duration.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/large_image_changer_perf_android.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/linux_chrome_dev_mode.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/list_text_layout_perf__e2e_summary.dart @dnfield @flutter/engine
+/dev/devicelab/bin/tasks/list_text_layout_impeller_perf__e2e_summary.dart @dnfield @flutter/engine
 /dev/devicelab/bin/tasks/multi_widget_construction_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery__crane_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/picture_cache_perf__e2e_summary.dart @zanderso @flutter/engine
@@ -255,4 +257,3 @@
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # verify_binaries_codesigned @christopherfujino @flutter/releases
-# google_test @renyou
