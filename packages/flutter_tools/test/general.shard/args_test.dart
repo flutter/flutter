@@ -80,7 +80,8 @@ void main() {
         }
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
-    command.argParser.addMultiOption('key',
+    command.argParser.addMultiOption(
+      'key',
       allowed: <String>['a', 'b', 'c'],
     );
     // argResults will be null at this point, if attempt to read them is made,
