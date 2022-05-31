@@ -28,3 +28,5 @@ dev_dependencies:
       url: https://github.com/flutter/web_installers.git
       path: packages/simulators/
       ref: 9afed28b771da1c4e82a3382c4a2b31344c04522
+  skia_gold_client:
+    path: ../../testing/skia_gold_client

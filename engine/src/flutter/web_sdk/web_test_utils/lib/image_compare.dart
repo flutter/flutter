@@ -6,16 +6,10 @@ import 'dart:io';
 
 import 'package:image/image.dart';
 import 'package:path/path.dart' as p;
+import 'package:skia_gold_client/skia_gold_client.dart';
 
 import 'environment.dart';
 import 'goldens.dart';
-import 'skia_client.dart';
-
-/// Whether this code is running on LUCI.
-bool _isLuci = Platform.environment.containsKey('SWARMING_TASK_ID') && Platform.environment.containsKey('GOLDCTL');
-bool _isPreSubmit = _isLuci && Platform.environment.containsKey('GOLD_TRYJOB');
-bool _isPostSubmit = _isLuci && !_isPreSubmit;
-
 
 /// Compares a screenshot taken through a test with its golden.
 ///
@@ -43,12 +37,26 @@ Future<String> compareImage(
   await screenshotFile.create(recursive: true);
   await screenshotFile.writeAsBytes(encodePng(screenshot), flush: true);
 
-  if (_isLuci) {
+  if (isLuciEnv) {
     // This is temporary to get started by uploading existing screenshots to
     // Skia Gold. The next step would be to actually use Skia Gold for
     // comparison.
     final int screenshotSize = screenshot.width * screenshot.height;
-    await _uploadToSkiaGold(skiaClient, screenshotFile, screenshotSize, filename, isCanvaskitTest);
+
+    late int pixelColorDelta;
+    if (isCanvaskitTest) {
+      pixelColorDelta = 21;
+    } else if (skiaClient.dimensions != null && skiaClient.dimensions!['Browser'] == 'ios-safari') {
+      pixelColorDelta = 15;
+    } else {
+      pixelColorDelta = 3;
+    }
+    skiaClient.addImg(
+      filename,
+      screenshotFile,
+      screenshotSize: screenshotSize,
+      pixelColorDelta: pixelColorDelta,
+    );
     return 'OK';
   }
 
@@ -147,44 +155,4 @@ Future<Image?> _getGolden(String filename) {
 
 String _getFullScreenshotPath(String filename) {
   return p.join(environment.webUiSkiaGoldDirectory.path, filename);
-}
-
-Future<void> _uploadToSkiaGold(
-  SkiaGoldClient skiaClient,
-  File screenshotFile,
-  int screenshotSize,
-  String filename,
-  bool isCanvaskitTest,
-) async {
-  // Can't upload to Gold Skia unless running in LUCI.
-  assert(_isLuci);
-
-  if (_isPreSubmit) {
-    return _uploadInPreSubmit(skiaClient, filename, screenshotFile, screenshotSize, isCanvaskitTest);
-  }
-  if (_isPostSubmit) {
-    return _uploadInPostSubmit(skiaClient, filename, screenshotFile, screenshotSize, isCanvaskitTest);
-  }
-}
-
-Future<void> _uploadInPreSubmit(
-  SkiaGoldClient skiaClient,
-  String filename,
-  File screenshotFile,
-  int screenshotSize,
-  bool isCanvaskitTest,
-) {
-  assert(_isPreSubmit);
-  return skiaClient.tryjobAdd(filename, screenshotFile, screenshotSize, isCanvaskitTest);
-}
-
-Future<void> _uploadInPostSubmit(
-  SkiaGoldClient skiaClient,
-  String filename,
-  File screenshotFile,
-  int screenshotSize,
-  bool isCanvaskitTest,
-) {
-  assert(_isPostSubmit);
-  return skiaClient.imgtestAdd(filename, screenshotFile, screenshotSize, isCanvaskitTest);
 }
