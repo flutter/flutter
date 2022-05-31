@@ -164,7 +164,7 @@ Future<void> run(List<String> args) async {
       } else {
         globals.fs.currentDirectory = testDirectory;
       }
-      if (!collector.collectCoverageData(argResults[_kOptionCoveragePath] as String, coverageDirectory: coverageDirectory)) {
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath] as String, coverageDirectory: coverageDirectory)) {
         throwToolExit('Failed to collect coverage data');
       }
     }
