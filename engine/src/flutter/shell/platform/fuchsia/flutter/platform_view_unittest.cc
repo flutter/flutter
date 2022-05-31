@@ -632,10 +632,11 @@ TEST_F(PlatformViewTests, SetViewportMetrics) {
       })));
   session_listener->OnScenicEvent(std::move(events));
   RunLoopUntilIdle();
-  EXPECT_EQ(delegate.metrics(),
-            flutter::ViewportMetrics(
-                valid_pixel_ratio, valid_pixel_ratio * valid_max_bound,
-                valid_pixel_ratio * valid_max_bound, -1.0));
+  EXPECT_EQ(
+      delegate.metrics(),
+      flutter::ViewportMetrics(
+          valid_pixel_ratio, std::round(valid_pixel_ratio * valid_max_bound),
+          std::round(valid_pixel_ratio * valid_max_bound), -1.0));
 }
 
 // This test makes sure that the PlatformView correctly registers semantics
