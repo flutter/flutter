@@ -101,6 +101,9 @@ bool TextureContents::Render(const ContentContext& renderer,
                    entity.GetTransformation();
   frame_info.alpha = opacity_;
 
+  FS::FragInfo frag_info;
+  frag_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
+
   Command cmd;
   cmd.label = "TextureFill";
   cmd.pipeline =
@@ -108,6 +111,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+  FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
   FS::BindTextureSampler(cmd, texture_,
                          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
                              sampler_descriptor_));

@@ -79,6 +79,9 @@ class TextureGLES final : public Texture,
   // |Texture|
   ISize GetSize() const override;
 
+  // |Texture|
+  Scalar GetYCoordScale() const override;
+
   void InitializeContentsIfNecessary() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextureGLES);

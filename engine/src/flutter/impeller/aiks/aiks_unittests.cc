@@ -225,6 +225,47 @@ TEST_P(AiksTest, CanRenderGroupOpacity) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CoordinateConversionsAreCorrect) {
+  Canvas canvas;
+
+  // Render a texture directly.
+  {
+    Paint paint;
+    auto image =
+        std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
+    paint.color = Color::Red();
+
+    canvas.Save();
+    canvas.Translate({100, 200, 0});
+    canvas.Scale(Vector2{0.5, 0.5});
+    canvas.DrawImage(image, Point::MakeXY(100.0, 100.0), paint);
+    canvas.Restore();
+  }
+
+  // Render an offscreen rendered texture.
+  {
+    Paint red;
+    red.color = Color::Red();
+    Paint green;
+    green.color = Color::Green();
+    Paint blue;
+    blue.color = Color::Blue();
+
+    Paint alpha;
+    alpha.color = Color::Red().WithAlpha(0.5);
+
+    canvas.SaveLayer(alpha);
+
+    canvas.DrawRect({000, 000, 100, 100}, red);
+    canvas.DrawRect({020, 020, 100, 100}, green);
+    canvas.DrawRect({040, 040, 100, 100}, blue);
+
+    canvas.Restore();
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanPerformFullScreenMSAA) {
   Canvas canvas;
 

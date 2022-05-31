@@ -344,7 +344,6 @@ void TextureGLES::InitializeContentsIfNecessary() const {
                                size.height                    // height
         );
       }
-
       break;
   }
 }
@@ -431,6 +430,17 @@ bool TextureGLES::SetAsFramebufferAttachment(GLuint fbo,
       break;
   }
   return true;
+}
+
+// |Texture|
+Scalar TextureGLES::GetYCoordScale() const {
+  switch (GetIntent()) {
+    case TextureIntent::kUploadFromHost:
+      return 1.0;
+    case TextureIntent::kRenderToTexture:
+      return -1.0;
+  }
+  FML_UNREACHABLE();
 }
 
 }  // namespace impeller

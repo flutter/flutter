@@ -154,6 +154,11 @@ enum class TextureUsage : TextureUsageMask {
   kRenderTarget = 1 << 2,
 };
 
+enum class TextureIntent {
+  kUploadFromHost,
+  kRenderToTexture,
+};
+
 enum class CullMode {
   kNone,
   kFrontFace,
