@@ -133,7 +133,7 @@ class EngineLineMetrics implements ui.LineMetrics {
   }
 
   @override
-  int get hashCode => ui.hashValues(
+  int get hashCode => Object.hash(
         displayText,
         startIndex,
         endIndex,
@@ -268,7 +268,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
 
   @override
   int get hashCode {
-    return ui.hashValues(
+    return Object.hash(
         textAlign,
         textDirection,
         fontWeight,
@@ -476,7 +476,7 @@ class EngineTextStyle implements ui.TextStyle {
   }
 
   @override
-  int get hashCode => ui.hashValues(
+  int get hashCode => Object.hash(
         color,
         decoration,
         decorationColor,
@@ -584,7 +584,7 @@ class EngineStrutStyle implements ui.StrutStyle {
   }
 
   @override
-  int get hashCode => ui.hashValues(
+  int get hashCode => Object.hash(
         _fontFamily,
         _fontFamilyFallback,
         _fontSize,

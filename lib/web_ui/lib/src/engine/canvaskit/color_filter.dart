@@ -94,7 +94,7 @@ class CkBlendModeColorFilter extends CkColorFilter {
   }
 
   @override
-  int get hashCode => ui.hashValues(color, blendMode);
+  int get hashCode => Object.hash(color, blendMode);
 
   @override
   bool operator ==(Object other) {
@@ -140,7 +140,7 @@ class CkMatrixColorFilter extends CkColorFilter {
   }
 
   @override
-  int get hashCode => ui.hashList(matrix);
+  int get hashCode => Object.hashAll(matrix);
 
   @override
   bool operator ==(Object other) {

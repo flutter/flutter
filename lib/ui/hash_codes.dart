@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 // @dart = 2.12
 part of dart.ui;
 
 class _HashEnd { const _HashEnd(); }
 const _HashEnd _hashEnd = _HashEnd();
 
+// ignore: avoid_classes_with_only_static_members
 /// Jenkins hash function, optimized for small integers.
 //
 // Borrowed from the dart sdk: sdk/lib/math/jenkins_smi_hash.dart.
@@ -41,6 +41,10 @@ class _Jenkins {
 /// ```dart
 /// int hashCode => hashValues(foo, bar, hashList(quux), baz);
 /// ```
+@Deprecated(
+  'Use Object.hash() instead. '
+  'This feature was deprecated in v3.1.0-0.0.pre.897'
+)
 int hashValues(
   Object? arg01,            Object? arg02,          [ Object? arg03 = _hashEnd,
   Object? arg04 = _hashEnd, Object? arg05 = _hashEnd, Object? arg06 = _hashEnd,
@@ -113,6 +117,10 @@ int hashValues(
 /// Combine the [Object.hashCode] values of an arbitrary number of objects from
 /// an [Iterable] into one value. This function will return the same value if
 /// given null as if given an empty list.
+@Deprecated(
+  'Use Object.hashAll() or Object.hashAllUnordered() instead. '
+  'This feature was deprecated in v3.1.0-0.0.pre.897'
+)
 int hashList(Iterable<Object?>? arguments) {
   int result = 0;
   if (arguments != null) {
