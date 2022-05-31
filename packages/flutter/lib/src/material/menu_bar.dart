@@ -1579,7 +1579,7 @@ class MenuBarMenu extends _MenuBarItemDefaults implements PlatformMenu {
   ///
   /// Defaults to the value of [MenuBarThemeData.menuShape] value of the
   /// ambient [MenuBarTheme].
-  final MaterialStateProperty<OutlinedBorder?>? shape;
+  final MaterialStateProperty<ShapeBorder?>? shape;
 
   /// The Material elevation of the submenu (if any).
   ///
@@ -1677,7 +1677,7 @@ class MenuBarMenu extends _MenuBarItemDefaults implements PlatformMenu {
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(
         DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<ShapeBorder?>>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets?>('buttonPadding', buttonPadding, defaultValue: null));
@@ -1867,7 +1867,7 @@ class MenuBarItem extends _MenuBarItemDefaults {
     this.padding,
     EdgeInsets? menuPadding,
     MaterialStateProperty<Color?>? menuBackgroundColor,
-    MaterialStateProperty<OutlinedBorder?>? menuShape,
+    MaterialStateProperty<ShapeBorder?>? menuShape,
     MaterialStateProperty<double?>? menuElevation,
     this.shape,
   })  : _hasMenu = true,
@@ -1942,7 +1942,7 @@ class MenuBarItem extends _MenuBarItemDefaults {
   final MaterialStateProperty<Color?>? _menuBackgroundColor;
 
   // The shape of the submenu, when _hasMenu is true.
-  final MaterialStateProperty<OutlinedBorder?>? _menuShape;
+  final MaterialStateProperty<ShapeBorder?>? _menuShape;
 
   // The elevation of the submenu, when _hasMenu is true.
   final MaterialStateProperty<double?>? _menuElevation;

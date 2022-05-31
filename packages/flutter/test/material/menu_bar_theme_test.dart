@@ -25,6 +25,10 @@ void main() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuBarTopLevelBar');
   }
 
+  Finder findSubMenuItem() {
+    return find.descendant(of: findMenuBarMenu(), matching: find.byType(MenuBarItem));
+  }
+
   Material getMenuBarMaterial(WidgetTester tester) {
     return tester.widget<Material>(
       find.descendant(of: findMenuTopLevelBar(), matching: find.byType(Material)).first,
@@ -34,6 +38,15 @@ void main() {
   Material getSubMenuMaterial(WidgetTester tester) {
     return tester.widget<Material>(
       find.descendant(of: findMenuBarMenu(), matching: find.byType(Material)).first,
+    );
+  }
+
+  DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
+    return tester.widget<DefaultTextStyle>(
+      find.ancestor(
+        of: find.text(labelText),
+        matching: find.byType(DefaultTextStyle),
+      ).first,
     );
   }
 
@@ -105,10 +118,12 @@ void main() {
                       menuBackground: Colors.cyan,
                       menuElevation: 18.0,
                       menuPadding: const EdgeInsets.all(14.0),
+                      menuShape: const BeveledRectangleBorder(),
                       itemBackground: Colors.amber,
                       itemForeground: Colors.grey,
                       itemOverlay: Colors.blueGrey,
                       itemPadding: const EdgeInsets.all(11.0),
+                      itemShape: const BeveledRectangleBorder(),
                     ),
                     backgroundColor: MaterialStateProperty.all<Color?>(Colors.blue),
                     height: 50.0,
@@ -137,6 +152,20 @@ void main() {
     expect(tester.getRect(findMenuBarMenu()), equals(const Rect.fromLTRB(136.0, 49.0, 448.0, 237.0)));
     expect(subMenuMaterial.elevation, equals(15));
     expect(subMenuMaterial.color, equals(Colors.cyan));
+    expect(subMenuMaterial.shape, equals(const BeveledRectangleBorder()));
+
+    final Finder menuItem = findSubMenuItem();
+    expect(tester.getRect(menuItem.first), equals(const Rect.fromLTRB(150.0, 63.0, 434.0, 111.0)));
+    final Material menuItemMaterial = tester.widget<Material>(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).first);
+    expect(menuItemMaterial.color, equals(Colors.amber));
+    expect(menuItemMaterial.elevation, equals(0.0));
+    expect(menuItemMaterial.shape, equals(const BeveledRectangleBorder()));
+    expect(getLabelStyle(tester, TestMenu.subMenu10.label).style.color, equals(Colors.grey));
+    final ButtonStyle? textButtonStyle = tester.widget<TextButton>(find.ancestor(
+      of: find.text(TestMenu.subMenu10.label),
+      matching: find.byType(TextButton),
+    ).first).style;
+    expect(textButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}), equals(Colors.blueGrey));
   });
 }
 
@@ -170,7 +199,9 @@ List<MenuItem> createTestMenus({
   EdgeInsets? itemPadding,
   Color? menuBackground,
   EdgeInsets? menuPadding,
+  ShapeBorder? menuShape,
   double? menuElevation,
+  OutlinedBorder? itemShape,
 }) {
   final List<MenuItem> result = <MenuItem>[
     MenuBarMenu(
@@ -192,6 +223,7 @@ List<MenuItem> createTestMenus({
       padding: menuPadding,
       backgroundColor: menuBackground != null ? MaterialStatePropertyAll<Color?>(menuBackground) : null,
       elevation: menuElevation != null ? MaterialStatePropertyAll<double?>(menuElevation) : null,
+      shape: menuShape != null ? MaterialStatePropertyAll<ShapeBorder?>(menuShape) : null,
       menus: <MenuItem>[
         MenuItemGroup(
           members: <MenuItem>[
@@ -200,6 +232,7 @@ List<MenuItem> createTestMenus({
               onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu10) : null,
               shortcut: shortcuts[TestMenu.subMenu10],
               padding: itemPadding,
+              shape: itemShape != null ? MaterialStatePropertyAll<OutlinedBorder?>(itemShape) : null,
               foregroundColor: itemForeground != null ? MaterialStatePropertyAll<Color?>(itemForeground) : null,
               backgroundColor: itemBackground != null ? MaterialStatePropertyAll<Color?>(itemBackground) : null,
               overlayColor: itemOverlay != null ? MaterialStatePropertyAll<Color?>(itemOverlay) : null,
