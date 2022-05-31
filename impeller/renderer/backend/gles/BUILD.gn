@@ -5,16 +5,13 @@
 import("../../../tools/impeller.gni")
 
 config("gles_config") {
-  include_dirs = []
-  if (!is_android) {
-    # Generic GL/GLES/EGL/Vulkan headers. Any will do. We just pick one from Angle
-    # because they are there.
-    include_dirs = [ "//third_party/angle/include" ]
-  }
+  # Generic GL/GLES/EGL/Vulkan headers. Any will do. We just pick one from Angle
+  # because they are there.
+  include_dirs = [ "//third_party/angle/include" ]
 }
 
 impeller_component("gles") {
-  public_configs = [ ":gles_config" ]
+  public_configs = []
 
   sources = [
     "allocator_gles.cc",
@@ -59,6 +56,14 @@ impeller_component("gles") {
     "texture_gles.cc",
     "texture_gles.h",
   ]
+
+  if (!is_android) {
+    public_configs = [ ":gles_config" ]
+    sources += [
+      "//third_party/angle/include/GLES2/gl2.h",
+      "//third_party/angle/include/GLES2/gl2ext.h",
+    ]
+  }
 
   public_deps = [
     "../../:renderer",

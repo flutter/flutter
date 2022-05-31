@@ -6,6 +6,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 
 #include "flutter/fml/macros.h"
 #include "impeller/archivist/archive_transaction.h"
