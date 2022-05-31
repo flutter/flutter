@@ -918,7 +918,7 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pump();
     expect(textField.controller!.text.length, 15);
-  });
+  }, skip: kIsWeb);
 }
 
 class TestHomePage extends StatelessWidget {
