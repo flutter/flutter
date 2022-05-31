@@ -660,7 +660,16 @@ class _UiKitViewState extends State<UiKitView> {
   }
 
   void _onFocusChange(bool isFocused) {
-    // TODO(hellohuanlin): send 'TextInput.setPlatformViewClient' channel message to engine after the engine is updated to handle this message.
+    if (!isFocused) {
+      // Unlike Android, we do not need to send "clearFocus" channel message
+      // to the engine, because focusing on another view will automatically
+      // cancel the focus on the previously focused platform view.
+    } else {
+      SystemChannels.textInput.invokeMethod<void>(
+        'TextInput.setPlatformViewClient',
+        <String, dynamic>{'platformViewId': _controller!.id},
+      );
+    }
   }
 }
 
