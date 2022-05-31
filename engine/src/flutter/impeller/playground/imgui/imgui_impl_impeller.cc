@@ -140,11 +140,23 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
       impeller::StorageMode::kHostVisible, total_vtx_bytes + total_idx_bytes);
   buffer->SetLabel(impeller::SPrintF("ImGui vertex+index buffer"));
 
+  auto display_rect =
+      impeller::Rect(draw_data->DisplayPos.x, draw_data->DisplayPos.y,
+                     draw_data->DisplaySize.x, draw_data->DisplaySize.y);
+
+  auto viewport = impeller::Viewport{
+      .rect = impeller::Rect(
+          display_rect.origin.x * draw_data->FramebufferScale.x,
+          display_rect.origin.y * draw_data->FramebufferScale.y,
+          display_rect.size.width * draw_data->FramebufferScale.x,
+          display_rect.size.height * draw_data->FramebufferScale.y)};
+
+  // Allocate vertex shader uniform buffer.
   VS::UniformBuffer uniforms;
-  uniforms.mvp = impeller::Matrix::MakeOrthographic(
-      impeller::Size(draw_data->DisplaySize.x, draw_data->DisplaySize.y));
-  uniforms.mvp = uniforms.mvp.Translate(
-      -impeller::Vector3(draw_data->DisplayPos.x, draw_data->DisplayPos.y));
+  uniforms.mvp = impeller::Matrix::MakeOrthographic(display_rect.size)
+                     .Translate(-display_rect.origin);
+  auto vtx_uniforms =
+      render_pass.GetTransientsBuffer().EmplaceUniform(uniforms);
 
   size_t vertex_buffer_offset = 0;
   size_t index_buffer_offset = total_vtx_bytes;
@@ -185,29 +197,39 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
       IM_ASSERT(false && "Could not copy indices to buffer.");
     }
 
-    auto viewport = impeller::Viewport{
-        .rect =
-            impeller::Rect(draw_data->DisplayPos.x, draw_data->DisplayPos.y,
-                           draw_data->DisplaySize.x, draw_data->DisplaySize.y)};
-
     for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
       const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
 
       if (pcmd->UserCallback) {
         pcmd->UserCallback(cmd_list, pcmd);
       } else {
-        // Project scissor/clipping rectangles into framebuffer space.
-        impeller::IPoint clip_min(pcmd->ClipRect.x - draw_data->DisplayPos.x,
-                                  pcmd->ClipRect.y - draw_data->DisplayPos.y);
-        impeller::IPoint clip_max(pcmd->ClipRect.z - draw_data->DisplayPos.x,
-                                  pcmd->ClipRect.w - draw_data->DisplayPos.y);
-        // Ensure the scissor never goes out of bounds.
-        clip_min.x = std::clamp<impeller::IPoint::Type>(
-            clip_min.x, 0ll, draw_data->DisplaySize.x);
-        clip_min.y = std::clamp<impeller::IPoint::Type>(
-            clip_min.y, 0ll, draw_data->DisplaySize.y);
-        if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y) {
-          continue;  // Nothing to render.
+        // Make the clip rect relative to the viewport.
+        auto clip_rect = impeller::Rect::MakeLTRB(
+            (pcmd->ClipRect.x - draw_data->DisplayPos.x) *
+                draw_data->FramebufferScale.x,
+            (pcmd->ClipRect.y - draw_data->DisplayPos.y) *
+                draw_data->FramebufferScale.y,
+            (pcmd->ClipRect.z - draw_data->DisplayPos.x) *
+                draw_data->FramebufferScale.x,
+            (pcmd->ClipRect.w - draw_data->DisplayPos.y) *
+                draw_data->FramebufferScale.y);
+        {
+          // Clamp the clip to the viewport bounds.
+          auto visible_clip = clip_rect.Intersection(viewport.rect);
+          if (!visible_clip.has_value()) {
+            continue;  // Nothing to render.
+          }
+          clip_rect = visible_clip.value();
+        }
+        {
+          // Clamp the clip to ensure it never goes outside of the render
+          // target.
+          auto visible_clip = clip_rect.Intersection(impeller::Rect::MakeSize(
+              impeller::Size(render_pass.GetRenderTargetSize())));
+          if (!visible_clip.has_value()) {
+            continue;  // Nothing to render.
+          }
+          clip_rect = visible_clip.value();
         }
 
         impeller::Command cmd;
@@ -215,19 +237,11 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
                                       draw_list_i, cmd_i);
 
         cmd.viewport = viewport;
-        cmd.scissor = impeller::IRect::MakeLTRB(
-            std::max<impeller::IRect::Type>(0ll, clip_min.x),  //
-            std::max<impeller::IRect::Type>(0ll, clip_min.y),  //
-            std::min<impeller::IRect::Type>(
-                render_pass.GetRenderTargetSize().width, clip_max.x),  //
-            std::min<impeller::IRect::Type>(
-                render_pass.GetRenderTargetSize().height, clip_max.y)  //
-        );
+        cmd.scissor = impeller::IRect(clip_rect);
 
         cmd.winding = impeller::WindingOrder::kClockwise;
         cmd.pipeline = bd->pipeline;
-        VS::BindUniformBuffer(
-            cmd, render_pass.GetTransientsBuffer().EmplaceUniform(uniforms));
+        VS::BindUniformBuffer(cmd, vtx_uniforms);
         FS::BindTex(cmd, bd->font_texture, bd->sampler);
 
         size_t vb_start =

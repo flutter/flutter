@@ -124,7 +124,7 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
 }
 
 // |PlaygroundImpl|
-PlaygroundImpl::WindowHandle PlaygroundImplGLES::GetWindowHandle() {
+PlaygroundImpl::WindowHandle PlaygroundImplGLES::GetWindowHandle() const {
   return handle_.get();
 }
 
