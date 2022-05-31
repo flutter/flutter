@@ -1579,7 +1579,7 @@ class MenuBarMenu extends _MenuBarItemDefaults implements PlatformMenu {
   ///
   /// Defaults to the value of [MenuBarThemeData.menuShape] value of the
   /// ambient [MenuBarTheme].
-  final MaterialStateProperty<ShapeBorder?>? shape;
+  final MaterialStateProperty<OutlinedBorder?>? shape;
 
   /// The Material elevation of the submenu (if any).
   ///
@@ -1677,7 +1677,7 @@ class MenuBarMenu extends _MenuBarItemDefaults implements PlatformMenu {
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(
         DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<ShapeBorder?>>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets?>('buttonPadding', buttonPadding, defaultValue: null));
@@ -1752,7 +1752,9 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
       textStyle: widget.buttonTextStyle,
       padding: widget.buttonPadding,
       shape: widget.buttonShape,
-      menuPadding: widget.padding ?? MenuBarTheme.of(context).menuPadding ?? _TokenDefaultsM3(context).menuPadding,
+      menuPadding: widget.padding,
+      menuBackgroundColor: widget.backgroundColor,
+      menuShape: widget.shape,
     );
   }
 
@@ -1842,6 +1844,9 @@ class MenuBarItem extends _MenuBarItemDefaults {
     this.shape,
   })  : _hasMenu = false,
         _menuPadding = null,
+        _menuBackgroundColor = null,
+        _menuShape = null,
+        _menuElevation = null,
         assert(onSelected == null || onSelectedIntent == null,
             'Only one of onSelected or onSelectedIntent may be specified');
 
@@ -1861,11 +1866,17 @@ class MenuBarItem extends _MenuBarItemDefaults {
     this.textStyle,
     this.padding,
     EdgeInsets? menuPadding,
+    MaterialStateProperty<Color?>? menuBackgroundColor,
+    MaterialStateProperty<OutlinedBorder?>? menuShape,
+    MaterialStateProperty<double?>? menuElevation,
     this.shape,
   })  : _hasMenu = true,
         onSelectedIntent = null,
         shortcut = null,
-        _menuPadding = menuPadding;
+        _menuPadding = menuPadding,
+        _menuBackgroundColor = menuBackgroundColor,
+        _menuShape = menuShape,
+        _menuElevation = menuElevation;
 
   @override
   final MenuSerializableShortcut? shortcut;
@@ -1911,10 +1922,6 @@ class MenuBarItem extends _MenuBarItemDefaults {
   /// Defaults to the value of [MenuBarThemeData.itemPadding] if not set.
   final EdgeInsets? padding;
 
-  // The padding around the edges of a submenu. Passed in from the MenuBarMenu
-  // so that it can be given during registration with the controller.
-  final EdgeInsets? _menuPadding;
-
   /// The text style for the text in this menu bar item.
   ///
   /// May be overridden inside of [labelWidget], if supplied.
@@ -1926,6 +1933,19 @@ class MenuBarItem extends _MenuBarItemDefaults {
   ///
   /// Defaults to the value of [MenuBarThemeData.itemShape] if not set.
   final MaterialStateProperty<OutlinedBorder?>? shape;
+
+  // The padding around the edges of a submenu. Passed in from the MenuBarMenu
+  // so that it can be given during registration with the controller.
+  final EdgeInsets? _menuPadding;
+  
+  // The background color of the submenu, when _hasMenu is true.
+  final MaterialStateProperty<Color?>? _menuBackgroundColor;
+
+  // The shape of the submenu, when _hasMenu is true.
+  final MaterialStateProperty<OutlinedBorder?>? _menuShape;
+
+  // The elevation of the submenu, when _hasMenu is true.
+  final MaterialStateProperty<double?>? _menuElevation;
 
   // Indicates that this is a button for a submenu, not just a regular item.
   final bool _hasMenu;
@@ -2139,10 +2159,10 @@ class _MenuBarItemState extends State<MenuBarItem> {
                 child: _MenuBarControllerMarker(
                   controller: controller,
                   child: _MenuBarMenuList(
-                    elevation: (menuBarTheme.menuElevation ?? defaultTheme.menuElevation).resolve(disabled)!,
-                    shape: (widget.shape ?? menuBarTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled)!,
+                    elevation: (widget._menuElevation ?? menuBarTheme.menuElevation ?? defaultTheme.menuElevation).resolve(disabled)!,
+                    shape: (widget._menuShape ?? menuBarTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled)!,
                     backgroundColor:
-                        (widget.backgroundColor ?? menuBarTheme.menuBackgroundColor ?? defaultTheme.menuBackgroundColor)
+                        (widget._menuBackgroundColor ?? menuBarTheme.menuBackgroundColor ?? defaultTheme.menuBackgroundColor)
                             .resolve(disabled)!,
                     menuPadding: menuButtonNode.menuPadding ?? menuBarTheme.menuPadding ?? defaultTheme.menuPadding,
                     semanticLabel: widget.semanticLabel ?? MaterialLocalizations.of(context).popupMenuLabel,
@@ -2169,7 +2189,7 @@ class _MenuBarItemState extends State<MenuBarItem> {
         menuContext: context,
         node: newMenu,
         buttonFocus: focusNode,
-        menuPadding: widget._menuPadding,
+        menuPadding: widget._menuPadding ?? MenuBarTheme.of(context).menuPadding ?? _TokenDefaultsM3(context).menuPadding,
         menuBuilder: menu!.hasSubmenu ? (BuildContext context) => _buildPositionedMenu(menu!) : null,
       );
     }
