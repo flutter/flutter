@@ -6,21 +6,26 @@
 
 """Get the Git HEAD revision of a specified Git repository."""
 
-
-
-
 import sys
 import subprocess
 import os
 import argparse
+
+def IsWindows():
+  os_id = sys.platform
+  return os_id.startswith('win32') or os_id.startswith('cygwin')
+
 
 def GetRepositoryVersion(repository):
   "Returns the Git HEAD for the supplied repository path as a string."
   if not os.path.exists(repository):
     raise IOError("path doesn't exist")
 
+  git = 'git'
+  if IsWindows():
+    git = 'git.bat'
   version = subprocess.check_output([
-    'git',
+    git,
     '-C',
     repository,
     'rev-parse',
@@ -28,6 +33,7 @@ def GetRepositoryVersion(repository):
   ])
 
   return str(version.strip(), 'utf-8')
+
 
 def main():
   parser = argparse.ArgumentParser()
@@ -43,6 +49,7 @@ def main():
   print(version.strip())
 
   return 0
+
 
 if __name__ == '__main__':
   sys.exit(main())
