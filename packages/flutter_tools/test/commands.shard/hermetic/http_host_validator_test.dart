@@ -302,6 +302,40 @@ void main() {
     });
   });
 
+  testWithoutContext('Does not throw on HandshakeException', () async {
+    const String handshakeMessage = '''
+Handshake error in client (OS Error:
+        BLOCK_TYPE_IS_NOT_01(../../third_party/boringssl/src/crypto/fipsmodule/rsa/padding.c:108)
+        PADDING_CHECK_FAILED(../../third_party/boringssl/src/crypto/fipsmodule/rsa/rsa_impl.c:676)
+        public key routines(../../third_party/boringssl/src/crypto/x509/a_verify.c:108)
+        CERTIFICATE_VERIFY_FAILED: certificate signature failure(../../third_party/boringssl/src/ssl/handshake.cc:393))
+''';
+    final HttpHostValidator httpHostValidator = HttpHostValidator(
+      platform: FakePlatform(environment: kTestEnvironment),
+      featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+      httpClient: FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(
+          Uri.parse(kTestEnvPubHost),
+          method: HttpMethod.head,
+          responseError: const HandshakeException(handshakeMessage),
+        ),
+        FakeRequest(Uri.parse(kTestEnvGCloudHost), method: HttpMethod.head),
+      ]),
+    );
+
+    // Run the validation check and get the results
+    final ValidationResult result = await httpHostValidator.validate();
+
+    expect(
+      result.messages.first,
+      isA<ValidationMessage>().having(
+        (ValidationMessage msg) => msg.message,
+        'message',
+        contains(handshakeMessage),
+      ),
+    );
+  });
+
   testWithoutContext('Http host validator timeout message includes timeout duration.', () async {
     final HttpHostValidator httpHostValidator = HttpHostValidator(
       platform: FakePlatform(environment: kTestEnvironment),
