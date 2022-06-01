@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 class _SnakeLayoutDelegate extends MultiChildLayoutDelegate {
   _SnakeLayoutDelegate(
       {required this.ids, required this.numCols, required this.rowHeight});
-  // In our case we only care about ids since we just need something to refer to in the LayoutId widget in the build of the ExampleWidget
+  // In our case we only care about ids since we just need something to refer to in the LayoutId widget in the build of the ExampleWidget.
   final List<String> ids;
   final int numCols;
   // Not sure how to access the greatest height of children to make a max height so here I hardcode the rowHeight value
