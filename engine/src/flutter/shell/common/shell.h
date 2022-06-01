@@ -473,6 +473,9 @@ class Shell final : public PlatformView::Delegate,
   // used to discard wrong size layer tree produced during interactive resizing
   SkISize expected_frame_size_ = SkISize::MakeEmpty();
 
+  // Used to communicate the right frame bounds via service protocol.
+  double device_pixel_ratio_ = 0.0;
+
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
 
