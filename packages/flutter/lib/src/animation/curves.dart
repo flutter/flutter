@@ -201,7 +201,7 @@ class Interval extends Curve {
 /// A curve that progresses linearly until [begin], then curved (according to
 /// [curve] from t at [begin] to 1.0.
 ///
-/// Unlike [Interval], [curve] will not start at zero, but at the Y
+/// Unlike [Interval], [curve] will not start at zero, but at the point
 /// corresponding to t=`begin`.
 ///
 /// For example, if [begin] is set to 0.5, and [curve] is set to
@@ -238,7 +238,6 @@ class Suspended extends Curve {
 
   @override
   double transformInternal(double t) {
-    assert(t >= 0.0 && t <= 1.0);
     assert(begin >= 0.0 && begin <= 1.0);
 
     if (t < begin) {
@@ -252,7 +251,7 @@ class Suspended extends Curve {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($begin, $curve)';
+    return '${objectRuntimeType(this, 'Suspended')}($begin, $curve)';
   }
 }
 
