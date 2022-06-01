@@ -280,475 +280,59 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
 /// If the control is a descendant of the [MenuBar], a `MenuBarController`
 /// doesn't need to be created, since the [MenuBar] will create one
 /// automatically. It can be retrieved with the [MenuBarController.of] method.
-abstract class MenuBarController with ChangeNotifier {
-  /// A factory that constructs a [MenuBarController] for use with a [MenuBar].
-  factory MenuBarController() => _MenuBarController();
+class MenuBarController with ChangeNotifier {
+  // Connects this controller to the MenuBar it is controlling.
+  //
+  // This is called by the MenuBar that the controller is attached to.
+  void _connect(_MenuBarState state) {
+    _state = state;
+  }
 
-  // Private constructor to prevent this class from being instantiated by
-  // anything other than the factory constructor, and from being subclassed.
-  MenuBarController._();
+  void _disconnect(_MenuBarState state) {
+    assert(state == _state, 'Disconnecting from a state that the $MenuBarController was not connected to.');
+    _state = null;
+  }
+
+  void _notifyListeners() {
+    notifyListeners();
+  }
+
+  _MenuBarState? _state;
 
   /// Closes any menus that are currently open.
-  void closeAll();
+  void closeAll() => _state?.closeAll();
 
   /// Returns true if any menu in the menu bar is open.
-  bool get menuIsOpen;
-
-  /// Returns the active menu controller in the given context, and creates a
-  /// dependency relationship that will rebuild the context when the controller
-  /// changes.
-  static MenuBarController of(BuildContext context) {
-    final MenuBarController? found = context.dependOnInheritedWidgetOfExactType<_MenuBarControllerMarker>()?.controller;
-    if (found == null) {
-      throw FlutterError('A ${context.widget.runtimeType} requested a '
-          'MenuBarController, but was not a descendant of a MenuBar: $context');
-    }
-    return found;
-  }
+  bool get menuIsOpen => _state?.menuIsOpen ?? false;
 
   /// A testing method used to provide access to a testing description of the
   /// currently open menu for tests.
   ///
   /// Only meant to be called by tests. Will return null in release mode.
   @visibleForTesting
-  String? get debugCurrentItem;
+  String? get debugCurrentItem => _state?.debugCurrentItem;
 
   /// A testing method used to provide access to a testing description of the
   /// currently focused menu item for tests.
   ///
   /// Only meant to be called by tests. Will return null in release mode.
   @visibleForTesting
-  String? get debugFocusedItem;
-}
-
-/// A private implementation of [MenuBarController], so that we can have a
-/// separate API for the [MenuBar] internals to use. This is the class that gets
-/// instantiated when the [MenuBarController] factory constructor is called.
-class _MenuBarController extends MenuBarController with Diagnosticable {
-  _MenuBarController() : super._();
-
-  // The root of the menu node tree.
-  final _MenuNode root = _MenuNode(item: const PlatformMenu(label: 'root', menus: <MenuItem>[]));
-
-  // The serial number containing the number of times the menu hierarchy has
-  // been updated.
-  //
-  // This is used to indicate to the [_MenuNodeWrapper] that the menu hierarchy
-  // or its attributes have changed, and its dependents need updating.
-  int get menuSerial => _menuSerial;
-  int _menuSerial = 0;
-
-  // The map of focus nodes to menus. This is used to look up which menu node
-  // goes with which focus node when finding the currently focused menu node.
-  final Map<FocusNode, _MenuNode> _focusNodes = <FocusNode, _MenuNode>{};
-
-  // The render boxes of all the MenuBarMenus that are displaying menu items.
-  // This is used to do hit testing to make sure that a pointer down has not
-  // hit a menu, and so to close all the menus.
-  final Set<RenderBox> _menuRenderBoxes = <RenderBox>{};
-
-  // If set, this is the overlay entry that contains all of the submenus.
-  // It is only non-null when there is a menu open.
-  OverlayEntry? _overlayEntry;
-
-  // This holds the previously focused widget when a top level menu is opened,
-  // so that when the last menu is dismissed, the focus can be restored.
-  FocusNode? _previousFocus;
-
-  // The primary focus at the time of the last pointer down event. This needs to
-  // be captured immediately before the FocusTrap unfocuses to the scope.
-  FocusNode? _focusBeforeClick;
-
-  // A menu that has been opened, but the menu widgets haven't been created yet.
-  // Once they are, then request focus on it.
-  _MenuNode? _pendingFocusedMenu;
-
-  // True when a menu is open and we are listening for pointer down events outside of
-  // the menus.
-  bool _listeningToPointerEvents = false;
-
-  // Used to tell if we've already been disposed, for both debug checks, and to
-  // avoid causing widget changes after being disposed.
-  bool _disposed = false;
-
-  @override
-  bool get menuIsOpen => openMenu != null;
-
-  final FocusScopeNode menuBarScope = FocusScopeNode(debugLabel: 'MenuBar');
-  final FocusScopeNode overlayScope = FocusScopeNode(debugLabel: 'MenuBar overlay');
-
-  /// The context of the [MenuBar] that this controller serves.
-  ///
-  /// This context must be set by the menu bar in its initState method.
-  BuildContext get menuBarContext => _menuBarContext!;
-  BuildContext? _menuBarContext;
-  set menuBarContext(BuildContext value) {
-    assert(
-      value.widget is MenuBar,
-      'A ${value.widget.runtimeType} was registered with a '
-      '$runtimeType, which is not a MenuBar.',
-    );
-    _menuBarContext = value;
-  }
-
-  /// Whether or not the menu bar is enabled for input. This is set by setting
-  /// [MenuBar.enabled] on the menu bar widget, and the menu children listen for
-  /// it to change.
-  ///
-  /// If set to false, all menus are closed, shortcuts stop working, and the
-  /// top level menu bar buttons are disabled.
-  bool get enabled => _enabled;
-  bool _enabled = true;
-  set enabled(bool value) {
-    if (_enabled != value) {
-      _enabled = value;
-      void closeAndMarkDirty() {
-        if (!_enabled) {
-          closeAll();
-        }
-        _markMenuDirty();
-      }
-
-      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-        // If we're in the middle of a build, we need to mark dirty in a post
-        // frame callback, since this function will often be called by a part of
-        // the tree that isn't in the overlay, but calling this would request that
-        // the overlay be rebuilt.
-        SchedulerBinding.instance.addPostFrameCallback((Duration _) => closeAndMarkDirty());
-      } else {
-        // If we're not in the middle of a build, we can just call it right away.
-        closeAndMarkDirty();
-      }
-    }
-  }
-
-  List<_MenuNode> get openMenus {
-    if (openMenu == null) {
-      return const <_MenuNode>[];
-    }
-    return <_MenuNode>[...openMenu!.ancestors, openMenu!];
-  }
-
-  _MenuNode? get openMenu => _openMenu;
-  _MenuNode? _openMenu;
-  set openMenu(_MenuNode? value) {
-    if (_openMenu == value) {
-      // Nothing changed.
-      return;
-    }
-    if (value != null && _openMenu == null) {
-      // We're opening the first menu, so cache the primary focus so that we can
-      // try to return to it when the menu is dismissed.
-      // If we captured a focus before the click, then use that, otherwise use
-      // the current primary focus.
-      _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
-    } else if (value == null && _openMenu != null) {
-      // Closing all menus, so restore the previous focus.
-      _previousFocus?.requestFocus();
-      _previousFocus = null;
-    }
-    _focusBeforeClick = null;
-    final _MenuNode? oldMenu = _openMenu;
-    _openMenu = value;
-    oldMenu?.ancestorDifference(_openMenu).forEach((_MenuNode node) {
-      node.close();
-    });
-    _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
-      node.open();
-    });
-    if (value != null && value.focusNode?.hasPrimaryFocus != true) {
-      // Request focus on the new thing that is now open, if any, so that
-      // focus traversal starts from that location.
-      if (value.focusNode == null || !value.focusNode!.canRequestFocus) {
-        // If we don't have a focus node to ask yet, or it can't be focused yet,
-        // then keep the menu until it gets registered, or something else sets
-        // the menu.
-        _pendingFocusedMenu = value;
-      } else {
-        _pendingFocusedMenu = null;
-        value.focusNode!.requestFocus();
-      }
-    }
-    _manageOverlayEntry();
-    _markMenuDirty();
-  }
-
-  // Creates or removes the overlay entry that contains the stack of all menus.
-  void _manageOverlayEntry() {
-    if (openMenu != null) {
-      if (_overlayEntry == null) {
-        _overlayEntry = OverlayEntry(builder: (BuildContext context) => _MenuStack(this));
-        Overlay.of(menuBarContext)?.insert(_overlayEntry!);
-      }
-    } else {
-      _overlayEntry?.remove();
-      _overlayEntry = null;
-    }
-  }
-
-  void _markMenuDirty() {
-    if (_disposed) {
-      return;
-    }
-    _menuSerial += 1;
-    _overlayEntry?.markNeedsBuild();
-    notifyListeners();
-  }
-
-  // Build the node hierarchy based upon the MenuItem hierarchy.
-  void _createMenuTree(List<MenuItem> topLevel) {
-    root.children.clear();
-    _focusNodes.clear();
-    _previousFocus = null;
-    _pendingFocusedMenu = null;
-    for (final MenuItem item in topLevel) {
-      _MenuNode(
-        item: item,
-        parent: root,
-      );
-    }
-    assert(root.children.length == topLevel.length);
-  }
-
-  /// Called when updating a MenuBar widget so that the metadata about that menu
-  /// hierarchy and widget can be connected to the correct context/widget.
-  ///
-  /// The context is the MenuBar's element.
-  ///
-  /// The topLevel is the list of menu items that are the top level children of
-  /// the [MenuBar].
-  void connect({
-    required BuildContext context,
-    required List<MenuItem> topLevel,
-    required bool enabled,
-  }) {
-    menuBarContext = context;
-    _createMenuTree(topLevel);
-    if (!_listeningToPointerEvents) {
-      GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
-      _listeningToPointerEvents = true;
-    }
-
-    this.enabled = enabled;
-
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      // If we're in the middle of a build, we need to mark dirty in a post
-      // frame callback, since this function will often be called by a part of
-      // the tree that isn't in the overlay, but calling this would request that
-      // the overlay be rebuilt.
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        _markMenuDirty();
-      });
-    } else {
-      // If we're not in the middle of a build, we can just mark dirty right away.
-      _markMenuDirty();
-    }
-  }
-
-  /// Disconnects this controller from its menu bar, in preparation for
-  /// disposal, or when the controller is being swapped out for another one.
-  void disconnect() {
-    _menuBarContext = null;
-    root.children.clear();
-    _focusNodes.clear();
-    _previousFocus = null;
-    _focusBeforeClick = null;
-    _pendingFocusedMenu = null;
-    if (_listeningToPointerEvents) {
-      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
-      _listeningToPointerEvents = false;
-    }
-  }
-
-  /// Closes the given menu, and any open descendant menus.
-  ///
-  /// Leaves ancestor menus open, if any.
-  ///
-  /// Notifies listeners if the menu changed.
-  void close(_MenuNode node) {
-    if (openMenu == null) {
-      // Everything is already closed.
-      return;
-    }
-    if (isAnOpenMenu(node)) {
-      // Don't call onClose, notifyListeners, etc, here, because setting
-      // openMenu will call them if needed.
-      if (node.parent == root) {
-        openMenu = null;
-      } else {
-        openMenu = node.parent;
-      }
-    }
-  }
-
-  @override
-  void closeAll() {
-    openMenu = null;
-  }
-
-  /// Returns true if the given menu or one of its ancestors is open.
-  bool isAnOpenMenu(_MenuNode menu) {
-    if (_openMenu == null) {
-      return false;
-    }
-    return _openMenu == menu || (_openMenu?.ancestors.contains(menu) ?? false);
-  }
-
-  @override
-  void dispose() {
-    disconnect();
-    menuBarScope.dispose();
-    overlayScope.dispose();
-    super.dispose();
-    _disposed = true;
-  }
-
-  // Handles any pointer events that occur in the app, checking them against
-  // open menus to see if the menus should be closed or not.
-  // This isn't called if no menus are open.
-  void _handlePointerEvent(PointerEvent event) {
-    if (event is! PointerDownEvent) {
-      return;
-    }
-    bool isInsideMenu = false;
-    final RenderBox? menuBarBox = menuBarContext.findRenderObject() as RenderBox?;
-    final List<RenderBox> renderBoxes = <RenderBox>[
-      if (menuBarBox != null) menuBarBox,
-      ..._menuRenderBoxes,
-    ];
-    for (final RenderBox renderBox in renderBoxes) {
-      assert(renderBox.attached);
-      isInsideMenu =
-          renderBox.hitTest(BoxHitTestResult(), position: renderBox.globalToLocal(event.position)) || isInsideMenu;
-      if (isInsideMenu) {
-        break;
-      }
-    }
-    if (!isInsideMenu) {
-      closeAll();
-    } else {
-      _focusBeforeClick = FocusManager.instance.primaryFocus;
-    }
-  }
-
-  /// Registers the given menu in the menu controller whenever a menu item
-  /// widget is created or updated.
-  void registerMenu({
-    required BuildContext menuContext,
-    required _MenuNode node,
-    WidgetBuilder? menuBuilder,
-    EdgeInsets? menuPadding,
-    FocusNode? buttonFocus,
-  }) {
-    if (node.focusNode != buttonFocus) {
-      node.focusNode?.removeListener(_handleItemFocus);
-      node.focusNode = buttonFocus;
-      node.focusNode?.addListener(_handleItemFocus);
-      if (buttonFocus != null) {
-        _focusNodes[buttonFocus] = node;
-      }
-    }
-
-    node.menuPadding = menuPadding;
-    node.menuBuilder = menuBuilder;
-
-    if (node == _pendingFocusedMenu) {
-      node.focusNode?.requestFocus();
-      _pendingFocusedMenu = null;
-    }
-  }
-
-  /// Unregisters the given context from the menu controller.
-  ///
-  /// If the given context corresponds to the currently open menu, then close
-  /// it.
-  void unregisterMenu(_MenuNode node) {
-    node.focusNode?.removeListener(_handleItemFocus);
-    node.focusNode = null;
-    node.menuBuilder = null;
-    _focusNodes.remove(node.focusNode);
-    if (node == _pendingFocusedMenu) {
-      _pendingFocusedMenu = null;
-    }
-    if (openMenu == node) {
-      close(node);
-    }
-  }
-
-  // Used to register the menu's render box whenever it changes, so that it can
-  // be used to do hit detection and find out if a pointer event hit a menu or
-  // not without participating in the gesture arena.
-  void registerMenuRenderObject(RenderBox menu) {
-    _menuRenderBoxes.add(menu);
-  }
-
-  // Used to unregister the menu's previous render box whenever it changes, or
-  // remove it when it is disposed.
-  void unregisterMenuRenderObject(RenderBox menu) {
-    _menuRenderBoxes.remove(menu);
-  }
-
-  // Handles focus notifications for menu items so that the focused item can be
-  // set as the currently open menu.
-  void _handleItemFocus() {
-    if (openMenu == null) {
-      // Don't traverse the menu hierarchy on focus unless the user opened a
-      // menu already.
-      return;
-    }
-    final _MenuNode? focused = focusedItem;
-    if (focused != null && !isAnOpenMenu(focused)) {
-      openMenu = focused;
-    }
-  }
-
-  _MenuNode? get focusedItem {
-    final Iterable<FocusNode> focusedItems = _focusNodes.keys.where((FocusNode node) => node.hasFocus);
-    assert(
-        focusedItems.length <= 1,
-        'The same focus node is registered to more than one MenuItem '
-        'menu:\n  ${focusedItems.first}');
-    return focusedItems.isNotEmpty ? _focusNodes[focusedItems.first] : null;
-  }
-
-  @override
-  String? get debugCurrentItem {
-    String? result;
-    assert(() {
-      if (openMenu != null) {
-        result = openMenus.map<String>((_MenuNode node) => node.toStringShort()).join(' > ');
-      }
-      return true;
-    }());
-    return result;
-  }
-
-  @override
-  String? get debugFocusedItem {
-    String? result;
-    assert(() {
-      if (primaryFocus?.context != null) {
-        result = _focusNodes[primaryFocus]?.toStringShort();
-      }
-      return true;
-    }());
-    return result;
-  }
+  String? get debugFocusedItem => _state?.debugFocusedItem;
 }
 
 // The InheritedWidget marker for _MenuBarController, used to find the nearest
 // ancestor _MenuBarController.
-class _MenuBarControllerMarker extends InheritedWidget {
-  const _MenuBarControllerMarker({
-    required this.controller,
+class _MenuBarMarker extends InheritedWidget {
+  const _MenuBarMarker({
+    required this.state,
     required super.child,
   });
 
-  final _MenuBarController controller;
+  final _MenuBarState state;
 
   @override
-  bool updateShouldNotify(covariant _MenuBarControllerMarker oldWidget) {
-    return controller != oldWidget.controller;
+  bool updateShouldNotify(covariant _MenuBarMarker oldWidget) {
+    return state != oldWidget.state;
   }
 }
 
@@ -758,23 +342,23 @@ class _MenuBarControllerMarker extends InheritedWidget {
 // the menus with. Positioning of the top level submenus is relative to the
 // position of the menu buttons.
 class _MenuStack extends StatelessWidget {
-  const _MenuStack(this.controller);
+  const _MenuStack(this.menuBar);
 
-  final _MenuBarController controller;
+  final _MenuBarState menuBar;
 
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
       child: FocusScope(
-        node: controller.overlayScope,
+        node: menuBar.overlayScope,
         child: Actions(
           actions: <Type, Action<Intent>>{
-            NextFocusIntent: _MenuNextFocusAction(controller: controller),
-            PreviousFocusIntent: _MenuPreviousFocusAction(controller: controller),
+            NextFocusIntent: _MenuNextFocusAction(menuBar: menuBar),
+            PreviousFocusIntent: _MenuPreviousFocusAction(menuBar: menuBar),
             DirectionalFocusIntent: _MenuDirectionalFocusAction(
-              controller: controller,
+              menuBar: menuBar,
             ),
-            DismissIntent: _MenuDismissAction(controller: controller),
+            DismissIntent: _MenuDismissAction(menuBar: menuBar),
             VoidCallbackIntent: VoidCallbackAction(),
           },
           child: Shortcuts(
@@ -785,11 +369,11 @@ class _MenuStack extends StatelessWidget {
             // apply everywhere but override these in the menu itself, since
             // there we have to be able to traverse the menus.
             shortcuts: _kMenuTraversalShortcuts,
-            child: _MenuBarControllerMarker(
-              controller: controller,
+            child: _MenuBarMarker(
+              state: menuBar,
               child: Stack(
                 children: <Widget>[
-                  ...controller.openMenus.where((_MenuNode node) => node.menuBuilder != null).map<Widget>(
+                  ...menuBar.openMenus.where((_MenuNode node) => node.menuBuilder != null).map<Widget>(
                     (_MenuNode node) {
                       return Builder(
                         key: ValueKey<_MenuNode>(node),
@@ -808,128 +392,128 @@ class _MenuStack extends StatelessWidget {
 }
 
 class _MenuDismissAction extends DismissAction {
-  _MenuDismissAction({required this.controller});
+  _MenuDismissAction({required this.menuBar});
 
-  final _MenuBarController controller;
+  final _MenuBarState menuBar;
 
   @override
   bool isEnabled(DismissIntent intent) {
-    return controller.openMenu != null;
+    return menuBar.openMenu != null;
   }
 
   @override
   void invoke(DismissIntent intent) {
-    controller.closeAll();
+    menuBar.closeAll();
   }
 }
 
 class _MenuNextFocusAction extends NextFocusAction {
-  _MenuNextFocusAction({required this.controller});
+  _MenuNextFocusAction({required this.menuBar});
 
-  final _MenuBarController controller;
+  final _MenuBarState menuBar;
 
   @override
   void invoke(NextFocusIntent intent) {
-    if (controller.openMenu == null) {
+    if (menuBar.openMenu == null) {
       // Nothing is open, select first top level menu item.
-      if (controller.root.children.isEmpty) {
+      if (menuBar.root.children.isEmpty) {
         return;
       }
-      controller.openMenu = controller.root.children[0];
+      menuBar.openMenu = menuBar.root.children[0];
       return;
     }
-    final List<_MenuNode> enabledNodes = controller.root.descendants.where((_MenuNode node) {
+    final List<_MenuNode> enabledNodes = menuBar.root.descendants.where((_MenuNode node) {
       return (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null) &&
-          controller.enabled;
+          menuBar.enabled;
     }).toList();
     if (enabledNodes.isEmpty) {
       return;
     }
-    final int index = enabledNodes.indexOf(controller.openMenu!);
+    final int index = enabledNodes.indexOf(menuBar.openMenu!);
     if (index == -1) {
       return;
     }
     if (index == enabledNodes.length - 1) {
-      controller.openMenu = enabledNodes.first;
+      menuBar.openMenu = enabledNodes.first;
       return;
     }
-    controller.openMenu = enabledNodes[index + 1];
+    menuBar.openMenu = enabledNodes[index + 1];
   }
 }
 
 class _MenuPreviousFocusAction extends PreviousFocusAction {
-  _MenuPreviousFocusAction({required this.controller});
+  _MenuPreviousFocusAction({required this.menuBar});
 
-  final _MenuBarController controller;
+  final _MenuBarState menuBar;
 
   @override
   void invoke(PreviousFocusIntent intent) {
-    if (controller.openMenu == null) {
+    if (menuBar.openMenu == null) {
       // Nothing is open, select first top level menu item.
-      if (controller.root.children.isEmpty) {
+      if (menuBar.root.children.isEmpty) {
         return;
       }
-      controller.openMenu = controller.root.children.last;
+      menuBar.openMenu = menuBar.root.children.last;
       return;
     }
-    final List<_MenuNode> enabledNodes = controller.root.descendants.where((_MenuNode node) {
+    final List<_MenuNode> enabledNodes = menuBar.root.descendants.where((_MenuNode node) {
       return (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null) &&
-          controller.enabled;
+          menuBar.enabled;
     }).toList();
     final List<MenuItem> enabledItems = enabledNodes.map<MenuItem>((_MenuNode node) => node.item).toList();
     if (enabledNodes.isEmpty) {
       return;
     }
-    final int index = enabledItems.indexOf(controller.openMenu!.item);
+    final int index = enabledItems.indexOf(menuBar.openMenu!.item);
     if (index == -1) {
       return;
     }
     if (index == 0) {
-      controller.openMenu = enabledNodes.last;
+      menuBar.openMenu = enabledNodes.last;
       return;
     }
-    controller.openMenu = enabledNodes[index - 1];
+    menuBar.openMenu = enabledNodes[index - 1];
     return;
   }
 }
 
 class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   /// Creates a [DirectionalFocusAction].
-  _MenuDirectionalFocusAction({required this.controller});
+  _MenuDirectionalFocusAction({required this.menuBar});
 
-  final _MenuBarController controller;
+  final _MenuBarState menuBar;
 
   bool _moveForward() {
-    if (controller.openMenu == null) {
+    if (menuBar.openMenu == null) {
       return false;
     }
-    final _MenuNode? focusedItem = controller.focusedItem;
+    final _MenuNode? focusedItem = menuBar.focusedItem;
     if (focusedItem == null) {
       return false;
     }
-    if (focusedItem.hasSubmenu && focusedItem.parent != controller.root) {
+    if (focusedItem.hasSubmenu && focusedItem.parent != menuBar.root) {
       // If no submenu is open, then arrow opens the submenu.
       if (focusedItem.children.isNotEmpty) {
-        controller.openMenu = focusedItem.children.first;
+        menuBar.openMenu = focusedItem.children.first;
       }
     } else {
       // If there's no submenu, then an arrow moves to the next top
       // level sibling, wrapping around if need be.
       final _MenuNode? next = focusedItem.topLevel.nextSibling;
       if (next != null) {
-        controller.openMenu = next;
+        menuBar.openMenu = next;
       } else {
-        controller.openMenu = controller.root.children.isNotEmpty ? controller.root.children.first : null;
+        menuBar.openMenu = menuBar.root.children.isNotEmpty ? menuBar.root.children.first : null;
       }
     }
     return true;
   }
 
   bool _moveBackward() {
-    if (controller.openMenu == null) {
+    if (menuBar.openMenu == null) {
       return false;
     }
-    final _MenuNode? focusedItem = controller.focusedItem;
+    final _MenuNode? focusedItem = menuBar.focusedItem;
     if (focusedItem == null) {
       return false;
     }
@@ -946,24 +530,24 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       }
     }
     if (previous != null) {
-      controller.openMenu = previous;
+      menuBar.openMenu = previous;
     } else {
-      controller.openMenu = controller.root.children.isNotEmpty ? controller.root.children.last : null;
+      menuBar.openMenu = menuBar.root.children.isNotEmpty ? menuBar.root.children.last : null;
     }
     return true;
   }
 
   bool _moveUp() {
-    if (controller.openMenu == null) {
+    if (menuBar.openMenu == null) {
       return false;
     }
-    final _MenuNode? focusedItem = controller.focusedItem;
+    final _MenuNode? focusedItem = menuBar.focusedItem;
     if (focusedItem == null) {
       return false;
     }
-    if (focusedItem.parent == controller.root) {
+    if (focusedItem.parent == menuBar.root) {
       // Pressing on a top level menu closes all the menus.
-      controller.openMenu = null;
+      menuBar.openMenu = null;
       return true;
     }
     _MenuNode? previousFocusable = focusedItem.previousSibling;
@@ -971,27 +555,27 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       previousFocusable = previousFocusable.previousSibling;
     }
     if (previousFocusable != null) {
-      controller.openMenu = previousFocusable;
-    } else if (focusedItem.parent?.parent == controller.root) {
+      menuBar.openMenu = previousFocusable;
+    } else if (focusedItem.parent?.parent == menuBar.root) {
       // Pressing on a next-to-top level menu, moves to the parent.
-      controller.openMenu = focusedItem.parent;
+      menuBar.openMenu = focusedItem.parent;
     }
     return true;
   }
 
   bool _moveDown() {
-    final _MenuNode? focusedItem = controller.focusedItem;
+    final _MenuNode? focusedItem = menuBar.focusedItem;
     if (focusedItem == null) {
       return false;
     }
-    if (focusedItem.parent == controller.root) {
-      if (controller.openMenu == null) {
-        controller.openMenu = focusedItem;
+    if (focusedItem.parent == menuBar.root) {
+      if (menuBar.openMenu == null) {
+        menuBar.openMenu = focusedItem;
         return true;
       }
       final List<_MenuNode> children = focusedItem.focusableChildren;
       if (children.isNotEmpty) {
-        controller.openMenu = children[0];
+        menuBar.openMenu = children[0];
       }
       return true;
     }
@@ -1000,14 +584,14 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       nextFocusable = nextFocusable.nextSibling;
     }
     if (nextFocusable != null) {
-      controller.openMenu = nextFocusable;
+      menuBar.openMenu = nextFocusable;
     }
     return true;
   }
 
   @override
   void invoke(DirectionalFocusIntent intent) {
-    final TextDirection textDirection = Directionality.of(controller.menuBarContext);
+    final TextDirection textDirection = Directionality.of(menuBar.context);
     switch (intent.direction) {
       case TraversalDirection.up:
         if (_moveUp()) {
@@ -1313,40 +897,97 @@ class MenuBar extends PlatformMenuBar {
 class _MenuBarState extends State<MenuBar> {
   final FocusNode focusNode = FocusNode(debugLabel: 'MenuBar');
   late Map<MenuSerializableShortcut, Intent> shortcuts;
-  _MenuBarController? _controller;
-  _MenuBarController get controller {
-    // Make our own controller if the user didn't provide one.
-    if (widget.controller != null) {
-      _controller?.dispose();
-      _controller = null;
-      return widget.controller! as _MenuBarController;
-    }
-    return _controller ??= _MenuBarController();
-  }
 
+  // The root of the menu node tree.
+  final _MenuNode root = _MenuNode(item: const PlatformMenu(label: 'root', menus: <MenuItem>[]));
+
+  // The serial number containing the number of times the menu hierarchy has
+  // been updated.
+  //
+  // This is used to indicate to the [_MenuNodeWrapper] that the menu hierarchy
+  // or its attributes have changed, and its dependents need updating.
+  int get menuSerial => _menuSerial;
+  int _menuSerial = 0;
+
+  // The map of focus nodes to menus. This is used to look up which menu node
+  // goes with which focus node when finding the currently focused menu node.
+  final Map<FocusNode, _MenuNode> _focusNodes = <FocusNode, _MenuNode>{};
+
+  // The render boxes of all the MenuBarMenus that are displaying menu items.
+  // This is used to do hit testing to make sure that a pointer down has not
+  // hit a menu, and so to close all the menus.
+  final Set<RenderBox> _menuRenderBoxes = <RenderBox>{};
+
+  // If set, this is the overlay entry that contains all of the submenus.
+  // It is only non-null when there is a menu open.
+  OverlayEntry? _overlayEntry;
+
+  // This holds the previously focused widget when a top level menu is opened,
+  // so that when the last menu is dismissed, the focus can be restored.
+  FocusNode? _previousFocus;
+
+  // The primary focus at the time of the last pointer down event. This needs to
+  // be captured immediately before the FocusTrap unfocuses to the scope.
+  FocusNode? _focusBeforeClick;
+
+  // A menu that has been opened, but the menu widgets haven't been created yet.
+  // Once they are, then request focus on it.
+  _MenuNode? _pendingFocusedMenu;
+
+  // True when a menu is open and we are listening for pointer down events outside of
+  // the menus.
+  bool _listeningToPointerEvents = false;
+
+  // Used to tell if we've already been disposed, for both debug checks, and to
+  // avoid causing widget changes after being disposed.
+  bool _disposed = false;
+
+  bool get menuIsOpen => openMenu != null;
+
+  final FocusScopeNode menuBarScope = FocusScopeNode(debugLabel: 'MenuBar');
+  final FocusScopeNode overlayScope = FocusScopeNode(debugLabel: 'MenuBar overlay');
+
+  /// Returns the active menu controller in the given context, and creates a
+  /// dependency relationship that will rebuild the context when the controller
+  /// changes.
+  static _MenuBarState of(BuildContext context) {
+    final _MenuBarState? found = context.dependOnInheritedWidgetOfExactType<_MenuBarMarker>()?.state;
+    if (found == null) {
+      throw FlutterError('A ${context.widget.runtimeType} requested a '
+          'MenuBarController, but was not a descendant of a MenuBar: $context');
+    }
+    return found;
+  }
+  
   @override
   void initState() {
     super.initState();
     shortcuts = _getShortcuts();
-    _updateController();
+    widget.controller?._connect(this);
+    _createMenuTree(widget.menus);
+    if (!_listeningToPointerEvents) {
+      GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+      _listeningToPointerEvents = true;
+    }
   }
 
   @override
   void dispose() {
     focusNode.dispose();
-    if (!widget._isPlatformMenu) {
-      controller.disconnect();
-      // Only dispose of the controller if we created it in this state object.
-      _controller?.dispose();
+    widget.controller?._disconnect(this);
+    menuBarScope.dispose();
+    overlayScope.dispose();
+    root.children.clear();
+    _focusNodes.clear();
+    _previousFocus = null;
+    _focusBeforeClick = null;
+    _pendingFocusedMenu = null;
+    if (_listeningToPointerEvents) {
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+      _listeningToPointerEvents = false;
     }
     super.dispose();
-  }
-
-  void _updateController() {
-    if (widget._isPlatformMenu) {
-      return;
-    }
-    controller.connect(context: context, topLevel: widget.menus, enabled: widget.enabled);
+    _disposed = true;
   }
 
   @override
@@ -1357,20 +998,21 @@ class _MenuBarState extends State<MenuBar> {
       return;
     }
     if (widget.controller != oldWidget.controller) {
-      (oldWidget.controller as _MenuBarController?)?.disconnect();
+      oldWidget.controller?._disconnect(this);
+      widget.controller?._connect(this);
     }
-    if (widget.controller != oldWidget.controller || widget.menus != oldWidget.menus) {
-      _updateController();
+    if (widget.menus != oldWidget.menus) {
+      _createMenuTree(widget.menus);
     }
-    controller.enabled = widget.enabled;
+    enabled = widget.enabled;
   }
 
   void _doSelect(Intent onSelected) {
-    if (widget._isPlatformMenu || controller.enabled) {
+    if (widget._isPlatformMenu || enabled) {
       Actions.maybeInvoke(FocusManager.instance.primaryFocus!.context!, onSelected);
     }
     if (!widget._isPlatformMenu) {
-      controller.closeAll();
+      closeAll();
     }
   }
 
@@ -1460,26 +1102,23 @@ class _MenuBarState extends State<MenuBar> {
     }
     final Set<MaterialState> state = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
     final MenuBarThemeData menuBarTheme = MenuBarTheme.of(context);
-    return _MenuBarControllerMarker(
-      controller: controller,
+    return _MenuBarMarker(
+      state: this,
       child: Actions(
         actions: <Type, Action<Intent>>{
-          NextFocusIntent: _MenuNextFocusAction(controller: controller),
-          PreviousFocusIntent: _MenuPreviousFocusAction(controller: controller),
+          NextFocusIntent: _MenuNextFocusAction(menuBar: this),
+          PreviousFocusIntent: _MenuPreviousFocusAction(menuBar: this),
           DirectionalFocusIntent: _MenuDirectionalFocusAction(
-            controller: controller,
+            menuBar: this,
           ),
-          DismissIntent: _MenuDismissAction(controller: controller),
+          DismissIntent: _MenuDismissAction(menuBar: this),
         },
-        child: AnimatedBuilder(
-          animation: controller,
-          builder: (BuildContext context, Widget? ignoredChild) {
-            return _ShortcutRegistration(
-              shortcuts: controller.enabled ? shortcuts : const <MenuSerializableShortcut, Intent>{},
+        child: _ShortcutRegistration(
+              shortcuts: enabled ? shortcuts : const <MenuSerializableShortcut, Intent>{},
               child: ExcludeFocus(
-                excluding: !controller.enabled || !controller.menuIsOpen,
+                excluding: !enabled || !menuIsOpen,
                 child: FocusScope(
-                  node: controller.menuBarScope,
+                  node: menuBarScope,
                   child: Shortcuts(
                     // Make sure that these override any shortcut bindings from
                     // the menu items when a menu is open. If someone wants to
@@ -1493,7 +1132,7 @@ class _MenuBarState extends State<MenuBar> {
                           (widget.elevation ?? menuBarTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
                               .resolve(state)!,
                       height: widget.height ?? menuBarTheme.barHeight ?? _TokenDefaultsM3(context).barHeight,
-                      enabled: controller.enabled,
+                      enabled: enabled,
                       color: (widget.backgroundColor ??
                               menuBarTheme.barBackgroundColor ??
                               _TokenDefaultsM3(context).barBackgroundColor)
@@ -1504,11 +1143,291 @@ class _MenuBarState extends State<MenuBar> {
                   ),
                 ),
               ),
-            );
-          },
         ),
       ),
     );
+  }
+
+  /// Whether or not the menu bar is enabled for input. This is set by setting
+  /// [MenuBar.enabled] on the menu bar widget, and the menu children listen for
+  /// it to change.
+  ///
+  /// If set to false, all menus are closed, shortcuts stop working, and the
+  /// top level menu bar buttons are disabled.
+  bool get enabled => _enabled;
+  bool _enabled = true;
+  set enabled(bool value) {
+    if (_enabled != value) {
+      _enabled = value;
+      void closeAndMarkDirty() {
+        if (!_enabled) {
+          closeAll();
+        }
+        _markMenuDirty();
+      }
+
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+        // If we're in the middle of a build, we need to mark dirty in a post
+        // frame callback, since this function will often be called by a part of
+        // the tree that isn't in the overlay, but calling this would request that
+        // the overlay be rebuilt.
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) => closeAndMarkDirty());
+      } else {
+        // If we're not in the middle of a build, we can just call it right away.
+        closeAndMarkDirty();
+      }
+    }
+  }
+
+  List<_MenuNode> get openMenus {
+    if (openMenu == null) {
+      return const <_MenuNode>[];
+    }
+    return <_MenuNode>[...openMenu!.ancestors, openMenu!];
+  }
+
+  _MenuNode? get openMenu => _openMenu;
+  _MenuNode? _openMenu;
+  set openMenu(_MenuNode? value) {
+    if (_openMenu == value) {
+      // Nothing changed.
+      return;
+    }
+    if (value != null && _openMenu == null) {
+      // We're opening the first menu, so cache the primary focus so that we can
+      // try to return to it when the menu is dismissed.
+      // If we captured a focus before the click, then use that, otherwise use
+      // the current primary focus.
+      _previousFocus = _focusBeforeClick ?? FocusManager.instance.primaryFocus;
+    } else if (value == null && _openMenu != null) {
+      // Closing all menus, so restore the previous focus.
+      _previousFocus?.requestFocus();
+      _previousFocus = null;
+    }
+    _focusBeforeClick = null;
+    final _MenuNode? oldMenu = _openMenu;
+    _openMenu = value;
+    oldMenu?.ancestorDifference(_openMenu).forEach((_MenuNode node) {
+      node.close();
+    });
+    _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
+      node.open();
+    });
+    if (value != null && value.focusNode?.hasPrimaryFocus != true) {
+      // Request focus on the new thing that is now open, if any, so that
+      // focus traversal starts from that location.
+      if (value.focusNode == null || !value.focusNode!.canRequestFocus) {
+        // If we don't have a focus node to ask yet, or it can't be focused yet,
+        // then keep the menu until it gets registered, or something else sets
+        // the menu.
+        _pendingFocusedMenu = value;
+      } else {
+        _pendingFocusedMenu = null;
+        value.focusNode!.requestFocus();
+      }
+    }
+    _manageOverlayEntry();
+    _markMenuDirty();
+  }
+
+  // Creates or removes the overlay entry that contains the stack of all menus.
+  void _manageOverlayEntry() {
+    if (openMenu != null) {
+      if (_overlayEntry == null) {
+        _overlayEntry = OverlayEntry(builder: (BuildContext context) => _MenuStack(this));
+        Overlay.of(context)?.insert(_overlayEntry!);
+      }
+    } else {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    }
+  }
+
+  void _markMenuDirty() {
+    if (_disposed) {
+      return;
+    }
+    _menuSerial += 1;
+    _overlayEntry?.markNeedsBuild();
+    widget.controller?._notifyListeners();
+  }
+
+  // Build the node hierarchy based upon the MenuItem hierarchy.
+  void _createMenuTree(List<MenuItem> topLevel) {
+    root.children.clear();
+    _focusNodes.clear();
+    _previousFocus = null;
+    _pendingFocusedMenu = null;
+    for (final MenuItem item in topLevel) {
+      _MenuNode(
+        item: item,
+        parent: root,
+      );
+    }
+    assert(root.children.length == topLevel.length);
+  }
+
+  /// Closes the given menu, and any open descendant menus.
+  ///
+  /// Leaves ancestor menus open, if any.
+  ///
+  /// Notifies listeners if the menu changed.
+  void close(_MenuNode node) {
+    if (openMenu == null) {
+      // Everything is already closed.
+      return;
+    }
+    if (isAnOpenMenu(node)) {
+      // Don't call onClose, notifyListeners, etc, here, because setting
+      // openMenu will call them if needed.
+      if (node.parent == root) {
+        openMenu = null;
+      } else {
+        openMenu = node.parent;
+      }
+    }
+  }
+
+  void closeAll() {
+    openMenu = null;
+  }
+
+  /// Returns true if the given menu or one of its ancestors is open.
+  bool isAnOpenMenu(_MenuNode menu) {
+    if (_openMenu == null) {
+      return false;
+    }
+    return _openMenu == menu || (_openMenu?.ancestors.contains(menu) ?? false);
+  }
+
+  // Handles any pointer events that occur in the app, checking them against
+  // open menus to see if the menus should be closed or not.
+  // This isn't called if no menus are open.
+  void _handlePointerEvent(PointerEvent event) {
+    if (event is! PointerDownEvent) {
+      return;
+    }
+    bool isInsideMenu = false;
+    final RenderBox? menuBarBox = context.findRenderObject() as RenderBox?;
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      if (menuBarBox != null) menuBarBox,
+      ..._menuRenderBoxes,
+    ];
+    for (final RenderBox renderBox in renderBoxes) {
+      assert(renderBox.attached);
+      isInsideMenu =
+          renderBox.hitTest(BoxHitTestResult(), position: renderBox.globalToLocal(event.position)) || isInsideMenu;
+      if (isInsideMenu) {
+        break;
+      }
+    }
+    if (!isInsideMenu) {
+      closeAll();
+    } else {
+      _focusBeforeClick = FocusManager.instance.primaryFocus;
+    }
+  }
+
+  /// Registers the given menu in the menu controller whenever a menu item
+  /// widget is created or updated.
+  void registerMenu({
+    required BuildContext menuContext,
+    required _MenuNode node,
+    WidgetBuilder? menuBuilder,
+    EdgeInsets? menuPadding,
+    FocusNode? buttonFocus,
+  }) {
+    if (node.focusNode != buttonFocus) {
+      node.focusNode?.removeListener(_handleItemFocus);
+      node.focusNode = buttonFocus;
+      node.focusNode?.addListener(_handleItemFocus);
+      if (buttonFocus != null) {
+        _focusNodes[buttonFocus] = node;
+      }
+    }
+
+    node.menuPadding = menuPadding;
+    node.menuBuilder = menuBuilder;
+
+    if (node == _pendingFocusedMenu) {
+      node.focusNode?.requestFocus();
+      _pendingFocusedMenu = null;
+    }
+  }
+
+  /// Unregisters the given context from the menu controller.
+  ///
+  /// If the given context corresponds to the currently open menu, then close
+  /// it.
+  void unregisterMenu(_MenuNode node) {
+    node.focusNode?.removeListener(_handleItemFocus);
+    node.focusNode = null;
+    node.menuBuilder = null;
+    _focusNodes.remove(node.focusNode);
+    if (node == _pendingFocusedMenu) {
+      _pendingFocusedMenu = null;
+    }
+    if (openMenu == node) {
+      close(node);
+    }
+  }
+
+  // Used to register the menu's render box whenever it changes, so that it can
+  // be used to do hit detection and find out if a pointer event hit a menu or
+  // not without participating in the gesture arena.
+  void registerMenuRenderObject(RenderBox menu) {
+    _menuRenderBoxes.add(menu);
+  }
+
+  // Used to unregister the menu's previous render box whenever it changes, or
+  // remove it when it is disposed.
+  void unregisterMenuRenderObject(RenderBox menu) {
+    _menuRenderBoxes.remove(menu);
+  }
+
+  // Handles focus notifications for menu items so that the focused item can be
+  // set as the currently open menu.
+  void _handleItemFocus() {
+    if (openMenu == null) {
+      // Don't traverse the menu hierarchy on focus unless the user opened a
+      // menu already.
+      return;
+    }
+    final _MenuNode? focused = focusedItem;
+    if (focused != null && !isAnOpenMenu(focused)) {
+      openMenu = focused;
+    }
+  }
+
+  _MenuNode? get focusedItem {
+    final Iterable<FocusNode> focusedItems = _focusNodes.keys.where((FocusNode node) => node.hasFocus);
+    assert(
+    focusedItems.length <= 1,
+    'The same focus node is registered to more than one MenuItem '
+        'menu:\n  ${focusedItems.first}');
+    return focusedItems.isNotEmpty ? _focusNodes[focusedItems.first] : null;
+  }
+
+  String? get debugCurrentItem {
+    String? result;
+    assert(() {
+      if (openMenu != null) {
+        result = openMenus.map<String>((_MenuNode node) => node.toStringShort()).join(' > ');
+      }
+      return true;
+    }());
+    return result;
+  }
+
+  String? get debugFocusedItem {
+    String? result;
+    assert(() {
+      if (primaryFocus?.context != null) {
+        result = _focusNodes[primaryFocus]?.toStringShort();
+      }
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1709,13 +1628,13 @@ class MenuBarMenu extends StatefulWidget with _MenuBarItemDefaults implements Pl
 
 class _MenuBarMenuState extends State<MenuBarMenu> {
   _MenuNode? menu;
-  _MenuBarController? controller;
+  _MenuBarState? menuBar;
   Timer? _clickBanTimer;
   bool _clickBan = false;
   late FocusNode _focusNode;
 
   bool get _isAnOpenMenu {
-    return menu != null && controller!.isAnOpenMenu(menu!);
+    return menu != null && menuBar!.isAnOpenMenu(menu!);
   }
 
   @override
@@ -1733,7 +1652,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
   @override
   void didChangeDependencies() {
     menu = _MenuNodeWrapper.of(context);
-    controller = MenuBarController.of(context) as _MenuBarController;
+    menuBar = _MenuBarState.of(context);
     super.didChangeDependencies();
   }
 
@@ -1746,7 +1665,7 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     super.didUpdateWidget(oldWidget);
   }
 
-  bool get enabled => controller!.enabled && widget.menus.isNotEmpty;
+  bool get enabled => menuBar!.enabled && widget.menus.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -1781,9 +1700,9 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     }
 
     if (_isAnOpenMenu) {
-      controller!.close(menu!);
+      menuBar!.close(menu!);
     } else {
-      controller!.openMenu = menu;
+      menuBar!.openMenu = menu;
     }
   }
 
@@ -1797,12 +1716,12 @@ class _MenuBarMenuState extends State<MenuBarMenu> {
     // Don't open the top level menu bar buttons on hover unless something else
     // is already open. This means that the user has to first open the menu bar
     // before hovering allows them to traverse it.
-    if (menu!.isTopLevel && controller!.openMenu == null) {
+    if (menu!.isTopLevel && menuBar!.openMenu == null) {
       return;
     }
 
     if (hovering && !_isAnOpenMenu) {
-      controller!.openMenu = menu;
+      menuBar!.openMenu = menu;
       // If we just opened the menu because the user is hovering, then just
       // ignore any clicks for a bit. Otherwise, the user hovers to the
       // submenu, and sometimes clicks to open it just after the hover timer
@@ -2002,14 +1921,14 @@ class MenuBarItem extends StatefulWidget with _MenuBarItemDefaults {
 class _MenuBarItemState extends State<MenuBarItem> {
   _MenuNode? menu;
   int menuSerial = 0;
-  late _MenuBarController controller;
+  late _MenuBarState menuBar;
   bool registered = false;
   Timer? hoverTimer;
   FocusNode get focusNode => widget.focusNode ?? _focusNode!;
   FocusNode? _focusNode;
 
   bool get enabled {
-    return (widget.onSelected != null || widget.onSelectedIntent != null) && controller.enabled;
+    return (widget.onSelected != null || widget.onSelectedIntent != null) && menuBar.enabled;
   }
 
   @override
@@ -2024,7 +1943,7 @@ class _MenuBarItemState extends State<MenuBarItem> {
   void dispose() {
     hoverTimer?.cancel();
     hoverTimer = null;
-    controller.unregisterMenu(menu!);
+    menuBar.unregisterMenu(menu!);
     _focusNode?.dispose();
     _focusNode = null;
     super.dispose();
@@ -2113,14 +2032,14 @@ class _MenuBarItemState extends State<MenuBarItem> {
   }) {
     final TextDirection textDirection = Directionality.of(menuButtonContext);
     final RenderBox button = menuButtonContext.findRenderObject()! as RenderBox;
-    final RenderBox menuBar = controller.menuBarContext.findRenderObject()! as RenderBox;
-    final RenderBox overlay = Navigator.of(menuButtonContext).overlay!.context.findRenderObject()! as RenderBox;
+    final RenderBox menuBarBox = menuBar.context.findRenderObject()! as RenderBox;
+    final RenderBox overlay = Overlay.of(menuButtonContext)!.context.findRenderObject()! as RenderBox;
 
     assert(menuButtonNode.menuPadding != null, 'Menu padding not properly set.');
     Offset menuOrigin;
     switch (textDirection) {
       case TextDirection.rtl:
-        final Offset menuBarOrigin = menuBar.localToGlobal(menuBar.paintBounds.topRight);
+        final Offset menuBarOrigin = menuBarBox.localToGlobal(menuBarBox.paintBounds.topRight);
         if (menuButtonNode.isTopLevel) {
           menuOrigin = button.localToGlobal(button.paintBounds.bottomRight, ancestor: overlay);
           menuOrigin = Offset(menuBarOrigin.dx - menuOrigin.dx, menuOrigin.dy);
@@ -2135,7 +2054,7 @@ class _MenuBarItemState extends State<MenuBarItem> {
         break;
       case TextDirection.ltr:
         if (menuButtonNode.isTopLevel) {
-          menuOrigin = button.localToGlobal(button.paintBounds.bottomLeft, ancestor: menuBar);
+          menuOrigin = button.localToGlobal(button.paintBounds.bottomLeft, ancestor: menuBarBox);
         } else {
           menuOrigin = button.localToGlobal(button.paintBounds.topRight, ancestor: overlay) +
               Offset(
@@ -2156,9 +2075,9 @@ class _MenuBarItemState extends State<MenuBarItem> {
   // A builder for a submenu that should be positioned relative to the menu
   // button whose context is given.
   Widget _buildPositionedMenu(_MenuNode menuButtonNode) {
-    final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(controller.menuBarContext);
-    final MenuBarThemeData menuBarTheme = MenuBarTheme.of(controller.menuBarContext);
-    final TextDirection textDirection = Directionality.of(controller.menuBarContext);
+    final _TokenDefaultsM3 defaultTheme = _TokenDefaultsM3(menuBar.context);
+    final MenuBarThemeData menuBarTheme = MenuBarTheme.of(menuBar.context);
+    final TextDirection textDirection = Directionality.of(menuBar.context);
     final Set<MaterialState> disabled = <MaterialState>{
       if (!enabled) MaterialState.disabled,
     };
@@ -2170,14 +2089,14 @@ class _MenuBarItemState extends State<MenuBarItem> {
       child: Directionality(
         textDirection: textDirection,
         child: InheritedTheme.captureAll(
-          controller.menuBarContext,
+          menuBar.context,
           Builder(
             builder: (BuildContext context) {
               return _MenuNodeWrapper(
                 menu: menuButtonNode,
                 serial: menuSerial,
-                child: _MenuBarControllerMarker(
-                  controller: controller,
+                child: _MenuBarMarker(
+                  state: menuBar,
                   child: _MenuBarMenuList(
                     elevation: (widget._menuElevation ?? menuBarTheme.menuElevation ?? defaultTheme.menuElevation).resolve(disabled)!,
                     shape: (widget._menuShape ?? menuBarTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled)!,
@@ -2201,10 +2120,10 @@ class _MenuBarItemState extends State<MenuBarItem> {
   void _updateMenuRegistration() {
     final _MenuNode newMenu = _MenuNodeWrapper.of(context);
     final _MenuBarController newController = MenuBarController.of(context) as _MenuBarController;
-    if (menuSerial != newController.menuSerial || newMenu != menu || newController != controller) {
-      controller = newController;
+    if (menuSerial != newController.menuSerial || newMenu != menu || newController != menuBar) {
+      menuBar = newController;
       menu = newMenu;
-      menuSerial = controller.menuSerial;
+      menuSerial = menuBar.menuSerial;
       newController.registerMenu(
         menuContext: context,
         node: newMenu,
@@ -2219,16 +2138,16 @@ class _MenuBarItemState extends State<MenuBarItem> {
     widget.onSelected?.call();
 
     if (!widget._hasMenu) {
-      controller.closeAll();
+      menuBar.closeAll();
     }
   }
 
   void _handleHover(bool hovering) {
     widget.onHover?.call(hovering);
 
-    if (!widget._hasMenu && hovering && !controller.isAnOpenMenu(menu!)) {
+    if (!widget._hasMenu && hovering && !menuBar.isAnOpenMenu(menu!)) {
       setState(() {
-        controller.openMenu = menu;
+        menuBar.openMenu = menu;
       });
     }
   }
