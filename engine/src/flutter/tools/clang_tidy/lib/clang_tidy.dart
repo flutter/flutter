@@ -229,6 +229,10 @@ class ClangTidy {
       }
       _errSink.writeln('❌ Failures for ${job.name}:');
       _errSink.writeln(job.result.stdout);
+      final Exception? exception = job.exception;
+      if (exception != null) {
+        _errSink.writeln(exception);
+      }
       result = 1;
     }
     return result;
