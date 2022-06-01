@@ -27,7 +27,7 @@
 namespace impeller {
 
 #define UNIMPLEMENTED \
-  FML_LOG(ERROR) << "Unimplemented detail in " << __FUNCTION__;
+  FML_DLOG(ERROR) << "Unimplemented detail in " << __FUNCTION__;
 
 DisplayListDispatcher::DisplayListDispatcher() = default;
 
