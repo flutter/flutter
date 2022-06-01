@@ -4,6 +4,8 @@
 
 #include "display_list/display_list_blend_mode.h"
 #include "display_list/display_list_color_filter.h"
+#include "display_list/display_list_image_filter.h"
+#include "display_list/display_list_tile_mode.h"
 #include "gtest/gtest.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -250,6 +252,37 @@ TEST_P(DisplayListTest, CanDrawWithBlendColorFilter) {
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DisplayListTest, CanDrawWithImageBlurFilter) {
+  auto texture = CreateTextureForFixture("embarcadero.jpg");
+
+  bool first_frame = true;
+  auto callback = [&]() {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({400, 100});
+      ImGui::SetNextWindowPos({300, 550});
+    }
+
+    static float sigma[] = {10, 10};
+
+    ImGui::Begin("Controls");
+    ImGui::SliderFloat2("Sigma", sigma, 0, 100);
+    ImGui::End();
+
+    flutter::DisplayListBuilder builder;
+
+    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1],
+                                             flutter::DlTileMode::kClamp);
+    builder.setImageFilter(&filter);
+    builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(200, 200),
+                      SkSamplingOptions{}, true);
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing
