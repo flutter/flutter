@@ -754,19 +754,21 @@ void main() {
       3.0: 1.0 / 3.0,
     };
 
+    final GlobalKey iconKey = GlobalKey();
     final GlobalKey titleKey = GlobalKey();
     final GlobalKey contentKey = GlobalKey();
     final GlobalKey childrenKey = GlobalKey();
 
     final Finder dialogFinder = find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first;
+    final Finder iconFinder = find.byKey(iconKey);
     final Finder titleFinder = find.byKey(titleKey);
     final Finder contentFinder = find.byKey(contentKey);
     final Finder actionsFinder = _findButtonBar();
     final Finder childrenFinder = find.byKey(childrenKey);
 
-    Future<void> openDialog(WidgetTester tester, Widget dialog, double textScaleFactor) async {
+    Future<void> openDialog(WidgetTester tester, Widget dialog, double textScaleFactor, {bool isM3 = false}) async {
       await tester.pumpWidget(
-        _buildAppWithDialog(dialog, textScaleFactor: textScaleFactor),
+        _buildAppWithDialog(dialog, textScaleFactor: textScaleFactor, theme: ThemeData(useMaterial3: isM3)),
       );
 
       await tester.tap(find.text('X'));
@@ -853,6 +855,10 @@ void main() {
       );
     }
 
+    final Widget icon = Icon(
+      Icons.ac_unit,
+      key: iconKey,
+    );
     final Widget title = Text(
       'title',
       key: titleKey,
@@ -876,7 +882,203 @@ void main() {
     ];
 
     for (final double textScaleFactor in textScaleFactors) {
-      testWidgets('AlertDialog padding is correct when only title and actions are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
+      testWidgets('AlertDialog padding is correct when only icon and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
+        final AlertDialog dialog = AlertDialog(
+          icon: icon,
+          actions: actions,
+        );
+
+        await openDialog(tester, dialog, textScaleFactor);
+
+        expectTopEdgePadding(
+          tester,
+          finder: iconFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 24.0,
+        );
+        expectLeftEdgePadding(
+          tester,
+          finder: iconFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 24.0,
+        );
+        expectRightEdgePadding(
+          tester,
+          finder: iconFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 24.0,
+        );
+        expectVerticalInnerPadding(
+          tester,
+          top: iconFinder,
+          bottom: actionsFinder,
+          value: 24.0,
+        );
+        expectLeftEdgePadding(
+          tester,
+          finder: actionsFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 0.0,
+        );
+        expectRightEdgePadding(
+          tester,
+          finder: actionsFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 0.0,
+        );
+        expectBottomEdgePadding(
+          tester,
+          finder: actionsFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 0.0,
+        );
+      });
+
+      testWidgets('AlertDialog padding is correct when only icon, title and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
+        final AlertDialog dialog = AlertDialog(
+          icon: icon,
+          title: title,
+          actions: actions,
+        );
+
+        await openDialog(tester, dialog, textScaleFactor);
+
+        expectTopEdgePadding(
+          tester,
+          finder: iconFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 24.0,
+        );
+        expectLeftEdgePadding(
+          tester,
+          finder: iconFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 24.0,
+        );
+        expectRightEdgePadding(
+          tester,
+          finder: iconFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 24.0,
+        );
+        expectVerticalInnerPadding(
+          tester,
+          top: iconFinder,
+          bottom: titleFinder,
+          value: 16.0,
+        );
+        expectLeftEdgePadding(
+          tester,
+          finder: titleFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 24.0,
+        );
+        expectRightEdgePadding(
+          tester,
+          finder: titleFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 24.0,
+        );
+        expectVerticalInnerPadding(
+          tester,
+          top: titleFinder,
+          bottom: actionsFinder,
+          value: 20.0,
+        );
+        expectLeftEdgePadding(
+          tester,
+          finder: actionsFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 0.0,
+        );
+        expectRightEdgePadding(
+          tester,
+          finder: actionsFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 0.0,
+        );
+        expectBottomEdgePadding(
+          tester,
+          finder: actionsFinder,
+          textScaleFactor: textScaleFactor,
+          unscaledValue: 0.0,
+        );
+      });
+
+      for (final bool isM3 in <bool>[true, false]) {
+        testWidgets('AlertDialog padding is correct when only icon, content and actions are specified [textScaleFactor]=$textScaleFactor [isM3]=$isM3', (WidgetTester tester) async {
+          final AlertDialog dialog = AlertDialog(
+            icon: icon,
+            content: content,
+            actions: actions,
+          );
+
+          await openDialog(tester, dialog, textScaleFactor, isM3: isM3);
+
+          expectTopEdgePadding(
+            tester,
+            finder: iconFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: iconFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: iconFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectVerticalInnerPadding(
+            tester,
+            top: iconFinder,
+            bottom: contentFinder,
+            value: isM3 ? 16.0 : 20.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: contentFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: contentFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 24.0,
+          );
+          expectVerticalInnerPadding(
+            tester,
+            top: contentFinder,
+            bottom: actionsFinder,
+            value: 24.0,
+          );
+          expectLeftEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectRightEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+          expectBottomEdgePadding(
+            tester,
+            finder: actionsFinder,
+            textScaleFactor: textScaleFactor,
+            unscaledValue: 0.0,
+          );
+        });
+      }
+
+      testWidgets('AlertDialog padding is correct when only title and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final AlertDialog dialog = AlertDialog(
           title: title,
           actions: actions,
@@ -928,7 +1130,7 @@ void main() {
         );
       });
 
-      testWidgets('AlertDialog padding is correct when only content and actions are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
+      testWidgets('AlertDialog padding is correct when only content and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final AlertDialog dialog = AlertDialog(
           content: content,
           actions: actions,
@@ -980,7 +1182,7 @@ void main() {
         );
       });
 
-      testWidgets('AlertDialog padding is correct when title, content, and actions are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
+      testWidgets('AlertDialog padding is correct when title, content, and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final AlertDialog dialog = AlertDialog(
           title: title,
           content: content,
@@ -1051,7 +1253,7 @@ void main() {
         );
       });
 
-      testWidgets('SimpleDialog padding is correct when only children are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
+      testWidgets('SimpleDialog padding is correct when only children are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final SimpleDialog dialog = SimpleDialog(
           children: children,
         );
@@ -1084,7 +1286,7 @@ void main() {
         );
       });
 
-      testWidgets('SimpleDialog padding is correct when title and children are specified [textScaleFactor]=$textScaleFactor}', (WidgetTester tester) async {
+      testWidgets('SimpleDialog padding is correct when title and children are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final SimpleDialog dialog = SimpleDialog(
           title: title,
           children: children,

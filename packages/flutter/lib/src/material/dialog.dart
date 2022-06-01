@@ -263,6 +263,7 @@ class AlertDialog extends StatelessWidget {
   const AlertDialog({
     super.key,
     this.icon,
+    this.iconPadding,
     this.iconColor,
     this.title,
     this.titlePadding,
@@ -294,8 +295,22 @@ class AlertDialog extends StatelessWidget {
 
   /// Color for the [Icon] in the [icon] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.iconColor] is used.
+  /// If null, [DialogTheme.iconColor] is used. If that is null, defaults to
+  /// color scheme's [ColorScheme.secondary] if [ThemeData.useMaterial3] is
+  /// true, black otherwise.
   final Color? iconColor;
+
+  /// Padding around the [icon].
+  ///
+  /// If there is no [icon], no padding will be provided. Otherwise, this
+  /// padding is used.
+  ///
+  /// This property defaults to providing 24 pixels on the top, left, and right
+  /// of the [icon]. If the [title] is null and [content] is _not_ null, then no
+  /// bottom padding is provided (but see [contentPadding]). In any other case
+  /// an extra 16 pixels of bottom padding is added to separate the [icon] from
+  /// the [title].
+  final EdgeInsetsGeometry? iconPadding;
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog, below the (optional) [icon].
@@ -330,13 +345,18 @@ class AlertDialog extends StatelessWidget {
   /// will not fit.
   final Widget? content;
 
-  // TODO(werainkhatri): how do i mention that 16dp will be used with M3?
   /// Padding around the content.
   ///
-  /// If there is no content, no padding will be provided. Otherwise, padding of
-  /// 20 pixels is provided above the content to separate the content from the
-  /// title, and padding of 24 pixels is provided on the left, right, and bottom
-  /// to separate the content from the other edges of the dialog.
+  /// If there is no [content], no padding will be provided. Otherwise, this
+  /// padding is used.
+  ///
+  /// This property defaults to providing a padding of 20 pixels above the
+  /// [content] to separate the [content] from the [title], and 24 pixels on the
+  /// left, right, and bottom to separate the [content] from the other edges of
+  /// the dialog.
+  ///
+  /// If [ThemeData.useMaterial3] is true, the top padding separating the
+  /// content from the title defaults to 16 pixels instead of 20 pixels.
   final EdgeInsetsGeometry? contentPadding;
 
   /// Style for the text in the [content] of this [AlertDialog].
@@ -519,7 +539,6 @@ class AlertDialog extends StatelessWidget {
     // children.
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection? textDirection = Directionality.maybeOf(context);
-    const double m3ContentTopPadding = 16.0;
 
     Widget? iconWidget;
     Widget? titleWidget;
@@ -527,8 +546,22 @@ class AlertDialog extends StatelessWidget {
     Widget? actionsWidget;
 
     if (icon != null) {
+      final bool belowIsTitle = title != null;
+      final bool belowIsContent = !belowIsTitle && content != null;
+      final EdgeInsets defaultIconPadding = EdgeInsets.only(
+        left: 24.0,
+        top: 24.0,
+        right: 24.0,
+        bottom: belowIsTitle ? 16.0 : belowIsContent ? 0.0 : 24.0,
+      );
+      final EdgeInsets effectiveIconPadding = iconPadding?.resolve(textDirection) ?? defaultIconPadding;
       iconWidget = Padding(
-        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 16.0),
+        padding: EdgeInsets.only(
+          left: effectiveIconPadding.left * paddingScaleFactor,
+          right: effectiveIconPadding.right * paddingScaleFactor,
+          top: effectiveIconPadding.top * paddingScaleFactor,
+          bottom: effectiveIconPadding.bottom,
+        ),
         child: IconTheme(
           data: IconThemeData(
             color: iconColor ?? dialogTheme.iconColor ?? defaults.iconColor,
@@ -550,7 +583,7 @@ class AlertDialog extends StatelessWidget {
         padding: EdgeInsets.only(
           left: effectiveTitlePadding.left * paddingScaleFactor,
           right: effectiveTitlePadding.right * paddingScaleFactor,
-          top: effectiveTitlePadding.top * paddingScaleFactor,
+          top: icon == null ? effectiveTitlePadding.top * paddingScaleFactor : effectiveTitlePadding.top,
           bottom: effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
@@ -570,7 +603,7 @@ class AlertDialog extends StatelessWidget {
     if (content != null) {
       final EdgeInsets defaultContentPadding = EdgeInsets.only(
         left: 24.0,
-        top: theme.useMaterial3 ? m3ContentTopPadding : 20.0,
+        top: theme.useMaterial3 ? 16.0 : 20.0,
         right: 24.0,
         bottom: 24.0,
       );
@@ -579,7 +612,9 @@ class AlertDialog extends StatelessWidget {
         padding: EdgeInsets.only(
           left: effectiveContentPadding.left * paddingScaleFactor,
           right: effectiveContentPadding.right * paddingScaleFactor,
-          top: title == null ? effectiveContentPadding.top * paddingScaleFactor : effectiveContentPadding.top,
+          top: title == null && icon == null
+            ? effectiveContentPadding.top * paddingScaleFactor
+            : effectiveContentPadding.top,
           bottom: effectiveContentPadding.bottom,
         ),
         child: DefaultTextStyle(
@@ -1228,6 +1263,7 @@ double _paddingScaleFactor(double textScaleFactor) {
 class _DefaultsM2 extends DialogTheme {
   _DefaultsM2(this.context)
     : _textTheme = Theme.of(context).textTheme,
+      _theme = Theme.of(context),
       super(
         alignment: Alignment.center,
         elevation: 24.0,
@@ -1236,6 +1272,10 @@ class _DefaultsM2 extends DialogTheme {
 
   final BuildContext context;
   final TextTheme _textTheme;
+  final ThemeData _theme;
+
+  @override
+  Color? get iconColor => _theme.iconTheme.color;
 
   @override
   Color? get backgroundColor => Theme.of(context).dialogBackgroundColor;
@@ -1269,6 +1309,9 @@ class _TokenDefaultsM3 extends DialogTheme {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
+  @override
+  Color? get iconColor => _colors.secondary;
+
   // TODO(darrenaustin): overlay should be handled by Material widget: https://github.com/flutter/flutter/issues/9160
   @override
   Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.primary, 6.0);
@@ -1281,9 +1324,6 @@ class _TokenDefaultsM3 extends DialogTheme {
 
   @override
   EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
-
-  @override
-  Color? get iconColor => _colors.secondary;
 }
 
 // END GENERATED TOKEN PROPERTIES
