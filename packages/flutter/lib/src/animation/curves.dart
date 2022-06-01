@@ -199,9 +199,9 @@ class Interval extends Curve {
 }
 
 /// A curve that progresses linearly until [begin], then curved (according to
-/// [curve] from t at [begin] to 1.0. 
-/// 
-/// Unlike [Interval], [curve] will not start at zero, but at the Y 
+/// [curve] from t at [begin] to 1.0.
+///
+/// Unlike [Interval], [curve] will not start at zero, but at the Y
 /// corresponding to t=`begin`.
 ///
 /// For example, if [begin] is set to 0.5, and [curve] is set to
@@ -214,11 +214,11 @@ class Interval extends Curve {
 /// using a curve specified with the [curve] argument, after the finger is
 /// released. In such a case, the value of [begin] would be the progress of the
 /// animation at the time when the finger was released.
-/// 
+///
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_suspended.mp4}
 class SuspendedCurve extends Curve {
   /// Creates a suspended curve.
-  /// 
+  ///
   /// The [begin] and [curve] arguments must not be null.
   const SuspendedCurve(
     this.begin, {
@@ -232,7 +232,7 @@ class SuspendedCurve extends Curve {
   final double begin;
 
   /// The curve to apply when [begin] is reached.
-  /// 
+  ///
   /// This defaults to [Curves.easeOutCubic].
   final Curve curve;
 
