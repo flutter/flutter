@@ -33,6 +33,7 @@ class _SnakeLayoutDelegate extends MultiChildLayoutDelegate {
   final int numCols;
   // Not sure how to access the greatest height of children to make a max height so here I hardcode the rowHeight value
   final double rowHeight;
+
   @override
   void performLayout(Size size) {
     // Distribute children between numCols
