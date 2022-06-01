@@ -216,11 +216,11 @@ class Interval extends Curve {
 /// animation at the time when the finger was released.
 ///
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_suspended.mp4}
-class SuspendedCurve extends Curve {
+class Suspended extends Curve {
   /// Creates a suspended curve.
   ///
   /// The [begin] and [curve] arguments must not be null.
-  const SuspendedCurve(
+  const Suspended(
     this.begin, {
     this.curve = Curves.easeOutCubic,
   }) : assert(begin != null),

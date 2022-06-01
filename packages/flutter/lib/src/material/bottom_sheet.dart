@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet_theme.dart';
@@ -393,7 +392,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
   void handleDragEnd(DragEndDetails details, {bool? isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
-    animationCurve = SuspendedCurve(
+    animationCurve = Suspended(
       widget.route!.animation!.value,
       curve: _modalBottomSheetCurve,
     );

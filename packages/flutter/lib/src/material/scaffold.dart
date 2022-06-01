@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
@@ -2987,7 +2986,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   void _handleDragEnd(DragEndDetails details, { bool? isClosing }) {
     // Allow the bottom sheet to animate smoothly from its current position.
-    animationCurve = SuspendedCurve(
+    animationCurve = Suspended(
       widget.animationController.value,
       curve: _standardBottomSheetCurve,
     );
