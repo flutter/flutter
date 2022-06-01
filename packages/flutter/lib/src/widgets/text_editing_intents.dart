@@ -338,8 +338,9 @@ class TransposeCharactersIntent extends Intent {
   const TransposeCharactersIntent();
 }
 
-// ---------- Gesture Intents ----------
+// ---------- Selection Gesture Intents ----------
 class ExpandSelectionToPositionIntent extends Intent {
+  /// Creates an [ExpandSelectionToPositionIntent].
   const ExpandSelectionToPositionIntent({required this.cause, this.fromSelection, required this.position, required this.shiftPressed});
 
   final SelectionChangedCause cause;
@@ -349,6 +350,7 @@ class ExpandSelectionToPositionIntent extends Intent {
 }
 
 class ExtendSelectionToPositionIntent extends Intent {
+  /// Creates an [ExtendSelectionToPositionIntent].
   const ExtendSelectionToPositionIntent({required this.cause, required this.position, required this.shiftPressed});
 
   final SelectionChangedCause cause;
@@ -356,18 +358,27 @@ class ExtendSelectionToPositionIntent extends Intent {
   final bool shiftPressed;
 }
 
+/// An [Intent] that represents a user interaction that attempts to request the
+/// virtual keyboard.
 class KeyboardRequestIntent extends Intent {
+  /// Creates an [KeyboardRequestIntent].
   const KeyboardRequestIntent();
 }
 
+/// An [Intent] that represents a user interaction that attempts to select the
+/// edge of the word closest to the [position] in an input field.
 class SelectWordEdgeIntent extends Intent {
+  /// Creates an [SelectWordEdgeIntent].
   const SelectWordEdgeIntent({required this.cause, required this.position});
 
   final SelectionChangedCause cause;
   final Offset position;
 }
 
+/// An [Intent] that represents a user interaction that attempts to select the
+/// range in an input field at [from] to [to].
 class SelectRangeIntent extends Intent {
+  /// Creates an [SelectRangeIntent].
   const SelectRangeIntent({required this.cause, required this.from, this.to});
 
   final SelectionChangedCause cause;
@@ -376,6 +387,7 @@ class SelectRangeIntent extends Intent {
 }
 
 class SelectTapPositionIntent extends Intent {
+  /// Creates an [SelectTapPositionIntent].
   const SelectTapPositionIntent({required this.cause, required this.from, this.to});
 
   final SelectionChangedCause cause;
@@ -383,7 +395,10 @@ class SelectTapPositionIntent extends Intent {
   final Offset? to;
 }
 
+/// An [Intent] that represents a user interaction that attempts to hide, show,
+/// or toggle the selection toolbar overlay.
 class SelectionToolbarControlIntent extends Intent {
+  /// Creates an [SelectToolbarControlIntent].
   const SelectionToolbarControlIntent._({this.positionToDisplay, this.showSelectionToolbar, this.toggleSelectionToolbar});
 
   const SelectionToolbarControlIntent.show({required Offset position}) : this._(positionToDisplay: position, showSelectionToolbar: true, toggleSelectionToolbar: false);
@@ -395,6 +410,9 @@ class SelectionToolbarControlIntent extends Intent {
   final bool? toggleSelectionToolbar;
 }
 
+/// An [Intent] that represents a user interaction that attempts to execute a given
+/// callback provided by the user.
 class UserOnTapCallbackIntent extends Intent {
+  /// Creates an [UserOnTapCallbackIntent].
   const UserOnTapCallbackIntent();
 }

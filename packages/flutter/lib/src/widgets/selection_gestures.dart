@@ -139,10 +139,6 @@ abstract class ContextGestureRecognizerFactory<T extends GestureRecognizer> {
   }
 }
 
-class _SelectionTapStatus {
-
-}
-
 typedef ConsecutiveSelectionTapGestureTapDownCallback = void Function(TapDownDetails details, int tapCount);
 typedef ConsecutiveSelectionTapGestureTapUpCallback = void Function(TapUpDetails details, int tapCount);
 typedef ConsecutiveSelectionTapGestureSecondaryTapCallback = void Function(Offset lastSecondaryTapDownPosition);
