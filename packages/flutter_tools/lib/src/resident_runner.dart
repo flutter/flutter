@@ -1178,8 +1178,10 @@ abstract class ResidentRunner extends ResidentHandlers {
     String route,
   });
 
-  /// The first time we do a run hot a full restart is not needed
-  /// (full dill already compiled) as opposed when doing attach.
+  /// Connect to a flutter application.
+  ///
+  /// [needsFullRestart] defaults to `true`, and controls if the frontend server should
+  /// compile a full dill. This should be set to `false` if this is called in [ResidentRunner.run], since that method already perfoms an initial compilation.
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
