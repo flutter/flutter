@@ -1224,70 +1224,53 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
       ExpandSelectionToPositionIntent : SelectionCallbackAction<ExpandSelectionToPositionIntent>(
-              (ExpandSelectionToPositionIntent intent) {
-            _editableText!.expandSelection(intent);
-          },
+          onInvoke: (ExpandSelectionToPositionIntent intent) => _editableText!.expandSelection(intent),
           enabledPredicate: (ExpandSelectionToPositionIntent intent) {
             return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
-          }
+          },
       ),
       ExtendSelectionToPositionIntent : SelectionCallbackAction<ExtendSelectionToPositionIntent>(
-          (ExtendSelectionToPositionIntent intent) {
-            _editableText!.extendSelection(intent);
-          },
+          onInvoke: (ExtendSelectionToPositionIntent intent) => _editableText!.extendSelection(intent),
           enabledPredicate: (ExtendSelectionToPositionIntent intent) {
             return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
           }
       ),
       KeyboardRequestIntent : SelectionCallbackAction<KeyboardRequestIntent>(
-              (KeyboardRequestIntent intent) => _requestKeyboard(),
+        onInvoke: (KeyboardRequestIntent intent) => _requestKeyboard(),
+        enabledPredicate: (KeyboardRequestIntent intent) => widget.selectionEnabled,
       ),
       SelectRangeIntent : SelectionCallbackAction<SelectRangeIntent>(
-              (SelectRangeIntent intent) {
-            _editableText!.selectRange(intent);
-          },
-          enabledPredicate: (SelectRangeIntent intent) {
-            return widget.selectionEnabled;
-          }
+          onInvoke: (SelectRangeIntent intent) => _editableText!.selectRange(intent),
+          enabledPredicate: (SelectRangeIntent intent) => widget.selectionEnabled,
       ),
       SelectWordEdgeIntent : SelectionCallbackAction<SelectWordEdgeIntent>(
-              (SelectWordEdgeIntent intent) {
-            _editableText!.selectWordEdge(intent);
-          },
-          enabledPredicate: (SelectWordEdgeIntent intent) {
-            return widget.selectionEnabled;
-          }
+          onInvoke: (SelectWordEdgeIntent intent) => _editableText!.selectWordEdge(intent),
+          enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
       ),
       SelectTapPositionIntent : SelectionCallbackAction<SelectTapPositionIntent>(
-              (SelectTapPositionIntent intent) {
-            _editableText!.selectPosition(intent);
-          },
-          enabledPredicate: (SelectTapPositionIntent intent) {
-            return widget.selectionEnabled;
-          }
+          onInvoke: (SelectTapPositionIntent intent) => _editableText!.selectPosition(intent),
+          enabledPredicate: (SelectTapPositionIntent intent) => widget.selectionEnabled,
       ),
       SelectionToolbarControlIntent : SelectionCallbackAction<SelectionToolbarControlIntent>(
-              (SelectionToolbarControlIntent intent) {
-                if (intent.showSelectionToolbar != null) {
-                  if (intent.showSelectionToolbar!) {
-                    _editableText!.showToolbar(intent.positionToDisplay);
-                  } else {
-                    _editableText!.hideToolbar();
-                  }
-                }
+          onInvoke: (SelectionToolbarControlIntent intent) {
+            if (intent.showSelectionToolbar != null) {
+              if (intent.showSelectionToolbar!) {
+                _editableText!.showToolbar(intent.positionToDisplay);
+              } else {
+                _editableText!.hideToolbar();
+              }
+            }
 
-                if (intent.toggleSelectionToolbar != null) {
-                  if (intent.toggleSelectionToolbar!) {
-                    _editableText!.toggleToolbar(intent.positionToDisplay);
-                  }
-                }
+            if (intent.toggleSelectionToolbar != null) {
+              if (intent.toggleSelectionToolbar!) {
+                _editableText!.toggleToolbar(intent.positionToDisplay);
+              }
+            }
           },
-          enabledPredicate: (SelectionToolbarControlIntent intent) {
-            return widget.selectionEnabled;
-          }
+          enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
       ),
       UserOnTapCallbackIntent : SelectionCallbackAction<UserOnTapCallbackIntent>(
-          (UserOnTapCallbackIntent intent) => widget.onTap?.call(),
+        onInvoke: (UserOnTapCallbackIntent intent) => widget.onTap?.call(),
         enabledPredicate: (UserOnTapCallbackIntent intent) => widget.selectionEnabled,
       ),
     };
@@ -1330,13 +1313,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 }
 
 class SelectionCallbackAction<T extends Intent> extends Action<T> {
-  SelectionCallbackAction(this._onInvoke, { this.enabledPredicate });
+  SelectionCallbackAction({ required this.onInvoke, this.enabledPredicate });
 
-  final void Function(T intent) _onInvoke;
+  final void Function(T intent) onInvoke;
   final bool Function(T)? enabledPredicate;
 
   @override
-  void invoke(T intent) => _onInvoke(intent);
+  void invoke(T intent) => onInvoke(intent);
 
   @override
   bool isEnabled(T intent) => enabledPredicate?.call(intent) ?? true;
