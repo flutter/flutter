@@ -97,8 +97,7 @@ class MigrateApplyCommand extends FlutterCommand {
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
     if (customWorkingDirectoryPath != null) {
-      if (customWorkingDirectoryPath.startsWith(fileSystem.path.separator) || customWorkingDirectoryPath.startsWith(RegExp(r'[A-Z]:\\'))) {
-        // Is an absolute path
+      if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
       } else {
         workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
