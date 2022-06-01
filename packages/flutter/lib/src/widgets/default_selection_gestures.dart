@@ -51,6 +51,7 @@ class DefaultSelectionGestures extends StatelessWidget {
           ..onTapUp = (TapUpDetails details, int tapCount) {
             print('onTapUp , tapCount  $tapCount');
             if (tapCount > 1) return;
+            Actions.invoke(context, SelectionToolbarControlIntent.hide);
             switch (details.kind) {
               case PointerDeviceKind.mouse:
               case PointerDeviceKind.stylus:
@@ -67,6 +68,8 @@ class DefaultSelectionGestures extends StatelessWidget {
                 Actions.invoke(context, SelectWordEdgeIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
                 break;
             }
+            Actions.invoke(context, KeyboardRequestIntent());
+            //Actions.invoke(context, UserOnTapCallbackIntent);
           }
           ..onTapCancel = () {
             print('onTapCancel');
@@ -93,21 +96,77 @@ class DefaultSelectionGestures extends StatelessWidget {
           }
   );
 
-  static final Map<Type, ContextGestureRecognizerFactory> _commonGestures = {
-    TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-            (BuildContext context) => TapGestureRecognizer(debugOwner: context),
-            (TapGestureRecognizer instance, BuildContext context) {
-          instance
-            ..onSecondaryTap = () {
-            }
-            ..onSecondaryTapDown = (TapDownDetails details) {}
-            ..onTapDown = (TapDownDetails details) {
-              Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition, shiftPressed: _isShiftPressed));
-            }
-            ..onTapUp = (TapUpDetails details) {
+  static final ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer> _iOSMacLongPressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+          (BuildContext context) => LongPressGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch }),
+          (LongPressGestureRecognizer instance, BuildContext context) {
+        instance
+          ..onLongPressStart = (LongPressStartDetails details) {
+            print('onLongPressStart');
+            Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+          }
+          ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+            print('onLongPressMoveUpdate');
+            Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+          }
+          ..onLongPressEnd = (LongPressEndDetails details) {
+            print('onLongPressEnd');
+            Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+          };
+      }
+  );
 
+  static final ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer> _iOSMacForcePressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
+          (BuildContext context) => ForcePressGestureRecognizer(debugOwner: context),
+          (ForcePressGestureRecognizer instance, BuildContext context) {
+        instance
+          ..onStart = (ForcePressDetails details) {
+            print('onStartForcePress');
+            Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition));
+          }
+          ..onEnd = (ForcePressDetails details) {
+            print('onEndForcePress');
+            Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition));
+            Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+          };
+      }
+  );
+
+  static final Map<Type, ContextGestureRecognizerFactory> _commonGestures = {
+    TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<SelectionConsecutiveTapGestureRecognizer>(
+            (BuildContext context) => SelectionConsecutiveTapGestureRecognizer(debugOwner: context),
+            (SelectionConsecutiveTapGestureRecognizer instance, BuildContext context) {
+          instance
+            ..onSecondaryTapUp = (TapUpDetails details) {
+              print('onSecondaryTapUp');
             }
-            ..onTapCancel = () {};
+            ..onSecondaryTap = () {
+              print('onSecondaryTap');
+            }
+            ..onSecondaryTapDown = (TapDownDetails details) {
+              print('onSecondaryTapDown');
+              Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));//if renderEditable doesnt have focus
+              Actions.invoke(context, SelectionToolbarControlIntent.toggle);
+            }
+            ..onTapDown = (TapDownDetails details, int tapCount) {
+              print('onTapDown , tapCount  $tapCount');
+              Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition, shiftPressed: _isShiftPressed));
+
+              if (tapCount == 2) {
+                print('onDoubleTapDown');
+                Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+              }
+            }
+            ..onTapUp = (TapUpDetails details, int tapCount) {
+              print('onTapUp , tapCount  $tapCount');
+              if (tapCount > 1) return;
+              Actions.invoke(context, SelectionToolbarControlIntent.hide);
+              Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+              Actions.invoke(context, KeyboardRequestIntent());
+              //Actions.invoke(context, UserOnTapCallbackIntent);
+            }
+            ..onTapCancel = () {
+              print('onTapCancel');
+            };
         }
     ),
     LongPressGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
@@ -115,16 +174,17 @@ class DefaultSelectionGestures extends StatelessWidget {
             (LongPressGestureRecognizer instance, BuildContext context) {
           instance
             ..onLongPressStart = (LongPressStartDetails details) {
-              // Actions.invoke(
-              //   context,
-              //   SelectTextAtPositionIntent(
-              //
-              //     cause: SelectionChangedCause.longpress,
-              //   ),
-              // );
+              print('onLongPressStart');
+              Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
             }
-            ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {}
-            ..onLongPressEnd = (LongPressEndDetails details) {};
+            ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+              print('onLongPressMoveUpdate');
+              Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+            }
+            ..onLongPressEnd = (LongPressEndDetails details) {
+              print('onLongPressEnd');
+              Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+            };
         }
     ),
     PanGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
@@ -137,14 +197,6 @@ class DefaultSelectionGestures extends StatelessWidget {
             ..onEnd = (DragEndDetails details) {};
         }
     ),
-    ForcePressGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
-            (BuildContext context) => ForcePressGestureRecognizer(debugOwner: context),
-            (ForcePressGestureRecognizer instance, BuildContext context) {
-          instance
-            ..onStart = (ForcePressDetails details) {}
-            ..onEnd = (ForcePressDetails details) {};
-        }
-    ),
   };
 
   static final Map<Type, ContextGestureRecognizerFactory> _androidGestures = _commonGestures;
@@ -152,6 +204,8 @@ class DefaultSelectionGestures extends StatelessWidget {
   static final Map<Type, ContextGestureRecognizerFactory> _iOSGestures = <Type, ContextGestureRecognizerFactory>{
     TapGestureRecognizer : _iOSMacTapGestureRecognizer,
     PanGestureRecognizer : _iOSMacPanGestureRecognizer,
+    LongPressGestureRecognizer : _iOSMacLongPressGestureRecognizer,
+    ForcePressGestureRecognizer : _iOSMacForcePressGestureRecognizer,
   };
   static final Map<Type, ContextGestureRecognizerFactory> _linuxGestures = _commonGestures;
   static final Map<Type, ContextGestureRecognizerFactory> _macGestures = _commonGestures;
