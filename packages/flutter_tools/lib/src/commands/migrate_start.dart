@@ -116,7 +116,9 @@ class MigrateStartCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String? projectDirectory = stringArg('project-directory');
     final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
-    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
+    final FlutterProject project = projectDirectory == null
+      ? FlutterProject.current()
+      : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
     if (project.isModule || project.isPlugin) {
       logger.printError('Migrate tool only supports app projects. This project is a ${project.isModule ? 'module' : 'plugin'}');
       return const FlutterCommandResult(ExitStatus.fail);
@@ -129,8 +131,7 @@ class MigrateStartCommand extends FlutterCommand {
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
     if (customWorkingDirectoryPath != null) {
-      if (customWorkingDirectoryPath.startsWith(fileSystem.path.separator) || customWorkingDirectoryPath.startsWith('/')) {
-        // Is an absolute path
+      if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
       } else {
         workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
