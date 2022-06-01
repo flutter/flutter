@@ -1728,19 +1728,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     }
 
-    // final Map<Type, ContextGestureRecognizerFactory> _defaultGestures = {
-    //   TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-    //           (BuildContext context) => TapGestureRecognizer(debugOwner: context),
-    //           (TapGestureRecognizer instance, BuildContext context) {
-    //         instance
-    //           ..onTapDown = (TapDownDetails details) {
-    //             print('not default');
-    //             Actions.invoke(context, ActivateIntent());
-    //           };
-    //       }
-    //   )
-    // };
-
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: SharedAppData(
@@ -1750,20 +1737,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
           // fall through to the defaultShortcuts.
           child: DefaultSelectionGestures(
-            // child: TextSelectionGestures(
-              // manager: LoggingTextSelectionGesturesManager(),
-              // gestures: _defaultGestures,
-              child: DefaultTextEditingShortcuts(
-                child: Actions(
-                  actions: widget.actions ?? WidgetsApp.defaultActions,
-                  child: FocusTraversalGroup(
-                    policy: ReadingOrderTraversalPolicy(),
-                    ShortcutRegistrar(
-                      child: child,
-                    ),
+            child: DefaultTextEditingShortcuts(
+              child: Actions(
+                actions: widget.actions ?? WidgetsApp.defaultActions,
+                child: FocusTraversalGroup(
+                  policy: ReadingOrderTraversalPolicy(),
+                  child: ShortcutRegistrar(
+                    child: child,
                   ),
                 ),
-              // ),
+              ),
             ),
           ),
         ),
