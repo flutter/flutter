@@ -664,12 +664,14 @@ class _UiKitViewState extends State<UiKitView> {
       // Unlike Android, we do not need to send "clearFocus" channel message
       // to the engine, because focusing on another view will automatically
       // cancel the focus on the previously focused platform view.
-    } else {
-      SystemChannels.textInput.invokeMethod<void>(
-        'TextInput.setPlatformViewClient',
-        <String, dynamic>{'platformViewId': _controller!.id},
-      );
+      return;
     }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      // _controller must not be nil because _controller and _focusNode are
+      // set at the same time, and this function is triggered by _focusNode.
+      <String, dynamic>{'platformViewId': _controller!.id},
+    );
   }
 }
 
