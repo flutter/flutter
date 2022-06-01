@@ -364,6 +364,20 @@ void main() {
       await daemonStreams.dispose();
       expect(outputStream.isClosed, true);
     });
+
+    testWithoutContext('handles sending to a closed sink', () async {
+      // Unless the stream is listened to, the call to .close() will never
+      // complete
+      outputStream.stream.listen((List<int> _) {});
+      await outputStream.sink.close();
+      daemonStreams.send(testCommand);
+      expect(
+        bufferLogger.errorText,
+        contains(
+          'Failed to write daemon command response: Bad state: Cannot add event after closing',
+        ),
+      );
+    });
   });
 }
 

@@ -219,6 +219,10 @@ class DaemonStreams {
       if (binary != null) {
         _outputSink.add(binary);
       }
+    } on StateError catch (error) {
+      _logger.printError('Failed to write daemon command response: $error');
+      // Failed to send, close the connection
+      _outputSink.close();
     } on IOException catch (error) {
       _logger.printError('Failed to write daemon command response: $error');
       // Failed to send, close the connection
