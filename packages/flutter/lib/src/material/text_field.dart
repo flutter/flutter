@@ -1278,7 +1278,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
                 if (intent.toggleSelectionToolbar != null) {
                   if (intent.toggleSelectionToolbar!) {
-                    _editableText!.toggleToolbar();
+                    _editableText!.toggleToolbar(intent.positionToDisplay);
                   }
                 }
           },
