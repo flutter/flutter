@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 
 using testing::_;
+using testing::InSequence;
 using testing::Invoke;
 using testing::Return;
 
@@ -87,24 +88,34 @@ TEST(MockWin32Window, OnImeCompositionResult) {
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
 }
 
-TEST(MockWin32Window, OnImeCompositionComposeAndResult) {
+TEST(MockWin32Window, OnImeCompositionResultAndCompose) {
   MockTextInputManagerWin32* text_input_manager =
       new MockTextInputManagerWin32();
   std::unique_ptr<TextInputManagerWin32> text_input_manager_ptr(
       text_input_manager);
   MockWin32Window window(std::move(text_input_manager_ptr));
-  EXPECT_CALL(*text_input_manager, GetComposingString())
-      .WillRepeatedly(
-          Return(std::optional<std::u16string>(std::u16string(u"nihao"))));
-  EXPECT_CALL(*text_input_manager, GetResultString())
-      .WillRepeatedly(
-          Return(std::optional<std::u16string>(std::u16string(u"`}"))));
+
+  // This situation is that Google Japanese Input finished composing "今日" in
+  // "今日は" but is still composing "は".
+  {
+    InSequence dummy;
+    EXPECT_CALL(*text_input_manager, GetResultString())
+        .WillRepeatedly(
+            Return(std::optional<std::u16string>(std::u16string(u"今日"))));
+    EXPECT_CALL(*text_input_manager, GetComposingString())
+        .WillRepeatedly(
+            Return(std::optional<std::u16string>(std::u16string(u"は"))));
+  }
+  {
+    InSequence dummy;
+    EXPECT_CALL(window, OnComposeChange(std::u16string(u"今日"), 0)).Times(1);
+    EXPECT_CALL(window, OnComposeCommit()).Times(1);
+    EXPECT_CALL(window, OnComposeChange(std::u16string(u"は"), 0)).Times(1);
+  }
+
   EXPECT_CALL(*text_input_manager, GetComposingCursorPosition())
       .WillRepeatedly(Return((int)0));
 
-  EXPECT_CALL(window, OnComposeChange(std::u16string(u"nihao"), 0)).Times(1);
-  EXPECT_CALL(window, OnComposeChange(std::u16string(u"`}"), 0)).Times(1);
-  EXPECT_CALL(window, OnComposeCommit()).Times(1);
   ON_CALL(window, OnImeComposition)
       .WillByDefault(Invoke(&window, &MockWin32Window::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);

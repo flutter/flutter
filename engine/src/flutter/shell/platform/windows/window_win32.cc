@@ -233,15 +233,9 @@ void WindowWin32::OnImeComposition(UINT const message,
     OnComposeCommit();
   }
 
-  if (lparam & GCS_COMPSTR) {
-    // Read the in-progress composing string.
-    long pos = text_input_manager_->GetComposingCursorPosition();
-    std::optional<std::u16string> text =
-        text_input_manager_->GetComposingString();
-    if (text) {
-      OnComposeChange(text.value(), pos);
-    }
-  }
+  // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK send
+  // both GCS_RESULTSTR and GCS_COMPSTR to commit composed text and send new
+  // composing text.
   if (lparam & GCS_RESULTSTR) {
     // Commit but don't end composing.
     // Read the committed composing string.
@@ -250,6 +244,15 @@ void WindowWin32::OnImeComposition(UINT const message,
     if (text) {
       OnComposeChange(text.value(), pos);
       OnComposeCommit();
+    }
+  }
+  if (lparam & GCS_COMPSTR) {
+    // Read the in-progress composing string.
+    long pos = text_input_manager_->GetComposingCursorPosition();
+    std::optional<std::u16string> text =
+        text_input_manager_->GetComposingString();
+    if (text) {
+      OnComposeChange(text.value(), pos);
     }
   }
 }
