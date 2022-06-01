@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_api_samples/widgets/custom_multi_child_layout/custom_multi_child_layout.0.dart'
     as example;
