@@ -98,6 +98,9 @@ static bool AdvancedBlend(const FilterInput::Vector& inputs,
   if (foreground_color.has_value()) {
     blend_info.color_factor = 1;
     blend_info.color = foreground_color.value();
+    // This texture will not be sampled from due to the color factor. But this
+    // is present so that validation doesn't trip on a missing binding.
+    FS::BindTextureSamplerSrc(cmd, dst_snapshot->texture, sampler);
   } else {
     blend_info.color_factor = 0;
     FS::BindTextureSamplerSrc(cmd, src_snapshot->texture, sampler);
