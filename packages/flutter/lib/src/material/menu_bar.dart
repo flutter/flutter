@@ -488,40 +488,38 @@ class _MenuBarState extends State<MenuBar> {
           ),
           DismissIntent: _MenuDismissAction(menuBar: this),
         },
-        child: Builder(
-          builder: (BuildContext context) {
-            return _ShortcutRegistration(
-              shortcuts: enabled ? shortcuts : const <MenuSerializableShortcut, Intent>{},
-              child: ExcludeFocus(
-                excluding: !enabled || !menuIsOpen,
-                child: FocusScope(
-                  node: menuBarScope,
-                  child: Shortcuts(
-                    // Make sure that these override any shortcut bindings from
-                    // the menu items when a menu is open. If someone wants to
-                    // bind an arrow or tab to a menu item, it would otherwise
-                    // override the default traversal keys. We want their
-                    // shortcut to apply everywhere but in the menu itself,
-                    // since there we have to be able to traverse menus.
-                    shortcuts: _kMenuTraversalShortcuts,
-                    child: _MenuBarTopLevelBar(
-                      elevation: (widget.elevation ?? menuBarTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
-                          .resolve(state)!,
-                      height: widget.height ?? menuBarTheme.barHeight ?? _TokenDefaultsM3(context).barHeight,
-                      enabled: enabled,
-                      color: (widget.backgroundColor ??
-                              menuBarTheme.barBackgroundColor ??
-                              _TokenDefaultsM3(context).barBackgroundColor)
-                          .resolve(state)!,
-                      padding: widget.padding ?? menuBarTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
-                      children: widget.menus,
-                    ),
+        child: Builder(builder: (BuildContext context) {
+          return _ShortcutRegistration(
+            shortcuts: enabled ? shortcuts : const <MenuSerializableShortcut, Intent>{},
+            child: ExcludeFocus(
+              excluding: !enabled || !menuIsOpen,
+              child: FocusScope(
+                node: menuBarScope,
+                child: Shortcuts(
+                  // Make sure that these override any shortcut bindings from
+                  // the menu items when a menu is open. If someone wants to
+                  // bind an arrow or tab to a menu item, it would otherwise
+                  // override the default traversal keys. We want their
+                  // shortcut to apply everywhere but in the menu itself,
+                  // since there we have to be able to traverse menus.
+                  shortcuts: _kMenuTraversalShortcuts,
+                  child: _MenuBarTopLevelBar(
+                    elevation: (widget.elevation ?? menuBarTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
+                        .resolve(state)!,
+                    height: widget.height ?? menuBarTheme.barHeight ?? _TokenDefaultsM3(context).barHeight,
+                    enabled: enabled,
+                    color: (widget.backgroundColor ??
+                            menuBarTheme.barBackgroundColor ??
+                            _TokenDefaultsM3(context).barBackgroundColor)
+                        .resolve(state)!,
+                    padding: widget.padding ?? menuBarTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
+                    children: widget.menus,
                   ),
                 ),
               ),
-            );
-          }
-        ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -648,10 +646,7 @@ class _MenuBarState extends State<MenuBar> {
     _previousFocus = null;
     _pendingFocusedMenu = null;
     for (final MenuItem item in topLevel) {
-      _MenuNode(
-        item: item,
-        parent: root,
-      );
+      _MenuNode(item: item, parent: root).createChildren();
     }
     assert(root.children.length == topLevel.length);
   }
@@ -1707,6 +1702,16 @@ class MenuItemGroup extends StatelessWidget implements MenuItem {
     final _MenuNode menu = _MenuNodeWrapper.of(context);
     final bool hasDividerBefore = menu.parentIndex != 0 && !menu.previousSibling!.isGroup;
     final bool hasDividerAfter = menu.parentIndex != (menu.parent!.children.length - 1);
+    if (menu.isTopLevel) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (hasDividerBefore) const _MenuItemDivider(axis: Axis.horizontal),
+          ...members.cast<Widget>(),
+          if (hasDividerAfter) const _MenuItemDivider(axis: Axis.horizontal),
+        ],
+      );
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -1726,11 +1731,26 @@ class MenuItemGroup extends StatelessWidget implements MenuItem {
 
 class _MenuItemDivider extends StatelessWidget {
   /// Creates a [_MenuItemDivider].
-  const _MenuItemDivider();
+  const _MenuItemDivider({this.axis = Axis.vertical});
+
+  final Axis axis;
 
   @override
   Widget build(BuildContext context) {
-    return Divider(height: math.max(2, 16 + Theme.of(context).visualDensity.vertical * 4));
+    switch (axis) {
+      case Axis.horizontal:
+        return VerticalDivider(width: math.max(2, 16 + Theme.of(context).visualDensity.horizontal * 4));
+      // return Container(width: 10, height: 20, color: const Color(0xffff0000));
+      case Axis.vertical:
+        return Divider(height: math.max(2, 16 + Theme.of(context).visualDensity.vertical * 4));
+    }
+
+    // switch (axis) {
+    //   case Axis.horizontal:
+    //     return VerticalDivider(width: math.max(2, 16 + Theme.of(context).visualDensity.horizontal * 4));
+    //   case Axis.vertical:
+    //     return Divider(height: math.max(2, 16 + Theme.of(context).visualDensity.vertical * 4));
+    // }
   }
 }
 
@@ -1798,17 +1818,32 @@ class _MenuStack extends StatelessWidget {
 /// the same lifetime as the [MenuBar].
 class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNode> {
   _MenuNode({required this.item, this.parent}) : children = <_MenuNode>[] {
-    if (item.members.isNotEmpty) {
-      // Don't add groups to the parent, just the members of the group.
+    assert(!isGroup || !hasSubmenu);
+    if (!isGroup) {
+      // If this is a group, don't add it to the parent, since only its members
+      // will be added.
+      parent?.children.add(this);
+    }
+  }
+
+  /// Adds any members of groups, or submenus to the tree, instantiating new
+  /// menu nodes as needed.
+  ///
+  /// Does not add [MenuItemGroup]s, since they don't participate in the tree.
+  void createChildren() {
+    assert(!isGroup || item.menus.isEmpty);
+    if (isGroup) {
+      // Don't add groups to the parent, just the members of the group. This
+      // attaches nodes for each of the members, but not this group item itself.
       for (final MenuItem member in item.members) {
-        _MenuNode(item: member, parent: parent);
+        _MenuNode(item: member, parent: parent).createChildren();
       }
     } else {
-      parent?.children.add(this);
+      assert(parent?.children.contains(this) ?? true);
       for (final MenuItem child in item.menus) {
-        // Children get automatically linked into the menu tree by creating
-        // them.
-        _MenuNode(item: child, parent: this);
+        // Children get automatically linked into the menu tree by attaching
+        // this node.
+        _MenuNode(item: child, parent: this).createChildren();
       }
     }
   }
@@ -2037,6 +2072,1379 @@ class _MenuNodeWrapper extends InheritedWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<_MenuNode>('menu', menu, defaultValue: null));
+  }
+}
+
+/// A widget that manages the top level of menu buttons in a bar. This widget is
+/// what gets drawn in the main widget hierarchy, while the rest of the menu
+/// widgets are drawn in an overlay.
+class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget {
+  _MenuBarTopLevelBar({
+    required this.enabled,
+    required this.elevation,
+    required this.height,
+    required this.color,
+    required this.padding,
+    required this.children,
+  }) : preferredSize = Size.fromHeight(height);
+
+  /// Whether or not this [_MenuBarTopLevelBar] is enabled.
+  final bool enabled;
+
+  /// The elevation to give the material behind the menu bar.
+  final double elevation;
+
+  /// The minimum height to give the menu bar.
+  final double height;
+
+  /// The background color of the menu app bar.
+  final Color color;
+
+  /// The padding around the outside of the menu bar contents.
+  final EdgeInsets padding;
+
+  @override
+  final Size preferredSize;
+
+  /// The list of widgets to use as children of this menu bar.
+  ///
+  /// These are the top level [MenuBarMenu]s.
+  final List<MenuItem> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final _MenuBarState controller = _MenuBarState.of(context);
+
+    int index = 0;
+    final Widget appBar = Material(
+      elevation: elevation,
+      color: color,
+      child: Row(
+        children: <Widget>[
+          ...children.map<Widget>((MenuItem child) {
+            final Widget result = _MenuNodeWrapper(
+              serial: controller.menuSerial,
+              menu: controller.root.children[index],
+              child: child as Widget,
+            );
+            index += 1;
+            return result;
+          }).toList(),
+          const Spacer(),
+        ],
+      ),
+    );
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: height),
+      child: appBar,
+    );
+  }
+}
+
+/// A label widget that is used as the default label for a [MenuBarItem] or
+/// [MenuBarMenu].
+///
+/// It not only shows the [MenuBarMenu.label] or [MenuBarItem.label], but if
+/// there is a shortcut associated with the [MenuBarItem], it will display a
+/// mnemonic for the shortcut. For [MenuBarMenu]s, it will display a visual
+/// indicator that there is a submenu.
+class _MenuBarItemLabel extends StatelessWidget {
+  /// Creates a const [_MenuBarItemLabel].
+  ///
+  /// The [menuBarItem] argument is required.
+  const _MenuBarItemLabel({
+    this.leadingIcon,
+    required this.label,
+    this.trailingIcon,
+    this.shortcut,
+    required this.hasSubmenu,
+  });
+
+  /// The optional icon that comes before the [label].
+  final Widget? leadingIcon;
+
+  /// The required label widget.
+  final Widget label;
+
+  /// The optional icon that comes after the [label].
+  final Widget? trailingIcon;
+
+  /// The shortcut for this label, so that it can generate a string describing
+  /// the shortcut.
+  final MenuSerializableShortcut? shortcut;
+
+  /// Whether or not this menu has a submenu.
+  final bool hasSubmenu;
+
+  @override
+  Widget build(BuildContext context) {
+    final _MenuBarState menuBar = _MenuBarState.of(context);
+    final bool isTopLevelItem = _MenuNodeWrapper.of(context).parent == menuBar.root;
+    final VisualDensity density = Theme.of(context).visualDensity;
+    final double horizontalPadding = math.max(
+      _kLabelItemMinSpacing,
+      _kLabelItemDefaultSpacing + density.horizontal * 2,
+    );
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            if (leadingIcon != null) leadingIcon!,
+            Padding(
+              padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+              child: label,
+            ),
+            if (trailingIcon != null)
+              Padding(
+                padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+                child: trailingIcon,
+              ),
+          ],
+        ),
+        if (!isTopLevelItem) SizedBox(width: horizontalPadding),
+        if (shortcut != null && !isTopLevelItem)
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+            child: Text(
+              _LocalizedShortcutLabeler.instance.getShortcutLabel(
+                shortcut!,
+                MaterialLocalizations.of(context),
+              ),
+            ),
+          ),
+        if (hasSubmenu && !isTopLevelItem)
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+            child: const Icon(
+              Icons.arrow_right, // Automatically switches with text direction.
+              size: _kDefaultSubmenuIconSize,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// A menu container for [MenuBarItem]s.
+///
+/// This widget contains a column of widgets, and sizes its width to the widest
+/// child, and then forces all the other children to be that same width. It
+/// adopts a height large enough to accommodate all the children.
+///
+/// It is used by [MenuBarMenu] to render its child items.
+class _MenuBarMenuList extends StatefulWidget {
+  /// Create a const [_MenuBarMenuList].
+  ///
+  /// All parameters except `key` and [shape] are required.
+  const _MenuBarMenuList({
+    required this.backgroundColor,
+    required this.shape,
+    required this.elevation,
+    required this.menuPadding,
+    required this.semanticLabel,
+    required this.textDirection,
+    required this.children,
+  });
+
+  /// The background color of this submenu.
+  final Color backgroundColor;
+
+  /// The shape of the border on this submenu.
+  ///
+  /// Defaults to a rectangle.
+  final ShapeBorder shape;
+
+  /// The Material elevation for the menu's shadow.
+  ///
+  /// See also:
+  ///
+  ///  * [Material.elevation] for a description of what elevation implies.
+  final double elevation;
+
+  /// The padding around the inside of the menu panel.
+  final EdgeInsets menuPadding;
+
+  /// The semantic label for this submenu.
+  final String semanticLabel;
+
+  /// The text direction to use for rendering this menu.
+  final TextDirection textDirection;
+
+  /// The menu items that fill this submenu.
+  final List<Widget> children;
+
+  @override
+  State<_MenuBarMenuList> createState() => _MenuBarMenuListState();
+}
+
+class _MenuBarMenuListState extends State<_MenuBarMenuList> {
+  List<Widget> _expandGroups() {
+    int index = 0;
+    final _MenuNode parentMenu = _MenuNodeWrapper.of(context);
+    final _MenuBarState menuBar = _MenuBarState.of(context);
+    final List<Widget> expanded = <Widget>[];
+
+    for (final Widget child in widget.children) {
+      if (child is! MenuItem) {
+        // If it's not a menu item, then it's probably a _MenuItemDivider. Don't
+        // increment the index, or wrap non-MenuItems with _MenuNodeWrapper:
+        // they're not represented in the node tree.
+        expanded.add(child);
+        continue;
+      }
+      final MenuItem childMenuItem = child as MenuItem;
+      assert(index < parentMenu.children.length);
+      if (childMenuItem.members.isEmpty) {
+        expanded.add(
+          _MenuNodeWrapper(
+            serial: menuBar.menuSerial,
+            menu: parentMenu.children[index],
+            child: child,
+          ),
+        );
+        index += 1;
+      } else {
+        // Groups are expanded in the node tree, so expand them here too.
+        expanded.addAll(childMenuItem.members.map<Widget>((MenuItem member) {
+          final Widget wrapper = _MenuNodeWrapper(
+            serial: menuBar.menuSerial,
+            menu: parentMenu.children[index],
+            child: child,
+          );
+          index += 1;
+          return wrapper;
+        }));
+      }
+    }
+    return expanded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: widget.backgroundColor,
+      shape: widget.shape,
+      elevation: widget.elevation,
+      child: _MenuBarMenuRenderWidget(
+        menuBar: _MenuBarState.of(context),
+        padding: widget.menuPadding,
+        direction: Axis.vertical,
+        semanticLabel: widget.semanticLabel,
+        textDirection: widget.textDirection,
+        children: _expandGroups(),
+      ),
+    );
+  }
+}
+
+/// A render widget for laying out menu bar items.
+///
+/// It finds the widest child, and then forces all of the other children to be
+/// that width.
+class _MenuBarMenuRenderWidget extends MultiChildRenderObjectWidget {
+  /// Creates a const [_MenuBarMenuRenderWidget].
+  ///
+  /// The `children` and [padding] arguments are required.
+  _MenuBarMenuRenderWidget({
+    required this.menuBar,
+    required this.direction,
+    required super.children,
+    required this.padding,
+    this.semanticLabel,
+    this.textDirection,
+  });
+
+  /// The MenuBarController that this menu should register its render object with.
+  final _MenuBarState menuBar;
+
+  final Axis direction;
+
+  /// Padding around the contents of the menu bar.
+  final EdgeInsets padding;
+
+  /// The semantic label for this menu.
+  ///
+  /// Defaults to [MaterialLocalizations.menuBarMenuLabel].
+  final String? semanticLabel;
+
+  /// The text direction to use for rendering this menu.
+  ///
+  /// Defaults to the ambient text direction from [Directionality.of].
+  final TextDirection? textDirection;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderMenuBarMenu(
+      menuBar: menuBar,
+      padding: padding,
+      direction: direction,
+      textDirection: textDirection ?? Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderMenuBarMenu renderObject) {
+    renderObject
+      ..menuBar = menuBar
+      ..padding = padding
+      ..direction = direction
+      ..textDirection = textDirection ?? Directionality.of(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  }
+}
+
+class _RenderMenuBarMenuParentData extends ContainerBoxParentData<RenderBox> {}
+
+typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
+
+class _LayoutSizes {
+  const _LayoutSizes({
+    required this.mainSize,
+    required this.crossSize,
+    required this.allocatedSize,
+  });
+
+  final double mainSize;
+  final double crossSize;
+  final double allocatedSize;
+}
+
+class _RenderMenuBarMenu extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, _RenderMenuBarMenuParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _RenderMenuBarMenuParentData>,
+        DebugOverflowIndicatorMixin {
+  /// Creates a flex render object.
+  ///
+  /// By default, the flex layout is horizontal and children are aligned to the
+  /// start of the main axis and the center of the cross axis.
+  _RenderMenuBarMenu({
+    required _MenuBarState menuBar,
+    List<RenderBox>? children,
+    required EdgeInsets padding,
+    Axis direction = Axis.horizontal,
+    TextDirection? textDirection,
+  })  : assert(direction != null),
+        _menuBar = menuBar,
+        _direction = direction,
+        _padding = padding,
+        _textDirection = textDirection {
+    _menuBar.registerMenuRenderObject(this);
+    addAll(children);
+  }
+
+  @override
+  void dispose() {
+    _menuBar.unregisterMenuRenderObject(this);
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
+
+  _MenuBarState get menuBar => _menuBar;
+  _MenuBarState _menuBar;
+  set menuBar(_MenuBarState value) {
+    if (_menuBar != value) {
+      _menuBar.unregisterMenuRenderObject(this);
+      _menuBar = value;
+      _menuBar.registerMenuRenderObject(this);
+      markNeedsLayout();
+    }
+  }
+
+  /// The direction to use as the main axis.
+  Axis get direction => _direction;
+  Axis _direction;
+  set direction(Axis value) {
+    assert(value != null);
+    if (_direction != value) {
+      _direction = value;
+      markNeedsLayout();
+    }
+  }
+
+  /// The padding around the contents.
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  set padding(EdgeInsets value) {
+    if (_padding != value) {
+      _padding = value;
+      markNeedsLayout();
+    }
+  }
+
+  /// Determines the order to lay children out horizontally and how to interpret
+  /// `start` and `end` in the horizontal direction.
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls the order in which
+  /// children are positioned (left-to-right or right-to-left), and the meaning
+  /// of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
+  /// [MainAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and either the
+  /// [mainAxisAlignment] is either [MainAxisAlignment.start] or
+  /// [MainAxisAlignment.end], or there's more than one child, then the
+  /// [textDirection] must not be null.
+  ///
+  /// If the [direction] is [Axis.vertical], this controls the meaning of the
+  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
+  /// [CrossAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], then the [textDirection] must not
+  /// be null.
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection != value) {
+      _textDirection = value;
+      markNeedsLayout();
+    }
+  }
+
+  bool get _debugHasNecessaryDirections {
+    assert(direction != null);
+    if (firstChild != null && lastChild != firstChild) {
+      // i.e. there's more than one child
+      switch (direction) {
+        case Axis.horizontal:
+          assert(textDirection != null,
+              'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
+          break;
+        case Axis.vertical:
+          break;
+      }
+    }
+    switch (direction) {
+      case Axis.horizontal:
+        assert(textDirection != null,
+            'Horizontal $runtimeType with ${MainAxisAlignment.start} has a null textDirection, so the alignment cannot be resolved.');
+        break;
+      case Axis.vertical:
+        break;
+    }
+    switch (direction) {
+      case Axis.horizontal:
+        break;
+      case Axis.vertical:
+        assert(textDirection != null,
+            'Vertical $runtimeType with ${CrossAxisAlignment.start} has a null textDirection, so the alignment cannot be resolved.');
+        break;
+    }
+    return true;
+  }
+
+  // Set during layout if overflow occurred on the main axis.
+  double _overflow = 0;
+  // Check whether any meaningful overflow is present. Values below an epsilon
+  // are treated as not overflowing.
+  bool get _hasOverflow => _overflow > precisionErrorTolerance;
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _RenderMenuBarMenuParentData) {
+      child.parentData = _RenderMenuBarMenuParentData();
+    }
+  }
+
+  double _getIntrinsicSize({
+    required Axis sizingDirection,
+    required double extent, // the extent in the direction that isn't the sizing direction
+    required _ChildSizingFunction childSize, // a method to find the size in the sizing direction
+  }) {
+    if (_direction == sizingDirection) {
+      // INTRINSIC MAIN SIZE
+      // Intrinsic main size is the smallest size the flex container can take
+      // while maintaining the min/max-content contributions of its flex items.
+      double inflexibleSpace = 0.0;
+      RenderBox? child = firstChild;
+      while (child != null) {
+        inflexibleSpace += childSize(child, extent);
+        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+        child = childParentData.nextSibling;
+      }
+      return inflexibleSpace;
+    } else {
+      // INTRINSIC CROSS SIZE
+      // Intrinsic cross size is the max of the intrinsic cross sizes of the
+      // children, after the flexible children are fit into the available space,
+      // with the children sized using their max intrinsic dimensions.
+
+      // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
+      double maxCrossSize = 0.0;
+      RenderBox? child = firstChild;
+      while (child != null) {
+        late final double mainSize;
+        late final double crossSize;
+        switch (_direction) {
+          case Axis.horizontal:
+            mainSize = child.getMaxIntrinsicWidth(double.infinity);
+            crossSize = childSize(child, mainSize);
+            break;
+          case Axis.vertical:
+            mainSize = child.getMaxIntrinsicHeight(double.infinity);
+            crossSize = childSize(child, mainSize);
+            break;
+        }
+        maxCrossSize = math.max(maxCrossSize, crossSize);
+        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+        child = childParentData.nextSibling;
+      }
+      return maxCrossSize;
+    }
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return _getIntrinsicSize(
+      sizingDirection: Axis.horizontal,
+      extent: height,
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return _getIntrinsicSize(
+      sizingDirection: Axis.horizontal,
+      extent: height,
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
+    );
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return _getIntrinsicSize(
+      sizingDirection: Axis.vertical,
+      extent: width,
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return _getIntrinsicSize(
+      sizingDirection: Axis.vertical,
+      extent: width,
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
+    );
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    if (_direction == Axis.horizontal) {
+      return defaultComputeDistanceToHighestActualBaseline(baseline);
+    }
+    return defaultComputeDistanceToFirstActualBaseline(baseline);
+  }
+
+  double _getCrossSize(Size size) {
+    switch (_direction) {
+      case Axis.horizontal:
+        return size.height;
+      case Axis.vertical:
+        return size.width;
+    }
+  }
+
+  double _getMainSize(Size size) {
+    switch (_direction) {
+      case Axis.horizontal:
+        return size.width;
+      case Axis.vertical:
+        return size.height;
+    }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final _LayoutSizes sizes = _computeSizes(
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      constraints: constraints,
+    );
+
+    switch (_direction) {
+      case Axis.horizontal:
+        return constraints.constrain(Size(sizes.mainSize, sizes.crossSize));
+      case Axis.vertical:
+        return constraints.constrain(Size(sizes.crossSize, sizes.mainSize));
+    }
+  }
+
+  _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    assert(_debugHasNecessaryDirections);
+    assert(constraints != null);
+
+    double crossSize = 0.0;
+    double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+      final BoxConstraints innerConstraints;
+      switch (_direction) {
+        case Axis.horizontal:
+          innerConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
+          break;
+        case Axis.vertical:
+          innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
+          break;
+      }
+      final Size childSize = layoutChild(child, innerConstraints);
+      allocatedSize += _getMainSize(childSize);
+      crossSize = math.max(crossSize, _getCrossSize(childSize));
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
+    }
+
+    // Make a second pass, fixing the size of the children in the cross
+    // direction at the size of the largest one.
+    child = firstChild;
+    final BoxConstraints innerConstraints;
+    switch (_direction) {
+      case Axis.horizontal:
+        innerConstraints = BoxConstraints.tightFor(height: crossSize);
+        break;
+      case Axis.vertical:
+        innerConstraints = BoxConstraints.tightFor(width: crossSize);
+        break;
+    }
+    while (child != null) {
+      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+      layoutChild(child, innerConstraints);
+      child = childParentData.nextSibling;
+    }
+
+    switch (_direction) {
+      case Axis.horizontal:
+        return _LayoutSizes(
+          mainSize: allocatedSize + padding.horizontal,
+          crossSize: crossSize + padding.vertical,
+          allocatedSize: allocatedSize + padding.horizontal,
+        );
+        break;
+      case Axis.vertical:
+        return _LayoutSizes(
+          mainSize: allocatedSize + padding.vertical,
+          crossSize: crossSize + padding.horizontal,
+          allocatedSize: allocatedSize + padding.vertical,
+        );
+    }
+  }
+
+  @override
+  void performLayout() {
+    assert(_debugHasNecessaryDirections);
+    final BoxConstraints constraints = this.constraints;
+    final _LayoutSizes sizes = _computeSizes(
+      layoutChild: ChildLayoutHelper.layoutChild,
+      constraints: constraints,
+    );
+
+    final double allocatedSize = sizes.allocatedSize;
+    double actualSize = sizes.mainSize;
+    double crossSize = sizes.crossSize;
+
+    // Align items along the main axis.
+    switch (_direction) {
+      case Axis.horizontal:
+        size = constraints.constrain(Size(actualSize, crossSize));
+        actualSize = size.width;
+        crossSize = size.height;
+        break;
+      case Axis.vertical:
+        size = constraints.constrain(Size(crossSize, actualSize));
+        actualSize = size.height;
+        crossSize = size.width;
+        break;
+    }
+    final double actualSizeDelta = actualSize - allocatedSize;
+    _overflow = math.max(0.0, -actualSizeDelta);
+    final double leadingSpace = padding.top;
+
+    // flipMainAxis is used to decide whether to lay out
+    // left-to-right/top-to-bottom (false), or right-to-left/bottom-to-top
+    // (true). The _startIsTopLeft will return null if there's only one child
+    // and the relevant direction is null, in which case we arbitrarily decide
+    // to flip, but that doesn't have any detectable effect.
+    final bool flipMainAxis = !(_startIsTopLeft(direction, textDirection, VerticalDirection.down) ?? true);
+
+    // Position elements
+    double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+      final double childCrossPosition;
+      childCrossPosition = _startIsTopLeft(flipAxis(direction), textDirection, VerticalDirection.down) ?? false
+          ? padding.right
+          : padding.left;
+      if (flipMainAxis) {
+        childMainPosition -= _getMainSize(child.size);
+      }
+      switch (_direction) {
+        case Axis.horizontal:
+          childParentData.offset = Offset(childMainPosition, childCrossPosition);
+          break;
+        case Axis.vertical:
+          childParentData.offset = Offset(childCrossPosition, childMainPosition);
+          break;
+      }
+      if (!flipMainAxis) {
+        childMainPosition += _getMainSize(child.size);
+      }
+      child = childParentData.nextSibling;
+    }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return defaultHitTestChildren(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (!_hasOverflow) {
+      defaultPaint(context, offset);
+      return;
+    }
+
+    // There's no point in drawing the children if we're empty.
+    if (size.isEmpty) {
+      return;
+    }
+
+    _clipRectLayer.layer = context.pushClipRect(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      defaultPaint,
+      clipBehavior: Clip.none,
+      oldLayer: _clipRectLayer.layer,
+    );
+
+    assert(() {
+      final List<DiagnosticsNode> debugOverflowHints = <DiagnosticsNode>[
+        ErrorDescription(
+          'The overflowing $runtimeType has an orientation of $_direction.',
+        ),
+        ErrorDescription(
+          'The edge of the $runtimeType that is overflowing has been marked '
+          'in the rendering with a yellow and black striped pattern. This is '
+          'usually caused by the contents being too big for the $runtimeType.',
+        ),
+        ErrorHint(
+          'This is considered an error condition because it indicates that there '
+          'is content that cannot be seen. If the content is legitimately bigger '
+          'than the available space, consider clipping it with a ClipRect widget '
+          'before putting it in the $runtimeType.',
+        ),
+      ];
+
+      // Simulate a child rect that overflows by the right amount. This child
+      // rect is never used for drawing, just for determining the overflow
+      // location and amount.
+      final Rect overflowChildRect;
+      switch (_direction) {
+        case Axis.horizontal:
+          overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
+          break;
+        case Axis.vertical:
+          overflowChildRect = Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
+          break;
+      }
+      paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: debugOverflowHints);
+      return true;
+    }());
+  }
+
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  static bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDirection? verticalDirection) {
+    assert(direction != null);
+    // If the relevant value of textDirection or verticalDirection is null, this returns null too.
+    switch (direction) {
+      case Axis.horizontal:
+        switch (textDirection) {
+          case TextDirection.ltr:
+            return true;
+          case TextDirection.rtl:
+            return false;
+          case null:
+            return null;
+        }
+      case Axis.vertical:
+        return true;
+    }
+  }
+
+  @override
+  String toStringShort() {
+    String header = super.toStringShort();
+    if (!kReleaseMode) {
+      if (_hasOverflow) {
+        header += ' OVERFLOWING';
+      }
+    }
+    return header;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<Axis>('direction', direction));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  }
+}
+
+class _RenderMenuBarMenuOld extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, _RenderMenuBarMenuParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _RenderMenuBarMenuParentData>,
+        DebugOverflowIndicatorMixin {
+  _RenderMenuBarMenuOld({
+    required _MenuBarState menuBar,
+    required EdgeInsets padding,
+    required String semanticLabel,
+    required TextDirection textDirection,
+    required Axis axis,
+  })  : _menuBar = menuBar,
+        _axis = axis,
+        _padding = padding,
+        _semanticLabel = semanticLabel,
+        _textDirection = textDirection {
+    _menuBar.registerMenuRenderObject(this);
+  }
+
+  @override
+  void dispose() {
+    _menuBar.unregisterMenuRenderObject(this);
+    super.dispose();
+  }
+
+  _MenuBarState get menuBar => _menuBar;
+  _MenuBarState _menuBar;
+  set menuBar(_MenuBarState value) {
+    if (_menuBar != value) {
+      _menuBar.unregisterMenuRenderObject(this);
+      _menuBar = value;
+      _menuBar.registerMenuRenderObject(this);
+      markNeedsLayout();
+    }
+  }
+
+  Axis get axis => _axis;
+  Axis _axis;
+  set axis(Axis value) {
+    if (_axis != value) {
+      _axis = value;
+      markNeedsLayout();
+    }
+  }
+
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  set padding(EdgeInsets value) {
+    if (_padding != value) {
+      _padding = value;
+      markNeedsLayout();
+    }
+  }
+
+  String get semanticLabel => _semanticLabel;
+  String _semanticLabel;
+  set semanticLabel(String value) {
+    if (value != _semanticLabel) {
+      _semanticLabel = value;
+      markNeedsLayout();
+    }
+  }
+
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection != value) {
+      _textDirection = value;
+      markNeedsLayout();
+    }
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _RenderMenuBarMenuParentData) {
+      child.parentData = _RenderMenuBarMenuParentData();
+    }
+  }
+
+  double _getIntrinsicSize({
+    required Axis sizingDirection,
+    required double extent,
+    required _ChildSizingFunction childSize,
+  }) {
+    if (sizingDirection == Axis.vertical) {
+      double inflexibleSpace = 0.0;
+      RenderBox? child = firstChild;
+      while (child != null) {
+        inflexibleSpace += childSize(child, extent) + padding.vertical;
+        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+        child = childParentData.nextSibling;
+      }
+      return inflexibleSpace;
+    } else {
+      double maxCrossSize = 0.0;
+      RenderBox? child = firstChild;
+      while (child != null) {
+        final double mainSize = child.getMaxIntrinsicHeight(double.infinity);
+        final double crossSize = childSize(child, mainSize) + padding.horizontal;
+        maxCrossSize = math.max(maxCrossSize, crossSize);
+        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+        child = childParentData.nextSibling;
+      }
+      return maxCrossSize;
+    }
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return _getIntrinsicSize(
+      sizingDirection: Axis.horizontal,
+      extent: height,
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return _getIntrinsicSize(
+      sizingDirection: Axis.horizontal,
+      extent: height,
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
+    );
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return _getIntrinsicSize(
+      sizingDirection: Axis.vertical,
+      extent: width,
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return _getIntrinsicSize(
+      sizingDirection: Axis.vertical,
+      extent: width,
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
+    );
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return defaultComputeDistanceToFirstActualBaseline(baseline);
+  }
+
+  _LayoutSizes _computeSizes({
+    required BoxConstraints constraints,
+    required ChildLayouter layoutChild,
+  }) {
+    assert(constraints != null);
+
+    double crossSize = 0.0;
+    double allocatedSize = 0.0;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+      final BoxConstraints innerConstraints;
+      final Size childSize;
+      switch (axis) {
+        case Axis.horizontal:
+          innerConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
+          childSize = layoutChild(child, innerConstraints);
+          allocatedSize += childSize.height;
+          crossSize = math.max(crossSize, childSize.width);
+          break;
+        case Axis.vertical:
+          innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
+          childSize = layoutChild(child, innerConstraints);
+          allocatedSize += childSize.width;
+          crossSize = math.max(crossSize, childSize.height);
+          break;
+      }
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
+    }
+    // Make a second pass, fixing the width of the children at the size of the
+    // widest one.
+    child = firstChild;
+    final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: crossSize);
+    while (child != null) {
+      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+      layoutChild(child, innerConstraints);
+      child = childParentData.nextSibling;
+    }
+    switch (axis) {
+      case Axis.horizontal:
+        return _LayoutSizes(
+          mainSize: allocatedSize,
+          crossSize: crossSize + padding.vertical,
+          allocatedSize: allocatedSize + padding.horizontal,
+        );
+      case Axis.vertical:
+        return _LayoutSizes(
+          mainSize: allocatedSize,
+          crossSize: crossSize + padding.horizontal,
+          allocatedSize: allocatedSize + padding.vertical,
+        );
+    }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final _LayoutSizes sizes = _computeSizes(
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      constraints: constraints,
+    );
+
+    return constraints.constrain(Size(sizes.crossSize, sizes.allocatedSize));
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+
+    final _LayoutSizes sizes = _computeSizes(
+      layoutChild: ChildLayoutHelper.layoutChild,
+      constraints: constraints,
+    );
+
+    double actualSize = sizes.allocatedSize;
+    double crossSize = sizes.crossSize;
+
+    // Align items along the main axis.
+    size = constraints.constrain(Size(crossSize, actualSize));
+    actualSize = size.height;
+    crossSize = size.width;
+    late final double leadingSpace;
+    // flipMainAxis is used to decide whether to lay out
+    // left-to-right/top-to-bottom (false), or right-to-left/bottom-to-top
+    // (true). The _startIsTopLeft will return null if there's only one child
+    // and the relevant direction is null, in which case we arbitrarily decide
+    // to flip, but that doesn't have any detectable effect.
+    final bool flipMainAxis = !(_startIsTopLeft(Axis.vertical, textDirection) ?? true);
+    leadingSpace = padding.top;
+
+    // Position elements
+    double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
+      final double childCrossPosition;
+      childCrossPosition = padding.left;
+      if (flipMainAxis) {
+        childMainPosition -= child.size.height;
+      }
+      childParentData.offset = Offset(childCrossPosition, childMainPosition);
+      if (!flipMainAxis) {
+        childMainPosition += child.size.height;
+      }
+      child = childParentData.nextSibling;
+    }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return defaultHitTestChildren(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) => defaultPaint(context, offset);
+
+  static bool? _startIsTopLeft(Axis direction, TextDirection? textDirection) {
+    assert(direction != null);
+    // If the relevant value of textDirection is null, this returns null too.
+    switch (direction) {
+      case Axis.horizontal:
+        switch (textDirection) {
+          case TextDirection.ltr:
+            return true;
+          case TextDirection.rtl:
+            return false;
+          case null:
+            return null;
+        }
+      case Axis.vertical:
+        return true;
+    }
+  }
+}
+
+class _ShortcutRegistration extends StatefulWidget {
+  const _ShortcutRegistration({required this.shortcuts, required this.child});
+
+  final Map<MenuSerializableShortcut, Intent> shortcuts;
+  final Widget child;
+
+  @override
+  State<_ShortcutRegistration> createState() => _ShortcutRegistrationState();
+}
+
+class _ShortcutRegistrationState extends State<_ShortcutRegistration> {
+  ShortcutRegistryEntry? _entry;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _entry?.dispose();
+    _entry = ShortcutRegistry.of(context).addAll(
+      widget.shortcuts.cast<ShortcutActivator, Intent>(),
+    );
+  }
+
+  @override
+  void didUpdateWidget(_ShortcutRegistration oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shortcuts != oldWidget.shortcuts || _entry == null) {
+      _entry?.dispose();
+      _entry = ShortcutRegistry.of(context).addAll(
+        widget.shortcuts.cast<ShortcutActivator, Intent>(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _entry?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// A helper class used to generate shortcut labels for a [ShortcutActivator].
+///
+/// This helper class is typically used by the [MenuBarItem] class to display a
+/// label for its assigned shortcut.
+///
+/// Call [getShortcutLabel] with the [ShortcutActivator] to get a label for it.
+///
+/// For instance, calling [getShortcutLabel] with `SingleActivator(trigger:
+/// LogicalKeyboardKey.keyA, control: true)` would return "⌃ A" on macOS, "Ctrl
+/// A" in an US English locale, and "Strg A" in a German locale.
+class _LocalizedShortcutLabeler {
+  _LocalizedShortcutLabeler._();
+
+  /// Return the instance for this singleton.
+  static _LocalizedShortcutLabeler get instance {
+    return _instance ??= _LocalizedShortcutLabeler._();
+  }
+
+  static _LocalizedShortcutLabeler? _instance;
+
+  // Caches the created shortcut key maps so that creating one of these isn't
+  // expensive after the first time for each unique localizations object.
+  final Map<MaterialLocalizations, Map<LogicalKeyboardKey, String>> _cachedShortcutKeys =
+      <MaterialLocalizations, Map<LogicalKeyboardKey, String>>{};
+
+  static final Map<LogicalKeyboardKey, String> _shortcutGraphicEquivalents = <LogicalKeyboardKey, String>{
+    LogicalKeyboardKey.arrowLeft: '←',
+    LogicalKeyboardKey.arrowRight: '→',
+    LogicalKeyboardKey.arrowUp: '↑',
+    LogicalKeyboardKey.arrowDown: '↓',
+    LogicalKeyboardKey.enter: '↵',
+    LogicalKeyboardKey.shift: '⇧',
+    LogicalKeyboardKey.shiftLeft: '⇧',
+    LogicalKeyboardKey.shiftRight: '⇧',
+  };
+
+  static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.alt,
+    LogicalKeyboardKey.control,
+    LogicalKeyboardKey.meta,
+    LogicalKeyboardKey.shift,
+    LogicalKeyboardKey.altLeft,
+    LogicalKeyboardKey.controlLeft,
+    LogicalKeyboardKey.metaLeft,
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.altRight,
+    LogicalKeyboardKey.controlRight,
+    LogicalKeyboardKey.metaRight,
+    LogicalKeyboardKey.shiftRight,
+  };
+
+  // Tries to look up the key in an internal table, and if it can't find it,
+  // then fall back to the key's keyLabel.
+  String? _getLocalizedName(LogicalKeyboardKey key, MaterialLocalizations localizations) {
+    // Since this is an expensive table to build, we cache it based on the
+    // localization object. There's currently no way to clear the cache, but
+    // it's unlikely that more than one or two will be cached for each run, and
+    // they're not huge.
+    _cachedShortcutKeys[localizations] ??= <LogicalKeyboardKey, String>{
+      LogicalKeyboardKey.altGraph: localizations.keyboardKeyAltGraph,
+      LogicalKeyboardKey.backspace: localizations.keyboardKeyBackspace,
+      LogicalKeyboardKey.capsLock: localizations.keyboardKeyCapsLock,
+      LogicalKeyboardKey.channelDown: localizations.keyboardKeyChannelDown,
+      LogicalKeyboardKey.channelUp: localizations.keyboardKeyChannelUp,
+      LogicalKeyboardKey.delete: localizations.keyboardKeyDelete,
+      LogicalKeyboardKey.eject: localizations.keyboardKeyEject,
+      LogicalKeyboardKey.end: localizations.keyboardKeyEnd,
+      LogicalKeyboardKey.escape: localizations.keyboardKeyEscape,
+      LogicalKeyboardKey.fn: localizations.keyboardKeyFn,
+      LogicalKeyboardKey.home: localizations.keyboardKeyHome,
+      LogicalKeyboardKey.insert: localizations.keyboardKeyInsert,
+      LogicalKeyboardKey.numLock: localizations.keyboardKeyNumLock,
+      LogicalKeyboardKey.numpad1: localizations.keyboardKeyNumpad1,
+      LogicalKeyboardKey.numpad2: localizations.keyboardKeyNumpad2,
+      LogicalKeyboardKey.numpad3: localizations.keyboardKeyNumpad3,
+      LogicalKeyboardKey.numpad4: localizations.keyboardKeyNumpad4,
+      LogicalKeyboardKey.numpad5: localizations.keyboardKeyNumpad5,
+      LogicalKeyboardKey.numpad6: localizations.keyboardKeyNumpad6,
+      LogicalKeyboardKey.numpad7: localizations.keyboardKeyNumpad7,
+      LogicalKeyboardKey.numpad8: localizations.keyboardKeyNumpad8,
+      LogicalKeyboardKey.numpad9: localizations.keyboardKeyNumpad9,
+      LogicalKeyboardKey.numpad0: localizations.keyboardKeyNumpad0,
+      LogicalKeyboardKey.numpadAdd: localizations.keyboardKeyNumpadAdd,
+      LogicalKeyboardKey.numpadComma: localizations.keyboardKeyNumpadComma,
+      LogicalKeyboardKey.numpadDecimal: localizations.keyboardKeyNumpadDecimal,
+      LogicalKeyboardKey.numpadDivide: localizations.keyboardKeyNumpadDivide,
+      LogicalKeyboardKey.numpadEnter: localizations.keyboardKeyNumpadEnter,
+      LogicalKeyboardKey.numpadEqual: localizations.keyboardKeyNumpadEqual,
+      LogicalKeyboardKey.numpadMultiply: localizations.keyboardKeyNumpadMultiply,
+      LogicalKeyboardKey.numpadParenLeft: localizations.keyboardKeyNumpadParenLeft,
+      LogicalKeyboardKey.numpadParenRight: localizations.keyboardKeyNumpadParenRight,
+      LogicalKeyboardKey.numpadSubtract: localizations.keyboardKeyNumpadSubtract,
+      LogicalKeyboardKey.pageDown: localizations.keyboardKeyPageDown,
+      LogicalKeyboardKey.pageUp: localizations.keyboardKeyPageUp,
+      LogicalKeyboardKey.power: localizations.keyboardKeyPower,
+      LogicalKeyboardKey.powerOff: localizations.keyboardKeyPowerOff,
+      LogicalKeyboardKey.printScreen: localizations.keyboardKeyPrintScreen,
+      LogicalKeyboardKey.scrollLock: localizations.keyboardKeyScrollLock,
+      LogicalKeyboardKey.select: localizations.keyboardKeySelect,
+      LogicalKeyboardKey.space: localizations.keyboardKeySpace,
+    };
+    return _cachedShortcutKeys[localizations]![key];
+  }
+
+  String _getModifierLabel(LogicalKeyboardKey modifier, MaterialLocalizations localizations) {
+    assert(_modifiers.contains(modifier), '${modifier.keyLabel} is not a modifier key');
+    if (modifier == LogicalKeyboardKey.meta ||
+        modifier == LogicalKeyboardKey.metaLeft ||
+        modifier == LogicalKeyboardKey.metaRight) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+          return localizations.keyboardKeyMeta;
+        case TargetPlatform.windows:
+          return localizations.keyboardKeyMetaWindows;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return '⌘';
+      }
+    }
+    if (modifier == LogicalKeyboardKey.alt ||
+        modifier == LogicalKeyboardKey.altLeft ||
+        modifier == LogicalKeyboardKey.altRight) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          return localizations.keyboardKeyAlt;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return '⌥';
+      }
+    }
+    if (modifier == LogicalKeyboardKey.control ||
+        modifier == LogicalKeyboardKey.controlLeft ||
+        modifier == LogicalKeyboardKey.controlRight) {
+      // '⎈' (a boat helm wheel, not an asterisk) is apparently the standard
+      // icon for "control", but only seems to appear on the French Canadian
+      // keyboard. A '✲' (an open center asterisk) appears on some Microsoft
+      // keyboards. For all but macOS (which has standardized on "⌃", it seems),
+      // we just return the local translation of "Ctrl".
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          return localizations.keyboardKeyControl;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return '⌃';
+      }
+    }
+    if (modifier == LogicalKeyboardKey.shift ||
+        modifier == LogicalKeyboardKey.shiftLeft ||
+        modifier == LogicalKeyboardKey.shiftRight) {
+      return _shortcutGraphicEquivalents[LogicalKeyboardKey.shift]!;
+    }
+    throw ArgumentError('Keyboard key ${modifier.keyLabel} is not a modifier.');
+  }
+
+  /// Returns the label to be shown to the user in the UI when a
+  /// [ShortcutActivator] is used as a keyboard shortcut.
+  ///
+  /// To keep the representation short, this will return graphical key
+  /// representations when it can. For instance, the default
+  /// [LogicalKeyboardKey.shift] will return '⇧', and the arrow keys will return
+  /// arrows.
+  ///
+  /// When [defaultTargetPlatform] is [TargetPlatform.macOS] or
+  /// [TargetPlatform.iOS], the key [LogicalKeyboardKey.meta] will show as '⌘',
+  /// [LogicalKeyboardKey.control] will show as '˄', and
+  /// [LogicalKeyboardKey.alt] will show as '⌥'.
+  String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
+    final ShortcutSerialization serialized = shortcut.serializeForMenu();
+    if (serialized.trigger != null) {
+      final List<String> modifiers = <String>[];
+      final LogicalKeyboardKey trigger = serialized.trigger!;
+      // These should be in this order, to match the LogicalKeySet version.
+      if (serialized.alt!) {
+        modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
+      }
+      if (serialized.control!) {
+        modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
+      }
+      if (serialized.meta!) {
+        modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
+      }
+      if (serialized.shift!) {
+        modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
+      }
+      String? shortcutTrigger;
+      final int logicalKeyId = trigger.keyId;
+      if (_shortcutGraphicEquivalents.containsKey(trigger)) {
+        shortcutTrigger = _shortcutGraphicEquivalents[trigger];
+      } else {
+        // Otherwise, look it up, and if we don't have a translation for it,
+        // then fall back to the key label.
+        shortcutTrigger = _getLocalizedName(trigger, localizations);
+        if (shortcutTrigger == null && logicalKeyId & LogicalKeyboardKey.planeMask == 0x0) {
+          // If the trigger is a Unicode-character-producing key, then use the character.
+          shortcutTrigger = String.fromCharCode(logicalKeyId & LogicalKeyboardKey.valueMask).toUpperCase();
+        }
+        // Fall back to the key label if all else fails.
+        shortcutTrigger ??= trigger.keyLabel;
+      }
+      return <String>[
+        ...modifiers,
+        if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
+      ].join(' ');
+    } else if (serialized.character != null) {
+      return serialized.character!;
+    }
+    throw UnimplementedError('Shortcut labels for ShortcutActivators that do not implement '
+        'MenuSerializableShortcut (e.g. ShortcutActivators other than SingleActivator or '
+        'CharacterActivator) are not supported.');
   }
 }
 
@@ -2284,857 +3692,6 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     }
     super.invoke(intent);
   }
-}
-
-/// A widget that manages the top level of menu buttons in a bar. This widget is
-/// what gets drawn in the main widget hierarchy, while the rest of the menu
-/// widgets are drawn in an overlay.
-class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget {
-  _MenuBarTopLevelBar({
-    required this.enabled,
-    required this.elevation,
-    required this.height,
-    required this.color,
-    required this.padding,
-    required this.children,
-  }) : preferredSize = Size.fromHeight(height);
-
-  /// Whether or not this [_MenuBarTopLevelBar] is enabled.
-  final bool enabled;
-
-  /// The elevation to give the material behind the menu bar.
-  final double elevation;
-
-  /// The minimum height to give the menu bar.
-  final double height;
-
-  /// The background color of the menu app bar.
-  final Color color;
-
-  /// The padding around the outside of the menu bar contents.
-  final EdgeInsets padding;
-
-  @override
-  final Size preferredSize;
-
-  /// The list of widgets to use as children of this menu bar.
-  ///
-  /// These are the top level [MenuBarMenu]s.
-  final List<MenuItem> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final _MenuBarState controller = _MenuBarState.of(context);
-
-    int index = 0;
-    final Widget appBar = Material(
-      elevation: elevation,
-      color: color,
-      child: Row(
-        children: <Widget>[
-          ...children.map<Widget>((MenuItem child) {
-            final Widget result = _MenuNodeWrapper(
-              serial: controller.menuSerial,
-              menu: controller.root.children[index],
-              child: child as Widget,
-            );
-            index += 1;
-            return result;
-          }).toList(),
-          const Spacer(),
-        ],
-      ),
-    );
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: height),
-      child: appBar,
-    );
-  }
-}
-
-/// A label widget that is used as the default label for a [MenuBarItem] or
-/// [MenuBarMenu].
-///
-/// It not only shows the [MenuBarMenu.label] or [MenuBarItem.label], but if
-/// there is a shortcut associated with the [MenuBarItem], it will display a
-/// mnemonic for the shortcut. For [MenuBarMenu]s, it will display a visual
-/// indicator that there is a submenu.
-class _MenuBarItemLabel extends StatelessWidget {
-  /// Creates a const [_MenuBarItemLabel].
-  ///
-  /// The [menuBarItem] argument is required.
-  const _MenuBarItemLabel({
-    this.leadingIcon,
-    required this.label,
-    this.trailingIcon,
-    this.shortcut,
-    required this.hasSubmenu,
-  });
-
-  /// The optional icon that comes before the [label].
-  final Widget? leadingIcon;
-
-  /// The required label widget.
-  final Widget label;
-
-  /// The optional icon that comes after the [label].
-  final Widget? trailingIcon;
-
-  /// The shortcut for this label, so that it can generate a string describing
-  /// the shortcut.
-  final MenuSerializableShortcut? shortcut;
-
-  /// Whether or not this menu has a submenu.
-  final bool hasSubmenu;
-
-  @override
-  Widget build(BuildContext context) {
-    final _MenuBarState menuBar = _MenuBarState.of(context);
-    final bool isTopLevelItem = _MenuNodeWrapper.of(context).parent == menuBar.root;
-    final VisualDensity density = Theme.of(context).visualDensity;
-    final double horizontalPadding = math.max(
-      _kLabelItemMinSpacing,
-      _kLabelItemDefaultSpacing + density.horizontal * 2,
-    );
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (leadingIcon != null) leadingIcon!,
-            Padding(
-              padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
-              child: label,
-            ),
-            if (trailingIcon != null)
-              Padding(
-                padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-                child: trailingIcon,
-              ),
-          ],
-        ),
-        if (!isTopLevelItem) SizedBox(width: horizontalPadding),
-        if (shortcut != null && !isTopLevelItem)
-          Padding(
-            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-            child: Text(
-              _LocalizedShortcutLabeler.instance.getShortcutLabel(
-                shortcut!,
-                MaterialLocalizations.of(context),
-              ),
-            ),
-          ),
-        if (hasSubmenu && !isTopLevelItem)
-          Padding(
-            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-            child: const Icon(
-              Icons.arrow_right, // Automatically switches with text direction.
-              size: _kDefaultSubmenuIconSize,
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// A helper class used to generate shortcut labels for a [ShortcutActivator].
-///
-/// This helper class is typically used by the [MenuBarItem] class to display a
-/// label for its assigned shortcut.
-///
-/// Call [getShortcutLabel] with the [ShortcutActivator] to get a label for it.
-///
-/// For instance, calling [getShortcutLabel] with `SingleActivator(trigger:
-/// LogicalKeyboardKey.keyA, control: true)` would return "⌃ A" on macOS, "Ctrl
-/// A" in an US English locale, and "Strg A" in a German locale.
-class _LocalizedShortcutLabeler {
-  _LocalizedShortcutLabeler._();
-
-  /// Return the instance for this singleton.
-  static _LocalizedShortcutLabeler get instance {
-    return _instance ??= _LocalizedShortcutLabeler._();
-  }
-
-  static _LocalizedShortcutLabeler? _instance;
-
-  // Caches the created shortcut key maps so that creating one of these isn't
-  // expensive after the first time for each unique localizations object.
-  final Map<MaterialLocalizations, Map<LogicalKeyboardKey, String>> _cachedShortcutKeys =
-      <MaterialLocalizations, Map<LogicalKeyboardKey, String>>{};
-
-  static final Map<LogicalKeyboardKey, String> _shortcutGraphicEquivalents = <LogicalKeyboardKey, String>{
-    LogicalKeyboardKey.arrowLeft: '←',
-    LogicalKeyboardKey.arrowRight: '→',
-    LogicalKeyboardKey.arrowUp: '↑',
-    LogicalKeyboardKey.arrowDown: '↓',
-    LogicalKeyboardKey.enter: '↵',
-    LogicalKeyboardKey.shift: '⇧',
-    LogicalKeyboardKey.shiftLeft: '⇧',
-    LogicalKeyboardKey.shiftRight: '⇧',
-  };
-
-  static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.alt,
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.meta,
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.altLeft,
-    LogicalKeyboardKey.controlLeft,
-    LogicalKeyboardKey.metaLeft,
-    LogicalKeyboardKey.shiftLeft,
-    LogicalKeyboardKey.altRight,
-    LogicalKeyboardKey.controlRight,
-    LogicalKeyboardKey.metaRight,
-    LogicalKeyboardKey.shiftRight,
-  };
-
-  // Tries to look up the key in an internal table, and if it can't find it,
-  // then fall back to the key's keyLabel.
-  String? _getLocalizedName(LogicalKeyboardKey key, MaterialLocalizations localizations) {
-    // Since this is an expensive table to build, we cache it based on the
-    // localization object. There's currently no way to clear the cache, but
-    // it's unlikely that more than one or two will be cached for each run, and
-    // they're not huge.
-    _cachedShortcutKeys[localizations] ??= <LogicalKeyboardKey, String>{
-      LogicalKeyboardKey.altGraph: localizations.keyboardKeyAltGraph,
-      LogicalKeyboardKey.backspace: localizations.keyboardKeyBackspace,
-      LogicalKeyboardKey.capsLock: localizations.keyboardKeyCapsLock,
-      LogicalKeyboardKey.channelDown: localizations.keyboardKeyChannelDown,
-      LogicalKeyboardKey.channelUp: localizations.keyboardKeyChannelUp,
-      LogicalKeyboardKey.delete: localizations.keyboardKeyDelete,
-      LogicalKeyboardKey.eject: localizations.keyboardKeyEject,
-      LogicalKeyboardKey.end: localizations.keyboardKeyEnd,
-      LogicalKeyboardKey.escape: localizations.keyboardKeyEscape,
-      LogicalKeyboardKey.fn: localizations.keyboardKeyFn,
-      LogicalKeyboardKey.home: localizations.keyboardKeyHome,
-      LogicalKeyboardKey.insert: localizations.keyboardKeyInsert,
-      LogicalKeyboardKey.numLock: localizations.keyboardKeyNumLock,
-      LogicalKeyboardKey.numpad1: localizations.keyboardKeyNumpad1,
-      LogicalKeyboardKey.numpad2: localizations.keyboardKeyNumpad2,
-      LogicalKeyboardKey.numpad3: localizations.keyboardKeyNumpad3,
-      LogicalKeyboardKey.numpad4: localizations.keyboardKeyNumpad4,
-      LogicalKeyboardKey.numpad5: localizations.keyboardKeyNumpad5,
-      LogicalKeyboardKey.numpad6: localizations.keyboardKeyNumpad6,
-      LogicalKeyboardKey.numpad7: localizations.keyboardKeyNumpad7,
-      LogicalKeyboardKey.numpad8: localizations.keyboardKeyNumpad8,
-      LogicalKeyboardKey.numpad9: localizations.keyboardKeyNumpad9,
-      LogicalKeyboardKey.numpad0: localizations.keyboardKeyNumpad0,
-      LogicalKeyboardKey.numpadAdd: localizations.keyboardKeyNumpadAdd,
-      LogicalKeyboardKey.numpadComma: localizations.keyboardKeyNumpadComma,
-      LogicalKeyboardKey.numpadDecimal: localizations.keyboardKeyNumpadDecimal,
-      LogicalKeyboardKey.numpadDivide: localizations.keyboardKeyNumpadDivide,
-      LogicalKeyboardKey.numpadEnter: localizations.keyboardKeyNumpadEnter,
-      LogicalKeyboardKey.numpadEqual: localizations.keyboardKeyNumpadEqual,
-      LogicalKeyboardKey.numpadMultiply: localizations.keyboardKeyNumpadMultiply,
-      LogicalKeyboardKey.numpadParenLeft: localizations.keyboardKeyNumpadParenLeft,
-      LogicalKeyboardKey.numpadParenRight: localizations.keyboardKeyNumpadParenRight,
-      LogicalKeyboardKey.numpadSubtract: localizations.keyboardKeyNumpadSubtract,
-      LogicalKeyboardKey.pageDown: localizations.keyboardKeyPageDown,
-      LogicalKeyboardKey.pageUp: localizations.keyboardKeyPageUp,
-      LogicalKeyboardKey.power: localizations.keyboardKeyPower,
-      LogicalKeyboardKey.powerOff: localizations.keyboardKeyPowerOff,
-      LogicalKeyboardKey.printScreen: localizations.keyboardKeyPrintScreen,
-      LogicalKeyboardKey.scrollLock: localizations.keyboardKeyScrollLock,
-      LogicalKeyboardKey.select: localizations.keyboardKeySelect,
-      LogicalKeyboardKey.space: localizations.keyboardKeySpace,
-    };
-    return _cachedShortcutKeys[localizations]![key];
-  }
-
-  String _getModifierLabel(LogicalKeyboardKey modifier, MaterialLocalizations localizations) {
-    assert(_modifiers.contains(modifier), '${modifier.keyLabel} is not a modifier key');
-    if (modifier == LogicalKeyboardKey.meta ||
-        modifier == LogicalKeyboardKey.metaLeft ||
-        modifier == LogicalKeyboardKey.metaRight) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-          return localizations.keyboardKeyMeta;
-        case TargetPlatform.windows:
-          return localizations.keyboardKeyMetaWindows;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          return '⌘';
-      }
-    }
-    if (modifier == LogicalKeyboardKey.alt ||
-        modifier == LogicalKeyboardKey.altLeft ||
-        modifier == LogicalKeyboardKey.altRight) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          return localizations.keyboardKeyAlt;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          return '⌥';
-      }
-    }
-    if (modifier == LogicalKeyboardKey.control ||
-        modifier == LogicalKeyboardKey.controlLeft ||
-        modifier == LogicalKeyboardKey.controlRight) {
-      // '⎈' (a boat helm wheel, not an asterisk) is apparently the standard
-      // icon for "control", but only seems to appear on the French Canadian
-      // keyboard. A '✲' (an open center asterisk) appears on some Microsoft
-      // keyboards. For all but macOS (which has standardized on "⌃", it seems),
-      // we just return the local translation of "Ctrl".
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          return localizations.keyboardKeyControl;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          return '⌃';
-      }
-    }
-    if (modifier == LogicalKeyboardKey.shift ||
-        modifier == LogicalKeyboardKey.shiftLeft ||
-        modifier == LogicalKeyboardKey.shiftRight) {
-      return _shortcutGraphicEquivalents[LogicalKeyboardKey.shift]!;
-    }
-    throw ArgumentError('Keyboard key ${modifier.keyLabel} is not a modifier.');
-  }
-
-  /// Returns the label to be shown to the user in the UI when a
-  /// [ShortcutActivator] is used as a keyboard shortcut.
-  ///
-  /// To keep the representation short, this will return graphical key
-  /// representations when it can. For instance, the default
-  /// [LogicalKeyboardKey.shift] will return '⇧', and the arrow keys will return
-  /// arrows.
-  ///
-  /// When [defaultTargetPlatform] is [TargetPlatform.macOS] or
-  /// [TargetPlatform.iOS], the key [LogicalKeyboardKey.meta] will show as '⌘',
-  /// [LogicalKeyboardKey.control] will show as '˄', and
-  /// [LogicalKeyboardKey.alt] will show as '⌥'.
-  String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
-    final ShortcutSerialization serialized = shortcut.serializeForMenu();
-    if (serialized.trigger != null) {
-      final List<String> modifiers = <String>[];
-      final LogicalKeyboardKey trigger = serialized.trigger!;
-      // These should be in this order, to match the LogicalKeySet version.
-      if (serialized.alt!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
-      }
-      if (serialized.control!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
-      }
-      if (serialized.meta!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
-      }
-      if (serialized.shift!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
-      }
-      String? shortcutTrigger;
-      final int logicalKeyId = trigger.keyId;
-      if (_shortcutGraphicEquivalents.containsKey(trigger)) {
-        shortcutTrigger = _shortcutGraphicEquivalents[trigger];
-      } else {
-        // Otherwise, look it up, and if we don't have a translation for it,
-        // then fall back to the key label.
-        shortcutTrigger = _getLocalizedName(trigger, localizations);
-        if (shortcutTrigger == null && logicalKeyId & LogicalKeyboardKey.planeMask == 0x0) {
-          // If the trigger is a Unicode-character-producing key, then use the character.
-          shortcutTrigger = String.fromCharCode(logicalKeyId & LogicalKeyboardKey.valueMask).toUpperCase();
-        }
-        // Fall back to the key label if all else fails.
-        shortcutTrigger ??= trigger.keyLabel;
-      }
-      return <String>[
-        ...modifiers,
-        if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
-      ].join(' ');
-    } else if (serialized.character != null) {
-      return serialized.character!;
-    }
-    throw UnimplementedError('Shortcut labels for ShortcutActivators that do not implement '
-        'MenuSerializableShortcut (e.g. ShortcutActivators other than SingleActivator or '
-        'CharacterActivator) are not supported.');
-  }
-}
-
-/// A menu container for [MenuBarItem]s.
-///
-/// This widget contains a column of widgets, and sizes its width to the widest
-/// child, and then forces all the other children to be that same width. It
-/// adopts a height large enough to accommodate all the children.
-///
-/// It is used by [MenuBarMenu] to render its child items.
-class _MenuBarMenuList extends StatefulWidget {
-  /// Create a const [_MenuBarMenuList].
-  ///
-  /// All parameters except `key` and [shape] are required.
-  const _MenuBarMenuList({
-    required this.backgroundColor,
-    required this.shape,
-    required this.elevation,
-    required this.menuPadding,
-    required this.semanticLabel,
-    required this.textDirection,
-    required this.children,
-  });
-
-  /// The background color of this submenu.
-  final Color backgroundColor;
-
-  /// The shape of the border on this submenu.
-  ///
-  /// Defaults to a rectangle.
-  final ShapeBorder shape;
-
-  /// The Material elevation for the menu's shadow.
-  ///
-  /// See also:
-  ///
-  ///  * [Material.elevation] for a description of what elevation implies.
-  final double elevation;
-
-  /// The padding around the inside of the menu panel.
-  final EdgeInsets menuPadding;
-
-  /// The semantic label for this submenu.
-  final String semanticLabel;
-
-  /// The text direction to use for rendering this menu.
-  final TextDirection textDirection;
-
-  /// The menu items that fill this submenu.
-  final List<Widget> children;
-
-  @override
-  State<_MenuBarMenuList> createState() => _MenuBarMenuListState();
-}
-
-class _MenuBarMenuListState extends State<_MenuBarMenuList> {
-  List<Widget> _expandGroups() {
-    int index = 0;
-    final _MenuNode parentMenu = _MenuNodeWrapper.of(context);
-    final _MenuBarState menuBar = _MenuBarState.of(context);
-    final List<Widget> expanded = <Widget>[];
-
-    for (final Widget child in widget.children) {
-      if (child is! MenuItem) {
-        // If it's not a menu item, then it's probably a _MenuItemDivider. Don't
-        // increment the index, or wrap non-MenuItems with _MenuNodeWrapper:
-        // they're not represented in the node tree.
-        expanded.add(child);
-        continue;
-      }
-      final MenuItem childMenuItem = child as MenuItem;
-      assert(index < parentMenu.children.length);
-      if (childMenuItem.members.isEmpty) {
-        expanded.add(
-          _MenuNodeWrapper(
-            serial: menuBar.menuSerial,
-            menu: parentMenu.children[index],
-            child: child,
-          ),
-        );
-        index += 1;
-      } else {
-        // Groups are expanded in the node tree, so expand them here too.
-        expanded.addAll(childMenuItem.members.map<Widget>((MenuItem member) {
-          final Widget wrapper = _MenuNodeWrapper(
-            serial: menuBar.menuSerial,
-            menu: parentMenu.children[index],
-            child: child,
-          );
-          index += 1;
-          return wrapper;
-        }));
-      }
-    }
-    return expanded;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: widget.backgroundColor,
-      shape: widget.shape,
-      elevation: widget.elevation,
-      child: _MenuBarMenuRenderWidget(
-        menuBar: _MenuBarState.of(context),
-        padding: widget.menuPadding,
-        semanticLabel: widget.semanticLabel,
-        textDirection: widget.textDirection,
-        children: _expandGroups(),
-      ),
-    );
-  }
-}
-
-/// A render widget for laying out menu bar items.
-///
-/// It finds the widest child, and then forces all of the other children to be
-/// that width.
-class _MenuBarMenuRenderWidget extends MultiChildRenderObjectWidget {
-  /// Creates a const [_MenuBarMenuRenderWidget].
-  ///
-  /// The `children` and [padding] arguments are required.
-  _MenuBarMenuRenderWidget({
-    required this.menuBar,
-    required super.children,
-    required this.padding,
-    this.semanticLabel,
-    this.textDirection,
-  });
-
-  /// The MenuBarController that this menu should register its render object with.
-  final _MenuBarState menuBar;
-
-  /// Padding around the contents of the menu bar.
-  final EdgeInsets padding;
-
-  /// The semantic label for this menu.
-  ///
-  /// Defaults to [MaterialLocalizations.menuBarMenuLabel].
-  final String? semanticLabel;
-
-  /// The text direction to use for rendering this menu.
-  ///
-  /// Defaults to the ambient text direction from [Directionality.of].
-  final TextDirection? textDirection;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderMenuBarMenu(
-      menuBar: menuBar,
-      padding: padding,
-      semanticLabel: semanticLabel ?? MaterialLocalizations.of(context).menuBarMenuLabel,
-      textDirection: textDirection ?? Directionality.of(context),
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, covariant _RenderMenuBarMenu renderObject) {
-    renderObject
-      ..menuBar = menuBar
-      ..padding = padding
-      ..semanticLabel = semanticLabel ?? MaterialLocalizations.of(context).menuBarMenuLabel
-      ..textDirection = textDirection ?? Directionality.of(context);
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
-    properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-  }
-}
-
-class _RenderMenuBarMenuParentData extends ContainerBoxParentData<RenderBox> {}
-
-typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
-
-class _LayoutSizes {
-  const _LayoutSizes({
-    required this.crossSize,
-    required this.allocatedSize,
-  });
-
-  final double crossSize;
-  final double allocatedSize;
-}
-
-class _RenderMenuBarMenu extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, _RenderMenuBarMenuParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, _RenderMenuBarMenuParentData>,
-        DebugOverflowIndicatorMixin {
-  _RenderMenuBarMenu({
-    required _MenuBarState menuBar,
-    required EdgeInsets padding,
-    required String semanticLabel,
-    required TextDirection textDirection,
-  })  : _menuBar = menuBar,
-        _padding = padding,
-        _semanticLabel = semanticLabel,
-        _textDirection = textDirection {
-    _menuBar.registerMenuRenderObject(this);
-  }
-
-  @override
-  void dispose() {
-    _menuBar.unregisterMenuRenderObject(this);
-    super.dispose();
-  }
-
-  _MenuBarState get menuBar => _menuBar;
-  _MenuBarState _menuBar;
-  set menuBar(_MenuBarState value) {
-    if (_menuBar != value) {
-      _menuBar.unregisterMenuRenderObject(this);
-      _menuBar = value;
-      _menuBar.registerMenuRenderObject(this);
-      markNeedsLayout();
-    }
-  }
-
-  EdgeInsets get padding => _padding;
-  EdgeInsets _padding;
-  set padding(EdgeInsets value) {
-    if (_padding != value) {
-      _padding = value;
-      markNeedsLayout();
-    }
-  }
-
-  String get semanticLabel => _semanticLabel;
-  String _semanticLabel;
-  set semanticLabel(String value) {
-    if (value != _semanticLabel) {
-      _semanticLabel = value;
-      markNeedsLayout();
-    }
-  }
-
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    if (_textDirection != value) {
-      _textDirection = value;
-      markNeedsLayout();
-    }
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! _RenderMenuBarMenuParentData) {
-      child.parentData = _RenderMenuBarMenuParentData();
-    }
-  }
-
-  double _getIntrinsicSize({
-    required Axis sizingDirection,
-    required double extent,
-    required _ChildSizingFunction childSize,
-  }) {
-    if (sizingDirection == Axis.vertical) {
-      double inflexibleSpace = 0.0;
-      RenderBox? child = firstChild;
-      while (child != null) {
-        inflexibleSpace += childSize(child, extent) + padding.vertical;
-        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-        child = childParentData.nextSibling;
-      }
-      return inflexibleSpace;
-    } else {
-      double maxCrossSize = 0.0;
-      RenderBox? child = firstChild;
-      while (child != null) {
-        final double mainSize = child.getMaxIntrinsicHeight(double.infinity);
-        final double crossSize = childSize(child, mainSize) + padding.horizontal;
-        maxCrossSize = math.max(maxCrossSize, crossSize);
-        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-        child = childParentData.nextSibling;
-      }
-      return maxCrossSize;
-    }
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.horizontal,
-      extent: height,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
-    );
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.horizontal,
-      extent: height,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
-    );
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.vertical,
-      extent: width,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
-    );
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.vertical,
-      extent: width,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
-    );
-  }
-
-  @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    return defaultComputeDistanceToFirstActualBaseline(baseline);
-  }
-
-  _LayoutSizes _computeSizes({
-    required BoxConstraints constraints,
-    required ChildLayouter layoutChild,
-  }) {
-    assert(constraints != null);
-
-    double crossSize = 0.0;
-    double allocatedSize = 0.0;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-      final BoxConstraints innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-      final Size childSize = layoutChild(child, innerConstraints);
-      allocatedSize += childSize.height;
-      crossSize = math.max(crossSize, childSize.width);
-      assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
-    }
-    // Make a second pass, fixing the width of the children at the size of the
-    // widest one.
-    child = firstChild;
-    final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: crossSize);
-    while (child != null) {
-      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-      layoutChild(child, innerConstraints);
-      child = childParentData.nextSibling;
-    }
-
-    return _LayoutSizes(
-      crossSize: crossSize + padding.horizontal,
-      allocatedSize: allocatedSize + padding.vertical,
-    );
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    final _LayoutSizes sizes = _computeSizes(
-      layoutChild: ChildLayoutHelper.dryLayoutChild,
-      constraints: constraints,
-    );
-
-    return constraints.constrain(Size(sizes.crossSize, sizes.allocatedSize));
-  }
-
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-
-    final _LayoutSizes sizes = _computeSizes(
-      layoutChild: ChildLayoutHelper.layoutChild,
-      constraints: constraints,
-    );
-
-    double actualSize = sizes.allocatedSize;
-    double crossSize = sizes.crossSize;
-
-    // Align items along the main axis.
-    size = constraints.constrain(Size(crossSize, actualSize));
-    actualSize = size.height;
-    crossSize = size.width;
-    late final double leadingSpace;
-    // flipMainAxis is used to decide whether to lay out
-    // left-to-right/top-to-bottom (false), or right-to-left/bottom-to-top
-    // (true). The _startIsTopLeft will return null if there's only one child
-    // and the relevant direction is null, in which case we arbitrarily decide
-    // not to flip, but that doesn't have any detectable effect.
-    final bool flipMainAxis = !(_startIsTopLeft(Axis.vertical, textDirection) ?? true);
-    leadingSpace = padding.top;
-
-    // Position elements
-    double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-      final double childCrossPosition;
-      childCrossPosition = padding.left;
-      if (flipMainAxis) {
-        childMainPosition -= child.size.height;
-      }
-      childParentData.offset = Offset(childCrossPosition, childMainPosition);
-      if (!flipMainAxis) {
-        childMainPosition += child.size.height;
-      }
-      child = childParentData.nextSibling;
-    }
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    return defaultHitTestChildren(result, position: position);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) => defaultPaint(context, offset);
-
-  static bool? _startIsTopLeft(Axis direction, TextDirection? textDirection) {
-    assert(direction != null);
-    // If the relevant value of textDirection is null, this returns null too.
-    switch (direction) {
-      case Axis.horizontal:
-        switch (textDirection) {
-          case TextDirection.ltr:
-            return true;
-          case TextDirection.rtl:
-            return false;
-          case null:
-            return null;
-        }
-      case Axis.vertical:
-        return true;
-    }
-  }
-}
-
-class _ShortcutRegistration extends StatefulWidget {
-  const _ShortcutRegistration({required this.shortcuts, required this.child});
-
-  final Map<MenuSerializableShortcut, Intent> shortcuts;
-  final Widget child;
-
-  @override
-  State<_ShortcutRegistration> createState() => _ShortcutRegistrationState();
-}
-
-class _ShortcutRegistrationState extends State<_ShortcutRegistration> {
-  ShortcutRegistryEntry? _entry;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _entry = ShortcutRegistry.of(context).addAll(
-      widget.shortcuts.cast<ShortcutActivator, Intent>(),
-    );
-  }
-
-  @override
-  void didUpdateWidget(_ShortcutRegistration oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.shortcuts != oldWidget.shortcuts || _entry == null) {
-      _entry?.dispose();
-      _entry = ShortcutRegistry.of(context).addAll(
-        widget.shortcuts.cast<ShortcutActivator, Intent>(),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _entry?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
 }
 
 // This class will eventually be auto-generated, so it should remain at the end
