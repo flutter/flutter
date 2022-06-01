@@ -12,9 +12,9 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/migrate.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
-import '../src/common.dart';
-import '../src/context.dart';
-import '../src/test_flutter_command_runner.dart';
+import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   FileSystem fileSystem;
@@ -41,7 +41,7 @@ void main() {
     tryToDelete(appDir);
   });
 
-  testUsingContext('Status produces all outputs', () async {
+  testUsingContext('Apply produces all outputs', () async {
     final MigrateCommand command = MigrateCommand(
       verbose: true,
       logger: logger,
