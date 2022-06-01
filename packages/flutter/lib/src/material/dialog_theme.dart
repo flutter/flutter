@@ -57,7 +57,7 @@ class DialogTheme with Diagnosticable {
   /// [AlertDialog.content].
   final TextStyle? contentTextStyle;
 
-  /// Overrides the default value for [AlterDialog.actionsPadding].
+  /// Overrides the default value for [AlertDialog.actionsPadding].
   final EdgeInsetsGeometry? actionsPadding;
 
   /// Creates a copy of this object but with the given fields replaced with the
