@@ -78,7 +78,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('staging-directory');
     if (customWorkingDirectoryPath != null) {
-      if (Context().isAbsolute(customWorkingDirectoryPath)) {
+      if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
       } else {
         workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
