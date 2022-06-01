@@ -350,7 +350,7 @@ class AlertDialog extends StatelessWidget {
   /// Typically used to provide padding to the button bar between the button bar
   /// and the edges of the dialog.
   ///
-  /// If are no [actions], then no padding will be included. It is also
+  /// If there are no [actions], then no padding will be included. It is also
   /// important to note that [buttonPadding] may contribute to the padding on
   /// the edges of [actions] as well.
   ///
