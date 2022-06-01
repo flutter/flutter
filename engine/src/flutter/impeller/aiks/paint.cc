@@ -48,6 +48,11 @@ std::shared_ptr<Contents> Paint::WithFilters(
     input = filter(FilterInput::Make(input), is_solid_color_val);
   }
 
+  if (image_filter.has_value()) {
+    const ImageFilterProc& filter = image_filter.value();
+    input = filter(FilterInput::Make(input));
+  }
+
   if (color_filter.has_value()) {
     const ColorFilterProc& filter = color_filter.value();
     input = filter(FilterInput::Make(input));
