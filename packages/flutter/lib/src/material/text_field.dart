@@ -1223,7 +1223,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
 
     late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
-      ExpandSelectionToPositionIntent : TextEditingCallbackAction<ExpandSelectionToPositionIntent>(
+      ExpandSelectionToPositionIntent : SelectionCallbackAction<ExpandSelectionToPositionIntent>(
               (ExpandSelectionToPositionIntent intent) {
             _editableText!.expandSelection(intent);
           },
@@ -1231,7 +1231,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
           }
       ),
-      ExtendSelectionToPositionIntent : TextEditingCallbackAction<ExtendSelectionToPositionIntent>(
+      ExtendSelectionToPositionIntent : SelectionCallbackAction<ExtendSelectionToPositionIntent>(
           (ExtendSelectionToPositionIntent intent) {
             _editableText!.extendSelection(intent);
           },
@@ -1239,10 +1239,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
           }
       ),
-      KeyboardRequestIntent : TextEditingCallbackAction<KeyboardRequestIntent>(
+      KeyboardRequestIntent : SelectionCallbackAction<KeyboardRequestIntent>(
               (KeyboardRequestIntent intent) => _requestKeyboard(),
       ),
-      SelectRangeIntent : TextEditingCallbackAction<SelectRangeIntent>(
+      SelectRangeIntent : SelectionCallbackAction<SelectRangeIntent>(
               (SelectRangeIntent intent) {
             _editableText!.selectRange(intent);
           },
@@ -1250,7 +1250,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             return widget.selectionEnabled;
           }
       ),
-      SelectWordEdgeIntent : TextEditingCallbackAction<SelectWordEdgeIntent>(
+      SelectWordEdgeIntent : SelectionCallbackAction<SelectWordEdgeIntent>(
               (SelectWordEdgeIntent intent) {
             _editableText!.selectWordEdge(intent);
           },
@@ -1258,7 +1258,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             return widget.selectionEnabled;
           }
       ),
-      SelectTapPositionIntent : TextEditingCallbackAction<SelectTapPositionIntent>(
+      SelectTapPositionIntent : SelectionCallbackAction<SelectTapPositionIntent>(
               (SelectTapPositionIntent intent) {
             _editableText!.selectPosition(intent);
           },
@@ -1266,7 +1266,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             return widget.selectionEnabled;
           }
       ),
-      SelectionToolbarControlIntent : TextEditingCallbackAction<SelectionToolbarControlIntent>(
+      SelectionToolbarControlIntent : SelectionCallbackAction<SelectionToolbarControlIntent>(
               (SelectionToolbarControlIntent intent) {
                 if (intent.showSelectionToolbar != null) {
                   if (intent.showSelectionToolbar!) {
@@ -1286,7 +1286,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             return widget.selectionEnabled;
           }
       ),
-      UserOnTapCallbackIntent : TextEditingCallbackAction<UserOnTapCallbackIntent>(
+      UserOnTapCallbackIntent : SelectionCallbackAction<UserOnTapCallbackIntent>(
           (UserOnTapCallbackIntent intent) => widget.onTap?.call(),
         enabledPredicate: (UserOnTapCallbackIntent intent) => widget.selectionEnabled,
       ),
@@ -1329,8 +1329,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
-class TextEditingCallbackAction<T extends Intent> extends Action<T> {
-  TextEditingCallbackAction(this._onInvoke, { this.enabledPredicate });
+class SelectionCallbackAction<T extends Intent> extends Action<T> {
+  SelectionCallbackAction(this._onInvoke, { this.enabledPredicate });
 
   final void Function(T intent) _onInvoke;
   final bool Function(T)? enabledPredicate;
