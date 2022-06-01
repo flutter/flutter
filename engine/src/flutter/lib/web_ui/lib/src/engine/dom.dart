@@ -29,6 +29,7 @@ extension DomWindowExtension on DomWindow {
   external int? get innerHeight;
   external int? get innerWidth;
   external DomNavigator get navigator;
+  external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
   Future<Object?> fetch(String url) =>
       js_util.promiseToFuture(js_util.callMethod(this, 'fetch', <String>[url]));
@@ -50,6 +51,7 @@ external DomWindow get domWindow;
 class DomNavigator {}
 
 extension DomNavigatorExtension on DomNavigator {
+  external DomClipboard? get clipboard;
   external int? get maxTouchPoints;
   external String get vendor;
   external String get language;
@@ -62,6 +64,7 @@ extension DomNavigatorExtension on DomNavigator {
 class DomDocument {}
 
 extension DomDocumentExtension on DomDocument {
+  external DomElement? get documentElement;
   external DomElement? querySelector(String selectors);
   List<DomElement> querySelectorAll(String selectors) =>
       js_util.callMethod<List<Object?>>(
@@ -69,6 +72,7 @@ extension DomDocumentExtension on DomDocument {
   DomElement createElement(String name, [Object? options]) =>
       js_util.callMethod(this, 'createElement',
           <Object>[name, if (options != null) options]) as DomElement;
+  external bool execCommand(String commandId);
   external DomHTMLScriptElement? get currentScript;
   external DomElement createElementNS(
       String namespaceURI, String qualifiedName);
@@ -167,6 +171,8 @@ DomElement createDomElement(String tag) => domDocument.createElement(tag);
 extension DomElementExtension on DomElement {
   List<DomElement> get children =>
       js_util.getProperty<List<Object?>>(this, 'children').cast<DomElement>();
+  external int get clientHeight;
+  external int get clientWidth;
   external String get id;
   external set id(String id);
   external set innerHtml(String? html);
@@ -254,6 +260,7 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   set flexDirection(String value) => setProperty('flex-direction', value);
   set alignItems(String value) => setProperty('align-items', value);
   set margin(String value) => setProperty('margin', value);
+  set background(String value) => setProperty('background', value);
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -308,6 +315,7 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get flexDirection => getPropertyValue('flex-direction');
   String get alignItems => getPropertyValue('align-items');
   String get margin => getPropertyValue('margin');
+  String get background=> getPropertyValue('background');
 
   external String getPropertyValue(String property);
   void setProperty(String propertyName, String value, [String? priority]) {
@@ -325,6 +333,7 @@ class DomHTMLElement extends DomElement {}
 
 extension DomHTMLElementExtension on DomHTMLElement {
   int get offsetWidth => js_util.getProperty<num>(this, 'offsetWidth') as int;
+  external void focus();
 }
 
 @JS()
@@ -375,6 +384,13 @@ class DomHTMLDivElement extends DomHTMLElement {}
 
 DomHTMLDivElement createDomHTMLDivElement() =>
     domDocument.createElement('div') as DomHTMLDivElement;
+
+@JS()
+@staticInterop
+class DomHTMLSpanElement extends DomHTMLElement {}
+
+DomHTMLSpanElement createDomHTMLSpanElement() =>
+    domDocument.createElement('span') as DomHTMLSpanElement;
 
 @JS()
 @staticInterop
@@ -608,6 +624,39 @@ class DomFontFaceSet extends DomEventTarget {}
 extension DomFontFaceSetExtension on DomFontFaceSet {
   external DomFontFaceSet? add(DomFontFace font);
   external void clear();
+}
+
+@JS()
+@staticInterop
+class DomVisualViewport extends DomEventTarget {}
+
+extension DomVisualViewportExtension on DomVisualViewport {
+  external num? get height;
+  external num? get width;
+}
+
+@JS()
+@staticInterop
+class DomHTMLTextAreaElement extends DomHTMLElement {}
+
+DomHTMLTextAreaElement createDomHTMLTextAreaElement() =>
+    domDocument.createElement('textarea') as DomHTMLTextAreaElement;
+
+extension DomHTMLTextAreaElementExtension on DomHTMLTextAreaElement {
+  external set value(String? value);
+  external void select();
+}
+
+@JS()
+@staticInterop
+class DomClipboard extends DomEventTarget {}
+
+extension DomClipboardExtension on DomClipboard {
+  Future<String> readText() =>
+      js_util.promiseToFuture<String>(js_util.callMethod(this, 'readText', <Object>[]));
+
+  Future<dynamic> writeText(String data) =>
+      js_util.promiseToFuture(js_util.callMethod(this, 'readText', <Object>[data]));
 }
 
 extension DomResponseExtension on DomResponse {

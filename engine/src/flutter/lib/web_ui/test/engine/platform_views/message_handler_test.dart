@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -23,12 +22,12 @@ void testMain() {
       const int viewId = 6;
       late PlatformViewManager contentManager;
       late Completer<ByteData?> completer;
-      late Completer<html.Element> contentCompleter;
+      late Completer<DomElement> contentCompleter;
 
       setUp(() {
         contentManager = PlatformViewManager();
         completer = Completer<ByteData?>();
-        contentCompleter = Completer<html.Element>();
+        contentCompleter = Completer<DomElement>();
       });
 
       group('"create" message', () {
@@ -53,7 +52,7 @@ void testMain() {
 
         test('duplicate viewId, fails with descriptive exception', () async {
           contentManager.registerFactory(
-              viewType, (int id) => html.DivElement());
+              viewType, (int id) => createDomHTMLDivElement());
           contentManager.renderContent(viewType, viewId, null);
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
@@ -74,7 +73,7 @@ void testMain() {
         test('returns a successEnvelope when the view is created normally',
             () async {
           contentManager.registerFactory(
-              viewType, (int id) => html.DivElement()..id = 'success');
+              viewType, (int id) => createDomHTMLDivElement()..id = 'success');
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
           );
@@ -91,7 +90,7 @@ void testMain() {
         test('calls a contentHandler with the result of creating a view',
             () async {
           contentManager.registerFactory(
-              viewType, (int id) => html.DivElement()..id = 'success');
+              viewType, (int id) => createDomHTMLDivElement()..id = 'success');
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
             contentManager: contentManager,
             contentHandler: contentCompleter.complete,
@@ -100,7 +99,7 @@ void testMain() {
 
           messageHandler.handlePlatformViewCall(message, completer.complete);
 
-          final html.Element contents = await contentCompleter.future;
+          final DomElement contents = await contentCompleter.future;
           final ByteData? response = await completer.future;
 
           expect(contents.querySelector('div#success'), isNotNull,

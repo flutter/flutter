@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:typed_data';
 
+import '../dom.dart';
 import '../services.dart';
 import '../util.dart';
 import 'content_manager.dart';
@@ -13,9 +13,9 @@ import 'content_manager.dart';
 /// Copied here so there's no circular dependencies.
 typedef _PlatformMessageResponseCallback = void Function(ByteData? data);
 
-/// A function that handle a newly created [html.Element] with the contents of a
+/// A function that handle a newly created [DomElement] with the contents of a
 /// platform view with a unique [int] id.
-typedef PlatformViewContentHandler = void Function(html.Element);
+typedef PlatformViewContentHandler = void Function(DomElement);
 
 /// This class handles incoming framework messages to create/dispose Platform Views.
 ///
@@ -91,7 +91,7 @@ class PlatformViewMessageHandler {
     }
 
     // TODO(hterkelsen): How can users add extra `args` from the HtmlElementView widget?
-    final html.Element content = _contentManager.renderContent(
+    final DomElement content = _contentManager.renderContent(
       viewType,
       viewId,
       args,

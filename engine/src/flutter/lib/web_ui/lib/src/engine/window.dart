@@ -6,7 +6,6 @@
 library window;
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
@@ -15,6 +14,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../engine.dart' show registerHotRestartListener;
 import 'browser_detection.dart';
+import 'dom.dart';
 import 'navigation/history.dart';
 import 'navigation/js_url_strategy.dart';
 import 'navigation/url_strategy.dart';
@@ -215,7 +215,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     return _physicalSize!;
   }
 
-  /// Computes the physical size of the screen from [html.window].
+  /// Computes the physical size of the screen from [domWindow].
   ///
   /// This function is expensive. It triggers browser layout if there are
   /// pending DOM writes.
@@ -233,7 +233,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     if (!override) {
       double windowInnerWidth;
       double windowInnerHeight;
-      final html.VisualViewport? viewport = html.window.visualViewport;
+      final DomVisualViewport? viewport = domWindow.visualViewport;
 
       if (viewport != null) {
         if (operatingSystem == OperatingSystem.iOs) {
@@ -246,9 +246,9 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
           /// text editing to make sure inset is correctly reported to
           /// framework.
           final double docWidth =
-              html.document.documentElement!.clientWidth.toDouble();
+              domDocument.documentElement!.clientWidth.toDouble();
           final double docHeight =
-              html.document.documentElement!.clientHeight.toDouble();
+              domDocument.documentElement!.clientHeight.toDouble();
           windowInnerWidth = docWidth * devicePixelRatio;
           windowInnerHeight = docHeight * devicePixelRatio;
         } else {
@@ -256,8 +256,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
           windowInnerHeight = viewport.height!.toDouble() * devicePixelRatio;
         }
       } else {
-        windowInnerWidth = html.window.innerWidth! * devicePixelRatio;
-        windowInnerHeight = html.window.innerHeight! * devicePixelRatio;
+        windowInnerWidth = domWindow.innerWidth! * devicePixelRatio;
+        windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
       }
       _physicalSize = ui.Size(
         windowInnerWidth,
@@ -273,16 +273,16 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
 
   void computeOnScreenKeyboardInsets(bool isEditingOnMobile) {
     double windowInnerHeight;
-    final html.VisualViewport? viewport = html.window.visualViewport;
+    final DomVisualViewport? viewport = domWindow.visualViewport;
     if (viewport != null) {
       if (operatingSystem == OperatingSystem.iOs && !isEditingOnMobile) {
         windowInnerHeight =
-            html.document.documentElement!.clientHeight * devicePixelRatio;
+            domDocument.documentElement!.clientHeight * devicePixelRatio;
       } else {
         windowInnerHeight = viewport.height!.toDouble() * devicePixelRatio;
       }
     } else {
-      windowInnerHeight = html.window.innerHeight! * devicePixelRatio;
+      windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
     }
     final double bottomPadding = _physicalSize!.height - windowInnerHeight;
     _viewInsets =
@@ -306,13 +306,13 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   bool isRotation() {
     double height = 0;
     double width = 0;
-    if (html.window.visualViewport != null) {
+    if (domWindow.visualViewport != null) {
       height =
-          html.window.visualViewport!.height!.toDouble() * devicePixelRatio;
-      width = html.window.visualViewport!.width!.toDouble() * devicePixelRatio;
+          domWindow.visualViewport!.height!.toDouble() * devicePixelRatio;
+      width = domWindow.visualViewport!.width!.toDouble() * devicePixelRatio;
     } else {
-      height = html.window.innerHeight! * devicePixelRatio;
-      width = html.window.innerWidth! * devicePixelRatio;
+      height = domWindow.innerHeight! * devicePixelRatio;
+      width = domWindow.innerWidth! * devicePixelRatio;
     }
 
     // This method compares the new dimensions with the previous ones.
