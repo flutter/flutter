@@ -109,24 +109,28 @@ class _HomeState extends State<Home> {
                       ),
                     ],
                   ),
-                  MenuBarMenu(
-                    label: TestMenu.mainMenu2.label,
-                    onOpen: () {
-                      _openItem(TestMenu.mainMenu2);
-                    },
-                    onClose: () {
-                      _closeItem(TestMenu.mainMenu2);
-                    },
-                    menus: <MenuItem>[
-                      MenuBarItem(
-                        label: TestMenu.subMenu3.label,
-                        shortcut: const SingleActivator(
-                          LogicalKeyboardKey.enter,
-                          control: true,
-                        ),
-                        onSelected: () {
-                          _itemSelected(TestMenu.subMenu3);
+                  MenuItemGroup(
+                    members: <MenuItem>[
+                      MenuBarMenu(
+                        label: TestMenu.mainMenu2.label,
+                        onOpen: () {
+                          _openItem(TestMenu.mainMenu2);
                         },
+                        onClose: () {
+                          _closeItem(TestMenu.mainMenu2);
+                        },
+                        menus: <MenuItem>[
+                          MenuBarItem(
+                            label: TestMenu.subMenu3.label,
+                            shortcut: const SingleActivator(
+                              LogicalKeyboardKey.enter,
+                              control: true,
+                            ),
+                            onSelected: () {
+                              _itemSelected(TestMenu.subMenu3);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -139,7 +143,7 @@ class _HomeState extends State<Home> {
                       _closeItem(TestMenu.mainMenu3);
                     },
                     menus: <MenuItem>[
-                      PlatformMenuItemGroup(members: <MenuItem>[
+                      MenuItemGroup(members: <MenuItem>[
                         MenuBarItem(
                           label: TestMenu.subMenu4.label,
                           shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
