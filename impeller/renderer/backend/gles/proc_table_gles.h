@@ -11,6 +11,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/trace_event.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/backend/gles/description_gles.h"
 #include "impeller/renderer/backend/gles/gles.h"
@@ -64,7 +65,12 @@ struct GLProc {
   ///
   template <class... Args>
   auto operator()(Args&&... args) const {
+#ifdef IMPELLER_ERROR_CHECK_ALL_GL_CALLS
     AutoErrorCheck error(error_fn, name);
+#endif  // IMPELLER_ERROR_CHECK_ALL_GL_CALLS
+#ifdef IMPELLER_TRACE_ALL_GL_CALLS
+    TRACE_EVENT0("impeller", name);
+#endif  // IMPELLER_TRACE_ALL_GL_CALLS
     return function(std::forward<Args>(args)...);
   }
 

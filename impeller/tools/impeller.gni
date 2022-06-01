@@ -23,6 +23,13 @@ declare_args() {
   # If this is the empty string, impellerc will be built.
   # If it is non-empty, it should be the absolute path to impellerc.
   impeller_use_prebuilt_impellerc = ""
+
+  # If enabled, all OpenGL calls will be traced. Because additional trace
+  # overhead may be substantial, this is not enabled by default.
+  impeller_trace_all_gl_calls = false
+
+  # Call glGetError after each OpenGL call and log failures.
+  impeller_error_check_all_gl_calls = is_debug
 }
 
 declare_args() {
