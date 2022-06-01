@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CustomMultiChildLayout
+// Flutter code sample for CustomMultiChildLayout. This example creates a parent widget that takes in children, the number of columns wanted, and the row height wanted, then creates a layout that lists the children in a "snake" pattern where the child in the new row is placed directly under the previous child and the layout direction is toggled between ltr or rtl.
 
 import 'package:flutter/material.dart';
 
