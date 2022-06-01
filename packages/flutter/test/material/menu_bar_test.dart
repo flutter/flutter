@@ -330,9 +330,9 @@ void main() {
         menuBar.toStringDeep(),
         equalsIgnoringHashCodes(
           'MenuBar#00000\n'
-          ' │ controller: _MenuBarController#00000\n'
+          " │ controller: Instance of 'MenuBarController'\n"
           ' └MenuBarMenu#00000(Menu 0)(label: "Menu 0", backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)), elevation: MaterialStatePropertyAll(10.0))\n'
-          '  └MenuItemGroup(members: [MenuBarItem#00000(Sub Menu 00)(DISABLED, label: "Sub Menu 00", semanticLabel: "semanticLabel")])\n',
+          '  └MenuItemGroup(members: [MenuBarItem#00000(Sub Menu 00)(DISABLED, label: "Sub Menu 00", semanticLabel: "semanticLabel")])\n'
         ),
       );
     });
@@ -370,13 +370,11 @@ void main() {
       expect(
         description.join('\n'),
         equalsIgnoringHashCodes(
-          <String>[
-            'DISABLED',
-            'controller: _MenuBarController#00000',
-            'backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336)))',
-            'height: 40.0',
-            'elevation: MaterialStatePropertyAll(10.0)'
-          ].join('\n'),
+          'DISABLED\n'
+          "controller: Instance of 'MenuBarController'\n"
+          'backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336)))\n'
+          'height: 40.0\n'
+          'elevation: MaterialStatePropertyAll(10.0)'
         ),
       );
     });
