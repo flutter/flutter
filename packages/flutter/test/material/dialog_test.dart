@@ -658,25 +658,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy + 8.0,
+      tester.getTopRight(_findButtonBar()).dy,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 20.0,
+      tester.getBottomRight(_findButtonBar()).dy - 24.0,
     ); // bottom
 
     // // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy + 8.0,
+      tester.getTopRight(_findButtonBar()).dy,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 20.0,
+      tester.getBottomRight(_findButtonBar()).dy - 24.0,
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - 26.0,
+      tester.getBottomRight(_findButtonBar()).dx - 24.0,
     ); // right
   });
 
