@@ -59,7 +59,6 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
   SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
 };
 
-
 /// A menu bar with cascading child menus.
 ///
 /// This is a Material Design menu bar that resides above the main body of an
@@ -380,7 +379,7 @@ class _MenuBarState extends State<MenuBar> {
       _createMenuTree(widget.menus);
     }
     enabled = widget.enabled;
-    widget.controller?._menuBarStateChanged();
+    _markMenuDirtyAndDelayIfNecessary();
   }
 
   void _doSelect(Intent onSelected) {
@@ -446,27 +445,27 @@ class _MenuBarState extends State<MenuBar> {
   Map<MenuSerializableShortcut, Intent> _getShortcuts() {
     assert(_debugCheckForDuplicateShortcuts());
     Map<MenuSerializableShortcut, Intent> collectChildShortcuts(List<MenuItem> children) {
-      final Map<MenuSerializableShortcut, Intent> shortcuts = <MenuSerializableShortcut, Intent>{};
+      final Map<MenuSerializableShortcut, Intent> newShortcuts = <MenuSerializableShortcut, Intent>{};
       for (final MenuItem child in children) {
         if (child.menus.isNotEmpty) {
           // Short circuit if it's a menu item with a submenu.
-          shortcuts.addAll(collectChildShortcuts(child.menus));
+          newShortcuts.addAll(collectChildShortcuts(child.menus));
         } else if (child.shortcut != null && child.onSelected != null) {
           // onSelected takes priority over onSelectedIntent (they can't specify
           // both anyhow).
-          shortcuts[child.shortcut!] = VoidCallbackIntent(child.onSelected!);
+          newShortcuts[child.shortcut!] = VoidCallbackIntent(child.onSelected!);
         } else if (child.shortcut != null && child.onSelectedIntent != null) {
-          shortcuts[child.shortcut!] = child.onSelectedIntent!;
+          newShortcuts[child.shortcut!] = child.onSelectedIntent!;
         } else if (child.members.isNotEmpty) {
           // Groups can't have onSelected/onSelectedIntent or menus.
-          shortcuts.addAll(collectChildShortcuts(child.members));
+          newShortcuts.addAll(collectChildShortcuts(child.members));
         }
       }
-      return shortcuts;
+      return newShortcuts;
     }
 
-    final Map<MenuSerializableShortcut, Intent> shortcuts = collectChildShortcuts(widget.menus);
-    return shortcuts.map((MenuSerializableShortcut key, Intent value) {
+    final Map<MenuSerializableShortcut, Intent> collectedShortcuts = collectChildShortcuts(widget.menus);
+    return collectedShortcuts.map<MenuSerializableShortcut, Intent>((MenuSerializableShortcut key, Intent value) {
       return MapEntry<MenuSerializableShortcut, Intent>(key, VoidCallbackIntent(() => _doSelect(value)));
     });
   }
@@ -489,36 +488,39 @@ class _MenuBarState extends State<MenuBar> {
           ),
           DismissIntent: _MenuDismissAction(menuBar: this),
         },
-        child: _ShortcutRegistration(
-          shortcuts: enabled ? shortcuts : const <MenuSerializableShortcut, Intent>{},
-          child: ExcludeFocus(
-            excluding: !enabled || !menuIsOpen,
-            child: FocusScope(
-              node: menuBarScope,
-              child: Shortcuts(
-                // Make sure that these override any shortcut bindings from
-                // the menu items when a menu is open. If someone wants to
-                // bind an arrow or tab to a menu item, it would otherwise
-                // override the default traversal keys. We want their
-                // shortcut to apply everywhere but in the menu itself,
-                // since there we have to be able to traverse menus.
-                shortcuts: _kMenuTraversalShortcuts,
-                child: _MenuBarTopLevelBar(
-                  elevation:
-                  (widget.elevation ?? menuBarTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
-                      .resolve(state)!,
-                  height: widget.height ?? menuBarTheme.barHeight ?? _TokenDefaultsM3(context).barHeight,
-                  enabled: enabled,
-                  color: (widget.backgroundColor ??
-                      menuBarTheme.barBackgroundColor ??
-                      _TokenDefaultsM3(context).barBackgroundColor)
-                      .resolve(state)!,
-                  padding: widget.padding ?? menuBarTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
-                  children: widget.menus,
+        child: Builder(
+          builder: (BuildContext context) {
+            return _ShortcutRegistration(
+              shortcuts: enabled ? shortcuts : const <MenuSerializableShortcut, Intent>{},
+              child: ExcludeFocus(
+                excluding: !enabled || !menuIsOpen,
+                child: FocusScope(
+                  node: menuBarScope,
+                  child: Shortcuts(
+                    // Make sure that these override any shortcut bindings from
+                    // the menu items when a menu is open. If someone wants to
+                    // bind an arrow or tab to a menu item, it would otherwise
+                    // override the default traversal keys. We want their
+                    // shortcut to apply everywhere but in the menu itself,
+                    // since there we have to be able to traverse menus.
+                    shortcuts: _kMenuTraversalShortcuts,
+                    child: _MenuBarTopLevelBar(
+                      elevation: (widget.elevation ?? menuBarTheme.barElevation ?? _TokenDefaultsM3(context).barElevation)
+                          .resolve(state)!,
+                      height: widget.height ?? menuBarTheme.barHeight ?? _TokenDefaultsM3(context).barHeight,
+                      enabled: enabled,
+                      color: (widget.backgroundColor ??
+                              menuBarTheme.barBackgroundColor ??
+                              _TokenDefaultsM3(context).barBackgroundColor)
+                          .resolve(state)!,
+                      padding: widget.padding ?? menuBarTheme.barPadding ?? _TokenDefaultsM3(context).barPadding,
+                      children: widget.menus,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          }
         ),
       ),
     );
@@ -534,24 +536,13 @@ class _MenuBarState extends State<MenuBar> {
   bool _enabled = true;
   set enabled(bool value) {
     if (_enabled != value) {
-      _enabled = value;
-      void closeAndMarkDirty() {
+      setState(() {
+        _enabled = value;
         if (!_enabled) {
           closeAll();
         }
-        _markMenuDirty();
-      }
-
-      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-        // If we're in the middle of a build, we need to mark dirty in a post
-        // frame callback, since this function will often be called by a part of
-        // the tree that isn't in the overlay, but calling this would request that
-        // the overlay be rebuilt.
-        SchedulerBinding.instance.addPostFrameCallback((Duration _) => closeAndMarkDirty());
-      } else {
-        // If we're not in the middle of a build, we can just call it right away.
-        closeAndMarkDirty();
-      }
+        _markMenuDirtyAndDelayIfNecessary();
+      });
     }
   }
 
@@ -581,29 +572,35 @@ class _MenuBarState extends State<MenuBar> {
       _previousFocus = null;
     }
     _focusBeforeClick = null;
-    final _MenuNode? oldMenu = _openMenu;
-    _openMenu = value;
-    oldMenu?.ancestorDifference(_openMenu).forEach((_MenuNode node) {
-      node.close();
-    });
-    _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
-      node.open();
-    });
-    if (value != null && value.focusNode?.hasPrimaryFocus != true) {
-      // Request focus on the new thing that is now open, if any, so that
-      // focus traversal starts from that location.
-      if (value.focusNode == null || !value.focusNode!.canRequestFocus) {
-        // If we don't have a focus node to ask yet, or it can't be focused yet,
-        // then keep the menu until it gets registered, or something else sets
-        // the menu.
-        _pendingFocusedMenu = value;
-      } else {
-        _pendingFocusedMenu = null;
-        value.focusNode!.requestFocus();
-      }
+    if (!mounted) {
+      _openMenu = value;
+      return;
     }
-    _manageOverlayEntry();
-    _markMenuDirty();
+    setState(() {
+      final _MenuNode? oldMenu = _openMenu;
+      _openMenu = value;
+      oldMenu?.ancestorDifference(_openMenu).forEach((_MenuNode node) {
+        node.close();
+      });
+      _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
+        node.open();
+      });
+      if (value != null && value.focusNode?.hasPrimaryFocus != true) {
+        // Request focus on the new thing that is now open, if any, so that
+        // focus traversal starts from that location.
+        if (value.focusNode == null || !value.focusNode!.canRequestFocus) {
+          // If we don't have a focus node to ask yet, or it can't be focused yet,
+          // then keep the menu until it gets registered, or something else sets
+          // the menu.
+          _pendingFocusedMenu = value;
+        } else {
+          _pendingFocusedMenu = null;
+          value.focusNode!.requestFocus();
+        }
+      }
+      _manageOverlayEntry();
+      _markMenuDirty();
+    });
   }
 
   // Creates or removes the overlay entry that contains the stack of all menus.
@@ -619,8 +616,24 @@ class _MenuBarState extends State<MenuBar> {
     }
   }
 
+  void _markMenuDirtyAndDelayIfNecessary() {
+    if (_disposed || !mounted) {
+      return;
+    }
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      // If we're in the middle of a build, we need to mark dirty in a post
+      // frame callback, since this function will often be called by a part of
+      // the tree that isn't in the overlay, but calling this would request that
+      // the overlay be rebuilt.
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _markMenuDirty());
+    } else {
+      // If we're not in the middle of a build, we can just call it right away.
+      _markMenuDirty();
+    }
+  }
+
   void _markMenuDirty() {
-    if (_disposed) {
+    if (_disposed || !mounted) {
       return;
     }
     _menuSerial += 1;
@@ -778,8 +791,8 @@ class _MenuBarState extends State<MenuBar> {
   _MenuNode? get focusedItem {
     final Iterable<FocusNode> focusedItems = _focusNodes.keys.where((FocusNode node) => node.hasFocus);
     assert(
-    focusedItems.length <= 1,
-    'The same focus node is registered to more than one MenuItem '
+        focusedItems.length <= 1,
+        'The same focus node is registered to more than one MenuItem '
         'menu:\n  ${focusedItems.first}');
     return focusedItems.isNotEmpty ? _focusNodes[focusedItems.first] : null;
   }
@@ -960,7 +973,7 @@ class MenuBarItem extends StatefulWidget with _MenuBarItemDefaults {
         _menuShape = null,
         _menuElevation = null,
         assert(onSelected == null || onSelectedIntent == null,
-        'Only one of onSelected or onSelectedIntent may be specified');
+            'Only one of onSelected or onSelectedIntent may be specified');
 
   // Used for MenuBarMenu's button, which has some slightly different behavior.
   const MenuBarItem._forMenu({
@@ -989,7 +1002,6 @@ class MenuBarItem extends StatefulWidget with _MenuBarItemDefaults {
         _menuBackgroundColor = menuBackgroundColor,
         _menuShape = menuShape,
         _menuElevation = menuElevation;
-
 
   @override
   final String label;
@@ -1278,10 +1290,12 @@ class _MenuBarItemState extends State<MenuBarItem> {
                 child: _MenuBarMarker(
                   state: menuBar,
                   child: _MenuBarMenuList(
-                    elevation: (widget._menuElevation ?? menuBarTheme.menuElevation ?? defaultTheme.menuElevation).resolve(disabled)!,
+                    elevation: (widget._menuElevation ?? menuBarTheme.menuElevation ?? defaultTheme.menuElevation)
+                        .resolve(disabled)!,
                     shape: (widget._menuShape ?? menuBarTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled)!,
-                    backgroundColor:
-                    (widget._menuBackgroundColor ?? menuBarTheme.menuBackgroundColor ?? defaultTheme.menuBackgroundColor)
+                    backgroundColor: (widget._menuBackgroundColor ??
+                            menuBarTheme.menuBackgroundColor ??
+                            defaultTheme.menuBackgroundColor)
                         .resolve(disabled)!,
                     menuPadding: menuButtonNode.menuPadding ?? menuBarTheme.menuPadding ?? defaultTheme.menuPadding,
                     semanticLabel: widget.semanticLabel ?? MaterialLocalizations.of(context).popupMenuLabel,
@@ -1308,7 +1322,8 @@ class _MenuBarItemState extends State<MenuBarItem> {
         menuContext: context,
         node: newMenu,
         buttonFocus: focusNode,
-        menuPadding: widget._menuPadding ?? MenuBarTheme.of(context).menuPadding ?? _TokenDefaultsM3(context).menuPadding,
+        menuPadding:
+            widget._menuPadding ?? MenuBarTheme.of(context).menuPadding ?? _TokenDefaultsM3(context).menuPadding,
         menuBuilder: menu!.hasSubmenu ? (BuildContext context) => _buildPositionedMenu(menu!) : null,
       );
     }
@@ -1925,9 +1940,7 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
   /// in the [other]'s ancestors removed. Includes this node in the results.
   List<_MenuNode> ancestorDifference(_MenuNode? other) {
     final List<_MenuNode> myAncestors = <_MenuNode>[...ancestors, this];
-    final List<_MenuNode> otherAncestors = other == null
-        ? const <_MenuNode>[]
-        : <_MenuNode>[...other.ancestors, other];
+    final List<_MenuNode> otherAncestors = other == null ? const <_MenuNode>[] : <_MenuNode>[...other.ancestors, other];
     int skip = 0;
     for (; skip < myAncestors.length && skip < otherAncestors.length; skip += 1) {
       if (myAncestors[skip] != otherAncestors[skip]) {
@@ -2377,8 +2390,8 @@ class _MenuBarItemLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _MenuBarState controller = _MenuBarState.of(context);
-    final bool isTopLevelItem = _MenuNodeWrapper.of(context).parent == controller.root;
+    final _MenuBarState menuBar = _MenuBarState.of(context);
+    final bool isTopLevelItem = _MenuNodeWrapper.of(context).parent == menuBar.root;
     final VisualDensity density = Theme.of(context).visualDensity;
     final double horizontalPadding = math.max(
       _kLabelItemMinSpacing,
