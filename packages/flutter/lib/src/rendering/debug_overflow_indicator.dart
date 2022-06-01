@@ -54,9 +54,9 @@ class _OverflowRegionData {
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
 ///   MyRenderObject({
 ///     AlignmentGeometry alignment = Alignment.center,
-///     TextDirection? textDirection,
+///     required TextDirection? textDirection,
 ///     RenderBox? child,
-///   }) : super.mixin(alignment, textDirection, child);
+///   });
 ///
 ///   late Rect _containerRect;
 ///   late Rect _childRect;
