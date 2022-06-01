@@ -42,8 +42,7 @@ void main() {
 
     expect(childSize.width.roundToDouble(), 200.0);
   });
-  testWidgets('row behavior is correct',
-      (WidgetTester tester) async {
+  testWidgets('row behavior is correct', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
         child: SizedBox(
             key: Key('parent'),
@@ -54,16 +53,18 @@ void main() {
     final Finder child = find.byKey(const Key('Pink'));
     final Size childSize = tester.getSize(find.byKey(const Key('Pink')));
     final Offset childPosition = tester.getBottomRight(child);
-    expect(childPosition, Offset(childSize.width, childSize.height*2+56));
-    
+    expect(childPosition, Offset(childSize.width, childSize.height * 2 + 56));
+
     final Finder child1 = find.byKey(const Key('Yellow'));
     final Size childSize1 = tester.getSize(find.byKey(const Key('Yellow')));
     final Offset childPosition1 = tester.getBottomRight(child1);
-    expect(childPosition1, Offset(childSize1.width, childSize1.height*3+56));
-    
+    expect(
+        childPosition1, Offset(childSize1.width, childSize1.height * 3 + 56));
+
     final Finder child2 = find.byKey(const Key('Purple'));
     final Size childSize2 = tester.getSize(find.byKey(const Key('Purple')));
     final Offset childPosition2 = tester.getBottomRight(child2);
-    expect(childPosition2, Offset(childSize2.width*2, childSize2.height*2+56));
+    expect(childPosition2,
+        Offset(childSize2.width * 2, childSize2.height * 2 + 56));
   });
 }
