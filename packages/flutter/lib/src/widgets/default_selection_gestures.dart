@@ -69,7 +69,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                 break;
             }
             Actions.invoke(context, KeyboardRequestIntent());
-            //Actions.invoke(context, UserOnTapCallbackIntent);
+            Actions.invoke(context, UserOnTapCallbackIntent());
           }
           ..onTapCancel = () {
             print('onTapCancel');
@@ -145,7 +145,7 @@ class DefaultSelectionGestures extends StatelessWidget {
             ..onSecondaryTapDown = (TapDownDetails details) {
               print('onSecondaryTapDown');
               Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));//if renderEditable doesnt have focus
-              Actions.invoke(context, SelectionToolbarControlIntent.toggle);
+              Actions.invoke(context, SelectionToolbarControlIntent.toggle(position: details.globalPosition));
             }
             ..onTapDown = (TapDownDetails details, int tapCount) {
               print('onTapDown , tapCount  $tapCount');
@@ -162,7 +162,7 @@ class DefaultSelectionGestures extends StatelessWidget {
               Actions.invoke(context, SelectionToolbarControlIntent.hide);
               Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
               Actions.invoke(context, KeyboardRequestIntent());
-              //Actions.invoke(context, UserOnTapCallbackIntent);
+              Actions.invoke(context, UserOnTapCallbackIntent());
             }
             ..onTapCancel = () {
               print('onTapCancel');
@@ -179,7 +179,7 @@ class DefaultSelectionGestures extends StatelessWidget {
             }
             ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
               print('onLongPressMoveUpdate');
-              Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+              Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition));
             }
             ..onLongPressEnd = (LongPressEndDetails details) {
               print('onLongPressEnd');
@@ -192,9 +192,17 @@ class DefaultSelectionGestures extends StatelessWidget {
             (PanGestureRecognizer instance, BuildContext context) {
           instance
             ..dragStartBehavior = DragStartBehavior.down
-            ..onStart = (DragStartDetails details) {}
-            ..onUpdate = (DragUpdateDetails details) {}
-            ..onEnd = (DragEndDetails details) {};
+            ..onStart = (DragStartDetails details) {
+              print('onDragStart');
+              ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: _isShiftPressed);
+            }
+            ..onUpdate = (DragUpdateDetails details) {
+              print('onDragUpdate');
+              Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: true));
+            }
+            ..onEnd = (DragEndDetails details) {
+              print('onDragEnd');
+            };
         }
     ),
   };

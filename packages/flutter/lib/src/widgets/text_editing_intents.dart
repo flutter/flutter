@@ -389,9 +389,13 @@ class SelectionToolbarControlIntent extends Intent {
 
   const SelectionToolbarControlIntent.show({required Offset position}) : this._(positionToDisplay: position, showSelectionToolbar: true, toggleSelectionToolbar: false);
   static const SelectionToolbarControlIntent hide = SelectionToolbarControlIntent._(positionToDisplay: null, showSelectionToolbar: false, toggleSelectionToolbar: null);
-  static const SelectionToolbarControlIntent toggle = SelectionToolbarControlIntent._(positionToDisplay: null, showSelectionToolbar: null, toggleSelectionToolbar: true);
+  const SelectionToolbarControlIntent.toggle({required Offset position}) : this._(positionToDisplay: position, showSelectionToolbar: null, toggleSelectionToolbar: true);
 
   final Offset? positionToDisplay;
   final bool? showSelectionToolbar;
   final bool? toggleSelectionToolbar;
+}
+
+class UserOnTapCallbackIntent extends Intent {
+  const UserOnTapCallbackIntent();
 }

@@ -336,8 +336,8 @@ class TextSelectionOverlay {
   void hideHandles() => _selectionOverlay.hideHandles();
 
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
-  void showToolbar([Offset? positionToDisplay]) {
-    _updateSelectionOverlay(positionToDisplay);
+  void showToolbar([Offset? locationToDisplayToolbar]) {
+    _updateSelectionOverlay(locationToDisplayToolbar);
     _selectionOverlay.showToolbar();
   }
 
@@ -358,7 +358,7 @@ class TextSelectionOverlay {
     _updateSelectionOverlay();
   }
 
-  void _updateSelectionOverlay([Offset? positionToDisplay]) {
+  void _updateSelectionOverlay([Offset? locationToDisplayToolbar]) {
     _selectionOverlay
       // Update selection handle metrics.
       ..startHandleType = _chooseType(
@@ -375,7 +375,7 @@ class TextSelectionOverlay {
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
       ..selectionEndPoints = renderObject.getEndpointsForSelection(_selection)
-      ..toolbarLocation = positionToDisplay ?? renderObject.lastSecondaryTapDownPosition;
+      ..toolbarLocation = locationToDisplayToolbar ?? renderObject.lastSecondaryTapDownPosition;
   }
 
   /// Causes the overlay to update its rendering.

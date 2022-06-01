@@ -1286,6 +1286,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             return widget.selectionEnabled;
           }
       ),
+      UserOnTapCallbackIntent : TextEditingCallbackAction<UserOnTapCallbackIntent>(
+          (UserOnTapCallbackIntent intent) => widget.onTap?.call(),
+        enabledPredicate: (UserOnTapCallbackIntent intent) => widget.selectionEnabled,
+      ),
     };
 
     return FocusTrapArea(
