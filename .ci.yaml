@@ -17,6 +17,7 @@ platform_properties:
           {"dependency": "curl"}
         ]
       os: Ubuntu
+      cores: "8"
       device_type: none
       ignore_flakiness: "true"
   linux:
@@ -26,6 +27,7 @@ platform_properties:
           {"dependency": "curl"}
         ]
       os: Ubuntu
+      cores: "8"
       device_type: none
   linux_android:
     properties:
