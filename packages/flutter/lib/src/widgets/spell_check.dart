@@ -163,23 +163,6 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     return correctedSpellCheckResults;
   }
 
-  // TODO(camillesimon): Pretty sure this can be replaced with a String method
-  int? findBadSpan(String text, String spanText, int spanLength) {
-    bool foundSpan = false;
-    int text_pointer = 0;
-
-    while (!foundSpan && text_pointer + spanLength < text.length) {
-      int end = text_pointer + spanText.length;
-
-      if (text.substring(text_pointer, end) == spanText) {
-        return text_pointer;
-      }
-
-      text_pointer += 1;
-    }
-    return null;
-  }
-
   // Temporary way to merge two resutls since set union is not working as expected
   List<SuggestionSpan> mergeResults(
       List<SuggestionSpan> oldResults, List<SuggestionSpan> newResults) {
@@ -255,6 +238,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
         !listEquals(reusableSpellCheckResults, rawSpellCheckResults)) {
       correctedSpellCheckResults =
           mergeResults(reusableSpellCheckResults!, rawSpellCheckResults);
+                  correctedSpellCheckResults!.forEach((SuggestionSpan s) {
     } else {
       correctedSpellCheckResults = rawSpellCheckResults;
     }
@@ -291,7 +275,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
 
   /// Helper method for building TextSpan trees.
   List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(
-      List<SuggestionSpan> spellCheckSuggestions,
+      List<SuggestionSpan>? spellCheckSuggestions,
       TextEditingValue value,
       TextStyle? style,
       TextStyle misspelledStyle,
@@ -309,7 +293,7 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
 
     int scss_pointer = 0;
 
-    while (text_pointer < text.length &&
+    while (text_pointer < text.length && spellCheckSuggestions != null &&
         scss_pointer < spellCheckSuggestions.length) {
       int end_index;
       bool isComposing;
@@ -333,8 +317,6 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
         isComposing = text_pointer >= composingRegion.start &&
             end_index <= composingRegion.end &&
             !composingWithinCurrentTextRange;
-        print(
-            "ELSE: |${text.substring(currScssSpan.startIndex, end_index)}|, ${isComposing}");
         tsTreeChildren.add(TextSpan(
             style: isComposing ? composingStyle : misspelledJointStyle,
             text: text.substring(currScssSpan.startIndex, end_index)));
