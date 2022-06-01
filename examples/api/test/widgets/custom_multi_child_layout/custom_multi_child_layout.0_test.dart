@@ -16,6 +16,7 @@ void main() {
     final Finder containerFinder = find.byType(Container);
     expect(containerFinder, findsNWidgets(7));
   });
+
   testWidgets('has correct constraints when shrunk',
       (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
