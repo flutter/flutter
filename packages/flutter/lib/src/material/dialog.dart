@@ -1203,7 +1203,7 @@ class _DefaultsM2 extends DialogTheme {
   @override
   TextStyle? get contentTextStyle => _textTheme.subtitle1;
 
-  @override 
+  @override
   EdgeInsetsGeometry? get actionsPadding => EdgeInsets.zero;
 }
 
@@ -1236,7 +1236,7 @@ class _TokenDefaultsM3 extends DialogTheme {
   @override
   TextStyle? get contentTextStyle => _textTheme.bodyMedium;
 
-  @override 
+  @override
   EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
 }
 
