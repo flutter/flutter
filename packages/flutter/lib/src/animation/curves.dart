@@ -198,6 +198,64 @@ class Interval extends Curve {
   }
 }
 
+/// A curve that progresses linearly until [begin], then curved (according to
+/// [curve] from t at [begin] to 1.0. 
+/// 
+/// Unlike [Interval], [curve] will not start at zero, but at the Y 
+/// corresponding to t=`begin`.
+///
+/// For example, if [begin] is set to 0.5, and [curve] is set to
+/// [Curves.easeOut], then the bottom-left quarter of the curve will be a
+/// straight line, and the top-right quarter will contain the entire
+/// [Curves.easeOut] curve.
+///
+/// Suspended curves are useful in situations where a widget must track the
+/// user's finger (which requires a linear animation), but can also be flung
+/// using a curve specified with the [curve] argument, after the finger is
+/// released. In such a case, the value of [begin] would be the progress of the
+/// animation at the time when the finger was released.
+/// 
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_suspended.mp4}
+class SuspendedCurve extends Curve {
+  /// Creates a suspended curve.
+  /// 
+  /// The [begin] and [curve] arguments must not be null.
+  const SuspendedCurve(
+    this.begin, {
+    this.curve = Curves.easeOutCubic,
+  }) : assert(begin != null),
+       assert(curve != null);
+
+  /// The progress value at which [curve] should begin.
+  ///
+  /// From t=0.0 to t=`begin`, the interval's value progresses linearly (i.e, = t).
+  final double begin;
+
+  /// The curve to apply when [begin] is reached.
+  /// 
+  /// This defaults to [Curves.easeOutCubic].
+  final Curve curve;
+
+  @override
+  double transformInternal(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    assert(begin >= 0.0 && begin <= 1.0);
+
+    if (t < begin) {
+      return t;
+    }
+
+    final double curveProgress = (t - begin) / (1 - begin);
+    final double transformed = curve.transform(curveProgress);
+    return lerpDouble(begin, 1, transformed)!;
+  }
+
+  @override
+  String toString() {
+    return '${describeIdentity(this)}($begin, $curve)';
+  }
+}
+
 /// A curve that is 0.0 until it hits the threshold, then it jumps to 1.0.
 ///
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_threshold.mp4}
