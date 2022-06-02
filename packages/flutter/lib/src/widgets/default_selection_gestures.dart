@@ -26,55 +26,58 @@ class DefaultSelectionGestures extends StatelessWidget {
   static final ContextGestureRecognizerFactoryWithHandlers<SelectionConsecutiveTapGestureRecognizer> _iOSMacTapGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<SelectionConsecutiveTapGestureRecognizer>(
           (BuildContext context) => SelectionConsecutiveTapGestureRecognizer(debugOwner: context),
           (SelectionConsecutiveTapGestureRecognizer instance, BuildContext context) {
-        instance
-          ..onSecondaryTapUp = (TapUpDetails details) {
-            print('onSecondaryTapUp');
-          }
-          ..onSecondaryTap = () {
-            print('onSecondaryTap');
-          }
-          ..onSecondaryTapDown = (TapDownDetails details) {
-            print('onSecondaryTapDown');
-            Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
-            Actions.invoke(context, SelectionToolbarControlIntent.hide);
-            Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
-          }
-          ..onTapDown = (TapDownDetails details, int tapCount) {
-            print('onTapDown , tapCount  $tapCount');
-            Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition, shiftPressed: _isShiftPressed));
+            instance
+              ..onSecondaryTapUp = (TapUpDetails details) {
+                print('onSecondaryTapUp');
+                Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition)); //if !lastSecondaryTapWasOnSelection || !renderEditable.hasFocus
+                Actions.invoke(context, SelectionToolbarControlIntent.hide); //if shouldshowselectiontoolbar, which is set to true by onSecondaryTapDown
+                Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition)); //if shouldshowselectiontoolbar, which is set to true by onSecondaryTapDown
+              }
+              ..onSecondaryTap = () {
+                print('onSecondaryTap');
+              }
+              ..onSecondaryTapDown = (TapDownDetails details) {
+                print('onSecondaryTapDown');
+              }
+              ..onTapDown = (TapDownDetails details, int tapCount) {
+                print('onTapDown , tapCount  $tapCount');
 
-            if (tapCount == 2) {
-              print('onDoubleTapDown');
-              Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
-            }
+                if (_isShiftPressed) {
+                  Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                }
+
+                if (tapCount == 2) {
+                  print('onDoubleTapDown');
+                  Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                }
+              }
+              ..onTapUp = (TapUpDetails details, int tapCount) {
+                print('onTapUp , tapCount  $tapCount');
+                if (tapCount > 1) return;
+                Actions.invoke(context, SelectionToolbarControlIntent.hide);
+                switch (details.kind) {
+                  case PointerDeviceKind.mouse:
+                  case PointerDeviceKind.stylus:
+                  case PointerDeviceKind.invertedStylus:
+                  // Precise devices should place the cursor at a precise position.
+                    Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                    break;
+                  case PointerDeviceKind.touch:
+                  case PointerDeviceKind.unknown:
+                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+                  // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
+                  // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
+                  // of the word.
+                    Actions.invoke(context, SelectWordEdgeIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                    break;
+                }
+                Actions.invoke(context, KeyboardRequestIntent());
+                Actions.invoke(context, UserOnTapCallbackIntent());
+              }
+              ..onTapCancel = () {
+                print('onTapCancel');
+              };
           }
-          ..onTapUp = (TapUpDetails details, int tapCount) {
-            print('onTapUp , tapCount  $tapCount');
-            if (tapCount > 1) return;
-            Actions.invoke(context, SelectionToolbarControlIntent.hide);
-            switch (details.kind) {
-              case PointerDeviceKind.mouse:
-              case PointerDeviceKind.stylus:
-              case PointerDeviceKind.invertedStylus:
-              // Precise devices should place the cursor at a precise position.
-                Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
-                break;
-              case PointerDeviceKind.touch:
-              case PointerDeviceKind.unknown:
-              default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-              // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
-              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-              // of the word.
-                Actions.invoke(context, SelectWordEdgeIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
-                break;
-            }
-            Actions.invoke(context, KeyboardRequestIntent());
-            Actions.invoke(context, UserOnTapCallbackIntent());
-          }
-          ..onTapCancel = () {
-            print('onTapCancel');
-          };
-      }
   );
 
   static final ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer> _iOSMacPanGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
@@ -84,11 +87,15 @@ class DefaultSelectionGestures extends StatelessWidget {
               ..dragStartBehavior = DragStartBehavior.down
               ..onStart = (DragStartDetails details) {
                 print('onDragStart');
-                Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: true));
+                if (_isShiftPressed) {
+                  Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
+                } else {
+                  Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition));
+                }
               }
               ..onUpdate = (DragUpdateDetails details) {
                 print('onDragUpdate');
-                Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: true));
+                Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
               }
               ..onEnd = (DragEndDetails details) {
                 print('onDragEnd');
@@ -99,111 +106,118 @@ class DefaultSelectionGestures extends StatelessWidget {
   static final ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer> _iOSMacLongPressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
           (BuildContext context) => LongPressGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch }),
           (LongPressGestureRecognizer instance, BuildContext context) {
-        instance
-          ..onLongPressStart = (LongPressStartDetails details) {
-            print('onLongPressStart');
-            Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+            instance
+              ..onLongPressStart = (LongPressStartDetails details) {
+                print('onLongPressStart');
+                Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+              }
+              ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+                print('onLongPressMoveUpdate');
+                Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+              }
+              ..onLongPressEnd = (LongPressEndDetails details) {
+                print('onLongPressEnd');
+                Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+              };
           }
-          ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-            print('onLongPressMoveUpdate');
-            Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
-          }
-          ..onLongPressEnd = (LongPressEndDetails details) {
-            print('onLongPressEnd');
-            Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
-          };
-      }
   );
 
   static final ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer> _iOSMacForcePressGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
           (BuildContext context) => ForcePressGestureRecognizer(debugOwner: context),
           (ForcePressGestureRecognizer instance, BuildContext context) {
-        instance
-          ..onStart = (ForcePressDetails details) {
-            print('onStartForcePress');
-            Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition));
+            instance
+              ..onStart = (ForcePressDetails details) {
+                print('onStartForcePress');
+                Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition));
+              }
+              ..onEnd = (ForcePressDetails details) {
+                print('onEndForcePress');
+                Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition));
+                Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+              };
           }
-          ..onEnd = (ForcePressDetails details) {
-            print('onEndForcePress');
-            Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.forcePress, from: details.globalPosition));
-            Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
-          };
-      }
   );
 
   static final Map<Type, ContextGestureRecognizerFactory> _commonGestures = {
     TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<SelectionConsecutiveTapGestureRecognizer>(
             (BuildContext context) => SelectionConsecutiveTapGestureRecognizer(debugOwner: context),
             (SelectionConsecutiveTapGestureRecognizer instance, BuildContext context) {
-          instance
-            ..onSecondaryTapUp = (TapUpDetails details) {
-              print('onSecondaryTapUp');
-            }
-            ..onSecondaryTap = () {
-              print('onSecondaryTap');
-            }
-            ..onSecondaryTapDown = (TapDownDetails details) {
-              print('onSecondaryTapDown');
-              Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));//if renderEditable doesnt have focus
-              Actions.invoke(context, SelectionToolbarControlIntent.toggle(position: details.globalPosition));
-            }
-            ..onTapDown = (TapDownDetails details, int tapCount) {
-              print('onTapDown , tapCount  $tapCount');
-              Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition, shiftPressed: _isShiftPressed));
+              instance
+                ..onSecondaryTapUp = (TapUpDetails details) {
+                  print('onSecondaryTapUp');
+                  Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));//if renderEditable doesnt have focus
+                  Actions.invoke(context, SelectionToolbarControlIntent.toggle(position: details.globalPosition));
+                }
+                ..onSecondaryTap = () {
+                  print('onSecondaryTap');
+                }
+                ..onSecondaryTapDown = (TapDownDetails details) {
+                  print('onSecondaryTapDown');
+                }
+                ..onTapDown = (TapDownDetails details, int tapCount) {
+                  print('onTapDown , tapCount  $tapCount');
+                  if (_isShiftPressed) {
+                    Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                  }
 
-              if (tapCount == 2) {
-                print('onDoubleTapDown');
-                Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
-              }
+                  if (tapCount == 2) {
+                    print('onDoubleTapDown');
+                    Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                  }
+                }
+                ..onTapUp = (TapUpDetails details, int tapCount) {
+                  print('onTapUp , tapCount  $tapCount');
+                  if (tapCount > 1) return;
+                  Actions.invoke(context, SelectionToolbarControlIntent.hide);
+                  Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                  Actions.invoke(context, KeyboardRequestIntent());
+                  Actions.invoke(context, UserOnTapCallbackIntent());
+                }
+                ..onTapCancel = () {
+                  print('onTapCancel');
+                };
             }
-            ..onTapUp = (TapUpDetails details, int tapCount) {
-              print('onTapUp , tapCount  $tapCount');
-              if (tapCount > 1) return;
-              Actions.invoke(context, SelectionToolbarControlIntent.hide);
-              Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
-              Actions.invoke(context, KeyboardRequestIntent());
-              Actions.invoke(context, UserOnTapCallbackIntent());
-            }
-            ..onTapCancel = () {
-              print('onTapCancel');
-            };
-        }
     ),
     LongPressGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
             (BuildContext context) => LongPressGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch }),
             (LongPressGestureRecognizer instance, BuildContext context) {
-          instance
-            ..onLongPressStart = (LongPressStartDetails details) {
-              print('onLongPressStart');
-              Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+              instance
+                ..onLongPressStart = (LongPressStartDetails details) {
+                  print('onLongPressStart');
+                  Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
+                  Actions.invoke(context, FeedbackRequestIntent());
+                }
+                ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+                  print('onLongPressMoveUpdate');
+                  Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition));
+                }
+                ..onLongPressEnd = (LongPressEndDetails details) {
+                  print('onLongPressEnd');
+                  Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+                };
             }
-            ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-              print('onLongPressMoveUpdate');
-              Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition - details.offsetFromOrigin, to: details.globalPosition));
-            }
-            ..onLongPressEnd = (LongPressEndDetails details) {
-              print('onLongPressEnd');
-              Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
-            };
-        }
     ),
     PanGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
             (BuildContext context) => PanGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
             (PanGestureRecognizer instance, BuildContext context) {
-          instance
-            ..dragStartBehavior = DragStartBehavior.down
-            ..onStart = (DragStartDetails details) {
-              print('onDragStart');
-              ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: _isShiftPressed);
+              instance
+                ..dragStartBehavior = DragStartBehavior.down
+                ..onStart = (DragStartDetails details) {
+                  print('onDragStart');
+                  if (_isShiftPressed) {
+                    Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
+                  } else {
+                    Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition));
+                  }
+                }
+                ..onUpdate = (DragUpdateDetails details) {
+                  print('onDragUpdate');
+                  Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
+                }
+                ..onEnd = (DragEndDetails details) {
+                  print('onDragEnd');
+                };
             }
-            ..onUpdate = (DragUpdateDetails details) {
-              print('onDragUpdate');
-              Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition, shiftPressed: true));
-            }
-            ..onEnd = (DragEndDetails details) {
-              print('onDragEnd');
-            };
-        }
     ),
   };
 

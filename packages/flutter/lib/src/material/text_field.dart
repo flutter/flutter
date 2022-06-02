@@ -1226,14 +1226,18 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       ExpandSelectionToPositionIntent : SelectionCallbackAction<ExpandSelectionToPositionIntent>(
           onInvoke: (ExpandSelectionToPositionIntent intent) => _editableText!.expandSelection(intent),
           enabledPredicate: (ExpandSelectionToPositionIntent intent) {
-            return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
+            return widget.selectionEnabled && _effectiveController.value.selection.isValid;
           },
       ),
       ExtendSelectionToPositionIntent : SelectionCallbackAction<ExtendSelectionToPositionIntent>(
           onInvoke: (ExtendSelectionToPositionIntent intent) => _editableText!.extendSelection(intent),
           enabledPredicate: (ExtendSelectionToPositionIntent intent) {
-            return widget.selectionEnabled && _effectiveController.value.selection.isValid && intent.shiftPressed;
+            return widget.selectionEnabled && _effectiveController.value.selection.isValid;
           }
+      ),
+      FeedbackRequestIntent : SelectionCallbackAction<FeedbackRequestIntent>(
+        onInvoke: (FeedbackRequestIntent intent) => Feedback.forLongPress(this.context),
+        enabledPredicate: (FeedbackRequestIntent intent) => widget.selectionEnabled,
       ),
       KeyboardRequestIntent : SelectionCallbackAction<KeyboardRequestIntent>(
         onInvoke: (KeyboardRequestIntent intent) => _requestKeyboard(),

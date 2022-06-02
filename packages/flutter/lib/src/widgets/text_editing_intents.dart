@@ -341,21 +341,24 @@ class TransposeCharactersIntent extends Intent {
 // ---------- Selection Gesture Intents ----------
 class ExpandSelectionToPositionIntent extends Intent {
   /// Creates an [ExpandSelectionToPositionIntent].
-  const ExpandSelectionToPositionIntent({required this.cause, this.fromSelection, required this.position, required this.shiftPressed});
+  const ExpandSelectionToPositionIntent({required this.cause, this.fromSelection, required this.position});
 
   final SelectionChangedCause cause;
   final TextSelection? fromSelection;
   final Offset position;
-  final bool shiftPressed;
 }
 
 class ExtendSelectionToPositionIntent extends Intent {
   /// Creates an [ExtendSelectionToPositionIntent].
-  const ExtendSelectionToPositionIntent({required this.cause, required this.position, required this.shiftPressed});
+  const ExtendSelectionToPositionIntent({required this.cause, required this.position});
 
   final SelectionChangedCause cause;
   final Offset position;
-  final bool shiftPressed;
+}
+
+class FeedbackRequestIntent extends Intent {
+  /// Creates an [FeedbackRequestIntent].
+  const FeedbackRequestIntent();
 }
 
 /// An [Intent] that represents a user interaction that attempts to request the
