@@ -34,6 +34,7 @@ void main() {
         (parentSize.width / 3).roundToDouble());
     expect(childSize.height.roundToDouble(), 100.0);
   });
+
   testWidgets('has correct size maximum constraints',
       (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
@@ -47,6 +48,7 @@ void main() {
 
     expect(childSize.width.roundToDouble(), 200.0);
   });
+  
   testWidgets('row behavior is correct', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
         child: SizedBox(
