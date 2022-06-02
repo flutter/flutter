@@ -1028,7 +1028,7 @@ public class FlutterView extends FrameLayout
    * @param currentView The root view.
    * @return A descendant of currentView or currentView itself.
    */
-  @SuppressLint("PrivateApi")
+  @SuppressLint("DiscouragedPrivateApi")
   private View findViewByAccessibilityIdRootedAtCurrentView(int accessibilityId, View currentView) {
     Method getAccessibilityViewIdMethod;
     try {

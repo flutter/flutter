@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="4" by="lint 26.1.1">
+<issues format="6" by="lint 7.2.0" type="baseline" client="" dependencies="true" name="" variant="all" version="7.2.0">
 
     <issue
         id="InlinedApi"
@@ -8,7 +8,7 @@
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
-            line="221"
+            line="267"
             column="16"/>
     </issue>
 
@@ -19,7 +19,7 @@
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
-            line="225"
+            line="271"
             column="16"/>
     </issue>
 
@@ -30,58 +30,36 @@
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
-            line="229"
+            line="275"
             column="16"/>
     </issue>
 
     <issue
         id="InlinedApi"
-        message="Field requires API level 21 (current min is 16): `android.view.HapticFeedbackConstants#CLOCK_TICK`"
-        errorLine1="                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);"
-        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java"
-            line="121"
-            column="44"/>
-    </issue>
-
-    <issue
-        id="InlinedApi"
-        message="Field requires API level 19 (current min is 16): `android.view.View#SYSTEM_UI_FLAG_IMMERSIVE_STICKY`"
-        errorLine1="            enabledOverlays |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;"
-        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java"
-            line="154"
-            column="32"/>
-    </issue>
-
-    <issue
-        id="InlinedApi"
         message="Field requires API level 17 (current min is 16): `android.view.View#LAYOUT_DIRECTION_LTR`"
-        errorLine1="        return direction == View.LAYOUT_DIRECTION_LTR || direction == View.LAYOUT_DIRECTION_RTL;"
-        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="    return direction == View.LAYOUT_DIRECTION_LTR || direction == View.LAYOUT_DIRECTION_RTL;"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
-            line="370"
-            column="29"/>
+            line="661"
+            column="25"/>
     </issue>
 
     <issue
         id="InlinedApi"
         message="Field requires API level 17 (current min is 16): `android.view.View#LAYOUT_DIRECTION_RTL`"
-        errorLine1="        return direction == View.LAYOUT_DIRECTION_LTR || direction == View.LAYOUT_DIRECTION_RTL;"
-        errorLine2="                                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="    return direction == View.LAYOUT_DIRECTION_LTR || direction == View.LAYOUT_DIRECTION_RTL;"
+        errorLine2="                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
-            line="370"
-            column="71"/>
+            line="661"
+            column="67"/>
     </issue>
 
     <issue
         id="OldTargetApi"
         message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
-        errorLine1="    &lt;uses-sdk android:minSdkVersion=&quot;16&quot; android:targetSdkVersion=&quot;21&quot; />"
+        errorLine1="    &lt;uses-sdk android:minSdkVersion=&quot;16&quot; android:targetSdkVersion=&quot;31&quot; />"
         errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/AndroidManifest.xml"
@@ -101,102 +79,25 @@
     </issue>
 
     <issue
-        id="UseSparseArrays"
-        message="Use `new SparseArray&lt;SemanticsNode>(...)` instead for better performance"
-        errorLine1="    private final Map&lt;Integer, SemanticsNode> flutterSemanticsTree = new HashMap&lt;>();"
-        errorLine2="                                                                     ~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="130"
-            column="70"/>
-    </issue>
-
-    <issue
-        id="UseSparseArrays"
-        message="Use `new SparseArray&lt;CustomAccessibilityAction>(...)` instead for better performance"
-        errorLine1="    private final Map&lt;Integer, CustomAccessibilityAction> customAccessibilityActions = new HashMap&lt;>();"
-        errorLine2="                                                                                       ~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="155"
-            column="88"/>
-    </issue>
-
-    <issue
-        id="UseSparseArrays"
-        message="Use `new SparseArray&lt;BinaryReply>(...)` instead for better performance"
-        errorLine1="    this.pendingReplies = new HashMap&lt;>();"
-        errorLine2="                          ~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartMessenger.java"
-            line="43"
-            column="27"/>
-    </issue>
-
-    <issue
         id="ClickableViewAccessibility"
         message="Custom view `FlutterView` overrides `onTouchEvent` but not `performClick`"
         errorLine1="  public boolean onTouchEvent(MotionEvent event) {"
         errorLine2="                 ~~~~~~~~~~~~">
         <location
-            file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java"
-            line="367"
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="436"
             column="18"/>
     </issue>
 
     <issue
         id="ClickableViewAccessibility"
         message="Custom view `FlutterView` overrides `onTouchEvent` but not `performClick`"
-        errorLine1="    public boolean onTouchEvent(MotionEvent event) {"
-        errorLine2="                   ~~~~~~~~~~~~">
+        errorLine1="  public boolean onTouchEvent(@NonNull MotionEvent event) {"
+        errorLine2="                 ~~~~~~~~~~~~">
         <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
-            line="391"
-            column="20"/>
-    </issue>
-
-    <issue
-        id="UseValueOf"
-        message="Use `Boolean.valueOf(true)` instead"
-        errorLine1="    messageContent.add(new Boolean(true));"
-        errorLine2="                       ~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/test/io/flutter/plugin/common/StandardMessageCodecTest.java"
-            line="87"
-            column="24"/>
-    </issue>
-
-    <issue
-        id="UseValueOf"
-        message="Use `Boolean.valueOf(false)` instead"
-        errorLine1="    messageContent.add(new Boolean(false));"
-        errorLine2="                       ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/test/io/flutter/plugin/common/StandardMessageCodecTest.java"
-            line="88"
-            column="24"/>
-    </issue>
-
-    <issue
-        id="Recycle"
-        message="This `SurfaceTexture` should be freed up after use with `#release()`"
-        errorLine1="    final SurfaceTexture surfaceTexture = new SurfaceTexture(0);"
-        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java"
-            line="97"
-            column="43"/>
-    </issue>
-
-    <issue
-        id="Recycle"
-        message="This `SurfaceTexture` should be freed up after use with `#release()`"
-        errorLine1="    final SurfaceTexture surfaceTexture = new SurfaceTexture(0);"
-        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
-            line="876"
-            column="43"/>
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java"
+            line="911"
+            column="18"/>
     </issue>
 
 </issues>

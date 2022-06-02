@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.localization;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -22,6 +23,7 @@ public class LocalizationPlugin {
   @NonNull private final LocalizationChannel localizationChannel;
   @NonNull private final Context context;
 
+  @SuppressLint("AppBundleLocaleChanges") // This is optionally turned on by apps.
   @VisibleForTesting
   final LocalizationChannel.LocalizationMessageHandler localizationMessageHandler =
       new LocalizationChannel.LocalizationMessageHandler() {
