@@ -1421,16 +1421,11 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  // TODO(justinmc): Update the "see also" to the final classes when done.
   /// {@template flutter.widgets.EditableText.buildContextMenu}
   /// Builds the text selection toolbar when requested by the user.
-  ///
-  /// If not provided, will build a default menu based on the platform.
-  ///
-  /// See also:
-  ///
-  ///  * [_PlatformTextSelectionControlsToolbar], which is built by default.
   /// {@endtemplate}
+  ///
+  /// If not provided, no context menu will be shown.
   final TextSelectionToolbarBuilder? buildContextMenu;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
@@ -2513,6 +2508,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         Offset primaryAnchor,
         Offset? secondaryAnchor,
       ) {
+        if (widget.buildContextMenu == null) {
+          return const SizedBox.shrink();
+        }
         return widget.buildContextMenu!(
           context,
           controller,

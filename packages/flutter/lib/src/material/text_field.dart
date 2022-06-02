@@ -773,6 +773,12 @@ class TextField extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [DefaultTextSelectionToolbar], which is built by default.
   final TextSelectionToolbarBuilder? buildContextMenu;
 
   @override

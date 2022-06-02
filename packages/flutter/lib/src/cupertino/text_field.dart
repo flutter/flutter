@@ -782,6 +782,12 @@ class CupertinoTextField extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [DefaultCupertinoTextSelectionToolbar], which is built by default.
   final TextSelectionToolbarBuilder? buildContextMenu;
 
   @override
