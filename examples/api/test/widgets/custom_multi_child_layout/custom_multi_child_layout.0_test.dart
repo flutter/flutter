@@ -48,7 +48,7 @@ void main() {
 
     expect(childSize.width.roundToDouble(), 200.0);
   });
-  
+
   testWidgets('row behavior is correct', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
         child: SizedBox(
