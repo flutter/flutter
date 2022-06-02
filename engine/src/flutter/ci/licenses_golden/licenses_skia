@@ -1,4 +1,4 @@
-Signature: 2fe2547aa5977ad46dc64cd2c89793c6
+Signature: fa162c38f6440991d5b1a608ec5491e5
 
 UNUSED LICENSES:
 
@@ -837,6 +837,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_windows/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_sdk_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/armhf_sysroot/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bazel/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/bazel_build_task_driver/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bazelisk/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bloaty/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cast_toolchain/VERSION
@@ -5958,6 +5959,8 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.cpp
 FILE: ../../../third_party/skia/src/text/gpu/GlyphVector.h
+FILE: ../../../third_party/skia/src/text/gpu/SubRunContainer.cpp
+FILE: ../../../third_party/skia/src/text/gpu/SubRunContainer.h
 FILE: ../../../third_party/skia/src/utils/SkTestCanvas.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
