@@ -302,18 +302,18 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              menus: <MenuBarItem>[
                 MenuBarMenu(
                   shape: MaterialStateProperty.all<ShapeBorder?>(const RoundedRectangleBorder()),
                   label: TestMenu.mainMenu0.label,
                   elevation: MaterialStateProperty.all<double?>(10.0),
                   backgroundColor: MaterialStateProperty.all(Colors.red),
-                  menus: <MenuItem>[
+                  menus: <MenuBarItem>[
                     MenuItemGroup(
-                      members: <MenuItem>[
-                        MenuBarItem(
+                      members: <MenuBarItem>[
+                        MenuBarButton(
                           label: TestMenu.subMenu00.label,
-                          semanticLabel: 'semanticLabel',
+                          semanticsLabel: 'semanticLabel',
                         ),
                       ],
                     ),
@@ -338,7 +338,7 @@ void main() {
       );
     });
     testWidgets('diagnostics', (WidgetTester tester) async {
-      const MenuBarItem item = MenuBarItem(
+      const MenuBarButton item = MenuBarButton(
         label: 'label2',
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
       );
@@ -348,7 +348,7 @@ void main() {
         backgroundColor: MaterialStateProperty.all(Colors.red),
         height: 40,
         elevation: MaterialStateProperty.all<double?>(10.0),
-        menus: const <MenuItem>[item],
+        menus: const <MenuBarItem>[item],
       );
 
       await tester.pumpWidget(
@@ -474,16 +474,16 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              menus: <MenuBarItem>[
                 MenuBarMenu(
                   label: TestMenu.mainMenu0.label,
-                  menus: <MenuItem>[
-                    MenuBarItem(
+                  menus: <MenuBarItem>[
+                    MenuBarButton(
                       label: TestMenu.subMenu10.label,
                       onSelected: sameCallback,
                       shortcut: sameShortcut,
                     ),
-                    MenuBarItem(
+                    MenuBarButton(
                       label: TestMenu.subMenu11.label,
                       onSelected: sameCallback,
                       shortcut: sameShortcut,
@@ -1241,11 +1241,11 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              menus: <MenuBarItem>[
                 MenuBarMenu(
                   label: TestMenu.mainMenu0.label,
-                  menus: <MenuItem>[
-                    MenuBarItem(
+                  menus: <MenuBarItem>[
+                    MenuBarButton(
                       leadingIcon: const Text('leadingIcon'),
                       label: TestMenu.subMenu00.label,
                     ),
@@ -1269,11 +1269,11 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              menus: <MenuBarItem>[
                 MenuBarMenu(
                   label: TestMenu.mainMenu0.label,
-                  menus: <MenuItem>[
-                    MenuBarItem(
+                  menus: <MenuBarItem>[
+                    MenuBarButton(
                       label: TestMenu.subMenu00.label,
                       trailingIcon: const Text('trailingIcon'),
                     ),
@@ -1296,18 +1296,18 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              menus: <MenuBarItem>[
                 MenuBarMenu(
                   shape: MaterialStateProperty.all<ShapeBorder?>(const RoundedRectangleBorder()),
                   label: TestMenu.mainMenu0.label,
                   elevation: MaterialStateProperty.all<double?>(10.0),
                   backgroundColor: MaterialStateProperty.all(Colors.red),
-                  menus: <MenuItem>[
+                  menus: <MenuBarItem>[
                     MenuItemGroup(
-                      members: <MenuItem>[
-                        MenuBarItem(
+                      members: <MenuBarItem>[
+                        MenuBarButton(
                           label: TestMenu.subMenu00.label,
-                          semanticLabel: 'semanticLabel',
+                          semanticsLabel: 'semanticLabel',
                         ),
                       ],
                     ),
@@ -1380,15 +1380,15 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              menus: <MenuItem>[
+              menus: <MenuBarItem>[
                 MenuBarMenu(
                   label: TestMenu.mainMenu0.label,
-                  menus: <MenuItem>[
-                    MenuBarItem(
+                  menus: <MenuBarItem>[
+                    MenuBarButton(
                       label: TestMenu.subMenu10.label,
                       shortcut: allModifiers,
                     ),
-                    MenuBarItem(
+                    MenuBarButton(
                       label: TestMenu.subMenu11.label,
                       shortcut: charShortcuts,
                     ),
@@ -1426,20 +1426,20 @@ enum TestMenu {
   final String label;
 }
 
-List<MenuItem> createTestMenus({
+List<MenuBarItem> createTestMenus({
   void Function(TestMenu)? onSelected,
   void Function(TestMenu)? onOpen,
   void Function(TestMenu)? onClose,
   Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
   bool includeStandard = false,
 }) {
-  final List<MenuItem> result = <MenuItem>[
+  final List<MenuBarItem> result = <MenuBarItem>[
     MenuBarMenu(
       label: TestMenu.mainMenu0.label,
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,
-      menus: <MenuItem>[
-        MenuBarItem(
+      menus: <MenuBarItem>[
+        MenuBarButton(
           label: TestMenu.subMenu00.label,
           onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu00) : null,
           shortcut: shortcuts[TestMenu.subMenu00],
@@ -1450,10 +1450,10 @@ List<MenuItem> createTestMenus({
       label: TestMenu.mainMenu1.label,
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu1) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu1) : null,
-      menus: <MenuItem>[
+      menus: <MenuBarItem>[
         MenuItemGroup(
-          members: <MenuItem>[
-            MenuBarItem(
+          members: <MenuBarItem>[
+            MenuBarButton(
               label: TestMenu.subMenu10.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu10) : null,
               shortcut: shortcuts[TestMenu.subMenu10],
@@ -1464,34 +1464,34 @@ List<MenuItem> createTestMenus({
           label: TestMenu.subMenu11.label,
           onOpen: onOpen != null ? () => onOpen(TestMenu.subMenu11) : null,
           onClose: onClose != null ? () => onClose(TestMenu.subMenu11) : null,
-          menus: <MenuItem>[
+          menus: <MenuBarItem>[
             MenuItemGroup(
-              members: <MenuItem>[
-                MenuBarItem(
+              members: <MenuBarItem>[
+                MenuBarButton(
                   label: TestMenu.subSubMenu100.label,
                   onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu100) : null,
                   shortcut: shortcuts[TestMenu.subSubMenu100],
                 ),
               ],
             ),
-            MenuBarItem(
+            MenuBarButton(
               label: TestMenu.subSubMenu101.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu101) : null,
               shortcut: shortcuts[TestMenu.subSubMenu101],
             ),
-            MenuBarItem(
+            MenuBarButton(
               label: TestMenu.subSubMenu102.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu102) : null,
               shortcut: shortcuts[TestMenu.subSubMenu102],
             ),
-            MenuBarItem(
+            MenuBarButton(
               label: TestMenu.subSubMenu103.label,
               onSelected: onSelected != null ? () => onSelected(TestMenu.subSubMenu103) : null,
               shortcut: shortcuts[TestMenu.subSubMenu103],
             ),
           ],
         ),
-        MenuBarItem(
+        MenuBarButton(
           label: TestMenu.subMenu12.label,
           onSelected: onSelected != null ? () => onSelected(TestMenu.subMenu12) : null,
           shortcut: shortcuts[TestMenu.subMenu12],
@@ -1502,8 +1502,8 @@ List<MenuItem> createTestMenus({
       label: TestMenu.mainMenu2.label,
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu2) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu2) : null,
-      menus: <MenuItem>[
-        MenuBarItem(
+      menus: <MenuBarItem>[
+        MenuBarButton(
           // Always disabled.
           label: TestMenu.subMenu20.label,
           shortcut: shortcuts[TestMenu.subMenu20],
