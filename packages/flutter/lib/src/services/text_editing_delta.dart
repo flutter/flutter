@@ -97,7 +97,6 @@ abstract class TextEditingDelta {
     // A non text update delta occurs when the selection and/or composing region
     // has been changed by the platform, and there have been no changes to the
     // text value.
-    print(encoded);
     final String oldText = encoded['oldText'] as String;
     final int replacementDestinationStart = encoded['deltaStart'] as int;
     final int replacementDestinationEnd = encoded['deltaEnd'] as int;
