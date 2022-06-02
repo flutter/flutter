@@ -408,10 +408,11 @@ class MouseTracker extends ChangeNotifier {
     // hit-test order.
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
-      if (!nextAnnotations.containsKey(annotation))
+      if (!nextAnnotations.containsKey(annotation)) {
         if (annotation.validForMouseTracker && annotation.onExit != null) {
           annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
         }
+      }
     });
 
     // Send enter events to annotations that are not in last but in next, in
