@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
-import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'desktop_text_selection.dart';
@@ -24,12 +22,12 @@ import 'text_selection_toolbar_buttons.dart';
 class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [DefaultCupertinoTextSelectionToolbar].
   const DefaultCupertinoTextSelectionToolbar({
+    super.key,
     required this.primaryAnchor,
     this.secondaryAnchor,
     this.buttonDatas,
     this.children,
     this.editableTextState,
-    Key? key,
   }) : assert(
          buttonDatas == null || children == null,
          'No need for both buttonDatas and children.',
@@ -37,8 +35,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
        assert(
          !(buttonDatas == null && children == null && editableTextState == null),
          'If not providing buttonDatas or children, provide editableTextState to generate them.',
-       ),
-       super(key: key);
+       );
 
   /// The main location on which to anchor the menu.
   ///
@@ -69,7 +66,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
-    if ((children?.isEmpty ?? false) || (buttonDatas?.isEmpty ?? false)) { 
+    if ((children?.isEmpty ?? false) || (buttonDatas?.isEmpty ?? false)) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -109,9 +106,7 @@ class _DefaultTextSelectionToolbarFromChildren extends StatelessWidget {
     required this.primaryAnchor,
     this.secondaryAnchor,
     required this.children,
-    Key? key,
-  }) : assert(children != null),
-       super(key: key);
+  }) : assert(children != null);
 
   /// The main location on which to anchor the menu.
   ///
@@ -160,9 +155,7 @@ class _DefaultTextSelectionToolbarFromButtonDatas extends StatelessWidget {
     required this.primaryAnchor,
     this.secondaryAnchor,
     required this.buttonDatas,
-    Key? key,
-  }) : assert(buttonDatas != null),
-       super(key: key);
+  }) : assert(buttonDatas != null);
 
   /// The main location on which to anchor the menu.
   ///
