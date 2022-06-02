@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.platform;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager.TaskDescription;
 import android.content.ClipData;
@@ -243,8 +244,7 @@ public class PlatformPlugin {
   private void setSystemChromeEnabledSystemUIMode(PlatformChannel.SystemUiMode systemUiMode) {
     int enabledOverlays;
 
-    if (systemUiMode == PlatformChannel.SystemUiMode.LEAN_BACK
-        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (systemUiMode == PlatformChannel.SystemUiMode.LEAN_BACK) {
       // LEAN BACK
       // Available starting at SDK 16
       // Should not show overlays, tap to reveal overlays, needs onChange callback
@@ -364,6 +364,7 @@ public class PlatformPlugin {
   }
 
   @SuppressWarnings("deprecation")
+  @TargetApi(21)
   private void setSystemChromeSystemUIOverlayStyle(
       PlatformChannel.SystemChromeStyle systemChromeStyle) {
     Window window = activity.getWindow();
