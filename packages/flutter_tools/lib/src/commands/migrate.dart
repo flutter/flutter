@@ -23,7 +23,13 @@ class MigrateCommand extends FlutterCommand {
     required ProcessManager processManager,
   }) {
     // TODO(garyq): Add each subcommand back in as they land.
-    addSubcommand(MigrateStatusCommand(verbose: verbose, logger: logger, fileSystem: fileSystem, platform: platform, processManager: processManager));
+    addSubcommand(MigrateStatusCommand(
+      verbose: verbose,
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager
+    ));
   }
 
   final Logger logger;
