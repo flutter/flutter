@@ -8,11 +8,7 @@ import 'message_codecs.dart';
 import 'platform_channel.dart';
 
 /// Platform channels used by the Flutter system.
-class SystemChannels {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemChannels._();
-
+extension SystemChannels on Never {
   /// A JSON [MethodChannel] for navigation.
   ///
   /// The following incoming methods are defined for this channel (registered

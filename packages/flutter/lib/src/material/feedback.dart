@@ -22,7 +22,7 @@ import 'theme.dart';
 /// Calling any of these methods is a no-op on iOS as actions on that platform
 /// typically don't provide haptic or acoustic feedback.
 ///
-/// All methods in this class are usually called from within a
+/// All those functions are usually called from within a
 /// [StatelessWidget.build] method or from a [State]'s methods as you have to
 /// provide a [BuildContext].
 ///
@@ -81,11 +81,7 @@ import 'theme.dart';
 /// }
 /// ```
 /// {@end-tool}
-class Feedback {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Feedback._();
-
+extension Feedback on Never {
   /// Provides platform-specific feedback for a tap.
   ///
   /// On Android the click system sound is played. On iOS this is a no-op.

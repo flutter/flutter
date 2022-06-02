@@ -36,14 +36,8 @@ String? _keyLabel(LogicalKeyboardKey key) {
   return null;
 }
 
-// ignore: avoid_classes_with_only_static_members
-/// A class that serves as a namespace for a bunch of keyboard-key generation
-/// utilities.
-class KeyEventSimulator {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  KeyEventSimulator._();
-
+/// Namespace for a bunch of keyboard-key generation utilities.
+extension KeyEventSimulator on Never {
   // Look up a synonym key, and just return the left version of it.
   static LogicalKeyboardKey _getKeySynonym(LogicalKeyboardKey origKey) {
     if (origKey == LogicalKeyboardKey.shift) {

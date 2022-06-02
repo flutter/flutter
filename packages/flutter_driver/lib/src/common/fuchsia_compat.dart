@@ -76,17 +76,13 @@ Future<PortForwarder> _dummyPortForwardingFunction(
   return _DummyPortForwarder(remotePort, remotePort);
 }
 
-/// Utility class for creating connections to the Fuchsia Device.
+/// Utility functions for creating connections to the Fuchsia Device.
 ///
 /// If executed on a host (non-Fuchsia device), behaves the same as running
 /// [FuchsiaRemoteConnection.connect] whereby the `FUCHSIA_REMOTE_URL` and
 /// `FUCHSIA_SSH_CONFIG` variables must be set. If run on a Fuchsia device, will
 /// connect locally without need for environment variables.
-class FuchsiaCompat {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  FuchsiaCompat._();
-
+extension FuchsiaCompat on Never {
   static void _init() {
     fuchsiaPortForwardingFunction = _dummyPortForwardingFunction;
   }

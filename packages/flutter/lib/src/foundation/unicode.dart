@@ -10,10 +10,7 @@
 ///
 ///  * <http://unicode.org/reports/tr9/>, which describes the Unicode
 ///    bidirectional text algorithm.
-class Unicode {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Unicode._();
+extension Unicode on Never {
   /// `U+202A LEFT-TO-RIGHT EMBEDDING`
   ///
   /// Treat the following text as embedded left-to-right.

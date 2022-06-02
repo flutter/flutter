@@ -10,9 +10,7 @@ class TypographyTemplate extends TokenTemplate {
   @override
   String generate() => '''
 // Generated version ${tokens["version"]}
-class _M3Typography {
-  _M3Typography._();
-
+extension _M3Typography on Never {
   ${_textTheme('englishLike', 'alphabetic')}
 
   ${_textTheme('dense', 'ideographic')}

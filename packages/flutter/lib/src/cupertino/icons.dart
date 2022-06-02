@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 ///
 /// Icons are identified by their name as listed below.
 ///
-/// To use this class, make sure you add a dependency on `cupertino_icons` in your
+/// To use them, make sure you add a dependency on `cupertino_icons` in your
 /// project's `pubspec.yaml` file. This ensures that the CupertinoIcons font is
 /// included in your application. This font is used to display the icons. For example:
 ///
@@ -59,11 +59,7 @@ import 'package:flutter/widgets.dart';
 /// See also:
 ///
 ///  * [Icon], used to show these icons.
-class CupertinoIcons {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  CupertinoIcons._();
-
+extension CupertinoIcons on Never {
   /// The icon font used for Cupertino icons.
   static const String iconFont = 'CupertinoIcons';
 

@@ -20,12 +20,8 @@ class ClipboardData {
   final String? text;
 }
 
-/// Utility methods for interacting with the system's clipboard.
-class Clipboard {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Clipboard._();
-
+/// Utility functions for interacting with the system's clipboard.
+extension Clipboard on Never {
   // Constants for common [getData] [format] types.
 
   /// Plain text data format string.

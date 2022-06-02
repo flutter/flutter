@@ -401,11 +401,7 @@ class SystemMouseCursor extends MouseCursor {
 /// The cursors should be named based on the cursors' use cases instead of their
 /// appearance, because different platforms might (although not commonly) use
 /// different shapes for the same use case.
-class SystemMouseCursors {
-  // This class only contains static members, and should not be instantiated or
-  // extended.
-  SystemMouseCursors._();
-
+extension SystemMouseCursors on Never {
   // The mapping in this class must be kept in sync with the following files in
   // the engine:
   //

@@ -291,11 +291,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 ///    uses this API to select licenses to show.
 ///  * [AboutListTile], which is a widget that can be added to a [Drawer]. When
 ///    tapped it calls [showAboutDialog].
-class LicenseRegistry {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  LicenseRegistry._();
-
+extension LicenseRegistry on Never {
   static List<LicenseEntryCollector>? _collectors;
 
   /// Adds licenses to the registry.

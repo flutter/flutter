@@ -33,7 +33,7 @@ linter:
     # - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses
     # - avoid_catching_errors
-    # - avoid_classes_with_only_static_members
+    - avoid_classes_with_only_static_members
     # - avoid_double_and_int_checks # only useful when targeting JS runtime
     # - avoid_dynamic_calls
     - avoid_empty_else

@@ -205,10 +205,8 @@ mixin SelectionRegistrant on Selectable {
   }
 }
 
-/// A utility class that provides useful methods for handling selection events.
-class SelectionUtils {
-  SelectionUtils._();
-
+/// Utility functions for handling selection events.
+extension SelectionUtils on Never {
   /// Determines [SelectionResult] purely based on the target rectangle.
   ///
   /// This method returns [SelectionResult.end] if the `point` is inside the

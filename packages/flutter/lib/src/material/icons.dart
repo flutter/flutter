@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 /// A set of platform-adaptive Material Design icons.
 ///
 /// Use [Icons.adaptive] to access a static instance of this class.
-class PlatformAdaptiveIcons implements Icons {
+class PlatformAdaptiveIcons {
   const PlatformAdaptiveIcons._();
 
   static bool _isCupertino() {
@@ -100,7 +100,7 @@ class PlatformAdaptiveIcons implements Icons {
 ///
 /// Search and find the perfect icon on the [Google Fonts](https://material.io/resources/icons) website.
 ///
-/// To use this class, make sure you set `uses-material-design: true` in your
+/// To use those icons, make sure you set `uses-material-design: true` in your
 /// project's `pubspec.yaml` file in the `flutter` section. This ensures that
 /// the Material Icons font is included in your application. This font is used to
 /// display the icons. For example:
@@ -148,11 +148,7 @@ class PlatformAdaptiveIcons implements Icons {
 ///  * [Icon]
 ///  * [IconButton]
 ///  * <https://material.io/resources/icons>
-class Icons {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Icons._();
-
+extension Icons on Never {
   /// A set of platform-adaptive Material Design icons.
   ///
   /// Provides a convenient way to show a certain set of platform-appropriate

@@ -12,11 +12,11 @@ class _AsyncScope {
   final Zone zone;
 }
 
-/// Utility class for all the async APIs in the `flutter_test` library.
+/// Utility functions for all the async APIs in the `flutter_test` library.
 ///
-/// This class provides checking for asynchronous APIs, allowing the library to
-/// verify that all the asynchronous APIs are properly `await`ed before calling
-/// another.
+/// This set of functions provides checking for asynchronous APIs, allowing the
+/// library to verify that all the asynchronous APIs are properly `await`ed
+/// before calling another.
 ///
 /// For example, it prevents this kind of code:
 ///
@@ -44,10 +44,7 @@ class _AsyncScope {
 ///   // ...
 /// });
 /// ```
-class TestAsyncUtils {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  TestAsyncUtils._();
+extension TestAsyncUtils on Never {
   static const String _className = 'TestAsyncUtils';
 
   static final List<_AsyncScope> _scopeStack = <_AsyncScope>[];

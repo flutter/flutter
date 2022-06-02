@@ -88,9 +88,7 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
   }
 }
 
-class _UntilNextFrame {
-  _UntilNextFrame._();
-
+extension _UntilNextFrame on Never {
   static Completer<void>? _completer;
 
   static Future<void> wait() {
