@@ -102,35 +102,35 @@ class _MyMenuBarState extends State<MyMenuBar> {
     return Column(
       children: <Widget>[
         MenuBar(
-          menus: <PlatformMenu>[
+          menus: <MenuBarItem>[
             MenuBarMenu(
               autofocus: true,
               label: 'Menu App',
-              menus: <MenuItem>[
-                MenuBarItem(
+              menus: <MenuBarItem>[
+                MenuBarButton(
                   label: MenuSelection.about.label,
                   onSelected: () => _activate(MenuSelection.about),
                 ),
-                MenuBarItem(
+                MenuBarButton(
                   label: showingMessage ? MenuSelection.hideMessage.label : MenuSelection.showMessage.label,
                   onSelected: () => _activate(showingMessage ? MenuSelection.hideMessage : MenuSelection.showMessage),
                 ),
                 MenuBarMenu(
                   label: 'Background Color',
-                  menus: <MenuItem>[
-                    MenuItemGroup(members: <MenuItem>[
-                      MenuBarItem(
+                  menus: <MenuBarItem>[
+                    MenuItemGroup(members: <MenuBarItem>[
+                      MenuBarButton(
                         onSelected: () => _activate(MenuSelection.colorRed),
                         label: MenuSelection.colorRed.label,
                         shortcut: const SingleActivator(LogicalKeyboardKey.keyR, control: true),
                       ),
-                      MenuBarItem(
+                      MenuBarButton(
                         onSelected: () => _activate(MenuSelection.colorGreen),
                         label: MenuSelection.colorGreen.label,
                         shortcut: const SingleActivator(LogicalKeyboardKey.keyG, control: true),
                       ),
                     ]),
-                    MenuBarItem(
+                    MenuBarButton(
                       onSelected: () => _activate(MenuSelection.colorBlue),
                       label: MenuSelection.colorBlue.label,
                       shortcut: const SingleActivator(LogicalKeyboardKey.keyB, control: true),
@@ -139,7 +139,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
                 ),
                 // Only include the "quit" item on non-web platforms.
                 if (!kIsWeb)
-                  MenuBarItem(
+                  MenuBarButton(
                     onSelected: () => _activate(MenuSelection.quit),
                     label: MenuSelection.quit.label,
                   ),

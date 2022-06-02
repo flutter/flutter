@@ -18,7 +18,7 @@ void main() {
     expect(menuBar.menus, isNotEmpty);
     expect(menuBar.menus.length, equals(1));
 
-    final Finder menuButtonFinder = find.byType(MenuBarItem).first;
+    final Finder menuButtonFinder = find.byType(MenuBarButton).first;
     await tester.tap(menuButtonFinder);
     await tester.pump();
 

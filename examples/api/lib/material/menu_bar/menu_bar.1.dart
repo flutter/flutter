@@ -4,6 +4,8 @@
 
 // Example for MenuBar.adaptive.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +18,7 @@ void main() {
 }
 
 enum MenuSelection {
+  about('About'),
   edit('Edit'),
   cut('Cut'),
   copy('Copy'),
@@ -30,12 +33,31 @@ enum MenuSelection {
   final String label;
 }
 
-
 class MenuApp extends StatelessWidget {
   const MenuApp({super.key});
 
-  void _onSelected(MenuSelection item) {
+  void _onSelected(BuildContext context, MenuSelection item) {
     debugPrint('Selected ${item.name}');
+    switch (item) {
+      case MenuSelection.about:
+        showAboutDialog(
+          context: context,
+          applicationName: 'MenuBar Sample',
+          applicationVersion: '1.0.0',
+        );
+        break;
+      case MenuSelection.edit:
+      case MenuSelection.cut:
+      case MenuSelection.copy:
+      case MenuSelection.paste:
+      case MenuSelection.file:
+      case MenuSelection.open:
+      case MenuSelection.save:
+      case MenuSelection.saveAs:
+        break;
+      case MenuSelection.quit:
+        exit(0);
+    }
   }
 
   @override
@@ -59,20 +81,22 @@ class MenuApp extends StatelessWidget {
     final bool meta = isAppleOS;
     final bool control = !isAppleOS;
 
-    final bool hasAbout = PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.about);
-    final bool hasQuit = PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.quit);
-
     return Column(
       children: <Widget>[
         MenuBar.adaptive(
-          menus: <MenuItem>[
+          menus: <MenuBarItem>[
             MenuBarMenu(
               label: MenuSelection.file.label,
-              menus: <MenuItem>[
-                if (hasAbout) const PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.about),
+              menus: <MenuBarItem>[
+                MenuBarButton(
+                  label: MenuSelection.about.label,
+                  onSelected: () {
+                    _onSelected(context, MenuSelection.about);
+                  },
+                ),
                 MenuItemGroup(
-                  members: <MenuItem>[
-                    MenuBarItem(
+                  members: <MenuBarItem>[
+                    MenuBarButton(
                       label: MenuSelection.open.label,
                       shortcut: SingleActivator(
                         LogicalKeyboardKey.keyO,
@@ -80,10 +104,10 @@ class MenuApp extends StatelessWidget {
                         meta: meta,
                       ),
                       onSelected: () {
-                        _onSelected(MenuSelection.open);
+                        _onSelected(context, MenuSelection.open);
                       },
                     ),
-                    MenuBarItem(
+                    MenuBarButton(
                       label: MenuSelection.save.label,
                       shortcut: SingleActivator(
                         LogicalKeyboardKey.keyS,
@@ -91,10 +115,10 @@ class MenuApp extends StatelessWidget {
                         meta: meta,
                       ),
                       onSelected: () {
-                        _onSelected(MenuSelection.save);
+                        _onSelected(context, MenuSelection.save);
                       },
                     ),
-                    MenuBarItem(
+                    MenuBarButton(
                       label: MenuSelection.saveAs.label,
                       shortcut: SingleActivator(
                         LogicalKeyboardKey.keyS,
@@ -103,43 +127,48 @@ class MenuApp extends StatelessWidget {
                         meta: meta,
                       ),
                       onSelected: () {
-                        _onSelected(MenuSelection.saveAs);
+                        _onSelected(context, MenuSelection.saveAs);
                       },
                     ),
                   ],
                 ),
-                if (hasQuit) const PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.quit),
+                MenuBarButton(
+                  label: MenuSelection.quit.label,
+                  onSelected: () {
+                    _onSelected(context, MenuSelection.quit);
+                  },
+                ),
               ],
             ),
             MenuBarMenu(
               label: MenuSelection.edit.label,
-              menus: <MenuItem>[
-                MenuBarItem(
+              menus: <MenuBarItem>[
+                MenuBarButton(
                   label: MenuSelection.cut.label,
                   shortcut: SingleActivator(
                     LogicalKeyboardKey.keyX,
                     control: control,
                     meta: meta,
                   ),
-                  onSelected: () => _onSelected(MenuSelection.cut),
+                  onSelected: () => _onSelected(context, MenuSelection.cut),
                 ),
-                MenuBarItem(
+                MenuBarButton(
                   label: MenuSelection.copy.label,
                   shortcut: SingleActivator(
                     LogicalKeyboardKey.keyC,
                     control: control,
                     meta: meta,
                   ),
-                  onSelected: () => _onSelected(MenuSelection.copy),
+                  onSelected: () => _onSelected(context, MenuSelection.copy),
                 ),
-                MenuBarItem(
+                MenuBarButton(
                   label: MenuSelection.paste.label,
                   shortcut: SingleActivator(
                     LogicalKeyboardKey.keyV,
                     control: control,
                     meta: meta,
                   ),
-                  onSelected: () => _onSelected(MenuSelection.paste),
+                  onSelected: () => _onSelected(context, MenuSelection.paste),
                 ),
               ],
             ),
