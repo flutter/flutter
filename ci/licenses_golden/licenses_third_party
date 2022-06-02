@@ -1,4 +1,4 @@
-Signature: db716e6ccafa024e78ad8faa46b7a8bb
+Signature: d04a730b1ba392b04f5ab3dd217662b9
 
 UNUSED LICENSES:
 
@@ -9984,6 +9984,8 @@ FILE: ../../../third_party/dart/benchmarks/AsyncLiveVars/dart/AsyncLiveVars.dart
 FILE: ../../../third_party/dart/benchmarks/AsyncLiveVars/dart2/AsyncLiveVars.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateBaseOverhead/dart/IsolateBaseOverhead.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateBaseOverhead/dart2/IsolateBaseOverhead.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateSendExit/dart/IsolateSendExitLatency.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateSendExit/dart2/IsolateSendExitLatency.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart/Iterators.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart/data.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart2/Iterators.dart
@@ -10440,6 +10442,8 @@ FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart2/laten
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart/latency.dart
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart2/EventLoopLatencyRegexp.dart
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart2/latency.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateSendExit/dart/latency.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateSendExit/dart2/latency.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart2/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/MD5/dart/md5.dart
