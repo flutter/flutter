@@ -52,7 +52,7 @@ class SuggestionSpan {
 /// Determines how spell check results are received for text input.
 abstract class SpellCheckService {
   /// Facilitates a spell check request.
-  Future<SpellCheckResults?> fetchSpellCheckSuggestions(
+  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
       Locale locale, String text
     );
 }
@@ -102,7 +102,7 @@ class DefaultSpellCheckService implements SpellCheckService {
   }
 
   @override
-  Future<SpellCheckResults?> fetchSpellCheckSuggestions(
+  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
       Locale locale, String text) async {
     assert(locale != null);
     assert(text != null);
@@ -121,7 +121,7 @@ class DefaultSpellCheckService implements SpellCheckService {
 
     List<String> results = rawResults.cast<String>();
 
-    String resultsText = results.removeAt(0);
+    String resultsText = results.removeAt(0); // this will be removed when text is no longer sent from engine
     List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
 
     results.forEach((String result) {
@@ -130,6 +130,6 @@ class DefaultSpellCheckService implements SpellCheckService {
           end: int.parse(resultParsed[1])), resultParsed[2].split("\n")));
     });
 
-    return SpellCheckResults(resultsText, suggestionSpans);
+    return suggestionSpans;
   }
 }

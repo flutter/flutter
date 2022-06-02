@@ -2577,10 +2577,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (_spellCheckEnabled! && _value.text.length > 0 && cause! == SelectionChangedCause.tap) {
       Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-      Future<SpellCheckResults?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value.text);
+      Future<List<SuggestionSpan>?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, _value.text);
+      final String resultsText = _value.text;
 
-      spellCheckResultsFuture.then((SpellCheckResults? results) {
-       _spellCheckConfiguration!.spellCheckResults = results ?? _spellCheckConfiguration!.spellCheckResults;
+      spellCheckResultsFuture.then((List<SuggestionSpan>? spans) {
+        if (spans == null) {
+          return;
+        }
+        SpellCheckResults results = SpellCheckResults(resultsText, spans);
+       _spellCheckConfiguration!.spellCheckResults = results;
         renderEditable.text = buildTextSpan();
       });
     }
@@ -2697,12 +2702,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
         if (_spellCheckEnabled! && value.text.length > 0 && _value.text != value.text) {
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          Future<SpellCheckResults?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
+          Future<List<SuggestionSpan>?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
+          final String resultsText = _value.text;
 
-          spellCheckResultsFuture.then((SpellCheckResults? results) {
-            _spellCheckConfiguration!.spellCheckResults = results ?? _spellCheckConfiguration!.spellCheckResults;
+          spellCheckResultsFuture.then((List<SuggestionSpan>? spans) {
+            if (spans == null) {
+              return;
+            }
+            SpellCheckResults results = SpellCheckResults(resultsText, spans);
+            _spellCheckConfiguration!.spellCheckResults = results;
             renderEditable.text = buildTextSpan();
-      });
+          });
         }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
