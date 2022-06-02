@@ -549,7 +549,7 @@ void main() {
     );
 
     testWidgets(
-      'When select multiple lines over max lines',
+      'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
         final TextEditingController controller =
             TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
@@ -563,6 +563,7 @@ void main() {
                 alignment: Alignment.bottomCenter,
                 child: Material(
                   child: TextField(
+                    decoration: const InputDecoration(contentPadding: EdgeInsets.all(8.0)),
                     style: const TextStyle(fontSize: 32, height: 1),
                     maxLines: 2,
                     controller: controller,
@@ -610,10 +611,15 @@ void main() {
         expect(find.text('Select all'), findsNothing);
         expect(find.byType(IconButton), findsNothing);
 
-        final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
+
+        // The menu appears at the top of the visible selection.
+        final Offset selectionOffset = tester
+            .getTopLeft(find.byType(TextSelectionToolbarTextButton).first);
         final Offset textFieldOffset =
             tester.getTopLeft(find.byType(TextField));
-        expect(cutOffset.dy + 25, equals(textFieldOffset.dy));
+
+        // 44.0 + 8.0 - 8.0 = _kToolbarHeight + _kToolbarContentDistance - contentPadding
+        expect(selectionOffset.dy + 44.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
       },
       skip: isBrowser, // [intended] the selection menu isn't required by web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),

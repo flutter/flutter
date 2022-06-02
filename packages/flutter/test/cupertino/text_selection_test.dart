@@ -535,7 +535,7 @@ void main() {
     );
 
     testWidgets(
-      'When select multiple lines over max lines',
+      'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
         final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
         await tester.pumpWidget(CupertinoApp(
@@ -545,6 +545,7 @@ void main() {
                 data: const MediaQueryData(size: Size(800.0, 600.0)),
                 child: Center(
                   child: CupertinoTextField(
+                    padding: const EdgeInsets.all(8.0),
                     controller: controller,
                     maxLines: 2,
                   ),
@@ -583,10 +584,14 @@ void main() {
         expect(find.text('◀'), findsNothing);
         expect(find.text('▶'), findsNothing);
 
-        final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
+        // The menu appears at the top of the visible selection.
+        final Offset selectionOffset = tester
+            .getTopLeft(find.byType(CupertinoTextSelectionToolbarButton).first);
         final Offset textFieldOffset =
             tester.getTopLeft(find.byType(CupertinoTextField));
-        expect(cutOffset.dy + 36, equals(textFieldOffset.dy));
+
+        // 7.0 + 43.0 + 8.0 - 8.0 = _kToolbarArrowSize + _kToolbarHeight + _kToolbarContentDistance - padding
+        expect(selectionOffset.dy + 7.0 + 43.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
       },
       skip: isBrowser, // [intended] the selection menu isn't required by web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
