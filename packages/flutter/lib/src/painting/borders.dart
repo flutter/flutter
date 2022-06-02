@@ -566,6 +566,45 @@ abstract class OutlinedBorder extends ShapeBorder {
   /// Returns a copy of this OutlinedBorder that draws its outline with the
   /// specified [side], if [side] is non-null.
   OutlinedBorder copyWith({ BorderSide? side });
+
+  @override
+  ShapeBorder scale(double t);
+
+  @override
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+    if (a == null) {
+      return scale(t);
+    }
+    return null;
+  }
+
+  @override
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+    if (b == null) {
+      return scale(1.0 - t);
+    }
+    return null;
+  }
+
+  /// Linearly interpolates between two [OutlinedBorder]s.
+  ///
+  /// This defers to `b`'s [lerpTo] function if `b` is not null. If `b` is
+  /// null or if its [lerpTo] returns null, it uses `a`'s [lerpFrom]
+  /// function instead. If both return null, it returns `a` before `t=0.5`
+  /// and `b` after `t=0.5`.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  static OutlinedBorder? lerp(OutlinedBorder? a, OutlinedBorder? b, double t) {
+    assert(t != null);
+    ShapeBorder? result;
+    if (b != null) {
+      result = b.lerpFrom(a, t);
+    }
+    if (result == null && a != null) {
+      result = a.lerpTo(b, t);
+    }
+    return result as OutlinedBorder? ?? (t < 0.5 ? a : b);
+  }
 }
 
 /// Represents the addition of two otherwise-incompatible borders.
