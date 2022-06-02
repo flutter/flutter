@@ -243,13 +243,68 @@ class BuildInfo {
         kBuildNumber: buildNumber!,
     };
   }
+   ///load custom environment form config file
+  ///
+  /// We agree to use the variable "CUSTOM_ENVIRONMENT_FILE" as the storage path of the custom variable file
+  ///
+  /// Variables within each file can be obtained by: String.fromEnvironment("file_inter_define", defaultValue: "{}");
+  String getCustomConfigEnvironmentConfigRaw() {
+    var feConfigRaw = "";
+    if (dartDefines.isNotEmpty) {
+      dartDefines.forEach((element) {
+        List<String> els = element.split("=");
+        if (els[0].startsWith("CUSTOM_ENVIRONMENT_FILE")) {
+          if (globals.fs.isFileSync(els[1])) {
+            File configFile = globals.fs.file(els[1]);
+            feConfigRaw = configFile.readAsStringSync();
+          }
+        }
+      });
+    }
+    return feConfigRaw;
+  }
 
+  ///load custom environment
+  Map<String, String> getCustomConfigEnvironmentConfig() {
+    Map<String, String> map = <String, String>{};
+    var feConfigRaw = getCustomConfigEnvironmentConfigRaw();
+    if (feConfigRaw.isNotEmpty) {
+      Map valueMap = json.decode(feConfigRaw);
+      valueMap.entries.forEach((element) {
+        var key = '${element.key}';
+        var value = '${element.value}';
+        map[key] = value;
+      });
+    }
+    return map;
+  }
+
+  /// Read the content of the custom variable into the convention variable "CUSTOM_ENVIRONMENT_FILE_RAW"
+  ///
+  /// We can get it by code: String.fromEnvironment("CUSTOM_ENVIRONMENT_FILE_RAW", defaultValue: "{}");
+  List<String> modifyDartDefines() {
+    var map = getCustomConfigEnvironmentConfig();
+    if (map.isNotEmpty) {
+      var content = utf8.encode(getCustomConfigEnvironmentConfigRaw());
+      var digest = base64Encode(content);
+      dartDefines.add('CUSTOM_ENVIRONMENT_FILE_RAW=${digest}');
+      map.forEach((key, value) {
+        dartDefines.add('$key=$value');
+      });
+    }
+    return dartDefines;
+  }
+  
   /// Convert to a structured string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
   ///
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
-    return <String, String>{
+    Map<String, String> map = <String, String>{};
+    /// We can directly use the parameters defined in our configuration file "CUSTOM_ENVIRONMENT_FILE" in ios xcode project
+    /// It can be find 'ios/Flutter/Generated.xcconfig' and 'ios/Flutter/flutter_export_environment.sh'
+    map.addAll(getCustomConfigEnvironmentConfig());
+    map.addAll(<String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
       if (dartObfuscation != null)
@@ -272,14 +327,22 @@ class BuildInfo {
         'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
-    };
+    });
+    return map;
   }
 
   /// Convert this config to a series of project level arguments to be passed
   /// on the command line to gradle.
   List<String> toGradleConfig() {
     // PACKAGE_CONFIG not currently supported.
-    return <String>[
+    List<String> result = <String>[];
+    getCustomConfigEnvironmentConfig().forEach((key, value) {
+      //set android project properties,
+      //We can directly use the parameters defined in our configuration file "CUSTOM_ENVIRONMENT_FILE" in build.gradle
+      var keyTemp = '-P$key'.toUpperCase();
+      result.add('$keyTemp=$value');
+    });
+    result.addAll(<String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
       if (dartObfuscation != null)
@@ -302,7 +365,8 @@ class BuildInfo {
         '-Pcode-size-directory=$codeSizeDirectory',
       for (String projectArg in androidProjectArgs)
         '-P$projectArg',
-    ];
+    ]);
+    return result;
   }
 }
 
