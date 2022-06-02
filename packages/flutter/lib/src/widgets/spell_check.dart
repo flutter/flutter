@@ -22,7 +22,8 @@ class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
   SpellCheckConfiguration(
-      {this.spellCheckService, this.spellCheckSuggestionsHandler});
+    {this.spellCheckService, this.spellCheckSuggestionsHandler}
+  );
 
   /// The service used to fetch spell check results for text input.
   final SpellCheckService? spellCheckService;
@@ -53,7 +54,8 @@ mixin SpellCheckSuggestionsHandler {
       TextEditingValue value,
       bool composingWithinCurrentTextRange,
       TextStyle? style,
-      SpellCheckResults spellCheckResults);
+      SpellCheckResults spellCheckResults
+    );
 
   /// NOTE: NOT INCLUDED IN PR 1.1:
   Widget buildSpellCheckSuggestionsToolbar(
@@ -124,8 +126,8 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
 
     while (span_pointer < results.length) {
       currentSpan = results[span_pointer];
-      currentSpanStart = currentSpan.startIndex;
-      currentSpanEnd = currentSpan.endIndex;
+      currentSpanStart = currentSpan.range.start;
+      currentSpanEnd = currentSpan.range.end;
 
       start_index = currentSpanStart < newText.length ? currentSpanStart : null;
       end_index = currentSpanEnd < newText.length ? currentSpanEnd : null;
@@ -150,8 +152,8 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
           newStart = substring + searchStart;
 
           if (substring >= 0) {
-            correctedSpellCheckResults.add(SuggestionSpan(
-                newStart, newStart + spanLength, currentSpan.suggestions));
+            correctedSpellCheckResults.add(SuggestionSpan(TextRange(
+                start: newStart, end: newStart + spanLength), currentSpan.suggestions));
             searchStart = newStart + spanLength;
           }
         }
@@ -177,12 +179,12 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       SuggestionSpan oldSpan = oldResults[old_span_pointer];
       SuggestionSpan newSpan = newResults[new_span_pointer];
 
-      if (oldSpan.startIndex == newSpan.startIndex) {
+      if (oldSpan.range.start == newSpan.range.start) {
         mergedResults.add(oldSpan);
         old_span_pointer += 1;
         new_span_pointer += 1;
       } else {
-        if (oldSpan.startIndex < newSpan.startIndex) {
+        if (oldSpan.range.start < newSpan.range.start) {
           mergedResults.add(oldSpan);
           old_span_pointer += 1;
         } else {
@@ -284,9 +286,9 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       bool isComposing;
       SuggestionSpan currScssSpan = spellCheckSuggestions[scss_pointer];
 
-      if (currScssSpan.startIndex > text_pointer) {
-        end_index = currScssSpan.startIndex < text.length
-            ? currScssSpan.startIndex
+      if (currScssSpan.range.start > text_pointer) {
+        end_index = currScssSpan.range.start < text.length
+            ? currScssSpan.range.start
             : text.length;
         isComposing = text_pointer >= composingRegion.start &&
             end_index <= composingRegion.end &&
@@ -296,15 +298,15 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
             text: text.substring(text_pointer, end_index)));
         text_pointer = end_index;
       } else {
-        end_index = currScssSpan.endIndex + 1 < text.length
-            ? (currScssSpan.endIndex + 1)
+        end_index = currScssSpan.range.end + 1 < text.length
+            ? (currScssSpan.range.end + 1)
             : text.length;
         isComposing = text_pointer >= composingRegion.start &&
             end_index <= composingRegion.end &&
             !composingWithinCurrentTextRange;
         tsTreeChildren.add(TextSpan(
             style: isComposing ? composingStyle : misspelledJointStyle,
-            text: text.substring(currScssSpan.startIndex, end_index)));
+            text: text.substring(currScssSpan.range.start, end_index)));
 
         text_pointer = end_index;
         scss_pointer += 1;
@@ -396,12 +398,12 @@ class _SpellCheckSuggestionsToolbarState
     while (left_index <= right_index) {
       mid_index = (left_index + (right_index - left_index) / 2).floor();
 
-      if (suggestionSpans[mid_index].startIndex <= curr_index &&
-          suggestionSpans[mid_index].endIndex + 1 >= curr_index) {
+      if (suggestionSpans[mid_index].range.start <= curr_index &&
+          suggestionSpans[mid_index].range.end + 1 >= curr_index) {
         return suggestionSpans[mid_index];
       }
 
-      if (suggestionSpans[mid_index].startIndex <= curr_index) {
+      if (suggestionSpans[mid_index].range.start <= curr_index) {
         left_index = left_index + 1;
       } else {
         right_index = right_index - 1;
@@ -460,7 +462,7 @@ class _SpellCheckSuggestionsToolbarState
         label: suggestion,
         onPressed: () {
           widget.delegate.replaceSelection(SelectionChangedCause.toolbar,
-              suggestion, relevantSpan.startIndex, relevantSpan.endIndex + 1);
+              suggestion, relevantSpan.range.start, relevantSpan.range.end + 1);
         },
       ));
     });
