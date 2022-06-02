@@ -1107,7 +1107,7 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines = updateDartDefines(dartDefines, stringArgDeprecated('web-renderer')!);
     }
 
-    return BuildInfo(buildMode,
+    BuildInfo buildInfo = BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArgDeprecated('flavor')
         : null,
@@ -1143,6 +1143,8 @@ abstract class FlutterCommand extends Command<void> {
       assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
           && boolArgDeprecated(FlutterOptions.kAssumeInitializeFromDillUpToDate),
     );
+    buildInfo.modifyDartDefines();
+    return buildInfo;
   }
 
   void setupApplicationPackages() {
