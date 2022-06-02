@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -94,6 +93,7 @@ final TextSelectionControls cupertinoDesktopTextSelectionControls =
 class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of CupertinoTextSelectionToolbar.
   const CupertinoDesktopTextSelectionToolbar({
+    super.key,
     required this.anchor,
     required this.children,
   }) : assert(children.length > 0);
@@ -182,6 +182,7 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
   /// Creates an instance of CupertinoDesktopTextSelectionToolbarButton.
   const CupertinoDesktopTextSelectionToolbarButton({
+    super.key,
     required this.onPressed,
     required this.child,
   });
@@ -189,6 +190,7 @@ class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
   /// Create an instance of [CupertinoDesktopTextSelectionToolbarButton] whose child is
   /// a [Text] widget styled like the default Mac context menu button.
   CupertinoDesktopTextSelectionToolbarButton.text({
+    super.key,
     required BuildContext context,
     required this.onPressed,
     required String text,
@@ -210,7 +212,7 @@ class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
   final Widget child;
 
   @override
-  _CupertinoDesktopTextSelectionToolbarButtonState createState() => _CupertinoDesktopTextSelectionToolbarButtonState();
+  State<CupertinoDesktopTextSelectionToolbarButton> createState() => _CupertinoDesktopTextSelectionToolbarButtonState();
 }
 
 class _CupertinoDesktopTextSelectionToolbarButtonState extends State<CupertinoDesktopTextSelectionToolbarButton> {

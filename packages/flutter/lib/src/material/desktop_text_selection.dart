@@ -2,16 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';
-import 'debug.dart';
 import 'material.dart';
-import 'material_localizations.dart';
 import 'text_button.dart';
 import 'text_selection_toolbar.dart';
 import 'theme.dart';
@@ -92,6 +89,7 @@ final TextSelectionControls desktopTextSelectionControls =
 class DesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of _DesktopTextSelectionToolbar.
   const DesktopTextSelectionToolbar({
+    super.key,
     required this.anchor,
     required this.children,
   }) : assert(children.length > 0);
@@ -167,6 +165,7 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 class DesktopTextSelectionToolbarButton extends StatelessWidget {
   /// Creates an instance of DesktopTextSelectionToolbarButton.
   const DesktopTextSelectionToolbarButton({
+    super.key,
     required this.onPressed,
     required this.child,
   });
@@ -174,6 +173,7 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
   /// Create an instance of [DesktopTextSelectionToolbarButton] whose child is
   /// a [Text] widget in the style of the Material text selection toolbar.
   DesktopTextSelectionToolbarButton.text({
+    super.key,
     required BuildContext context,
     required this.onPressed,
     required String text,

@@ -342,6 +342,7 @@ class TextSelectionOverlay {
 
   late final SelectionOverlay _selectionOverlay;
 
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
   final ContextMenuBuilder buildContextMenu;
 
   /// Retrieve current value.
@@ -1064,8 +1065,9 @@ class SelectionOverlay {
 
   Future<void> _handleDragging() async {
     // Hide toolbar while dragging either handle on Android and iOS.
-    if (!_hideToolbarWhenDraggingHandles)
+    if (!_hideToolbarWhenDraggingHandles) {
       return;
+    }
 
     if (_isDraggingHandles) {
       if (defaultTargetPlatform == TargetPlatform.android) {

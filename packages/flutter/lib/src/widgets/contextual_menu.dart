@@ -29,6 +29,8 @@ typedef ContextualMenuBuilder = Widget Function(
   Offset?,
 );
 
+// TODO(justinmc): Better docs.
+/// Builds a context menu.
 typedef ContextMenuBuilder = Widget Function(
   BuildContext,
   ContextMenuController,
@@ -38,6 +40,7 @@ typedef ContextMenuBuilder = Widget Function(
 
 // TODO(justinmc): Is the ephemeral approach with just dipose right? Consumers
 // that get passed a controller call dispose on it, then it's done for.
+/// Builds and manages a conext menu at the given location.
 class ContextMenuController {
   // TODO(justinmc): Update method for efficiency of moving the menu?
   /// Creates an instance of [ContextMenuController].
@@ -276,15 +279,17 @@ typedef ToolbarButtonWidgetBuilder = Widget Function(
 class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   /// Creates an instance of [TextSelectionToolbarButtonDatasBuilder].
   const TextSelectionToolbarButtonDatasBuilder({
-    Key? key,
+    super.key,
     required this.builder,
     required this.editableTextState,
-  }) : super(key: key);
+  });
 
   /// Called with a list of [ContextualMenuButtonData]s so the contextual menu
   /// can be built.
   final ToolbarButtonWidgetBuilder builder;
 
+  /// The EditableTextState for the field that will display the text selection
+  /// toolbar.
   final EditableTextState editableTextState;
 
   @override
@@ -432,10 +437,9 @@ typedef _ClipboardStatusWidgetBuilder = Widget Function(
 class _ClipboardStatusBuilder extends StatefulWidget {
   /// Creates an instance of [_ClipboardStatusBuilder].
   const _ClipboardStatusBuilder({
-    Key? key,
     required this.builder,
     required this.clipboardStatusNotifier,
-  }) : super(key: key);
+  });
 
   /// Called with the current [ClipboardStatus].
   final _ClipboardStatusWidgetBuilder builder;
@@ -494,15 +498,15 @@ class _ClipboardStatusBuilderState extends State<_ClipboardStatusBuilder> with T
 class ContextMenu extends StatefulWidget {
   /// Creates an instance of [ContextMenu].
   ContextMenu({
+    super.key,
     required this.child,
     required this.buildContextMenu,
     bool? longPressEnabled,
     bool? secondaryTapEnabled,
-    Key? key,
   }) : longPressEnabled = longPressEnabled ?? _longPressEnabled,
-       secondaryTapEnabled = secondaryTapEnabled ?? true,
-       super(key: key);
+       secondaryTapEnabled = secondaryTapEnabled ?? true;
 
+  /// Builds the context menu.
   final ContextMenuBuilder buildContextMenu;
 
   /// The child widget that will be listened to for gestures.
