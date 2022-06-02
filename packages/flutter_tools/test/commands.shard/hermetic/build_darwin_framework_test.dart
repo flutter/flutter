@@ -271,4 +271,83 @@ void main() {
       });
     });
   });
+
+  group('XCFrameworks', () {
+    MemoryFileSystem fileSystem;
+    FakeProcessManager fakeProcessManager;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      fakeProcessManager = FakeProcessManager.empty();
+    });
+
+    testWithoutContext('created', () async {
+      final Directory frameworkA = fileSystem.directory('FrameworkA.framework')..createSync();
+      final Directory frameworkB = fileSystem.directory('FrameworkB.framework')..createSync();
+      final Directory output = fileSystem.directory('output');
+
+      fakeProcessManager.addCommand(FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-create-xcframework',
+          '-framework',
+          frameworkA.path,
+          '-framework',
+          frameworkB.path,
+          '-output',
+          output.childDirectory('Combine.xcframework').path,
+        ],
+      ));
+      await BuildFrameworkCommand.produceXCFramework(
+        <Directory>[frameworkA, frameworkB],
+        'Combine',
+        output,
+        fakeProcessManager,
+      );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    });
+
+    testWithoutContext('created with symbols', () async {
+      final Directory parentA = fileSystem.directory('FrameworkA')..createSync();
+      final File bcsymbolmapA = parentA.childFile('ABC123.bcsymbolmap')..createSync();
+      final File dSYMA = parentA.childFile('FrameworkA.framework.dSYM')..createSync();
+      final Directory frameworkA = parentA.childDirectory('FrameworkA.framework')..createSync();
+
+      final Directory parentB = fileSystem.directory('FrameworkB')..createSync();
+      final File bcsymbolmapB = parentB.childFile('ZYX987.bcsymbolmap')..createSync();
+      final File dSYMB = parentB.childFile('FrameworkB.framework.dSYM')..createSync();
+      final Directory frameworkB = parentB.childDirectory('FrameworkB.framework')..createSync();
+      final Directory output = fileSystem.directory('output');
+
+      fakeProcessManager.addCommand(FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-create-xcframework',
+          '-framework',
+          frameworkA.path,
+          '-debug-symbols',
+          bcsymbolmapA.path,
+          '-debug-symbols',
+          dSYMA.path,
+          '-framework',
+          frameworkB.path,
+          '-debug-symbols',
+          bcsymbolmapB.path,
+          '-debug-symbols',
+          dSYMB.path,
+          '-output',
+          output.childDirectory('Combine.xcframework').path,
+        ],
+      ));
+      await BuildFrameworkCommand.produceXCFramework(
+        <Directory>[frameworkA, frameworkB],
+        'Combine',
+        output,
+        fakeProcessManager,
+      );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    });
+  });
 }
