@@ -9,9 +9,17 @@ import 'desktop_text_selection.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_buttons.dart';
 
-// TODO(justinmc): A user building a contextual menu not related to text
-// selection might want something like this, too.
-/// The default contextual menu for text selection for the current platform.
+// TODO(justinmc): Change "contextual menu" to "context menu" everywhere?
+/// The default Cupertino contextual menu for text selection for the current
+/// platform.
+///
+/// Builds the mobile Cupertino context menu for all mobile platforms, not just
+/// iOS, and builds the desktop Cupertino context menu for all desktop
+/// platforms, not just MacOS. For a widget that builds all context menus, see
+/// [DefaultTextSelectionToolbar].
+///
+/// The children can be customized using the [children] or [buttonDatas]
+/// parameters. If neither is given, then the default buttons will be used.
 ///
 /// See also:
 ///
@@ -19,6 +27,8 @@ import 'text_selection_toolbar_buttons.dart';
 ///   [ContextualMenuButtonData]s.
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
 ///   given [ContextualMenuButtonData]s.
+/// * [DefaultTextSelectionToolbar], which does the same thing as this widget
+///   but for all platforms.
 class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [DefaultCupertinoTextSelectionToolbar].
   const DefaultCupertinoTextSelectionToolbar({
@@ -30,7 +40,7 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
     this.editableTextState,
   }) : assert(
          buttonDatas == null || children == null,
-         'No need for both buttonDatas and children.',
+         'No need for both buttonDatas and children, use one or the other, or neither.',
        ),
        assert(
          !(buttonDatas == null && children == null && editableTextState == null),
@@ -56,8 +66,6 @@ class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
   /// [children] and [buttonDatas] are not provided.
   final EditableTextState? editableTextState;
 
-  // TODO(justinmc): Does it make sesne to have this parameter? Even though
-  // there is a switch on the platform in here. Try out some examples.
   /// The children of the toolbar.
   ///
   /// If provided, buttonDatas cannot also be provided.

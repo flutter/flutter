@@ -9,9 +9,10 @@ import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_buttons.dart';
 import 'theme.dart';
 
-// TODO(justinmc): A user building a contextual menu not related to text
-// selection might want something like this, too.
 /// The default contextual menu for text selection for the current platform.
+///
+/// The children can be customized using the [children] or [buttonDatas]
+/// parameters. If neither is given, then the default buttons will be used.
 ///
 /// See also:
 ///
@@ -19,6 +20,8 @@ import 'theme.dart';
 ///   [ContextualMenuButtonData]s.
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
 ///   given [ContextualMenuButtonData]s.
+/// * [DefaultCupertinoTextSelectionToolbar], which does the same thing as this
+///   widget but only for Cupertino context menus.
 class DefaultTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [DefaultTextSelectionToolbar].
   const DefaultTextSelectionToolbar({
@@ -30,7 +33,7 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
     this.editableTextState,
   }) : assert(
          buttonDatas == null || children == null,
-         'No need for both buttonDatas and children.',
+         'No need for both buttonDatas and children, use one or the other, or neither.',
        ),
        assert(
          !(buttonDatas == null && children == null && editableTextState == null),
@@ -56,8 +59,6 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
   /// [children] and [buttonDatas] are not provided.
   final EditableTextState? editableTextState;
 
-  // TODO(justinmc): Does it make sesne to have this parameter? Even though
-  // there is a switch on the platform in here. Try out some examples.
   /// The children of the toolbar.
   ///
   /// If provided, buttonDatas cannot also be provided.
