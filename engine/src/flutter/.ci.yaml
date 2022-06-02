@@ -28,7 +28,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "version:1.8.0u202-b08"},
-          {"dependency": "gradle_cache"}
+          {"dependency": "gradle_cache", "version": "none"}
         ]
       device_type: none
       os: Ubuntu
@@ -223,7 +223,7 @@ targets:
       gcs_goldens_bucket: flutter_logs
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
     timeout: 60
     runIf:
@@ -320,7 +320,7 @@ targets:
       gcs_goldens_bucket: flutter_logs
       dependencies: >-
         [
-          {"dependency": "goldctl"}
+          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       os: Mac-10.15
       xcode: 12c33 # xcode 12.3
