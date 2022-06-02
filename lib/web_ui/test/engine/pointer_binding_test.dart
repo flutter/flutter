@@ -168,6 +168,14 @@ void testMain() {
     expect(events[1].client.x, equals(222));
     expect(events[1].client.y, equals(223));
 
+    event = expectCorrectType(context.mouseLeave(clientX: 1000, clientY: 2000, buttons: 6));
+    expect(event.type, equals('pointerleave'));
+    expect(event.pointerId, equals(1));
+    expect(event.button, equals(0));
+    expect(event.buttons, equals(6));
+    expect(event.client.x, equals(1000));
+    expect(event.client.y, equals(2000));
+
     event = expectCorrectType(context.primaryUp(clientX: 300, clientY: 301));
     expect(event.type, equals('pointerup'));
     expect(event.pointerId, equals(1));
@@ -384,6 +392,13 @@ void testMain() {
     expect(event.buttons, equals(1));
     expect(event.client.x, equals(214));
     expect(event.client.y, equals(215));
+
+    event = expectCorrectType(context.mouseLeave(clientX: 1000, clientY: 2000, buttons: 6));
+    expect(event.type, equals('mouseleave'));
+    expect(event.button, equals(0));
+    expect(event.buttons, equals(6));
+    expect(event.client.x, equals(1000));
+    expect(event.client.y, equals(2000));
 
     event = expectCorrectType(context.primaryUp(clientX: 300, clientY: 301));
     expect(event.type, equals('mouseup'));
@@ -842,7 +857,7 @@ void testMain() {
       if (!isIosSafari) _PointerEventContext(),
       if (!isIosSafari) _MouseEventContext(),
     ],
-    'correctly converts buttons of down, move and up events',
+    'correctly converts buttons of down, move, leave, and up events',
     (_ButtonedEventMixin context) {
       PointerBinding.instance!.debugOverrideDetector(context);
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
@@ -1002,6 +1017,30 @@ void testMain() {
       expect(packets[0].data[0].synthesized, isFalse);
       expect(packets[0].data[0].physicalX, equals(40 * dpi));
       expect(packets[0].data[0].physicalY, equals(41 * dpi));
+      expect(packets[0].data[0].buttons, equals(0));
+      packets.clear();
+
+      // Leave
+
+      glassPane.dispatchEvent(context.mouseLeave(
+        buttons: 1,
+        clientX: 1000.0,
+        clientY: 2000.0,
+      ));
+      expect(packets, isEmpty);
+      packets.clear();
+
+      glassPane.dispatchEvent(context.mouseLeave(
+        buttons: 0,
+        clientX: 1000.0,
+        clientY: 2000.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.hover));
+      expect(packets[0].data[0].synthesized, isFalse);
+      expect(packets[0].data[0].physicalX, equals(1000 * dpi));
+      expect(packets[0].data[0].physicalY, equals(2000 * dpi));
       expect(packets[0].data[0].buttons, equals(0));
       packets.clear();
     },
@@ -2295,6 +2334,9 @@ mixin _ButtonedEventMixin on _BasicEventContext {
       required int button,
       required int buttons});
 
+  // Generate an event that moves the mouse outside of the tracked area.
+  html.Event mouseLeave({double? clientX, double? clientY, required int buttons});
+
   // Generate an event that releases all mouse buttons.
   html.Event mouseUp(
       {double? clientX, double? clientY, int? button, int? buttons});
@@ -2551,6 +2593,21 @@ class _MouseEventContext extends _BasicEventContext
   }
 
   @override
+  html.Event mouseLeave({
+    double? clientX,
+    double? clientY,
+    required int buttons,
+  }) {
+    return _createMouseEvent(
+      'mouseleave',
+      buttons: buttons,
+      button: 0,
+      clientX: clientX,
+      clientY: clientY,
+    );
+  }
+
+  @override
   html.Event mouseUp({
     double? clientX,
     double? clientY,
@@ -2704,6 +2761,41 @@ class _PointerEventContext extends _BasicEventContext
     String? pointerType,
   }) {
     return html.PointerEvent('pointermove', <String, dynamic>{
+      'pointerId': pointer,
+      'button': button,
+      'buttons': buttons,
+      'clientX': clientX,
+      'clientY': clientY,
+      'pointerType': pointerType,
+    });
+  }
+
+  @override
+  html.Event mouseLeave({
+    double? clientX,
+    double? clientY,
+    required int buttons,
+    int pointerId = 1,
+  }) {
+    return _leaveWithFullDetails(
+      pointer: pointerId,
+      buttons: buttons,
+      button: 0,
+      clientX: clientX,
+      clientY: clientY,
+      pointerType: 'mouse',
+    );
+  }
+
+  html.Event _leaveWithFullDetails({
+    double? clientX,
+    double? clientY,
+    int? button,
+    int? buttons,
+    int? pointer,
+    String? pointerType,
+  }) {
+    return html.PointerEvent('pointerleave', <String, dynamic>{
       'pointerId': pointer,
       'button': button,
       'buttons': buttons,

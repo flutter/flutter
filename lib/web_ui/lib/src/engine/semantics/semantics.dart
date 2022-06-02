@@ -1655,6 +1655,7 @@ class EngineSemanticsOwner {
     const List<String> _pointerEventTypes = <String>[
       'pointerdown',
       'pointermove',
+      'pointerleave',
       'pointerup',
       'pointercancel',
       'touchstart',
@@ -1663,6 +1664,7 @@ class EngineSemanticsOwner {
       'touchcancel',
       'mousedown',
       'mousemove',
+      'mouseleave',
       'mouseup',
       'keyup',
       'keydown',
