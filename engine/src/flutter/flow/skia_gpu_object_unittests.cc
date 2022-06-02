@@ -145,7 +145,8 @@ TEST_F(SkiaGpuObjectTest, UnrefResourceContextInTaskRunnerThread) {
     auto resource_context =
         sk_make_sp<TestResourceContext>(latch, &dtor_task_queue_id);
     unref_queue = fml::MakeRefCounted<UnrefQueue<TestResourceContext>>(
-        unref_task_runner(), fml::TimeDelta::FromSeconds(0), resource_context);
+        unref_task_runner(), fml::TimeDelta::FromSeconds(0),
+        std::move(resource_context));
     latch->Signal();
   });
   latch->Wait();
