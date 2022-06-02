@@ -37,6 +37,7 @@ void main() {
           minCompileSdkVersionHandler,
           jvm11RequiredHandler,
           outdatedGradleHandler,
+          sslExceptionHandler,
         ])
       );
     });
@@ -359,6 +360,11 @@ Execution failed for task ':app:mergeDexDebug'.
       expect(testLogger.statusText,
         contains(
           'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'See https://docs.flutter.dev/deployment/android#enabling-multidex-support for more information.'
         )
       );
       expect(testLogger.statusText,
@@ -1039,6 +1045,73 @@ A problem occurred evaluating project ':flutter'.
           '│                                                                               │\n'
           '│ To check the Java version used by Flutter, run `flutter doctor -v`.           │\n'
           '└───────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('SSLException', () {
+    testWithoutContext('pattern', () {
+      expect(
+        sslExceptionHandler.test(r'''
+Exception in thread "main" javax.net.ssl.SSLException: Tag mismatch!
+at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:129)
+at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:321)
+at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:264)
+at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:259)
+at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:129)
+at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1155)
+at java.base/sun.security.ssl.SSLSocketImpl.readApplicationRecord(SSLSocketImpl.java:1125)
+at java.base/sun.security.ssl.SSLSocketImpl$AppInputStream.read(SSLSocketImpl.java:823)
+at java.base/java.io.BufferedInputStream.read1(BufferedInputStream.java:290)
+at java.base/java.io.BufferedInputStream.read(BufferedInputStream.java:351)
+at java.base/sun.net.www.MeteredStream.read(MeteredStream.java:134)
+at java.base/java.io.FilterInputStream.read(FilterInputStream.java:133)
+at java.base/sun.net.www.protocol.http.HttpURLConnection$HttpInputStream.read(HttpURLConnection.java:3444)
+at java.base/sun.net.www.protocol.http.HttpURLConnection$HttpInputStream.read(HttpURLConnection.java:3437)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:62)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install$1.call(Install.java:61)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
+        ),
+        isTrue,
+      );
+
+      expect(
+        sslExceptionHandler.test(r'''
+Caused by: javax.crypto.AEADBadTagException: Tag mismatch!
+at java.base/com.sun.crypto.provider.GaloisCounterMode.decryptFinal(GaloisCounterMode.java:580)
+at java.base/com.sun.crypto.provider.CipherCore.finalNoPadding(CipherCore.java:1049)
+at java.base/com.sun.crypto.provider.CipherCore.doFinal(CipherCore.java:985)
+at java.base/com.sun.crypto.provider.AESCipher.engineDoFinal(AESCipher.java:491)
+at java.base/javax.crypto.CipherSpi.bufferCrypt(CipherSpi.java:779)
+at java.base/javax.crypto.CipherSpi.engineDoFinal(CipherSpi.java:730)
+at java.base/javax.crypto.Cipher.doFinal(Cipher.java:2497)
+at java.base/sun.security.ssl.SSLCipher$T12GcmReadCipherGenerator$GcmReadCipher.decrypt(SSLCipher.java:1613)
+at java.base/sun.security.ssl.SSLSocketInputRecord.decodeInputRecord(SSLSocketInputRecord.java:262)
+at java.base/sun.security.ssl.SSLSocketInputRecord.decode(SSLSocketInputRecord.java:190)
+at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      final GradleBuildStatus status = await sslExceptionHandler.handler();
+
+      expect(status, GradleBuildStatus.retry);
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{

@@ -97,8 +97,9 @@ TextStyle getLabelStyle(WidgetTester tester) {
 }
 
 InputBorder? getBorder(WidgetTester tester) {
-  if (!tester.any(findBorderPainter()))
+  if (!tester.any(findBorderPainter())) {
     return null;
+  }
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
   // ignore: avoid_dynamic_calls

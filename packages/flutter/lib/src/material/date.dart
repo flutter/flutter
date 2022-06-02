@@ -231,8 +231,9 @@ class DateTimeRange {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DateTimeRange
       && other.start == start
       && other.end == end;

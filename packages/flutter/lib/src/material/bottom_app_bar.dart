@@ -180,8 +180,9 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   // Material widget.
   double get bottomNavigationBarTop {
     final double? bottomNavigationBarTop = geometry.value.bottomNavigationBarTop;
-    if (bottomNavigationBarTop != null)
+    if (bottomNavigationBarTop != null) {
       return bottomNavigationBarTop;
+    }
     final RenderBox? box = materialKey.currentContext?.findRenderObject() as RenderBox?;
     return box?.localToGlobal(Offset.zero).dy ?? 0;
   }

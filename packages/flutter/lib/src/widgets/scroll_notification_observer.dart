@@ -124,14 +124,16 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   void _notifyListeners(ScrollNotification notification) {
     assert(_debugAssertNotDisposed());
-    if (_listeners!.isEmpty)
+    if (_listeners!.isEmpty) {
       return;
+    }
 
     final List<_ListenerEntry> localListeners = List<_ListenerEntry>.of(_listeners!);
     for (final _ListenerEntry entry in localListeners) {
       try {
-        if (entry.list != null)
+        if (entry.list != null) {
           entry.listener(notification);
+        }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,

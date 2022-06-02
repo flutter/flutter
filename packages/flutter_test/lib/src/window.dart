@@ -569,8 +569,9 @@ class FakeAccessibilityFeatures implements ui.AccessibilityFeatures {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FakeAccessibilityFeatures
         && other.accessibleNavigation == accessibleNavigation
         && other.invertColors == invertColors

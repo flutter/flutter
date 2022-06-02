@@ -65,8 +65,9 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   bool didPop(String? result) {
     log('didPop $result');
     bool returnValue;
-    if (returnValue = super.didPop(result))
+    if (returnValue = super.didPop(result)) {
       navigator!.finalizeRoute(this);
+    }
     return returnValue;
   }
 
@@ -940,36 +941,6 @@ void main() {
       expect(trainHopper2.currentTrain, isNull); // Has been disposed.
     });
 
-    testWidgets('secondary animation is AnimationMin when transition route that cannot be transitioned to or from pops', (WidgetTester tester) async {
-      final PageRoute<void> pageRouteOne = MaterialPageRoute<void>(
-        builder: (_) => const Text('Page One'),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          onGenerateRoute: (_) => pageRouteOne,
-        ),
-      );
-
-      final PageRoute<void> pageRouteTwo = MaterialPageRoute<void>(
-        fullscreenDialog: true,
-        builder: (_) => const Text('Page Two'),
-      );
-
-      tester.state<NavigatorState>(find.byType(Navigator)).push(pageRouteTwo);
-      await tester.pumpAndSettle();
-
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pump();
-
-      expect(
-        ((pageRouteOne.secondaryAnimation! as ProxyAnimation).parent! as ProxyAnimation).parent,
-        isA<AnimationMin<double>>()
-          ..having((AnimationMin<double> a) => a.first, 'first', equals(kAlwaysDismissedAnimation))
-          ..having((AnimationMin<double> a) => a.next, 'first', equals(pageRouteTwo.animation)),
-      );
-    });
-
     testWidgets('secondary animation is triggered when pop initial route', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       late Animation<double> secondaryAnimationOfRouteOne;
@@ -981,10 +952,11 @@ void main() {
             return PageRouteBuilder<void>(
               settings: settings,
               pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-                if (settings.name == '/')
+                if (settings.name == '/') {
                   secondaryAnimationOfRouteOne = secondaryAnimation;
-                else
+                } else {
                   primaryAnimationOfRouteTwo = animation;
+                }
                 return const Text('Page');
               },
             );
@@ -1039,41 +1011,6 @@ void main() {
       await tester.tapAt(Offset.zero);
       await tester.pump();
       expect(find.byType(ModalBarrier), findsNWidgets(1));
-    });
-
-    testWidgets('showGeneralDialog ModalBarrier does not ignore pointers during transitions', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (BuildContext context) {
-              return TextButton(
-                onPressed: () {
-                  showGeneralDialog<void>(
-                    context: context,
-                    transitionDuration: const Duration(milliseconds: 400),
-                    pageBuilder: (BuildContext innerContext, __, ___) => TextButton(
-                      onPressed: Navigator.of(innerContext).pop,
-                      child: const Text('dialog'),
-                    ),
-                  );
-                },
-                child: const Text('Show Dialog'),
-              );
-            },
-          ),
-        ),
-      );
-
-      // Open the dialog.
-      await tester.tap(find.byType(TextButton));
-      await tester.pump(const Duration(milliseconds: 200));
-
-      // Trigger pop while the transition is in progress
-      await tester.tap(find.text('dialog'));
-      await tester.pumpAndSettle();
-
-      // The dialog has been dismissed mid-transition
-      expect(find.text('dialog'), findsNothing);
     });
 
     testWidgets('showGeneralDialog adds non-dismissible barrier when barrierDismissible is false', (WidgetTester tester) async {
@@ -1369,67 +1306,6 @@ void main() {
         expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
         expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
       });
-    });
-
-    testWidgets('does not ignore pointers when route on top of it pops', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
-              builders: <TargetPlatform, PageTransitionsBuilder>{
-                // Use a transitions builder that will keep the underlying content
-                // partially visible during a transition
-                TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-              },
-            )
-          ),
-          home: const Text('Home'),
-        ),
-      );
-
-      tester.state<NavigatorState>(find.byType(Navigator)).push<void>(
-        MaterialPageRoute<void>(builder: (_) => const Text('Page 2'))
-      );
-
-      await tester.pumpAndSettle();
-      expect(find.text('Page 2'), findsOneWidget);
-
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.text('Page 2'), findsOneWidget); // Transition still in progress
-
-      await tester.tap(find.text('Home')); // Home route is tappable
-    });
-
-    testWidgets('does not ignore pointers during its own entrance animation', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          onGenerateRoute: (_) => MaterialPageRoute<void>(
-            builder: (_) => const Text('Home'),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Home'));
-      tester.state<NavigatorState>(find.byType(Navigator)).push(
-        MaterialPageRoute<void>(
-          builder: (_) => const Text('Page 2'),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.text('Home'), findsOneWidget); // Transition still in progress
-
-      // Can't test directly for taps because route is interactive but offstage
-      // One ignore pointer for each of two overlay entries (ModalScope, ModalBarrier) on each of two routes
-      expect(find.byType(IgnorePointer, skipOffstage: false), findsNWidgets(4));
-      final List<Element> ignorePointers = find.byType(IgnorePointer, skipOffstage: false).evaluate().toList();
-      expect((ignorePointers.first.widget as IgnorePointer).ignoring, true); // Home modalBarrier
-      expect((ignorePointers[1].widget as IgnorePointer).ignoring, true);    // Home modalScope
-      expect((ignorePointers[2].widget as IgnorePointer).ignoring, false);   // Page 2 modalBarrier
-      expect((ignorePointers.last.widget as IgnorePointer).ignoring, false); // Page 2 modalScope
     });
 
     testWidgets('reverseTransitionDuration defaults to transitionDuration', (WidgetTester tester) async {
@@ -2073,7 +1949,7 @@ void main() {
 
   testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         restorationScopeId: 'app',
         home: _RestorableDialogTestWidget(),
       ),
@@ -2422,51 +2298,9 @@ class WidgetWithNoLocalHistoryState extends State<WidgetWithNoLocalHistory> {
   }
 }
 
-class TransitionDetector extends DefaultTransitionDelegate<void> {
-  bool hasTransition = false;
-  @override
-  Iterable<RouteTransitionRecord> resolve({
-    required List<RouteTransitionRecord> newPageRouteHistory,
-    required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
-    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
-  }) {
-    hasTransition = true;
-    return super.resolve(
-      newPageRouteHistory: newPageRouteHistory,
-      locationToExitingPageRoute: locationToExitingPageRoute,
-      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
-    );
-  }
-}
-
-Widget buildNavigator({
-  required List<Page<dynamic>> pages,
-  required PopPageCallback onPopPage,
-  GlobalKey<NavigatorState>? key,
-  TransitionDelegate<dynamic>? transitionDelegate,
-}) {
-  return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-    child: Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-      ],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Navigator(
-          key: key,
-          pages: pages,
-          onPopPage: onPopPage,
-          transitionDelegate: transitionDelegate ?? const DefaultTransitionDelegate<dynamic>(),
-        ),
-      ),
-    ),
-  );
-}
-
 class _RestorableDialogTestWidget extends StatelessWidget {
+  const _RestorableDialogTestWidget();
+
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return RawDialogRoute<void>(
       pageBuilder: (

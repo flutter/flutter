@@ -1296,8 +1296,9 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
-    if (!size.contains(position))
+    if (!size.contains(position)) {
       return false;
+    }
     // Only redirects hit detection which occurs above and below the render object.
     // In order to make this assumption true, I have removed the minimum width
     // constraints, since any reasonable chip would be at least that wide.
