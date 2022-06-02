@@ -176,10 +176,13 @@ void main() {
       await tester.pump();
 
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTWH(0, 0, 800, 48)));
-      expect(tester.getRect(find.text(TestMenu.subMenu10.label)), equals(const Rect.fromLTRB(148.0, 73.0, 302.0, 87.0)));
+      expect(
+        tester.getRect(find.text(TestMenu.subMenu10.label)),
+        equals(const Rect.fromLTRB(120.0, 73.0, 274.0, 87.0)),
+      );
       expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
-          equals(const Rect.fromLTRB(124.0, 48.0, 386.0, 224.0)));
-      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(124.0, 104.0, 386.0, 120.0)));
+          equals(const Rect.fromLTRB(96.0, 48.0, 358.0, 224.0)));
+      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(96.0, 104.0, 358.0, 120.0)));
 
       // Close and make sure it goes back where it was.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
@@ -328,12 +331,10 @@ void main() {
       final MenuBar menuBar = tester.widget(find.byType(MenuBar));
       expect(
         menuBar.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'MenuBar#00000\n'
-          " │ controller: Instance of 'MenuBarController'\n"
-          ' └MenuBarMenu#00000(Menu 0)(label: "Menu 0", backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)), elevation: MaterialStatePropertyAll(10.0))\n'
-          '  └MenuItemGroup(members: [MenuBarItem#00000(Sub Menu 00)(DISABLED, label: "Sub Menu 00", semanticLabel: "semanticLabel")])\n'
-        ),
+        equalsIgnoringHashCodes('MenuBar#00000\n'
+            " │ controller: Instance of 'MenuBarController'\n"
+            ' └MenuBarMenu#00000(Menu 0)(label: "Menu 0", backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)), elevation: MaterialStatePropertyAll(10.0))\n'
+            '  └MenuItemGroup(members: [MenuBarItem#00000(Sub Menu 00)(DISABLED, label: "Sub Menu 00", semanticLabel: "semanticLabel")])\n'),
       );
     });
     testWidgets('diagnostics', (WidgetTester tester) async {
@@ -369,13 +370,11 @@ void main() {
 
       expect(
         description.join('\n'),
-        equalsIgnoringHashCodes(
-          'DISABLED\n'
-          "controller: Instance of 'MenuBarController'\n"
-          'backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336)))\n'
-          'height: 40.0\n'
-          'elevation: MaterialStatePropertyAll(10.0)'
-        ),
+        equalsIgnoringHashCodes('DISABLED\n'
+            "controller: Instance of 'MenuBarController'\n"
+            'backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336)))\n'
+            'height: 40.0\n'
+            'elevation: MaterialStatePropertyAll(10.0)'),
       );
     });
     testWidgets('activation via shortcut works', (WidgetTester tester) async {
