@@ -285,8 +285,7 @@ void AndroidSurfaceGLImpeller::GLContextSetDamageRegion(
 
 // |GPUSurfaceGLDelegate|
 bool AndroidSurfaceGLImpeller::GLContextPresent(
-    uint32_t fbo_id,
-    const std::optional<SkIRect>& damage) {
+    const GLPresentInfo& present_info) {
   // The FBO ID is superfluous and was introduced for iOS where the default
   // framebuffer was not FBO0.
   if (!onscreen_surface_) {

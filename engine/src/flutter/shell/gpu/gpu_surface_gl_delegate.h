@@ -22,6 +22,15 @@ struct GLFrameInfo {
   uint32_t height;
 };
 
+// Information passed during presentation of a frame.
+struct GLPresentInfo {
+  uint32_t fbo_id;
+
+  // Damage is a hint to compositor telling it which parts of front buffer
+  // need to be updated
+  const std::optional<SkIRect>& damage;
+};
+
 class GPUSurfaceGLDelegate {
  public:
   ~GPUSurfaceGLDelegate();
@@ -39,11 +48,7 @@ class GPUSurfaceGLDelegate {
 
   // Called to present the main GL surface. This is only called for the main GL
   // context and not any of the contexts dedicated for IO.
-  //
-  // Damage is a hint to compositor telling it which parts of front buffer
-  // need to be updated
-  virtual bool GLContextPresent(uint32_t fbo_id,
-                                const std::optional<SkIRect>& damage) = 0;
+  virtual bool GLContextPresent(const GLPresentInfo& present_info) = 0;
 
   // The ID of the main window bound framebuffer. Typically FBO0.
   virtual intptr_t GLContextFBO(GLFrameInfo frame_info) const = 0;

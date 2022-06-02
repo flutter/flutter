@@ -10,6 +10,7 @@
 #include "flutter/fml/size.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/context_options.h"
+#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -265,7 +266,8 @@ bool GPUSurfaceGLSkia::PresentSurface(const SurfaceFrame& frame,
     onscreen_surface_->getCanvas()->flush();
   }
 
-  if (!delegate_->GLContextPresent(fbo_id_, frame.submit_info().frame_damage)) {
+  GLPresentInfo present_info = {fbo_id_, frame.submit_info().frame_damage};
+  if (!delegate_->GLContextPresent(present_info)) {
     return false;
   }
 
