@@ -2669,6 +2669,8 @@ class Paragraph extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   Paragraph._();
 
+  bool _needsLayout = true;
+
   /// The amount of horizontal space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
@@ -2717,7 +2719,13 @@ class Paragraph extends NativeFieldWrapperClass1 {
   /// Computes the size and position of each glyph in the paragraph.
   ///
   /// The [ParagraphConstraints] control how wide the text is allowed to be.
-  void layout(ParagraphConstraints constraints) => _layout(constraints.width);
+  void layout(ParagraphConstraints constraints) {
+    _layout(constraints.width);
+    assert(() {
+      _needsLayout = false;
+      return true;
+    }());
+  }
   void _layout(double width) native 'Paragraph_layout';
 
   List<TextBox> _decodeTextBoxes(Float32List encoded) {
