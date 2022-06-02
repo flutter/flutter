@@ -48,8 +48,13 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String outputArgument =
-        stringArg('output') ?? globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'macos', 'framework');
+    final String outputArgument = stringArg('output') ??
+        globals.fs.path.join(
+          globals.fs.currentDirectory.path,
+          'build',
+          'macos',
+          'framework',
+        );
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -61,8 +66,10 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
     final Directory outputDirectory =
         globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
+
     final List<BuildInfo> buildInfos = await getBuildInfos();
     displayNullSafetyMode(buildInfos.first);
+
     for (final BuildInfo buildInfo in buildInfos) {
       globals.printStatus('Building macOS frameworks in ${getNameForBuildMode(buildInfo.mode)} mode...');
       final String xcodeBuildConfiguration = sentenceCase(getNameForBuildMode(buildInfo.mode));
@@ -86,16 +93,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         await _producePlugins(xcodeBuildConfiguration, buildOutput, modeDirectory);
       }
 
-      final Status status =
-          globals.logger.startProgress(' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
-      try {
-        // Delete the intermediaries since they would have been copied into our
-        // output frameworks.
-        if (buildOutput.existsSync()) {
-          buildOutput.deleteSync(recursive: true);
-        }
-      } finally {
-        status.stop();
+      globals.logger.printStatus(' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
+
+      // Delete the intermediaries since they would have been copied into our
+      // output frameworks.
+      if (buildOutput.existsSync()) {
+        buildOutput.deleteSync(recursive: true);
       }
     }
 
