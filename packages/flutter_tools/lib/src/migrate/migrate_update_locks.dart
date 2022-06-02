@@ -15,7 +15,8 @@ Future<void> updatePubspecDependencies(
     FlutterProject flutterProject,
     MigrateUtils migrateUtils,
     Logger logger,
-    Terminal terminal) async {
+    Terminal terminal
+) async {
   final File pubspecFile = flutterProject.directory.childFile('pubspec.yaml');
   if (!pubspecFile.existsSync()) {
     return;
@@ -52,7 +53,8 @@ Future<void> updateGradleDependencyLocking(
     Logger logger,
     Terminal terminal,
     bool verbose,
-    FileSystem fileSystem) async {
+    FileSystem fileSystem
+) async {
   final Directory androidDir = flutterProject.directory.childDirectory('android');
   if (!androidDir.existsSync()) {
     return;

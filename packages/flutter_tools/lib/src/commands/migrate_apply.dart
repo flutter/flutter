@@ -33,7 +33,7 @@ class MigrateApplyCommand extends FlutterCommand {
          fileSystem: fileSystem,
          platform: platform,
          processManager: processManager,
-       ) {
+  ) {
     requiresPubspecYaml();
     argParser.addOption(
       'staging-directory',
