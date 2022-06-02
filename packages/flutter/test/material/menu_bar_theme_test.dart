@@ -26,7 +26,7 @@ void main() {
   }
 
   Finder findSubMenuItem() {
-    return find.descendant(of: findMenuBarMenu(), matching: find.byType(MenuBarItem));
+    return find.descendant(of: findMenuBarMenu().last, matching: find.byType(MenuBarItem));
   }
 
   Material getMenuBarMaterial(WidgetTester tester) {
@@ -37,7 +37,7 @@ void main() {
 
   Material getSubMenuMaterial(WidgetTester tester) {
     return tester.widget<Material>(
-      find.descendant(of: findMenuBarMenu(), matching: find.byType(Material)).first,
+      find.descendant(of: findMenuBarMenu().last, matching: find.byType(Material)).first,
     );
   }
 
@@ -89,7 +89,7 @@ void main() {
     expect(menuBarMaterial.color, equals(Colors.green));
 
     final Material subMenuMaterial = getSubMenuMaterial(tester);
-    expect(tester.getRect(findMenuBarMenu()), equals(const Rect.fromLTRB(136.0, 50.0, 440.0, 230.0)));
+    expect(tester.getRect(findMenuBarMenu().last), equals(const Rect.fromLTRB(108.0, 52.0, 412.0, 232.0)));
     expect(subMenuMaterial.elevation, equals(15));
     expect(subMenuMaterial.color, equals(Colors.red));
   });
@@ -149,13 +149,13 @@ void main() {
     expect(menuBarMaterial.color, equals(Colors.blue));
 
     final Material subMenuMaterial = getSubMenuMaterial(tester);
-    expect(tester.getRect(findMenuBarMenu()), equals(const Rect.fromLTRB(136.0, 49.0, 448.0, 237.0)));
+    expect(tester.getRect(findMenuBarMenu().last), equals(const Rect.fromLTRB(116.0, 62.0, 428.0, 250.0)));
     expect(subMenuMaterial.elevation, equals(15));
     expect(subMenuMaterial.color, equals(Colors.cyan));
     expect(subMenuMaterial.shape, equals(const BeveledRectangleBorder()));
 
     final Finder menuItem = findSubMenuItem();
-    expect(tester.getRect(menuItem.first), equals(const Rect.fromLTRB(150.0, 63.0, 434.0, 111.0)));
+    expect(tester.getRect(menuItem.first), equals(const Rect.fromLTRB(130.0, 76.0, 414.0, 124.0)));
     final Material menuItemMaterial = tester.widget<Material>(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).first);
     expect(menuItemMaterial.color, equals(Colors.amber));
     expect(menuItemMaterial.elevation, equals(0.0));

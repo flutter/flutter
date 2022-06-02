@@ -48,9 +48,6 @@ const double _kLabelItemMinSpacing = 4.0;
 // The minimum horizontal spacing on the outside of the top level menu.
 const double _kTopLevelMenuHorizontalMinPadding = 4.0;
 
-// The minimum vertical spacing on the outside of the top level menu.
-const double _kTopLevelMenuVerticalMinPadding = 4.0;
-
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
   SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
@@ -206,9 +203,6 @@ class MenuBar extends PlatformMenuBar {
   /// Setting this controller will allow closing of any open menus from outside
   /// of the menu bar using [MenuBarController.closeAll].
   ///
-  /// If a controller is not set, the widget will create its own controller
-  /// internally.
-  ///
   /// Descendants of the [MenuBar] can access its [MenuBarController] using
   /// [MenuBarController.of].
   final MenuBarController? controller;
@@ -326,8 +320,8 @@ class _MenuBarState extends State<MenuBar> {
   final FocusScopeNode menuBarScope = FocusScopeNode(debugLabel: 'MenuBar');
   final FocusScopeNode overlayScope = FocusScopeNode(debugLabel: 'MenuBar overlay');
 
-  /// Returns the active menu controller in the given context, and creates a
-  /// dependency relationship that will rebuild the context when the controller
+  /// Returns the active menu bar state in the given context, and creates a
+  /// dependency relationship that will rebuild the context when the menu bar
   /// changes.
   static _MenuBarState of(BuildContext context) {
     final _MenuBarState? found = context.dependOnInheritedWidgetOfExactType<_MenuBarMarker>()?.state;
@@ -718,7 +712,7 @@ class _MenuBarState extends State<MenuBar> {
     }
   }
 
-  /// Registers the given menu in the menu controller whenever a menu item
+  /// Registers the given menu in the [_MenuBarState] whenever a menu item
   /// widget is created or updated.
   void registerMenu({
     required BuildContext menuContext,
@@ -745,7 +739,7 @@ class _MenuBarState extends State<MenuBar> {
     }
   }
 
-  /// Unregisters the given context from the menu controller.
+  /// Unregisters the given context from the [_MenuBarState].
   ///
   /// If the given context corresponds to the currently open menu, then close
   /// it.
@@ -1067,7 +1061,7 @@ class MenuBarItem extends StatefulWidget with _MenuBarItemDefaults {
   final MaterialStateProperty<OutlinedBorder?>? shape;
 
   // The padding around the edges of a submenu. Passed in from the MenuBarMenu
-  // so that it can be given during registration with the controller.
+  // so that it can be given during registration with the _MenuBarState.
   final EdgeInsets? _menuPadding;
 
   // The background color of the submenu, when _hasMenu is true.
@@ -1858,29 +1852,37 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
   /// ancestors. The source [MenuItem] hierarchy only has children, not parents,
   /// so this is the only way to traverse ancestors without starting at the root
   /// each time.
-  _MenuNode? parent;
+  final _MenuNode? parent;
 
   /// These are the menu nodes that wrap the children of the menu item.
-  List<_MenuNode> children;
+  final List<_MenuNode> children;
 
   /// The widget/menu item with the menu data in it.
   final MenuItem item;
 
   /// Whether or not this menu item is currently open, in order to avoid
   /// duplicate calls to [onOpen] or [onClose].
+  ///
+  /// Set by the [_MenuBarState].
   bool isOpen = false;
 
   /// The focus node that corresponds to this menu item, so that it can be
   /// focused when set as the open menu.
+  ///
+  /// Set by the [_MenuBarState].
   FocusNode? focusNode;
 
   /// The builder function that builds a submenu, if any. Will be null if there
   /// is no submenu.
+  ///
+  /// Set by the [_MenuBarState].
   WidgetBuilder? menuBuilder;
 
   /// The padding around the submenu for this item, if any. This is used to
   /// calculate the position of the submenu, because the first item should align
   /// with the parent button, without including the menu padding.
+  ///
+  /// Set by the [_MenuBarState].
   EdgeInsets? menuPadding;
 
   /// Returns true if this menu item is a group (e.g. [MenuItemGroup]).
@@ -1917,9 +1919,14 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin, Comparable<_MenuNo
       // Top level nodes are their own topLevel.
       return this;
     }
-    assert(ancestors.isNotEmpty);
-    assert(ancestors.first.isTopLevel);
-    return ancestors.first;
+    _MenuNode? node = parent;
+    _MenuNode lastNode = node!;
+    while (node != null && node.parent != null) {
+      lastNode = node;
+      node = node.parent;
+    }
+    assert(lastNode.isTopLevel);
+    return lastNode;
   }
 
   /// Returns the index of this menu node in the parent. This is used to find
@@ -2119,12 +2126,12 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
 
   @override
   Widget build(BuildContext context) {
-    final _MenuBarState controller = _MenuBarState.of(context);
+    final _MenuBarState menuBar = _MenuBarState.of(context);
 
     int index = 0;
     return _MenuNodeWrapper(
-      serial: controller.menuSerial,
-      menu: controller.root,
+      serial: menuBar.menuSerial,
+      menu: menuBar.root,
       child: _MenuBarMenuList(
         backgroundColor: color,
         textDirection: Directionality.of(context),
@@ -2136,8 +2143,8 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
         children: <Widget>[
           ...children.map<Widget>((MenuItem child) {
             final Widget result = _MenuNodeWrapper(
-              serial: controller.menuSerial,
-              menu: controller.root.children[index],
+              serial: menuBar.menuSerial,
+              menu: menuBar.root.children[index],
               child: child as Widget,
             );
             index += 1;
