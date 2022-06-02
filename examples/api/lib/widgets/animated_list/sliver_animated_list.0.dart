@@ -134,8 +134,8 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   }
 }
 
-typedef RemovedItemBuilder = Widget Function(
-    int item, BuildContext context, Animation<double> animation);
+typedef RemovedItemBuilder<E> = Widget Function(
+    E item, BuildContext context, Animation<double> animation);
 
 // Keeps a Dart [List] in sync with an [AnimatedList].
 //
@@ -154,7 +154,7 @@ class ListModel<E> {
   }) : _items = List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<SliverAnimatedListState> listKey;
-  final RemovedItemBuilder removedItemBuilder;
+  final RemovedItemBuilder<E> removedItemBuilder;
   final List<E> _items;
 
   SliverAnimatedListState get _animatedList => listKey.currentState!;
@@ -170,7 +170,7 @@ class ListModel<E> {
       _animatedList.removeItem(
         index,
         (BuildContext context, Animation<double> animation) =>
-            removedItemBuilder(index, context, animation),
+            removedItemBuilder(removedItem, context, animation),
       );
     }
     return removedItem;
