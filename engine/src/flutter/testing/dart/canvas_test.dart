@@ -409,4 +409,30 @@ void main() {
     await fuzzyGoldenImageCompare(image, 'text_with_gradient_with_matrix.png');
     expect(areEqual, true);
   }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
+
+  test('Canvas.drawParagraph throws when Paragraph.layout was not called', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/97172
+    bool assertsEnabled = false;
+    assert(() {
+      assertsEnabled = true;
+      return true;
+    }());
+
+    Object? error;
+    try {
+      await toImage((Canvas canvas) {
+        final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+        builder.addText('Woodstock!');
+        final Paragraph woodstock = builder.build();
+        canvas.drawParagraph(woodstock, const Offset(0, 50));
+      }, 100, 100);
+    } catch (e) {
+      error = e;
+    }
+    if (assertsEnabled) {
+      expect(error, isNotNull);
+    } else {
+      expect(error, isNull);
+    }
+  });
 }
