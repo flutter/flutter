@@ -701,7 +701,7 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
   ///
   /// The [alignment] and [clipBehavior] must not be null.
   RenderConstraintsTransformBox({
-    required AlignmentGeometry alignment,
+    required super.alignment,
     required super.textDirection,
     required BoxConstraintsTransform constraintsTransform,
     super.child,
