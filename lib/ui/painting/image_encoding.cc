@@ -104,6 +104,14 @@ void ConvertImageToRaster(
   raster_task_runner->PostTask([image, encode_task = std::move(encode_task),
                                 resource_context, snapshot_delegate,
                                 io_task_runner, is_gpu_disabled_sync_switch]() {
+    if (!snapshot_delegate) {
+      io_task_runner->PostTask(
+          [encode_task = std::move(encode_task)]() mutable {
+            encode_task(nullptr);
+          });
+      return;
+    }
+
     sk_sp<SkImage> raster_image =
         snapshot_delegate->ConvertToRasterImage(image);
 
