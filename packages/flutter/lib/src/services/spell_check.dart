@@ -11,25 +11,21 @@ import 'package:flutter/foundation.dart';
 /// [List<SuggestionSpan>] suggestions of the [SpellCheckResults] corresponding
 /// to "Hello, wrold!" may be:
 /// ```dart
-/// SuggestionSpan(7, 11, List<String>.from["word, world, old"])
+/// SuggestionSpan(TextRange(7, 12), List<String>.from["word, world, old"])
 /// ```
 @immutable
 class SuggestionSpan {
   /// Creates a span representing a misspelled range of text and the replacements
   /// suggested by a spell checker.
   ///
-  /// The [startIndex], [endIndex], and replacement [suggestions] must all not
+  /// The [range] and replacement [suggestions] must all not
   /// be null.
-  const SuggestionSpan(this.startIndex, this.endIndex, this.suggestions)
-      : assert(startIndex != null),
-        assert(endIndex != null),
+  const SuggestionSpan(this.range, this.suggestions)
+      : assert(range != null),
         assert(suggestions != null);
 
-  /// The start index of the misspelled range of text.
-  final int startIndex;
-
-  /// The end index of the misspelled range of text, inclusive.
-  final int endIndex;
+  /// The misspelled range of text.
+  final TextRange range;
 
   /// The alternate suggestions for misspelled range of text.
   final List<String> suggestions;
@@ -39,13 +35,13 @@ class SuggestionSpan {
     if (identical(this, other))
         return true;
     return other is SuggestionSpan &&
-        other.startIndex == startIndex &&
-        other.endIndex == endIndex &&
+        other.range.start == range.start &&
+        other.range.end == range.end &&
         listEquals<String>(other.suggestions, suggestions);
   }
 
   @override
-  int get hashCode => Object.hash(startIndex, endIndex, hashList(suggestions));
+  int get hashCode => Object.hash(range.start, range.end, hashList(suggestions));
 }
 
 /// A data structure grouping together the [SuggestionSpan]s and related text of
@@ -53,12 +49,15 @@ class SuggestionSpan {
 @immutable
 class SpellCheckResults {
   /// Creates results based off those received by spell checking some text input.
-  const SpellCheckResults(this.spellCheckedText, this.suggestionSpans);
+  const SpellCheckResults(this.spellCheckedText, this.suggestionSpans)
+      : assert(spellCheckedText != null),
+        assert(suggestionSpans != null);
 
   /// The text that the [suggestionSpans] correspond to.
   final String spellCheckedText;
 
   /// The spell check results of the [spellCheckedText].
+  ///
   /// See also:
   ///
   ///  * [SuggestionSpan], the ranges of misspelled text and corresponding
@@ -81,6 +80,7 @@ class SpellCheckResults {
 /// Determines how spell check results are received for text input.
 abstract class SpellCheckService {
   /// Facilitates a spell check request.
-  Future<SpellCheckResults?> fetchSpellCheckSuggestions(
-      Locale locale, String text);
+  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
+    Locale locale, String text
+  );
 }
