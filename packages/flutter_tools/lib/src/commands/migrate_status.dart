@@ -32,13 +32,16 @@ class MigrateStatusCommand extends FlutterCommand {
     requiresPubspecYaml();
     argParser.addOption(
       'staging-directory',
-      help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
-            'This path can be absolute or relative to the flutter project root. This defaults to `$kDefaultMigrateWorkingDirectoryName`',
+      help: 'Specifies the custom migration working directory used to stage '
+            'and edit proposed changes. This path can be absolute or relative '
+            'to the flutter project root. This defaults to '
+            '`$kDefaultMigrateWorkingDirectoryName`',
       valueHelp: 'path',
     );
     argParser.addOption(
       'project-directory',
-      help: 'The root directory of the flutter project. This defaults to the current working directory if omitted.',
+      help: 'The root directory of the flutter project. This defaults to the '
+            'current working directory if omitted.',
       valueHelp: 'path',
     );
     argParser.addFlag(
@@ -82,7 +85,9 @@ class MigrateStatusCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String? projectDirectory = stringArg('project-directory');
     final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
-    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
+    final FlutterProject project = projectDirectory == null
+      ? FlutterProject.current()
+      : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     final String? customWorkingDirectoryPath = stringArg('working-directory');
     if (customWorkingDirectoryPath != null) {
@@ -100,7 +105,9 @@ class MigrateStatusCommand extends FlutterCommand {
 
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     if (!manifestFile.existsSync()) {
-      logger.printError('No migrate manifest in the migrate working directory at ${workingDirectory.path}. Fix the working directory or abandon and restart the migration.');
+      logger.printError('No migrate manifest in the migrate working directory '
+                        'at ${workingDirectory.path}. Fix the working directory '
+                        'or abandon and restart the migration.');
       return const FlutterCommandResult(ExitStatus.fail);
     }
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
@@ -158,7 +165,9 @@ class MigrateStatusCommand extends FlutterCommand {
       printCommandText('flutter migrate resolve-conflicts', logger);
       logger.printStatus('Resolve conflicts and accept changes with:');
     } else {
-      logger.printStatus('All conflicts resolved. Review changes above and apply the migration with:', color: TerminalColor.green);
+      logger.printStatus('All conflicts resolved. Review changes above and '
+                         'apply the migration with:',
+                         color: TerminalColor.green);
     }
     printCommandText('flutter migrate apply', logger);
 
