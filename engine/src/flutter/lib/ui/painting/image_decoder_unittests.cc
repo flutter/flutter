@@ -6,6 +6,7 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
+#include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
 #include "flutter/lib/ui/painting/multi_frame_codec.h"
 #include "flutter/runtime/dart_vm.h"
@@ -584,6 +585,11 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
 
   ASSERT_EQ(ImageDecoderSkia::ImageFromCompressedData(
                 descriptor.get(), 6, 2, fml::tracing::TraceFlow(""))
+                ->dimensions(),
+            SkISize::Make(6, 2));
+
+  ASSERT_EQ(ImageDecoderImpeller::DecompressTexture(descriptor.get(),
+                                                    SkISize::Make(6, 2))
                 ->dimensions(),
             SkISize::Make(6, 2));
 }
