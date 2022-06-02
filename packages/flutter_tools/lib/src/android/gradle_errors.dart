@@ -80,6 +80,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minCompileSdkVersionHandler,
   jvm11RequiredHandler,
   outdatedGradleHandler,
+  sslExceptionHandler,
   zipExceptionHandler,
 ];
 
@@ -646,4 +647,26 @@ final GradleHandledError jvm11RequiredHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'java11-required',
+);
+
+/// Handles SSL exceptions: https://github.com/flutter/flutter/issues/104628
+@visibleForTesting
+final GradleHandledError sslExceptionHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    'javax.net.ssl.SSLException: Tag mismatch!',
+    'javax.crypto.AEADBadTagException: Tag mismatch!',
+  ]),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
+    );
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'ssl-exception-tag-mismatch',
 );
