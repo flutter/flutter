@@ -621,8 +621,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   void visitChildren(ElementVisitor visitor) {
     slotToChild.values.forEach(visitor);
     for (final Element child in _children) {
-      if (!_forgottenChildren.contains(child))
+      if (!_forgottenChildren.contains(child)) {
         visitor(child);
+      }
     }
   }
 
@@ -1049,7 +1050,7 @@ enum _CupertinoTextSelectionToolbarItemsSlot {
 }
 
 class _NullElement extends Element {
-  _NullElement() : super(_NullWidget());
+  _NullElement() : super(const _NullWidget());
 
   static _NullElement instance = _NullElement();
 
@@ -1061,6 +1062,8 @@ class _NullElement extends Element {
 }
 
 class _NullWidget extends Widget {
+  const _NullWidget();
+
   @override
   Element createElement() => throw UnimplementedError();
 }

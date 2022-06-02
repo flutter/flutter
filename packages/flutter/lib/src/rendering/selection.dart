@@ -161,8 +161,9 @@ mixin SelectionRegistrant on Selectable {
   SelectionRegistrar? get registrar => _registrar;
   SelectionRegistrar? _registrar;
   set registrar(SelectionRegistrar? value) {
-    if (value == _registrar)
+    if (value == _registrar) {
       return;
+    }
     if (value == null) {
       // When registrar goes from non-null to null;
       removeListener(_updateSelectionRegistrarSubscription);
@@ -219,10 +220,12 @@ class SelectionUtils {
     if (targetRect.contains(point)) {
       return SelectionResult.end;
     }
-    if (point.dy < targetRect.top)
+    if (point.dy < targetRect.top) {
       return SelectionResult.previous;
-    if (point.dy > targetRect.bottom)
+    }
+    if (point.dy > targetRect.bottom) {
       return SelectionResult.next;
+    }
     return point.dx >= targetRect.right
         ? SelectionResult.next
         : SelectionResult.previous;
@@ -505,10 +508,12 @@ class SelectionGeometry {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SelectionGeometry
         && other.startSelectionPoint == startSelectionPoint
         && other.endSelectionPoint == endSelectionPoint
@@ -518,7 +523,7 @@ class SelectionGeometry {
 
   @override
   int get hashCode {
-    return hashValues(
+    return Object.hash(
       startSelectionPoint,
       endSelectionPoint,
       status,
@@ -555,10 +560,12 @@ class SelectionPoint {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SelectionPoint
         && other.localPosition == localPosition
         && other.lineHeight == lineHeight
@@ -567,7 +574,7 @@ class SelectionPoint {
 
   @override
   int get hashCode {
-    return hashValues(
+    return Object.hash(
       localPosition,
       lineHeight,
       handleType,

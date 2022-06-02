@@ -310,8 +310,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     // We may have started the layout while scrolled to the end, which would not
     // expose a new child.
-    if (estimatedMaxScrollOffset == trailingScrollOffset)
+    if (estimatedMaxScrollOffset == trailingScrollOffset) {
       childManager.setDidUnderflow(true);
+    }
     childManager.didFinishLayout();
   }
 }
@@ -351,8 +352,9 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   double _itemExtent;
   set itemExtent(double value) {
     assert(value != null);
-    if (_itemExtent == value)
+    if (_itemExtent == value) {
       return;
+    }
     _itemExtent = value;
     markNeedsLayout();
   }

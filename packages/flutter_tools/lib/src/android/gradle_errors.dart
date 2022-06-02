@@ -80,6 +80,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minCompileSdkVersionHandler,
   jvm11RequiredHandler,
   outdatedGradleHandler,
+  sslExceptionHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -101,6 +102,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
     if (multidexEnabled) {
       globals.printStatus(
         'Multidex support is required for your android app to build since the number of methods has exceeded 64k. '
+        'See https://docs.flutter.dev/deployment/android#enabling-multidex-support for more information. '
         "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.\n",
         indent: 4,
       );
@@ -597,4 +599,26 @@ final GradleHandledError jvm11RequiredHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'java11-required',
+);
+
+/// Handles SSL exceptions: https://github.com/flutter/flutter/issues/104628
+@visibleForTesting
+final GradleHandledError sslExceptionHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    'javax.net.ssl.SSLException: Tag mismatch!',
+    'javax.crypto.AEADBadTagException: Tag mismatch!',
+  ]),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
+    );
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'ssl-exception-tag-mismatch',
 );

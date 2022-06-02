@@ -206,8 +206,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// If the new selection is of non-zero length, or is outside the composing
   /// range, the composing range is cleared.
   set selection(TextSelection newSelection) {
-    if (!isSelectionWithinTextBounds(newSelection))
+    if (!isSelectionWithinTextBounds(newSelection)) {
       throw FlutterError('invalid text selection: $newSelection');
+    }
     final TextRange newComposing =
         newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
             ? value.composing
@@ -1669,6 +1670,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   AnimationController? _floatingCursorResetController;
 
+  Orientation? _lastOrientation;
+
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
@@ -1873,6 +1876,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _cursorTimer = null;
       }
     }
+
+    if (defaultTargetPlatform != TargetPlatform.iOS && defaultTargetPlatform != TargetPlatform.android) {
+      return;
+    }
+
+    // Hide the text selection toolbar on mobile when orientation changes.
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    if (_lastOrientation == null) {
+      _lastOrientation = orientation;
+      return;
+    }
+    if (orientation != _lastOrientation) {
+      _lastOrientation = orientation;
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        hideToolbar(false);
+      }
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        hideToolbar();
+      }
+    }
   }
 
   @override
@@ -1954,6 +1977,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     WidgetsBinding.instance.removeObserver(this);
     clipboardStatus?.removeListener(_onChangedClipboardStatus);
     clipboardStatus?.dispose();
+    _cursorVisibilityNotifier.dispose();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }
@@ -2037,8 +2061,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // If this is a multiline EditableText, do nothing for a "newline"
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
-        if (!_isMultiline)
+        if (!_isMultiline) {
           _finalizeEditing(action, shouldUnfocus: true);
+        }
         break;
       case TextInputAction.done:
       case TextInputAction.go:
@@ -2128,9 +2153,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
     if (_floatingCursorResetController!.isCompleted) {
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
-      if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset)
+      if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset) {
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
         _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), SelectionChangedCause.forcePress);
+      }
       _startCaretRect = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
@@ -2247,11 +2273,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _updateRemoteEditingValueIfNeeded() {
-    if (_batchEditDepth > 0 || !_hasInputConnection)
+    if (_batchEditDepth > 0 || !_hasInputConnection) {
       return;
+    }
     final TextEditingValue localValue = _value;
-    if (localValue == _lastKnownRemoteTextEditingValue)
+    if (localValue == _lastKnownRemoteTextEditingValue) {
       return;
+    }
     _textInputConnection!.setEditingState(localValue);
     _lastKnownRemoteTextEditingValue = localValue;
   }
@@ -2274,8 +2302,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // `renderEditable.preferredLineHeight`, before the target scroll offset is
   // calculated.
   RevealedOffset _getOffsetToRevealCaret(Rect rect) {
-    if (!_scrollController.position.allowImplicitScrolling)
+    if (!_scrollController.position.allowImplicitScrolling) {
       return RevealedOffset(offset: _scrollController.offset, rect: rect);
+    }
 
     final Size editableSize = renderEditable.size;
     final double additionalOffset;
@@ -2500,8 +2529,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // We return early if the selection is not valid. This can happen when the
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
-    if (!widget.controller.isSelectionWithinTextBounds(selection))
+    if (!widget.controller.isSelectionWithinTextBounds(selection)) {
       return;
+    }
 
     widget.controller.selection = selection;
 
@@ -2776,8 +2806,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     _targetCursorVisibility = true;
     _cursorBlinkOpacityController!.value = 1.0;
-    if (EditableText.debugDeterministicCursor)
+    if (EditableText.debugDeterministicCursor) {
       return;
+    }
     if (widget.cursorOpacityAnimates) {
       _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
     } else {
@@ -2791,10 +2822,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorTimer = null;
     _targetCursorVisibility = false;
     _cursorBlinkOpacityController!.value = 0.0;
-    if (EditableText.debugDeterministicCursor)
+    if (EditableText.debugDeterministicCursor) {
       return;
-    if (resetCharTicks)
+    }
+    if (resetCharTicks) {
       _obscureShowCharTicksPending = 0;
+    }
     if (widget.cursorOpacityAnimates) {
       _cursorBlinkOpacityController!.stop();
       _cursorBlinkOpacityController!.value = 0.0;
@@ -2802,10 +2835,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _startOrStopCursorTimerIfNeeded() {
-    if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed)
+    if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed) {
       _startCursorTimer();
-    else if (_cursorActive && (!_hasFocus || !_value.selection.isCollapsed))
+    } else if (_cursorActive && (!_hasFocus || !_value.selection.isCollapsed)) {
       _stopCursorTimer();
+    }
   }
 
   void _didChangeTextEditingValue() {
@@ -2852,13 +2886,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextStyle? _cachedTextStyle;
 
   void _updateSelectionRects({bool force = false}) {
-    if (!widget.scribbleEnabled)
+    if (!widget.scribbleEnabled) {
       return;
-    if (defaultTargetPlatform != TargetPlatform.iOS)
+    }
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
       return;
+    }
     // This is to avoid sending selection rects on non-iPad devices.
-    if (WidgetsBinding.instance.window.physicalSize.shortestSide < _kIPadWidth)
+    if (WidgetsBinding.instance.window.physicalSize.shortestSide < _kIPadWidth) {
       return;
+    }
 
     final String text = renderEditable.text?.toPlainText(includeSemanticsLabels: false) ?? '';
     final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1));
@@ -2880,13 +2917,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final List<SelectionRect> rects = List<SelectionRect?>.generate(
         _cachedText.characters.length,
         (int i) {
-          if (belowRenderEditableBottom)
+          if (belowRenderEditableBottom) {
             return null;
+          }
 
           final int offset = _cachedText.characters.getRange(0, i).string.length;
           final List<Rect> boxes = renderEditable.getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + _cachedText.characters.characterAt(i).string.length));
-          if (boxes.isEmpty)
+          if (boxes.isEmpty) {
             return null;
+          }
 
           final SelectionRect selectionRect = SelectionRect(
             bounds: boxes.first,
@@ -2899,12 +2938,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           return selectionRect;
         },
       ).where((SelectionRect? selectionRect) {
-        if (selectionRect == null)
+        if (selectionRect == null) {
           return false;
-        if (renderEditable.paintBounds.right < selectionRect.bounds.left || selectionRect.bounds.right < renderEditable.paintBounds.left)
+        }
+        if (renderEditable.paintBounds.right < selectionRect.bounds.left || selectionRect.bounds.right < renderEditable.paintBounds.left) {
           return false;
-        if (renderEditable.paintBounds.bottom < selectionRect.bounds.top || selectionRect.bounds.bottom < renderEditable.paintBounds.top)
+        }
+        if (renderEditable.paintBounds.bottom < selectionRect.bounds.top || selectionRect.bounds.bottom < renderEditable.paintBounds.top) {
           return false;
+        }
         return true;
       }).map<SelectionRect>((SelectionRect? selectionRect) => selectionRect!).toList();
       _textInputConnection!.setSelectionRects(rects);
@@ -3062,11 +3104,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void insertTextPlaceholder(Size size) {
-    if (!widget.scribbleEnabled)
+    if (!widget.scribbleEnabled) {
       return;
+    }
 
-    if (!widget.controller.selection.isValid)
+    if (!widget.controller.selection.isValid) {
       return;
+    }
 
     setState(() {
       _placeholderLocation = _value.text.length - widget.controller.selection.end;
@@ -3075,8 +3119,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void removeTextPlaceholder() {
-    if (!widget.scribbleEnabled)
+    if (!widget.scribbleEnabled) {
       return;
+    }
 
     setState(() {
       _placeholderLocation = -1;
@@ -3219,6 +3264,47 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return Action<T>.overridable(context: context, defaultAction: defaultAction);
   }
 
+  /// Transpose the characters immediately before and after the current
+  /// collapsed selection.
+  ///
+  /// When the cursor is at the end of the text, transposes the last two
+  /// characters, if they exist.
+  ///
+  /// When the cursor is at the start of the text, does nothing.
+  void _transposeCharacters(TransposeCharactersIntent intent) {
+    if (_value.text.characters.length <= 1
+        || _value.selection == null
+        || !_value.selection.isCollapsed
+        || _value.selection.baseOffset == 0) {
+      return;
+    }
+
+    final String text = _value.text;
+    final TextSelection selection = _value.selection;
+    final bool atEnd = selection.baseOffset == text.length;
+    final CharacterRange transposing = CharacterRange.at(text, selection.baseOffset);
+    if (atEnd) {
+      transposing.moveBack(2);
+    } else {
+      transposing..moveBack()..expandNext();
+    }
+    assert(transposing.currentCharacters.length == 2);
+
+    userUpdateTextEditingValue(
+      TextEditingValue(
+        text: transposing.stringBefore
+            + transposing.currentCharacters.last
+            + transposing.currentCharacters.first
+            + transposing.stringAfter,
+        selection: TextSelection.collapsed(
+          offset: transposing.stringBeforeLength + transposing.current.length,
+        ),
+      ),
+      SelectionChangedCause.keyboard,
+    );
+  }
+  late final Action<TransposeCharactersIntent> _transposeCharactersAction = CallbackAction<TransposeCharactersIntent>(onInvoke: _transposeCharacters);
+
   void _replaceText(ReplaceTextIntent intent) {
     final TextEditingValue oldValue = _value;
     final TextEditingValue newValue = intent.currentTextEditingValue.replaced(
@@ -3313,7 +3399,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     DeleteToLineBreakIntent: _makeOverridable(_DeleteTextAction<DeleteToLineBreakIntent>(this, _linebreak)),
 
     // Extend/Move Selection
-    ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary,)),
+    ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, true, _nextWordBoundary)),
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _linebreak)),
     ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
@@ -3327,6 +3413,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
     PasteTextIntent: _makeOverridable(CallbackAction<PasteTextIntent>(onInvoke: (PasteTextIntent intent) => pasteText(intent.cause))),
+
+    TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
   };
 
   @override
@@ -3450,8 +3538,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                     && mobilePlatforms.contains(defaultTargetPlatform);
       if (breiflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
-        if (o != null && o >= 0 && o < text.length)
+        if (o != null && o >= 0 && o < text.length) {
           text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+        }
       }
       return TextSpan(style: widget.style, text: text);
     }
@@ -3736,12 +3825,15 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   @override
   bool isInScribbleRect(Rect rect) {
     final Rect calculatedBounds = bounds;
-    if (renderEditable?.readOnly ?? false)
+    if (renderEditable?.readOnly ?? false) {
       return false;
-    if (calculatedBounds == Rect.zero)
+    }
+    if (calculatedBounds == Rect.zero) {
       return false;
-    if (!calculatedBounds.overlaps(rect))
+    }
+    if (!calculatedBounds.overlaps(rect)) {
       return false;
+    }
     final Rect intersection = calculatedBounds.intersect(rect);
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTest(result, intersection.center);
@@ -3751,8 +3843,9 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   @override
   Rect get bounds {
     final RenderBox? box = context.findRenderObject() as RenderBox?;
-    if (box == null || !mounted || !box.attached)
+    if (box == null || !mounted || !box.attached) {
       return Rect.zero;
+    }
     final Matrix4 transform = box.getTransformTo(null);
     return MatrixUtils.transformRect(transform, Rect.fromLTWH(0, 0, box.size.width, box.size.height));
   }
