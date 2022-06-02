@@ -324,7 +324,6 @@ migration:
                 'create_revision': String,
                 'base_revision': String,
               }, logger)) {
-            final YamlMap platformYamlMap = platform! as YamlMap;
             final SupportedPlatform platformValue = SupportedPlatform.values.firstWhere(
               (SupportedPlatform val) => val.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
             );
