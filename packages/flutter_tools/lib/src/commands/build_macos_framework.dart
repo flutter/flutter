@@ -43,8 +43,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-        DevelopmentArtifact.macOS,
-      };
+    DevelopmentArtifact.macOS,
+  };
 
   @override
   Future<FlutterCommandResult> runCommand() async {
