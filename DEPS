@@ -363,7 +363,7 @@ deps = {
       }
     ],
     'dep_type': 'cipd',
-    'condition': 'host_os == "linux"'
+    'condition': 'host_os == "linux" and download_dart_sdk'
   },
   'src/flutter/prebuilts/linux-arm64/dart-sdk': {
     'packages': [
@@ -373,7 +373,7 @@ deps = {
       }
     ],
     'dep_type': 'cipd',
-    'condition': 'host_os == "linux"'
+    'condition': 'host_os == "linux" and download_dart_sdk'
   },
   'src/flutter/prebuilts/macos-x64/dart-sdk': {
     'packages': [
@@ -383,7 +383,7 @@ deps = {
       }
     ],
     'dep_type': 'cipd',
-    'condition': 'host_os == "mac"'
+    'condition': 'host_os == "mac" and download_dart_sdk'
   },
   'src/flutter/prebuilts/macos-arm64/dart-sdk': {
     'packages': [
@@ -393,7 +393,7 @@ deps = {
       }
     ],
     'dep_type': 'cipd',
-    'condition': 'host_os == "mac"'
+    'condition': 'host_os == "mac" and download_dart_sdk'
   },
   'src/flutter/prebuilts/windows-x64/dart-sdk': {
     'packages': [
@@ -403,7 +403,7 @@ deps = {
       }
     ],
     'dep_type': 'cipd',
-    'condition': 'host_os == "win"'
+    'condition': 'host_os == "win" and download_dart_sdk'
   },
   'src/flutter/prebuilts/windows-arm64/dart-sdk': {
     'packages': [
@@ -413,7 +413,7 @@ deps = {
       }
     ],
     'dep_type': 'cipd',
-    'condition': 'host_os == "win"'
+    'condition': 'host_os == "win" and download_dart_sdk'
   },
 
   'src/third_party/colorama/src':
