@@ -163,11 +163,12 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     return correctedSpellCheckResults;
   }
 
-  // Temporary way to merge two resutls since set union is not working as expected
+  /// Merges two lists of spell check results to account for Gboard's automatic
+  /// deletion of results in the composing region.
   List<SuggestionSpan> mergeResults(
       List<SuggestionSpan> oldResults, List<SuggestionSpan> newResults) {
     List<SuggestionSpan> mergedResults = <SuggestionSpan>[];
-    ;
+
     int old_span_pointer = 0;
     int new_span_pointer = 0;
 
@@ -177,37 +178,22 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       SuggestionSpan newSpan = newResults[new_span_pointer];
 
       if (oldSpan.startIndex == newSpan.startIndex) {
-        if (!mergedResults.contains(oldSpan)) {
-          mergedResults.add(oldSpan);
-        }
-
+        mergedResults.add(oldSpan);
         old_span_pointer += 1;
         new_span_pointer += 1;
       } else {
         if (oldSpan.startIndex < newSpan.startIndex) {
-          // simplifying assumption that spans do not overlap for now
-          if (!mergedResults.contains(oldSpan)) {
-            mergedResults.add(oldSpan);
-          }
+          mergedResults.add(oldSpan);
           old_span_pointer += 1;
         } else {
-          if (!mergedResults.contains(newSpan)) {
-            mergedResults.add(newSpan);
-          }
+          mergedResults.add(newSpan);
           new_span_pointer += 1;
         }
       }
     }
 
-    while (old_span_pointer < oldResults.length) {
-      mergedResults.add(oldResults[old_span_pointer]);
-      old_span_pointer += 1;
-    }
-
-    while (new_span_pointer < newResults.length) {
-      mergedResults.add(newResults[new_span_pointer]);
-      new_span_pointer += 1;
-    }
+    mergedResults.addAll(oldResults.sublist(old_span_pointer));
+    mergedResults.addAll(newResults.sublist(new_span_pointer));
 
     return mergedResults;
   }
@@ -236,9 +222,8 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
         reusableSpellCheckResults != null &&
         rawSpellCheckResults != null &&
         !listEquals(reusableSpellCheckResults, rawSpellCheckResults)) {
-      correctedSpellCheckResults =
+        correctedSpellCheckResults =
           mergeResults(reusableSpellCheckResults!, rawSpellCheckResults);
-                  correctedSpellCheckResults!.forEach((SuggestionSpan s) {
     } else {
       correctedSpellCheckResults = rawSpellCheckResults;
     }
@@ -384,7 +369,7 @@ class _SpellCheckSuggestionsToolbar extends StatefulWidget {
     required this.globalEditableRegion,
     required this.selectionMidpoint,
     required this.textLineHeight,
-    required this.suggestionSpans,
+    required this.suggestionSpans, // This will need to actually use the corrected spell check results instead of the ones stored in the configuration. This makes me think that this correction should occur way before now. Well, it's not actually the correction. It's the merging because of the Gboard issue.
   }) : super(key: key);
 
   final TargetPlatform platform;
