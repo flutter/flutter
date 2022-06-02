@@ -434,7 +434,7 @@ class AccessibilityViewEmbedder {
     private @Nullable final Field childNodeIdsField;
     private @Nullable final Method longArrayGetIndex;
 
-    @SuppressLint("PrivateApi")
+    @SuppressLint("DiscouragedPrivateApi,PrivateApi")
     private ReflectionAccessors() {
       Method getSourceNodeId = null;
       Method getParentNodeId = null;

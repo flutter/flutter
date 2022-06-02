@@ -29,7 +29,7 @@ allprojects {
 apply plugin: "com.android.application"
 
 android {
-  compileSdkVersion 31
+  compileSdkVersion 32
 }
 
 configurations {
