@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 
+#include <memory>
+
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
@@ -13,6 +15,7 @@
 #include "flutter/impeller/renderer/texture.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
 #include "impeller/base/strings.h"
+#include "include/core/SkSize.h"
 #include "third_party/skia/include/core/SkPixmap.h"
 
 namespace flutter {
@@ -53,8 +56,9 @@ static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
   return std::nullopt;
 }
 
-static std::shared_ptr<SkBitmap> DecompressTexture(ImageDescriptor* descriptor,
-                                                   SkISize target_size) {
+std::shared_ptr<SkBitmap> ImageDecoderImpeller::DecompressTexture(
+    ImageDescriptor* descriptor,
+    SkISize target_size) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!descriptor) {
     FML_DLOG(ERROR) << "Invalid descriptor.";
@@ -67,9 +71,18 @@ static std::shared_ptr<SkBitmap> DecompressTexture(ImageDescriptor* descriptor,
     return nullptr;
   }
 
+  const SkISize source_size = descriptor->image_info().dimensions();
+  auto decode_size = descriptor->get_scaled_dimensions(std::max(
+      static_cast<double>(target_size.width()) / source_size.width(),
+      static_cast<double>(target_size.height()) / source_size.height()));
+
+  //----------------------------------------------------------------------------
+  /// 1. Decode the image into the image generator's closest supported size.
+  ///
+
   const auto base_image_info = descriptor->image_info();
   const auto image_info =
-      base_image_info.makeWH(target_size.width(), target_size.height())
+      base_image_info.makeWH(decode_size.width(), decode_size.height())
           .makeColorType(ChooseCompatibleColorType(base_image_info.colorType()))
           .makeAlphaType(
               ChooseCompatibleAlphaType(base_image_info.alphaType()));
@@ -92,7 +105,31 @@ static std::shared_ptr<SkBitmap> DecompressTexture(ImageDescriptor* descriptor,
     return nullptr;
   }
 
-  return bitmap;
+  if (decode_size == target_size) {
+    return bitmap;
+  }
+
+  //----------------------------------------------------------------------------
+  /// 2. If the decoded image isn't the requested target size, resize it.
+  ///
+
+  TRACE_EVENT0("impeller", "DecodeScale");
+  const auto scaled_image_info = image_info.makeDimensions(target_size);
+
+  auto scaled_bitmap = std::make_shared<SkBitmap>();
+  if (!scaled_bitmap->tryAllocPixels(scaled_image_info)) {
+    FML_LOG(ERROR)
+        << "Could not allocate scaled bitmap for image decompression.";
+    return nullptr;
+  }
+  if (!bitmap->pixmap().scalePixels(
+          scaled_bitmap->pixmap(),
+          SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone))) {
+    FML_LOG(ERROR) << "Could not scale decoded bitmap data.";
+  }
+  scaled_bitmap->setImmutable();
+
+  return scaled_bitmap;
 }
 
 static sk_sp<DlImage> UploadTexture(std::shared_ptr<impeller::Context> context,
