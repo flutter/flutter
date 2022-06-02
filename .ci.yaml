@@ -2030,6 +2030,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android platform_channels_benchmarks
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/105267
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
