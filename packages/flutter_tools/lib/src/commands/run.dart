@@ -133,6 +133,19 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'this comma separated list of allowed prefixes.',
         valueHelp: 'skia.gpu,skia.shaders',
       )
+      ..addFlag('enable-software-rendering',
+        negatable: false,
+        help: 'Enable rendering using the Skia software backend. '
+            'This is useful when testing Flutter on emulators. By default, '
+            'Flutter will attempt to either use OpenGL or Vulkan and fall back '
+            'to software when neither is available.',
+      )
+      ..addFlag('skia-deterministic-rendering',
+        negatable: false,
+        help: 'When combined with "--enable-software-rendering", this should provide completely '
+            'deterministic (i.e. reproducible) Skia rendering. This is useful for testing purposes '
+            '(e.g. when comparing screenshots).',
+      )
       ..addMultiOption('dart-entrypoint-args',
         abbr: 'a',
         help: 'Pass a list of arguments to the Dart entrypoint at application '
@@ -184,6 +197,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   String get traceAllowlist => stringArgDeprecated('trace-allowlist');
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
+  @visibleForTesting
+  @protected
   Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
     final BuildInfo buildInfo = await getBuildInfo();
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
@@ -268,19 +283,6 @@ class RunCommand extends RunCommandBase {
     addMultidexOption();
     addIgnoreDeprecationOption();
     argParser
-      ..addFlag('enable-software-rendering',
-        negatable: false,
-        help: 'Enable rendering using the Skia software backend. '
-              'This is useful when testing Flutter on emulators. By default, '
-              'Flutter will attempt to either use OpenGL or Vulkan and fall back '
-              'to software when neither is available.',
-      )
-      ..addFlag('skia-deterministic-rendering',
-        negatable: false,
-        help: 'When combined with "--enable-software-rendering", this should provide completely '
-              'deterministic (i.e. reproducible) Skia rendering. This is useful for testing purposes '
-              '(e.g. when comparing screenshots).',
-      )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
         help: 'Whether to wait for the first frame when tracing startup ("--trace-startup"), '
