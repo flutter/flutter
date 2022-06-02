@@ -89,7 +89,7 @@ class MigrateStatusCommand extends FlutterCommand {
       ? FlutterProject.current()
       : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    final String? customWorkingDirectoryPath = stringArg('working-directory');
+    final String? customWorkingDirectoryPath = stringArg('staging-directory');
     if (customWorkingDirectoryPath != null) {
       if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
@@ -98,7 +98,7 @@ class MigrateStatusCommand extends FlutterCommand {
       }
     }
     if (!workingDirectory.existsSync()) {
-      logger.printStatus('No migration in progress. Start a new migration with:');
+      logger.printStatus('No migration in progress in $workingDirectory. Start a new migration with:');
       printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
