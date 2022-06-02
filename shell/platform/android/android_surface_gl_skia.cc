@@ -153,12 +153,10 @@ void AndroidSurfaceGLSkia::GLContextSetDamageRegion(
   onscreen_surface_->SetDamageRegion(region);
 }
 
-bool AndroidSurfaceGLSkia::GLContextPresent(
-    uint32_t fbo_id,
-    const std::optional<SkIRect>& damage) {
+bool AndroidSurfaceGLSkia::GLContextPresent(const GLPresentInfo& present_info) {
   FML_DCHECK(IsValid());
   FML_DCHECK(onscreen_surface_);
-  return onscreen_surface_->SwapBuffers(damage);
+  return onscreen_surface_->SwapBuffers(present_info.damage);
 }
 
 intptr_t AndroidSurfaceGLSkia::GLContextFBO(GLFrameInfo frame_info) const {
