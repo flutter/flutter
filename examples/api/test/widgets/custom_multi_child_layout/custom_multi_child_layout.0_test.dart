@@ -34,6 +34,7 @@ void main() {
         (parentSize.width / 3).roundToDouble());
     expect(childSize.height.roundToDouble(), 100.0);
   });
+
   testWidgets('has correct size maximum constraints',
       (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
