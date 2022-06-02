@@ -38,7 +38,14 @@ class MigrateCommand extends FlutterCommand {
       platform: platform,
       processManager: processManager
     ));
-    addSubcommand(MigrateApplyCommand(verbose: verbose, logger: logger, fileSystem: fileSystem, terminal: terminal, platform: platform, processManager: processManager));
+    addSubcommand(MigrateApplyCommand(
+      verbose: verbose,
+      logger: logger,
+      fileSystem: fileSystem,
+      terminal: terminal,
+      platform: platform,
+      processManager: processManager
+    ));
   }
 
   final Logger logger;

@@ -36,14 +36,17 @@ class MigrateApplyCommand extends FlutterCommand {
        ) {
     requiresPubspecYaml();
     argParser.addOption(
-      'working-directory',
-      help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
-            'This path can be absolute or relative to the flutter project root. This defaults to `migrate_working_dir`',
+      'staging-directory',
+      help: 'Specifies the custom migration working directory used to stage '
+            'and edit proposed changes. This path can be absolute or relative '
+            'to the flutter project root. This defaults to '
+            '`$kDefaultMigrateWorkingDirectoryName`',
       valueHelp: 'path',
     );
     argParser.addOption(
       'project-directory',
-      help: 'The root directory of the flutter project.',
+      help: 'The root directory of the flutter project. This defaults to the '
+            'current working directory if omitted.',
       valueHelp: 'path',
     );
     argParser.addFlag(
@@ -71,10 +74,12 @@ class MigrateApplyCommand extends FlutterCommand {
   final String name = 'apply';
 
   @override
-  final String description = r'Accepts the changes produced by `$ flutter migrate start` and copies '
-                              'the changed files into your project files. All merge conflicts should '
-                              'be resolved before apply will complete successfully. If conflicts still '
-                              'exist, this command will print the remaining conflicted files.';
+  final String description = r'Accepts the changes produced by `$ flutter '
+                              'migrate start` and copies the changed files into '
+                              'your project files. All merge conflicts should '
+                              'be resolved before apply will complete '
+                              'successfully. If conflicts still exist, this '
+                              'command will print the remaining conflicted files.';
 
   @override
   String get category => FlutterCommandCategory.project;
@@ -91,7 +96,8 @@ class MigrateApplyCommand extends FlutterCommand {
       : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
 
     if (!await gitRepoExists(project.directory.path, logger, migrateUtils)) {
-      logger.printStatus('No git repo found. Please run in a project with an initialized git repo or initialize one with:');
+      logger.printStatus('No git repo found. Please run in a project with an '
+                         'initialized git repo or initialize one with:');
       printCommandText('git init', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
@@ -191,7 +197,9 @@ class MigrateApplyCommand extends FlutterCommand {
     // Detect gradle lockfiles in android directory. Delete lockfiles and regenerate with ./gradlew tasks (any gradle task that requires a build).
     await updateGradleDependencyLocking(project, migrateUtils, logger, terminal, _verbose, fileSystem);
 
-    logger.printStatus('Migration complete. You may use commands like `git status`, `git diff` and `git restore <file>` to continue working with the migrated files.');
+    logger.printStatus('Migration complete. You may use commands like `git '
+                      'status`, `git diff` and `git restore <file>` to continue '
+                      'working with the migrated files.');
     return const FlutterCommandResult(ExitStatus.success);
   }
 }
