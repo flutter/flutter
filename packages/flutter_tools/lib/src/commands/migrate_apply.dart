@@ -107,7 +107,7 @@ class MigrateApplyCommand extends FlutterCommand {
     terminal.usesTerminalUi = true;
 
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    final String? customWorkingDirectoryPath = stringArg('working-directory');
+    final String? customWorkingDirectoryPath = stringArg('staging-directory');
     if (customWorkingDirectoryPath != null) {
       if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
@@ -116,7 +116,7 @@ class MigrateApplyCommand extends FlutterCommand {
       }
     }
     if (!workingDirectory.existsSync()) {
-      logger.printStatus('No migration in progress. Please run:');
+      logger.printStatus('No migration in progress at $workingDirectory. Please run:');
       printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
