@@ -337,7 +337,7 @@ class FlutterViewEmbedder {
     }
 
     PointerBinding.initInstance(glassPaneElement as html.Element);
-    KeyboardBinding.initInstance(glassPaneElement as html.Element);
+    KeyboardBinding.initInstance(glassPaneElement);
 
     if (html.window.visualViewport == null && isWebKit) {
       // Older Safari versions sometimes give us bogus innerWidth/innerHeight

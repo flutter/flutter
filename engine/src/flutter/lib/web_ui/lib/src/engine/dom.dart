@@ -20,7 +20,7 @@ import 'package:js/js_util.dart' as js_util;
 
 @JS()
 @staticInterop
-class DomWindow {}
+class DomWindow extends DomEventTarget {}
 
 extension DomWindowExtension on DomWindow {
   external DomConsole get console;
@@ -122,6 +122,8 @@ class DomEvent {}
 
 extension DomEventExtension on DomEvent {
   external DomEventTarget? get target;
+  external num? get timeStamp;
+  external String get type;
   external void preventDefault();
   external void stopPropagation();
 }
@@ -315,7 +317,7 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get flexDirection => getPropertyValue('flex-direction');
   String get alignItems => getPropertyValue('align-items');
   String get margin => getPropertyValue('margin');
-  String get background=> getPropertyValue('background');
+  String get background => getPropertyValue('background');
 
   external String getPropertyValue(String property);
   void setProperty(String propertyName, String value, [String? priority]) {
@@ -668,6 +670,27 @@ extension DomResponseExtension on DomResponse {
 
   Future<String> text() =>
       js_util.promiseToFuture(js_util.callMethod(this, 'text', <Object>[]));
+}
+
+@JS()
+@staticInterop
+class DomUIEvent extends DomEvent {}
+
+@JS()
+@staticInterop
+class DomKeyboardEvent extends DomUIEvent {}
+
+extension DomKeyboardEventExtension on DomKeyboardEvent {
+  external bool get altKey;
+  external String? get code;
+  external bool get ctrlKey;
+  external String? get key;
+  external int get keyCode;
+  external int get location;
+  external bool get metaKey;
+  external bool? get repeat;
+  external bool get shiftKey;
+  external bool getModifierState(String keyArg);
 }
 
 Object? domGetConstructor(String constructorName) =>

@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import '../engine.dart'  show registerHotRestartListener;
+import 'dom.dart';
 import 'platform_dispatcher.dart';
+import 'safe_browser_api.dart';
 import 'services.dart';
 
 /// Provides keyboard bindings, such as the `flutter/keyevent` channel.
@@ -29,19 +30,19 @@ class Keyboard {
   /// if no repeat events were received.
   final Map<String, Timer> _keydownTimers = <String, Timer>{};
 
-  html.EventListener? _keydownListener;
-  html.EventListener? _keyupListener;
+  DomEventListener? _keydownListener;
+  DomEventListener? _keyupListener;
 
   Keyboard._(this._onMacOs) {
-    _keydownListener = (html.Event event) {
+    _keydownListener = allowInterop((DomEvent event) {
       _handleHtmlEvent(event);
-    };
-    html.window.addEventListener('keydown', _keydownListener);
+    });
+    domWindow.addEventListener('keydown', _keydownListener);
 
-    _keyupListener = (html.Event event) {
+    _keyupListener = allowInterop((DomEvent event) {
       _handleHtmlEvent(event);
-    };
-    html.window.addEventListener('keyup', _keyupListener);
+    });
+    domWindow.addEventListener('keyup', _keyupListener);
     registerHotRestartListener(() {
       dispose();
     });
@@ -52,8 +53,8 @@ class Keyboard {
   /// After calling this method this object becomes unusable and [instance]
   /// becomes `null`. Call [initialize] again to initialize a new singleton.
   void dispose() {
-    html.window.removeEventListener('keydown', _keydownListener);
-    html.window.removeEventListener('keyup', _keyupListener);
+    domWindow.removeEventListener('keydown', _keydownListener);
+    domWindow.removeEventListener('keyup', _keyupListener);
 
     for (final String key in _keydownTimers.keys) {
       _keydownTimers[key]!.cancel();
@@ -86,12 +87,12 @@ class Keyboard {
     return _onMacOs;
   }
 
-  void _handleHtmlEvent(html.Event event) {
-    if (event is! html.KeyboardEvent) {
+  void _handleHtmlEvent(DomEvent event) {
+    if (!domInstanceOfString(event, 'KeyboardEvent')) {
       return;
     }
 
-    final html.KeyboardEvent keyboardEvent = event;
+    final DomKeyboardEvent keyboardEvent = event as DomKeyboardEvent;
     final String timerKey = keyboardEvent.code!;
 
     // Don't handle synthesizing a keyup event for modifier keys
@@ -146,7 +147,7 @@ class Keyboard {
     );
   }
 
-  void _synthesizeKeyup(html.KeyboardEvent event) {
+  void _synthesizeKeyup(DomKeyboardEvent event) {
     final Map<String, dynamic> eventData = <String, dynamic>{
       'type': 'keyup',
       'keymap': 'web',
@@ -179,7 +180,7 @@ const int modifierCapsLock = 0x20;
 const int modifierScrollLock = 0x40;
 
 /// Creates a bitmask representing the meta state of the [event].
-int _getMetaState(html.KeyboardEvent event) {
+int _getMetaState(DomKeyboardEvent event) {
   int metaState = _modifierNone;
   if (event.getModifierState('Shift')) {
     metaState |= _modifierShift;
@@ -211,7 +212,7 @@ int _getMetaState(html.KeyboardEvent event) {
 ///
 /// Modifier keys are shift, alt, ctrl and meta/cmd/win. These are the keys used
 /// to perform keyboard shortcuts (e.g. `cmd+c`, `cmd+l`).
-bool _isModifierKey(html.KeyboardEvent event) {
+bool _isModifierKey(DomKeyboardEvent event) {
   final String key = event.key!;
   return key == 'Meta' || key == 'Shift' || key == 'Alt' || key == 'Control';
 }
@@ -219,7 +220,7 @@ bool _isModifierKey(html.KeyboardEvent event) {
 /// Returns true if the [event] is been affects by any of the modifiers key
 ///
 /// This is a strong indication that this key is been used for a shortcut
-bool _isAffectedByModifiers(html.KeyboardEvent event) {
+bool _isAffectedByModifiers(DomKeyboardEvent event) {
   return event.ctrlKey || event.shiftKey || event.altKey || event.metaKey;
 }
 
