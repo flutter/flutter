@@ -134,7 +134,9 @@ class InkSparkle extends InteractiveInkFeature {
     _animationController = AnimationController(
       duration: _animationDuration,
       vsync: controller.vsync,
-    )..addListener(controller.markNeedsPaint)..forward();
+    )..addListener(controller.markNeedsPaint)
+     ..addStatusListener(_handleStatusChanged)
+     ..forward();
 
     _radiusScale = TweenSequence<double>(
       <TweenSequenceItem<double>>[
@@ -208,6 +210,11 @@ class InkSparkle extends InteractiveInkFeature {
     _turbulenceSeed = turbulenceSeed ?? math.Random().nextDouble() * 1000.0;
   }
 
+  void _handleStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed)
+      dispose();
+  }
+
   static const Duration _animationDuration = Duration(milliseconds: 617);
   static const double _targetRadiusMultiplier = 2.3;
   static const double _rotateRight = math.pi * 0.0078125;
@@ -258,6 +265,8 @@ class InkSparkle extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
+    assert(_animationController.isAnimating);
+
     // InkSparkle can only paint if its shader has been compiled.
     if (_InkSparkleFactory._shaderManager == null) {
       // Skipping paintFeature because the shader it relies on is not ready to
