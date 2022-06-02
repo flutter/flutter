@@ -45,6 +45,12 @@ const double _kLabelItemDefaultSpacing = 18.0;
 // shortcut label in a _MenuBarItemLabel.
 const double _kLabelItemMinSpacing = 4.0;
 
+// The minimum horizontal spacing on the outside of the top level menu.
+const double _kTopLevelMenuHorizontalMinPadding = 4.0;
+
+// The minimum vertical spacing on the outside of the top level menu.
+const double _kTopLevelMenuVerticalMinPadding = 4.0;
+
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
   SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
@@ -1285,6 +1291,7 @@ class _MenuBarItemState extends State<MenuBarItem> {
                 child: _MenuBarMarker(
                   state: menuBar,
                   child: _MenuBarMenuList(
+                    direction: Axis.vertical,
                     elevation: (widget._menuElevation ?? menuBarTheme.menuElevation ?? defaultTheme.menuElevation)
                         .resolve(disabled)!,
                     shape: (widget._menuShape ?? menuBarTheme.menuShape ?? defaultTheme.menuShape).resolve(disabled)!,
@@ -1293,7 +1300,6 @@ class _MenuBarItemState extends State<MenuBarItem> {
                             defaultTheme.menuBackgroundColor)
                         .resolve(disabled)!,
                     menuPadding: menuButtonNode.menuPadding ?? menuBarTheme.menuPadding ?? defaultTheme.menuPadding,
-                    semanticLabel: widget.semanticLabel ?? MaterialLocalizations.of(context).popupMenuLabel,
                     textDirection: Directionality.of(context),
                     children: _expandGroups(menuButtonNode.item),
                   ),
@@ -2116,10 +2122,17 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
     final _MenuBarState controller = _MenuBarState.of(context);
 
     int index = 0;
-    final Widget appBar = Material(
-      elevation: elevation,
-      color: color,
-      child: Row(
+    return _MenuNodeWrapper(
+      serial: controller.menuSerial,
+      menu: controller.root,
+      child: _MenuBarMenuList(
+        backgroundColor: color,
+        textDirection: Directionality.of(context),
+        direction: Axis.horizontal,
+        elevation: elevation,
+        menuPadding: padding,
+        crossAxisMinSize: height,
+        shape: const RoundedRectangleBorder(),
         children: <Widget>[
           ...children.map<Widget>((MenuItem child) {
             final Widget result = _MenuNodeWrapper(
@@ -2130,14 +2143,8 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
             index += 1;
             return result;
           }).toList(),
-          const Spacer(),
         ],
       ),
-    );
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: height),
-      child: appBar,
     );
   }
 }
@@ -2240,14 +2247,18 @@ class _MenuBarMenuList extends StatefulWidget {
   ///
   /// All parameters except `key` and [shape] are required.
   const _MenuBarMenuList({
+    required this.direction,
     required this.backgroundColor,
     required this.shape,
     required this.elevation,
     required this.menuPadding,
-    required this.semanticLabel,
     required this.textDirection,
     required this.children,
+    this.crossAxisMinSize = 0.0,
   });
+
+  /// The main axis of the list.
+  final Axis direction;
 
   /// The background color of this submenu.
   final Color backgroundColor;
@@ -2267,11 +2278,15 @@ class _MenuBarMenuList extends StatefulWidget {
   /// The padding around the inside of the menu panel.
   final EdgeInsets menuPadding;
 
-  /// The semantic label for this submenu.
-  final String semanticLabel;
-
   /// The text direction to use for rendering this menu.
   final TextDirection textDirection;
+
+  /// The minimum size in the main axis.
+  ///
+  /// Mainly used to enforce the main menu height.
+  ///
+  /// If null, then defaults to zero.
+  final double crossAxisMinSize;
 
   /// The menu items that fill this submenu.
   final List<Widget> children;
@@ -2331,8 +2346,8 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
       child: _MenuBarMenuRenderWidget(
         menuBar: _MenuBarState.of(context),
         padding: widget.menuPadding,
-        direction: Axis.vertical,
-        semanticLabel: widget.semanticLabel,
+        direction: widget.direction,
+        crossAxisMinSize: widget.crossAxisMinSize,
         textDirection: widget.textDirection,
         children: _expandGroups(),
       ),
@@ -2353,22 +2368,21 @@ class _MenuBarMenuRenderWidget extends MultiChildRenderObjectWidget {
     required this.direction,
     required super.children,
     required this.padding,
-    this.semanticLabel,
+    required this.crossAxisMinSize,
     this.textDirection,
   });
 
   /// The MenuBarController that this menu should register its render object with.
   final _MenuBarState menuBar;
 
+  /// The direction of the main axis for this menu.
   final Axis direction;
 
   /// Padding around the contents of the menu bar.
   final EdgeInsets padding;
 
-  /// The semantic label for this menu.
-  ///
-  /// Defaults to [MaterialLocalizations.menuBarMenuLabel].
-  final String? semanticLabel;
+  /// The minimum size that the menu should be in the main axis direction.
+  final double crossAxisMinSize;
 
   /// The text direction to use for rendering this menu.
   ///
@@ -2381,6 +2395,7 @@ class _MenuBarMenuRenderWidget extends MultiChildRenderObjectWidget {
       menuBar: menuBar,
       padding: padding,
       direction: direction,
+      crossAxisMinSize: crossAxisMinSize,
       textDirection: textDirection ?? Directionality.of(context),
     );
   }
@@ -2391,6 +2406,7 @@ class _MenuBarMenuRenderWidget extends MultiChildRenderObjectWidget {
       ..menuBar = menuBar
       ..padding = padding
       ..direction = direction
+      ..crossAxisMinSize = crossAxisMinSize
       ..textDirection = textDirection ?? Directionality.of(context);
   }
 
@@ -2432,12 +2448,14 @@ class _RenderMenuBarMenu extends RenderBox
     List<RenderBox>? children,
     required EdgeInsets padding,
     Axis direction = Axis.horizontal,
-    TextDirection? textDirection,
+    required TextDirection textDirection,
+    double crossAxisMinSize = 0.0,
   })  : assert(direction != null),
         _menuBar = menuBar,
         _direction = direction,
         _padding = padding,
-        _textDirection = textDirection {
+        _textDirection = textDirection,
+        _crossAxisMinSize = crossAxisMinSize {
     _menuBar.registerMenuRenderObject(this);
     addAll(children);
   }
@@ -2456,6 +2474,16 @@ class _RenderMenuBarMenu extends RenderBox
       _menuBar.unregisterMenuRenderObject(this);
       _menuBar = value;
       _menuBar.registerMenuRenderObject(this);
+      markNeedsLayout();
+    }
+  }
+
+  double get crossAxisMinSize => _crossAxisMinSize;
+  double _crossAxisMinSize;
+  set crossAxisMinSize(double value) {
+    assert(value != null);
+    if (_crossAxisMinSize != value) {
+      _crossAxisMinSize = value;
       markNeedsLayout();
     }
   }
@@ -2500,9 +2528,9 @@ class _RenderMenuBarMenu extends RenderBox
   ///
   /// If the [direction] is [Axis.vertical], then the [textDirection] must not
   /// be null.
-  TextDirection? get textDirection => _textDirection;
-  TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
     if (_textDirection != value) {
       _textDirection = value;
       markNeedsLayout();
@@ -2560,9 +2588,6 @@ class _RenderMenuBarMenu extends RenderBox
     required _ChildSizingFunction childSize, // a method to find the size in the sizing direction
   }) {
     if (_direction == sizingDirection) {
-      // INTRINSIC MAIN SIZE
-      // Intrinsic main size is the smallest size the flex container can take
-      // while maintaining the min/max-content contributions of its flex items.
       double inflexibleSpace = 0.0;
       RenderBox? child = firstChild;
       while (child != null) {
@@ -2572,12 +2597,6 @@ class _RenderMenuBarMenu extends RenderBox
       }
       return inflexibleSpace;
     } else {
-      // INTRINSIC CROSS SIZE
-      // Intrinsic cross size is the max of the intrinsic cross sizes of the
-      // children, after the flexible children are fit into the available space,
-      // with the children sized using their max intrinsic dimensions.
-
-      // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
       double maxCrossSize = 0.0;
       RenderBox? child = firstChild;
       while (child != null) {
@@ -2597,7 +2616,7 @@ class _RenderMenuBarMenu extends RenderBox
         final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
         child = childParentData.nextSibling;
       }
-      return maxCrossSize;
+      return math.max(_crossAxisMinSize, maxCrossSize);
     }
   }
 
@@ -2683,7 +2702,7 @@ class _RenderMenuBarMenu extends RenderBox
     assert(constraints != null);
 
     double crossSize = 0.0;
-    double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
+    double allocatedSize = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
       final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
@@ -2698,13 +2717,14 @@ class _RenderMenuBarMenu extends RenderBox
       }
       final Size childSize = layoutChild(child, innerConstraints);
       allocatedSize += _getMainSize(childSize);
-      crossSize = math.max(crossSize, _getCrossSize(childSize));
+      crossSize = math.max(_crossAxisMinSize, math.max(crossSize, _getCrossSize(childSize)));
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
 
     // Make a second pass, fixing the size of the children in the cross
-    // direction at the size of the largest one.
+    // direction at the size of the largest one. This is the main reason we need
+    // a custom render object.
     child = firstChild;
     final BoxConstraints innerConstraints;
     switch (_direction) {
@@ -2724,11 +2744,10 @@ class _RenderMenuBarMenu extends RenderBox
     switch (_direction) {
       case Axis.horizontal:
         return _LayoutSizes(
-          mainSize: allocatedSize + padding.horizontal,
-          crossSize: crossSize + padding.vertical,
-          allocatedSize: allocatedSize + padding.horizontal,
+          mainSize: constraints.maxWidth,
+          crossSize: crossSize,
+          allocatedSize: constraints.maxWidth,
         );
-        break;
       case Axis.vertical:
         return _LayoutSizes(
           mainSize: allocatedSize + padding.vertical,
@@ -2766,14 +2785,26 @@ class _RenderMenuBarMenu extends RenderBox
     }
     final double actualSizeDelta = actualSize - allocatedSize;
     _overflow = math.max(0.0, -actualSizeDelta);
-    final double leadingSpace = padding.top;
-
-    // flipMainAxis is used to decide whether to lay out
-    // left-to-right/top-to-bottom (false), or right-to-left/bottom-to-top
-    // (true). The _startIsTopLeft will return null if there's only one child
-    // and the relevant direction is null, in which case we arbitrarily decide
-    // to flip, but that doesn't have any detectable effect.
-    final bool flipMainAxis = !(_startIsTopLeft(direction, textDirection, VerticalDirection.down) ?? true);
+    final double leadingSpace;
+    final bool flipMainAxis;
+    switch (_direction) {
+      case Axis.horizontal:
+        switch (textDirection) {
+          case TextDirection.rtl:
+            leadingSpace = padding.right;
+            flipMainAxis = true;
+            break;
+          case TextDirection.ltr:
+            leadingSpace = padding.left;
+            flipMainAxis = false;
+            break;
+        }
+        break;
+      case Axis.vertical:
+        leadingSpace = padding.top;
+        flipMainAxis = false;
+        break;
+    }
 
     // Position elements
     double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
@@ -2781,9 +2812,21 @@ class _RenderMenuBarMenu extends RenderBox
     while (child != null) {
       final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
       final double childCrossPosition;
-      childCrossPosition = _startIsTopLeft(flipAxis(direction), textDirection, VerticalDirection.down) ?? false
-          ? padding.right
-          : padding.left;
+      switch (direction) {
+        case Axis.horizontal:
+          childCrossPosition = padding.top;
+          break;
+        case Axis.vertical:
+          switch (textDirection) {
+            case TextDirection.rtl:
+              childCrossPosition = padding.right;
+              break;
+            case TextDirection.ltr:
+              childCrossPosition = padding.left;
+              break;
+          }
+          break;
+      }
       if (flipMainAxis) {
         childMainPosition -= _getMainSize(child.size);
       }
@@ -2865,24 +2908,6 @@ class _RenderMenuBarMenu extends RenderBox
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
-  static bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDirection? verticalDirection) {
-    assert(direction != null);
-    // If the relevant value of textDirection or verticalDirection is null, this returns null too.
-    switch (direction) {
-      case Axis.horizontal:
-        switch (textDirection) {
-          case TextDirection.ltr:
-            return true;
-          case TextDirection.rtl:
-            return false;
-          case null:
-            return null;
-        }
-      case Axis.vertical:
-        return true;
-    }
-  }
-
   @override
   String toStringShort() {
     String header = super.toStringShort();
@@ -2899,289 +2924,6 @@ class _RenderMenuBarMenu extends RenderBox
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('direction', direction));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-  }
-}
-
-class _RenderMenuBarMenuOld extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, _RenderMenuBarMenuParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, _RenderMenuBarMenuParentData>,
-        DebugOverflowIndicatorMixin {
-  _RenderMenuBarMenuOld({
-    required _MenuBarState menuBar,
-    required EdgeInsets padding,
-    required String semanticLabel,
-    required TextDirection textDirection,
-    required Axis axis,
-  })  : _menuBar = menuBar,
-        _axis = axis,
-        _padding = padding,
-        _semanticLabel = semanticLabel,
-        _textDirection = textDirection {
-    _menuBar.registerMenuRenderObject(this);
-  }
-
-  @override
-  void dispose() {
-    _menuBar.unregisterMenuRenderObject(this);
-    super.dispose();
-  }
-
-  _MenuBarState get menuBar => _menuBar;
-  _MenuBarState _menuBar;
-  set menuBar(_MenuBarState value) {
-    if (_menuBar != value) {
-      _menuBar.unregisterMenuRenderObject(this);
-      _menuBar = value;
-      _menuBar.registerMenuRenderObject(this);
-      markNeedsLayout();
-    }
-  }
-
-  Axis get axis => _axis;
-  Axis _axis;
-  set axis(Axis value) {
-    if (_axis != value) {
-      _axis = value;
-      markNeedsLayout();
-    }
-  }
-
-  EdgeInsets get padding => _padding;
-  EdgeInsets _padding;
-  set padding(EdgeInsets value) {
-    if (_padding != value) {
-      _padding = value;
-      markNeedsLayout();
-    }
-  }
-
-  String get semanticLabel => _semanticLabel;
-  String _semanticLabel;
-  set semanticLabel(String value) {
-    if (value != _semanticLabel) {
-      _semanticLabel = value;
-      markNeedsLayout();
-    }
-  }
-
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    if (_textDirection != value) {
-      _textDirection = value;
-      markNeedsLayout();
-    }
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! _RenderMenuBarMenuParentData) {
-      child.parentData = _RenderMenuBarMenuParentData();
-    }
-  }
-
-  double _getIntrinsicSize({
-    required Axis sizingDirection,
-    required double extent,
-    required _ChildSizingFunction childSize,
-  }) {
-    if (sizingDirection == Axis.vertical) {
-      double inflexibleSpace = 0.0;
-      RenderBox? child = firstChild;
-      while (child != null) {
-        inflexibleSpace += childSize(child, extent) + padding.vertical;
-        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-        child = childParentData.nextSibling;
-      }
-      return inflexibleSpace;
-    } else {
-      double maxCrossSize = 0.0;
-      RenderBox? child = firstChild;
-      while (child != null) {
-        final double mainSize = child.getMaxIntrinsicHeight(double.infinity);
-        final double crossSize = childSize(child, mainSize) + padding.horizontal;
-        maxCrossSize = math.max(maxCrossSize, crossSize);
-        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-        child = childParentData.nextSibling;
-      }
-      return maxCrossSize;
-    }
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.horizontal,
-      extent: height,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
-    );
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.horizontal,
-      extent: height,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
-    );
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.vertical,
-      extent: width,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
-    );
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.vertical,
-      extent: width,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
-    );
-  }
-
-  @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    return defaultComputeDistanceToFirstActualBaseline(baseline);
-  }
-
-  _LayoutSizes _computeSizes({
-    required BoxConstraints constraints,
-    required ChildLayouter layoutChild,
-  }) {
-    assert(constraints != null);
-
-    double crossSize = 0.0;
-    double allocatedSize = 0.0;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-      final BoxConstraints innerConstraints;
-      final Size childSize;
-      switch (axis) {
-        case Axis.horizontal:
-          innerConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
-          childSize = layoutChild(child, innerConstraints);
-          allocatedSize += childSize.height;
-          crossSize = math.max(crossSize, childSize.width);
-          break;
-        case Axis.vertical:
-          innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-          childSize = layoutChild(child, innerConstraints);
-          allocatedSize += childSize.width;
-          crossSize = math.max(crossSize, childSize.height);
-          break;
-      }
-      assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
-    }
-    // Make a second pass, fixing the width of the children at the size of the
-    // widest one.
-    child = firstChild;
-    final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: crossSize);
-    while (child != null) {
-      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-      layoutChild(child, innerConstraints);
-      child = childParentData.nextSibling;
-    }
-    switch (axis) {
-      case Axis.horizontal:
-        return _LayoutSizes(
-          mainSize: allocatedSize,
-          crossSize: crossSize + padding.vertical,
-          allocatedSize: allocatedSize + padding.horizontal,
-        );
-      case Axis.vertical:
-        return _LayoutSizes(
-          mainSize: allocatedSize,
-          crossSize: crossSize + padding.horizontal,
-          allocatedSize: allocatedSize + padding.vertical,
-        );
-    }
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    final _LayoutSizes sizes = _computeSizes(
-      layoutChild: ChildLayoutHelper.dryLayoutChild,
-      constraints: constraints,
-    );
-
-    return constraints.constrain(Size(sizes.crossSize, sizes.allocatedSize));
-  }
-
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-
-    final _LayoutSizes sizes = _computeSizes(
-      layoutChild: ChildLayoutHelper.layoutChild,
-      constraints: constraints,
-    );
-
-    double actualSize = sizes.allocatedSize;
-    double crossSize = sizes.crossSize;
-
-    // Align items along the main axis.
-    size = constraints.constrain(Size(crossSize, actualSize));
-    actualSize = size.height;
-    crossSize = size.width;
-    late final double leadingSpace;
-    // flipMainAxis is used to decide whether to lay out
-    // left-to-right/top-to-bottom (false), or right-to-left/bottom-to-top
-    // (true). The _startIsTopLeft will return null if there's only one child
-    // and the relevant direction is null, in which case we arbitrarily decide
-    // to flip, but that doesn't have any detectable effect.
-    final bool flipMainAxis = !(_startIsTopLeft(Axis.vertical, textDirection) ?? true);
-    leadingSpace = padding.top;
-
-    // Position elements
-    double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-      final double childCrossPosition;
-      childCrossPosition = padding.left;
-      if (flipMainAxis) {
-        childMainPosition -= child.size.height;
-      }
-      childParentData.offset = Offset(childCrossPosition, childMainPosition);
-      if (!flipMainAxis) {
-        childMainPosition += child.size.height;
-      }
-      child = childParentData.nextSibling;
-    }
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    return defaultHitTestChildren(result, position: position);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) => defaultPaint(context, offset);
-
-  static bool? _startIsTopLeft(Axis direction, TextDirection? textDirection) {
-    assert(direction != null);
-    // If the relevant value of textDirection is null, this returns null too.
-    switch (direction) {
-      case Axis.horizontal:
-        switch (textDirection) {
-          case TextDirection.ltr:
-            return true;
-          case TextDirection.rtl:
-            return false;
-          case null:
-            return null;
-        }
-      case Axis.vertical:
-        return true;
-    }
   }
 }
 
@@ -3722,7 +3464,10 @@ class _TokenDefaultsM3 extends MenuBarThemeData {
   @override
   EdgeInsets get barPadding {
     return EdgeInsets.symmetric(
-      horizontal: 20 + Theme.of(context).visualDensity.baseSizeAdjustment.dx,
+      horizontal: math.max(
+        _kTopLevelMenuHorizontalMinPadding,
+        2 + Theme.of(context).visualDensity.baseSizeAdjustment.dx,
+      ),
     );
   }
 
