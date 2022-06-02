@@ -103,12 +103,13 @@ void addJsEventListener(Object target, String type, Function listener, Object ev
 }
 
 /// Removes an event listener that was added using [addJsEventListener].
-void removeJsEventListener(Object target, String type, Function listener) {
+void removeJsEventListener(Object target, String type, Function listener, Object eventOptions) {
   js_util.callMethod<void>(
     target,
     'removeEventListener', <dynamic>[
       type,
       listener,
+      eventOptions,
     ]
   );
 }
