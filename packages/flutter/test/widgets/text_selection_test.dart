@@ -1246,6 +1246,8 @@ void main() {
       await gesture2.up();
       await tester.pump(const Duration(milliseconds: 20));
       expect(endDragEndDetails, isNotNull);
+
+      selectionOverlay.dispose();
     });
   });
 
