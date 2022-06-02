@@ -19,16 +19,16 @@ class _TokenDefaultsM3 extends ButtonStyle {
         enableFeedback: true,
         alignment: Alignment.center,
       );
-    
+
     final BuildContext context;
     late final ColorScheme _colors = Theme.of(context).colorScheme;
-    
+
   // No default text style
-  
+
   @override
-  MaterialStateProperty<Color?>? get backgroundColor => 
+  MaterialStateProperty<Color?>? get backgroundColor =>
     ButtonStyleButton.allOrNull<Color>(Colors.transparent);
-    
+
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -36,7 +36,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
         return ${componentColor('md.comp.icon-button.disabled.icon')};
       return ${componentColor('md.comp.icon-button.unselected.icon')};
     });
-    
+
  @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -48,23 +48,23 @@ class _TokenDefaultsM3 extends ButtonStyle {
         return ${componentColor('md.comp.icon-button.unselected.pressed.state-layer')};
       return null;
     });
-    
+
   // No default shadow color
-  
+
   // No default surface tint color
-  
+
   @override
-  MaterialStateProperty<double>? get elevation => 
+  MaterialStateProperty<double>? get elevation =>
     ButtonStyleButton.allOrNull<double>(0.0);
-    
+
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
     ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(const EdgeInsets.all(8.0));
-    
+
   @override
   MaterialStateProperty<Size>? get minimumSize =>
     ButtonStyleButton.allOrNull<Size>(const Size(${tokens["md.comp.icon-button.state-layer.size"]}, ${tokens["md.comp.icon-button.state-layer.size"]}));
-    
+
   // No default fixedSize
 
   @override
@@ -72,11 +72,11 @@ class _TokenDefaultsM3 extends ButtonStyle {
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
 
   // No default side
-  
+
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
     ButtonStyleButton.allOrNull<OutlinedBorder>(${shape("md.comp.icon-button.state-layer")});
-    
+
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -84,16 +84,16 @@ class _TokenDefaultsM3 extends ButtonStyle {
         return SystemMouseCursors.basic;
       return SystemMouseCursors.click;
     });
-  
+
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
-  
+
   @override
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
-}  
+}
 ''';
 
 }
