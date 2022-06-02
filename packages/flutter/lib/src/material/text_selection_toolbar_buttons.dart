@@ -1,6 +1,8 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'desktop_text_selection.dart';
@@ -19,10 +21,10 @@ import 'theme.dart';
 class TextSelectionToolbarButtonsBuilder extends StatelessWidget {
   /// Creates an instance of [TextSelectionToolbarButtonsBuilder].
   const TextSelectionToolbarButtonsBuilder({
-    Key? key,
+    super.key,
     required this.buttonDatas,
     required this.builder,
-  }) : super(key: key);
+  });
 
   /// The information used to create each button Widget.
   final List<ContextualMenuButtonData> buttonDatas;
