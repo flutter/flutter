@@ -61,6 +61,9 @@ class LocalEngineLocator {
       engineSourcePath ??= _tryEnginePath(
         _fileSystem.path.join(_fileSystem.directory(_flutterRoot).parent.path, 'engine', 'src'),
       );
+      engineSourcePath ??= _tryEnginePath(
+        _fileSystem.path.join(_fileSystem.directory(_flutterRoot).parent.path, 'src'),
+      );
     }
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
