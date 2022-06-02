@@ -2,11 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CustomMultiChildLayout. This example creates a
-// parent widget that takes in children, the number of columns wanted, and
-// the row height wanted, then creates a layout that lists the children in
-// a "snake" pattern where the child in the new row is placed directly under
-// the previous child and the layout direction is toggled between ltr or rtl.
+/// This example shows a [CustomMultiChildLayout] being used to layout widgets
+/// in a "snake" pattern where the child in the new row is placed directly under
+/// the previous child and the layout direction is toggled between ltr or rtl.
+///
+/// It allows entry of the number of columns and column width and sets the
+/// constraints of the Layout widget
+/// 
+/// Each child must be wrapped in a [LayoutId] widget to identify the widget for
+/// the delegate.
+///
+/// {@tool dartpad}
+/// This example shows a [CustomMultiChildLayout] widget being used to lay out
+/// colored blocks in a "snake" pattern.
+///
+/// It allows entry of the number of columns and column width and sets the
+/// constraints of the Layout widget
+///
+/// ** See code in examples/api/lib/widgets/basic/custom_multi_child_layout.1.dart **
+/// {@end-tool}
 
 import 'package:flutter/material.dart';
 
@@ -23,7 +37,10 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const ExampleWidget(),
+        body: const Center(
+          key: Key('layoutParent'),
+          child: ExampleWidget(),
+        ),
       ),
     );
   }
@@ -33,26 +50,26 @@ class _SnakeLayoutDelegate extends MultiChildLayoutDelegate {
   _SnakeLayoutDelegate({
     required this.ids,
     required this.numCols,
+    required this.colWidth,
     required this.rowHeight,
   });
 
   // In our case we only care about IDs since we just need something to refer to in the LayoutId widget in the build of the ExampleWidget.
   final List<String> ids;
   final int numCols;
-  // Not sure how to access the greatest height of children to make a max height so here I hardcode the rowHeight value
   final double rowHeight;
+  final double colWidth;
 
   @override
   void performLayout(Size size) {
     // Distribute children between numCols
-    final double columnWidth = size.width / numCols;
     Offset childPosition = Offset.zero;
     // The layout direction changes depending on which row the children are being drawn on
     int direction = 1;
     // Position each child
     ids.asMap().forEach((int idx, String id) {
       final Size currentSize = layoutChild(
-          id, BoxConstraints(maxHeight: rowHeight, maxWidth: columnWidth));
+          id, BoxConstraints(maxHeight: rowHeight, maxWidth: colWidth));
       positionChild(id, childPosition);
       // Logic for checking if a new row has been reached and the appropriate behavior
       if ((idx + 1) % numCols == 0) {
@@ -62,6 +79,11 @@ class _SnakeLayoutDelegate extends MultiChildLayoutDelegate {
         childPosition += Offset(direction * currentSize.width, 0);
       }
     });
+  }
+
+  @override
+  Size getSize(BoxConstraints constraints) {
+    return Size(colWidth * numCols, super.getSize(constraints).height);
   }
 
   @override
@@ -84,9 +106,11 @@ class ExampleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomMultiChildLayout(
+      key: const Key('multiChildLayout'),
       delegate: _SnakeLayoutDelegate(
         ids: _colors.keys.toList(),
         numCols: 3,
+        colWidth: 100.0,
         rowHeight: 100.0,
       ),
       children: <Widget>[

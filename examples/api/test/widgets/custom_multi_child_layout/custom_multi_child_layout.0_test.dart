@@ -26,12 +26,8 @@ void main() {
             height: 700,
             child: example.MyApp())));
 
-    final Finder parent = find.byKey(const Key('parent'));
-    final Size parentSize = tester.getSize(parent);
     final Size childSize = tester.getSize(find.byKey(const Key('Blue')));
 
-    expect(childSize.width.roundToDouble(),
-        (parentSize.width / 3).roundToDouble());
     expect(childSize.height.roundToDouble(), 100.0);
   });
 
@@ -45,8 +41,14 @@ void main() {
             child: example.MyApp())));
 
     final Size childSize = tester.getSize(find.byKey(const Key('Blue')));
+    expect(childSize.width.roundToDouble(), 100.0);
 
-    expect(childSize.width.roundToDouble(), 200.0);
+    final Size multiLayoutSize =
+        tester.getSize(find.byKey(const Key('multiChildLayout')));
+    final Size layoutParentSize =
+        tester.getSize(find.byKey(const Key('layoutParent')));
+    expect(multiLayoutSize.width.roundToDouble(), 300.0);
+    expect(multiLayoutSize.height.roundToDouble(), layoutParentSize.height);
   });
 
   testWidgets('row behavior is correct', (WidgetTester tester) async {
