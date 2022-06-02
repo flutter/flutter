@@ -324,13 +324,13 @@ class IconButton extends StatelessWidget {
 
   /// {@macro flutter.material.ButtonStyleButton.style}
   ///
-  /// [style] is only used for Material 3 IconButton. If [ThemeData.useMaterial3]
-  /// is set to true, [style] is preferred for IconButton customization, and any
+  /// The [style] is only used for Material 3 [IconButton]. If [ThemeData.useMaterial3]
+  /// is set to true, [style] is preferred for icon button customization, and any
   /// parameters defined in [style] will override the same parameters in [IconButton].
   ///
   /// For example, if [IconButton]'s [visualDensity] is set to [VisualDensity.standard]
   /// and [style]'s [visualDensity] is set to [VisualDensity.compact],
-  /// the IconButton will have [VisualDensity.compact] to define the button's layout.
+  /// the icon button will have [VisualDensity.compact] to define the button's layout.
   final ButtonStyle? style;
 
   /// A static convenience method that constructs an icon button
@@ -476,16 +476,16 @@ class IconButton extends StatelessWidget {
         adjustedStyle = style!.merge(adjustedStyle);
       }
 
-      Widget resultM3 = IconTheme.merge(
+      Widget iconButton = IconTheme.merge(
         data: IconThemeData(
           size: effectiveIconSize,
         ),
         child: icon,
       );
       if (tooltip != null) {
-        resultM3 = Tooltip(
+        iconButton = Tooltip(
           message: tooltip,
-          child: resultM3,
+          child: iconButton,
         );
       }
       return _IconButtonM3(
@@ -494,7 +494,7 @@ class IconButton extends StatelessWidget {
         onPressed: onPressed,
         autofocus: autofocus,
         focusNode: focusNode,
-        child: resultM3,
+        child: iconButton,
       );
     }
 
@@ -619,7 +619,7 @@ class _IconButtonM3 extends ButtonStyleButton {
     return _TokenDefaultsM3(context);
   }
 
-  /// Returns null because IconButton doesn't have its component theme.
+  /// Returns null because [IconButton] doesn't have its component theme.
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
     return null;
