@@ -982,8 +982,8 @@ class PipelineOwner {
       return true;
     }());
     try {
-      assert(!_shouldMergeDirtyNodes);
       while (_nodesNeedingLayout.isNotEmpty) {
+        assert(!_shouldMergeDirtyNodes);
         final List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = <RenderObject>[];
         dirtyNodes.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
@@ -1000,6 +1000,9 @@ class PipelineOwner {
             node._layoutWithoutResize();
           }
         }
+        // No need to merge dirty nodes generated from processing the last
+        // relayout boundary back.
+        _shouldMergeDirtyNodes = false;
       }
     } finally {
       _shouldMergeDirtyNodes = false;
