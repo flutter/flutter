@@ -73,13 +73,13 @@ class SelectionGesturesManager extends ChangeNotifier {
     Map<Type, ContextGestureRecognizerFactory> gestures = const <Type, ContextGestureRecognizerFactory>{},
   })  : assert(gestures != null),
         _gestures = gestures;
-  
+
   Map<Type, ContextGestureRecognizerFactory> _gestures = <Type, ContextGestureRecognizerFactory>{};
   Map<Type, ContextGestureRecognizerFactory> get gestures => _gestures;
   set gestures(Map<Type, ContextGestureRecognizerFactory> gestures) {
     _gestures = gestures;
   }
- 
+
   @protected
   void handlePointerDown(BuildContext context, PointerDownEvent event, Map<Type, GestureRecognizer> recognizers) {
     for (final GestureRecognizer recognizer in recognizers.values) {
