@@ -29,14 +29,17 @@ class MigrateAbandonCommand extends FlutterCommand {
        ) {
     requiresPubspecYaml();
     argParser.addOption(
-      'working-directory',
-      help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
-            'This path can be absolute or relative to the flutter project root. This defaults to `migrate_working_dir`',
+      'staging-directory',
+      help: 'Specifies the custom migration working directory used to stage '
+            'and edit proposed changes. This path can be absolute or relative '
+            'to the flutter project root. This defaults to '
+            '`$kDefaultMigrateWorkingDirectoryName`',
       valueHelp: 'path',
     );
     argParser.addOption(
       'project-directory',
-      help: 'The root directory of the flutter project.',
+      help: 'The root directory of the flutter project. This defaults to the '
+            'current working directory if omitted.',
       valueHelp: 'path',
     );
     argParser.addFlag(
@@ -74,7 +77,7 @@ class MigrateAbandonCommand extends FlutterCommand {
       ? FlutterProject.current()
       : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    final String? customWorkingDirectoryPath = stringArg('working-directory');
+    final String? customWorkingDirectoryPath = stringArg('staging-directory');
     if (customWorkingDirectoryPath != null) {
       if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
         workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
@@ -82,7 +85,8 @@ class MigrateAbandonCommand extends FlutterCommand {
         workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
       }
       if (!workingDirectory.existsSync()) {
-        logger.printError('Provided working directory `$customWorkingDirectoryPath` does not exist or is not valid.');
+        logger.printError('Provided working directory `$customWorkingDirectoryPath` '
+                          'does not exist or is not valid.');
         return const FlutterCommandResult(ExitStatus.fail);
       }
     }
@@ -92,7 +96,8 @@ class MigrateAbandonCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    logger.printStatus('\nAbandoning the existing migration will delete the migration working directory at ${workingDirectory.path}');
+    logger.printStatus('\nAbandoning the existing migration will delete the '
+                       'migration working directory at ${workingDirectory.path}');
     final bool force = boolArg('force') ?? false;
     if (!force) {
       String selection = 'y';

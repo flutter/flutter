@@ -75,7 +75,7 @@ flutter:
       <String>[
         'migrate',
         'abandon',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${workingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -133,7 +133,7 @@ deleted_files:
       <String>[
         'migrate',
         'abandon',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${workingDir.path}',
         '--project-directory=${appDir.path}',
         '--force',
       ]
