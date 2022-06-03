@@ -28,8 +28,11 @@ public final class BuildConfig {{
 }}
 """
 
+
 def main():
-  parser = argparse.ArgumentParser(description='Generate BuildConfig.java for Android')
+  parser = argparse.ArgumentParser(
+      description='Generate BuildConfig.java for Android'
+  )
   parser.add_argument('--runtime-mode', type=str, required=True)
   parser.add_argument('--out', type=str, required=True)
 
@@ -42,7 +45,15 @@ def main():
   assert debug or profile or release or jit_release
 
   with open(os.path.abspath(args.out), 'w+') as output_file:
-    output_file.write(BUILD_CONFIG_TEMPLATE.format(str(debug).lower(), str(profile).lower(), str(release).lower(), str(jit_release).lower()))
+    output_file.write(
+        BUILD_CONFIG_TEMPLATE.format(
+            str(debug).lower(),
+            str(profile).lower(),
+            str(release).lower(),
+            str(jit_release).lower()
+        )
+    )
+
 
 if __name__ == '__main__':
   sys.exit(main())

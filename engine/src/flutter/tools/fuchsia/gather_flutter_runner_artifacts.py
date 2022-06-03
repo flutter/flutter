@@ -3,6 +3,7 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """ Gather all the fuchsia artifacts to a destination directory.
 """
 
@@ -16,10 +17,8 @@ import subprocess
 import sys
 
 _ARTIFACT_PATH_TO_DST = {
-    'flutter_jit_runner': 'flutter_jit_runner',
-    'icudtl.dat': 'data/icudtl.dat',
-    'dart_runner': 'dart_runner',
-    'flutter_patched_sdk': 'flutter_patched_sdk'
+    'flutter_jit_runner': 'flutter_jit_runner', 'icudtl.dat': 'data/icudtl.dat',
+    'dart_runner': 'dart_runner', 'flutter_patched_sdk': 'flutter_patched_sdk'
 }
 
 
@@ -74,9 +73,11 @@ def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument(
-      '--artifacts-root', dest='artifacts_root', action='store', required=True)
+      '--artifacts-root', dest='artifacts_root', action='store', required=True
+  )
   parser.add_argument(
-      '--dest-dir', dest='dst_dir', action='store', required=True)
+      '--dest-dir', dest='dst_dir', action='store', required=True
+  )
 
   args = parser.parse_args()
 

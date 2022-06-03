@@ -3,6 +3,7 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """ Gather the build_id, prefix_dir, and exec_name given the path to executable
     also copies to the specified destination.
 
@@ -27,7 +28,7 @@ def HashFile(filepath):
   digest = hashlib.sha1()
   with open(filepath, 'rb') as f:
     while True:
-      chunk = f.read(1024*1024)
+      chunk = f.read(1024 * 1024)
       if not chunk:
         break
       digest.update(chunk)
@@ -43,11 +44,13 @@ def GetBuildIdParts(exec_path, read_elf):
   sha1_pattern = re.compile(r'[0-9a-fA-F\-]+')
   file_out = subprocess.check_output([read_elf, '-n', exec_path])
   build_id_line = file_out.splitlines()[-1].split()
-  if (build_id_line[0] != b'Build' or
-      build_id_line[1] != b'ID:' or not
-      sha1_pattern.match(str(build_id_line[-1])) or not
-      len(build_id_line[-1]) > 2):
-    raise Exception('Expected the last line of llvm-readelf to match "Build ID <Hex String>" Got: %s' % file_out)
+  if (build_id_line[0] != b'Build' or build_id_line[1] != b'ID:' or
+      not sha1_pattern.match(str(build_id_line[-1])) or
+      not len(build_id_line[-1]) > 2):
+    raise Exception(
+        'Expected the last line of llvm-readelf to match "Build ID <Hex String>" Got: %s'
+        % file_out
+    )
 
   build_id = build_id_line[-1]
   return {
@@ -72,7 +75,8 @@ def main():
       dest='exec_path',
       action='store',
       required=True,
-      help='Path to the executable on the filesystem.')
+      help='Path to the executable on the filesystem.'
+  )
   parser.add_argument(
       '--destination-base',
       dest='dest',
@@ -85,26 +89,28 @@ def main():
       dest='stripped',
       action='store_true',
       default=True,
-      help='Executable at the specified path is stripped.')
+      help='Executable at the specified path is stripped.'
+  )
   parser.add_argument(
       '--unstripped',
       dest='stripped',
       action='store_false',
-      help='Executable at the specified path is unstripped.')
+      help='Executable at the specified path is unstripped.'
+  )
   parser.add_argument(
       '--read-elf',
       dest='read_elf',
       action='store',
       required=True,
-      help='Path to read-elf executable.')
+      help='Path to read-elf executable.'
+  )
 
   args = parser.parse_args()
-  assert os.path.exists(args.exec_path), (
-    'exec_path "%s" does not exist' % args.exec_path)
-  assert os.path.exists(args.dest), (
-    'dest "%s" does not exist' % args.dest)
-  assert os.path.exists(args.read_elf), (
-    'read_elf "%s" does not exist' % args.read_elf)
+  assert os.path.exists(args.exec_path
+                       ), ('exec_path "%s" does not exist' % args.exec_path)
+  assert os.path.exists(args.dest), ('dest "%s" does not exist' % args.dest)
+  assert os.path.exists(args.read_elf
+                       ), ('read_elf "%s" does not exist' % args.read_elf)
 
   parts = GetBuildIdParts(args.exec_path, args.read_elf)
   dbg_prefix_base = os.path.join(args.dest, parts['prefix_dir'])
@@ -129,7 +135,8 @@ def main():
 
   # If the debug file hasn't changed, don't rewrite the debug and completion
   # file, speeding up incremental builds.
-  if os.path.exists(dbg_file_path) and HashFile(args.exec_path) == HashFile(dbg_file_path):
+  if os.path.exists(dbg_file_path) and HashFile(args.exec_path
+                                               ) == HashFile(dbg_file_path):
     return 0
 
   shutil.copyfile(args.exec_path, dbg_file_path)

@@ -15,22 +15,22 @@ import subprocess
 import sys
 
 ALL_PACKAGES = [
-  os.path.join("src", "flutter", "ci"),
-  os.path.join("src", "flutter", "flutter_frontend_server"),
-  os.path.join("src", "flutter", "shell", "vmservice"),
-  os.path.join("src", "flutter", "testing", "benchmark"),
-  os.path.join("src", "flutter", "testing", "dart"),
-  os.path.join("src", "flutter", "testing", "litetest"),
-  os.path.join("src", "flutter", "testing", "android_background_image"),
-  os.path.join("src", "flutter", "testing", "scenario_app"),
-  os.path.join("src", "flutter", "testing", "smoke_test_failure"),
-  os.path.join("src", "flutter", "testing", "symbols"),
-  os.path.join("src", "flutter", "tools", "api_check"),
-  os.path.join("src", "flutter", "tools", "android_lint"),
-  os.path.join("src", "flutter", "tools", "clang_tidy"),
-  os.path.join("src", "flutter", "tools", "const_finder"),
-  os.path.join("src", "flutter", "tools", "githooks"),
-  os.path.join("src", "flutter", "tools", "licenses"),
+    os.path.join("src", "flutter", "ci"),
+    os.path.join("src", "flutter", "flutter_frontend_server"),
+    os.path.join("src", "flutter", "shell", "vmservice"),
+    os.path.join("src", "flutter", "testing", "benchmark"),
+    os.path.join("src", "flutter", "testing", "dart"),
+    os.path.join("src", "flutter", "testing", "litetest"),
+    os.path.join("src", "flutter", "testing", "android_background_image"),
+    os.path.join("src", "flutter", "testing", "scenario_app"),
+    os.path.join("src", "flutter", "testing", "smoke_test_failure"),
+    os.path.join("src", "flutter", "testing", "symbols"),
+    os.path.join("src", "flutter", "tools", "api_check"),
+    os.path.join("src", "flutter", "tools", "android_lint"),
+    os.path.join("src", "flutter", "tools", "clang_tidy"),
+    os.path.join("src", "flutter", "tools", "const_finder"),
+    os.path.join("src", "flutter", "tools", "githooks"),
+    os.path.join("src", "flutter", "tools", "licenses"),
 ]
 
 
@@ -38,8 +38,10 @@ def FetchPackage(pub, package):
   try:
     subprocess.check_output(pub, cwd=package, stderr=subprocess.STDOUT)
   except subprocess.CalledProcessError as err:
-    print("'%s' failed in '%s' with status %d:\n%s" %
-          (' '.join(pub), package, err.returncode, err.output))
+    print(
+        "'%s' failed in '%s' with status %d:\n%s" %
+        (' '.join(pub), package, err.returncode, err.output)
+    )
     return 1
   return 0
 
@@ -57,18 +59,27 @@ def CheckPackage(package):
         print("Error: package '%s' was fetched from pub" % package_name)
         pub_count = pub_count + 1
   if pub_count > 0:
-    print("Error: %d packages were fetched from pub for %s" % (pub_count, package))
-    print("Please fix the pubspec.yaml for %s "
-          "so that all dependencies are path dependencies" % package)
+    print(
+        "Error: %d packages were fetched from pub for %s" %
+        (pub_count, package)
+    )
+    print(
+        "Please fix the pubspec.yaml for %s "
+        "so that all dependencies are path dependencies" % package
+    )
   return pub_count
 
 
 def Main():
-  leading = os.path.join("src", "third_party", "dart", "tools", "sdks", "dart-sdk", "bin")
+  leading = os.path.join(
+      "src", "third_party", "dart", "tools", "sdks", "dart-sdk", "bin"
+  )
   dart = "dart"
   if os.name == "nt":
     dart = "dart.exe"
-  pubcmd = [os.path.abspath(os.path.join(leading, dart)), "pub", "get", "--offline"]
+  pubcmd = [
+      os.path.abspath(os.path.join(leading, dart)), "pub", "get", "--offline"
+  ]
 
   pub_count = 0
   for package in ALL_PACKAGES:

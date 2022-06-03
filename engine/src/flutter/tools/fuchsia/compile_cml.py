@@ -3,6 +3,7 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """ Compiles a cml manifest file.
 """
 
@@ -11,15 +12,17 @@ import os
 import subprocess
 import sys
 
+
 def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument(
-      '--cmc-bin', dest='cmc_bin', action='store', required=True)
+      '--cmc-bin', dest='cmc_bin', action='store', required=True
+  )
+  parser.add_argument('--output', dest='output', action='store', required=True)
   parser.add_argument(
-      '--output', dest='output', action='store', required=True)
-  parser.add_argument(
-      '--manifest-file', dest='manifest_file', action='store', required=True)
+      '--manifest-file', dest='manifest_file', action='store', required=True
+  )
   parser.add_argument(
       '--includepath',
       dest='includepath',
@@ -38,7 +41,7 @@ def main():
       '--output',
       args.output,
       args.manifest_file,
-  ] + (args.includepath and [ '--includepath' ] + args.includepath))
+  ] + (args.includepath and ['--includepath'] + args.includepath))
 
   return 0
 

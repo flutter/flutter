@@ -11,8 +11,11 @@ import os
 import subprocess
 import sys
 
-
-SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+SRC_ROOT = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+)
 FLUTTER_DIR = os.path.join(SRC_ROOT, 'flutter')
 
 
@@ -28,11 +31,12 @@ def Main(argv):
     git = 'git.bat'
     githooks = os.path.join(githooks, 'windows')
   result = subprocess.run([
-    git,
-    'config',
-    'core.hooksPath',
-    githooks,
-  ], cwd=FLUTTER_DIR)
+      git,
+      'config',
+      'core.hooksPath',
+      githooks,
+  ],
+                          cwd=FLUTTER_DIR)
   return result.returncode
 
 
