@@ -483,6 +483,9 @@ class _MenuBarState extends State<_MenuBar> {
     if (widget.menus != oldWidget.menus) {
       _createMenuTree(widget.menus);
     }
+    if (!widget.enabled) {
+      closeAll();
+    }
     _markMenuDirtyAndDelayIfNecessary();
   }
 
@@ -704,6 +707,7 @@ class _MenuBarState extends State<_MenuBar> {
       _overlayEntry?.markNeedsBuild();
       widget.controller?._menuBarStateChanged();
     }
+
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       // If we're in the middle of a build, we need to mark dirty in a post
       // frame callback, since this function will often be called by a part of
@@ -774,10 +778,8 @@ class _MenuBarState extends State<_MenuBar> {
       if (menuBarBox != null) menuBarBox,
       ..._menuRenderBoxes,
     ];
-    debugPrint('testing');
     for (final RenderBox renderBox in renderBoxes) {
       assert(renderBox.attached);
-      debugPrint('Hit testing ${renderBox.globalToLocal(event.position)} against ${renderBox.size}');
       isInsideMenu =
           renderBox.hitTest(BoxHitTestResult(), position: renderBox.globalToLocal(event.position)) || isInsideMenu;
       if (isInsideMenu) {
@@ -837,14 +839,12 @@ class _MenuBarState extends State<_MenuBar> {
   // be used to do hit detection and find out if a pointer event hit a menu or
   // not without participating in the gesture arena.
   void registerMenuRenderObject(RenderBox menu) {
-    debugPrint('Registering ${menu.paintBounds}');
     _menuRenderBoxes.add(menu);
   }
 
   // Used to unregister the menu's previous render box whenever it changes, or
   // remove it when it is disposed.
   void unregisterMenuRenderObject(RenderBox menu) {
-    debugPrint('Unregistering ${menu.paintBounds}');
     _menuRenderBoxes.remove(menu);
   }
 
@@ -1228,17 +1228,7 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 
   @override
   void dispose() {
-    if (_menu!.isOpen) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        // Must happen post-frame because unregistering it can cause the menu to
-        // close the menu, modifying the menu, which means it needs to call
-        // setState.
-        _menuBar.unregisterMenu(_menu!);
-      });
-    } else {
-      // Since this menu isn't open, it won't need to be closed.
-      _menuBar.unregisterMenu(_menu!);
-    }
+    _menuBar.unregisterMenu(_menu!);
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
     super.dispose();
@@ -1838,7 +1828,7 @@ class MenuItemGroup extends StatelessWidget with MenuBarItem {
   }
 
   @override
-  String get label => '';  // MenuItemGroups don't have labels.
+  String get label => ''; // MenuItemGroups don't have labels.
 }
 
 class _MenuItemDivider extends StatelessWidget {
@@ -2412,8 +2402,7 @@ class _MenuBarMenuList extends StatefulWidget {
 }
 
 class _MenuBarMenuListState extends State<_MenuBarMenuList> {
-  RenderBox? _lastRenderBox;
-  _MenuBarState? _menuBar;
+  late _MenuBarState _menuBar;
 
   List<Widget> _expandGroups() {
     int index = 0;
@@ -2459,33 +2448,13 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_lastRenderBox == null) {
-      _lastRenderBox = context.findRenderObject() as RenderBox?;
-      if (_lastRenderBox != null) {
-        _menuBar!.registerMenuRenderObject(_lastRenderBox!);
-      }
-    }
+    _menuBar = _MenuBarState.of(context);
   }
 
   @override
   void didUpdateWidget(_MenuBarMenuList oldWidget) {
     super.didUpdateWidget(oldWidget);
     _menuBar = _MenuBarState.of(context);
-    if (_lastRenderBox != null) {
-      _menuBar!.unregisterMenuRenderObject(_lastRenderBox!);
-    }
-    _lastRenderBox = context.findRenderObject() as RenderBox?;
-    if (_lastRenderBox != null) {
-      _menuBar!.registerMenuRenderObject(_lastRenderBox!);
-    }
-  }
-
-  @override
-  void dispose() {
-    if (_lastRenderBox != null) {
-      _menuBar?.unregisterMenuRenderObject(_lastRenderBox!);
-    }
-    super.dispose();
   }
 
   Widget _intrinsicCrossSize({required Widget child}) {
@@ -2511,28 +2480,76 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: _getMinSizeConstraint(),
-      child: Material(
-        color: widget.backgroundColor,
-        shape: widget.shape,
-        elevation: widget.elevation,
-        child: _intrinsicCrossSize(
-          child: Padding(
-            padding: widget.menuPadding,
-            child: Flex(
-              textDirection: widget.textDirection,
-              direction: widget.direction,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ..._expandGroups(),
-                if (widget.direction == Axis.horizontal) const Spacer(),
-              ],
+    return _RegisteredRenderBox(
+      menuBar: _menuBar,
+      child: Container(
+        constraints: _getMinSizeConstraint(),
+        child: Material(
+          color: widget.backgroundColor,
+          shape: widget.shape,
+          elevation: widget.elevation,
+          child: _intrinsicCrossSize(
+            child: Padding(
+              padding: widget.menuPadding,
+              child: Flex(
+                textDirection: widget.textDirection,
+                direction: widget.direction,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ..._expandGroups(),
+                  if (widget.direction == Axis.horizontal) const Spacer(),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+// A widget that wraps a render box that is registered with the _MenuBarState so
+// that when a pointer event comes in, it can check to see if the pointer hit a
+// menu or not.
+class _RegisteredRenderBox extends SingleChildRenderObjectWidget {
+  const _RegisteredRenderBox({required this.menuBar, required super.child});
+
+  final _MenuBarState menuBar;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderRegisteredRenderBox(menuBar: menuBar);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderRegisteredRenderBox renderObject) {
+    renderObject.menuBar = menuBar;
+  }
+}
+
+// A RenderProxyBox that registers and unregisters itself with the
+// _MenuBarState so that when a pointer event comes in, the _MenuBarState can
+// check to see if the pointer event hit a menu or not.
+class _RenderRegisteredRenderBox extends RenderProxyBox {
+  _RenderRegisteredRenderBox({required _MenuBarState menuBar}) : _menuBar = menuBar {
+    _menuBar.registerMenuRenderObject(this);
+  }
+
+  _MenuBarState get menuBar => _menuBar;
+  _MenuBarState _menuBar;
+  set menuBar(_MenuBarState value) {
+    if (_menuBar != value) {
+      _menuBar.unregisterMenuRenderObject(this);
+      _menuBar = value;
+      _menuBar.registerMenuRenderObject(this);
+      markNeedsLayout();
+    }
+  }
+
+  @override
+  void dispose() {
+    _menuBar.unregisterMenuRenderObject(this);
+    super.dispose();
   }
 }
 
@@ -2831,9 +2848,9 @@ class _MenuNextFocusAction extends NextFocusAction {
       return;
     }
     final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
-      return menuBar.enabled
-          && node != menuBar._root
-          && (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
+      return menuBar.enabled &&
+          node != menuBar._root &&
+          (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
     }).toList();
     if (enabledNodes.isEmpty) {
       return;
@@ -2866,9 +2883,9 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
       return;
     }
     final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
-      return menuBar.enabled
-          && node != menuBar._root
-          && (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null) ;
+      return menuBar.enabled &&
+          node != menuBar._root &&
+          (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
     }).toList();
     final List<MenuBarItem> enabledItems = enabledNodes.map<MenuBarItem>((_MenuNode node) => node.item).toList();
     if (enabledNodes.isEmpty) {
