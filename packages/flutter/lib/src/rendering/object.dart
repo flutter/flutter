@@ -927,6 +927,21 @@ class PipelineOwner {
     _rootNode?.attach(this);
   }
 
+  // Whether the current [flushLayout] call should pause to incorporate the
+  // [RenderObject]s in `_nodesNeedingLayout` into the current dirty list,
+  // before continuing to process dirty relayout boundaries.
+  //
+  // This flag is set to true when a [RenderObject.invokeLayoutCallback]
+  // returns, to avoid laying out dirty relayout boundaries in an incorrect
+  // order and causing them to be laid out more than once per frame. See
+  // layout_builder_mutations_test.dart for an example.
+  //
+  // The new dirty nodes are not immediately merged after a
+  // [RenderObject.invokeLayoutCallback] call because we may encounter multiple
+  // such calls while processing a single relayout boundary in [flushLayout].
+  // Batching new dirty nodes can reduce the number of merges [flushLayout]
+  // has to perform.
+  bool _shouldMergeDirtyNodes = false;
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
 
   /// Whether this pipeline is currently in the layout phase.
@@ -968,15 +983,29 @@ class PipelineOwner {
     }());
     try {
       while (_nodesNeedingLayout.isNotEmpty) {
+        assert(!_shouldMergeDirtyNodes);
         final List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = <RenderObject>[];
-        for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)) {
+        dirtyNodes.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+        for (int i = 0; i < dirtyNodes.length; i++) {
+          if (_shouldMergeDirtyNodes) {
+            _shouldMergeDirtyNodes = false;
+            if (_nodesNeedingLayout.isNotEmpty) {
+              _nodesNeedingLayout.addAll(dirtyNodes.getRange(i, dirtyNodes.length));
+              break;
+            }
+          }
+          final RenderObject node = dirtyNodes[i];
           if (node._needsLayout && node.owner == this) {
             node._layoutWithoutResize();
           }
         }
+        // No need to merge dirty nodes generated from processing the last
+        // relayout boundary back.
+        _shouldMergeDirtyNodes = false;
       }
     } finally {
+      _shouldMergeDirtyNodes = false;
       assert(() {
         _debugDoingLayout = false;
         return true;
@@ -1006,6 +1035,7 @@ class PipelineOwner {
     try {
       callback();
     } finally {
+      _shouldMergeDirtyNodes = true;
       assert(() {
         _debugAllowMutationsToDirtySubtrees = oldState!;
         return true;
