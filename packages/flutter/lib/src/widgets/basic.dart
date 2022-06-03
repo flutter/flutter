@@ -3853,7 +3853,6 @@ class Stack extends MultiChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/indexed_stack.0.dart **
 /// {@end-tool}
 ///
-///
 /// See also:
 ///
 ///  * [Stack], for more details about stacks.
