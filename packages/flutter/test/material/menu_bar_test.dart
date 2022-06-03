@@ -331,10 +331,12 @@ void main() {
       final MenuBar menuBar = tester.widget(find.byType(MenuBar));
       expect(
         menuBar.toStringDeep(),
-        equalsIgnoringHashCodes('MenuBar#00000\n'
-            " │ controller: Instance of 'MenuBarController'\n"
-            ' └MenuBarMenu#00000(Menu 0)(label: "Menu 0", backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)), elevation: MaterialStatePropertyAll(10.0))\n'
-            '  └MenuItemGroup(members: [MenuBarItem#00000(Sub Menu 00)(DISABLED, label: "Sub Menu 00", semanticLabel: "semanticLabel")])\n'),
+        equalsIgnoringHashCodes(
+          'MenuBar#00000\n'
+          " │ controller: Instance of 'MenuBarController'\n"
+          ' └MenuBarMenu#00000(Menu 0)(label: "Menu 0", backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)), elevation: MaterialStatePropertyAll(10.0))\n'
+          '  └MenuItemGroup#00000()(members: [MenuBarButton#00000(Sub Menu 00)(DISABLED, label: "Sub Menu 00", semanticLabel: "semanticLabel")])\n',
+        ),
       );
     });
     testWidgets('diagnostics', (WidgetTester tester) async {
@@ -527,31 +529,31 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 00)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 00)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 10)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 10)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Sub Menu 11)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 100)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 100)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 101)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 101)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 102)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 102)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 103)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 103)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 12)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 12)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 2)'));
@@ -560,7 +562,7 @@ void main() {
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 0)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 00)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 00)'));
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -571,25 +573,25 @@ void main() {
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 2)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 12)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 12)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 103)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 103)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 102)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 102)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 101)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 101)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 100)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 100)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Sub Menu 11)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 10)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 10)'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
@@ -633,7 +635,7 @@ void main() {
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 10)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 10)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -641,12 +643,12 @@ void main() {
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 12)'));
-      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarItem#00000(Sub Menu 12)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 12)'));
+      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarButton#00000(Sub Menu 12)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 12)'));
-      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarItem#00000(Sub Menu 12)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 12)'));
+      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarButton#00000(Sub Menu 12)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
@@ -656,7 +658,7 @@ void main() {
       // Open the next submenu
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 100)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 100)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       // Go back, close the submenu.
@@ -668,8 +670,8 @@ void main() {
       // Move up, should close the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 10)'));
-      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarItem#00000(Sub Menu 10)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 10)'));
+      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarButton#00000(Sub Menu 10)'));
 
       // Move down, should reopen the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -680,23 +682,23 @@ void main() {
       // Open the next submenu again.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 100)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 100)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 101)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 101)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 102)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 102)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 103)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 103)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 103)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 103)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -751,7 +753,7 @@ void main() {
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 10)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 10)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -759,12 +761,12 @@ void main() {
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 12)'));
-      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarItem#00000(Sub Menu 12)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 12)'));
+      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarButton#00000(Sub Menu 12)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 12)'));
-      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarItem#00000(Sub Menu 12)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 12)'));
+      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarButton#00000(Sub Menu 12)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
@@ -774,7 +776,7 @@ void main() {
       // Open the next submenu
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 100)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 100)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       // Go back, close the submenu.
@@ -786,8 +788,8 @@ void main() {
       // Move up, should close the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 10)'));
-      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarItem#00000(Sub Menu 10)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 10)'));
+      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarButton#00000(Sub Menu 10)'));
 
       // Move down, should reopen the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -798,23 +800,23 @@ void main() {
       // Open the next submenu again.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 100)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 100)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 101)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 101)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 102)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 102)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 103)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 103)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 103)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 103)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
@@ -884,7 +886,7 @@ void main() {
       // Hovering over the menu items focuses them.
       await hoverOver(tester, find.text(TestMenu.subMenu10.label));
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Menu 10)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Menu 10)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
 
       await hoverOver(tester, find.text(TestMenu.subMenu11.label));
@@ -894,7 +896,7 @@ void main() {
 
       await hoverOver(tester, find.text(TestMenu.subSubMenu100.label));
       await tester.pump();
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarItem#00000(Sub Sub Menu 100)'));
+      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarButton#00000(Sub Sub Menu 100)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
     });
   });
@@ -946,7 +948,8 @@ void main() {
 
       // Open a menu initially.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
-      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(opened, equals(<TestMenu>[TestMenu.mainMenu1]));
 
       await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();

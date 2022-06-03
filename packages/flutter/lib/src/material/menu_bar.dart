@@ -634,6 +634,7 @@ class _MenuBarState extends State<_MenuBar> {
   _MenuNode? get openMenu => _openMenu;
   _MenuNode? _openMenu;
   set openMenu(_MenuNode? value) {
+    assert(value != _root);
     if (_openMenu == value) {
       // Nothing changed.
       return;
@@ -654,8 +655,8 @@ class _MenuBarState extends State<_MenuBar> {
       _openMenu = value;
       return;
     }
+    final _MenuNode? oldMenu = _openMenu;
     setState(() {
-      final _MenuNode? oldMenu = _openMenu;
       _openMenu = value;
       oldMenu?.ancestorDifference(_openMenu).forEach((_MenuNode node) {
         node.close();
@@ -677,7 +678,7 @@ class _MenuBarState extends State<_MenuBar> {
         }
       }
       _manageOverlayEntry();
-      _markMenuDirty();
+      _markMenuDirtyAndDelayIfNecessary();
     });
   }
 
@@ -698,25 +699,21 @@ class _MenuBarState extends State<_MenuBar> {
     if (_disposed || !mounted) {
       return;
     }
+    void markMenuDirty() {
+      _menuSerial += 1;
+      _overlayEntry?.markNeedsBuild();
+      widget.controller?._menuBarStateChanged();
+    }
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       // If we're in the middle of a build, we need to mark dirty in a post
       // frame callback, since this function will often be called by a part of
       // the tree that isn't in the overlay, but calling this would request that
       // the overlay be rebuilt.
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _markMenuDirty());
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => markMenuDirty());
     } else {
       // If we're not in the middle of a build, we can just call it right away.
-      _markMenuDirty();
+      markMenuDirty();
     }
-  }
-
-  void _markMenuDirty() {
-    if (_disposed || !mounted) {
-      return;
-    }
-    _menuSerial += 1;
-    _overlayEntry?.markNeedsBuild();
-    widget.controller?._menuBarStateChanged();
   }
 
   // Build the node hierarchy based upon the MenuItem hierarchy.
@@ -1206,7 +1203,6 @@ class _MenuBarButtonState extends State<MenuBarButton> {
   _MenuNode? _menu;
   int _menuSerial = 0;
   late _MenuBarState _menuBar;
-  Timer? _hoverTimer;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
 
@@ -1228,8 +1224,6 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 
   @override
   void dispose() {
-    _hoverTimer?.cancel();
-    _hoverTimer = null;
     _menuBar.unregisterMenu(_menu!);
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
@@ -2812,8 +2806,9 @@ class _MenuNextFocusAction extends NextFocusAction {
       return;
     }
     final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
-      return (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null) &&
-          menuBar.enabled;
+      return menuBar.enabled
+          && node != menuBar._root
+          && (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null);
     }).toList();
     if (enabledNodes.isEmpty) {
       return;
@@ -2846,8 +2841,9 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
       return;
     }
     final List<_MenuNode> enabledNodes = menuBar._root.descendants.where((_MenuNode node) {
-      return (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null) &&
-          menuBar.enabled;
+      return menuBar.enabled
+          && node != menuBar._root
+          && (node.item.menus.isNotEmpty || node.item.onSelected != null || node.item.onSelectedIntent != null) ;
     }).toList();
     final List<MenuBarItem> enabledItems = enabledNodes.map<MenuBarItem>((_MenuNode node) => node.item).toList();
     if (enabledNodes.isEmpty) {
