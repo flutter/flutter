@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/indexed_stack/indexed_stack.0.dart'
+import 'package:flutter_api_samples/widgets/basic/indexed_stack.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
