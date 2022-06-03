@@ -626,10 +626,6 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
-      expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
       expect(focusedMenu, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1)'));

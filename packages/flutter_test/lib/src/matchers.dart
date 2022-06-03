@@ -898,7 +898,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final String description = _normalize(object as String);
+    final String description = _normalize(object.toString());
     if (_value != description) {
       matchState[_mismatchedValueKey] = description;
       return false;

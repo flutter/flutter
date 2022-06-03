@@ -673,11 +673,17 @@ class _MenuBarState extends State<_MenuBar> {
     if (value != null && value.focusNode?.hasPrimaryFocus != true) {
       // Request focus on the new thing that is now open, if any, so that
       // focus traversal starts from that location.
-      if (value.focusNode == null || !value.focusNode!.canRequestFocus) {
-        // If we don't have a focus node to ask yet, or it can't be focused yet,
-        // then keep the menu until it gets registered, or something else sets
-        // the menu.
+      if (value.focusNode == null) {
+        // If we don't have a focus node to ask yet, then keep the menu until it
+        // gets registered, or something else sets the menu.
         _pendingFocusedMenu = value;
+      } else if (!value.focusNode!.canRequestFocus) {
+        // The node is currently under an ExcludeFocus, but presumably that will no
+        // longer be the case after this frame.
+        _pendingFocusedMenu = null;
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+          value.focusNode!.requestFocus();
+        });
       } else {
         _pendingFocusedMenu = null;
         value.focusNode!.requestFocus();
@@ -941,7 +947,9 @@ class MenuBarController with ChangeNotifier {
   ///
   /// Only meant to be called by tests. Will return null in release mode.
   @visibleForTesting
-  String? get debugFocusedItem => _menuBar?.debugFocusedItem;
+  String? get debugFocusedItem {
+    return _menuBar?.debugFocusedItem;
+  }
 
   // Called by _MenuBarState when its state changes.
   void _menuBarStateChanged() {
