@@ -55,9 +55,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             },
             controller: fieldText,
           )),
-      const SizedBox(
-        height: 50,
-      ),
+      const SizedBox(height: 50),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
