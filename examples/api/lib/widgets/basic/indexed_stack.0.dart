@@ -63,13 +63,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             GestureDetector(
-              onTap: () => setState(() {
-                if (index == 0) {
-                  index = names.length - 1;
-                } else {
-                  index--;
-                }
-              }),
+              onTap: () {
+                setState(() {
+                  if (index == 0) {
+                    index = names.length - 1;
+                  } else {
+                    index--;
+                  }
+                });
+              },
               child: const Icon(key: Key('gesture1'), Icons.chevron_left),
             ),
           ],
@@ -79,13 +81,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             GestureDetector(
-              onTap: () => setState(() {
-                if (index == 0) {
-                  index = names.length - 1;
-                } else {
-                  index--;
-                }
-              }),
+              onTap: () {
+                setState(() {
+                  if (index == 0) {
+                    index = names.length - 1;
+                  } else {
+                    index--;
+                  }
+                });
+              },
               child: const Icon(key: Key('gesture1'), Icons.chevron_left),
             ),
             Column(
@@ -98,13 +102,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               ],
             ),
             GestureDetector(
-              onTap: () => setState(() {
-                if (index == names.length - 1) {
-                  index = 0;
-                } else {
-                  index++;
-                }
-              }),
+              onTap: () {
+                setState(() {
+                  if (index == names.length - 1) {
+                    index = 0;
+                  } else {
+                    index++;
+                  }
+                });
+              },
               child: const Icon(key: Key('gesture2'), Icons.chevron_right),
             ),
           ],
@@ -139,9 +145,9 @@ class _PersonTrackerState extends State<PersonTracker> {
           TextButton.icon(
             icon: const Icon(Icons.add),
             onPressed: () {
-              setState(
-                () => counter++,
-              );
+              setState(() {
+                counter++;
+              });
             },
             label: const Text('Increment'),
           )
