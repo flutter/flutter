@@ -17,6 +17,7 @@ import 'build_bundle.dart';
 import 'build_fuchsia.dart';
 import 'build_ios.dart';
 import 'build_ios_framework.dart';
+import 'build_macos_framework.dart';
 import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
@@ -26,6 +27,10 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildIOSCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildIOSFrameworkCommand(
+      buildSystem: globals.buildSystem,
+      verboseHelp: verboseHelp,
+    ));
+    _addSubcommand(BuildMacOSFrameworkCommand(
       buildSystem: globals.buildSystem,
       verboseHelp: verboseHelp,
     ));

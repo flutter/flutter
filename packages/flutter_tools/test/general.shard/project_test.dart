@@ -251,7 +251,7 @@ void main() {
         final FlutterProject project = await someProject();
         project.macos.managedDirectory.createSync(recursive: true);
         await project.regeneratePlatformSpecificTooling();
-        expectExists(project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'));
+        expectExists(project.macos.pluginRegistrantImplementation);
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),

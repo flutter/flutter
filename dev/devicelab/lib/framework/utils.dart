@@ -753,6 +753,13 @@ void checkDirectoryNotExists(String directory) {
   }
 }
 
+/// Checks that the symlink exists, otherwise throws a [FileSystemException].
+void checkSymlinkExists(String file) {
+  if (!exists(Link(file))) {
+    throw FileSystemException('Expected symlink to exist.', file);
+  }
+}
+
 /// Check that `collection` contains all entries in `values`.
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
   for (final T value in values) {
