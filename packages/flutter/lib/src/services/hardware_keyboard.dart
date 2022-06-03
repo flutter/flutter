@@ -784,7 +784,7 @@ class KeyEventManager {
   /// handled by shortcuts, therefore unhandled by the handler and not printed
   /// out.
   ///
-  /// ** See code in examples/api/lib/widgets/basic/custom_multi_child_layout.0.dart **
+  /// ** See code in examples/api/lib/widgets/hardware_keyboard/key_event_manager.0.dart **
   /// {@end-tool}
   ///
   /// See also:
