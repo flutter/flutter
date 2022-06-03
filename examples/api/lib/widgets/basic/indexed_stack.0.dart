@@ -111,9 +111,7 @@ class _PersonTrackerState extends State<PersonTracker> {
       key: Key(widget.name),
       decoration: BoxDecoration(
           color: const Color.fromARGB(255, 239, 248, 255),
-          border: Border.all(
-            color: const Color.fromARGB(255, 54, 60, 244),
-          ),
+          border: Border.all(color: const Color.fromARGB(255, 54, 60, 244)),
           borderRadius: const BorderRadius.all(Radius.circular(10))),
       padding: const EdgeInsets.all(16.0),
       child: Column(
