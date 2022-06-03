@@ -9,7 +9,9 @@ import os
 import subprocess
 import sys
 
-BUILDROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
+BUILDROOT_DIR = os.path.abspath(
+    os.path.join(os.path.realpath(__file__), '..', '..', '..')
+)
 
 PERFETTO_SESSION_KEY = 'session1'
 PERFETTO_TRACE_FILE = '/data/misc/perfetto-traces/trace'
@@ -32,19 +34,23 @@ data_sources: {
 }
 '''
 
+
 def InstallApk(apk_path, package_name, adb_path='adb'):
   print('Installing APK')
   subprocess.check_output([adb_path, 'shell', 'am', 'force-stop', package_name])
   # Allowed to fail if APK was never installed.
-  subprocess.call([adb_path, 'uninstall', package_name], stdout=subprocess.DEVNULL)
+  subprocess.call([adb_path, 'uninstall', package_name],
+                  stdout=subprocess.DEVNULL)
   subprocess.check_output([adb_path, 'install', apk_path])
 
 
 def StartPerfetto(package_name, adb_path='adb'):
   print('Starting trace')
-  cmd = [adb_path, 'shell', 'echo' , "'" + PERFETTO_CONFIG % package_name + "'", '|',
-      'perfetto', '-c', '-', '--txt', '-o', PERFETTO_TRACE_FILE,
-      '--detach', PERFETTO_SESSION_KEY]
+  cmd = [
+      adb_path, 'shell', 'echo', "'" + PERFETTO_CONFIG % package_name + "'",
+      '|', 'perfetto', '-c', '-', '--txt', '-o', PERFETTO_TRACE_FILE,
+      '--detach', PERFETTO_SESSION_KEY
+  ]
 
   subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
@@ -52,30 +58,44 @@ def StartPerfetto(package_name, adb_path='adb'):
 def LaunchPackage(package_name, activity_name, adb_path='adb'):
   print('Scanning logcat')
   subprocess.check_output([adb_path, 'logcat', '-c'], stderr=subprocess.STDOUT)
-  logcat = subprocess.Popen([adb_path, 'logcat'], stdout=subprocess.PIPE,
-      stderr=subprocess.STDOUT, universal_newlines=True)
+  logcat = subprocess.Popen([adb_path, 'logcat'],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            universal_newlines=True)
 
   print('Launching %s (%s)' % (package_name, activity_name))
-  subprocess.check_output(
-      [adb_path, 'shell', 'am ', 'start', '-n',
-          '%s/%s' % (package_name, activity_name)], stderr=subprocess.STDOUT)
+  subprocess.check_output([
+      adb_path, 'shell', 'am ', 'start', '-n',
+      '%s/%s' % (package_name, activity_name)
+  ],
+                          stderr=subprocess.STDOUT)
   for line in logcat.stdout:
     print('>>>>>>>> ' + line.strip())
-    if ('Observatory listening' in line) or ('Dart VM service is listening' in line):
+    if ('Observatory listening' in line) or ('Dart VM service is listening'
+                                             in line):
       logcat.kill()
       break
 
 
-def CollectAndValidateTrace(adb_path = 'adb'):
+def CollectAndValidateTrace(adb_path='adb'):
   print('Fetching trace')
-  subprocess.check_output([adb_path, 'shell', 'perfetto', '--attach',
-      PERFETTO_SESSION_KEY, '--stop'], stderr=subprocess.STDOUT)
-  subprocess.check_output([adb_path, 'pull', PERFETTO_TRACE_FILE, 'trace.pb'], stderr=subprocess.STDOUT)
+  subprocess.check_output([
+      adb_path, 'shell', 'perfetto', '--attach', PERFETTO_SESSION_KEY, '--stop'
+  ],
+                          stderr=subprocess.STDOUT)
+  subprocess.check_output([adb_path, 'pull', PERFETTO_TRACE_FILE, 'trace.pb'],
+                          stderr=subprocess.STDOUT)
 
   print('Validating trace')
-  traceconv = os.path.join(BUILDROOT_DIR, 'third_party',
-      'android_tools', 'trace_to_text', 'trace_to_text')
-  traceconv_output = subprocess.check_output([traceconv, 'systrace', 'trace.pb'], stderr=subprocess.STDOUT, universal_newlines=True)
+  traceconv = os.path.join(
+      BUILDROOT_DIR, 'third_party', 'android_tools', 'trace_to_text',
+      'trace_to_text'
+  )
+  traceconv_output = subprocess.check_output([
+      traceconv, 'systrace', 'trace.pb'
+  ],
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
 
   print('Trace output:')
   print(traceconv_output)
@@ -90,16 +110,33 @@ def CollectAndValidateTrace(adb_path = 'adb'):
 def main():
   parser = argparse.ArgumentParser()
 
-  parser.add_argument('--apk-path', dest='apk_path', action='store',
-      help='Provide the path to the APK to install')
-  parser.add_argument('--package-name', dest='package_name', action='store',
-      help='The package name of the APK, e.g. dev.flutter.scenarios')
-  parser.add_argument('--activity-name', dest='activity_name', action='store',
+  parser.add_argument(
+      '--apk-path',
+      dest='apk_path',
+      action='store',
+      help='Provide the path to the APK to install'
+  )
+  parser.add_argument(
+      '--package-name',
+      dest='package_name',
+      action='store',
+      help='The package name of the APK, e.g. dev.flutter.scenarios'
+  )
+  parser.add_argument(
+      '--activity-name',
+      dest='activity_name',
+      action='store',
       help='The activity to launch as it appears in AndroidManifest.xml, '
-           'e.g. .TextPlatformViewActivity')
-  parser.add_argument('--adb-path', dest='adb_path', action='store',
-      default='adb', help='Provide the path of adb used for android tests. '
-          'By default it looks on $PATH.')
+      'e.g. .TextPlatformViewActivity'
+  )
+  parser.add_argument(
+      '--adb-path',
+      dest='adb_path',
+      action='store',
+      default='adb',
+      help='Provide the path of adb used for android tests. '
+      'By default it looks on $PATH.'
+  )
 
   args = parser.parse_args()
 

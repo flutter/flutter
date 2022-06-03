@@ -12,11 +12,16 @@ import os
 
 from create_xcframework import create_xcframework
 
-DSYMUTIL = os.path.join(os.path.dirname(__file__), '..', '..', '..',
-                        'buildtools', 'mac-x64', 'clang', 'bin', 'dsymutil')
+DSYMUTIL = os.path.join(
+    os.path.dirname(__file__), '..', '..', '..', 'buildtools', 'mac-x64',
+    'clang', 'bin', 'dsymutil'
+)
+
 
 def main():
-  parser = argparse.ArgumentParser(description='Creates FlutterMacOS.framework for macOS')
+  parser = argparse.ArgumentParser(
+      description='Creates FlutterMacOS.framework for macOS'
+  )
 
   parser.add_argument('--dst', type=str, required=True)
   parser.add_argument('--arm64-out-dir', type=str, required=True)
@@ -56,16 +61,13 @@ def main():
   shutil.rmtree(fat_framework, True)
   shutil.copytree(arm64_framework, fat_framework, symlinks=True)
 
-  fat_framework_binary = os.path.join(fat_framework, 'Versions', 'A', 'FlutterMacOS')
+  fat_framework_binary = os.path.join(
+      fat_framework, 'Versions', 'A', 'FlutterMacOS'
+  )
 
   # Create the arm64/x64 fat framework.
   subprocess.check_call([
-    'lipo',
-    arm64_dylib,
-    x64_dylib,
-    '-create',
-    '-output',
-    fat_framework_binary
+      'lipo', arm64_dylib, x64_dylib, '-create', '-output', fat_framework_binary
   ])
   process_framework(args, fat_framework, fat_framework_binary)
 

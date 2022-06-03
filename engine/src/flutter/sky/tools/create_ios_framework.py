@@ -12,30 +12,46 @@ import os
 
 from create_xcframework import create_xcframework
 
-DSYMUTIL = os.path.join(os.path.dirname(__file__), '..', '..', '..',
-                        'buildtools', 'mac-x64', 'clang', 'bin', 'dsymutil')
+DSYMUTIL = os.path.join(
+    os.path.dirname(__file__), '..', '..', '..', 'buildtools', 'mac-x64',
+    'clang', 'bin', 'dsymutil'
+)
+
 
 def main():
-  parser = argparse.ArgumentParser(description='Creates Flutter.framework and Flutter.xcframework')
+  parser = argparse.ArgumentParser(
+      description='Creates Flutter.framework and Flutter.xcframework'
+  )
 
   parser.add_argument('--dst', type=str, required=True)
   parser.add_argument('--arm64-out-dir', type=str, required=True)
   parser.add_argument('--armv7-out-dir', type=str, required=False)
   # TODO(gw280): Remove --simulator-out-dir alias when all recipes are updated
-  parser.add_argument('--simulator-x64-out-dir', '--simulator-out-dir', type=str, required=True)
+  parser.add_argument(
+      '--simulator-x64-out-dir', '--simulator-out-dir', type=str, required=True
+  )
   parser.add_argument('--simulator-arm64-out-dir', type=str, required=False)
   parser.add_argument('--strip', action="store_true", default=False)
   parser.add_argument('--dsym', action="store_true", default=False)
-  parser.add_argument('--strip-bitcode', dest='strip_bitcode', action="store_true", default=False)
+  parser.add_argument(
+      '--strip-bitcode',
+      dest='strip_bitcode',
+      action="store_true",
+      default=False
+  )
 
   args = parser.parse_args()
 
   framework = os.path.join(args.dst, 'Flutter.framework')
   simulator_framework = os.path.join(args.dst, 'sim', 'Flutter.framework')
   arm64_framework = os.path.join(args.arm64_out_dir, 'Flutter.framework')
-  simulator_x64_framework = os.path.join(args.simulator_x64_out_dir, 'Flutter.framework')
+  simulator_x64_framework = os.path.join(
+      args.simulator_x64_out_dir, 'Flutter.framework'
+  )
   if args.simulator_arm64_out_dir is not None:
-    simulator_arm64_framework = os.path.join(args.simulator_arm64_out_dir, 'Flutter.framework')
+    simulator_arm64_framework = os.path.join(
+        args.simulator_arm64_out_dir, 'Flutter.framework'
+    )
     simulator_arm64_dylib = os.path.join(simulator_arm64_framework, 'Flutter')
 
   arm64_dylib = os.path.join(arm64_framework, 'Flutter')
@@ -74,12 +90,8 @@ def main():
 
     # Create the arm64/x64 simulator fat framework.
     subprocess.check_call([
-      'lipo',
-      simulator_x64_dylib,
-      simulator_arm64_dylib,
-      '-create',
-      '-output',
-      simulator_framework_binary
+        'lipo', simulator_x64_dylib, simulator_arm64_dylib, '-create',
+        '-output', simulator_framework_binary
     ])
     process_framework(args, simulator_framework, simulator_framework_binary)
     simulator_framework = simulator_framework
@@ -93,12 +105,8 @@ def main():
 
   # Add the x64 simulator into the fat framework
   subprocess.check_call([
-    'lipo',
-    arm64_dylib,
-    simulator_x64_dylib,
-    '-create',
-    '-output',
-    framework_binary
+      'lipo', arm64_dylib, simulator_x64_dylib, '-create', '-output',
+      framework_binary
   ])
 
   process_framework(args, framework, framework_binary)
@@ -106,7 +114,9 @@ def main():
 
 def process_framework(args, framework, framework_binary):
   if args.strip_bitcode:
-    subprocess.check_call(['xcrun', 'bitcode_strip', '-r', framework_binary, '-o', framework_binary])
+    subprocess.check_call([
+        'xcrun', 'bitcode_strip', '-r', framework_binary, '-o', framework_binary
+    ])
 
   if args.dsym:
     dsym_out = os.path.splitext(framework)[0] + '.dSYM'

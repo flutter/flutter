@@ -37,11 +37,10 @@ def generate_gen_snapshot(directory, destination):
     print('Cannot find gen_snapshot at %s' % gen_snapshot_dir)
     sys.exit(1)
 
-  subprocess.check_call(
-      ['xcrun', 'bitcode_strip', '-r', gen_snapshot_dir, '-o', destination]
-  )
+  subprocess.check_call([
+      'xcrun', 'bitcode_strip', '-r', gen_snapshot_dir, '-o', destination
+  ])
 
 
 if __name__ == '__main__':
   sys.exit(main())
-

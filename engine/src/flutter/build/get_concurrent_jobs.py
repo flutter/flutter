@@ -84,43 +84,45 @@ class ParseSizeAction(argparse.Action):
 
 
 def Main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
       '--memory-per-job',
       action=ParseSizeAction,
       default=[],
       nargs='*',
       help='Key value pairings (dart=1GB) giving an estimate of the amount of '
-           'memory needed for the class of job.')
-    parser.add_argument(
+      'memory needed for the class of job.'
+  )
+  parser.add_argument(
       '--reserve-memory',
       type=ParseSize,
       default=0,
-      help='The amount of memory to be held out of the amount for jobs to use.')
-    args = parser.parse_args()
+      help='The amount of memory to be held out of the amount for jobs to use.'
+  )
+  args = parser.parse_args()
 
-    total_memory = GetTotalMemory()
+  total_memory = GetTotalMemory()
 
-    # Ensure the total memory used in the calculation below is at least 0
-    mem_total_bytes = max(0, total_memory - args.reserve_memory)
+  # Ensure the total memory used in the calculation below is at least 0
+  mem_total_bytes = max(0, total_memory - args.reserve_memory)
 
-    # Ensure the number of cpus used in the calculation below is at least 1
-    try:
-      cpu_cap = multiprocessing.cpu_count()
-    except:
-      cpu_cap = 1
+  # Ensure the number of cpus used in the calculation below is at least 1
+  try:
+    cpu_cap = multiprocessing.cpu_count()
+  except:
+    cpu_cap = 1
 
-    concurrent_jobs = {}
-    for job, memory_per_job in args.memory_per_job:
-      # Calculate the number of jobs that will fit in memory. Ensure the
-      # value is at least 1.
-      num_concurrent_jobs = int(max(1, mem_total_bytes / memory_per_job))
-      # Cap the number of jobs by the number of cpus available.
-      concurrent_jobs[job] = min(num_concurrent_jobs, cpu_cap)
+  concurrent_jobs = {}
+  for job, memory_per_job in args.memory_per_job:
+    # Calculate the number of jobs that will fit in memory. Ensure the
+    # value is at least 1.
+    num_concurrent_jobs = int(max(1, mem_total_bytes / memory_per_job))
+    # Cap the number of jobs by the number of cpus available.
+    concurrent_jobs[job] = min(num_concurrent_jobs, cpu_cap)
 
-    print(json.dumps(concurrent_jobs))
+  print(json.dumps(concurrent_jobs))
 
-    return 0
+  return 0
 
 
 if __name__ == '__main__':

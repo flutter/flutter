@@ -3,6 +3,7 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """ Copies paths, creates if they do not exist.
 """
 
@@ -50,7 +51,8 @@ def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument(
-      '--file-list', dest='file_list', action='store', required=True)
+      '--file-list', dest='file_list', action='store', required=True
+  )
 
   args = parser.parse_args()
 

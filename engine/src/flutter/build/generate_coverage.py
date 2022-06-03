@@ -11,8 +11,11 @@ import argparse
 import errno
 import shutil
 
+
 def GetLLVMBinDirectory():
-  buildtool_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../buildtools")
+  buildtool_dir = os.path.join(
+      os.path.dirname(os.path.realpath(__file__)), "../../buildtools"
+  )
   platform_dir = ""
   if sys.platform.startswith('linux'):
     platform_dir = "linux-x64"
@@ -20,7 +23,9 @@ def GetLLVMBinDirectory():
     platform_dir = "mac-x64"
   else:
     raise Exception("Unknown/Unsupported platform.")
-  llvm_bin_dir = os.path.abspath(os.path.join(buildtool_dir, platform_dir, "clang/bin"))
+  llvm_bin_dir = os.path.abspath(
+      os.path.join(buildtool_dir, platform_dir, "clang/bin")
+  )
   if not os.path.exists(llvm_bin_dir):
     raise Exception("LLVM directory %s double not be located." % llvm_bin_dir)
   return llvm_bin_dir
@@ -34,23 +39,48 @@ def MakeDirs(new_dir):
     if e.errno != errno.EEXIST:
       raise
 
+
 def RemoveIfExists(path):
-    if os.path.isdir(path) and not os.path.islink(path):
-        shutil.rmtree(path)
-    elif os.path.exists(path):
-        os.remove(path)
+  if os.path.isdir(path) and not os.path.islink(path):
+    shutil.rmtree(path)
+  elif os.path.exists(path):
+    os.remove(path)
+
 
 def main():
-  parser = argparse.ArgumentParser();
+  parser = argparse.ArgumentParser()
 
-  parser.add_argument('-t', '--tests', nargs='+', dest='tests',
-      required=True, help='The unit tests to run and gather coverage data on.')
-  parser.add_argument('-o', '--output', dest='output',
-      required=True, help='The output directory for coverage results.')
-  parser.add_argument('-f', '--format', type=str, choices=['all', 'html', 'summary', 'lcov'],
-      required=True, help='The type of coverage information to be displayed.')
-  parser.add_argument('-a', '--args', nargs='+', dest='test_args',
-      required=False, help='The arguments to pass to the unit test executable being run.')
+  parser.add_argument(
+      '-t',
+      '--tests',
+      nargs='+',
+      dest='tests',
+      required=True,
+      help='The unit tests to run and gather coverage data on.'
+  )
+  parser.add_argument(
+      '-o',
+      '--output',
+      dest='output',
+      required=True,
+      help='The output directory for coverage results.'
+  )
+  parser.add_argument(
+      '-f',
+      '--format',
+      type=str,
+      choices=['all', 'html', 'summary', 'lcov'],
+      required=True,
+      help='The type of coverage information to be displayed.'
+  )
+  parser.add_argument(
+      '-a',
+      '--args',
+      nargs='+',
+      dest='test_args',
+      required=False,
+      help='The arguments to pass to the unit test executable being run.'
+  )
 
   args = parser.parse_args()
 
@@ -73,7 +103,9 @@ def main():
       print("Path %s does not exist." % absolute_test_path)
       return -1
 
-    unstripped_test_path = os.path.join(absolute_test_dir, "exe.unstripped", test_name)
+    unstripped_test_path = os.path.join(
+        absolute_test_dir, "exe.unstripped", test_name
+    )
 
     if os.path.exists(unstripped_test_path):
       binaries.append(unstripped_test_path)
@@ -84,7 +116,10 @@ def main():
 
     RemoveIfExists(raw_profile)
 
-    print("Running test %s to gather profile." % os.path.basename(absolute_test_path))
+    print(
+        "Running test %s to gather profile." %
+        os.path.basename(absolute_test_path)
+    )
 
     test_command = [absolute_test_path]
 
@@ -93,9 +128,7 @@ def main():
     if test_args is not None:
       test_command += test_args
 
-    subprocess.check_call(test_command, env={
-      "LLVM_PROFILE_FILE":  raw_profile
-    })
+    subprocess.check_call(test_command, env={"LLVM_PROFILE_FILE": raw_profile})
 
     if not os.path.exists(raw_profile):
       print("Could not find raw profile data for unit test run %s." % test)
@@ -121,7 +154,8 @@ def main():
   print("Merging %d raw profile(s) into single profile." % len(raw_profiles))
   merged_profile_path = os.path.join(output, "all.profile")
   RemoveIfExists(merged_profile_path)
-  merge_command = [profdata_binary, "merge", "-sparse"] + raw_profiles + ["-o", merged_profile_path]
+  merge_command = [profdata_binary, "merge", "-sparse"
+                  ] + raw_profiles + ["-o", merged_profile_path]
   subprocess.check_call(merge_command)
   print("Done.")
 
@@ -137,11 +171,11 @@ def main():
   if generate_all_reports or args.format == 'html':
     print("Generating HTML report.")
     show_command = [llvm_cov_binary, "show"] + binaries_flag + [
-      instr_profile_flag,
-      "-format=html",
-      "-output-dir=%s" % output,
-      "-tab-size=2",
-      ignore_flags,
+        instr_profile_flag,
+        "-format=html",
+        "-output-dir=%s" % output,
+        "-tab-size=2",
+        ignore_flags,
     ]
     subprocess.check_call(show_command)
     print("Done.")
@@ -150,8 +184,8 @@ def main():
   if generate_all_reports or args.format == 'summary':
     print("Generating a summary report.")
     report_command = [llvm_cov_binary, "report"] + binaries_flag + [
-      instr_profile_flag,
-      ignore_flags,
+        instr_profile_flag,
+        ignore_flags,
     ]
     subprocess.check_call(report_command)
     print("Done.")
@@ -162,15 +196,16 @@ def main():
     lcov_file = os.path.join(output, 'coverage.lcov')
     RemoveIfExists(lcov_file)
     lcov_command = [llvm_cov_binary, "export"] + binaries_flag + [
-      instr_profile_flag,
-      ignore_flags,
-      "-format=lcov",
+        instr_profile_flag,
+        ignore_flags,
+        "-format=lcov",
     ]
     with open(lcov_file, 'w') as lcov_redirect:
       subprocess.check_call(lcov_command, stdout=lcov_redirect)
     print("Done.")
 
   return 0
+
 
 if __name__ == '__main__':
   sys.exit(main())

@@ -13,71 +13,96 @@ ANDROID_SRC_ROOT = 'flutter/shell/platform/android'
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
+
 def JavadocBin():
   if sys.platform == 'darwin':
-    return os.path.join(SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home', 'bin', 'javadoc')
+    return os.path.join(
+        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk',
+        'Contents', 'Home', 'bin', 'javadoc'
+    )
   elif sys.platform.startswith(('cygwin', 'win')):
-    return os.path.join(SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc.exe')
-  else :
-    return os.path.join(SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc')
+    return os.path.join(
+        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin',
+        'javadoc.exe'
+    )
+  else:
+    return os.path.join(
+        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin',
+        'javadoc'
+    )
 
 
 def main():
-  parser = argparse.ArgumentParser(description='Runs javadoc on Flutter Android libraries')
+  parser = argparse.ArgumentParser(
+      description='Runs javadoc on Flutter Android libraries'
+  )
   parser.add_argument('--out-dir', type=str, required=True)
-  parser.add_argument('--android-source-root', type=str, default=ANDROID_SRC_ROOT)
+  parser.add_argument(
+      '--android-source-root', type=str, default=ANDROID_SRC_ROOT
+  )
   parser.add_argument('--build-config-path', type=str)
   parser.add_argument('--third-party', type=str, default='third_party')
   parser.add_argument('--quiet', default=False, action='store_true')
   args = parser.parse_args()
 
   if not os.path.exists(args.android_source_root):
-    print('This script must be run at the root of the Flutter source tree, or '
-          'the --android-source-root must be set.')
+    print(
+        'This script must be run at the root of the Flutter source tree, or '
+        'the --android-source-root must be set.'
+    )
     return 1
 
   if not os.path.exists(args.out_dir):
     os.makedirs(args.out_dir)
 
   classpath = [
-    args.android_source_root,
-    os.path.join(args.third_party, 'android_tools/sdk/platforms/android-32/android.jar'),
-    os.path.join(args.third_party, 'android_embedding_dependencies', 'lib', '*'),
+      args.android_source_root,
+      os.path.join(
+          args.third_party, 'android_tools/sdk/platforms/android-32/android.jar'
+      ),
+      os.path.join(
+          args.third_party, 'android_embedding_dependencies', 'lib', '*'
+      ),
   ]
   if args.build_config_path:
     classpath.append(args.build_config_path)
 
   packages = [
-    'io.flutter.app',
-    'io.flutter.embedding.android',
-    'io.flutter.embedding.engine',
-    'io.flutter.embedding.engine.dart',
-    'io.flutter.embedding.engine.loader',
-    'io.flutter.embedding.engine.mutatorsstack',
-    'io.flutter.embedding.engine.plugins',
-    'io.flutter.embedding.engine.plugins.activity',
-    'io.flutter.embedding.engine.plugins.broadcastreceiver',
-    'io.flutter.embedding.engine.plugins.contentprovider',
-    'io.flutter.embedding.engine.plugins.lifecycle',
-    'io.flutter.embedding.engine.plugins.service',
-    'io.flutter.embedding.engine.plugins.shim',
-    'io.flutter.embedding.engine.renderer',
-    'io.flutter.embedding.engine.systemchannels',
-    'io.flutter.plugin.common',
-    'io.flutter.plugin.editing',
-    'io.flutter.plugin.platform',
-    'io.flutter.util',
-    'io.flutter.view',
+      'io.flutter.app',
+      'io.flutter.embedding.android',
+      'io.flutter.embedding.engine',
+      'io.flutter.embedding.engine.dart',
+      'io.flutter.embedding.engine.loader',
+      'io.flutter.embedding.engine.mutatorsstack',
+      'io.flutter.embedding.engine.plugins',
+      'io.flutter.embedding.engine.plugins.activity',
+      'io.flutter.embedding.engine.plugins.broadcastreceiver',
+      'io.flutter.embedding.engine.plugins.contentprovider',
+      'io.flutter.embedding.engine.plugins.lifecycle',
+      'io.flutter.embedding.engine.plugins.service',
+      'io.flutter.embedding.engine.plugins.shim',
+      'io.flutter.embedding.engine.renderer',
+      'io.flutter.embedding.engine.systemchannels',
+      'io.flutter.plugin.common',
+      'io.flutter.plugin.editing',
+      'io.flutter.plugin.platform',
+      'io.flutter.util',
+      'io.flutter.view',
   ]
 
   android_package_list = os.path.join(SCRIPT_DIR, 'android_reference')
 
   command = [
-    JavadocBin(),
-    '-classpath', ':'.join(classpath),
-    '-d', args.out_dir,
-    '-linkoffline', 'https://developer.android.com/reference/', android_package_list,
-    '-source', '1.8',
+      JavadocBin(),
+      '-classpath',
+      ':'.join(classpath),
+      '-d',
+      args.out_dir,
+      '-linkoffline',
+      'https://developer.android.com/reference/',
+      android_package_list,
+      '-source',
+      '1.8',
   ] + packages
 
   if not args.quiet:

@@ -16,8 +16,10 @@ import sys
 
 USE_LINKS = sys.platform != "win32"
 
-DART_ANALYZE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                            "dart_analyze.py")
+DART_ANALYZE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "dart_analyze.py"
+)
+
 
 def dart_filter(path):
   if os.path.isdir(path):
@@ -142,7 +144,7 @@ def remove_broken_symlinks(root_dir):
 
 
 def analyze_entrypoints(dart_sdk, package_root, entrypoints):
-  cmd = [ "python", DART_ANALYZE ]
+  cmd = ["python", DART_ANALYZE]
   cmd.append("--dart-sdk")
   cmd.append(dart_sdk)
   cmd.append("--entrypoints")
@@ -161,60 +163,84 @@ def analyze_entrypoints(dart_sdk, package_root, entrypoints):
 
 def main():
   parser = argparse.ArgumentParser(description='Generate a dart-pkg')
-  parser.add_argument('--dart-sdk',
-                      action='store',
-                      metavar='dart_sdk',
-                      help='Path to the Dart SDK.')
-  parser.add_argument('--package-name',
-                      action='store',
-                      metavar='package_name',
-                      help='Name of package',
-                      required=True)
-  parser.add_argument('--pkg-directory',
-                      metavar='pkg_directory',
-                      help='Directory where dart_pkg should go',
-                      required=True)
-  parser.add_argument('--package-root',
-                      metavar='package_root',
-                      help='packages/ directory',
-                      required=True)
-  parser.add_argument('--stamp-file',
-                      metavar='stamp_file',
-                      help='timestamp file',
-                      required=True)
-  parser.add_argument('--entries-file',
-                      metavar='entries_file',
-                      help='script entries file',
-                      required=True)
-  parser.add_argument('--package-sources',
-                      metavar='package_sources',
-                      help='Package sources',
-                      nargs='+')
-  parser.add_argument('--package-entrypoints',
-                      metavar='package_entrypoints',
-                      help='Package entry points for analyzer',
-                      nargs='*',
-                      default=[])
-  parser.add_argument('--sdk-ext-directories',
-                      metavar='sdk_ext_directories',
-                      help='Directory containing .dart sources',
-                      nargs='*',
-                      default=[])
-  parser.add_argument('--sdk-ext-files',
-                      metavar='sdk_ext_files',
-                      help='List of .dart files that are part of sdk_ext.',
-                      nargs='*',
-                      default=[])
-  parser.add_argument('--sdk-ext-mappings',
-                      metavar='sdk_ext_mappings',
-                      help='Mappings for SDK extension libraries.',
-                      nargs='*',
-                      default=[])
-  parser.add_argument('--read_only',
-                      action='store_true',
-                      dest='read_only',
-                      help='Package is a read only package.',
-                      default=False)
+  parser.add_argument(
+      '--dart-sdk',
+      action='store',
+      metavar='dart_sdk',
+      help='Path to the Dart SDK.'
+  )
+  parser.add_argument(
+      '--package-name',
+      action='store',
+      metavar='package_name',
+      help='Name of package',
+      required=True
+  )
+  parser.add_argument(
+      '--pkg-directory',
+      metavar='pkg_directory',
+      help='Directory where dart_pkg should go',
+      required=True
+  )
+  parser.add_argument(
+      '--package-root',
+      metavar='package_root',
+      help='packages/ directory',
+      required=True
+  )
+  parser.add_argument(
+      '--stamp-file',
+      metavar='stamp_file',
+      help='timestamp file',
+      required=True
+  )
+  parser.add_argument(
+      '--entries-file',
+      metavar='entries_file',
+      help='script entries file',
+      required=True
+  )
+  parser.add_argument(
+      '--package-sources',
+      metavar='package_sources',
+      help='Package sources',
+      nargs='+'
+  )
+  parser.add_argument(
+      '--package-entrypoints',
+      metavar='package_entrypoints',
+      help='Package entry points for analyzer',
+      nargs='*',
+      default=[]
+  )
+  parser.add_argument(
+      '--sdk-ext-directories',
+      metavar='sdk_ext_directories',
+      help='Directory containing .dart sources',
+      nargs='*',
+      default=[]
+  )
+  parser.add_argument(
+      '--sdk-ext-files',
+      metavar='sdk_ext_files',
+      help='List of .dart files that are part of sdk_ext.',
+      nargs='*',
+      default=[]
+  )
+  parser.add_argument(
+      '--sdk-ext-mappings',
+      metavar='sdk_ext_mappings',
+      help='Mappings for SDK extension libraries.',
+      nargs='*',
+      default=[]
+  )
+  parser.add_argument(
+      '--read_only',
+      action='store_true',
+      dest='read_only',
+      help='Package is a read only package.',
+      default=False
+  )
   args = parser.parse_args()
 
   # We must have a pubspec.yaml.
@@ -233,14 +259,16 @@ def main():
   sdkext_path = os.path.join(lib_path, '_sdkext')
   if mappings:
     with open(sdkext_path, 'w') as stream:
-      json.dump(mappings, stream, sort_keys=True,
-                indent=2, separators=(',', ': '))
+      json.dump(
+          mappings, stream, sort_keys=True, indent=2, separators=(',', ': ')
+      )
   else:
     remove_if_exists(sdkext_path)
 
   # Copy or symlink package sources into pkg directory.
-  common_source_prefix = os.path.dirname(os.path.commonprefix(
-      args.package_sources))
+  common_source_prefix = os.path.dirname(
+      os.path.commonprefix(args.package_sources)
+  )
   for source in args.package_sources:
     relative_source = os.path.relpath(source, common_source_prefix)
     target = os.path.join(target_dir, relative_source)
@@ -263,8 +291,9 @@ def main():
       target = os.path.join(sdk_ext_dir, relative_source)
       copy_or_link(source, target)
 
-  common_source_prefix = os.path.dirname(os.path.commonprefix(
-      args.sdk_ext_files))
+  common_source_prefix = os.path.dirname(
+      os.path.commonprefix(args.sdk_ext_files)
+  )
   for source in args.sdk_ext_files:
     relative_source = os.path.relpath(source, common_source_prefix)
     target = os.path.join(sdk_ext_dir, relative_source)
@@ -292,6 +321,7 @@ def main():
     pass
 
   return 0
+
 
 if __name__ == '__main__':
   sys.exit(main())

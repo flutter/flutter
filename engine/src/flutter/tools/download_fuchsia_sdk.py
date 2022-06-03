@@ -6,7 +6,6 @@
 # The return code of this script will always be 0, even if there is an error,
 # unless the --fail-loudly flag is passed.
 
-
 import argparse
 import tarfile
 import json
@@ -15,9 +14,12 @@ import shutil
 import subprocess
 import sys
 
-SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+SRC_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
 FUCHSIA_SDK_DIR = os.path.join(SRC_ROOT, 'fuchsia', 'sdk')
 FLUTTER_DIR = os.path.join(SRC_ROOT, 'flutter')
+
 
 # Prints to stderr.
 def eprint(*args, **kwargs):
@@ -43,28 +45,38 @@ def DownloadFuchsiaSDKFromGCS(sdk_path, verbose):
   # Ensure destination folder exists.
   os.makedirs(FUCHSIA_SDK_DIR, exist_ok=True)
   curl_command = [
-    'curl',
-    '--retry', '3',
-    '--continue-at', '-', '--location',
-    '--output', dest,
-    url,
+      'curl',
+      '--retry',
+      '3',
+      '--continue-at',
+      '-',
+      '--location',
+      '--output',
+      dest,
+      url,
   ]
   if verbose:
     print('Running: "%s"' % (' '.join(curl_command)))
   curl_result = subprocess.run(
-    curl_command,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
-    universal_newlines=True,
+      curl_command,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE,
+      universal_newlines=True,
   )
   if curl_result.returncode == 0 and verbose:
-    print('curl output:stdout:\n{}\nstderr:\n{}'.format(
-      curl_result.stdout, curl_result.stderr,
-    ))
+    print(
+        'curl output:stdout:\n{}\nstderr:\n{}'.format(
+            curl_result.stdout,
+            curl_result.stderr,
+        )
+    )
   elif curl_result.returncode != 0:
-    eprint('Failed to download: stdout:\n{}\nstderr:\n{}'.format(
-      curl_result.stdout, curl_result.stderr,
-    ))
+    eprint(
+        'Failed to download: stdout:\n{}\nstderr:\n{}'.format(
+            curl_result.stdout,
+            curl_result.stderr,
+        )
+    )
     return None
 
   return dest
@@ -111,24 +123,25 @@ def ExtractGzipArchive(archive, host_os, verbose):
 def Main():
   parser = argparse.ArgumentParser()
   parser.add_argument(
-    '--fail-loudly',
-    action='store_true',
-    default=False,
-    help="Return an error code if a prebuilt couldn't be fetched and extracted")
+      '--fail-loudly',
+      action='store_true',
+      default=False,
+      help="Return an error code if a prebuilt couldn't be fetched and extracted"
+  )
 
   parser.add_argument(
-    '--verbose',
-    action='store_true',
-    default='LUCI_CONTEXT' in os.environ,
-    help='Emit verbose output')
+      '--verbose',
+      action='store_true',
+      default='LUCI_CONTEXT' in os.environ,
+      help='Emit verbose output'
+  )
+
+  parser.add_argument('--host-os', help='The host os')
 
   parser.add_argument(
-    '--host-os',
-    help='The host os')
-
-  parser.add_argument(
-    '--fuchsia-sdk-path',
-    help='The path in gcs to the fuchsia sdk to download')
+      '--fuchsia-sdk-path',
+      help='The path in gcs to the fuchsia sdk to download'
+  )
 
   args = parser.parse_args()
   fail_loudly = 1 if args.fail_loudly else 0

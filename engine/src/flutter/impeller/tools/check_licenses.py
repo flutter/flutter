@@ -27,39 +27,39 @@ def ContainsLicenseBlock(source_file):
 
 def IsSourceFile(path):
   known_extensions = [
-    ".cc",
-    ".cpp",
-    ".c",
-    ".h",
-    ".hpp",
-    ".py",
-    ".sh",
-    ".gn",
-    ".gni",
-    ".glsl",
-    ".sl.h",
-    ".vert",
-    ".frag",
-    ".tesc",
-    ".tese",
-    ".yaml",
-    ".dart",
+      ".cc",
+      ".cpp",
+      ".c",
+      ".h",
+      ".hpp",
+      ".py",
+      ".sh",
+      ".gn",
+      ".gni",
+      ".glsl",
+      ".sl.h",
+      ".vert",
+      ".frag",
+      ".tesc",
+      ".tese",
+      ".yaml",
+      ".dart",
   ]
   for extension in known_extensions:
     if os.path.basename(path).endswith(extension):
       return True
-  return False;
+  return False
 
 
 # Checks that all source files have the same license preamble.
 def Main():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--source-root",
-                    type=str, required=True,
-                    help="The source root.")
+  parser.add_argument(
+      "--source-root", type=str, required=True, help="The source root."
+  )
   args = parser.parse_args()
 
-  assert(os.path.exists(args.source_root))
+  assert (os.path.exists(args.source_root))
 
   source_files = set()
 
@@ -71,7 +71,10 @@ def Main():
 
   for source_file in source_files:
     if not ContainsLicenseBlock(source_file):
-      raise Exception("Could not find valid license block in source ", source_file)
+      raise Exception(
+          "Could not find valid license block in source ", source_file
+      )
+
 
 if __name__ == '__main__':
   Main()

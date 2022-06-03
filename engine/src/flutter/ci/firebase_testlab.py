@@ -25,27 +25,38 @@ def RunFirebaseTest(apk, results_dir):
   # See https://firebase.google.com/docs/test-lab/android/game-loop
   # Pixel 5. As of this commit, this is a highly available device in FTL.
   process = subprocess.Popen(
-    [
-      'gcloud',
-      '--project', 'flutter-infra',
-      'firebase', 'test', 'android', 'run',
-      '--type', 'game-loop',
-      '--app', apk,
-      '--timeout', '2m',
-      '--results-bucket', bucket,
-      '--results-dir', results_dir,
-      '--device', 'model=redfin,version=30',
-    ],
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-    universal_newlines=True,
+      [
+          'gcloud',
+          '--project',
+          'flutter-infra',
+          'firebase',
+          'test',
+          'android',
+          'run',
+          '--type',
+          'game-loop',
+          '--app',
+          apk,
+          '--timeout',
+          '2m',
+          '--results-bucket',
+          bucket,
+          '--results-dir',
+          results_dir,
+          '--device',
+          'model=redfin,version=30',
+      ],
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      universal_newlines=True,
   )
   return process
 
 
 def CheckLogcat(results_dir):
   logcat = subprocess.check_output([
-      'gsutil', 'cat', '%s/%s/*/logcat' % (bucket, results_dir)
+      'gsutil', 'cat',
+      '%s/%s/*/logcat' % (bucket, results_dir)
   ])
   if not logcat:
     sys.exit(1)
@@ -60,7 +71,8 @@ def CheckLogcat(results_dir):
 def CheckTimeline(results_dir):
   du = subprocess.check_output([
       'gsutil', 'du',
-      '%s/%s/*/game_loop_results/results_scenario_0.json' % (bucket, results_dir)
+      '%s/%s/*/game_loop_results/results_scenario_0.json' %
+      (bucket, results_dir)
   ]).strip()
   if du == '0':
     print('Failed to produce a timeline.')
@@ -69,11 +81,18 @@ def CheckTimeline(results_dir):
 
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument('--variant', dest='variant', action='store',
-      default='android_profile_arm64', help='The engine variant to run tests for.')
-  parser.add_argument('--build-id',
+  parser.add_argument(
+      '--variant',
+      dest='variant',
+      action='store',
+      default='android_profile_arm64',
+      help='The engine variant to run tests for.'
+  )
+  parser.add_argument(
+      '--build-id',
       default=os.environ.get('SWARMING_TASK_ID', 'local_test'),
-      help='A unique build identifier for this test. Used to sort results in the GCS bucket.')
+      help='A unique build identifier for this test. Used to sort results in the GCS bucket.'
+  )
 
   args = parser.parse_args()
 
@@ -84,12 +103,14 @@ def main():
     print('No APKs found at %s' % apks_dir)
     return 1
 
-  git_revision = subprocess.check_output(
-      ['git', 'rev-parse', 'HEAD'], cwd=script_dir).strip()
+  git_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
+                                         cwd=script_dir).strip()
 
   results = []
   for apk in apks:
-    results_dir = '%s/%s/%s' % (os.path.basename(apk), git_revision, args.build_id)
+    results_dir = '%s/%s/%s' % (
+        os.path.basename(apk), git_revision, args.build_id
+    )
     process = RunFirebaseTest(apk, results_dir)
     results.append((results_dir, process))
 

@@ -11,6 +11,7 @@ import subprocess
 import os
 import argparse
 
+
 def IsWindows():
   os_id = sys.platform
   return os_id.startswith('win32') or os_id.startswith('cygwin')
@@ -25,11 +26,11 @@ def GetRepositoryVersion(repository):
   if IsWindows():
     git = 'git.bat'
   version = subprocess.check_output([
-    git,
-    '-C',
-    repository,
-    'rev-parse',
-    'HEAD',
+      git,
+      '-C',
+      repository,
+      'rev-parse',
+      'HEAD',
   ])
 
   return str(version.strip(), 'utf-8')
@@ -38,10 +39,12 @@ def GetRepositoryVersion(repository):
 def main():
   parser = argparse.ArgumentParser()
 
-  parser.add_argument('--repository',
-                      action='store',
-                      help='Path to the Git repository.',
-                      required=True)
+  parser.add_argument(
+      '--repository',
+      action='store',
+      help='Path to the Git repository.',
+      required=True
+  )
 
   args = parser.parse_args()
   repository = os.path.abspath(args.repository)
