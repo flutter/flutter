@@ -1566,7 +1566,10 @@ class _ActionButtonParentDataWidget
       parentData.isPressed = isPressed;
 
       // Force a repaint.
-      renderObject.parent?.markNeedsPaint();
+      final AbstractNode? targetParent = renderObject.parent;
+      if (targetParent is RenderObject) {
+        targetParent.markNeedsPaint();
+      }
     }
   }
 
@@ -1903,8 +1906,9 @@ class _RenderCupertinoDialogActions extends RenderBox
   bool _hasCancelButton;
   bool get hasCancelButton => _hasCancelButton;
   set hasCancelButton(bool newValue) {
-    if (newValue == _hasCancelButton)
+    if (newValue == _hasCancelButton) {
       return;
+    }
 
     _hasCancelButton = newValue;
     markNeedsLayout();
@@ -1913,8 +1917,9 @@ class _RenderCupertinoDialogActions extends RenderBox
   Color get dialogColor => _buttonBackgroundPaint.color;
   final Paint _buttonBackgroundPaint;
   set dialogColor(Color value) {
-    if (value == _buttonBackgroundPaint.color)
+    if (value == _buttonBackgroundPaint.color) {
       return;
+    }
 
     _buttonBackgroundPaint.color = value;
     markNeedsPaint();
@@ -1923,8 +1928,9 @@ class _RenderCupertinoDialogActions extends RenderBox
   Color get dialogPressedColor => _pressedButtonBackgroundPaint.color;
   final Paint _pressedButtonBackgroundPaint;
   set dialogPressedColor(Color value) {
-    if (value == _pressedButtonBackgroundPaint.color)
+    if (value == _pressedButtonBackgroundPaint.color) {
       return;
+    }
 
     _pressedButtonBackgroundPaint.color = value;
     markNeedsPaint();
@@ -1933,8 +1939,9 @@ class _RenderCupertinoDialogActions extends RenderBox
   Color get dividerColor => _dividerPaint.color;
   final Paint _dividerPaint;
   set dividerColor(Color value) {
-    if (value == _dividerPaint.color)
+    if (value == _dividerPaint.color) {
       return;
+    }
 
     _dividerPaint.color = value;
     markNeedsPaint();
@@ -1943,8 +1950,9 @@ class _RenderCupertinoDialogActions extends RenderBox
   bool get isActionSheet => _isActionSheet;
   bool _isActionSheet;
   set isActionSheet(bool value) {
-    if (value == _isActionSheet)
+    if (value == _isActionSheet) {
       return;
+    }
 
     _isActionSheet = value;
     markNeedsPaint();
@@ -1979,8 +1987,9 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _ActionButtonParentData)
+    if (child.parentData is! _ActionButtonParentData) {
       child.parentData = _ActionButtonParentData();
+    }
   }
 
   @override
@@ -1998,10 +2007,12 @@ class _RenderCupertinoDialogActions extends RenderBox
     if (childCount == 0) {
       return 0.0;
     } else if (isActionSheet) {
-      if (childCount == 1)
+      if (childCount == 1) {
         return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
-      if (hasCancelButton && childCount < 4)
+      }
+      if (hasCancelButton && childCount < 4) {
         return _computeMinIntrinsicHeightWithCancel(width);
+      }
       return _computeMinIntrinsicHeightStacked(width);
     } else if (childCount == 1) {
       // If only 1 button, display the button across the entire dialog.
@@ -2068,8 +2079,9 @@ class _RenderCupertinoDialogActions extends RenderBox
       // No buttons. Zero height.
       return 0.0;
     } else if (isActionSheet) {
-      if (childCount == 1)
+      if (childCount == 1) {
         return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
+      }
       return _computeMaxIntrinsicHeightStacked(width);
     } else if (childCount == 1) {
       // One button. Our max intrinsic height is equal to the button's.

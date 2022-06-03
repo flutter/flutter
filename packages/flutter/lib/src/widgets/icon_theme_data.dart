@@ -49,8 +49,9 @@ class IconThemeData with Diagnosticable {
   /// replaced by the non-null parameters of the given icon theme. If the given
   /// icon theme is null, simply returns this icon theme.
   IconThemeData merge(IconThemeData? other) {
-    if (other == null)
+    if (other == null) {
       return this;
+    }
     return copyWith(
       color: other.color,
       opacity: other.opacity,
@@ -108,8 +109,9 @@ class IconThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is IconThemeData
         && other.color == color
         && other.opacity == opacity

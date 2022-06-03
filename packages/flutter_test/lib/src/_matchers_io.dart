@@ -23,7 +23,7 @@ Future<ui.Image> captureImage(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent!;
+    renderObject = renderObject.parent! as RenderObject;
   }
   assert(!renderObject.debugNeedsPaint);
   final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
@@ -91,8 +91,9 @@ class MatchesGoldenFile extends AsyncMatcher {
         throw AssertionError('Future<Image> completed to null');
       }
       final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null)
+      if (bytes == null) {
         return 'could not encode screenshot.';
+      }
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
         return null;

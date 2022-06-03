@@ -4,7 +4,7 @@
 
 import 'package:fuchsia_remote_debug_protocol/src/common/network.dart';
 
-import '../../common.dart';
+import 'package:test/test.dart';
 
 void main() {
   final List<String> ipv4Addresses = <String>['127.0.0.1', '8.8.8.8'];

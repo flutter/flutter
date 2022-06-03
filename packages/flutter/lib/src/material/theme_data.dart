@@ -1170,7 +1170,7 @@ class ThemeData with Diagnosticable {
   ///   * [ElevatedButton]
   ///   * [FloatingActionButton]
   ///   * [Material]
-  ///   * [NavigationBar]
+  ///   * [NavigationBar] (new, replacing [BottomNavigationBar])
   ///   * [NavigationRail]
   ///   * [OutlinedButton]
   ///   * [StretchingOverscrollIndicator], replacing the
@@ -1900,8 +1900,9 @@ class ThemeData with Diagnosticable {
     // Design spec shows for its color palette on
     // <https://material.io/go/design-theming#color-color-palette>.
     const double kThreshold = 0.15;
-    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold)
+    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold) {
       return Brightness.light;
+    }
     return Brightness.dark;
   }
 
@@ -2039,8 +2040,9 @@ class ThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ThemeData &&
         // For the sanity of the reader, make sure these properties are in the same
         // order in every place that they are separated by section comments (e.g.
@@ -2146,8 +2148,8 @@ class ThemeData with Diagnosticable {
       // GENERAL CONFIGURATION
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
-      hashList(extensions.keys),
-      hashList(extensions.values),
+      ...extensions.keys,
+      ...extensions.values,
       inputDecorationTheme,
       materialTapTargetSize,
       pageTransitionsTheme,
@@ -2498,10 +2500,12 @@ class _FifoCache<K, V> {
     assert(key != null);
     assert(loader != null);
     final V? result = _cache[key];
-    if (result != null)
+    if (result != null) {
       return result;
-    if (_cache.length == _maximumSize)
+    }
+    if (_cache.length == _maximumSize) {
       _cache.remove(_cache.keys.first);
+    }
     return _cache[key] = loader();
   }
 }
