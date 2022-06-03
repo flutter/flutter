@@ -779,10 +779,10 @@ class KeyEventManager {
   /// focus handlers (such as shortcuts) by patching [keyMessageHandler].
   ///
   /// Try to type something in the first text field. These key presses are not
-  /// handled by shorcuts and will be captured by the handler and printed out.
-  /// Now try to press text shortcuts, such as Ctrl+A. The KeyA press is
-  /// handled by shortcuts, therefore unhandled by the handler and not printed
-  /// out.
+  /// handled by shorcuts and will be sent to the fallback handler and printed
+  /// out. Now try to press text shortcuts, such as Ctrl+A. The KeyA press is
+  /// handled as a shortcut, therefore not sent to the fallback handler and not
+  /// printed out.
   ///
   /// ** See code in examples/api/lib/widgets/hardware_keyboard/key_event_manager.0.dart **
   /// {@end-tool}
