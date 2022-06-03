@@ -533,10 +533,10 @@ class FlutterValidator extends DoctorValidator {
   ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel) {
     final String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
 
-    // The tool sets the channel as "unknown", if the tracking branch isn't a
-    // git remote, and sets the frameworkVersion as "0.0.0-unknown" if "git
-    // describe" on HEAD doesn't produce an expected format to be parsed for the
-    // frameworkVersion.
+    // The tool sets the channel as "unknown", if the current branch is on a
+    // "detached HEAD" state or doesn't have an upstream, and sets the
+    // frameworkVersion as "0.0.0-unknown" if  "git describe" on HEAD doesn't
+    // produce an expected format to be parsed for the frameworkVersion.
     if (versionChannel == 'unknown' || frameworkVersion == '0.0.0-unknown') {
       return ValidationMessage.hint(flutterVersionMessage);
     }
