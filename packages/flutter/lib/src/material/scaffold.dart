@@ -3077,17 +3077,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     return false;
   }
 
-  Widget _wrapBottomSheet(Widget bottomSheet) {
-    return Semantics(
-      container: true,
-      onDismiss: close,
-      child:  NotificationListener<DraggableScrollableNotification>(
-        onNotification: extentChanged,
-        child: bottomSheet,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -3099,19 +3088,24 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           child: child,
         );
       },
-      child: _wrapBottomSheet(
-        BottomSheet(
-          animationController: widget.animationController,
-          enableDrag: widget.enableDrag,
-          onDragStart: _handleDragStart,
-          onDragEnd: _handleDragEnd,
-          onClosing: widget.onClosing!,
-          builder: widget.builder,
-          backgroundColor: widget.backgroundColor,
-          elevation: widget.elevation,
-          shape: widget.shape,
-          clipBehavior: widget.clipBehavior,
-          constraints: widget.constraints,
+      child: Semantics(
+        container: true,
+        onDismiss: close,
+        child:  NotificationListener<DraggableScrollableNotification>(
+          onNotification: extentChanged,
+          child: BottomSheet(
+            animationController: widget.animationController,
+            enableDrag: widget.enableDrag,
+            onDragStart: _handleDragStart,
+            onDragEnd: _handleDragEnd,
+            onClosing: widget.onClosing!,
+            builder: widget.builder,
+            backgroundColor: widget.backgroundColor,
+            elevation: widget.elevation,
+            shape: widget.shape,
+            clipBehavior: widget.clipBehavior,
+            constraints: widget.constraints,
+          ),
         ),
       ),
     );
