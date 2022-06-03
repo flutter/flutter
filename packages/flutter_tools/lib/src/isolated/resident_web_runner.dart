@@ -518,6 +518,7 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false, // ignored, we don't yet support devtools for web
+    bool needsFullRestart = true,
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher.connectedInstance;
