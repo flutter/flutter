@@ -20,6 +20,7 @@ import '../services.dart';
 import '../text/paragraph.dart';
 import '../util.dart';
 import 'autofill_hint.dart';
+import 'composition_aware_mixin.dart';
 import 'input_type.dart';
 import 'text_capitalization.dart';
 
@@ -508,7 +509,6 @@ class TextEditingDeltaState {
     final bool isCurrentlyComposing = newTextEditingDeltaState.composingOffset != null && newTextEditingDeltaState.composingOffset != newTextEditingDeltaState.composingExtent;
     if (newTextEditingDeltaState.deltaText.isNotEmpty && previousSelectionWasCollapsed && isCurrentlyComposing) {
       newTextEditingDeltaState.deltaStart = newTextEditingDeltaState.composingOffset!;
-      newTextEditingDeltaState.deltaEnd = newTextEditingDeltaState.composingExtent!;
     }
 
     final bool isDeltaRangeEmpty = newTextEditingDeltaState.deltaStart == -1 && newTextEditingDeltaState.deltaStart == newTextEditingDeltaState.deltaEnd;
@@ -618,6 +618,8 @@ class TextEditingDeltaState {
         'deltaEnd': deltaEnd,
         'selectionBase': baseOffset,
         'selectionExtent': extentOffset,
+        'composingBase': composingOffset,
+        'composingExtent': composingExtent
       },
     ],
   };
@@ -647,7 +649,13 @@ class TextEditingDeltaState {
 
 /// The current text and selection state of a text field.
 class EditingState {
-  EditingState({this.text, int? baseOffset, int? extentOffset}) :
+  EditingState({
+      this.text,
+      int? baseOffset,
+      int? extentOffset,
+      this.composingBaseOffset,
+      this.composingExtentOffset
+    }) :
     // Don't allow negative numbers. Pick the smallest selection index for base.
     baseOffset = math.max(0, math.min(baseOffset ?? 0, extentOffset ?? 0)),
     // Don't allow negative numbers. Pick the greatest selection index for extent.
@@ -674,14 +682,20 @@ class EditingState {
   /// valid selection range for input DOM elements.
   factory EditingState.fromFrameworkMessage(
       Map<String, dynamic> flutterEditingState) {
+    final String? text = flutterEditingState.tryString('text');
+
     final int selectionBase = flutterEditingState.readInt('selectionBase');
     final int selectionExtent = flutterEditingState.readInt('selectionExtent');
-    final String? text = flutterEditingState.tryString('text');
+
+    final int? composingBase = flutterEditingState.tryInt('composingBase');
+    final int? composingExtent = flutterEditingState.tryInt('composingExtent');
 
     return EditingState(
       text: text,
       baseOffset: selectionBase,
       extentOffset: selectionExtent,
+      composingBaseOffset: composingBase,
+      composingExtentOffset: composingExtent
     );
   }
 
@@ -708,6 +722,22 @@ class EditingState {
     }
   }
 
+    EditingState copyWith({
+     String? text,
+     int? baseOffset,
+     int? extentOffset,
+     int? composingBaseOffset,
+     int? composingExtentOffset,
+   }) {
+     return EditingState(
+       text: text ?? this.text,
+       baseOffset: baseOffset ?? this.baseOffset,
+       extentOffset: extentOffset ?? this.extentOffset,
+       composingBaseOffset: composingBaseOffset ?? this.composingBaseOffset,
+       composingExtentOffset: composingExtentOffset ?? this.composingExtentOffset,
+     );
+   }
+
   /// The counterpart of [EditingState.fromFrameworkMessage]. It generates a Map that
   /// can be sent to Flutter.
   // TODO(mdebbar): Should we get `selectionAffinity` and other properties from flutter's editing state?
@@ -715,6 +745,8 @@ class EditingState {
         'text': text,
         'selectionBase': baseOffset,
         'selectionExtent': extentOffset,
+        'composingBase': composingBaseOffset,
+        'composingExtent': composingExtentOffset,
       };
 
   /// The current text being edited.
@@ -726,11 +758,19 @@ class EditingState {
   /// The offset at which the text selection terminates.
   final int? extentOffset;
 
+  /// The offset at which [CompositionAwareMixin.composingText] begins, if any.
+  final int? composingBaseOffset;
+
+  /// The offset at which [CompositionAwareMixin.composingText] terminates, if any.
+  final int? composingExtentOffset;
+
   /// Whether the current editing state is valid or not.
   bool get isValid => baseOffset! >= 0 && extentOffset! >= 0;
 
   @override
-  int get hashCode => Object.hash(text, baseOffset, extentOffset);
+  int get hashCode => Object.hash(
+    text, baseOffset, extentOffset, composingBaseOffset, composingExtentOffset
+  );
 
   @override
   bool operator ==(Object other) {
@@ -743,13 +783,15 @@ class EditingState {
     return other is EditingState &&
         other.text == text &&
         other.baseOffset == baseOffset &&
-        other.extentOffset == extentOffset;
+        other.extentOffset == extentOffset &&
+        other.composingBaseOffset == composingBaseOffset &&
+        other.composingExtentOffset == composingExtentOffset;
   }
 
   @override
   String toString() {
     return assertionsEnabled
-        ? 'EditingState("$text", base:$baseOffset, extent:$extentOffset)'
+        ? 'EditingState("$text", base:$baseOffset, extent:$extentOffset, composingBase:$composingBaseOffset, composingExtent:$composingExtentOffset)'
         : super.toString();
   }
 
@@ -1038,7 +1080,7 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
 ///
 /// Unless a formfactor/browser requires specific implementation for a specific
 /// strategy the methods in this class should be used.
-abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
+abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements TextEditingStrategy  {
   final HybridTextEditing owner;
 
   DefaultTextEditingStrategy(this.owner);
@@ -1169,7 +1211,7 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     activeDomElement.addEventListener('beforeinput', handleBeforeInput);
 
-    activeDomElement.addEventListener('compositionupdate', handleCompositionUpdate);
+    addCompositionEventHandlers(activeDomElement);
 
     // Refocus on the activeDomElement after blur, so that user can keep editing the
     // text field.
@@ -1210,6 +1252,8 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
       subscriptions[i].cancel();
     }
     subscriptions.clear();
+    removeCompositionEventHandlers(activeDomElement);
+
     // If focused element is a part of a form, it needs to stay on the DOM
     // until the autofill context of the form is finalized.
     // More details on `TextInput.finishAutofillContext` call.
@@ -1246,9 +1290,13 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
   void handleChange(html.Event event) {
     assert(isEnabled);
 
-    final EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
+    EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
+    newEditingState = determineCompositionState(newEditingState);
+
     TextEditingDeltaState? newTextEditingDeltaState;
     if (inputConfiguration.enableDeltaModel) {
+      editingDeltaState.composingOffset = newEditingState.composingBaseOffset;
+      editingDeltaState.composingExtent = newEditingState.composingExtentOffset;
       newTextEditingDeltaState = TextEditingDeltaState.inferDeltaState(newEditingState, lastEditingState, editingDeltaState);
     }
 
@@ -1293,12 +1341,6 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
         editingDeltaState.deltaEnd = lastEditingState!.extentOffset!;
       }
     }
-  }
-
-  void handleCompositionUpdate(html.Event event) {
-    final EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
-    editingDeltaState.composingOffset = newEditingState.baseOffset!;
-    editingDeltaState.composingExtent = newEditingState.extentOffset!;
   }
 
   void maybeSendAction(html.Event event) {
@@ -1450,7 +1492,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     activeDomElement.addEventListener('beforeinput', handleBeforeInput);
 
-    activeDomElement.addEventListener('compositionupdate', handleCompositionUpdate);
+    addCompositionEventHandlers(activeDomElement);
 
     // Position the DOM element after it is focused.
     subscriptions.add(activeDomElement.onFocus.listen((_) {
@@ -1594,7 +1636,7 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     activeDomElement.addEventListener('beforeinput', handleBeforeInput);
 
-    activeDomElement.addEventListener('compositionupdate', handleCompositionUpdate);
+    addCompositionEventHandlers(activeDomElement);
 
     subscriptions.add(activeDomElement.onBlur.listen((_) {
       if (windowHasFocus) {
@@ -1650,7 +1692,7 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     activeDomElement.addEventListener('beforeinput', handleBeforeInput);
 
-    activeDomElement.addEventListener('compositionupdate', handleCompositionUpdate);
+    addCompositionEventHandlers(activeDomElement);
 
     // Detects changes in text selection.
     //
