@@ -322,7 +322,13 @@ class IconButton extends StatelessWidget {
   /// and `Theme.of(context).visualDensity` otherwise.
   final BoxConstraints? constraints;
 
-  /// {@macro flutter.material.ButtonStyleButton.style}
+  /// Customizes this button's appearance.
+  ///
+  /// Non-null properties of this style override the corresponding
+  /// properties in [_IconButtonM3.themeStyleOf] and [_IconButtonM3.defaultStyleOf].
+  /// [MaterialStateProperty]s that resolve to non-null values will similarly
+  /// override the corresponding [MaterialStateProperty]s in [_IconButtonM3.themeStyleOf]
+  /// and [_IconButtonM3.defaultStyleOf].
   ///
   /// The [style] is only used for Material 3 [IconButton]. If [ThemeData.useMaterial3]
   /// is set to true, [style] is preferred for icon button customization, and any
@@ -331,6 +337,8 @@ class IconButton extends StatelessWidget {
   /// For example, if [IconButton]'s [visualDensity] is set to [VisualDensity.standard]
   /// and [style]'s [visualDensity] is set to [VisualDensity.compact],
   /// the icon button will have [VisualDensity.compact] to define the button's layout.
+  ///
+  /// Null by default.
   final ButtonStyle? style;
 
   /// A static convenience method that constructs an icon button
@@ -365,10 +373,10 @@ class IconButton extends StatelessWidget {
   /// )
   /// ```
   static ButtonStyle styleFrom({
-    Color? backgroundColor,
     Color? foregroundColor,
-    Color? disabledBackgroundColor,
+    Color? backgroundColor,
     Color? disabledForegroundColor,
+    Color? disabledBackgroundColor,
     Color? focusColor,
     Color? hoverColor,
     Color? highlightColor,
@@ -571,16 +579,15 @@ class _IconButtonM3 extends ButtonStyleButton {
   const _IconButtonM3({
     super.key,
     required super.onPressed,
-    super.onLongPress,
-    super.onHover,
-    super.onFocusChange,
     super.style,
     super.focusNode,
     super.autofocus = false,
-    super.clipBehavior = Clip.none,
     required Widget super.child,
-
-  });
+  }) : super(
+      onLongPress: null,
+      onHover: null,
+      onFocusChange: null,
+      clipBehavior: Clip.none);
 
   /// ## Material 3 defaults
   ///
