@@ -39,64 +39,59 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+      SizedBox(
+          width: 300,
+          child: TextField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter the name for a person to track',
+            ),
+            onSubmitted: (String value) {
+              setState(() {
+                names.add(value);
+              });
+              fieldText.clear();
+            },
+            controller: fieldText,
+          )),
+      const SizedBox(
+        height: 50,
+      ),
+      Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          SizedBox(
-              width: 300,
-              child: TextField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter the name for a person to track',
-                ),
-                onSubmitted: (String value) {
-                  setState(() {
-                    names.add(value);
-                  });
-                  fieldText.clear();
-                },
-                controller: fieldText,
-              )),
-          const SizedBox(
-            height: 50,
+          GestureDetector(
+            onTap: () => setState(() {
+              if (index == 0) {
+                index = names.length - 1;
+              } else {
+                index--;
+              }
+            }),
+            child: const Icon(key: Key('gesture1'), Icons.chevron_left),
           ),
-          Row(
+          Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              GestureDetector(
-                onTap: () => setState(() {
-                  if (index == 0) {
-                    index = names.length - 1;
-                  } else {
-                    index--;
-                  }
-                }),
-                child: const Icon(key: Key('gesture1'), Icons.chevron_left),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  IndexedStack(
-                    index: index,
-                    children: <Widget>[
-                      for (String name in names) PersonTracker(name: name)
-                    ],
-                  )
-                ],
-              ),
-              GestureDetector(
-                onTap: () => setState(() {
-                  if (index == names.length - 1) {
-                    index = 0;
-                  } else {
-                    index++;
-                  }
-                }),
-                child: const Icon(key: Key('gesture2'), Icons.chevron_right),
-              ),
+              IndexedStack(
+                index: index,
+                children: <Widget>[for (String name in names) PersonTracker(name: name)],
+              )
             ],
-          )
-        ]);
+          ),
+          GestureDetector(
+            onTap: () => setState(() {
+              if (index == names.length - 1)
+                index = 0;
+              else
+                index++;
+            }),
+            child: const Icon(key: Key('gesture2'), Icons.chevron_right),
+          ),
+        ],
+      )
+    ]);
   }
 }
 
