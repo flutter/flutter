@@ -228,6 +228,7 @@ class HotRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    bool needsFullRestart = true,
   }) async {
     _didAttach = true;
     try {
@@ -276,7 +277,7 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
-    final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
+    final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: needsFullRestart);
     _addBenchmarkData(
       'hotReloadInitialDevFSSyncMilliseconds',
       initialUpdateDevFSsTimer.elapsed.inMilliseconds,
@@ -436,6 +437,7 @@ class HotRunner extends ResidentRunner {
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
       enableDevTools: enableDevTools,
+      needsFullRestart: false,
     );
   }
 
