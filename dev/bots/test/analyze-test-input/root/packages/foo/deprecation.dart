@@ -66,19 +66,19 @@ void test11() { }
 void test12() { }
 
 @Deprecated(
-  'Version number test (should fail). '
+  'Version number test (should pass). '
   'This feature was deprecated after v1.20.0.'
 )
 void test13() { }
 
 @Deprecated(
-  'Version number test (should fail). '
+  'Version number test (should pass). '
   'This feature was deprecated after v1.21.0.'
 )
 void test14() { }
 
 @Deprecated(
-  'Version number test (should fail). '
+  'Version number test (should pass). '
   'This feature was deprecated after v3.1.0.'
 )
 void test15() { }

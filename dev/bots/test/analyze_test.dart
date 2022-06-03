@@ -53,9 +53,6 @@ void main() {
         'test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern.',
         'test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.',
         'test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:70: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:76: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:82: Deprecation notice does not accurately indicate a dev branch version number; please see RELEASES_URL to find the latest dev build version number.',
         'test/analyze-test-input/root/packages/foo/deprecation.dart:99: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
       ]
       .map((String line) {
