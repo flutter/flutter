@@ -725,7 +725,11 @@ class PythonFormatChecker extends FormatChecker {
   }
 
   Future<int> _runYapfCheck({required bool fixing}) async {
-    final List<String> filesToCheck = await getFileList(<String>['*.py']);
+    final List<String> filesToCheck = <String>[
+      ...await getFileList(<String>['*.py']),
+      // Always include flutter/tools/gn.
+      '${repoDir.path}/tools/gn',
+    ];
 
     final List<String> cmd = <String>[
       yapfBin.path,
