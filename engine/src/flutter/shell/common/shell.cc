@@ -1150,9 +1150,7 @@ void Shell::OnAnimatorUpdateLatestFrameTargetTime(
 }
 
 // |Animator::Delegate|
-void Shell::OnAnimatorDraw(
-    std::shared_ptr<Pipeline<flutter::LayerTree>> pipeline,
-    std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) {
+void Shell::OnAnimatorDraw(std::shared_ptr<LayerTreePipeline> pipeline) {
   FML_DCHECK(is_setup_);
 
   auto discard_callback = [this](flutter::LayerTree& tree) {
@@ -1165,14 +1163,12 @@ void Shell::OnAnimatorDraw(
       [&waiting_for_first_frame = waiting_for_first_frame_,
        &waiting_for_first_frame_condition = waiting_for_first_frame_condition_,
        rasterizer = rasterizer_->GetWeakPtr(),
-       weak_pipeline = std::weak_ptr<Pipeline<LayerTree>>(pipeline),
-       discard_callback = std::move(discard_callback),
-       frame_timings_recorder = std::move(frame_timings_recorder)]() mutable {
+       weak_pipeline = std::weak_ptr<LayerTreePipeline>(pipeline),
+       discard_callback = std::move(discard_callback)]() mutable {
         if (rasterizer) {
-          std::shared_ptr<Pipeline<LayerTree>> pipeline = weak_pipeline.lock();
+          std::shared_ptr<LayerTreePipeline> pipeline = weak_pipeline.lock();
           if (pipeline) {
-            rasterizer->Draw(std::move(frame_timings_recorder),
-                             std::move(pipeline), std::move(discard_callback));
+            rasterizer->Draw(std::move(pipeline), std::move(discard_callback));
           }
 
           if (waiting_for_first_frame.load()) {

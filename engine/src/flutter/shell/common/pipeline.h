@@ -9,6 +9,8 @@
 #include <memory>
 #include <mutex>
 
+#include "flutter/flow/frame_timings.h"
+#include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/synchronization/semaphore.h"
@@ -218,6 +220,17 @@ class Pipeline {
 
   FML_DISALLOW_COPY_AND_ASSIGN(Pipeline);
 };
+
+struct LayerTreeItem {
+  LayerTreeItem(std::unique_ptr<LayerTree> layer_tree,
+                std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder)
+      : layer_tree(std::move(layer_tree)),
+        frame_timings_recorder(std::move(frame_timings_recorder)) {}
+  std::unique_ptr<LayerTree> layer_tree;
+  std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder;
+};
+
+using LayerTreePipeline = Pipeline<LayerTreeItem>;
 
 }  // namespace flutter
 
