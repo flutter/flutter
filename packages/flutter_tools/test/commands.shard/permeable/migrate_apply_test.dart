@@ -78,7 +78,7 @@ flutter:
       <String>[
         'migrate',
         'apply',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${workingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -91,11 +91,11 @@ flutter:
       <String>[
         'migrate',
         'apply',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${workingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
-    expect(logger.statusText, contains('No migration in progress. Please run:'));
+    expect(logger.statusText, contains('No migration in progress'));
 
     final File pubspecModified = workingDir.childFile('pubspec.yaml');
     pubspecModified.createSync(recursive: true);
@@ -157,7 +157,7 @@ line3
       <String>[
         'migrate',
         'apply',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${workingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -184,7 +184,7 @@ line3
       <String>[
         'migrate',
         'apply',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${workingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -198,7 +198,7 @@ line3
       <String>[
         'migrate',
         'apply',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${workingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
