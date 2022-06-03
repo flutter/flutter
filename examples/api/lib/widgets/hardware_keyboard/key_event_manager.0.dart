@@ -5,19 +5,71 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const ExampleApp());
+// This example app demonstrates a use case of patching
+// `KeyEventManager.keyMessageHandler`: be notified of key events that are not
+// handled by any focus handlers (such as shortcuts).
+//
+// See [KeyEventManager.keyMessageHandler].
 
-class ExampleApp extends StatelessWidget {
-  const ExampleApp({super.key});
+void main() => runApp(
+  const MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: FallbackDemo(),
+      )
+    ),
+  ),
+);
+
+class FallbackDemo extends StatefulWidget {
+  const FallbackDemo({super.key});
+
+  @override
+  State<StatefulWidget> createState() => FallbackDemoState();
+}
+
+class FallbackDemoState extends State<FallbackDemo> {
+  String? _capture;
+  late final FallbackFocusNode _node = FallbackFocusNode(
+    onKeyEvent: (KeyEvent event) {
+      if (event is! KeyDownEvent) {
+        return false;
+      }
+      setState(() {
+        _capture = event.logicalKey.keyLabel;
+      });
+      // TRY THIS: Change the return value to true. You will no longer be able
+      // to input text, because rhese key events will no longer be sent to the
+      // text input system.
+      return false;
+    }
+  );
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: FallbackDemo(),
-        )
-      ),
+    return FallbackFocus(
+      node: _node,
+      child: Container(
+        decoration: BoxDecoration(border: Border.all(color: Colors.red)),
+        padding: const EdgeInsets.all(10),
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 200),
+        child: Column(
+          children: <Widget>[
+            const Text('This area handles key pressses that are unhandled by any shortcuts by displaying them below. '
+              'Try text shortcuts such as Ctrl-A!'),
+            Text(_capture == null ? '' : '$_capture is not handled by shortcuts.'),
+            const TextField(decoration: InputDecoration(label: Text('Text field 1'))),
+            Shortcuts(
+              shortcuts: <ShortcutActivator, Intent>{
+                const SingleActivator(LogicalKeyboardKey.keyQ): VoidCallbackIntent(() {}),
+              },
+              child: const TextField(
+                decoration: InputDecoration(label: Text('This field also considers key Q as a shortcut (that does nothing).')),
+              ),
+            ),
+          ],
+        ),
+      )
     );
   }
 }
@@ -101,59 +153,6 @@ class FallbackFocus extends StatelessWidget {
     return Focus(
       onFocusChange: _onFocusChange,
       child: child,
-    );
-  }
-}
-
-class FallbackDemo extends StatefulWidget {
-  const FallbackDemo({super.key});
-
-  @override
-  State<StatefulWidget> createState() => FallbackDemoState();
-}
-
-class FallbackDemoState extends State<FallbackDemo> {
-  String? _capture;
-  late final FallbackFocusNode _node = FallbackFocusNode(
-    onKeyEvent: (KeyEvent event) {
-      if (event is! KeyDownEvent) {
-        return false;
-      }
-      setState(() {
-        _capture = event.logicalKey.keyLabel;
-      });
-      // TRY THIS: Change the return value to true. You will no longer be able
-      // to input text, because rhese key events will no longer be sent to the
-      // text input system.
-      return false;
-    }
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return FallbackFocus(
-      node: _node,
-      child: Container(
-        decoration: BoxDecoration(border: Border.all(color: Colors.red)),
-        padding: const EdgeInsets.all(10),
-        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 200),
-        child: Column(
-          children: <Widget>[
-            const Text('This area handles key pressses that are unhandled by any shortcuts by displaying them below. '
-              'Try text shortcuts such as Ctrl-A!'),
-            Text(_capture == null ? '' : '$_capture is not handled by shortcuts.'),
-            const TextField(decoration: InputDecoration(label: Text('Text field 1'))),
-            Shortcuts(
-              shortcuts: <ShortcutActivator, Intent>{
-                const SingleActivator(LogicalKeyboardKey.keyQ): VoidCallbackIntent(() {}),
-              },
-              child: const TextField(
-                decoration: InputDecoration(label: Text('This field also considers key Q as a shortcut (that does nothing).')),
-              ),
-            ),
-          ],
-        ),
-      )
     );
   }
 }
