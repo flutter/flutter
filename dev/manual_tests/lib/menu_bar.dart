@@ -47,7 +47,6 @@ class _HomeState extends State<Home> {
   TextDirection _textDirection = TextDirection.ltr;
   bool _enabled = true;
   bool _addItem = false;
-  bool _checked = false;
 
   void _itemSelected(TestMenu item) {
     debugPrint('App: Selected item ${item.label}');
@@ -90,12 +89,12 @@ class _HomeState extends State<Home> {
                           LogicalKeyboardKey.keyB,
                           control: true,
                         ),
-                        leadingIcon: _checked ? const Icon(Icons.check_box) : const Icon(Icons.check_box_outline_blank),
+                        leadingIcon: _addItem ? const Icon(Icons.check_box) : const Icon(Icons.check_box_outline_blank),
                         trailingIcon: const Icon(Icons.assessment),
                         onSelected: () {
                           _itemSelected(TestMenu.subMenu1);
                           setState(() {
-                            _checked = !_checked;
+                            _addItem = !_addItem;
                           });
                         },
                       ),
