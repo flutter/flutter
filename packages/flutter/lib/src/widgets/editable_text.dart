@@ -1426,7 +1426,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// If not provided, no context menu will be shown.
-  final TextSelectionToolbarBuilder? buildContextMenu;
+  final EditableTextToolbarBuilder? buildContextMenu;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -4735,17 +4735,3 @@ _Throttled<T> _throttle<T>({
     return timer!;
   };
 }
-
-/// A function that builds a widget to use as the text selection toolbar.
-///
-/// See also:
-///
-///  * [ContextualMenuBuilder], which is the generic type for any contextual
-///    menu builder, not just for the text selection toolbar.
-typedef TextSelectionToolbarBuilder = Widget Function(
-  BuildContext,
-  ContextMenuController,
-  EditableTextState,
-  Offset,
-  Offset?,
-);

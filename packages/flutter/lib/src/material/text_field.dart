@@ -779,7 +779,7 @@ class TextField extends StatefulWidget {
   /// See also:
   ///
   ///  * [DefaultTextSelectionToolbar], which is built by default.
-  final TextSelectionToolbarBuilder? buildContextMenu;
+  final EditableTextToolbarBuilder? buildContextMenu;
 
   @override
   State<TextField> createState() => _TextFieldState();

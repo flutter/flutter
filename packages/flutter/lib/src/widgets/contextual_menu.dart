@@ -16,11 +16,13 @@ import 'overlay.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
+// TODO(justinmc): Rename this file. context_menu.dart? There is already cupertino/context_menu.dart.
+
 /// A function that builds a widget to use as a contextual menu.
 ///
 /// See also:
 ///
-///  * [TextSelectionToolbarBuilder], which is a specific case of this for
+///  * [EditableTextToolbarBuilder], which is a specific case of this for
 ///    building text selection toolbars.
 typedef ContextualMenuBuilder = Widget Function(
   BuildContext,
@@ -34,6 +36,21 @@ typedef ContextualMenuBuilder = Widget Function(
 typedef ContextMenuBuilder = Widget Function(
   BuildContext,
   ContextMenuController,
+  Offset,
+  Offset?,
+);
+
+/// A function that builds a widget to use as the text selection toolbar for
+/// editable text.
+///
+/// See also:
+///
+///  * [ContextualMenuBuilder], which is the generic type for any contextual
+///    menu builder, not just for the editable text selection toolbar.
+typedef EditableTextToolbarBuilder = Widget Function(
+  BuildContext,
+  ContextMenuController,
+  EditableTextState,
   Offset,
   Offset?,
 );

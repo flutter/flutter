@@ -431,7 +431,7 @@ class SelectableText extends StatefulWidget {
   final SelectionChangedCallback? onSelectionChanged;
 
   /// {@macro flutter.widgets.EditableText.buildContextMenu}
-  final TextSelectionToolbarBuilder? buildContextMenu;
+  final EditableTextToolbarBuilder? buildContextMenu;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();

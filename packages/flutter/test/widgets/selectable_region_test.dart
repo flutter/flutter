@@ -43,6 +43,9 @@ void main() {
             home: SelectableRegion(
               focusNode: FocusNode(),
               selectionControls: materialTextSelectionControls,
+              buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                return const SizedBox.shrink();
+              },
               child: SelectionSpy(key: spy),
             ),
           )
@@ -82,6 +85,9 @@ void main() {
               SelectableRegion(
                 focusNode: FocusNode(),
                 selectionControls: materialTextSelectionControls,
+                buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                  return const SizedBox.shrink();
+                },
                 child: SelectAllWidget(key: spy, child: const SizedBox(width: 100, height: 100)),
               ),
               const Text('Fine, thank you.'),
@@ -107,6 +113,9 @@ void main() {
             home: SelectableRegion(
               focusNode: FocusNode(),
               selectionControls: materialTextSelectionControls,
+              buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                return const SizedBox.shrink();
+              },
               child: SelectionSpy(key: spy),
             ),
           )
@@ -130,6 +139,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Scaffold(
               body: Center(
                 child: Column(
@@ -205,6 +217,9 @@ void main() {
             home: SelectableRegion(
               focusNode: FocusNode(),
               selectionControls: materialTextSelectionControls,
+              buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                return const SizedBox.shrink();
+              },
               child: SelectionSpy(key: spy),
             ),
           )
@@ -224,6 +239,9 @@ void main() {
             home: SelectableRegion(
               focusNode: FocusNode(),
               selectionControls: materialTextSelectionControls,
+              buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                return const SizedBox.shrink();
+              },
               child: SelectionSpy(key: spy),
             ),
           )
@@ -248,6 +266,9 @@ void main() {
             home: SelectableRegion(
               focusNode: FocusNode(),
               selectionControls: materialTextSelectionControls,
+              buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                return const SizedBox.shrink();
+              },
               child: SelectionSpy(key: spy),
             ),
           )
@@ -279,6 +300,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: SelectionSpy(key: spy),
           ),
         ),
@@ -304,6 +328,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: const Center(
               child: Text('How are you'),
             ),
@@ -347,6 +374,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -387,6 +417,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -428,6 +461,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -467,6 +503,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -509,6 +548,9 @@ void main() {
               child: SelectableRegion(
                 focusNode: selectableRegionFocus,
                 selectionControls: materialTextSelectionControls,
+                buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                  return const SizedBox.shrink();
+                },
                 child: Column(
                   children: <Widget>[
                     const Text('How are you?'),
@@ -566,6 +608,9 @@ void main() {
               child: SelectableRegion(
                 focusNode: selectableRegionFocus,
                 selectionControls: materialTextSelectionControls,
+                buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                  return const SizedBox.shrink();
+                },
                 child: Column(
                   children: <Widget>[
                     const Text('How are you?'),
@@ -618,6 +663,9 @@ void main() {
           home: SelectableRegion(
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -652,6 +700,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Center(
               child: Text.rich(
                 const TextSpan(
@@ -695,6 +746,9 @@ void main() {
             home: SelectableRegion(
               focusNode: FocusNode(),
               selectionControls: materialTextSelectionControls,
+              buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                return const SizedBox.shrink();
+              },
               child: Center(
                 child: Text.rich(
                   const TextSpan(
@@ -738,6 +792,9 @@ void main() {
             home: SelectableRegion(
               focusNode: FocusNode(),
               selectionControls: materialTextSelectionControls,
+              buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                return const SizedBox.shrink();
+              },
               child: Center(
                 child: Text.rich(
                   const TextSpan(
@@ -778,6 +835,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -819,6 +879,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -853,6 +916,9 @@ void main() {
               SelectableRegion(
                 focusNode: FocusNode(),
                 selectionControls: materialTextSelectionControls,
+                buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                  return const SizedBox.shrink();
+                },
                 child: const Text('Good, and you?'),
               ),
               const Text('Fine, thank you.'),
@@ -888,6 +954,9 @@ void main() {
               SelectableRegion(
                 focusNode: FocusNode(),
                 selectionControls: materialTextSelectionControls,
+                buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+                  return const SizedBox.shrink();
+                },
                 child: const Text('Good, and you?'),
               ),
               const Text('Fine, thank you.'),
@@ -919,6 +988,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -960,6 +1032,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -996,6 +1071,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -1032,6 +1110,9 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -1067,6 +1148,23 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return DefaultTextSelectionToolbar(
+                primaryAnchor: primaryAnchor,
+                secondaryAnchor: secondaryAnchor,
+                buttonDatas: <ContextualMenuButtonData>[
+                  // TODO(justinmc): Only show copy button when there's a selection?
+                  ContextualMenuButtonData(
+                    onPressed: () {
+                      // TODO(justinmc): Actually do copy, without EditableTextState.
+                      // How did TextSelectionControls do it?
+                      controller.dispose();
+                    },
+                    type: DefaultContextualMenuButtonType.copy,
+                  ),
+                ],
+              );
+            },
             child: Column(
               children: const <Widget>[
                 Text('How are you?'),
@@ -1107,6 +1205,9 @@ void main() {
         home: SelectableRegion(
           focusNode: FocusNode(),
           selectionControls: materialTextSelectionControls,
+            buildContextMenu: (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+              return const SizedBox.shrink();
+            },
           child: const Text('How are you?'),
         ),
       ),

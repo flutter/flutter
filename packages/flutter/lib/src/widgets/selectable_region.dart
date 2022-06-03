@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'contextual_menu.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -175,6 +176,7 @@ class SelectableRegion extends StatefulWidget {
   /// toolbar for mobile devices.
   const SelectableRegion({
     super.key,
+    required this.buildContextMenu,
     required this.focusNode,
     required this.selectionControls,
     required this.child,
@@ -187,6 +189,9 @@ class SelectableRegion extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
+
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  final ContextMenuBuilder buildContextMenu;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
@@ -214,6 +219,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
                                         || _selectionDelegate.value.endSelectionPoint != null;
 
   Orientation? _lastOrientation;
+
+  ContextMenuController? _contextMenuController;
 
   @override
   void initState() {
@@ -581,6 +588,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
   bool _showToolbar({Offset? location}) {
+    _contextMenuController?.dispose();
+
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
       return false;
     }
@@ -593,12 +602,38 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return false;
     }
 
+    // TODO(justinmc): What's that about calculating the location in the docs above?
+    if (location == null) {
+      return false;
+    }
+
+    // TODO(justinmc): Is there ever a reason to use a secondary anchor?
+    _contextMenuController = ContextMenuController(
+      context: context,
+      primaryAnchor: location,
+      buildContextMenu: (
+        BuildContext context,
+        ContextMenuController controller,
+        Offset primaryAnchor,
+        Offset? secondaryAnchor,
+      ) {
+        return widget.buildContextMenu(
+          context,
+          controller,
+          primaryAnchor,
+          secondaryAnchor,
+        );
+      },
+    );
+
+    /*
     if (_selectionOverlay == null) {
       _createSelectionOverlay();
     }
 
     _selectionOverlay!.toolbarLocation = location;
     _selectionOverlay!.showToolbar();
+    */
     return true;
   }
 
@@ -735,6 +770,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     if (hideHandles) {
       _selectionOverlay?.hideHandles();
     }
+    // TODO(justinmc): What of the above is still needed?
+    _contextMenuController?.dispose();
+    _contextMenuController = null;
   }
 
   @override

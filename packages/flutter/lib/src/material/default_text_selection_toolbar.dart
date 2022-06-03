@@ -40,6 +40,8 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
          'If not providing buttonDatas or children, provide editableTextState to generate them.',
        );
 
+  final EditableTextState? editableTextState;
+
   /// The main location on which to anchor the menu.
   ///
   /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
@@ -54,10 +56,6 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
   ///
   /// If provided, [children] cannot also be provided.
   final List<ContextualMenuButtonData>? buttonDatas;
-
-  /// Used to generate the default buttons for the platform in the case that
-  /// [children] and [buttonDatas] are not provided.
-  final EditableTextState? editableTextState;
 
   /// The children of the toolbar.
   ///

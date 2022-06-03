@@ -788,7 +788,7 @@ class CupertinoTextField extends StatefulWidget {
   /// See also:
   ///
   ///  * [DefaultCupertinoTextSelectionToolbar], which is built by default.
-  final TextSelectionToolbarBuilder? buildContextMenu;
+  final EditableTextToolbarBuilder? buildContextMenu;
 
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();

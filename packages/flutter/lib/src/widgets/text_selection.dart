@@ -398,6 +398,8 @@ class TextSelectionOverlay {
 
     // If right clicking, use the right click position as the only anchor.
     if (renderObject.lastSecondaryTapDownPosition != null) {
+      // TODO(justinmc): Should ContextMenuController be a singleton to enforce
+      // that there can be only one?
       _contextMenuController = ContextMenuController(
         context: context,
         primaryAnchor: renderObject.lastSecondaryTapDownPosition!,

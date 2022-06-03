@@ -147,7 +147,7 @@ class TextFormField extends FormField<String> {
     super.restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
-    TextSelectionToolbarBuilder? buildContextMenu,
+    EditableTextToolbarBuilder? buildContextMenu,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
