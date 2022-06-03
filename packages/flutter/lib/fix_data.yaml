@@ -17,7 +17,7 @@
 
 version: 1
 transforms:
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/105291
   - title: "Migrate 'ElevatedButton.styleFrom(primary)' to 'ElevatedButton.styleFrom(backgroundColor)'"
     date: 2022-05-27
     element:
@@ -39,7 +39,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[primary]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/105291
   - title: "Migrate 'ElevatedButton.styleFrom(onPrimary)' to 'ElevatedButton.styleFrom(foregroundColor)'"
     date: 2022-05-27
     element:
@@ -61,7 +61,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[onPrimary]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/105291
   - title: "Migrate 'ElevatedButton.styleFrom(onSurface)' to 'ElevatedButton.styleFrom(disabledForegroundColor)'"
     date: 2022-05-27
     element:
@@ -90,7 +90,7 @@ transforms:
        kind: 'fragment'
        value: 'arguments[onSurface]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/105291
   - title: "Migrate 'OutlinedButton.styleFrom(primary)' to 'OutlinedButton.styleFrom(foregroundColor)'"
     date: 2022-05-27
     element:
@@ -112,7 +112,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[primary]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/105291
   - title: "Migrate 'OutlinedButton.styleFrom(onSurface)' to 'OutlinedButton.styleFrom(disabledForeground)'"
     date: 2022-05-27
     element:
@@ -134,7 +134,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[onSurface]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/105291
   - title: "Migrate 'TextButton.styleFrom(primary)' to 'TextButton.styleFrom(foregroundColor)'"
     date: 2022-05-27
     element:
@@ -156,7 +156,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[primary]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/105291
   - title: "Migrate 'TextButton.styleFrom(onSurface)' to 'TextButton.styleFrom(disabledForeground)'"
     date: 2022-05-27
     element:
