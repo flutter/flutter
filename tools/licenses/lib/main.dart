@@ -1844,6 +1844,7 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
         && entry.name != 'mockito' // only used by tests
         && entry.name != 'pymock' // presumably only used by tests
         && entry.name != 'pyyaml' // build-time dependency only
+        && entry.name != 'yapf'  // only used for code formatting
         && entry.name != 'android_embedding_dependencies' // testing framework for android
         && entry.name != 'yasm' // build-time dependency only
         && entry.name != 'binutils' // build-time dependency only

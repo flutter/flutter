@@ -24,8 +24,13 @@ def cp_files(args):
 
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument('-i', dest='input_pairs', nargs=2, action='append',
-      help='The input file and its destination.')
+  parser.add_argument(
+      '-i',
+      dest='input_pairs',
+      nargs=2,
+      action='append',
+      help='The input file and its destination.'
+  )
   cp_files(parser.parse_args())
   return 0
 

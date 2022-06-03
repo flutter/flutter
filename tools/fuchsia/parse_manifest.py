@@ -3,6 +3,7 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """ Parses manifest file and dumps it to json.
 """
 
@@ -12,13 +13,16 @@ import os
 import sys
 import hashlib
 
+
 def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument(
-      '--input', dest='file_path', action='store', required=True)
+      '--input', dest='file_path', action='store', required=True
+  )
   parser.add_argument(
-      '--clang-cpu', dest='clang_cpu', action='store', required=True)
+      '--clang-cpu', dest='clang_cpu', action='store', required=True
+  )
 
   args = parser.parse_args()
 

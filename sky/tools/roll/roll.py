@@ -91,49 +91,51 @@ files_not_to_roll = [
 
 
 def rev(source_dir, dest_dir, dirs_to_rev, name, revision_file=None):
-    for dir_to_rev in dirs_to_rev:
-      if type(dir_to_rev) is tuple:
-          d, file_subset = dir_to_rev
-      else:
-          d = dir_to_rev
-          file_subset = None
-      print("removing directory %s" % d)
-      try:
-          system(["git", "rm", "-r", d], cwd=dest_dir)
-      except subprocess.CalledProcessError:
-          print("Could not remove %s" % d)
-      print("cloning directory %s" % d)
+  for dir_to_rev in dirs_to_rev:
+    if type(dir_to_rev) is tuple:
+      d, file_subset = dir_to_rev
+    else:
+      d = dir_to_rev
+      file_subset = None
+    print("removing directory %s" % d)
+    try:
+      system(["git", "rm", "-r", d], cwd=dest_dir)
+    except subprocess.CalledProcessError:
+      print("Could not remove %s" % d)
+    print("cloning directory %s" % d)
 
-      if file_subset is None:
-          files = system(["git", "ls-files", d], cwd=source_dir).splitlines()
-      else:
-          files = [os.path.join(d, f) for f in file_subset]
+    if file_subset is None:
+      files = system(["git", "ls-files", d], cwd=source_dir).splitlines()
+    else:
+      files = [os.path.join(d, f) for f in file_subset]
 
-      for f in files:
-          source_path = os.path.join(source_dir, f)
-          if not os.path.isfile(source_path):
-              continue
-          dest_path = os.path.join(dest_dir, f)
-          system(["mkdir", "-p", os.path.dirname(dest_path)], cwd=source_dir)
-          system(["cp", source_path, dest_path], cwd=source_dir)
-      system(["git", "add", d], cwd=dest_dir)
+    for f in files:
+      source_path = os.path.join(source_dir, f)
+      if not os.path.isfile(source_path):
+        continue
+      dest_path = os.path.join(dest_dir, f)
+      system(["mkdir", "-p", os.path.dirname(dest_path)], cwd=source_dir)
+      system(["cp", source_path, dest_path], cwd=source_dir)
+    system(["git", "add", d], cwd=dest_dir)
 
-    for f in files_not_to_roll:
-        system(["git", "checkout", "HEAD", f], cwd=dest_dir)
+  for f in files_not_to_roll:
+    system(["git", "checkout", "HEAD", f], cwd=dest_dir)
 
-    src_commit = system(["git", "rev-parse", "HEAD"], cwd=source_dir).strip()
+  src_commit = system(["git", "rev-parse", "HEAD"], cwd=source_dir).strip()
 
-    if revision_file:
-      with open(revision_file, 'w') as f:
-        f.write(src_commit)
+  if revision_file:
+    with open(revision_file, 'w') as f:
+      f.write(src_commit)
 
-    system(["git", "add", "."], cwd=dest_dir)
-    commit("Update to %s %s" % (name, src_commit), cwd=dest_dir)
+  system(["git", "add", "."], cwd=dest_dir)
+  commit("Update to %s %s" % (name, src_commit), cwd=dest_dir)
 
 
 def main():
-  parser = argparse.ArgumentParser(description="Update the mojo repo's " +
-      "snapshot of things imported from chromium.")
+  parser = argparse.ArgumentParser(
+      description="Update the mojo repo's " +
+      "snapshot of things imported from chromium."
+  )
   parser.add_argument("--mojo-dir", type=str)
   parser.add_argument("--chromium-dir", type=str)
   parser.add_argument("--dest-dir", type=str)
@@ -143,18 +145,26 @@ def main():
   dest_dir = os.path.abspath(args.dest_dir)
 
   if args.mojo_dir:
-      rev(os.path.abspath(args.mojo_dir), dest_dir, dirs_from_mojo, 'mojo',
-          revision_file='mojo/VERSION')
+    rev(
+        os.path.abspath(args.mojo_dir),
+        dest_dir,
+        dirs_from_mojo,
+        'mojo',
+        revision_file='mojo/VERSION'
+    )
 
   if args.chromium_dir:
-      rev(os.path.abspath(args.chromium_dir), dest_dir, dirs_from_chromium, 'chromium')
+    rev(
+        os.path.abspath(args.chromium_dir), dest_dir, dirs_from_chromium,
+        'chromium'
+    )
 
-      try:
-          patch.patch_and_filter(dest_dir, os.path.join('patches', 'chromium'))
-      except subprocess.CalledProcessError:
-          print("ERROR: Roll failed due to a patch not applying")
-          print("Fix the patch to apply, commit the result, and re-run this script")
-          return 1
+    try:
+      patch.patch_and_filter(dest_dir, os.path.join('patches', 'chromium'))
+    except subprocess.CalledProcessError:
+      print("ERROR: Roll failed due to a patch not applying")
+      print("Fix the patch to apply, commit the result, and re-run this script")
+      return 1
 
   return 0
 
