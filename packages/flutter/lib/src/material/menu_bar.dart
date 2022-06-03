@@ -122,7 +122,7 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 ///    platform instead of by Flutter (on macOS, for example).
 ///  * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///    application, used by the `MenuBar` to register its shortcuts.
-class MenuBar extends StatelessWidget {
+class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
   /// Creates a const [MenuBar].
   const MenuBar({
     super.key,
@@ -291,9 +291,26 @@ class MenuBar extends StatelessWidget {
       menus: menus,
     );
   }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuBarItem item) => item.toDiagnosticsNode())];
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED'));
+    properties.add(DiagnosticsProperty<MenuBarController>('controller', controller, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsets?>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
+  }
 }
 
-class _MenuBar extends StatefulWidget {
+class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// Creates a const [MenuBar].
   const _MenuBar({
     super.key,
@@ -345,7 +362,7 @@ class _MenuBar extends StatefulWidget {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuItem item) => item.toDiagnosticsNode())];
+    return <DiagnosticsNode>[...menus.map<DiagnosticsNode>((MenuBarItem item) => item.toDiagnosticsNode())];
   }
 
   @override
@@ -439,7 +456,7 @@ class _MenuBarState extends State<_MenuBar> {
 
   @override
   void dispose() {
-    assert(widget.controller?._menuBar == this);
+    assert(widget.controller?._menuBar == this || widget.controller?._menuBar == null);
     widget.controller?._menuBar = null;
     menuBarScope.dispose();
     overlayScope.dispose();
@@ -458,7 +475,7 @@ class _MenuBarState extends State<_MenuBar> {
     super.didUpdateWidget(oldWidget);
     _shortcuts = _getShortcuts();
     if (widget.controller != oldWidget.controller) {
-      assert(oldWidget.controller?._menuBar == this);
+      assert(widget.controller?._menuBar == this || widget.controller?._menuBar == null);
       oldWidget.controller?._menuBar = null;
       assert(widget.controller?._menuBar == null);
       widget.controller?._menuBar = this;
@@ -937,11 +954,13 @@ class MenuBarController with ChangeNotifier {
   _MenuBarState? _menuBar;
 }
 
+/// The base type for all menu items in a [MenuBar] widget.
+///
 /// Provides default implementations for [MenuItem] members, to serve as a mixin
-/// class for the [MenuBarButton] and [MenuBarMenu] classes to make their
+/// class for the [MenuBarButton], [MenuItemGroup] and [MenuBarMenu] classes to make their
 /// declarations simpler, and free of members that are irrelevant for each of
 /// them.
-mixin MenuBarItem implements PlatformMenuItem {
+mixin MenuBarItem implements PlatformMenuItem, Widget {
   /// A required label displayed on the entry for this item in the menu.
   ///
   /// This is rendered by default in a [Text] widget.
@@ -955,7 +974,7 @@ mixin MenuBarItem implements PlatformMenuItem {
   /// An optional widget that will be displayed in place of the default [Text]
   /// widget containing the [label].
   ///
-  /// If both the `labelWidget` and [semanticsLabel] are both provided, the
+  /// If both the `labelWidget` and [semanticsLabel] are provided, the
   /// [semanticsLabel] will take precedence for defining semantic information.
   Widget? get labelWidget => null;
 
@@ -1008,7 +1027,7 @@ mixin MenuBarItem implements PlatformMenuItem {
 ///  * [MenuBar], a class that renders data in a [MenuBarButton] using
 ///    Flutter-rendered widgets in a Material Design style.
 ///  * [PlatformMenuBar], a class that renders similar menu bar items from a
-///    [MenuBarItem] using platform-native APIs.
+///    [PlatformMenuItem] using platform-native APIs.
 class MenuBarButton extends StatefulWidget with MenuBarItem {
   /// Creates a const [MenuBarButton].
   ///
@@ -1811,7 +1830,7 @@ class MenuItemGroup extends StatelessWidget with MenuBarItem {
   }
 
   @override
-  String get label => throw UnimplementedError("MenuItemGroups don't have labels");
+  String get label => '';  // MenuItemGroups don't have labels.
 }
 
 class _MenuItemDivider extends StatelessWidget {
@@ -2158,7 +2177,7 @@ class _MenuNodeWrapper extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_MenuNodeWrapper oldWidget) {
-    return oldWidget.menu != menu || oldWidget.child != child || oldWidget.serial != serial;
+    return oldWidget.menu != menu || oldWidget.serial != serial;
   }
 
   @override
@@ -2322,11 +2341,13 @@ class _MenuBarItemLabel extends StatelessWidget {
   }
 }
 
-/// A menu container for [MenuBarButton]s.
+/// A menu container for [MenuBarButton]s that can be vertical (like regular
+/// menus), or horizontal (like the top level menu items).
 ///
-/// This widget contains a column of widgets, and sizes its width to the widest
-/// child, and then forces all the other children to be that same width. It
-/// adopts a height large enough to accommodate all the children.
+/// Depending on the [direction], this widget contains a column (or row) of
+/// widgets, and sizes its width (or height) to the widest (tallest) child, and
+/// then forces all the other children to be that same width (or height). It
+/// adopts a height (or width) large enough to accommodate all the children.
 ///
 /// It is used by [MenuBarMenu] to render its child items.
 class _MenuBarMenuList extends StatefulWidget {
@@ -2344,7 +2365,7 @@ class _MenuBarMenuList extends StatefulWidget {
     this.crossAxisMinSize = 0.0,
   });
 
-  /// The main axis of the list.
+  /// The main axis direction of the list.
   final Axis direction;
 
   /// The background color of this submenu.
@@ -2383,6 +2404,9 @@ class _MenuBarMenuList extends StatefulWidget {
 }
 
 class _MenuBarMenuListState extends State<_MenuBarMenuList> {
+  RenderBox? _lastRenderBox;
+  _MenuBarState? _menuBar;
+
   List<Widget> _expandGroups() {
     int index = 0;
     final _MenuNode parentMenu = _MenuNodeWrapper.of(context);
@@ -2425,592 +2449,71 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: widget.backgroundColor,
-      shape: widget.shape,
-      elevation: widget.elevation,
-      child: _MenuBarMenuRenderWidget(
-        menuBar: _MenuBarState.of(context),
-        padding: widget.menuPadding,
-        direction: widget.direction,
-        crossAxisMinSize: widget.crossAxisMinSize,
-        textDirection: widget.textDirection,
-        children: _expandGroups(),
-      ),
-    );
-  }
-}
-
-/// A render widget for laying out menu bar items.
-///
-/// It finds the widest child, and then forces all of the other children to be
-/// that width.
-class _MenuBarMenuRenderWidget extends MultiChildRenderObjectWidget {
-  /// Creates a const [_MenuBarMenuRenderWidget].
-  ///
-  /// The `children` and [padding] arguments are required.
-  _MenuBarMenuRenderWidget({
-    required this.menuBar,
-    required this.direction,
-    required super.children,
-    required this.padding,
-    required this.crossAxisMinSize,
-    this.textDirection,
-  });
-
-  /// The MenuBarController that this menu should register its render object with.
-  final _MenuBarState menuBar;
-
-  /// The direction of the main axis for this menu.
-  final Axis direction;
-
-  /// Padding around the contents of the menu bar.
-  final EdgeInsets padding;
-
-  /// The minimum size that the menu should be in the main axis direction.
-  final double crossAxisMinSize;
-
-  /// The text direction to use for rendering this menu.
-  ///
-  /// Defaults to the ambient text direction from [Directionality.of].
-  final TextDirection? textDirection;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderMenuBarMenu(
-      menuBar: menuBar,
-      padding: padding,
-      direction: direction,
-      crossAxisMinSize: crossAxisMinSize,
-      textDirection: textDirection ?? Directionality.of(context),
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, covariant _RenderMenuBarMenu renderObject) {
-    renderObject
-      ..menuBar = menuBar
-      ..padding = padding
-      ..direction = direction
-      ..crossAxisMinSize = crossAxisMinSize
-      ..textDirection = textDirection ?? Directionality.of(context);
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-  }
-}
-
-class _RenderMenuBarMenuParentData extends ContainerBoxParentData<RenderBox> {}
-
-typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
-
-class _LayoutSizes {
-  const _LayoutSizes({
-    required this.mainSize,
-    required this.crossSize,
-    required this.allocatedSize,
-  });
-
-  final double mainSize;
-  final double crossSize;
-  final double allocatedSize;
-}
-
-class _RenderMenuBarMenu extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, _RenderMenuBarMenuParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, _RenderMenuBarMenuParentData>,
-        DebugOverflowIndicatorMixin {
-  /// Creates a flex render object.
-  ///
-  /// By default, the flex layout is horizontal and children are aligned to the
-  /// start of the main axis and the center of the cross axis.
-  _RenderMenuBarMenu({
-    required _MenuBarState menuBar,
-    List<RenderBox>? children,
-    required EdgeInsets padding,
-    Axis direction = Axis.horizontal,
-    required TextDirection textDirection,
-    double crossAxisMinSize = 0.0,
-  })  : assert(direction != null),
-        _menuBar = menuBar,
-        _direction = direction,
-        _padding = padding,
-        _textDirection = textDirection,
-        _crossAxisMinSize = crossAxisMinSize {
-    _menuBar.registerMenuRenderObject(this);
-    addAll(children);
+  void didUpdateWidget(_MenuBarMenuList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _menuBar = _MenuBarState.of(context);
+    if (_lastRenderBox != null) {
+      _menuBar!.unregisterMenuRenderObject(_lastRenderBox!);
+    }
+    _lastRenderBox = context.findRenderObject() as RenderBox?;
+    if (_lastRenderBox != null) {
+      _menuBar!.registerMenuRenderObject(_lastRenderBox!);
+    }
   }
 
   @override
   void dispose() {
-    _menuBar.unregisterMenuRenderObject(this);
-    _clipRectLayer.layer = null;
+    if (_lastRenderBox != null) {
+      _menuBar?.unregisterMenuRenderObject(_lastRenderBox!);
+    }
     super.dispose();
   }
 
-  _MenuBarState get menuBar => _menuBar;
-  _MenuBarState _menuBar;
-  set menuBar(_MenuBarState value) {
-    if (_menuBar != value) {
-      _menuBar.unregisterMenuRenderObject(this);
-      _menuBar = value;
-      _menuBar.registerMenuRenderObject(this);
-      markNeedsLayout();
-    }
-  }
-
-  double get crossAxisMinSize => _crossAxisMinSize;
-  double _crossAxisMinSize;
-  set crossAxisMinSize(double value) {
-    assert(value != null);
-    if (_crossAxisMinSize != value) {
-      _crossAxisMinSize = value;
-      markNeedsLayout();
-    }
-  }
-
-  /// The direction to use as the main axis.
-  Axis get direction => _direction;
-  Axis _direction;
-  set direction(Axis value) {
-    assert(value != null);
-    if (_direction != value) {
-      _direction = value;
-      markNeedsLayout();
-    }
-  }
-
-  /// The padding around the contents.
-  EdgeInsets get padding => _padding;
-  EdgeInsets _padding;
-  set padding(EdgeInsets value) {
-    if (_padding != value) {
-      _padding = value;
-      markNeedsLayout();
-    }
-  }
-
-  /// Determines the order to lay children out horizontally and how to interpret
-  /// `start` and `end` in the horizontal direction.
-  ///
-  /// If the [direction] is [Axis.horizontal], this controls the order in which
-  /// children are positioned (left-to-right or right-to-left), and the meaning
-  /// of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
-  /// [MainAxisAlignment.end] values.
-  ///
-  /// If the [direction] is [Axis.horizontal], and either the
-  /// [mainAxisAlignment] is either [MainAxisAlignment.start] or
-  /// [MainAxisAlignment.end], or there's more than one child, then the
-  /// [textDirection] must not be null.
-  ///
-  /// If the [direction] is [Axis.vertical], this controls the meaning of the
-  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
-  /// [CrossAxisAlignment.end] values.
-  ///
-  /// If the [direction] is [Axis.vertical], then the [textDirection] must not
-  /// be null.
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    if (_textDirection != value) {
-      _textDirection = value;
-      markNeedsLayout();
-    }
-  }
-
-  bool get _debugHasNecessaryDirections {
-    assert(direction != null);
-    if (firstChild != null && lastChild != firstChild) {
-      // i.e. there's more than one child
-      switch (direction) {
-        case Axis.horizontal:
-          assert(textDirection != null,
-              'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
-          break;
-        case Axis.vertical:
-          break;
-      }
-    }
-    switch (direction) {
+  Widget _intrinsicCrossSize({required Widget child}) {
+    switch (widget.direction) {
       case Axis.horizontal:
-        assert(textDirection != null,
-            'Horizontal $runtimeType with ${MainAxisAlignment.start} has a null textDirection, so the alignment cannot be resolved.');
-        break;
+        return IntrinsicHeight(child: child);
       case Axis.vertical:
-        break;
+        return IntrinsicWidth(child: child);
     }
-    switch (direction) {
+  }
+
+  BoxConstraints? _getMinSizeConstraint() {
+    if (widget.crossAxisMinSize == null) {
+      return null;
+    }
+    switch (widget.direction) {
       case Axis.horizontal:
-        break;
+        return BoxConstraints(minHeight: widget.crossAxisMinSize);
       case Axis.vertical:
-        assert(textDirection != null,
-            'Vertical $runtimeType with ${CrossAxisAlignment.start} has a null textDirection, so the alignment cannot be resolved.');
-        break;
-    }
-    return true;
-  }
-
-  // Set during layout if overflow occurred on the main axis.
-  double _overflow = 0;
-  // Check whether any meaningful overflow is present. Values below an epsilon
-  // are treated as not overflowing.
-  bool get _hasOverflow => _overflow > precisionErrorTolerance;
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! _RenderMenuBarMenuParentData) {
-      child.parentData = _RenderMenuBarMenuParentData();
-    }
-  }
-
-  double _getIntrinsicSize({
-    required Axis sizingDirection,
-    required double extent, // the extent in the direction that isn't the sizing direction
-    required _ChildSizingFunction childSize, // a method to find the size in the sizing direction
-  }) {
-    if (_direction == sizingDirection) {
-      double inflexibleSpace = 0.0;
-      RenderBox? child = firstChild;
-      while (child != null) {
-        inflexibleSpace += childSize(child, extent);
-        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-        child = childParentData.nextSibling;
-      }
-      return inflexibleSpace;
-    } else {
-      double maxCrossSize = 0.0;
-      RenderBox? child = firstChild;
-      while (child != null) {
-        late final double mainSize;
-        late final double crossSize;
-        switch (_direction) {
-          case Axis.horizontal:
-            mainSize = child.getMaxIntrinsicWidth(double.infinity);
-            crossSize = childSize(child, mainSize);
-            break;
-          case Axis.vertical:
-            mainSize = child.getMaxIntrinsicHeight(double.infinity);
-            crossSize = childSize(child, mainSize);
-            break;
-        }
-        maxCrossSize = math.max(maxCrossSize, crossSize);
-        final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-        child = childParentData.nextSibling;
-      }
-      return math.max(_crossAxisMinSize, maxCrossSize);
+        return BoxConstraints(minWidth: widget.crossAxisMinSize);
     }
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.horizontal,
-      extent: height,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
-    );
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.horizontal,
-      extent: height,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
-    );
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.vertical,
-      extent: width,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
-    );
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    return _getIntrinsicSize(
-      sizingDirection: Axis.vertical,
-      extent: width,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
-    );
-  }
-
-  @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (_direction == Axis.horizontal) {
-      return defaultComputeDistanceToHighestActualBaseline(baseline);
-    }
-    return defaultComputeDistanceToFirstActualBaseline(baseline);
-  }
-
-  double _getCrossSize(Size size) {
-    switch (_direction) {
-      case Axis.horizontal:
-        return size.height;
-      case Axis.vertical:
-        return size.width;
-    }
-  }
-
-  double _getMainSize(Size size) {
-    switch (_direction) {
-      case Axis.horizontal:
-        return size.width;
-      case Axis.vertical:
-        return size.height;
-    }
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    final _LayoutSizes sizes = _computeSizes(
-      layoutChild: ChildLayoutHelper.dryLayoutChild,
-      constraints: constraints,
-    );
-
-    switch (_direction) {
-      case Axis.horizontal:
-        return constraints.constrain(Size(sizes.mainSize, sizes.crossSize));
-      case Axis.vertical:
-        return constraints.constrain(Size(sizes.crossSize, sizes.mainSize));
-    }
-  }
-
-  _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    assert(_debugHasNecessaryDirections);
-    assert(constraints != null);
-
-    double crossSize = 0.0;
-    double allocatedSize = 0.0;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-      final BoxConstraints innerConstraints;
-      switch (_direction) {
-        case Axis.horizontal:
-          innerConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
-          break;
-        case Axis.vertical:
-          innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-          break;
-      }
-      final Size childSize = layoutChild(child, innerConstraints);
-      allocatedSize += _getMainSize(childSize);
-      crossSize = math.max(_crossAxisMinSize, math.max(crossSize, _getCrossSize(childSize)));
-      assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
-    }
-
-    // Make a second pass, fixing the size of the children in the cross
-    // direction at the size of the largest one. This is the main reason we need
-    // a custom render object.
-    child = firstChild;
-    final BoxConstraints innerConstraints;
-    switch (_direction) {
-      case Axis.horizontal:
-        innerConstraints = BoxConstraints.tightFor(height: crossSize);
-        break;
-      case Axis.vertical:
-        innerConstraints = BoxConstraints.tightFor(width: crossSize);
-        break;
-    }
-    while (child != null) {
-      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-      layoutChild(child, innerConstraints);
-      child = childParentData.nextSibling;
-    }
-
-    switch (_direction) {
-      case Axis.horizontal:
-        return _LayoutSizes(
-          mainSize: constraints.maxWidth,
-          crossSize: crossSize,
-          allocatedSize: constraints.maxWidth,
-        );
-      case Axis.vertical:
-        return _LayoutSizes(
-          mainSize: allocatedSize + padding.vertical,
-          crossSize: crossSize + padding.horizontal,
-          allocatedSize: allocatedSize + padding.vertical,
-        );
-    }
-  }
-
-  @override
-  void performLayout() {
-    assert(_debugHasNecessaryDirections);
-    final BoxConstraints constraints = this.constraints;
-    final _LayoutSizes sizes = _computeSizes(
-      layoutChild: ChildLayoutHelper.layoutChild,
-      constraints: constraints,
-    );
-
-    final double allocatedSize = sizes.allocatedSize;
-    double actualSize = sizes.mainSize;
-    double crossSize = sizes.crossSize;
-
-    // Align items along the main axis.
-    switch (_direction) {
-      case Axis.horizontal:
-        size = constraints.constrain(Size(actualSize, crossSize));
-        actualSize = size.width;
-        crossSize = size.height;
-        break;
-      case Axis.vertical:
-        size = constraints.constrain(Size(crossSize, actualSize));
-        actualSize = size.height;
-        crossSize = size.width;
-        break;
-    }
-    final double actualSizeDelta = actualSize - allocatedSize;
-    _overflow = math.max(0.0, -actualSizeDelta);
-    final double leadingSpace;
-    final bool flipMainAxis;
-    switch (_direction) {
-      case Axis.horizontal:
-        switch (textDirection) {
-          case TextDirection.rtl:
-            leadingSpace = padding.right;
-            flipMainAxis = true;
-            break;
-          case TextDirection.ltr:
-            leadingSpace = padding.left;
-            flipMainAxis = false;
-            break;
-        }
-        break;
-      case Axis.vertical:
-        leadingSpace = padding.top;
-        flipMainAxis = false;
-        break;
-    }
-
-    // Position elements
-    double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final _RenderMenuBarMenuParentData childParentData = child.parentData! as _RenderMenuBarMenuParentData;
-      final double childCrossPosition;
-      switch (direction) {
-        case Axis.horizontal:
-          childCrossPosition = padding.top;
-          break;
-        case Axis.vertical:
-          switch (textDirection) {
-            case TextDirection.rtl:
-              childCrossPosition = padding.right;
-              break;
-            case TextDirection.ltr:
-              childCrossPosition = padding.left;
-              break;
-          }
-          break;
-      }
-      if (flipMainAxis) {
-        childMainPosition -= _getMainSize(child.size);
-      }
-      switch (_direction) {
-        case Axis.horizontal:
-          childParentData.offset = Offset(childMainPosition, childCrossPosition);
-          break;
-        case Axis.vertical:
-          childParentData.offset = Offset(childCrossPosition, childMainPosition);
-          break;
-      }
-      if (!flipMainAxis) {
-        childMainPosition += _getMainSize(child.size);
-      }
-      child = childParentData.nextSibling;
-    }
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    return defaultHitTestChildren(result, position: position);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (!_hasOverflow) {
-      defaultPaint(context, offset);
-      return;
-    }
-
-    // There's no point in drawing the children if we're empty.
-    if (size.isEmpty) {
-      return;
-    }
-
-    _clipRectLayer.layer = context.pushClipRect(
-      needsCompositing,
-      offset,
-      Offset.zero & size,
-      defaultPaint,
-      clipBehavior: Clip.none,
-      oldLayer: _clipRectLayer.layer,
-    );
-
-    assert(() {
-      final List<DiagnosticsNode> debugOverflowHints = <DiagnosticsNode>[
-        ErrorDescription(
-          'The overflowing $runtimeType has an orientation of $_direction.',
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: _getMinSizeConstraint(),
+      child: Material(
+        color: widget.backgroundColor,
+        shape: widget.shape,
+        elevation: widget.elevation,
+        child: _intrinsicCrossSize(
+          child: Padding(
+            padding: widget.menuPadding,
+            child: Flex(
+              textDirection: widget.textDirection,
+              direction: widget.direction,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ..._expandGroups(),
+                if (widget.direction == Axis.horizontal) const Spacer(),
+              ],
+            ),
+          ),
         ),
-        ErrorDescription(
-          'The edge of the $runtimeType that is overflowing has been marked '
-          'in the rendering with a yellow and black striped pattern. This is '
-          'usually caused by the contents being too big for the $runtimeType.',
-        ),
-        ErrorHint(
-          'This is considered an error condition because it indicates that there '
-          'is content that cannot be seen. If the content is legitimately bigger '
-          'than the available space, consider clipping it with a ClipRect widget '
-          'before putting it in the $runtimeType.',
-        ),
-      ];
-
-      // Simulate a child rect that overflows by the right amount. This child
-      // rect is never used for drawing, just for determining the overflow
-      // location and amount.
-      final Rect overflowChildRect;
-      switch (_direction) {
-        case Axis.horizontal:
-          overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
-          break;
-        case Axis.vertical:
-          overflowChildRect = Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
-          break;
-      }
-      paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: debugOverflowHints);
-      return true;
-    }());
-  }
-
-  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
-
-  @override
-  String toStringShort() {
-    String header = super.toStringShort();
-    if (!kReleaseMode) {
-      if (_hasOverflow) {
-        header += ' OVERFLOWING';
-      }
-    }
-    return header;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(EnumProperty<Axis>('direction', direction));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+      ),
+    );
   }
 }
 
