@@ -710,39 +710,82 @@ class KeyEventManager {
   /// This is typically only called by [ServicesBinding].
   KeyEventManager(this._hardwareKeyboard, this._rawKeyboard);
 
-  /// The global handler for all hardware key messages of Flutter.
+  /// The global entrance to handle all key events sent to Flutter.
   ///
-  /// Key messages received from the platform are first sent to [RawKeyboard]'s
-  /// listeners and [HardwareKeyboard]'s handlers, then sent to
-  /// [keyMessageHandler], regardless of the results of [HardwareKeyboard]'s
-  /// handlers. The event results from the handlers and [keyMessageHandler] are
-  /// combined and returned to the platform. The event result is explained
-  /// below.
+  /// Key messages received from the platform are sent to [RawKeyboard]'s
+  /// listeners, [HardwareKeyboard]'s handlers, and this handler
+  /// [keyMessageHandler], all of them regardless of each one's result. These
+  /// results are combined and returned to the platform. If any handlers return
+  /// true, then this event will not be propagated to the text input system or
+  /// other native components. See below for detailed introduction of event
+  /// results.
   ///
   /// For most common applications, which use [WidgetsBinding], this field
-  /// is set by the focus system (see `FocusManger`) on startup and should not
-  /// be change explicitly.
+  /// is set by the focus system (see `FocusManger`) on startup, and should not
+  /// be assigned or read manually. In this case, this [keyMessageHandler] will
+  /// take care of everything related to the focus system, including
+  /// [FocusNode.onKey], [FocusNode.onKeyEvent], and shortcuts.
+  ///
+  /// ## Event result
+  ///
+  /// Roughly speaking, each native key event might go through the following few
+  /// stages:
+  ///
+  /// 1. Pre-filtering, such as IME.
+  /// 2. Flutter framework, including [RawKeyboard] and [HardwareKeyboard].
+  /// 3. The text input system.
+  /// 4. Other native components (possibly non-Flutter).
+  ///
+  /// Each stage can choose to _handle_ the event, preventing it from being
+  /// propagated to the next stage. This is called the "event result". This
+  /// allows shortcuts such as "Ctrl-C" to not generate a text "C" in the text
+  /// field, or shortcuts that are not handled by any components to trigger
+  /// special alerts (such as the "bonk" noise on macOS).
+  ///
+  /// The event result of stage 2 _Flutter framework_ is composed of the
+  /// following parts:
+  ///
+  /// - [HardwareKeyboard]'s handlers (see [[HardwareKeyboard.addHandler]).
+  /// - [keyMessageHandler].
+  ///
+  /// These handlers will always be called regardless of each one's results.
+  /// The result from these handlers are combined. If any of the handlers claim
+  /// to handle the event, the overall result of stage 2 will be "event
+  /// handled".
+  ///
+  /// ## Advanced usages: Manual assignment or patching
   ///
   /// If you are not using the focus system to manage focus, set this
   /// attribute to a [KeyMessageHandler] that returns true if the propagation
   /// on the platform should not be continued. If this field is null, key events
   /// will be assumed to not have been handled by Flutter.
   ///
-  /// ## Event result
+  /// Even if you are using the focus system, you might also want to do more
+  /// than the focus system allows. In these cases, you can _patch_
+  /// [keyMessageHandler] by assigning it with a callback that performs your
+  /// tasks and calls the original callback in between (or not at all.)
   ///
-  /// Key messages on the platform are given to Flutter to be handled by the
-  /// engine. If they are not handled, then the platform will continue to
-  /// distribute the keys (i.e. propagate them) to other (possibly non-Flutter)
-  /// components in the application. The return value from this handler tells
-  /// the platform to either stop propagation (by returning true: "event
-  /// handled"), or pass the event on to other controls (false: "event not
-  /// handled"). Some platforms might trigger special alerts if the event
-  /// is not handled by other controls either (such as the "bonk" noise on
-  /// macOS).
+  /// Patching [keyMessageHandler] can not be reverted. You should always assume
+  /// that other component might haved patch it before you and after you.
+  /// This means that you might want to write your own global notification
+  /// manager, which callbacks can be added to and removed from.
   ///
-  /// The result from [keyMessageHandler] and [HardwareKeyboard]'s handlers
-  /// are combined. If any of the handlers claim to handle the event,
-  /// the overall result will be "event handled".
+  /// You should not patch [keyMessageHandler] until `FocusManager` has assigned
+  /// its callback. This is assured during any time within the widget lifecycle
+  /// (such as `initState`), or after calling `WidgetManager.instance`.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to process key events that are not handled by any
+  /// focus handlers (such as shortcuts) by patching [keyMessageHandler].
+  ///
+  /// Try to type something in the first text field. These key presses are not
+  /// handled by shorcuts and will be captured by the handler and printed out.
+  /// Now try to press text shortcuts, such as Ctrl+A. The KeyA press is
+  /// handled by shortcuts, therefore unhandled by the handler and not printed
+  /// out.
+  ///
+  /// ** See code in examples/api/lib/widgets/basic/custom_multi_child_layout.0.dart **
+  /// {@end-tool}
   ///
   /// See also:
   ///
