@@ -388,14 +388,6 @@ class _MenuBarState extends State<_MenuBar> {
   // displayed.
   final _MenuNode _root = _MenuNode.root();
 
-  // The serial number containing the number of times the menu hierarchy has
-  // been updated.
-  //
-  // This is used to indicate to the [_MenuNodeWrapper] that the menu hierarchy
-  // or its attributes have changed, and its dependents need updating.
-  int get menuSerial => _menuSerial;
-  int _menuSerial = 0;
-
   // The map of focus nodes to menus. This is used to look up which menu node
   // goes with which focus node when finding the currently focused menu node.
   final Map<FocusNode, _MenuNode> _focusNodes = <FocusNode, _MenuNode>{};
@@ -447,17 +439,27 @@ class _MenuBarState extends State<_MenuBar> {
   void initState() {
     super.initState();
     _shortcuts = _getShortcuts();
-    assert(widget.controller?._menuBar == null);
-    widget.controller?._menuBar = this;
+    widget.controller?._attach(this);
     _createMenuTree(widget.menus);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
     widget.controller?._menuBarStateChanged();
   }
 
   @override
+  void deactivate() {
+    super.deactivate();
+    widget.controller?._detach(this);
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    widget.controller?._attach(this);
+  }
+
+  @override
   void dispose() {
-    assert(widget.controller?._menuBar == this || widget.controller?._menuBar == null);
-    widget.controller?._menuBar = null;
+    widget.controller?._detach(this);
     menuBarScope.dispose();
     overlayScope.dispose();
     _root.children.clear();
@@ -703,7 +705,6 @@ class _MenuBarState extends State<_MenuBar> {
       return;
     }
     void markMenuDirty() {
-      _menuSerial += 1;
       _overlayEntry?.markNeedsBuild();
       widget.controller?._menuBarStateChanged();
     }
@@ -950,8 +951,20 @@ class MenuBarController with ChangeNotifier {
     }
   }
 
+  void _attach(_MenuBarState menuBar) {
+    assert(_menuBar == null);
+    _menuBar = menuBar;
+  }
+
+  void _detach(_MenuBarState menuBar) {
+    // Can't just assert this, since on reassemble, the order of reassembling
+    // isn't guaranteed.
+    if (_menuBar == menuBar) {
+      _menuBar = null;
+    }
+  }
+
   // The menu bar this controller is attached to.
-  // This is set directly by _MenuBarState.
   _MenuBarState? _menuBar;
 }
 
@@ -1205,7 +1218,6 @@ class MenuBarButton extends StatefulWidget with MenuBarItem {
 
 class _MenuBarButtonState extends State<MenuBarButton> {
   _MenuNode? _menu;
-  int _menuSerial = 0;
   late _MenuBarState _menuBar;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
@@ -1385,7 +1397,6 @@ class _MenuBarButtonState extends State<MenuBarButton> {
             builder: (BuildContext context) {
               return _MenuNodeWrapper(
                 menu: menuButtonNode,
-                serial: _menuSerial,
                 child: _MenuBarMarker(
                   state: _menuBar,
                   child: _MenuBarMenuList(
@@ -1412,12 +1423,11 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 
   void _updateMenuRegistration() {
     final _MenuNode newMenu = _MenuNodeWrapper.of(context);
-    final _MenuBarState newController = _MenuBarState.of(context);
-    if (_menuSerial != newController.menuSerial || newMenu != _menu || newController != _menuBar) {
-      _menuBar = newController;
+    final _MenuBarState newMenuBar = _MenuBarState.of(context);
+    if (newMenu != _menu || newMenuBar != _menuBar) {
+      _menuBar = newMenuBar;
       _menu = newMenu;
-      _menuSerial = _menuBar.menuSerial;
-      newController.registerMenu(
+      newMenuBar.registerMenu(
         menuContext: context,
         node: newMenu,
         buttonFocus: _focusNode,
@@ -2159,13 +2169,11 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
 /// the same lifetime as the [MenuBar].
 class _MenuNodeWrapper extends InheritedWidget {
   const _MenuNodeWrapper({
-    required this.serial,
     required this.menu,
     required super.child,
   });
 
   final _MenuNode menu;
-  final int serial;
 
   static _MenuNode of(BuildContext context) {
     final _MenuNodeWrapper? wrapper = context.dependOnInheritedWidgetOfExactType<_MenuNodeWrapper>();
@@ -2175,7 +2183,7 @@ class _MenuNodeWrapper extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_MenuNodeWrapper oldWidget) {
-    return oldWidget.menu != menu || oldWidget.serial != serial;
+    return oldWidget.menu != menu;
   }
 
   @override
@@ -2227,7 +2235,6 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
 
     int index = 0;
     return _MenuNodeWrapper(
-      serial: menuBar.menuSerial,
       menu: menuBar._root,
       child: _MenuBarMenuList(
         backgroundColor: color,
@@ -2240,7 +2247,6 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
         children: <Widget>[
           ...children.map<Widget>((MenuItem child) {
             final Widget result = _MenuNodeWrapper(
-              serial: menuBar.menuSerial,
               menu: menuBar._root.children[index],
               child: child as Widget,
             );
@@ -2407,7 +2413,6 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
   List<Widget> _expandGroups() {
     int index = 0;
     final _MenuNode parentMenu = _MenuNodeWrapper.of(context);
-    final _MenuBarState menuBar = _MenuBarState.of(context);
     final List<Widget> expanded = <Widget>[];
 
     for (final Widget child in widget.children) {
@@ -2423,7 +2428,6 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
       if (childMenuItem.members.isEmpty) {
         expanded.add(
           _MenuNodeWrapper(
-            serial: menuBar.menuSerial,
             menu: parentMenu.children[index],
             child: child,
           ),
@@ -2433,7 +2437,6 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
         // Groups are expanded in the node tree, so expand them here too.
         expanded.addAll(childMenuItem.members.map<Widget>((MenuItem member) {
           final Widget wrapper = _MenuNodeWrapper(
-            serial: menuBar.menuSerial,
             menu: parentMenu.children[index],
             child: child,
           );
@@ -2587,8 +2590,24 @@ class _ShortcutRegistrationState extends State<_ShortcutRegistration> {
   }
 
   @override
+  void deactivate() {
+    super.deactivate();
+    _entry?.dispose();
+    _entry = null;
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    _entry = ShortcutRegistry.of(context).addAll(
+      widget.shortcuts.cast<ShortcutActivator, Intent>(),
+    );
+  }
+
+  @override
   void dispose() {
     _entry?.dispose();
+    _entry = null;
     super.dispose();
   }
 
