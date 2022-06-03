@@ -74,24 +74,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               },
               child: const Icon(key: Key('gesture1'), Icons.chevron_left),
             ),
-          ],
-        ),
-        const SizedBox(height: 50),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  if (index == 0) {
-                    index = names.length - 1;
-                  } else {
-                    index -= 1;
-                  }
-                });
-              },
-              child: const Icon(key: Key('gesture1'), Icons.chevron_left),
-            ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
