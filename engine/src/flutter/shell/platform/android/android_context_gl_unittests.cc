@@ -164,8 +164,7 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNull) {
   EXPECT_NE(android_surface->GetOnscreenSurface(), nullptr);
 }
 
-// TODO(https://github.com/flutter/flutter/issues/104463): Flaky test.
-TEST(AndroidContextGl, DISABLED_MSAAx4) {
+TEST(AndroidContextGl, MSAAx4) {
   GrMockOptions main_context_options;
   sk_sp<GrDirectContext> main_context =
       GrDirectContext::MakeMock(&main_context_options);
