@@ -48,7 +48,7 @@ void main() {
       platform: platform,
       processManager: processManager,
     );
-    final Directory stagingDir = appDir.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    final Directory stagingDir = appDir.childDirectory(kDefaultMigrateStagingDirectoryName);
     final File pubspecOriginal = appDir.childFile('pubspec.yaml');
     pubspecOriginal.createSync();
     pubspecOriginal.writeAsStringSync('''

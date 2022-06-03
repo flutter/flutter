@@ -35,7 +35,7 @@ class MigrateStatusCommand extends FlutterCommand {
       help: 'Specifies the custom migration working directory used to stage '
             'and edit proposed changes. This path can be absolute or relative '
             'to the flutter project root. This defaults to '
-            '`$kDefaultMigrateWorkingDirectoryName`',
+            '`$kDefaultMigrateStagingDirectoryName`',
       valueHelp: 'path',
     );
     argParser.addOption(
@@ -88,25 +88,25 @@ class MigrateStatusCommand extends FlutterCommand {
     final FlutterProject project = projectDirectory == null
       ? FlutterProject.current()
       : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
-    Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    final String? customWorkingDirectoryPath = stringArg('staging-directory');
-    if (customWorkingDirectoryPath != null) {
-      if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
-        workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
+    Directory stagingDirectory = project.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
+    final String? customStagingDirectoryPath = stringArg('staging-directory');
+    if (customStagingDirectoryPath != null) {
+      if (fileSystem.path.isAbsolute(customStagingDirectoryPath)) {
+        stagingDirectory = fileSystem.directory(customStagingDirectoryPath);
       } else {
-        workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
+        stagingDirectory = project.directory.childDirectory(customStagingDirectoryPath);
       }
     }
-    if (!workingDirectory.existsSync()) {
-      logger.printStatus('No migration in progress in $workingDirectory. Start a new migration with:');
+    if (!stagingDirectory.existsSync()) {
+      logger.printStatus('No migration in progress in $stagingDirectory. Start a new migration with:');
       printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
+    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(stagingDirectory);
     if (!manifestFile.existsSync()) {
       logger.printError('No migrate manifest in the migrate working directory '
-                        'at ${workingDirectory.path}. Fix the working directory '
+                        'at ${stagingDirectory.path}. Fix the working directory '
                         'or abandon and restart the migration.');
       return const FlutterCommandResult(ExitStatus.fail);
     }
@@ -119,7 +119,7 @@ class MigrateStatusCommand extends FlutterCommand {
         for (final String localPath in manifest.addedFiles) {
           logger.printStatus('Newly added file at $localPath:\n');
           try {
-            logger.printStatus(workingDirectory.childFile(localPath).readAsStringSync(), color: TerminalColor.green);
+            logger.printStatus(stagingDirectory.childFile(localPath).readAsStringSync(), color: TerminalColor.green);
           } on FileSystemException {
             logger.printStatus('Contents are byte data\n', color: TerminalColor.grey);
           }
@@ -127,10 +127,10 @@ class MigrateStatusCommand extends FlutterCommand {
       }
       final List<String> files = <String>[];
       files.addAll(manifest.mergedFiles);
-      files.addAll(manifest.resolvedConflictFiles(workingDirectory));
-      files.addAll(manifest.remainingConflictFiles(workingDirectory));
+      files.addAll(manifest.resolvedConflictFiles(stagingDirectory));
+      files.addAll(manifest.remainingConflictFiles(stagingDirectory));
       for (final String localPath in files) {
-        final DiffResult result = await migrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
+        final DiffResult result = await migrateUtils.diffFiles(project.directory.childFile(localPath), stagingDirectory.childFile(localPath));
         if (result.diff != '' && result.diff != null) {
           // Print with different colors for better visibility.
           int lineNumber = -1;
@@ -154,11 +154,11 @@ class MigrateStatusCommand extends FlutterCommand {
       }
     }
 
-    logger.printBox('Working directory at `${workingDirectory.path}`');
+    logger.printBox('Working directory at `${stagingDirectory.path}`');
 
-    checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
+    checkAndPrintMigrateStatus(manifest, stagingDirectory, logger: logger);
 
-    final bool readyToApply = manifest.remainingConflictFiles(workingDirectory).isEmpty;
+    final bool readyToApply = manifest.remainingConflictFiles(stagingDirectory).isEmpty;
 
     if (!readyToApply) {
       logger.printStatus('Guided conflict resolution wizard:');
