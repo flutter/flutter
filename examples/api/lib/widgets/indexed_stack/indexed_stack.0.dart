@@ -56,11 +56,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   border: OutlineInputBorder(),
                   hintText: 'Enter the name for a person to track',
                 ),
-                onSubmitted: (String value) => {
+                onSubmitted: (String value) {
                   setState(() {
                     names.add(value);
-                  }),
-                  fieldText.clear()
+                  });
+                  fieldText.clear();
                 },
                 controller: fieldText,
               )),
@@ -133,10 +133,10 @@ class _PersonTrackerState extends State<PersonTracker> {
             Text('Score: ${counter.toString()}'),
             TextButton.icon(
               icon: const Icon(Icons.add),
-              onPressed: () => {
+              onPressed: () {
                 setState(
                   () => counter++,
-                )
+                );
               },
               label: const Text('Increment'),
             )
