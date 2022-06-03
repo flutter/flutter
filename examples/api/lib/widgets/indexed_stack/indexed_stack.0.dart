@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [IndexedStack]
+/// Flutter code sample for [IndexedStack].
+/// {@tool dartpad}
+/// This example shows a [IndexedStack] widget being used to lay out one card
+/// at a time from a series of cards, each with their respective state.
+///
+/// ** See code in
+/// examples/api/lib/widgets/indexed_stack/indexed_stack.0.dart **
+/// {@end-tool}
 
 import 'package:flutter/material.dart';
 
@@ -63,16 +70,16 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-                GestureDetector(
-                  onTap: () => setState(() {
-                    if (index == 0) {
-                      index = names.length - 1;
-                    } else {
-                      index--;
-                    }
-                  }),
-                  child: const Icon(Icons.chevron_left),
-                ),
+              GestureDetector(
+                onTap: () => setState(() {
+                  if (index == 0) {
+                    index = names.length - 1;
+                  } else {
+                    index--;
+                  }
+                }),
+                child: const Icon(key: Key('gesture1'), Icons.chevron_left),
+              ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -84,16 +91,16 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   )
                 ],
               ),
-                GestureDetector(
-                  onTap: () => setState(() {
-                    if (index == names.length - 1) {
-                      index = 0;
-                    } else {
-                      index++;
-                    }
-                  }),
-                  child: const Icon(Icons.chevron_right),
-                ),
+              GestureDetector(
+                onTap: () => setState(() {
+                  if (index == names.length - 1) {
+                    index = 0;
+                  } else {
+                    index++;
+                  }
+                }),
+                child: const Icon(key: Key('gesture2'), Icons.chevron_right),
+              ),
             ],
           )
         ]);
@@ -112,6 +119,7 @@ class _PersonTrackerState extends State<PersonTracker> {
   @override
   Widget build(BuildContext context) {
     return Container(
+        key: Key(widget.name),
         decoration: BoxDecoration(
             color: const Color.fromARGB(255, 239, 248, 255),
             border: Border.all(
