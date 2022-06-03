@@ -197,7 +197,7 @@ void main() {
 
     expect(data.lengthInBytes, equals(20 * 20 * 4));
     expect(data.elementSizeInBytes, equals(1));
-    expect(getPixel(0, 0), equals(0x00000080));
+    expect(getPixel(0, 0), equals(0x0000007F));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
@@ -240,13 +240,13 @@ void main() {
     expect(renderOpacity.needsCompositing, false);
   });
 
-  test('RenderOpacity does composite if it is opaque', () {
+  test('RenderOpacity does not composite if it is opaque', () {
     final RenderOpacity renderOpacity = RenderOpacity(
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);
-    expect(renderOpacity.needsCompositing, true);
+    expect(renderOpacity.needsCompositing, false);
   });
 
   test('RenderOpacity reuses its layer', () {
