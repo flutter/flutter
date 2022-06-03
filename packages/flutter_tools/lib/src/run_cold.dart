@@ -152,6 +152,7 @@ class ColdRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    bool needsFullRestart = true,
   }) async {
     _didAttach = true;
     try {

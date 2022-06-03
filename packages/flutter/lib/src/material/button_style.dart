@@ -465,7 +465,7 @@ class ButtonStyle with Diagnosticable {
       fixedSize: _lerpProperties<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: _lerpProperties<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
       side: _lerpSides(a?.side, b?.side, t),
-      shape: _lerpShapes(a?.shape, b?.shape, t),
+      shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       tapTargetSize: t < 0.5 ? a?.tapTargetSize : b?.tapTargetSize,
@@ -490,14 +490,6 @@ class ButtonStyle with Diagnosticable {
       return null;
     }
     return _LerpSides(a, b, t);
-  }
-
-  // TODO(hansmuller): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
-  static MaterialStateProperty<OutlinedBorder?>? _lerpShapes(MaterialStateProperty<OutlinedBorder?>? a, MaterialStateProperty<OutlinedBorder?>? b, double t) {
-    if (a == null && b == null) {
-      return null;
-    }
-    return _LerpShapes(a, b, t);
   }
 }
 
@@ -538,20 +530,5 @@ class _LerpSides implements MaterialStateProperty<BorderSide?> {
       return BorderSide.lerp(resolvedA, BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), t);
     }
     return BorderSide.lerp(resolvedA, resolvedB, t);
-  }
-}
-
-class _LerpShapes implements MaterialStateProperty<OutlinedBorder?> {
-  const _LerpShapes(this.a, this.b, this.t);
-
-  final MaterialStateProperty<OutlinedBorder?>? a;
-  final MaterialStateProperty<OutlinedBorder?>? b;
-  final double t;
-
-  @override
-  OutlinedBorder? resolve(Set<MaterialState> states) {
-    final OutlinedBorder? resolvedA = a?.resolve(states);
-    final OutlinedBorder? resolvedB = b?.resolve(states);
-    return ShapeBorder.lerp(resolvedA, resolvedB, t) as OutlinedBorder?;
   }
 }

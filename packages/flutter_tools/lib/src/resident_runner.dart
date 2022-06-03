@@ -1178,11 +1178,16 @@ abstract class ResidentRunner extends ResidentHandlers {
     String route,
   });
 
+  /// Connect to a flutter application.
+  ///
+  /// [needsFullRestart] defaults to `true`, and controls if the frontend server should
+  /// compile a full dill. This should be set to `false` if this is called in [ResidentRunner.run], since that method already perfoms an initial compilation.
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    bool needsFullRestart = true,
   });
 
   @override
@@ -1486,13 +1491,16 @@ abstract class ResidentRunner extends ResidentHandlers {
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message, { this.fatal = false, this.updateFSReport });
+  OperationResult(this.code, this.message, { this.fatal = false, this.updateFSReport, this.extraTimings = const <OperationResultExtraTiming>[] });
 
   /// The result of the operation; a non-zero code indicates a failure.
   final int code;
 
   /// A user facing message about the results of the operation.
   final String message;
+
+  /// User facing extra timing information about the operation.
+  final List<OperationResultExtraTiming> extraTimings;
 
   /// Whether this error should cause the runner to exit.
   final bool fatal;
@@ -1502,6 +1510,16 @@ class OperationResult {
   bool get isOk => code == 0;
 
   static final OperationResult ok = OperationResult(0, '');
+}
+
+class OperationResultExtraTiming {
+  const OperationResultExtraTiming(this.description, this.timeInMs);
+
+  /// A user facing short description of this timing.
+  final String description;
+
+  /// The time this operation took in milliseconds.
+  final int timeInMs;
 }
 
 Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
