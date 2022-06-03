@@ -16,6 +16,7 @@ import 'migrate_abandon.dart';
 /// Base command for the migration tool.
 class MigrateCommand extends FlutterCommand {
   MigrateCommand({
+    required bool verbose,
     required this.logger,
     required FileSystem fileSystem,
     required Terminal terminal,
