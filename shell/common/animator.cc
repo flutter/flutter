@@ -163,26 +163,25 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
   delegate_.OnAnimatorUpdateLatestFrameTargetTime(
       frame_timings_recorder_->GetVsyncTargetTime());
 
+  auto layer_tree_item = std::make_unique<LayerTreeItem>(
+      std::move(layer_tree), std::move(frame_timings_recorder_));
   // Commit the pending continuation.
   PipelineProduceResult result =
-      producer_continuation_.Complete(std::move(layer_tree));
+      producer_continuation_.Complete(std::move(layer_tree_item));
 
   if (!result.success) {
-    frame_timings_recorder_.reset();
     FML_DLOG(INFO) << "No pending continuation to commit";
     return;
   }
 
   if (!result.is_first_item) {
-    frame_timings_recorder_.reset();
     // It has been successfully pushed to the pipeline but not as the first
     // item. Eventually the 'Rasterizer' will consume it, so we don't need to
     // notify the delegate.
     return;
   }
 
-  delegate_.OnAnimatorDraw(layer_tree_pipeline_,
-                           std::move(frame_timings_recorder_));
+  delegate_.OnAnimatorDraw(layer_tree_pipeline_);
 }
 
 const std::weak_ptr<VsyncWaiter> Animator::GetVsyncWaiter() const {

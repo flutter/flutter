@@ -35,10 +35,8 @@ class FakeAnimatorDelegate : public Animator::Delegate {
   MOCK_METHOD1(OnAnimatorUpdateLatestFrameTargetTime,
                void(fml::TimePoint frame_target_time));
 
-  MOCK_METHOD2(
-      OnAnimatorDraw,
-      void(std::shared_ptr<Pipeline<flutter::LayerTree>> pipeline,
-           std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder));
+  MOCK_METHOD1(OnAnimatorDraw,
+               void(std::shared_ptr<LayerTreePipeline> pipeline));
 
   void OnAnimatorDrawLastLayerTree(
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override {}
