@@ -168,6 +168,12 @@ class DataRow {
   /// Whether the row can be selected by using gestures such as
   /// tap or long press.
   ///
+  /// If the value is set to false and [onSelectChanged] is non-null,
+  /// the row can be only selected by toggling the checkbox.
+  ///
+  /// If the value is set to false and [onLongPress] is non-null,
+  /// [onLongPress] callback won't be called.
+  ///
   /// This value is true by default.
   final bool selectableOnGestures;
 
