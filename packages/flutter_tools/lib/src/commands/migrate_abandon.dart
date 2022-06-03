@@ -33,7 +33,7 @@ class MigrateAbandonCommand extends FlutterCommand {
       help: 'Specifies the custom migration working directory used to stage '
             'and edit proposed changes. This path can be absolute or relative '
             'to the flutter project root. This defaults to '
-            '`$kDefaultMigrateWorkingDirectoryName`',
+            '`$kDefaultMigrateStagingDirectoryName`',
       valueHelp: 'path',
     );
     argParser.addOption(
@@ -76,28 +76,28 @@ class MigrateAbandonCommand extends FlutterCommand {
     final FlutterProject project = projectDirectory == null
       ? FlutterProject.current()
       : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
-    Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    final String? customWorkingDirectoryPath = stringArg('staging-directory');
-    if (customWorkingDirectoryPath != null) {
-      if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
-        workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
+    Directory stagingDirectory = project.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
+    final String? customStagingDirectoryPath = stringArg('staging-directory');
+    if (customStagingDirectoryPath != null) {
+      if (fileSystem.path.isAbsolute(customStagingDirectoryPath)) {
+        stagingDirectory = fileSystem.directory(customStagingDirectoryPath);
       } else {
-        workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
+        stagingDirectory = project.directory.childDirectory(customStagingDirectoryPath);
       }
-      if (!workingDirectory.existsSync()) {
-        logger.printError('Provided working directory `$customWorkingDirectoryPath` '
+      if (!stagingDirectory.existsSync()) {
+        logger.printError('Provided staging directory `$customStagingDirectoryPath` '
                           'does not exist or is not valid.');
         return const FlutterCommandResult(ExitStatus.fail);
       }
     }
-    if (!workingDirectory.existsSync()) {
+    if (!stagingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Start a new migration with:');
       printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
     logger.printStatus('\nAbandoning the existing migration will delete the '
-                       'migration working directory at ${workingDirectory.path}');
+                       'migration staging directory at ${stagingDirectory.path}');
     final bool force = boolArg('force') ?? false;
     if (!force) {
       String selection = 'y';
@@ -120,7 +120,7 @@ class MigrateAbandonCommand extends FlutterCommand {
       }
     }
 
-    workingDirectory.deleteSync(recursive: true);
+    stagingDirectory.deleteSync(recursive: true);
 
     logger.printStatus('\nAbandon complete. Start a new migration with:');
     printCommandText('flutter migrate start', logger);
