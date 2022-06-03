@@ -34,7 +34,6 @@ class DialogTheme with Diagnosticable {
     this.alignment,
     this.titleTextStyle,
     this.contentTextStyle,
-    this.actionsPadding,
   });
 
   /// Overrides the default value for [Dialog.backgroundColor].
@@ -57,9 +56,6 @@ class DialogTheme with Diagnosticable {
   /// [AlertDialog.content].
   final TextStyle? contentTextStyle;
 
-  /// Overrides the default value for [AlertDialog.actionsPadding].
-  final EdgeInsetsGeometry? actionsPadding;
-
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DialogTheme copyWith({
@@ -69,7 +65,6 @@ class DialogTheme with Diagnosticable {
     AlignmentGeometry? alignment,
     TextStyle? titleTextStyle,
     TextStyle? contentTextStyle,
-    EdgeInsetsGeometry? actionsPadding,
   }) {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -78,7 +73,6 @@ class DialogTheme with Diagnosticable {
       alignment: alignment ?? this.alignment,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
-      actionsPadding: actionsPadding ?? this.actionsPadding,
     );
   }
 
@@ -101,7 +95,6 @@ class DialogTheme with Diagnosticable {
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
-      actionsPadding: EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
     );
   }
 
@@ -122,8 +115,7 @@ class DialogTheme with Diagnosticable {
         && other.shape == shape
         && other.alignment == alignment
         && other.titleTextStyle == titleTextStyle
-        && other.contentTextStyle == contentTextStyle
-        && other.actionsPadding == actionsPadding;
+        && other.contentTextStyle == contentTextStyle;
   }
 
   @override
@@ -135,6 +127,5 @@ class DialogTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
   }
 }
