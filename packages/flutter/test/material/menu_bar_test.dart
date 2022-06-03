@@ -231,53 +231,12 @@ void main() {
 
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(0, 0, 800, 48)));
     });
-    testWidgets('works with Padding around menu', (WidgetTester tester) async {
+    testWidgets('works with Padding around menu and overlay', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: MenuBar(
-                    menus: createTestMenus(onSelected: onSelected),
-                  ),
-                ),
-                const Expanded(child: Placeholder()),
-              ],
-            ),
-          ),
-        ),
-      );
-      await tester.pump();
-
-      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(12.0, 12.0, 788.0, 60.0)));
-
-      // Open and make sure things are the right size.
-      await tester.tap(find.text(TestMenu.mainMenu1.label));
-      await tester.pump();
-
-      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(12.0, 12.0, 788.0, 60.0)));
-      expect(
-        tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(132.0, 85.0, 286.0, 99.0)),
-      );
-      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
-          equals(const Rect.fromLTRB(108.0, 60.0, 370.0, 236.0)));
-      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(108.0, 116.0, 370.0, 132.0)));
-
-      // Close and make sure it goes back where it was.
-      await tester.tap(find.text(TestMenu.mainMenu1.label));
-      await tester.pump();
-
-      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(12.0, 12.0, 788.0, 60.0)));
-    });
-    testWidgets('works with Padding around menu with RTL direction', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Directionality(
-              textDirection: TextDirection.rtl,
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: MaterialApp(
+            home: Material(
               child: Column(
                 children: <Widget>[
                   Padding(
@@ -295,26 +254,77 @@ void main() {
       );
       await tester.pump();
 
-      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(12.0, 12.0, 788.0, 60.0)));
+      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
 
       // Open and make sure things are the right size.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
-      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(12.0, 12.0, 788.0, 60.0)));
+      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(514.0, 85.0, 668.0, 99.0)),
+        equals(const Rect.fromLTRB(142.0, 95.0, 296.0, 109.0)),
       );
-      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
-          equals(const Rect.fromLTRB(430.0, 60.0, 692.0, 236.0)));
-      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(430.0, 116.0, 692.0, 132.0)));
+      expect(
+        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
+        equals(const Rect.fromLTRB(118.0, 70.0, 380.0, 246.0)),
+      );
+      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(118.0, 126.0, 380.0, 142.0)));
 
       // Close and make sure it goes back where it was.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
-      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(12.0, 12.0, 788.0, 60.0)));
+      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
+    });
+    testWidgets('works with Padding around menu and overlay with RTL direction', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: MaterialApp(
+            home: Material(
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: MenuBar(
+                        menus: createTestMenus(onSelected: onSelected),
+                      ),
+                    ),
+                    const Expanded(child: Placeholder()),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
+
+      // Open and make sure things are the right size.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+
+      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
+      expect(
+        tester.getRect(find.text(TestMenu.subMenu10.label)),
+        equals(const Rect.fromLTRB(504.0, 95.0, 658.0, 109.0)),
+      );
+      expect(
+        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
+        equals(const Rect.fromLTRB(420.0, 70.0, 682.0, 246.0)),
+      );
+      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(420.0, 126.0, 682.0, 142.0)));
+
+      // Close and make sure it goes back where it was.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+
+      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
     });
     testWidgets('visual attributes can be set', (WidgetTester tester) async {
       await tester.pumpWidget(
