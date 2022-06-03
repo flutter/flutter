@@ -658,28 +658,28 @@ class _MenuBarState extends State<_MenuBar> {
     final _MenuNode? oldMenu = _openMenu;
     setState(() {
       _openMenu = value;
-      oldMenu?.ancestorDifference(_openMenu).forEach((_MenuNode node) {
-        node.close();
-      });
-      _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
-        node.open();
-      });
-      if (value != null && value.focusNode?.hasPrimaryFocus != true) {
-        // Request focus on the new thing that is now open, if any, so that
-        // focus traversal starts from that location.
-        if (value.focusNode == null || !value.focusNode!.canRequestFocus) {
-          // If we don't have a focus node to ask yet, or it can't be focused yet,
-          // then keep the menu until it gets registered, or something else sets
-          // the menu.
-          _pendingFocusedMenu = value;
-        } else {
-          _pendingFocusedMenu = null;
-          value.focusNode!.requestFocus();
-        }
-      }
-      _manageOverlayEntry();
-      _markMenuDirtyAndDelayIfNecessary();
     });
+    oldMenu?.ancestorDifference(_openMenu).forEach((_MenuNode node) {
+      node.close();
+    });
+    _openMenu?.ancestorDifference(oldMenu).forEach((_MenuNode node) {
+      node.open();
+    });
+    if (value != null && value.focusNode?.hasPrimaryFocus != true) {
+      // Request focus on the new thing that is now open, if any, so that
+      // focus traversal starts from that location.
+      if (value.focusNode == null || !value.focusNode!.canRequestFocus) {
+        // If we don't have a focus node to ask yet, or it can't be focused yet,
+        // then keep the menu until it gets registered, or something else sets
+        // the menu.
+        _pendingFocusedMenu = value;
+      } else {
+        _pendingFocusedMenu = null;
+        value.focusNode!.requestFocus();
+      }
+    }
+    _manageOverlayEntry();
+    _markMenuDirtyAndDelayIfNecessary();
   }
 
   // Creates or removes the overlay entry that contains the stack of all menus.
@@ -774,8 +774,10 @@ class _MenuBarState extends State<_MenuBar> {
       if (menuBarBox != null) menuBarBox,
       ..._menuRenderBoxes,
     ];
+    debugPrint('testing');
     for (final RenderBox renderBox in renderBoxes) {
       assert(renderBox.attached);
+      debugPrint('Hit testing ${renderBox.globalToLocal(event.position)} against ${renderBox.size}');
       isInsideMenu =
           renderBox.hitTest(BoxHitTestResult(), position: renderBox.globalToLocal(event.position)) || isInsideMenu;
       if (isInsideMenu) {
@@ -835,12 +837,14 @@ class _MenuBarState extends State<_MenuBar> {
   // be used to do hit detection and find out if a pointer event hit a menu or
   // not without participating in the gesture arena.
   void registerMenuRenderObject(RenderBox menu) {
+    debugPrint('Registering ${menu.paintBounds}');
     _menuRenderBoxes.add(menu);
   }
 
   // Used to unregister the menu's previous render box whenever it changes, or
   // remove it when it is disposed.
   void unregisterMenuRenderObject(RenderBox menu) {
+    debugPrint('Unregistering ${menu.paintBounds}');
     _menuRenderBoxes.remove(menu);
   }
 
@@ -1224,7 +1228,17 @@ class _MenuBarButtonState extends State<MenuBarButton> {
 
   @override
   void dispose() {
-    _menuBar.unregisterMenu(_menu!);
+    if (_menu!.isOpen) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        // Must happen post-frame because unregistering it can cause the menu to
+        // close the menu, modifying the menu, which means it needs to call
+        // setState.
+        _menuBar.unregisterMenu(_menu!);
+      });
+    } else {
+      // Since this menu isn't open, it won't need to be closed.
+      _menuBar.unregisterMenu(_menu!);
+    }
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
     super.dispose();
@@ -2440,6 +2454,17 @@ class _MenuBarMenuListState extends State<_MenuBarMenuList> {
       }
     }
     return expanded;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_lastRenderBox == null) {
+      _lastRenderBox = context.findRenderObject() as RenderBox?;
+      if (_lastRenderBox != null) {
+        _menuBar!.registerMenuRenderObject(_lastRenderBox!);
+      }
+    }
   }
 
   @override

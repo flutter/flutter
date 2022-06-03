@@ -948,7 +948,7 @@ void main() {
 
       // Open a menu initially.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(opened, equals(<TestMenu>[TestMenu.mainMenu1]));
 
       await tester.tap(find.text(TestMenu.subMenu11.label));
