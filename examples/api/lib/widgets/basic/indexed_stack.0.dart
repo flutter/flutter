@@ -43,20 +43,21 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         SizedBox(
-            width: 300,
-            child: TextField(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter the name for a person to track',
-              ),
-              onSubmitted: (String value) {
-                setState(() {
-                  names.add(value);
-                });
-                fieldText.clear();
-              },
-              controller: fieldText,
-            )),
+          width: 300,
+          child: TextField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter the name for a person to track',
+            ),
+            onSubmitted: (String value) {
+              setState(() {
+                names.add(value);
+              });
+              fieldText.clear();
+            },
+            controller: fieldText,
+          ),
+        ),
         const SizedBox(height: 50),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
