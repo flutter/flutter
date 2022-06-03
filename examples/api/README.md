@@ -82,8 +82,9 @@ source file they are linked from, and are named for the symbol they are attached
 to, in lower_snake_case, with an index relating to their order within the doc
 comment. So, for the `Curve2D` case, since it's in the `animation` package, in a
 file called `curves.dart`, and it's the first example, it goes in
-`examples/api/lib/animation/curves/curve2_d.0.dart`. You should also add tests 
-for your sample code under [`examples/api/test`](./test).
+`examples/api/lib/animation/curves/curve2_d.0.dart`. 
+
+You should also add tests for your sample code under [`examples/api/test`](./test).
 
 The entire example should be in a single file, so that Dartpad can load it.
 
