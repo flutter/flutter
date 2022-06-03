@@ -68,7 +68,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   if (index == 0) {
                     index = names.length - 1;
                   } else {
-                    index--;
+                    index -= 1;
                   }
                 });
               },
@@ -86,7 +86,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   if (index == 0) {
                     index = names.length - 1;
                   } else {
-                    index--;
+                    index -= 1;
                   }
                 });
               },
@@ -97,7 +97,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               children: <Widget>[
                 IndexedStack(
                   index: index,
-                  children: <Widget>[for (String name in names) PersonTracker(name: name)],
+                  children: <Widget>[
+                    for (String name in names) PersonTracker(name: name)
+                  ],
                 )
               ],
             ),
@@ -107,7 +109,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   if (index == names.length - 1) {
                     index = 0;
                   } else {
-                    index++;
+                    index += 1;
                   }
                 });
               },
@@ -141,12 +143,12 @@ class _PersonTrackerState extends State<PersonTracker> {
       child: Column(
         children: <Widget>[
           Text('Name: ${widget.name}'),
-          Text('Score: ${counter.toString()}'),
+          Text('Score: $counter'),
           TextButton.icon(
             icon: const Icon(Icons.add),
             onPressed: () {
               setState(() {
-                counter++;
+                counter += 1;
               });
             },
             label: const Text('Increment'),
