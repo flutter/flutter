@@ -1551,7 +1551,9 @@ Future<void> testMain() async {
           <String, dynamic>{
             'text': 'something',
             'selectionBase': 9,
-            'selectionExtent': 9
+            'selectionExtent': 9,
+            'composingBase': null,
+            'composingExtent': null
           }
         ],
       );
@@ -1575,7 +1577,9 @@ Future<void> testMain() async {
           <String, dynamic>{
             'text': 'something',
             'selectionBase': 2,
-            'selectionExtent': 5
+            'selectionExtent': 5,
+            'composingBase': null,
+            'composingExtent': null
           }
         ],
       );
@@ -1631,6 +1635,8 @@ Future<void> testMain() async {
                 'deltaEnd': -1,
                 'selectionBase': 2,
                 'selectionExtent': 5,
+                'composingBase': null,
+                'composingExtent': null
               }
             ],
           }
@@ -1709,7 +1715,9 @@ Future<void> testMain() async {
             hintForFirstElement: <String, dynamic>{
               'text': 'something',
               'selectionBase': 9,
-              'selectionExtent': 9
+              'selectionExtent': 9,
+              'composingBase': null,
+              'composingExtent': null
             }
           },
         ],
@@ -1748,6 +1756,8 @@ Future<void> testMain() async {
         'text': 'foo\nbar',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': null,
+        'composingExtent': null
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
       checkTextAreaEditingState(textarea, 'foo\nbar', 2, 3);
@@ -1777,6 +1787,8 @@ Future<void> testMain() async {
             'text': 'something\nelse',
             'selectionBase': 14,
             'selectionExtent': 14,
+            'composingBase': null,
+            'composingExtent': null
           }
         ],
       );
@@ -1791,6 +1803,8 @@ Future<void> testMain() async {
             'text': 'something\nelse',
             'selectionBase': 2,
             'selectionExtent': 5,
+            'composingBase': null,
+            'composingExtent': null
           }
         ],
       );
@@ -2275,21 +2289,32 @@ Future<void> testMain() async {
       expect(_editingState.extentOffset, 2);
     });
 
-    test('Compare two editing states', () {
-      final InputElement input = defaultTextEditingRoot.querySelector('input')! as InputElement;
-      input.value = 'Test';
-      input.selectionStart = 1;
-      input.selectionEnd = 2;
+    group('comparing editing states', () {
+      test('From dom element', () {
+        final InputElement input = defaultTextEditingRoot.querySelector('input')! as InputElement;
+        input.value = 'Test';
+        input.selectionStart = 1;
+        input.selectionEnd = 2;
 
-      final EditingState editingState1 = EditingState.fromDomElement(input);
-      final EditingState editingState2 = EditingState.fromDomElement(input);
+        final EditingState editingState1 = EditingState.fromDomElement(input);
+        final EditingState editingState2 = EditingState.fromDomElement(input);
 
-      input.setSelectionRange(1, 3);
+        input.setSelectionRange(1, 3);
 
-      final EditingState editingState3 = EditingState.fromDomElement(input);
+        final EditingState editingState3 = EditingState.fromDomElement(input);
 
-      expect(editingState1 == editingState2, isTrue);
-      expect(editingState1 != editingState3, isTrue);
+        expect(editingState1 == editingState2, isTrue);
+        expect(editingState1 != editingState3, isTrue);
+      });
+
+      test('takes composition range into account', () {
+          final EditingState editingState1 = EditingState(composingBaseOffset: 1, composingExtentOffset: 2);
+          final EditingState editingState2 = EditingState(composingBaseOffset: 1, composingExtentOffset: 2);
+          final EditingState editingState3 = EditingState(composingBaseOffset: 4, composingExtentOffset: 8);
+
+          expect(editingState1, editingState2);
+          expect(editingState1, isNot(editingState3));
+      });
     });
   });
 
