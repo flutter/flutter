@@ -14,7 +14,6 @@
 
 @TestOn('!chrome')
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -31,7 +30,7 @@ import 'widget_inspector_test_utils.dart';
 // columns will impact whether tests pass.
 
 class ClockDemo extends StatefulWidget {
-  const ClockDemo({ Key? key }) : super(key: key);
+  const ClockDemo({ super.key });
   @override
   State<ClockDemo> createState() => _ClockDemoState();
 }
@@ -69,9 +68,9 @@ class _ClockDemoState extends State<ClockDemo> {
 
 class ClockText extends StatefulWidget {
   const ClockText({
-    Key? key,
+    super.key,
     this.utcOffset = 0,
-  }) : super(key: key);
+  });
 
   final int utcOffset;
 
@@ -160,8 +159,6 @@ class _CreationLocation {
   String? name;
 }
 
-typedef InspectorServiceExtensionCallback = FutureOr<Map<String, Object>> Function(Map<String, String> parameters);
-
 class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
@@ -216,9 +213,9 @@ class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
 class RepaintBoundaryWithDebugPaint extends RepaintBoundary {
   /// Creates a widget that isolates repaints.
   const RepaintBoundaryWithDebugPaint({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.key,
+    super.child,
+  });
 
   @override
   RenderRepaintBoundary createRenderObject(BuildContext context) {
@@ -1999,7 +1996,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(64));
+      expect(location.line, equals(63));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -2009,7 +2006,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(102));
+      expect(location.line, equals(101));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -2036,7 +2033,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(64));
+      expect(location.line, equals(63));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -2046,7 +2043,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(102));
+      expect(location.line, equals(101));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -2997,6 +2994,46 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(debugIsLocalCreationLocation(paddingElement), isFalse);
       expect(debugIsLocalCreationLocation(paddingElement.widget), isFalse);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets('debugIsWidgetLocalCreation test', (WidgetTester tester) async {
+      setupDefaultPubRootDirectory(service);
+
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Text('target', key: key, textDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      final Element element = key.currentContext! as Element;
+      expect(debugIsWidgetLocalCreation(element.widget), isTrue);
+
+      final Finder paddingFinder = find.byType(Padding);
+      final Element paddingElement = paddingFinder.evaluate().first;
+      expect(debugIsWidgetLocalCreation(paddingElement.widget), isFalse);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets('debugIsWidgetLocalCreation false test', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Text('target', key: key, textDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      final Element element = key.currentContext! as Element;
+      expect(debugIsWidgetLocalCreation(element.widget), isFalse);
+    }, skip: WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --no-track-widget-creation flag.
 
     test('devToolsInspectorUri test', () {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';

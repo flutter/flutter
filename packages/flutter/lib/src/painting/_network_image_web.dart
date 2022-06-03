@@ -66,7 +66,24 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, decode, chunkEvents),
+      codec: _loadAsync(key as NetworkImage, null, decode, chunkEvents),
+      scale: key.scale,
+      debugLabel: key.url,
+      informationCollector: _imageStreamInformationCollector(key),
+    );
+  }
+
+  @override
+  ImageStreamCompleter loadBuffer(image_provider.NetworkImage key, image_provider.DecoderBufferCallback decode) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
+    final StreamController<ImageChunkEvent> chunkEvents =
+        StreamController<ImageChunkEvent>();
+
+    return MultiFrameImageStreamCompleter(
+      chunkEvents: chunkEvents.stream,
+      codec: _loadAsync(key as NetworkImage, decode, null, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -93,7 +110,8 @@ class NetworkImage
   // directly in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
-    image_provider.DecoderCallback decode,
+    image_provider.DecoderBufferCallback? decode,
+    image_provider.DecoderCallback? decodeDepreacted,
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
     assert(key == this);
@@ -139,11 +157,18 @@ class NetworkImage
 
       final Uint8List bytes = (request.response as ByteBuffer).asUint8List();
 
-      if (bytes.lengthInBytes == 0)
+      if (bytes.lengthInBytes == 0) {
         throw image_provider.NetworkImageLoadException(
             statusCode: request.status!, uri: resolved);
+      }
 
-      return decode(bytes);
+      if (decode != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        return decode(buffer);
+      } else {
+        assert(decodeDepreacted != null);
+        return decodeDepreacted!(bytes);
+      }
     } else {
       // This API only exists in the web engine implementation and is not
       // contained in the analyzer summary for Flutter.

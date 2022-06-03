@@ -1350,7 +1350,7 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
 class FocusTraversalOrder extends InheritedWidget {
   /// Creates an inherited widget used to describe the focus order of
   /// the [child] subtree.
-  const FocusTraversalOrder({Key? key, required this.order, required Widget child}) : super(key: key, child: child);
+  const FocusTraversalOrder({super.key, required this.order, required super.child});
 
   /// The order for the widget descendants of this [FocusTraversalOrder].
   final FocusOrder order;
@@ -1448,15 +1448,14 @@ class FocusTraversalGroup extends StatefulWidget {
   ///
   /// The [child] and [descendantsAreFocusable] arguments must not be null.
   FocusTraversalGroup({
-    Key? key,
+    super.key,
     FocusTraversalPolicy? policy,
     this.descendantsAreFocusable = true,
     this.descendantsAreTraversable = true,
     required this.child,
   }) : assert(descendantsAreFocusable != null),
        assert(descendantsAreTraversable != null),
-       policy = policy ?? ReadingOrderTraversalPolicy(),
-       super(key: key);
+       policy = policy ?? ReadingOrderTraversalPolicy();
 
   /// The policy used to move the focus from one focus node to another when
   /// traversing them using a keyboard.
@@ -1595,10 +1594,9 @@ class _FocusTraversalGroupMarker extends InheritedWidget {
   const _FocusTraversalGroupMarker({
     required this.policy,
     required this.focusNode,
-    required Widget child,
+    required super.child,
   })  : assert(policy != null),
-        assert(focusNode != null),
-        super(child: child);
+        assert(focusNode != null);
 
   final FocusTraversalPolicy policy;
   final FocusNode focusNode;
@@ -1768,12 +1766,11 @@ class ExcludeFocusTraversal extends StatelessWidget {
   ///
   /// The [child] argument is required, and must not be null.
   const ExcludeFocusTraversal({
-    Key? key,
+    super.key,
     this.excluding = true,
     required this.child,
   }) : assert(excluding != null),
-       assert(child != null),
-       super(key: key);
+       assert(child != null);
 
   /// If true, will make this widget's descendants untraversable.
   ///

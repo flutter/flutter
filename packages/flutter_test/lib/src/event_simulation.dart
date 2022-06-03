@@ -30,8 +30,9 @@ class _WebKeyLocationPair {
 
 String? _keyLabel(LogicalKeyboardKey key) {
   final String keyLabel = key.keyLabel;
-  if (keyLabel.length == 1)
+  if (keyLabel.length == 1) {
     return keyLabel.toLowerCase();
+  }
   return null;
 }
 
@@ -700,8 +701,9 @@ class KeyEventSimulator {
     final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
     for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
       final String? debugName = key.debugName;
-      if (debugName != null)
+      if (debugName != null) {
         result[debugName] = key;
+      }
     }
     return result;
   })();
@@ -757,7 +759,7 @@ class KeyEventSimulator {
     PhysicalKeyboardKey? physicalKey,
     String? character,
   }) async {
-    Future<bool> _simulateByRawEvent() {
+    Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
         return getKeyData(key, platform: platform!, physicalKey: physicalKey, character: character);
@@ -765,7 +767,7 @@ class KeyEventSimulator {
     }
     switch (_transitMode) {
       case KeyDataTransitMode.rawKeyData:
-        return _simulateByRawEvent();
+        return simulateByRawEvent();
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
         final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
@@ -778,7 +780,7 @@ class KeyEventSimulator {
             synthesized: false,
           ),
         );
-        return (await _simulateByRawEvent()) || resultByKeyEvent;
+        return (await simulateByRawEvent()) || resultByKeyEvent;
     }
   }
 
@@ -802,7 +804,7 @@ class KeyEventSimulator {
     String? platform,
     PhysicalKeyboardKey? physicalKey,
   }) async {
-    Future<bool> _simulateByRawEvent() {
+    Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
         return getKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
@@ -810,7 +812,7 @@ class KeyEventSimulator {
     }
     switch (_transitMode) {
       case KeyDataTransitMode.rawKeyData:
-        return _simulateByRawEvent();
+        return simulateByRawEvent();
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
         final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
@@ -823,7 +825,7 @@ class KeyEventSimulator {
             synthesized: false,
           ),
         );
-        return (await _simulateByRawEvent()) || resultByKeyEvent;
+        return (await simulateByRawEvent()) || resultByKeyEvent;
     }
   }
 
@@ -848,7 +850,7 @@ class KeyEventSimulator {
     PhysicalKeyboardKey? physicalKey,
     String? character,
   }) async {
-    Future<bool> _simulateByRawEvent() {
+    Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
         return getKeyData(key, platform: platform!, physicalKey: physicalKey, character: character);
@@ -856,7 +858,7 @@ class KeyEventSimulator {
     }
     switch (_transitMode) {
       case KeyDataTransitMode.rawKeyData:
-        return _simulateByRawEvent();
+        return simulateByRawEvent();
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
         final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
@@ -869,7 +871,7 @@ class KeyEventSimulator {
             synthesized: false,
           ),
         );
-        return (await _simulateByRawEvent()) || resultByKeyEvent;
+        return (await simulateByRawEvent()) || resultByKeyEvent;
     }
   }
 }

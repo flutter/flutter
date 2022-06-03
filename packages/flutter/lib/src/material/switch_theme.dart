@@ -98,11 +98,11 @@ class SwitchThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static SwitchThemeData lerp(SwitchThemeData? a, SwitchThemeData? b, double t) {
     return SwitchThemeData(
-      thumbColor: _lerpProperties<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
-      trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
+      thumbColor: MaterialStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
+      trackColor: MaterialStateProperty.lerp<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
-      overlayColor: _lerpProperties<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
+      overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
     );
   }
@@ -119,10 +119,12 @@ class SwitchThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SwitchThemeData
       && other.thumbColor == thumbColor
       && other.trackColor == trackColor
@@ -142,34 +144,6 @@ class SwitchThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
   }
-
-  static MaterialStateProperty<T>? _lerpProperties<T>(
-    MaterialStateProperty<T>? a,
-    MaterialStateProperty<T>? b,
-    double t,
-    T Function(T?, T?, double) lerpFunction,
-  ) {
-    // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
-      return null;
-    return _LerpProperties<T>(a, b, t, lerpFunction);
-  }
-}
-
-class _LerpProperties<T> implements MaterialStateProperty<T> {
-  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
-
-  final MaterialStateProperty<T>? a;
-  final MaterialStateProperty<T>? b;
-  final double t;
-  final T Function(T?, T?, double) lerpFunction;
-
-  @override
-  T resolve(Set<MaterialState> states) {
-    final T? resolvedA = a?.resolve(states);
-    final T? resolvedB = b?.resolve(states);
-    return lerpFunction(resolvedA, resolvedB, t);
-  }
 }
 
 /// Applies a switch theme to descendant [Switch] widgets.
@@ -188,10 +162,10 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
 class SwitchTheme extends InheritedWidget {
   /// Constructs a switch theme that configures all descendant [Switch] widgets.
   const SwitchTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// The properties used for all descendant [Switch] widgets.
   final SwitchThemeData data;

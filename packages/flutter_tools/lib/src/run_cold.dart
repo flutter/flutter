@@ -8,7 +8,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
@@ -153,6 +152,7 @@ class ColdRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    bool needsFullRestart = true,
   }) async {
     _didAttach = true;
     try {

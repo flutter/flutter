@@ -10,7 +10,7 @@ import 'rendering_tester.dart';
 int layouts = 0;
 
 class RenderLayoutWatcher extends RenderProxyBox {
-  RenderLayoutWatcher(RenderBox child) : super(child);
+  RenderLayoutWatcher(RenderBox super.child);
   @override
   void performLayout() {
     layouts += 1;

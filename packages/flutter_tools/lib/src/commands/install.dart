@@ -5,6 +5,7 @@
 import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -15,6 +16,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     requiresPubspecYaml();
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
+    usesApplicationBinaryOption();
     argParser.addFlag('uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',
     );
@@ -31,8 +33,11 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 
   Device? device;
 
-  bool get uninstallOnly => boolArg('uninstall-only');
-  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+  bool get uninstallOnly => boolArgDeprecated('uninstall-only');
+  String? get userIdentifier => stringArgDeprecated(FlutterOptions.kDeviceUser);
+
+  String? get _applicationBinaryPath => stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
+  File? get _applicationBinary => _applicationBinaryPath == null ? null : globals.fs.file(_applicationBinaryPath);
 
   @override
   Future<void> validateCommand() async {
@@ -44,6 +49,9 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     if (userIdentifier != null && device is! AndroidDevice) {
       throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
     }
+    if (_applicationBinaryPath != null && !(_applicationBinary?.existsSync() ?? true)) {
+      throwToolExit('Prebuilt binary $_applicationBinaryPath does not exist');
+    }
   }
 
   @override
@@ -51,6 +59,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     final Device targetDevice = device!;
     final ApplicationPackage? package = await applicationPackages?.getPackageForPlatform(
       await targetDevice.targetPlatform,
+      applicationBinary: _applicationBinary,
     );
     if (package == null) {
       throwToolExit('Could not find or build package');

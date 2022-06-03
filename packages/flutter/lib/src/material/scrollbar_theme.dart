@@ -198,16 +198,16 @@ class ScrollbarThemeData with Diagnosticable {
   static ScrollbarThemeData lerp(ScrollbarThemeData? a, ScrollbarThemeData? b, double t) {
     assert(t != null);
     return ScrollbarThemeData(
-      thumbVisibility: _lerpProperties<bool?>(a?.thumbVisibility, b?.thumbVisibility, t, _lerpBool),
-      thickness: _lerpProperties<double?>(a?.thickness, b?.thickness, t, lerpDouble),
-      trackVisibility: _lerpProperties<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
+      thumbVisibility: MaterialStateProperty.lerp<bool?>(a?.thumbVisibility, b?.thumbVisibility, t, _lerpBool),
+      thickness: MaterialStateProperty.lerp<double?>(a?.thickness, b?.thickness, t, lerpDouble),
+      trackVisibility: MaterialStateProperty.lerp<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
       showTrackOnHover: _lerpBool(a?.showTrackOnHover, b?.showTrackOnHover, t),
       isAlwaysShown: _lerpBool(a?.isAlwaysShown, b?.isAlwaysShown, t),
       interactive: _lerpBool(a?.interactive, b?.interactive, t),
       radius: Radius.lerp(a?.radius, b?.radius, t),
-      thumbColor: _lerpProperties<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
-      trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
-      trackBorderColor: _lerpProperties<Color?>(a?.trackBorderColor, b?.trackBorderColor, t, Color.lerp),
+      thumbColor: MaterialStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
+      trackColor: MaterialStateProperty.lerp<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
+      trackBorderColor: MaterialStateProperty.lerp<Color?>(a?.trackBorderColor, b?.trackBorderColor, t, Color.lerp),
       crossAxisMargin: lerpDouble(a?.crossAxisMargin, b?.crossAxisMargin, t),
       mainAxisMargin: lerpDouble(a?.mainAxisMargin, b?.mainAxisMargin, t),
       minThumbLength: lerpDouble(a?.minThumbLength, b?.minThumbLength, t),
@@ -233,10 +233,12 @@ class ScrollbarThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ScrollbarThemeData
       && other.thumbVisibility == thumbVisibility
       && other.thickness == thickness
@@ -270,34 +272,6 @@ class ScrollbarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<double>('mainAxisMargin', mainAxisMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('minThumbLength', minThumbLength, defaultValue: null));
   }
-
-  static MaterialStateProperty<T>? _lerpProperties<T>(
-    MaterialStateProperty<T>? a,
-    MaterialStateProperty<T>? b,
-    double t,
-    T Function(T?, T?, double) lerpFunction,
-  ) {
-    // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
-      return null;
-    return _LerpProperties<T>(a, b, t, lerpFunction);
-  }
-}
-
-class _LerpProperties<T> implements MaterialStateProperty<T> {
-  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
-
-  final MaterialStateProperty<T>? a;
-  final MaterialStateProperty<T>? b;
-  final double t;
-  final T Function(T?, T?, double) lerpFunction;
-
-  @override
-  T resolve(Set<MaterialState> states) {
-    final T? resolvedA = a?.resolve(states);
-    final T? resolvedB = b?.resolve(states);
-    return lerpFunction(resolvedA, resolvedB, t);
-  }
 }
 
 bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
@@ -319,10 +293,10 @@ class ScrollbarTheme extends InheritedWidget {
   /// Constructs a scrollbar theme that configures all descendant [Scrollbar]
   /// widgets.
   const ScrollbarTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// The properties used for all descendant [Scrollbar] widgets.
   final ScrollbarThemeData data;

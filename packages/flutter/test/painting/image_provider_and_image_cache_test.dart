@@ -17,8 +17,8 @@ import 'mocks_for_image_cache.dart';
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
-  Future<ui.Codec> _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+  Future<ui.Codec> basicDecoder(ui.ImmutableBuffer bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    return PaintingBinding.instance.instantiateImageCodecFromBuffer(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   }
 
   FlutterExceptionHandler? oldError;
@@ -76,7 +76,7 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
-      imageProvider, () => imageProvider.load(imageProvider, _basicDecoder),
+      imageProvider, () => imageProvider.loadBuffer(imageProvider, basicDecoder),
     )!;
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     final Completer<void> completer = Completer<void>();

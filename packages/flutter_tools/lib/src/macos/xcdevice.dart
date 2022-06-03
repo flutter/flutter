@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
-import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -186,11 +185,11 @@ class XCDevice {
           final String identifier = match.group(2)!;
           if (verb.startsWith('attach')) {
             _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
-              XCDeviceEvent.attach: identifier
+              XCDeviceEvent.attach: identifier,
             });
           } else if (verb.startsWith('detach')) {
             _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
-              XCDeviceEvent.detach: identifier
+              XCDeviceEvent.detach: identifier,
             });
           }
         }

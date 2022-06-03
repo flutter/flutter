@@ -3473,7 +3473,7 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholderLabel => 'Bilaketa';
+  String get searchTextFieldPlaceholderLabel => 'Bilatu';
 
   @override
   String get selectAllButtonLabel => 'Hautatu guztiak';

@@ -122,10 +122,10 @@ class DataTableThemeData with Diagnosticable {
     assert(t != null);
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
-      dataRowColor: _lerpProperties<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
+      dataRowColor: MaterialStateProperty.lerp<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
       dataRowHeight: lerpDouble(a.dataRowHeight, b.dataRowHeight, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
-      headingRowColor: _lerpProperties<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
+      headingRowColor: MaterialStateProperty.lerp<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
       headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
@@ -152,10 +152,12 @@ class DataTableThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DataTableThemeData
       && other.decoration == decoration
       && other.dataRowColor == dataRowColor
@@ -185,29 +187,6 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
     properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));
   }
-
-  static MaterialStateProperty<T>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T Function(T?, T?, double) lerpFunction ) {
-    // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
-      return null;
-    return _LerpProperties<T>(a, b, t, lerpFunction);
-  }
-}
-
-class _LerpProperties<T> implements MaterialStateProperty<T> {
-  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
-
-  final MaterialStateProperty<T>? a;
-  final MaterialStateProperty<T>? b;
-  final double t;
-  final T Function(T?, T?, double) lerpFunction;
-
-  @override
-  T resolve(Set<MaterialState> states) {
-    final T? resolvedA = a?.resolve(states);
-    final T? resolvedB = b?.resolve(states);
-    return lerpFunction(resolvedA, resolvedB, t);
-  }
 }
 
 /// Applies a data table theme to descendant [DataTable] widgets.
@@ -229,10 +208,10 @@ class DataTableTheme extends InheritedWidget {
   ///
   /// The [data] must not be null.
   const DataTableTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties used for all descendant [DataTable] widgets.
   final DataTableThemeData data;

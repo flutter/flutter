@@ -53,7 +53,7 @@ class Visibility extends StatelessWidget {
   /// The [maintainAnimation] argument can only be set if [maintainState] is
   /// set.
   const Visibility({
-    Key? key,
+    super.key,
     required this.child,
     this.replacement = const SizedBox.shrink(),
     this.visible = true,
@@ -83,8 +83,7 @@ class Visibility extends StatelessWidget {
        assert(
          maintainSize == true || maintainInteractivity == false,
          'Cannot maintain interactivity if size is not maintained.',
-       ),
-       super(key: key);
+       );
 
   /// The widget to show or hide, as controlled by [visible].
   ///
@@ -234,8 +233,9 @@ class Visibility extends StatelessWidget {
     assert(!maintainSize);
     if (maintainState) {
       Widget result = child;
-      if (!maintainAnimation)
+      if (!maintainAnimation) {
         result = TickerMode(enabled: visible, child: child);
+      }
       return Offstage(
         offstage: !visible,
         child: result,
@@ -298,7 +298,7 @@ class SliverVisibility extends StatelessWidget {
   /// The [maintainAnimation] argument can only be set if [maintainState] is
   /// set.
   const SliverVisibility({
-    Key? key,
+    super.key,
     required this.sliver,
     this.replacementSliver = const SliverToBoxAdapter(),
     this.visible = true,
@@ -330,8 +330,7 @@ class SliverVisibility extends StatelessWidget {
        assert(
          maintainSize == true || maintainInteractivity == false,
          'Cannot maintain interactivity if size is not maintained.',
-       ),
-       super(key: key);
+       );
 
   /// The sliver to show or hide, as controlled by [visible].
   final Widget sliver;
@@ -472,8 +471,9 @@ class SliverVisibility extends StatelessWidget {
     assert(!maintainSize);
     if (maintainState) {
       Widget result = sliver;
-      if (!maintainAnimation)
+      if (!maintainAnimation) {
         result = TickerMode(enabled: visible, child: sliver);
+      }
       return SliverOffstage(
         sliver: result,
         offstage: !visible,

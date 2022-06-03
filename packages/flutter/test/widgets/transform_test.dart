@@ -240,8 +240,7 @@ void main() {
           child: ClipRect(
             child: Transform(
               transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-              child: Opacity(
-                opacity: 0.9,
+              child: RepaintBoundary(
                 child: Container(
                   color: const Color(0xFF00FF00),
                 ),
@@ -265,7 +264,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2.0,
-        child: Opacity(opacity: 0.5, child: Container()),
+        child: RepaintBoundary(child: Container()),
       ),
     );
 
@@ -305,7 +304,7 @@ void main() {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(100.0, 50.0),
-        child: Opacity(opacity: 0.5, child: Container()),
+        child: RepaintBoundary(child: Container()),
       ),
     );
 
@@ -320,7 +319,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
-        child: Opacity(opacity: 0.5, child: Container()),
+        child: RepaintBoundary(child: Container()),
       ),
     );
 
@@ -364,7 +363,7 @@ void main() {
     expect(pointerDown, isTrue);
   });
 
-  Widget _generateTransform(bool needsCompositing, double angle) {
+  Widget generateTransform(bool needsCompositing, double angle) {
     final Widget customPaint = CustomPaint(painter: TestRectPainter());
     return Transform(
       transform: MatrixUtils.createCylindricalProjectionTransform(
@@ -381,12 +380,12 @@ void main() {
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
       for (double angle = 0; angle <= math.pi/4; angle += 0.01) {
-        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(true, angle)));
+        await tester.pumpWidget(RepaintBoundary(child: generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
         final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
         final ui.Image imageWithCompositing = await layer.toImage(renderBox.paintBounds);
 
-        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(false, angle)));
+        await tester.pumpWidget(RepaintBoundary(child: generateTransform(false, angle)));
         await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
       }
     },
@@ -412,8 +411,8 @@ void main() {
       1.0, 0.0, 0.0, 0.0,
       0.0, 1.0, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      25.0, 25.0, 0.0, 1.0]
-    );
+      25.0, 25.0, 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -430,8 +429,8 @@ void main() {
       3.14159, 0.0, 0.0, 0.0,
       0.0, 3.14159, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      -856.636, -642.477, 0.0, 1.0]
-    );
+      -856.636, -642.477, 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -448,8 +447,8 @@ void main() {
       moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
       moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
-    );
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Offset Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -470,8 +469,8 @@ void main() {
       moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
       moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
-    );
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Transform layers update to match child and filterQuality', (WidgetTester tester) async {

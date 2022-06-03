@@ -10,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 class TestSliverChildListDelegate extends SliverChildListDelegate {
-  TestSliverChildListDelegate(List<Widget> children) : super(children);
+  TestSliverChildListDelegate(super.children);
 
   final List<String> log = <String>[];
 
@@ -21,7 +21,7 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 }
 
 class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index, { Key? key }) : super(key: key);
+  const Alive(this.alive, this.index, { super.key });
   final bool alive;
   final int index;
 

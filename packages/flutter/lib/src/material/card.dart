@@ -8,7 +8,7 @@ import 'card_theme.dart';
 import 'material.dart';
 import 'theme.dart';
 
-/// A material design card: a panel with slightly rounded corners and an
+/// A Material Design card: a panel with slightly rounded corners and an
 /// elevation shadow.
 ///
 /// A card is a sheet of [Material] used to represent some related information,
@@ -54,12 +54,12 @@ import 'theme.dart';
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.io/design/components/cards.html>
 class Card extends StatelessWidget {
-  /// Creates a material design card.
+  /// Creates a Material Design card.
   ///
   /// The [elevation] must be null or non-negative. The [borderOnForeground]
   /// must not be null.
   const Card({
-    Key? key,
+    super.key,
     this.color,
     this.shadowColor,
     this.surfaceTintColor,
@@ -71,8 +71,7 @@ class Card extends StatelessWidget {
     this.child,
     this.semanticContainer = true,
   }) : assert(elevation == null || elevation >= 0.0),
-       assert(borderOnForeground != null),
-       super(key: key);
+       assert(borderOnForeground != null);
 
   /// The card's background color.
   ///
@@ -91,8 +90,8 @@ class Card extends StatelessWidget {
 
   /// The color used as an overlay on [color] to indicate elevation.
   ///
-  /// If this is null, no overlay will be applied. Otherwise the this
-  /// color will be composited on top of [color] with an opacity related
+  /// If this is null, no overlay will be applied. Otherwise this color
+  /// will be composited on top of [color] with an opacity related
   /// to [elevation] and used to paint the background of the card.
   ///
   /// The default is null.
@@ -212,7 +211,7 @@ class _DefaultsM2 extends CardTheme {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Generated version v0_98
 class _TokenDefaultsM3 extends CardTheme {
   const _TokenDefaultsM3(this.context)
     : super(

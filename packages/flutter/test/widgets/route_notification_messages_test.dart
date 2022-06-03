@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class OnTapPage extends StatelessWidget {
-  const OnTapPage({Key? key, required this.id, required this.onTap}) : super(key: key);
+  const OnTapPage({super.key, required this.id, required this.onTap});
 
   final String id;
   final VoidCallback onTap;
@@ -27,13 +27,6 @@ class OnTapPage extends StatelessWidget {
       ),
     );
   }
-}
-
-Map<String, dynamic> convertRouteInformationToMap(RouteInformation routeInformation) {
-  return <String, dynamic>{
-    'location': routeInformation.location,
-    'state': routeInformation.state,
-  };
 }
 
 void main() {
@@ -358,8 +351,9 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   RouteInformation? get currentConfiguration {
-    if (reportConfiguration)
+    if (reportConfiguration) {
       return routeInformation;
+    }
     return null;
   }
 
@@ -371,8 +365,9 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   Future<bool> popRoute() {
-    if (onPopRoute != null)
+    if (onPopRoute != null) {
       return onPopRoute!();
+    }
     return SynchronousFuture<bool>(true);
   }
 
@@ -381,7 +376,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 }
 
 class TestPage extends Page<void> {
-  const TestPage({LocalKey? key, String? name}) : super(key: key, name: name);
+  const TestPage({super.key, super.name});
 
   @override
   Route<void> createRoute(BuildContext context) {

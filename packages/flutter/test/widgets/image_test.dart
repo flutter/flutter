@@ -1180,8 +1180,9 @@ void main() {
         image: imageProvider,
         loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
           chunkEvents.add(loadingProgress);
-          if (loadingProgress == null)
+          if (loadingProgress == null) {
             return child;
+          }
           return Directionality(
             textDirection: TextDirection.ltr,
             child: Text('loading ${loadingProgress.cumulativeBytesLoaded} / ${loadingProgress.expectedTotalBytes}'),
@@ -1686,7 +1687,7 @@ void main() {
     expect(tester.takeException(), 'threw');
   });
 
-  Future<void> _testRotatedImage(WidgetTester tester, bool isAntiAlias) async {
+  Future<void> testRotatedImage(WidgetTester tester, bool isAntiAlias) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(RepaintBoundary(
       key: key,
@@ -1717,8 +1718,8 @@ void main() {
   testWidgets(
     'Rotated images',
     (WidgetTester tester) async {
-      await _testRotatedImage(tester, true);
-      await _testRotatedImage(tester, false);
+      await testRotatedImage(tester, true);
+      await testRotatedImage(tester, false);
     },
     skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
@@ -2121,7 +2122,7 @@ class _DebouncingImageProvider extends ImageProvider<Object> {
   Future<Object> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) => imageProvider.load(key, decode);
+  ImageStreamCompleter loadBuffer(Object key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
 }
 
 class _FailingImageProvider extends ImageProvider<int> {

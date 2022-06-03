@@ -1,8 +1,5 @@
 # Specify analysis options.
 #
-# Until there are meta linter rules, each desired lint must be explicitly enabled.
-# See: https://github.com/dart-lang/linter/issues/288
-#
 # For a list of lints, see: http://dart-lang.github.io/linter/lints/
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/main/pkg/analyzer#configuring-the-analyzer
@@ -15,11 +12,12 @@
 #   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
 #   - https://github.com/flutter/packages/blob/master/analysis_options.yaml
 #
-# This file contains the analysis options used by Flutter tools, such as IntelliJ,
-# Android Studio, and the `flutter analyze` command.
+# This file contains the analysis options used for code in the flutter/flutter
+# repository.
 
 analyzer:
   language:
+    strict-casts: true
     strict-raw-types: true
   errors:
     # treat missing required parameters as a warning (not a hint)
@@ -31,9 +29,6 @@ analyzer:
     # allow self-reference to deprecated members (we do this because otherwise we have
     # to annotate every member in every test, assert, etc, when we deprecate something)
     deprecated_member_use_from_same_package: ignore
-    # TODO(ianh): https://github.com/flutter/flutter/issues/74381
-    # Clean up existing unnecessary imports, and remove line to ignore.
-    unnecessary_import: ignore
     # Turned off until null-safe rollout is complete.
     unnecessary_null_comparison: ignore
   exclude:
@@ -43,8 +38,7 @@ analyzer:
 
 linter:
   rules:
-    # these rules are documented on and in the same order as
-    # the Dart Lint rules page to make maintenance easier
+    # This list is derived from the list of all available lints located at
     # https://github.com/dart-lang/linter/blob/master/example/all.yaml
     - always_declare_return_types
     - always_put_control_body_on_new_line
@@ -104,7 +98,7 @@ linter:
     # - conditional_uri_does_not_exist # not yet tested
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
-    # - curly_braces_in_flow_control_structures # not required by flutter style
+    # - curly_braces_in_flow_control_structures # not required by flutter style, but developer-facing code should have this on
     - depend_on_referenced_packages
     - deprecated_consistency
     # - diagnostic_describe_all_properties # enabled only at the framework level (packages/flutter/lib)
@@ -230,7 +224,9 @@ linter:
     - unrelated_type_equality_checks
     - unsafe_html
     - use_build_context_synchronously
+    # - use_colored_box # not yet tested
     # - use_decorated_box # not yet tested
+    # - use_enums # not yet tested
     - use_full_hex_values_for_flutter_colors
     - use_function_type_syntax_for_parameters
     - use_if_null_to_convert_nulls_to_bools
@@ -242,6 +238,7 @@ linter:
     - use_rethrow_when_possible
     - use_setters_to_change_properties
     # - use_string_buffers # has false positives: https://github.com/dart-lang/sdk/issues/34182
+    - use_super_parameters
     - use_test_throws_matchers
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - valid_regexps

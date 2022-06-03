@@ -16,12 +16,11 @@ import 'theme.dart';
 
 class _AccountPictures extends StatelessWidget {
   const _AccountPictures({
-    Key? key,
     this.currentAccountPicture,
     this.otherAccountsPictures,
     this.currentAccountPictureSize,
     this.otherAccountsPicturesSize,
-  }) : super(key: key);
+  });
 
   final Widget? currentAccountPicture;
   final List<Widget>? otherAccountsPictures;
@@ -70,13 +69,12 @@ class _AccountPictures extends StatelessWidget {
 
 class _AccountDetails extends StatefulWidget {
   const _AccountDetails({
-    Key? key,
     required this.accountName,
     required this.accountEmail,
     this.onTap,
     required this.isOpen,
     this.arrowColor,
-  }) : super(key: key);
+  });
 
   final Widget? accountName;
   final Widget? accountEmail;
@@ -284,7 +282,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
   }
 }
 
-/// A material design [Drawer] header that identifies the app's user.
+/// A Material Design [Drawer] header that identifies the app's user.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -293,11 +291,11 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 ///  * [DrawerHeader], for a drawer header that doesn't show user accounts.
 ///  * <https://material.io/design/components/navigation-drawer.html#anatomy>
 class UserAccountsDrawerHeader extends StatefulWidget {
-  /// Creates a material design drawer header.
+  /// Creates a Material Design drawer header.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   const UserAccountsDrawerHeader({
-    Key? key,
+    super.key,
     this.decoration,
     this.margin = const EdgeInsets.only(bottom: 8.0),
     this.currentAccountPicture,
@@ -308,7 +306,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     required this.accountEmail,
     this.onDetailsPressed,
     this.arrowColor = Colors.white,
-  }) : super(key: key);
+  });
 
   /// The header's background. If decoration is null then a [BoxDecoration]
   /// with its background color set to the current theme's primaryColor is used.
@@ -369,9 +367,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,
       child: DrawerHeader(
-        decoration: widget.decoration ?? BoxDecoration(
-          color: Theme.of(context).primaryColor,
-        ),
+        decoration: widget.decoration ?? BoxDecoration(color: Theme.of(context).colorScheme.primary),
         margin: widget.margin,
         padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),
         child: SafeArea(

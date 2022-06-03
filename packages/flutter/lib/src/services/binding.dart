@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -18,6 +17,7 @@ import 'message_codec.dart';
 import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
+import 'text_input.dart';
 
 /// Listens for platform messages and directs them to the [defaultBinaryMessenger].
 ///
@@ -37,6 +37,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
+    TextInput.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
   }
 
@@ -337,8 +338,9 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     ui.PlatformMessageResponseCallback? callback,
   ) async {
     ui.channelBuffers.push(channel, message, (ByteData? data) {
-      if (callback != null)
+      if (callback != null) {
         callback(data);
+      }
     });
   }
 

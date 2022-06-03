@@ -3,14 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
-import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/daemon.dart';
-import 'package:test/fake.dart';
 
 import '../src/common.dart';
 
@@ -368,6 +364,20 @@ void main() {
       await daemonStreams.dispose();
       expect(outputStream.isClosed, true);
     });
+
+    testWithoutContext('handles sending to a closed sink', () async {
+      // Unless the stream is listened to, the call to .close() will never
+      // complete
+      outputStream.stream.listen((List<int> _) {});
+      await outputStream.sink.close();
+      daemonStreams.send(testCommand);
+      expect(
+        bufferLogger.errorText,
+        contains(
+          'Failed to write daemon command response: Bad state: Cannot add event after closing',
+        ),
+      );
+    });
   });
 }
 
@@ -388,30 +398,4 @@ Future<List<_DaemonMessageAndBinary>> _readAllBinaries(Stream<DaemonMessage> inp
     outputs.add(_DaemonMessageAndBinary(iterator.current, binary));
   }
   return outputs;
-}
-
-class FakeSocket extends Fake implements Socket {
-  bool closeCalled = false;
-  final StreamController<Uint8List> controller = StreamController<Uint8List>();
-  final List<Object?> writtenObjects = <Object?>[];
-
-  @override
-  StreamSubscription<Uint8List> listen(
-    void Function(Uint8List event)? onData, {
-    Function? onError,
-    void Function()? onDone,
-    bool? cancelOnError,
-  }) {
-    return controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
-  }
-
-  @override
-  void write(Object? object) {
-    writtenObjects.add(object);
-  }
-
-  @override
-  Future<void> close() async {
-    closeCalled = true;
-  }
 }

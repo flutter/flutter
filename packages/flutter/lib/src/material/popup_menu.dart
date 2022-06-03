@@ -47,7 +47,7 @@ enum PopupMenuPosition {
   under,
 }
 
-/// A base class for entries in a material design popup menu.
+/// A base class for entries in a Material Design popup menu.
 ///
 /// The popup menu widget uses this interface to interact with the menu items.
 /// To show a popup menu, use the [showMenu] function. To create a button that
@@ -71,7 +71,7 @@ enum PopupMenuPosition {
 abstract class PopupMenuEntry<T> extends StatefulWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const PopupMenuEntry({ Key? key }) : super(key: key);
+  const PopupMenuEntry({ super.key });
 
   /// The amount of vertical space occupied by this entry.
   ///
@@ -96,7 +96,7 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
   bool represents(T? value);
 }
 
-/// A horizontal divider in a material design popup menu.
+/// A horizontal divider in a Material Design popup menu.
 ///
 /// This widget adapts the [Divider] for use in popup menus.
 ///
@@ -110,7 +110,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({ Key? key, this.height = _kMenuDividerHeight }) : super(key: key);
+  const PopupMenuDivider({ super.key, this.height = _kMenuDividerHeight });
 
   /// The height of the divider entry.
   ///
@@ -136,10 +136,9 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
 // item lines up with the center of its PopupMenuButton.
 class _MenuItem extends SingleChildRenderObjectWidget {
   const _MenuItem({
-    Key? key,
     required this.onLayout,
-    required Widget? child,
-  }) : assert(onLayout != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(onLayout != null);
 
   final ValueChanged<Size> onLayout;
 
@@ -181,7 +180,7 @@ class _RenderMenuItem extends RenderShiftedBox {
   }
 }
 
-/// An item in a material design popup menu.
+/// An item in a Material Design popup menu.
 ///
 /// To show a popup menu, use the [showMenu] function. To create a button that
 /// shows a popup menu, consider using [PopupMenuButton].
@@ -227,7 +226,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   ///
   /// The `enabled` and `height` arguments must not be null.
   const PopupMenuItem({
-    Key? key,
+    super.key,
     this.value,
     this.onTap,
     this.enabled = true,
@@ -237,8 +236,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
     this.mouseCursor,
     required this.child,
   }) : assert(enabled != null),
-       assert(height != null),
-       super(key: key);
+       assert(height != null);
 
   /// The value that will be returned by [showMenu] if this entry is selected.
   final T? value;
@@ -349,8 +347,9 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1!;
 
-    if (!widget.enabled)
+    if (!widget.enabled) {
       style = style.copyWith(color: theme.disabledColor);
+    }
 
     Widget item = AnimatedDefaultTextStyle(
       style: style,
@@ -386,7 +385,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   }
 }
 
-/// An item with a checkmark in a material design popup menu.
+/// An item with a checkmark in a Material Design popup menu.
 ///
 /// To show a popup menu, use the [showMenu] function. To create a button that
 /// shows a popup menu, consider using [PopupMenuButton].
@@ -456,22 +455,15 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   ///
   /// The `checked` and `enabled` arguments must not be null.
   const CheckedPopupMenuItem({
-    Key? key,
-    T? value,
+    super.key,
+    super.value,
     this.checked = false,
-    bool enabled = true,
-    EdgeInsets? padding,
-    double height = kMinInteractiveDimension,
-    Widget? child,
-  }) : assert(checked != null),
-       super(
-         key: key,
-         value: value,
-         enabled: enabled,
-         padding: padding,
-         height: height,
-         child: child,
-       );
+    super.enabled,
+    super.padding,
+    super.height,
+    super.mouseCursor,
+    super.child,
+  }) : assert(checked != null);
 
   /// Whether to display a checkmark next to the menu item.
   ///
@@ -513,33 +505,36 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   @override
   void handleTap() {
     // This fades the checkmark in or out when tapped.
-    if (widget.checked)
+    if (widget.checked) {
       _controller.reverse();
-    else
+    } else {
       _controller.forward();
+    }
     super.handleTap();
   }
 
   @override
   Widget buildChild() {
-    return ListTile(
-      enabled: widget.enabled,
-      leading: FadeTransition(
-        opacity: _opacity,
-        child: Icon(_controller.isDismissed ? null : Icons.done),
+    return IgnorePointer(
+      child: ListTile(
+        enabled: widget.enabled,
+        leading: FadeTransition(
+          opacity: _opacity,
+          child: Icon(_controller.isDismissed ? null : Icons.done),
+        ),
+        title: widget.child,
       ),
-      title: widget.child,
     );
   }
 }
 
 class _PopupMenu<T> extends StatelessWidget {
   const _PopupMenu({
-    Key? key,
+    super.key,
     required this.route,
     required this.semanticLabel,
     this.constraints,
-  }) : super(key: key);
+  });
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
@@ -553,7 +548,7 @@ class _PopupMenu<T> extends StatelessWidget {
 
     for (int i = 0; i < route.items.length; i += 1) {
       final double start = (i + 1) * unit;
-      final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
       final CurvedAnimation opacity = CurvedAnimation(
         parent: route.animation!,
         curve: Interval(start, end),
@@ -683,8 +678,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     double y = position.top;
     if (selectedItemIndex != null && itemSizes != null) {
       double selectedItemOffset = _kMenuVerticalPadding;
-      for (int index = 0; index < selectedItemIndex!; index += 1)
+      for (int index = 0; index < selectedItemIndex!; index += 1) {
         selectedItemOffset += itemSizes[index]!.height;
+      }
       selectedItemOffset += itemSizes[selectedItemIndex!]!.height / 2;
       y = y + buttonHeight / 2.0 - selectedItemOffset;
     }
@@ -731,14 +727,16 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     double y = wantedPosition.dy;
     // Avoid going outside an area defined as the rectangle 8.0 pixels from the
     // edge of the screen in every direction.
-    if (x < screen.left + _kMenuScreenPadding + padding.left)
+    if (x < screen.left + _kMenuScreenPadding + padding.left) {
       x = screen.left + _kMenuScreenPadding + padding.left;
-    else if (x + childSize.width > screen.right - _kMenuScreenPadding - padding.right)
+    } else if (x + childSize.width > screen.right - _kMenuScreenPadding - padding.right) {
       x = screen.right - childSize.width - _kMenuScreenPadding - padding.right;
-    if (y < screen.top + _kMenuScreenPadding + padding.top)
+    }
+    if (y < screen.top + _kMenuScreenPadding + padding.top) {
       y = _kMenuScreenPadding + padding.top;
-    else if (y + childSize.height > screen.bottom - _kMenuScreenPadding - padding.bottom)
+    } else if (y + childSize.height > screen.bottom - _kMenuScreenPadding - padding.bottom) {
       y = screen.bottom - childSize.height - _kMenuScreenPadding - padding.bottom;
+    }
 
     return Offset(x,y);
   }
@@ -811,8 +809,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     int? selectedItemIndex;
     if (initialValue != null) {
       for (int index = 0; selectedItemIndex == null && index < items.length; index += 1) {
-        if (items[index].represents(initialValue))
+        if (items[index].represents(initialValue)) {
           selectedItemIndex = index;
+        }
       }
     }
 
@@ -997,7 +996,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// The [itemBuilder] argument must not be null.
   const PopupMenuButton({
-    Key? key,
+    super.key,
     required this.itemBuilder,
     this.initialValue,
     this.onSelected,
@@ -1021,8 +1020,7 @@ class PopupMenuButton<T> extends StatefulWidget {
        assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
-       ),
-       super(key: key);
+       );
 
   /// Called when the button is pressed to create the items to show in the menu.
   final PopupMenuItemBuilder<T> itemBuilder;
@@ -1134,7 +1132,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// ```
   ///
   /// The default constraints ensure that the menu width matches maximum width
-  /// recommended by the material design guidelines.
+  /// recommended by the Material Design guidelines.
   /// Specifying this parameter enables creation of menu wider than
   /// the default maximum width.
   final BoxConstraints? constraints;
@@ -1199,8 +1197,9 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         constraints: widget.constraints,
       )
       .then<void>((T? newValue) {
-        if (!mounted)
+        if (!mounted) {
           return null;
+        }
         if (newValue == null) {
           widget.onCanceled?.call();
           return null;
@@ -1229,7 +1228,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
     assert(debugCheckHasMaterialLocalizations(context));
 
-    if (widget.child != null)
+    if (widget.child != null) {
       return Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
@@ -1240,6 +1239,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           child: widget.child,
         ),
       );
+    }
 
     return IconButton(
       icon: widget.icon ?? Icon(Icons.adaptive.more),

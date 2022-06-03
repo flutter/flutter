@@ -103,15 +103,6 @@ Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 200));
 }
 
-double getOpacity(WidgetTester tester, Finder finder) {
-  return tester.widget<FadeTransition>(
-      find.ancestor(
-        of: finder,
-        matching: find.byType(FadeTransition),
-      ),
-  ).opacity.value;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -295,6 +286,27 @@ void main() {
     await tester.tap(find.byType(SelectableText));
     await tester.idle();
     expect(tester.testTextInput.hasAnyClients, false);
+  });
+
+  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
+    const Color selectionColor = Colors.orange;
+    const Color cursorColor = Colors.red;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: DefaultSelectionStyle(
+            selectionColor: selectionColor,
+            cursorColor: cursorColor,
+            child: SelectableText('text'),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.selectionColor, selectionColor);
+    expect(state.widget.cursorColor, cursorColor);
   });
 
   testWidgets('Selectable Text has adaptive size', (WidgetTester tester) async {
@@ -588,7 +600,6 @@ void main() {
     const int eIndex = 5;
     final Offset ePos = textOffsetToPosition(tester, eIndex);
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
@@ -668,7 +679,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, 8);
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -706,7 +716,6 @@ void main() {
 
     // Drag from 'c' to 'g'.
     final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
@@ -750,7 +759,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, 8);
 
     final TestGesture gesture = await tester.startGesture(gPos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(ePos);
     await tester.pump();
@@ -779,7 +787,6 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester,8);
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -1625,10 +1632,11 @@ void main() {
 
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.setData')
+      if (methodCall.method == 'Clipboard.setData') {
         clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
-      else if (methodCall.method == 'Clipboard.getData')
+      } else if (methodCall.method == 'Clipboard.getData') {
         return <String, dynamic>{'text': clipboardContent};
+      }
       return null;
     });
     const String testValue = 'a big house\njumped over a mouse';
@@ -2176,7 +2184,7 @@ void main() {
           actions: <SemanticsAction>[SemanticsAction.longPress],
           label: 'German greeting for good day',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
   });
@@ -2377,7 +2385,7 @@ void main() {
                                 TestSemantics(
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHidden,
-                                    SemanticsFlag.isLink
+                                    SemanticsFlag.isLink,
                                   ],
                                   actions: <SemanticsAction>[SemanticsAction.tap],
                                   label: 'off screen',
@@ -4258,7 +4266,7 @@ void main() {
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -4318,7 +4326,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
       await tester.pump();
@@ -4347,7 +4354,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(seconds: 2));
       await gesture.up();
       await tester.pump();
@@ -4376,7 +4382,6 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -4505,7 +4510,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.text('test')));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -4609,12 +4613,11 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(newSelection!.baseOffset, 4);
-    expect(newSelection!.extentOffset, 7);
+    expect(newSelection!.isCollapsed, isTrue);
+    expect(newSelection!.baseOffset, 5);
     newSelection = null;
 
     await tester.tap(find.text('Select all'));
@@ -4643,7 +4646,6 @@ void main() {
       topLeft + const Offset(0.0, 5.0),
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 50));
     await gesture.up();
     await tester.pumpAndSettle();

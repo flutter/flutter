@@ -167,6 +167,96 @@ void main() {
       expect(stdio.stdout, contains('Verified that binaries are codesigned and have expected entitlements'));
     });
 
+    test('framework cloned from repo provided by --$kUpstream', () async {
+      const String upstreamRepo = 'https://githost.org/org/project';
+      final List<FakeCommand> codesignCheckCommands = <FakeCommand>[];
+      for (final String bin in binariesWithEntitlements) {
+        codesignCheckCommands.add(
+          FakeCommand(
+            command: <String>['codesign', '-vvv', bin],
+          ),
+        );
+        codesignCheckCommands.add(
+          FakeCommand(
+            command: <String>['codesign', '--display', '--entitlements', ':-', bin],
+            stdout: expectedEntitlements.join('\n'),
+          ),
+        );
+      }
+      for (final String bin in binariesWithoutEntitlements) {
+        codesignCheckCommands.add(
+          FakeCommand(
+            command: <String>['codesign', '-vvv', bin],
+          ),
+        );
+      }
+      createRunner(commands: <FakeCommand>[
+        const FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          upstreamRepo,
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          revision,
+        ]),
+        const FakeCommand(command: <String>[
+          flutterBin,
+          'help',
+        ]),
+        const FakeCommand(command: <String>[
+          flutterBin,
+          'help',
+        ]),
+        const FakeCommand(command: <String>[
+          flutterBin,
+          'precache',
+          '--android',
+          '--ios',
+          '--macos',
+        ]),
+        FakeCommand(
+          command: const <String>[
+            'find',
+            '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache',
+            '-type',
+            'f',
+          ],
+          stdout: allBinaries.join('\n'),
+        ),
+        for (String bin in allBinaries)
+          FakeCommand(
+            command: <String>['file', '--mime-type', '-b', bin],
+            stdout: 'application/x-mach-binary',
+          ),
+        ...codesignCheckCommands,
+      ]);
+      await runner.run(<String>[
+        'codesign',
+        '--$kVerify',
+        '--$kRevision',
+        revision,
+        '--$kUpstream',
+        upstreamRepo,
+      ]);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(stdio.stdout, contains('Verified that binaries for commit $revision are codesigned and have expected entitlements'));
+    });
 
     test('succeeds if every binary is codesigned and has correct entitlements', () async {
       final List<FakeCommand> codesignCheckCommands = <FakeCommand>[];

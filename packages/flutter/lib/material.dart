@@ -10,10 +10,14 @@
 ///
 /// See also:
 ///
-///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
-///    for a catalog of commonly-used Flutter widgets.
+///  * [flutter.dev/widgets/material](https://flutter.dev/widgets/material)
+///    for a catalog of commonly-used Material component widgets.
 ///  * [material.io/design](https://material.io/design/)
 ///    for an introduction to Material Design.
+///  * [material.io/components](https://material.io/components?platform=flutter)
+///    for the Material 2 specification.
+///  * [m3.material.io](https://m3.material.io)
+///    for the Material 3 specification.
 library material;
 
 export 'src/material/about.dart';
@@ -45,6 +49,10 @@ export 'src/material/checkbox.dart';
 export 'src/material/checkbox_list_tile.dart';
 export 'src/material/checkbox_theme.dart';
 export 'src/material/chip.dart';
+export 'src/material/chip_action.dart';
+export 'src/material/chip_choice.dart';
+export 'src/material/chip_filter.dart';
+export 'src/material/chip_input.dart';
 export 'src/material/chip_theme.dart';
 export 'src/material/circle_avatar.dart';
 export 'src/material/color_scheme.dart';
@@ -74,7 +82,6 @@ export 'src/material/expansion_panel.dart';
 export 'src/material/expansion_tile.dart';
 export 'src/material/expansion_tile_theme.dart';
 export 'src/material/feedback.dart';
-export 'src/material/flat_button.dart';
 export 'src/material/flexible_space_bar.dart';
 export 'src/material/floating_action_button.dart';
 export 'src/material/floating_action_button_location.dart';
@@ -118,7 +125,6 @@ export 'src/material/progress_indicator_theme.dart';
 export 'src/material/radio.dart';
 export 'src/material/radio_list_tile.dart';
 export 'src/material/radio_theme.dart';
-export 'src/material/raised_button.dart';
 export 'src/material/range_slider.dart';
 export 'src/material/refresh_indicator.dart';
 export 'src/material/reorderable_list.dart';
@@ -127,6 +133,7 @@ export 'src/material/scrollbar.dart';
 export 'src/material/scrollbar_theme.dart';
 export 'src/material/search.dart';
 export 'src/material/selectable_text.dart';
+export 'src/material/selection_area.dart';
 export 'src/material/shadows.dart';
 export 'src/material/slider.dart';
 export 'src/material/slider_theme.dart';

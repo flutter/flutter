@@ -22,7 +22,8 @@ String luciConsoleLink(String channel, String groupName) {
     <String>['flutter', 'engine', 'packaging'].contains(groupName),
     'group named $groupName not recognized',
   );
-  final String consoleName = channel == 'master' ? groupName : '${channel}_$groupName';
+  final String consoleName =
+      channel == 'master' ? groupName : '${channel}_$groupName';
   return 'https://ci.chromium.org/p/flutter/g/$consoleName/console';
 }
 
@@ -43,15 +44,18 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('Release channel: ${state.releaseChannel}');
   buffer.writeln('Release version: ${state.releaseVersion}');
   buffer.writeln();
-  buffer.writeln('Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
-  buffer.writeln('Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}');
+  buffer.writeln(
+      'Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
+  buffer.writeln(
+      'Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}');
   buffer.writeln();
   buffer.writeln('Engine Repo');
   buffer.writeln('\tCandidate branch: ${state.engine.candidateBranch}');
   buffer.writeln('\tStarting git HEAD: ${state.engine.startingGitHead}');
   buffer.writeln('\tCurrent git HEAD: ${state.engine.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
-  buffer.writeln('\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
+  buffer.writeln(
+      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
   if (state.engine.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
@@ -60,7 +64,8 @@ String presentState(pb.ConductorState state) {
   } else {
     buffer.writeln('0 Engine cherrypicks.');
   }
-  if (state.engine.dartRevision != null && state.engine.dartRevision.isNotEmpty) {
+  if (state.engine.dartRevision != null &&
+      state.engine.dartRevision.isNotEmpty) {
     buffer.writeln('New Dart SDK revision: ${state.engine.dartRevision}');
   }
   buffer.writeln('Framework Repo');
@@ -68,9 +73,11 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');
   buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
-  buffer.writeln('\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
+  buffer.writeln(
+      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
   if (state.framework.cherrypicks.isNotEmpty) {
-    buffer.writeln('${state.framework.cherrypicks.length} Framework Cherrypicks:');
+    buffer.writeln(
+        '${state.framework.cherrypicks.length} Framework Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
       buffer.writeln('\t${cherrypick.trunkRevision} - ${cherrypick.state}');
     }
@@ -125,7 +132,8 @@ String phaseInstructions(pb.ConductorState state) {
       return <String>[
         'You must now manually apply the following engine cherrypicks to the checkout',
         'at ${state.engine.checkoutPath} in order:',
-        for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) '\t${cherrypick.trunkRevision}',
+        for (final pb.Cherrypick cherrypick in state.engine.cherrypicks)
+          '\t${cherrypick.trunkRevision}',
         'See $kReleaseDocumentationUrl for more information.',
       ].join('\n');
     case ReleasePhase.CODESIGN_ENGINE_BINARIES:
@@ -147,19 +155,24 @@ String phaseInstructions(pb.ConductorState state) {
         'validate post-submit CI, and then codesign the binaries on the merge commit.',
       ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-      final List<pb.Cherrypick> outstandingCherrypicks = state.framework.cherrypicks.where(
+      final List<pb.Cherrypick> outstandingCherrypicks =
+          state.framework.cherrypicks.where(
         (pb.Cherrypick cp) {
-          return cp.state == pb.CherrypickState.PENDING || cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
+          return cp.state == pb.CherrypickState.PENDING ||
+              cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
         },
       ).toList();
       if (outstandingCherrypicks.isNotEmpty) {
         return <String>[
           'You must now manually apply the following framework cherrypicks to the checkout',
           'at ${state.framework.checkoutPath} in order:',
-          for (final pb.Cherrypick cherrypick in outstandingCherrypicks) '\t${cherrypick.trunkRevision}',
+          for (final pb.Cherrypick cherrypick in outstandingCherrypicks)
+            '\t${cherrypick.trunkRevision}',
         ].join('\n');
       }
-      return <String>['Either all cherrypicks have been auto-applied or there were none.'].join('\n');
+      return <String>[
+        'Either all cherrypicks have been auto-applied or there were none.',
+      ].join('\n');
     case ReleasePhase.PUBLISH_VERSION:
       if (!requiresFrameworkPR(state)) {
         return 'Since there are no code changes in this release, no Framework '
@@ -182,7 +195,41 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.VERIFY_RELEASE:
       return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
-      return 'This release has been completed.';
+      const String DISCORD_RELEASE_CHANNEL =
+          'https://discord.com/channels/608014603317936148/783492179922124850';
+      const String FLUTTER_RELEASE_HOTLINE =
+          'https://mail.google.com/chat/u/0/#chat/space/AAAA6RKcK2k';
+      const String HOTFIX_TO_STABLE_WIKI =
+          'https://github.com/flutter/flutter/wiki/Hotfixes-to-the-Stable-Channel';
+      const String FLUTTER_ANNOUNCE_GROUP =
+          'https://groups.google.com/g/flutter-announce';
+      const String DOCUMENTATION_BEST_PRACTICES =
+          'https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices';
+      if (state.releaseChannel == 'beta') {
+        return <String>[
+          'Ensure the following post release steps are complete:',
+          '\t 1. Post announcement to discord',
+          '\t\t Discord: $DISCORD_RELEASE_CHANNEL',
+          '\t 2. Post announcement flutter release hotline chat room',
+          '\t\t Chatroom: $FLUTTER_RELEASE_HOTLINE',
+          '-----------------------------------------------------------------------',
+          'This release has been completed.',
+        ].join('\n');
+      }
+      return <String>[
+        'Ensure the following post release steps are complete:',
+        '\t 1. Update hotfix to stable wiki following documentation best practices',
+        '\t\t Wiki link: $HOTFIX_TO_STABLE_WIKI',
+        '\t\t Best practices: $DOCUMENTATION_BEST_PRACTICES',
+        '\t 2. Post announcement to flutter-announce group',
+        '\t\t Flutter Announce: $FLUTTER_ANNOUNCE_GROUP',
+        '\t 3. Post announcement to discord',
+        '\t\t Discord: $DISCORD_RELEASE_CHANNEL',
+        '\t 4. Post announcement flutter release hotline chat room',
+        '\t\t Chatroom: $FLUTTER_RELEASE_HOTLINE',
+        '-----------------------------------------------------------------------',
+        'This release has been completed.',
+      ].join('\n');
   }
   // For analyzer
   throw ConductorException('Unimplemented phase ${state.currentPhase}');
@@ -193,8 +240,8 @@ String phaseInstructions(pb.ConductorState state) {
 /// First group = git host (currently must be github.com)
 /// Second group = account name
 /// Third group = repo name
-final RegExp githubRemotePattern =
-    RegExp(r'^(git@github\.com:|https?:\/\/github\.com\/)([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)(\.git)?$');
+final RegExp githubRemotePattern = RegExp(
+    r'^(git@github\.com:|https?:\/\/github\.com\/)([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)(\.git)?$');
 
 /// Parses a Git remote URL and returns the account name.
 ///
@@ -271,8 +318,8 @@ bool requiresFrameworkPR(pb.ConductorState state) {
   if (requiresEnginePR(state)) {
     return true;
   }
-  final bool hasRequiredCherrypicks =
-      state.framework.cherrypicks.any((pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
+  final bool hasRequiredCherrypicks = state.framework.cherrypicks
+      .any((pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
   if (hasRequiredCherrypicks) {
     return true;
   }

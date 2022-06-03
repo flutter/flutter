@@ -53,7 +53,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
 }
 
 class TestBox extends SizedBox {
-  const TestBox({Key? key}) : super(key: key, width: itemWidth, height: itemHeight);
+  const TestBox({super.key}) : super(width: itemWidth, height: itemHeight);
 
   static const double itemHeight = 44.0;
   static const double itemWidth = 100.0;
@@ -63,7 +63,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   // Find by a runtimeType String, including private types.
-  Finder _findPrivate(String type) {
+  Finder findPrivate(String type) {
     return find.descendant(
       of: find.byType(MaterialApp),
       matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
@@ -73,9 +73,9 @@ void main() {
   // Finding TextSelectionToolbar won't give you the position as the user sees
   // it because it's a full-sized Stack at the top level. This method finds the
   // visible part of the toolbar for use in measurements.
-  Finder _findToolbar() => _findPrivate('_TextSelectionToolbarOverflowable');
+  Finder findToolbar() => findPrivate('_TextSelectionToolbarOverflowable');
 
-  Finder _findOverflowButton() => _findPrivate('_TextSelectionToolbarOverflowButton');
+  Finder findOverflowButton() => findPrivate('_TextSelectionToolbarOverflowButton');
 
   testWidgets('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
@@ -100,7 +100,7 @@ void main() {
 
     // All children fit on the screen, so they are all rendered.
     expect(find.byType(TestBox), findsNWidgets(children.length));
-    expect(_findOverflowButton(), findsNothing);
+    expect(findOverflowButton(), findsNothing);
 
     // Adding one more child makes the children overflow.
     setState(() {
@@ -110,19 +110,19 @@ void main() {
     });
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(children.length - 1));
-    expect(_findOverflowButton(), findsOneWidget);
+    expect(findOverflowButton(), findsOneWidget);
 
     // Tap the overflow button to show the overflow menu.
-    await tester.tap(_findOverflowButton());
+    await tester.tap(findOverflowButton());
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(1));
-    expect(_findOverflowButton(), findsOneWidget);
+    expect(findOverflowButton(), findsOneWidget);
 
     // Tap the overflow button again to hide the overflow menu.
-    await tester.tap(_findOverflowButton());
+    await tester.tap(findOverflowButton());
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(children.length - 1));
-    expect(_findOverflowButton(), findsOneWidget);
+    expect(findOverflowButton(), findsOneWidget);
   });
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
@@ -154,7 +154,7 @@ void main() {
 
     // When the toolbar doesn't fit above aboveAnchor, it positions itself below
     // belowAnchor.
-    double toolbarY = tester.getTopLeft(_findToolbar()).dy;
+    double toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorBelowY));
 
     // Even when it barely doesn't fit.
@@ -162,7 +162,7 @@ void main() {
       anchorAboveY = 50.0;
     });
     await tester.pump();
-    toolbarY = tester.getTopLeft(_findToolbar()).dy;
+    toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorBelowY));
 
     // When it does fit above aboveAnchor, it positions itself there.
@@ -170,7 +170,7 @@ void main() {
       anchorAboveY = 60.0;
     });
     await tester.pump();
-    toolbarY = tester.getTopLeft(_findToolbar()).dy;
+    toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorAboveY - height));
   });
 

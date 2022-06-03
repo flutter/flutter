@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -89,6 +88,9 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  print('$clock No Double.clamp');
+  await verifyNoDoubleClamp(flutterRoot);
+
   print('$clock All tool test files end in _test.dart...');
   await verifyToolTestsEndInTestDart(flutterRoot);
 
@@ -159,6 +161,9 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
+  print('$clock Executable allowlist...');
+  await _checkForNewExecutables();
+
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
   print('$clock Dart analysis (with --watch)...');
@@ -169,10 +174,10 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
-  // Analyze all the sample code in the repo.
-  print('$clock Sample code...');
+  // Analyze the code in `{@tool snippet}` sections in the repo.
+  print('$clock Snippet code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart'), '--verbose'],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 
@@ -200,6 +205,80 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+FeatureSet _parsingFeatureSet() => FeatureSet.fromEnableFlags2(
+    sdkLanguageVersion: Version.parse('2.17.0-0'),
+    flags: <String>['super-parameters']);
+
+_Line _getLine(ParseStringResult parseResult, int offset) {
+  final int lineNumber =
+      parseResult.lineInfo.getLocation(offset).lineNumber;
+  final String content = parseResult.content.substring(
+      parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
+      parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1);
+  return _Line(lineNumber, content);
+}
+
+class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
+  _DoubleClampVisitor(this.parseResult);
+
+  final List<_Line> clamps = <_Line>[];
+  final ParseStringResult parseResult;
+
+  @override
+  CompilationUnit? visitMethodInvocation(MethodInvocation node) {
+    if (node.methodName.name == 'clamp') {
+      final _Line line = _getLine(parseResult, node.function.offset);
+      if (!line.content.contains('// ignore_clamp_double_lint')) {
+        clamps.add(line);
+      }
+    }
+
+    node.visitChildren(this);
+    return null;
+  }
+}
+
+/// Verify that we use clampDouble instead of Double.clamp for performance reasons.
+///
+/// We currently can't distinguish valid uses of clamp from problematic ones so
+/// if the clamp is operating on a type other than a `double` the
+/// `// ignore_clamp_double_lint` comment must be added to the line where clamp is
+/// invoked.
+///
+/// See also:
+///   * https://github.com/flutter/flutter/pull/103559
+///   * https://github.com/flutter/flutter/issues/103917
+Future<void> verifyNoDoubleClamp(String workingDirectory) async {
+  final String flutterLibPath = '$workingDirectory/packages/flutter/lib';
+  final Stream<File> testFiles =
+      _allFiles(flutterLibPath, 'dart', minimumMatches: 100);
+  final List<String> errors = <String>[];
+  await for (final File file in testFiles) {
+    try {
+      final ParseStringResult parseResult = parseFile(
+        featureSet: _parsingFeatureSet(),
+        path: file.absolute.path,
+      );
+      final _DoubleClampVisitor visitor = _DoubleClampVisitor(parseResult);
+      visitor.visitCompilationUnit(parseResult.unit);
+      for (final _Line clamp in visitor.clamps) {
+        errors.add('${file.path}:${clamp.line}: `clamp` method used without ignore_clamp_double_lint comment.');
+      }
+    } catch (ex) {
+      // TODO(gaaclarke): There is a bug with super parameter parsing on mac so
+      // we skip certain files until that is fixed.
+      // https://github.com/dart-lang/sdk/issues/49032
+      print('skipping ${file.path}: $ex');
+    }
+  }
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '\n${bold}See: https://github.com/flutter/flutter/pull/103559',
+    ]);
+  }
+}
 
 /// Verify tool test files end in `_test.dart`.
 ///
@@ -470,6 +549,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', trailingBlank: false, header: r'<!DOCTYPE HTML>\n');
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', header: r'(<\?xml version="1.0" encoding="utf-8"\?>\n)?');
+  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'frag', overrideMinimumMatches ?? 1, _generateLicense('// '), header: r'#version 320 es(\n)+');
   if (failed > 0) {
     exitWithError(<String>['License check failed.']);
   }
@@ -515,16 +595,16 @@ Future<int> _verifyNoMissingLicenseForExtension(
   return 0;
 }
 
-class _TestSkip {
-  _TestSkip(this.line, this.content);
+class _Line {
+  _Line(this.line, this.content);
 
   final int line;
   final String content;
 }
 
-Iterable<_TestSkip> _getTestSkips(File file) {
+Iterable<_Line> _getTestSkips(File file) {
   final ParseStringResult parseResult = parseFile(
-    featureSet: FeatureSet.fromEnableFlags2(sdkLanguageVersion: Version.parse('2.17.0-0'), flags: <String>['super-parameters']),
+    featureSet: _parsingFeatureSet(),
     path: file.absolute.path,
   );
   final _TestSkipLinesVisitor<CompilationUnit> visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);
@@ -533,10 +613,10 @@ Iterable<_TestSkip> _getTestSkips(File file) {
 }
 
 class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
-  _TestSkipLinesVisitor(this.parseResult) : skips = <_TestSkip>{};
+  _TestSkipLinesVisitor(this.parseResult) : skips = <_Line>{};
 
   final ParseStringResult parseResult;
-  final Set<_TestSkip> skips;
+  final Set<_Line> skips;
 
   static bool isTestMethod(String name) {
     return name.startsWith('test') || name == 'group' || name == 'expect';
@@ -547,10 +627,7 @@ class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
     if (isTestMethod(node.methodName.toString())) {
       for (final Expression argument in node.argumentList.arguments) {
         if (argument is NamedExpression && argument.name.label.name == 'skip') {
-          final int lineNumber = parseResult.lineInfo.getLocation(argument.beginToken.charOffset).lineNumber;
-          final String content = parseResult.content.substring(parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
-                                                               parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1);
-          skips.add(_TestSkip(lineNumber, content));
+          skips.add(_getLine(parseResult, argument.beginToken.charOffset));
         }
       }
     }
@@ -568,7 +645,7 @@ Future<void> verifySkipTestComments(String workingDirectory) async {
     .where((File f) => f.path.endsWith('_test.dart'));
 
   await for (final File file in testFiles) {
-    for (final _TestSkip skip in _getTestSkips(file)) {
+    for (final _Line skip in _getTestSkips(file)) {
       final Match? match = _skipTestCommentPattern.firstMatch(skip.content);
       final String? skipComment = match?.group(1);
       if (skipComment == null ||
@@ -636,7 +713,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
       'These are the exported packages:',
       ...packages.map<String>((String path) => '  lib/$path.dart'),
       'These are the directories:',
-      ...directories.map<String>((String path) => '  lib/src/$path/')
+      ...directories.map<String>((String path) => '  lib/src/$path/'),
     ].join('\n'));
   }
   // Verify that the imports are well-ordered.
@@ -739,6 +816,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
+      '--remove-undefined',
     ],
     workingDirectory: workingDirectory,
   );
@@ -747,6 +825,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     <String>[
       path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
+      '--remove-undefined',
     ],
     workingDirectory: workingDirectory,
   );
@@ -820,21 +899,21 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
     for (int index = 0; index < lines.length; index++) {
       if (toStringRegExp.hasMatch(lines[index])) {
         final int sourceLine = index + 1;
-        bool _checkForRuntimeType(String line) {
+        bool checkForRuntimeType(String line) {
           if (line.contains(r'$runtimeType') || line.contains('runtimeType.toString()')) {
             problems.add('${file.path}:$sourceLine}: toString calls runtimeType.toString');
             return true;
           }
           return false;
         }
-        if (_checkForRuntimeType(lines[index])) {
+        if (checkForRuntimeType(lines[index])) {
           continue;
         }
         if (lines[index].contains('=>')) {
           while (!lines[index].contains(';')) {
             index++;
             assert(index < lines.length, 'Source file $file has unterminated toString method.');
-            if (_checkForRuntimeType(lines[index])) {
+            if (checkForRuntimeType(lines[index])) {
               break;
             }
           }
@@ -843,7 +922,7 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
           while (!lines[index].contains('}') && openBraceCount > 0) {
             index++;
             assert(index < lines.length, 'Source file $file has unbalanced braces in a toString method.');
-            if (_checkForRuntimeType(lines[index])) {
+            if (checkForRuntimeType(lines[index])) {
               break;
             }
             openBraceCount += '{'.allMatches(lines[index]).length;
@@ -1415,6 +1494,8 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
         'size of the repository as it is distributed to all our developers. If you have a binary',
         'to which you need access, you should consider how to fetch it from another repository;',
         'for example, the "assets-for-api-docs" repository is used for images in API docs.',
+        'To add assets to flutter_tools templates, see the instructions in the wiki:',
+        'https://github.com/flutter/flutter/wiki/Managing-template-image-assets',
       ]);
     }
   }
@@ -1583,7 +1664,7 @@ Future<void> _checkConsumerDependencies() async {
       'pub',
       'deps',
       '--json',
-      '--directory=${path.join(flutterRoot, 'packages', package)}'
+      '--directory=${path.join(flutterRoot, 'packages', package)}',
     ]);
     if (result.exitCode != 0) {
       print(result.stdout as Object);
@@ -1681,6 +1762,63 @@ Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
     <String>['analyze', ...options],
     workingDirectory: workingDirectory,
   );
+}
+
+// These files legitimately require executable permissions
+const Set<String> kExecutableAllowlist = <String>{
+  'bin/dart',
+  'bin/flutter',
+  'bin/internal/update_dart_sdk.sh',
+
+  'dev/bots/accept_android_sdk_licenses.sh',
+  'dev/bots/codelabs_build_test.sh',
+  'dev/bots/docs.sh',
+
+  'dev/conductor/bin/conductor',
+  'dev/conductor/core/lib/src/proto/compile_proto.sh',
+
+  'dev/customer_testing/ci.sh',
+
+  'dev/integration_tests/flutter_gallery/tool/run_instrumentation_test.sh',
+
+  'dev/integration_tests/ios_add2app_life_cycle/build_and_test.sh',
+
+  'dev/integration_tests/deferred_components_test/download_assets.sh',
+  'dev/integration_tests/deferred_components_test/run_release_test.sh',
+
+  'dev/tools/gen_keycodes/bin/gen_keycodes',
+  'dev/tools/repackage_gradle_wrapper.sh',
+
+  'packages/flutter_tools/bin/macos_assemble.sh',
+  'packages/flutter_tools/bin/tool_backend.sh',
+  'packages/flutter_tools/bin/xcode_backend.sh',
+};
+
+Future<void> _checkForNewExecutables() async {
+  // 0b001001001
+  const int executableBitMask = 0x49;
+
+  final List<File> files = await _gitFiles(flutterRoot);
+  int unexpectedExecutableCount = 0;
+  for (final File file in files) {
+    final String relativePath = path.relative(
+      file.path,
+      from: flutterRoot,
+    );
+    final FileStat stat = file.statSync();
+    final bool isExecutable = stat.mode & executableBitMask != 0x0;
+    if (isExecutable && !kExecutableAllowlist.contains(relativePath)) {
+      unexpectedExecutableCount += 1;
+      print('$relativePath is executable: ${(stat.mode & 0x1FF).toRadixString(2)}');
+    }
+  }
+  if (unexpectedExecutableCount > 0) {
+    throw Exception(
+      'found $unexpectedExecutableCount unexpected executable file'
+      '${unexpectedExecutableCount == 1 ? '' : 's'}! If this was intended, you '
+      'must add this file to kExecutableAllowlist in dev/bots/analyze.dart',
+    );
+  }
 }
 
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');

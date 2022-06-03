@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
 double _volume = 0.0;
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
@@ -51,7 +51,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             });
           },
         ),
-        Text('Volume : $_volume')
+        Text('Volume : $_volume'),
       ],
     );
   }
