@@ -433,10 +433,10 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
 }
 
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
-final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
-final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
-final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?\.',?$");
-final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
+final RegExp _deprecationStartPattern = RegExp(r'^(?<indent> *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
+final RegExp _deprecationMessagePattern = RegExp(r"^ *'(?<message>.+) '$");
+final RegExp _deprecationVersionPattern = RegExp(r"^ *'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.',?$");
+final RegExp _deprecationEndPattern = RegExp(r'^ *\)$');
 
 /// Some deprecation notices are special, for example they're used to annotate members that
 /// will never go away and were never allowed but which we are trying to show messages for.
@@ -464,18 +464,18 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
     }
     for (int lineNumber in linesWithDeprecations) {
       try {
-        final Match? match1 = _deprecationPattern1.firstMatch(lines[lineNumber]);
-        if (match1 == null)
+        final RegExpMatch? startMatch = _deprecationStartPattern.firstMatch(lines[lineNumber]);
+        if (startMatch == null)
           throw 'Deprecation notice does not match required pattern.';
-        final String indent = match1[1]!;
+        final String indent = startMatch.namedGroup('indent')!;
         lineNumber += 1;
         if (lineNumber >= lines.length)
           throw 'Incomplete deprecation notice.';
-        Match? match3;
+        RegExpMatch? versionMatch;
         String? message;
         do {
-          final Match? match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
-          if (match2 == null) {
+          final RegExpMatch? messageMatch = _deprecationMessagePattern.firstMatch(lines[lineNumber]);
+          if (messageMatch == null) {
             String possibleReason = '';
             if (lines[lineNumber].trimLeft().startsWith('"')) {
               possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
@@ -485,24 +485,24 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
           if (!lines[lineNumber].startsWith("$indent  '"))
             throw 'Unexpected deprecation notice indent.';
           if (message == null) {
-            final String firstChar = String.fromCharCode(match2[1]!.runes.first);
+            message = messageMatch.namedGroup('message');
+            final String firstChar = String.fromCharCode(message!.runes.first);
             if (firstChar.toUpperCase() != firstChar)
               throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
           }
-          message = match2[1];
           lineNumber += 1;
           if (lineNumber >= lines.length)
             throw 'Incomplete deprecation notice.';
-          match3 = _deprecationPattern3.firstMatch(lines[lineNumber]);
-        } while (match3 == null);
-        if (!message!.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
+          versionMatch = _deprecationVersionPattern.firstMatch(lines[lineNumber]);
+        } while (versionMatch == null);
+        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
           throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
         if (!lines[lineNumber].startsWith("$indent  '"))
           throw 'Unexpected deprecation notice indent.';
         lineNumber += 1;
         if (lineNumber >= lines.length)
           throw 'Incomplete deprecation notice.';
-        if (!lines[lineNumber].contains(_deprecationPattern4))
+        if (!lines[lineNumber].contains(_deprecationEndPattern))
           throw 'End of deprecation notice does not match required pattern.';
         if (!lines[lineNumber].startsWith('$indent)'))
           throw 'Unexpected deprecation notice indent.';
