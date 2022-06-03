@@ -48,7 +48,7 @@ platform_properties:
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
       os: Linux
-      device_os: "R"
+      device_type: "SM-G973U1"
   mac:
     properties:
       dependencies: >-
