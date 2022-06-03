@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -267,7 +268,7 @@ class AlertDialog extends StatelessWidget {
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.contentTextStyle,
     this.actions,
-    this.actionsPadding = EdgeInsets.zero,
+    this.actionsPadding,
     this.actionsAlignment,
     this.actionsOverflowAlignment,
     this.actionsOverflowDirection,
@@ -349,10 +350,9 @@ class AlertDialog extends StatelessWidget {
   /// Typically used to provide padding to the button bar between the button bar
   /// and the edges of the dialog.
   ///
-  /// If are no [actions], then no padding will be included. The padding around
-  /// the button bar defaults to zero. It is also important to note that
-  /// [buttonPadding] may contribute to the padding on the edges of [actions] as
-  /// well.
+  /// If there are no [actions], then no padding will be included. It is also
+  /// important to note that [buttonPadding] may contribute to the padding on
+  /// the edges of [actions] as well.
   ///
   /// {@tool snippet}
   /// This is an example of a set of actions aligned with the content widget.
@@ -372,7 +372,7 @@ class AlertDialog extends StatelessWidget {
   /// See also:
   ///
   /// * [OverflowBar], which [actions] configures to lay itself out.
-  final EdgeInsetsGeometry actionsPadding;
+  final EdgeInsetsGeometry? actionsPadding;
 
   /// Defines the horizontal layout of the [actions] according to the same
   /// rules as for [Row.mainAxisAlignment].
@@ -506,8 +506,6 @@ class AlertDialog extends StatelessWidget {
     // children.
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection? textDirection = Directionality.maybeOf(context);
-    const double m3ActionEndPadding = 18.0;
-    const double m3ActionBottomPadding = 12.0;
 
     Widget? titleWidget;
     Widget? contentWidget;
@@ -557,13 +555,9 @@ class AlertDialog extends StatelessWidget {
     if (actions != null) {
       final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
       actionsWidget = Padding(
-        padding: theme.useMaterial3
-          ? actionsPadding.add(EdgeInsets.all(spacing))
-            .add(const EdgeInsets.only(
-              right: m3ActionEndPadding,
-              bottom: m3ActionBottomPadding,
-            ))
-          : actionsPadding.add(EdgeInsets.all(spacing)),
+        padding: actionsPadding ?? dialogTheme.actionsPadding ?? (
+          theme.useMaterial3 ? defaults.actionsPadding! : defaults.actionsPadding!.add(EdgeInsets.all(spacing))
+        ),
         child: OverflowBar(
           alignment: actionsAlignment ?? MainAxisAlignment.end,
           spacing: spacing,
@@ -610,7 +604,7 @@ class AlertDialog extends StatelessWidget {
       ),
     );
 
-    if (label != null)
+    if (label != null) {
       dialogChild = Semantics(
         scopesRoute: true,
         explicitChildNodes: true,
@@ -618,6 +612,7 @@ class AlertDialog extends StatelessWidget {
         label: label,
         child: dialogChild,
       );
+    }
 
     return Dialog(
       backgroundColor: backgroundColor,
@@ -946,7 +941,7 @@ class SimpleDialog extends StatelessWidget {
       ),
     );
 
-    if (label != null)
+    if (label != null) {
       dialogChild = Semantics(
         scopesRoute: true,
         explicitChildNodes: true,
@@ -954,6 +949,7 @@ class SimpleDialog extends StatelessWidget {
         label: label,
         child: dialogChild,
       );
+    }
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,
@@ -1176,7 +1172,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
-  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0);
+  final double clampedTextScaleFactor = clampDouble(textScaleFactor, 1.0, 2.0);
   // The final padding scale factor is clamped between 1/3 and 1. For example,
   // a non-scaled padding of 24 will produce a padding between 24 and 8.
   return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0)!;
@@ -1206,6 +1202,9 @@ class _DefaultsM2 extends DialogTheme {
 
   @override
   TextStyle? get contentTextStyle => _textTheme.subtitle1;
+
+  @override
+  EdgeInsetsGeometry? get actionsPadding => EdgeInsets.zero;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES
@@ -1236,6 +1235,9 @@ class _TokenDefaultsM3 extends DialogTheme {
 
   @override
   TextStyle? get contentTextStyle => _textTheme.bodyMedium;
+
+  @override
+  EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
 }
 
 // END GENERATED TOKEN PROPERTIES

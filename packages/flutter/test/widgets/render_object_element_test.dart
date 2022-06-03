@@ -80,10 +80,12 @@ abstract class SwapperElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (stable != null)
+    if (stable != null) {
       visitor(stable!);
-    if (swapper != null)
+    }
+    if (swapper != null) {
       visitor(swapper!);
+    }
   }
 
   @override
@@ -112,10 +114,11 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   void insertRenderObjectChild(RenderBox child, Object? slot) {
     insertSlots.add(slot);
     assert(child != null);
-    if (slot == 'stable')
+    if (slot == 'stable') {
       renderObject.stable = child;
-    else
+    } else {
       renderObject.setSwapper(child, slot! as bool);
+    }
   }
 
   @override
@@ -128,10 +131,11 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   @override
   void removeRenderObjectChild(RenderBox child, Object? slot) {
     removeSlots.add(slot);
-    if (slot == 'stable')
+    if (slot == 'stable') {
       renderObject.stable = null;
-    else
+    } else {
       renderObject.setSwapper(null, slot! as bool);
+    }
   }
 }
 
@@ -143,13 +147,16 @@ class RenderSwapper extends RenderBox {
   RenderBox? _stable;
   RenderBox? get stable => _stable;
   set stable(RenderBox? child) {
-    if (child == _stable)
+    if (child == _stable) {
       return;
-    if (_stable != null)
+    }
+    if (_stable != null) {
       dropChild(_stable!);
+    }
     _stable = child;
-    if (child != null)
+    if (child != null) {
       adoptChild(child);
+    }
   }
 
   bool? _swapperIsOnTop;
@@ -160,21 +167,26 @@ class RenderSwapper extends RenderBox {
       _swapperIsOnTop = isOnTop;
       markNeedsLayout();
     }
-    if (child == _swapper)
+    if (child == _swapper) {
       return;
-    if (_swapper != null)
+    }
+    if (_swapper != null) {
       dropChild(_swapper!);
+    }
     _swapper = child;
-    if (child != null)
+    if (child != null) {
       adoptChild(child);
+    }
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (_stable != null)
+    if (_stable != null) {
       visitor(_stable!);
-    if (_swapper != null)
+    }
+    if (_swapper != null) {
       visitor(_swapper!);
+    }
   }
 
   @override

@@ -48,8 +48,9 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   double _viewportFraction;
   set viewportFraction(double value) {
     assert(value != null);
-    if (_viewportFraction == value)
+    if (_viewportFraction == value) {
       return;
+    }
     _viewportFraction = value;
     markNeedsLayout();
   }
@@ -86,11 +87,12 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
     final SliverConstraints constraints = this.constraints;
     final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
-    if (child != null)
+    if (child != null) {
       child!.layout(constraints.asBoxConstraints(
         minExtent: extent,
         maxExtent: extent,
       ));
+    }
 
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
@@ -101,8 +103,9 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
-    if (child != null)
+    if (child != null) {
       setChildParentData(child!, constraints, geometry!);
+    }
   }
 }
 
@@ -174,8 +177,9 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
-    if (child != null)
+    if (child != null) {
       setChildParentData(child!, constraints, geometry!);
+    }
   }
 }
 
@@ -251,7 +255,8 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
       maxPaintExtent: maxExtent,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
-    if (child != null)
+    if (child != null) {
       setChildParentData(child!, constraints, geometry!);
+    }
   }
 }

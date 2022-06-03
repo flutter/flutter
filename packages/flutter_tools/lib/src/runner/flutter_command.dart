@@ -964,7 +964,7 @@ abstract class FlutterCommand extends Command<void> {
         negatable: false,
         hide: !verboseHelp,
         help: 'Whether to enable the experimental Impeller rendering engine. '
-              'Impeller is currently only supported on iOS. This flag will '
+              'Impeller is currently only supported on iOS and Android. This flag will '
               'be ignored when targeting other platforms.',
     );
   }
@@ -1519,25 +1519,25 @@ abstract class FlutterCommand extends Command<void> {
   ApplicationPackageFactory? applicationPackages;
 
   /// Gets the parsed command-line option named [name] as a `bool`.
-  /// This has been deprecated, use [boolArgDeprecated] instead.
+  /// This has been deprecated, use [boolArg] instead.
   bool boolArgDeprecated(String name) => argResults?[name] as bool? ?? false;
 
   /// Gets the parsed command-line option named [name] as a `bool?`.
   bool? boolArg(String name) {
-    if (argResults == null || !argParser.options.containsKey(name)) {
+    if (!argParser.options.containsKey(name)) {
       return null;
     }
-    return argResults?[name] as bool?;
+    return argResults![name] as bool;
   }
 
   /// Gets the parsed command-line option named [name] as a `String`.
   String? stringArgDeprecated(String name) => argResults?[name] as String?;
 
   String? stringArg(String name) {
-    if (argResults == null || !argParser.options.containsKey(name)) {
+    if (!argParser.options.containsKey(name)) {
       return null;
     }
-    return argResults?[name] as String?;
+    return argResults![name] as String;
   }
 
   /// Gets the parsed command-line option named [name] as an `int`.

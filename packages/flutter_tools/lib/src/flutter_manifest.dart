@@ -69,6 +69,8 @@ class FlutterManifest {
   /// A map representation of the `flutter` section in the `pubspec.yaml` file.
   Map<String, Object?> _flutterDescriptor = <String, Object?>{};
 
+  Map<String, Object?> get flutterDescriptor => _flutterDescriptor;
+
   /// True if the `pubspec.yaml` file does not exist.
   bool get isEmpty => _descriptor.isEmpty;
 
