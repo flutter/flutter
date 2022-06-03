@@ -293,6 +293,84 @@ void main() {
     log.clear();
   });
 
+  testWidgets('selectableOnGestures disables gestures on row', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    Widget buildTable({ int? sortColumnIndex, bool sortAscending = true }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        sortAscending: sortAscending,
+        onSelectAll: (bool? value) {
+          log.add('select-all: $value');
+        },
+        columns: <DataColumn>[
+          const DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+          DataColumn(
+            label: const Text('Calories'),
+            tooltip: 'Calories',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {
+              log.add('column-sort: $columnIndex $ascending');
+            },
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: ValueKey<String>(dessert.name),
+            selectableOnGestures: false,
+            onSelectChanged: (bool? selected) {
+              log.add('row-selected: ${dessert.name}');
+            },
+            onLongPress: () {
+              log.add('onLongPress: ${dessert.name}');
+            },
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+                onTap: () {
+                  log.add('cell-tap: ${dessert.calories}');
+                },
+                onDoubleTap: () {
+                  log.add('cell-doubleTap: ${dessert.calories}');
+                },
+                onLongPress: () {
+                  log.add('cell-longPress: ${dessert.calories}');
+                },
+                onTapCancel: () {
+                  log.add('cell-tapCancel: ${dessert.calories}');
+                },
+                onTapDown: (TapDownDetails details) {
+                  log.add('cell-tapDown: ${dessert.calories}');
+                },
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    await tester.tap(find.text('KitKat'));
+    expect(log.length, 0);
+
+    await tester.longPress(find.text('KitKat'));
+    expect(log.length, 0);
+
+    await tester.tap(find.byType(Checkbox).last);
+    expect(log, <String>['row-selected: KitKat']);
+    log.clear();
+  });
+
   testWidgets('DataTable overflow test - header', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

@@ -100,6 +100,7 @@ class DataRow {
     this.selected = false,
     this.onSelectChanged,
     this.onLongPress,
+    this.selectableOnGestures = true,
     this.color,
     required this.cells,
   }) : assert(cells != null);
@@ -113,6 +114,7 @@ class DataRow {
     this.selected = false,
     this.onSelectChanged,
     this.onLongPress,
+    this.selectableOnGestures = true,
     this.color,
     required this.cells,
   }) : assert(cells != null),
@@ -162,6 +164,18 @@ class DataRow {
   ///
   /// Otherwise, the checkbox, if present, will not be checked.
   final bool selected;
+
+  /// Whether the row can be selected by using gestures such as
+  /// tap or long press.
+  ///
+  /// If the value is set to false and [onSelectChanged] is non-null,
+  /// the row can be only selected by toggling the checkbox.
+  ///
+  /// If the value is set to false and [onLongPress] is non-null,
+  /// [onLongPress] callback won't be called.
+  ///
+  /// This value is true by default.
+  final bool selectableOnGestures;
 
   /// The data for this row.
   ///
@@ -807,6 +821,7 @@ class DataTable extends StatelessWidget {
     required GestureTapCancelCallback? onTapCancel,
     required MaterialStateProperty<Color?>? overlayColor,
     required GestureLongPressCallback? onRowLongPress,
+    required bool selectableOnGestures,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
@@ -852,7 +867,7 @@ class DataTable extends StatelessWidget {
         overlayColor: overlayColor,
         child: label,
       );
-    } else if (onSelectChanged != null || onRowLongPress != null) {
+    } else if (selectableOnGestures && (onSelectChanged != null || onRowLongPress != null)) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
         onLongPress: onRowLongPress,
@@ -1031,6 +1046,7 @@ class DataTable extends StatelessWidget {
           onSelectChanged: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
           onRowLongPress: row.onLongPress,
+          selectableOnGestures: row.selectableOnGestures,
         );
         rowIndex += 1;
       }
