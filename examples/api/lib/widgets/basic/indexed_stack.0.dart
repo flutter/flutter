@@ -82,10 +82,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           ),
           GestureDetector(
             onTap: () => setState(() {
-              if (index == names.length - 1)
+              if (index == names.length - 1) {
                 index = 0;
-              else
+              } else {
                 index++;
+              }
             }),
             child: const Icon(key: Key('gesture2'), Icons.chevron_right),
           ),
@@ -107,28 +108,29 @@ class _PersonTrackerState extends State<PersonTracker> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        key: Key(widget.name),
-        decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 239, 248, 255),
-            border: Border.all(
-              color: const Color.fromARGB(255, 54, 60, 244),
-            ),
-            borderRadius: const BorderRadius.all(Radius.circular(10))),
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            Text('Name: ${widget.name}'),
-            Text('Score: ${counter.toString()}'),
-            TextButton.icon(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                setState(
-                  () => counter++,
-                );
-              },
-              label: const Text('Increment'),
-            )
-          ],
-        ));
+      key: Key(widget.name),
+      decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 239, 248, 255),
+          border: Border.all(
+            color: const Color.fromARGB(255, 54, 60, 244),
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(10))),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: <Widget>[
+          Text('Name: ${widget.name}'),
+          Text('Score: ${counter.toString()}'),
+          TextButton.icon(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              setState(
+                () => counter++,
+              );
+            },
+            label: const Text('Increment'),
+          )
+        ],
+      ),
+    );
   }
 }
