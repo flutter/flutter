@@ -20,10 +20,15 @@ dependencies:
   process: any
   sky_engine: any
   vector_math: any
+  skia_gold_client: any
 
 dependency_overrides:
   args:
     path: ../../../third_party/dart/third_party/pkg/args
+  collection:
+    path: ../../../third_party/dart/third_party/pkg/collection
+  crypto:
+    path: ../../../third_party/dart/third_party/pkg/crypto
   file:
     path: ../../../third_party/pkg/file/packages/file
   meta:
@@ -34,7 +39,11 @@ dependency_overrides:
     path: ../../../third_party/pkg/platform
   process:
     path: ../../../third_party/pkg/process
+  skia_gold_client:
+    path: ../../testing/skia_gold_client
   sky_engine:
     path: ../../sky/packages/sky_engine
+  typed_data:
+    path: ../../../third_party/dart/third_party/pkg/typed_data
   vector_math:
     path: ../../../third_party/pkg/vector_math
