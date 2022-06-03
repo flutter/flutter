@@ -206,7 +206,7 @@ void main() {
     expect(image.width, equals(20));
     expect(image.height, equals(20));
     data = (await image.toByteData())!;
-    expect(getPixel(0, 0), equals(0x00000080));
+    expect(getPixel(0, 0), equals(0x0000007F));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     // non-zero offsets.
@@ -215,7 +215,7 @@ void main() {
     expect(image.height, equals(30));
     data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000000));
-    expect(getPixel(10, 10), equals(0x00000080));
+    expect(getPixel(10, 10), equals(0x0000007F));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 10), equals(0xffffffff));
 
@@ -225,7 +225,7 @@ void main() {
     expect(image.height, equals(60));
     data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000000));
-    expect(getPixel(20, 20), equals(0x00000080));
+    expect(getPixel(20, 20), equals(0x0000007F));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 20), equals(0xffffffff));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
