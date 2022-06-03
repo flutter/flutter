@@ -4455,7 +4455,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (_dependencies != null && _dependencies!.isNotEmpty) {
       final List<DiagnosticsNode> diagnosticsDependencies = _dependencies!
         .map((InheritedElement element) => element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse))
-        .toList();
+        .toList()
+        ..sort((DiagnosticsNode a, DiagnosticsNode b) => '$a'.compareTo('$b'));
       properties.add(DiagnosticsProperty<List<DiagnosticsNode>>('dependencies', diagnosticsDependencies));
     }
   }
