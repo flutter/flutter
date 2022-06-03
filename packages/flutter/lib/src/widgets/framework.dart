@@ -993,7 +993,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
 
   /// Called whenever the widget configuration changes.
   ///
-  /// If the parent widget rebuilds and request that this location in the tree
+  /// If the parent widget rebuilds and requests that this location in the tree
   /// update to display a new widget with the same [runtimeType] and
   /// [Widget.key], the framework will update the [widget] property of this
   /// [State] object to refer to the new widget and then call this method
