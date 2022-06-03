@@ -45,6 +45,7 @@ class _HomeState extends State<Home> {
   final MenuBarController _controller = MenuBarController();
   VisualDensity _density = VisualDensity.standard;
   TextDirection _textDirection = TextDirection.ltr;
+  double _extraPadding = 0;
   bool _enabled = true;
   bool _addItem = false;
 
@@ -64,7 +65,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(_extraPadding),
       child: Directionality(
         textDirection: _textDirection,
         child: Builder(builder: (BuildContext context) {
@@ -218,6 +219,7 @@ class _HomeState extends State<Home> {
                     density: _density,
                     enabled: _enabled,
                     addItem: _addItem,
+                    extraPadding: _extraPadding,
                     textDirection: _textDirection,
                     onDensityChanged: (VisualDensity value) {
                       setState(() {
@@ -227,6 +229,11 @@ class _HomeState extends State<Home> {
                     onTextDirectionChanged: (TextDirection value) {
                       setState(() {
                         _textDirection = value;
+                      });
+                    },
+                    onExtraPaddingChanged: (double value) {
+                      setState(() {
+                        _extraPadding = value;
                       });
                     },
                     onEnabledChanged: (bool value) {
@@ -254,20 +261,24 @@ class _Controls extends StatelessWidget {
   const _Controls({
     required this.density,
     required this.textDirection,
+    required this.extraPadding,
     this.enabled = true,
     this.addItem = false,
     required this.onDensityChanged,
     required this.onTextDirectionChanged,
+    required this.onExtraPaddingChanged,
     required this.onEnabledChanged,
     required this.onAddItemChanged,
   });
 
   final VisualDensity density;
   final TextDirection textDirection;
+  final double extraPadding;
   final bool enabled;
   final bool addItem;
   final ValueChanged<VisualDensity> onDensityChanged;
   final ValueChanged<TextDirection> onTextDirectionChanged;
+  final ValueChanged<double> onExtraPaddingChanged;
   final ValueChanged<bool> onEnabledChanged;
   final ValueChanged<bool> onAddItemChanged;
 
@@ -277,6 +288,23 @@ class _Controls extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          ConstrainedBox(
+            constraints: const BoxConstraints.tightFor(width: 400),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Text('Extra Padding: ${extraPadding.toStringAsFixed(1)}'),
+                Slider(
+                  value: extraPadding,
+                  max: 40,
+                  divisions: 20,
+                  onChanged: (double value) {
+                    onExtraPaddingChanged(value);
+                  },
+                ),
+              ],
+            ),
+          ),
           ConstrainedBox(
             constraints: const BoxConstraints.tightFor(width: 400),
             child: Row(

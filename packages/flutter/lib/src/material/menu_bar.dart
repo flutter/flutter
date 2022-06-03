@@ -1358,17 +1358,17 @@ class _MenuBarButtonState extends State<MenuBarButton> {
       case TextDirection.rtl:
         final Offset menuBarOrigin = menuBarBox.localToGlobal(menuBarBox.paintBounds.topRight, ancestor: overlay);
         if (menuButtonNode.isTopLevel) {
-          menuOrigin = button.localToGlobal(button.paintBounds.bottomRight, ancestor: overlay);
-          menuOrigin = Offset(menuBarOrigin.dx - menuOrigin.dx, menuOrigin.dy);
+          menuOrigin = button.localToGlobal(button.paintBounds.bottomRight, ancestor: menuBarBox);
+          menuOrigin = Offset(menuBarOrigin.dx - menuOrigin.dx, menuBarOrigin.dy + menuOrigin.dy);
         } else {
           menuOrigin = button.localToGlobal(button.paintBounds.topLeft, ancestor: overlay);
           menuOrigin =
-              Offset(menuBarOrigin.dx - menuOrigin.dx, menuOrigin.dy) + Offset(-menuPadding.right, -menuPadding.top);
+              Offset(menuBarOrigin.dx - menuOrigin.dx, menuOrigin.dy) + Offset(-menuPadding.left, -menuPadding.top);
         }
         break;
       case TextDirection.ltr:
         if (menuButtonNode.isTopLevel) {
-          menuOrigin = button.localToGlobal(button.paintBounds.bottomLeft, ancestor: menuBarBox);
+          menuOrigin = button.localToGlobal(button.paintBounds.bottomLeft, ancestor: overlay);
         } else {
           menuOrigin = button.localToGlobal(button.paintBounds.topRight, ancestor: overlay) +
               Offset(menuPadding.left, -menuPadding.top);
