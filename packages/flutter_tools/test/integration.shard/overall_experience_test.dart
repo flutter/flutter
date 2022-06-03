@@ -375,7 +375,7 @@ void main() {
             return null;
           }),
           Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
-          Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms\.$'), 'called reassemble', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms \(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.$'), 'called reassemble', 'called paint'], handler: (String line) {
             processManager.killPid(pid, ProcessSignal.sigusr2);
             return null;
           }),
