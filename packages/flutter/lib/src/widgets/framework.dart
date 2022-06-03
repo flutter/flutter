@@ -4456,7 +4456,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       final List<DiagnosticsNode> diagnosticsDependencies = _dependencies!
         .map((InheritedElement element) => element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse))
         .toList()
-        ..sort((DiagnosticsNode a, DiagnosticsNode b) => a.toDescription().compareTo(b.toDescription()));
+        ..sort((DiagnosticsNode a, DiagnosticsNode b) {
+          final String aCompare = a is Diagnosticable ? (a as Diagnosticable).toStringShort() : a.toDescription();
+          final String bCompare = b is Diagnosticable ? (b as Diagnosticable).toStringShort() : b.toDescription();
+          return aCompare.compareTo(bCompare);
+        });
       properties.add(DiagnosticsProperty<List<DiagnosticsNode>>('dependencies', diagnosticsDependencies));
     }
   }
