@@ -3166,6 +3166,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
 
   // --------------------------- Selection Actions ---------------------------
+  // The viewport offset pixels of the [RenderEditable] at the last drag start.
+  double _dragStartViewportOffset = 0.0;
+
+  // For a shift + tap + drag gesture, the TextSelection at the point of the
+  // tap. Mac uses this value to reset to the original selection when an
+  // inversion of the base and offset happens.
+  TextSelection? _shiftTapDragSelection;
+
+  void controlSelectionOnDragStart(SelectionOnDragStartControlIntent intent) {
+    if (intent.store) {
+      _shiftTapDragSelection = textEditingValue.selection;
+    } else {
+      _shiftTapDragSelection = null;
+    }
+  }
+
+  void controlViewportOffsetOnDragStart(ViewportOffsetOnDragStartControlIntent intent) {
+    if (intent.store) {
+      _dragStartViewportOffset = renderEditable.offset.pixels;
+    } else {
+      _dragStartViewportOffset = 0.0;
+    }
+  }
+
   void expandSelection(ExpandSelectionToPositionIntent intent) {
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
     final TextSelection selection = intent.fromSelection ?? textEditingValue.selection!;
@@ -3197,6 +3221,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ),
       intent.cause,
     );
+  }
+
+  void selectDragPosition(SelectDragPositionIntent intent) {
+    final Offset startOffset = renderEditable.maxLines == 1
+        ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
+        : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+
+    selectPosition(SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: intent.from - startOffset, to: intent.to));
   }
 
   void selectPosition(SelectTapPositionIntent intent) {

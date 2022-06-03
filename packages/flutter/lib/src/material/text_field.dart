@@ -1243,6 +1243,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         onInvoke: (KeyboardRequestIntent intent) => _requestKeyboard(),
         enabledPredicate: (KeyboardRequestIntent intent) => widget.selectionEnabled,
       ),
+      SelectDragPositionIntent : SelectionCallbackAction<SelectDragPositionIntent>(
+        onInvoke: (SelectDragPositionIntent intent) => _editableText!.selectDragPosition(intent),
+        enabledPredicate: (SelectDragPositionIntent intent) => widget.selectionEnabled,
+      ),
       SelectRangeIntent : SelectionCallbackAction<SelectRangeIntent>(
           onInvoke: (SelectRangeIntent intent) => _editableText!.selectRange(intent),
           enabledPredicate: (SelectRangeIntent intent) => widget.selectionEnabled,
@@ -1254,6 +1258,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       SelectTapPositionIntent : SelectionCallbackAction<SelectTapPositionIntent>(
           onInvoke: (SelectTapPositionIntent intent) => _editableText!.selectPosition(intent),
           enabledPredicate: (SelectTapPositionIntent intent) => widget.selectionEnabled,
+      ),
+      SelectionOnDragStartControlIntent : SelectionCallbackAction<SelectionOnDragStartControlIntent>(
+        onInvoke: (SelectionOnDragStartControlIntent intent) {
+          _editableText!.controlSelectionOnDragStart(intent);
+        },
+        enabledPredicate: (SelectionOnDragStartControlIntent intent) => widget.selectionEnabled,
       ),
       SelectionToolbarControlIntent : SelectionCallbackAction<SelectionToolbarControlIntent>(
           onInvoke: (SelectionToolbarControlIntent intent) {
@@ -1272,6 +1282,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             }
           },
           enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
+      ),
+      ViewportOffsetOnDragStartControlIntent : SelectionCallbackAction<ViewportOffsetOnDragStartControlIntent>(
+        onInvoke: (ViewportOffsetOnDragStartControlIntent intent) {
+          _editableText!.controlViewportOffsetOnDragStart(intent);
+        },
+        enabledPredicate: (ViewportOffsetOnDragStartControlIntent intent) => widget.selectionEnabled,
       ),
       UserOnTapCallbackIntent : SelectionCallbackAction<UserOnTapCallbackIntent>(
         onInvoke: (UserOnTapCallbackIntent intent) => widget.onTap?.call(),

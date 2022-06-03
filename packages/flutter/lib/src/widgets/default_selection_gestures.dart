@@ -43,36 +43,48 @@ class DefaultSelectionGestures extends StatelessWidget {
                 print('onTapDown , tapCount  $tapCount');
                 print('isShiftPressed: $_isShiftPressed');
 
-                if (_isShiftPressed) {
-                  Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                if (defaultTargetPlatform == TargetPlatform.macOS) {
+                  if (_isShiftPressed) {
+                    Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                  } else {
+                    Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                  }
                 }
 
                 if (tapCount == 2) {
                   print('onDoubleTapDown');
                   Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                  if (details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus) {
+                    Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+                  }
                 }
               }
               ..onTapUp = (TapUpDetails details, int tapCount) {
                 print('onTapUp , tapCount  $tapCount');
                 if (tapCount > 1) return;
                 print('isShiftPressed: $_isShiftPressed');
-                if (_isShiftPressed) return;
                 Actions.invoke(context, SelectionToolbarControlIntent.hide);
-                switch (details.kind) {
-                  case PointerDeviceKind.mouse:
-                  case PointerDeviceKind.stylus:
-                  case PointerDeviceKind.invertedStylus:
-                  // Precise devices should place the cursor at a precise position.
-                    Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
-                    break;
-                  case PointerDeviceKind.touch:
-                  case PointerDeviceKind.unknown:
-                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-                  // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
-                  // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-                  // of the word.
-                    Actions.invoke(context, SelectWordEdgeIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
-                    break;
+                if (defaultTargetPlatform != TargetPlatform.macOS) {
+                  if (_isShiftPressed){
+                    Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                  } else {
+                    switch (details.kind) {
+                      case PointerDeviceKind.mouse:
+                      case PointerDeviceKind.stylus:
+                      case PointerDeviceKind.invertedStylus:
+                      // Precise devices should place the cursor at a precise position.
+                        Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                        break;
+                      case PointerDeviceKind.touch:
+                      case PointerDeviceKind.unknown:
+                      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+                      // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
+                      // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
+                      // of the word.
+                        Actions.invoke(context, SelectWordEdgeIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                        break;
+                    }
+                  }
                 }
                 Actions.invoke(context, KeyboardRequestIntent());
                 Actions.invoke(context, UserOnTapCallbackIntent());
@@ -83,27 +95,48 @@ class DefaultSelectionGestures extends StatelessWidget {
           }
   );
 
-  static final ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer> _iOSMacPanGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-          (BuildContext context) => PanGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
-          (PanGestureRecognizer instance, BuildContext context) {
+  static final ContextGestureRecognizerFactoryWithHandlers<ShiftAwarePanGestureRecognizer> _iOSMacPanGestureRecognizer = ContextGestureRecognizerFactoryWithHandlers<ShiftAwarePanGestureRecognizer>(
+          (BuildContext context) => ShiftAwarePanGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+          (ShiftAwarePanGestureRecognizer instance, BuildContext context) {
             instance
               ..dragStartBehavior = DragStartBehavior.down
-              ..onStart = (DragStartDetails details) {
+              ..onDown = (DragDownDetails details, bool isShiftTapping) {
+                print('onDown');
+                print('isShiftTapping: $isShiftTapping');
+              }
+              ..onStart = (DragStartDetails details, bool isShiftTapping) {
                 print('onDragStart');
-                print('isShiftPressed: $_isShiftPressed');
-                if (_isShiftPressed) {
+                print('isShiftTapping: $isShiftTapping');
+                if (isShiftTapping) {
                   Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
+                  // Save shiftTapDragSelection to TextField/EditableText through an intent -> action?
+                  Actions.invoke(context, SelectionOnDragStartControlIntent.save);
                 } else {
                   Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition));
                 }
+                Actions.invoke(context, ViewportOffsetOnDragStartControlIntent.save);
+                // Save dragStartViewportOffset to TextField/EditableText through an intent -> action?
               }
-              ..onUpdate = (DragUpdateDetails details) {
+              ..onUpdate = (DragUpdateDetails updateDetails, DragStartDetails startDetails, bool isShiftTapping) {
                 print('onDragUpdate');
-                print('isShiftPressed: $_isShiftPressed');
-                Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
+                print('isShiftTapping: $isShiftTapping');
+                if (!isShiftTapping) {
+                  Actions.invoke(context, SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition));// ? instead of SelectTapPositionIntent, could also use SelectTapPositionIntent and in selectPosition check if _dragStartViewportOffset is null
+                  // Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: updateDetails));
+                  return;
+                }
+                Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition)); // remove? or ExtentSelectionToDragPositionIntent?
+                // ExpandSelectionToPositionConsideringInversionIntent?
+
               }
-              ..onEnd = (DragEndDetails details) {
+              ..onEnd = (DragEndDetails details, bool isShiftTapping) {
                 print('onDragEnd');
+                // set shiftTapDragSelection to null in TextField/EditableText through an intent -> action.
+                // set dragStartViewportOffset to 0.0 in TextField/EditableText through intent -> action.
+                if (isShiftTapping) {
+                  Actions.invoke(context, SelectionOnDragStartControlIntent.clear);
+                }
+                Actions.invoke(context, ViewportOffsetOnDragStartControlIntent.clear);
               };
           }
   );
@@ -161,20 +194,45 @@ class DefaultSelectionGestures extends StatelessWidget {
                 }
                 ..onTapDown = (TapDownDetails details, int tapCount) {
                   print('onTapDown , tapCount  $tapCount');
-                  if (_isShiftPressed) {
-                    Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                  switch (defaultTargetPlatform) {
+                    case TargetPlatform.android:
+                    case TargetPlatform.fuchsia:
+                      break;
+                    case TargetPlatform.linux:
+                    case TargetPlatform.windows:
+                      if (_isShiftPressed) {
+                        Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                      } else {
+                        Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                      }
+                      break;
                   }
 
                   if (tapCount == 2) {
                     print('onDoubleTapDown');
                     Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                    if (details.kind == null || details.kind == PointerDeviceKind.touch || details.kind == PointerDeviceKind.stylus) {
+                      Actions.invoke(context, SelectionToolbarControlIntent.show(position: details.globalPosition));
+                    }
                   }
                 }
                 ..onTapUp = (TapUpDetails details, int tapCount) {
                   print('onTapUp , tapCount  $tapCount');
                   if (tapCount > 1) return;
                   Actions.invoke(context, SelectionToolbarControlIntent.hide);
-                  Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                  switch (defaultTargetPlatform) {
+                    case TargetPlatform.android:
+                    case TargetPlatform.fuchsia:
+                      if (_isShiftPressed) {
+                        Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
+                      } else {
+                        Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.tap, from: details.globalPosition));
+                      }
+                      break;
+                    case TargetPlatform.linux:
+                    case TargetPlatform.windows:
+                      break;
+                  }
                   Actions.invoke(context, KeyboardRequestIntent());
                   Actions.invoke(context, UserOnTapCallbackIntent());
                 }
@@ -202,27 +260,48 @@ class DefaultSelectionGestures extends StatelessWidget {
                 };
             }
     ),
-    PanGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-            (BuildContext context) => PanGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
-            (PanGestureRecognizer instance, BuildContext context) {
-              instance
-                ..dragStartBehavior = DragStartBehavior.down
-                ..onStart = (DragStartDetails details) {
-                  print('onDragStart');
-                  if (_isShiftPressed) {
-                    Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
-                  } else {
-                    Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition));
-                  }
-                }
-                ..onUpdate = (DragUpdateDetails details) {
-                  print('onDragUpdate');
-                  Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
-                }
-                ..onEnd = (DragEndDetails details) {
-                  print('onDragEnd');
-                };
+    ShiftAwarePanGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<ShiftAwarePanGestureRecognizer>(
+            (BuildContext context) => ShiftAwarePanGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+            (ShiftAwarePanGestureRecognizer instance, BuildContext context) {
+          instance
+            ..dragStartBehavior = DragStartBehavior.down
+            ..onDown = (DragDownDetails details, bool isShiftTapping) {
+              print('onDown');
+              print('isShiftTapping: $isShiftTapping');
             }
+            ..onStart = (DragStartDetails details, bool isShiftTapping) {
+              print('onDragStart');
+              print('isShiftTapping: $isShiftTapping');
+              if (isShiftTapping) {
+                Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
+                // Save shiftTapDragSelection to TextField/EditableText through an intent -> action?
+                Actions.invoke(context, SelectionOnDragStartControlIntent.save);
+              } else {
+                Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: details.globalPosition));
+              }
+              Actions.invoke(context, ViewportOffsetOnDragStartControlIntent.save);
+              // Save dragStartViewportOffset to TextField/EditableText through an intent -> action?
+            }
+            ..onUpdate = (DragUpdateDetails updateDetails, DragStartDetails startDetails, bool isShiftTapping) {
+              print('onDragUpdate');
+              print('isShiftTapping: $isShiftTapping');
+              if (!isShiftTapping) {
+                Actions.invoke(context, SelectDragPositionIntent(cause: SelectionChangedCause.drag, from: startDetails.globalPosition, to: updateDetails.globalPosition));// ? instead of SelectTapPositionIntent, could also use SelectTapPositionIntent and in selectPosition check if _dragStartViewportOffset is null
+                // Actions.invoke(context, SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: updateDetails));
+                return;
+              }
+              Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: updateDetails.globalPosition));
+            }
+            ..onEnd = (DragEndDetails details, bool isShiftTapping) {
+              print('onDragEnd');
+              // set shiftTapDragSelection to null in TextField/EditableText through an intent -> action.
+              // set dragStartViewportOffset to 0.0 in TextField/EditableText through intent -> action.
+              if (isShiftTapping) {
+                Actions.invoke(context, SelectionOnDragStartControlIntent.clear);
+              }
+              Actions.invoke(context, ViewportOffsetOnDragStartControlIntent.clear);
+            };
+        }
     ),
   };
 
@@ -257,8 +336,10 @@ class DefaultSelectionGestures extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: (Renzo-Olivares) web gestures differ from default platform behaviors.
     return SelectionGestures(
-      gestures: kIsWeb ? _webGestures : _defaultGestures,
+      // gestures: kIsWeb ? _webGestures : _defaultGestures,
+      gestures: _defaultGestures,
       child: child,
     );
   }

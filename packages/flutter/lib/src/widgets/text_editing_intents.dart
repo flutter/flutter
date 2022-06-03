@@ -368,6 +368,33 @@ class KeyboardRequestIntent extends Intent {
   const KeyboardRequestIntent();
 }
 
+class SelectionOnDragStartControlIntent extends Intent {
+  const SelectionOnDragStartControlIntent._({required this.store});
+
+  static const SelectionOnDragStartControlIntent save = SelectionOnDragStartControlIntent._(store: true);
+  static const SelectionOnDragStartControlIntent clear = SelectionOnDragStartControlIntent._(store: false);
+
+  final bool store;
+}
+
+class ViewportOffsetOnDragStartControlIntent extends Intent {
+  const ViewportOffsetOnDragStartControlIntent._({required this.store});
+
+  static const ViewportOffsetOnDragStartControlIntent save = ViewportOffsetOnDragStartControlIntent._(store: true);
+  static const ViewportOffsetOnDragStartControlIntent clear = ViewportOffsetOnDragStartControlIntent._(store: false);
+
+  final bool store;
+}
+
+class SelectDragPositionIntent extends Intent {
+  /// Creates an [SelectDragPositionIntent].
+  const SelectDragPositionIntent({required this.cause, required this.from, this.to});
+
+  final SelectionChangedCause cause;
+  final Offset from;
+  final Offset? to;
+}
+
 /// An [Intent] that represents a user interaction that attempts to select the
 /// edge of the word closest to the [position] in an input field.
 class SelectWordEdgeIntent extends Intent {
