@@ -3,16 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/basic/indexed_stack.0.dart'
-    as example;
+import 'package:flutter_api_samples/widgets/basic/indexed_stack.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('has correct forward rendering mechanism',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.MyApp(),
-    );
+  testWidgets('has correct forward rendering mechanism', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.MyApp());
 
     final Finder gesture2 = find.byKey(const Key('gesture2'));
     final Element containerFinder =
