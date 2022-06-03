@@ -1857,7 +1857,7 @@ class TimePickerDialog extends StatefulWidget {
   /// Optionnaly provide your own button style for the cancel button.
   ///
   /// If null, the button uses [Theme.of(context).textButtonTheme].
-  final ButtonStyle? cancelButonStyle;
+  final ButtonStyle? cancelButtonStyle;
 
   /// Optionally provide your own button style for the confirm button.
   ///
