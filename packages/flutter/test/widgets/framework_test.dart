@@ -1597,7 +1597,7 @@ void main() {
         builder.properties.firstWhere((DiagnosticsNode property) => property.name == 'dependencies') as DiagnosticsProperty<List<DiagnosticsNode>>;
     expect(dependenciesProperty, isNotNull);
 
-    final List<DiagnosticsNode> dependencies = dependenciesProperty.value as List<DiagnosticsNode>;
+    final List<DiagnosticsNode> dependencies = dependenciesProperty.value!;
     expect(dependencies.length, equals(3));
     expect(dependencies.toString(), '[ButtonBarTheme, Directionality, FocusTraversalOrder]');
   });
