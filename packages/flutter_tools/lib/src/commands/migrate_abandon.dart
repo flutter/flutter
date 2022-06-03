@@ -120,7 +120,12 @@ class MigrateAbandonCommand extends FlutterCommand {
       }
     }
 
-    stagingDirectory.deleteSync(recursive: true);
+    try {
+      stagingDirectory.deleteSync(recursive: true);
+    } on FileSystemException catch (e) {
+      logger.printError('Deletion failed with: $e');
+      logger.printError('Please manually delete the staging directory at `${stagingDirectory.path}`');
+    }
 
     logger.printStatus('\nAbandon complete. Start a new migration with:');
     printCommandText('flutter migrate start', logger);
