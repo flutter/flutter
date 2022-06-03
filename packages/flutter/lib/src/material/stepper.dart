@@ -634,12 +634,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildLabelText(int index) {
-    if (widget.steps[index].label != null)
-      return  AnimatedDefaultTextStyle(
+    if (widget.steps[index].label != null) {
+      return AnimatedDefaultTextStyle(
         style: _labelStyle(index),
         duration: kThemeAnimationDuration,
         child: widget.steps[index].label!,
       );
+    }
     return const SizedBox();
   }
 
