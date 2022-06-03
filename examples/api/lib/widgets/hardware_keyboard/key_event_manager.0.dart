@@ -39,7 +39,7 @@ class FallbackDemoState extends State<FallbackDemo> {
         _capture = event.logicalKey.keyLabel;
       });
       // TRY THIS: Change the return value to true. You will no longer be able
-      // to input text, because rhese key events will no longer be sent to the
+      // to type text, because these key events will no longer be sent to the
       // text input system.
       return false;
     }
