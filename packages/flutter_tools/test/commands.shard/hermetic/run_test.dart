@@ -734,6 +734,7 @@ void main() {
       '--null-assertions',
       '--native-null-assertions',
       '--enable-impeller',
+      '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
     ]), throwsToolExit());
@@ -748,6 +749,7 @@ void main() {
     expect(options.verboseSystemLogs, true);
     expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
+    expect(options.traceSystrace, true);
     expect(options.enableImpeller, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
