@@ -37,8 +37,10 @@ public class ScreenshotUtil {
     }
 
     synchronized void writeFile(String name, byte[] fileContent) throws IOException {
-      final ByteBuffer buffer = ByteBuffer.allocate(name.length() + fileContent.length + 4);
+      final ByteBuffer buffer = ByteBuffer.allocate(name.length() + fileContent.length + 8);
+      // See ScreenshotBlobTransformer#bind in screenshot_transformer.dart for consumer side.
       buffer.putInt(name.length());
+      buffer.putInt(fileContent.length);
       buffer.put(name.getBytes());
       buffer.put(fileContent);
       final byte[] bytes = buffer.array();
@@ -118,6 +120,9 @@ public class ScreenshotUtil {
 
     final Bitmap bitmap =
         InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+    if (bitmap == null) {
+      throw new RuntimeException("failed to capture screenshot");
+    }
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
     ScreenshotUtil.writeFile(captureName, out.toByteArray());
