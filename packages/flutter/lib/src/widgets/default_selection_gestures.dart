@@ -41,6 +41,7 @@ class DefaultSelectionGestures extends StatelessWidget {
               }
               ..onTapDown = (TapDownDetails details, int tapCount) {
                 print('onTapDown , tapCount  $tapCount');
+                print('isShiftPressed: $_isShiftPressed');
 
                 if (_isShiftPressed) {
                   Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.tap, position: details.globalPosition));
@@ -54,6 +55,8 @@ class DefaultSelectionGestures extends StatelessWidget {
               ..onTapUp = (TapUpDetails details, int tapCount) {
                 print('onTapUp , tapCount  $tapCount');
                 if (tapCount > 1) return;
+                print('isShiftPressed: $_isShiftPressed');
+                if (_isShiftPressed) return;
                 Actions.invoke(context, SelectionToolbarControlIntent.hide);
                 switch (details.kind) {
                   case PointerDeviceKind.mouse:
@@ -87,6 +90,7 @@ class DefaultSelectionGestures extends StatelessWidget {
               ..dragStartBehavior = DragStartBehavior.down
               ..onStart = (DragStartDetails details) {
                 print('onDragStart');
+                print('isShiftPressed: $_isShiftPressed');
                 if (_isShiftPressed) {
                   Actions.invoke(context, ExpandSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
                 } else {
@@ -95,6 +99,7 @@ class DefaultSelectionGestures extends StatelessWidget {
               }
               ..onUpdate = (DragUpdateDetails details) {
                 print('onDragUpdate');
+                print('isShiftPressed: $_isShiftPressed');
                 Actions.invoke(context, ExtendSelectionToPositionIntent(cause: SelectionChangedCause.drag, position: details.globalPosition));
               }
               ..onEnd = (DragEndDetails details) {
