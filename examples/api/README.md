@@ -131,5 +131,5 @@ Tests go into a directory under [test](./test) that matches their location under
 `_test.dart` at the end, like other tests. For instance, a `LayoutBuilder`
 example that resides in [`lib/widgets/layout_builder/layout_builder.0.dart`](
 ./lib/widgets/layout_builder/layout_builder.0.dart) would have its tests in a
-file named [`test/animation/curves/curve2_d.0_test.dart`](
+file named [`test/widgets/layout_builder/layout_builder.0_test.dart`](
 ./test/widgets/layout_builder/layout_builder.0_test.dart)
