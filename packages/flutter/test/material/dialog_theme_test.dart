@@ -54,7 +54,6 @@ void main() {
       alignment: Alignment.bottomLeft,
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
       contentTextStyle: TextStyle(color: Color(0xff000000)),
-      actionsPadding: EdgeInsets.all(8.0),
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
@@ -65,7 +64,6 @@ void main() {
       'alignment: Alignment.bottomLeft',
       'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
-      'actionsPadding: EdgeInsets.all(8.0)',
     ]);
   });
 
