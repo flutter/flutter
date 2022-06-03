@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -501,12 +502,24 @@ class _DefaultPub implements Pub {
 
     final String cachePath = _fileSystem.path.join(Cache.flutterRoot!, '.pub-cache');
     if (_fileSystem.directory(cachePath).existsSync()) {
-      _logger.printTrace('Using $cachePath for the pub cache.');
-      return cachePath;
+      joinCaches(_fileSystem, '${_platform.environment['Home']}/.pub_cache', cachePath);
+      //_logger.printTrace('Using $cachePath for the pub cache.');
+      //return cachePath;
     }
 
     // Use pub's default location by returning null.
     return null;
+  }
+
+  @visibleForTesting
+  /// targetPath is the directory in which the content of the extraPath will be moved in
+  void joinCaches(FileSystem fileSystem, String targetPath, String extraPath) {
+    final Directory targetDirectory = fileSystem.directory(targetPath);
+    final extraDirectory = fileSystem.directory(extraPath);
+    extraDirectory.list(recursive: true).listen((FileSystemEntity entity) {
+      targetDirectory.childFile(entity.path);
+    });
+    extraDirectory.delete(recursive: true);
   }
 
   /// The full environment used when running pub.
