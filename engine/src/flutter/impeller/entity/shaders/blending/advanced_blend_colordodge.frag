@@ -5,10 +5,10 @@
 #include "advanced_blend_utils.glsl"
 
 vec3 Blend(vec3 dst, vec3 src) {
-  // https://www.w3.org/TR/compositing-1/#blendingcolorburn
-  vec3 color = 1 - min(vec3(1), (1 - dst) / src);
-  color = mix(color, vec3(1), ComponentIsValue(dst, 1.0));
-  color = mix(color, vec3(0), ComponentIsValue(src, 0.0));
+  // https://www.w3.org/TR/compositing-1/#blendingcolordodge
+  vec3 color = min(vec3(1), dst / (1 - src));
+  color = mix(color, vec3(0), ComponentIsValue(dst, 0.0));
+  color = mix(color, vec3(1), ComponentIsValue(src, 1.0));
   return color;
 }
 

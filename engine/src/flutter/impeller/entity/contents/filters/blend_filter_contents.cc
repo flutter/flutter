@@ -216,6 +216,18 @@ static bool PipelineBlend(const FilterInput::Vector& inputs,
   return true;
 }
 
+#define BLEND_CASE(mode)                                                      \
+  case Entity::BlendMode::k##mode:                                            \
+    advanced_blend_proc_ =                                                    \
+        [](const FilterInput::Vector& inputs, const ContentContext& renderer, \
+           const Entity& entity, RenderPass& pass, const Rect& coverage,      \
+           std::optional<Color> fg_color) {                                   \
+          PipelineProc p = &ContentContext::GetBlend##mode##Pipeline;         \
+          return AdvancedBlend<BlendScreenPipeline>(                          \
+              inputs, renderer, entity, pass, coverage, fg_color, p);         \
+        };                                                                    \
+    break;
+
 void BlendFilterContents::SetBlendMode(Entity::BlendMode blend_mode) {
   if (blend_mode > Entity::BlendMode::kLastAdvancedBlendMode) {
     VALIDATION_LOG << "Invalid blend mode " << static_cast<int>(blend_mode)
@@ -226,31 +238,20 @@ void BlendFilterContents::SetBlendMode(Entity::BlendMode blend_mode) {
 
   if (blend_mode > Entity::BlendMode::kLastPipelineBlendMode) {
     static_assert(Entity::BlendMode::kLastAdvancedBlendMode ==
-                  Entity::BlendMode::kColorBurn);
+                  Entity::BlendMode::kMultiply);
 
     switch (blend_mode) {
-      case Entity::BlendMode::kScreen:
-        advanced_blend_proc_ = [](const FilterInput::Vector& inputs,
-                                  const ContentContext& renderer,
-                                  const Entity& entity, RenderPass& pass,
-                                  const Rect& coverage,
-                                  std::optional<Color> fg_color) {
-          PipelineProc p = &ContentContext::GetBlendScreenPipeline;
-          return AdvancedBlend<BlendScreenPipeline>(
-              inputs, renderer, entity, pass, coverage, fg_color, p);
-        };
-        break;
-      case Entity::BlendMode::kColorBurn:
-        advanced_blend_proc_ = [](const FilterInput::Vector& inputs,
-                                  const ContentContext& renderer,
-                                  const Entity& entity, RenderPass& pass,
-                                  const Rect& coverage,
-                                  std::optional<Color> fg_color) {
-          PipelineProc p = &ContentContext::GetBlendColorburnPipeline;
-          return AdvancedBlend<BlendColorburnPipeline>(
-              inputs, renderer, entity, pass, coverage, fg_color, p);
-        };
-        break;
+      BLEND_CASE(Screen)
+      BLEND_CASE(Overlay)
+      BLEND_CASE(Darken)
+      BLEND_CASE(Lighten)
+      BLEND_CASE(ColorDodge)
+      BLEND_CASE(ColorBurn)
+      BLEND_CASE(HardLight)
+      BLEND_CASE(SoftLight)
+      BLEND_CASE(Difference)
+      BLEND_CASE(Exclusion)
+      BLEND_CASE(Multiply)
       default:
         FML_UNREACHABLE();
     }
