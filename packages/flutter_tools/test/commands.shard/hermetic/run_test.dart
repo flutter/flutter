@@ -721,16 +721,38 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('--enable-impeller flag propagates to debugging options', () async {
+  testUsingContext('flags propagate to debugging options', () async {
     final RunCommand command = RunCommand();
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'run',
+      '--start-paused',
+      '--disable-service-auth-codes',
+      '--use-test-fonts',
+      '--trace-skia',
+      '--trace-systrace',
+      '--verbose-system-logs',
+      '--null-assertions',
+      '--native-null-assertions',
       '--enable-impeller',
+      '--trace-systrace',
+      '--enable-software-rendering',
+      '--skia-deterministic-rendering',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
 
+    expect(options.startPaused, true);
+    expect(options.disableServiceAuthCodes, true);
+    expect(options.useTestFonts, true);
+    expect(options.traceSkia, true);
+    expect(options.traceSystrace, true);
+    expect(options.verboseSystemLogs, true);
+    expect(options.nullAssertions, true);
+    expect(options.nativeNullAssertions, true);
+    expect(options.traceSystrace, true);
     expect(options.enableImpeller, true);
+    expect(options.enableSoftwareRendering, true);
+    expect(options.skiaDeterministicRendering, true);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -799,14 +821,6 @@ class FakeDeviceManager extends Fake implements DeviceManager {
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   String get adbPath => 'adb';
-}
-
-class TestRunCommand extends RunCommand {
-  @override
-  // ignore: must_call_super
-  Future<void> validateCommand() async {
-    devices = await globals.deviceManager.getDevices();
-  }
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.

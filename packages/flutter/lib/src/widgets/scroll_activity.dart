@@ -382,8 +382,9 @@ class ScrollDragController implements Drag {
     if (offset == 0.0) {
       return;
     }
-    if (_reversed) // e.g. an AxisDirection.up scrollable
+    if (_reversed) {
       offset = -offset;
+    }
     delegate.applyUserOffset(offset);
   }
 
@@ -394,8 +395,9 @@ class ScrollDragController implements Drag {
     // the scroll has to move upwards. It's the same reason that update()
     // above negates the delta before applying it to the scroll offset.
     double velocity = -details.primaryVelocity!;
-    if (_reversed) // e.g. an AxisDirection.up scrollable
+    if (_reversed) {
       velocity = -velocity;
+    }
     _lastDetails = details;
 
     if (_retainMomentum) {
@@ -549,8 +551,9 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _tick() {
-    if (!applyMoveTo(_controller.value))
+    if (!applyMoveTo(_controller.value)) {
       delegate.goIdle();
+    }
   }
 
   /// Move the position to the given location.
@@ -643,8 +646,9 @@ class DrivenScrollActivity extends ScrollActivity {
   Future<void> get done => _completer.future;
 
   void _tick() {
-    if (delegate.setPixels(_controller.value) != 0.0)
+    if (delegate.setPixels(_controller.value) != 0.0) {
       delegate.goIdle();
+    }
   }
 
   void _end() {

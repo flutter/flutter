@@ -436,8 +436,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
     assert(alwaysUse24HourFormat != null);
-    if (alwaysUse24HourFormat)
+    if (alwaysUse24HourFormat) {
       return _get24HourVersionOf(timeOfDayFormatRaw);
+    }
     return timeOfDayFormatRaw;
   }
 

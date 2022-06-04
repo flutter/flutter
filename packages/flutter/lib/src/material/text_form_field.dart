@@ -325,8 +325,9 @@ class _TextFormFieldState extends FormFieldState<String> {
   void didChange(String? value) {
     super.didChange(value);
 
-    if (_effectiveController.text != value)
+    if (_effectiveController.text != value) {
       _effectiveController.text = value ?? '';
+    }
   }
 
   @override
@@ -345,7 +346,8 @@ class _TextFormFieldState extends FormFieldState<String> {
     // notifications for changes originating from within this class -- for
     // example, the reset() method. In such cases, the FormField value will
     // already have been set.
-    if (_effectiveController.text != value)
+    if (_effectiveController.text != value) {
       didChange(_effectiveController.text);
+    }
   }
 }

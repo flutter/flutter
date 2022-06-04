@@ -789,7 +789,7 @@ void main() {
                       ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
                         content: const SizedBox(width: 100, height: 100),
                         actions: List<Widget>.generate(actionCount, (int index) {
-                          if (index == 0)
+                          if (index == 0) {
                             return SizedBox(
                               width: 64,
                               height: 48,
@@ -799,6 +799,7 @@ void main() {
                                 onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                               ),
                             );
+                          }
 
                           return SizedBox(
                             width: 64,
@@ -911,7 +912,7 @@ void main() {
                       ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
                         content: const SizedBox(width: 100, height: 100),
                         actions: List<Widget>.generate(actionCount, (int index) {
-                          if (index == 0)
+                          if (index == 0) {
                             return SizedBox(
                               width: 200,
                               height: 10,
@@ -921,6 +922,7 @@ void main() {
                                 onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                               ),
                             );
+                          }
 
                           return SizedBox(
                             width: 200,
@@ -1016,7 +1018,7 @@ void main() {
                         overflowAlignment: overflowAlignment,
                         content: const SizedBox(width: 100, height: 100),
                         actions: List<Widget>.generate(actionCount, (int index) {
-                          if (index == 0)
+                          if (index == 0) {
                             return SizedBox(
                               width: 200,
                               height: 10,
@@ -1026,6 +1028,7 @@ void main() {
                                 onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                               ),
                             );
+                          }
 
                           return SizedBox(
                             width: 200,

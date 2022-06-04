@@ -4,9 +4,8 @@
 
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
 import 'package:test/fake.dart';
+import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart' as vms;
-
-import 'common.dart';
 
 void main() {
   group('FuchsiaRemoteConnection.connect', () {

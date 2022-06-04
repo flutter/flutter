@@ -803,11 +803,13 @@ class _AppBarState extends State<AppBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_scrollNotificationObserver != null)
+    if (_scrollNotificationObserver != null) {
       _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+    }
     _scrollNotificationObserver = ScrollNotificationObserver.of(context);
-    if (_scrollNotificationObserver != null)
+    if (_scrollNotificationObserver != null) {
       _scrollNotificationObserver!.addListener(_handleScrollNotification);
+    }
   }
 
   @override
@@ -949,10 +951,12 @@ class _AppBarState extends State<AppBar> {
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
-      if (titleTextStyle?.color != null)
+      if (titleTextStyle?.color != null) {
         titleTextStyle = titleTextStyle!.copyWith(color: titleTextStyle.color!.withOpacity(opacity));
-      if (toolbarTextStyle?.color != null)
+      }
+      if (toolbarTextStyle?.color != null) {
         toolbarTextStyle = toolbarTextStyle!.copyWith(color: toolbarTextStyle.color!.withOpacity(opacity));
+      }
       overallIconTheme = overallIconTheme.copyWith(
         opacity: opacity * (overallIconTheme.opacity ?? 1.0),
       );
@@ -970,9 +974,11 @@ class _AppBarState extends State<AppBar> {
           onPressed: _handleDrawerButton,
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
-      } else {
-        if (!hasEndDrawer && canPop)
-          leading = useCloseButton ? const CloseButton() : const BackButton();
+        // TODO(chunhtai): remove (!hasEndDrawer && canPop) once internal tests
+        // are migrated.
+        // https://github.com/flutter/flutter/issues/80256.
+      } else if ((!hasEndDrawer && canPop) || (parentRoute?.impliesAppBarDismissal ?? false)) {
+        leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
     if (leading != null) {
@@ -1278,7 +1284,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - (toolbarHeight ?? kToolbarHeight), 0.0);
     final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
 
-    final bool isScrolledUnder = overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent);
+    final bool isScrolledUnder = overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
       ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
@@ -1302,7 +1308,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
             )
           : flexibleSpace,
         bottom: bottom,
-        elevation: forceElevated || isScrolledUnder ? elevation : 0.0,
+        elevation: isScrolledUnder ? elevation : 0.0,
         scrolledUnderElevation: scrolledUnderElevation,
         shadowColor: shadowColor,
         surfaceTintColor: surfaceTintColor,
@@ -2048,10 +2054,12 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   @override
   void didUpdateWidget(SliverAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
+    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating) {
       _updateSnapConfiguration();
-    if (widget.stretch != oldWidget.stretch)
+    }
+    if (widget.stretch != oldWidget.stretch) {
       _updateStretchConfiguration();
+    }
   }
 
   @override

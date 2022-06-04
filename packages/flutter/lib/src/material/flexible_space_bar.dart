@@ -176,8 +176,9 @@ class FlexibleSpaceBar extends StatefulWidget {
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (widget.centerTitle != null)
+    if (widget.centerTitle != null) {
       return widget.centerTitle!;
+    }
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
@@ -192,8 +193,9 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   }
 
   Alignment _getTitleAlignment(bool effectiveCenterTitle) {
-    if (effectiveCenterTitle)
+    if (effectiveCenterTitle) {
       return Alignment.bottomCenter;
+    }
     final TextDirection textDirection = Directionality.of(context);
     assert(textDirection != null);
     switch (textDirection) {

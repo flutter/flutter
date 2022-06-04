@@ -79,24 +79,6 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
   }
 }
 
-class SynchronousTestImageProvider extends ImageProvider<int> {
-  const SynchronousTestImageProvider(this.image);
-
-  final Image image;
-
-  @override
-  Future<int> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<int>(1);
-  }
-
-  @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
-    return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
-    );
-  }
-}
-
 void main() {
   late Image image20x10;
   late Image image200x100;
