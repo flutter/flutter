@@ -12,18 +12,18 @@ import os
 import argparse
 
 
-def IsWindows():
+def is_windows():
   os_id = sys.platform
   return os_id.startswith('win32') or os_id.startswith('cygwin')
 
 
-def GetRepositoryVersion(repository):
-  "Returns the Git HEAD for the supplied repository path as a string."
+def get_repository_version(repository):
+  'Returns the Git HEAD for the supplied repository path as a string.'
   if not os.path.exists(repository):
-    raise IOError("path doesn't exist")
+    raise IOError('path does not exist')
 
   git = 'git'
-  if IsWindows():
+  if is_windows():
     git = 'git.bat'
   version = subprocess.check_output([
       git,
@@ -48,7 +48,7 @@ def main():
 
   args = parser.parse_args()
   repository = os.path.abspath(args.repository)
-  version = GetRepositoryVersion(repository)
+  version = get_repository_version(repository)
   print(version.strip())
 
   return 0
