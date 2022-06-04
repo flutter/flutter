@@ -1,4 +1,4 @@
-Signature: 5a6727cd91feca90b9e8ff50e611f23e
+Signature: ada8438d2ac972f7aba75c349ed498e7
 
 UNUSED LICENSES:
 
@@ -592,7 +592,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/meta.json
@@ -611,9 +610,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/elf_stdio.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/meta.json
@@ -622,7 +619,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/vulkan.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_compact_image.json
@@ -1347,7 +1343,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/meta.json
@@ -1366,9 +1361,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/elf_stdio.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/meta.json
@@ -1377,7 +1370,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/vulkan.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_compact_image.json
@@ -1999,7 +1991,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/meta.json
@@ -2018,9 +2009,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/elf_stdio.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/meta.json
@@ -2029,7 +2018,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/vulkan.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_compact_image.json
@@ -3724,9 +3712,13 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/transaction_
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/wire_format_metadata.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_base.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/elf_stdio.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 The Fuchsia Authors. All rights reserved.
 
