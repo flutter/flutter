@@ -1601,6 +1601,69 @@ void main() {
     // toolbar. Until we change that, this test should remain skipped.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android })); // [intended]
 
+  testWidgets('dragging handles hides toolbar on mobile', (WidgetTester tester) async {
+    controller.text = 'blah blah blah';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Show the toolbar
+    state.renderEditable.selectWordsInRange(
+      from: Offset.zero,
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+
+    expect(state.showToolbar(), true);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
+
+    final List<TextSelectionPoint> endpoints = globalize(
+      state.renderEditable.getEndpointsForSelection(state.textEditingValue.selection),
+      state.renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // We use a small offset because the endpoint is on the very corner of the
+    // handle.
+    final Offset endHandlePosition = endpoints[1].point + const Offset(1.0, 1.0);
+
+    // Select 2 more characters by dragging end handle.
+    final TestGesture gesture = await tester.startGesture(endHandlePosition);
+    await gesture.moveTo(textOffsetToPosition(tester, 6));
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsNothing);
+
+    // End drag gesture and expect toolbar to show again.
+    await gesture.up();
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      // There should be a delay before the toolbar is shown again on Android.
+      expect(find.text('Paste'), findsNothing);
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
+
+    // On web, we don't show the Flutter toolbar and instead rely on the browser
+    // toolbar. Until we change that, this test should remain skipped.
+  },
+    skip: kIsWeb, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+  );
+
   testWidgets('Paste is shown only when there is something to paste', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

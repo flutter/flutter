@@ -33,6 +33,11 @@ export 'package:flutter/services.dart' show TextSelectionDelegate;
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
+/// A duration that determines the delay before showing the text selection
+/// toolbar again after dragging either selection handle on Android. Eyeballed
+/// on a Pixel 5 Android API 31 emulator.
+const Duration _kAndroidPostDragShowDelay = Duration(milliseconds: 300);
+
 /// Signature for when a pointer that's dragging to select text has moved again.
 ///
 /// The first argument [startDetails] contains the details of the event that
@@ -1042,6 +1047,8 @@ class SelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
+  Timer? _androidPostDragShowTimer;
+
   /// A pair of handles. If this is non-null, there are always 2, though the
   /// second is hidden when the selection is collapsed.
   List<OverlayEntry>? _handles;
@@ -1081,7 +1088,7 @@ class SelectionOverlay {
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
   void showToolbar() {
-    if (_toolbar != null) {
+    if (_toolbar != null || (_hideToolbarWhenDraggingHandles && _isDraggingHandles)) {
       return;
     }
     _toolbar = OverlayEntry(builder: _buildToolbar);
@@ -1149,7 +1156,61 @@ class SelectionOverlay {
   /// Disposes this object and release resources.
   /// {@endtemplate}
   void dispose() {
+    _androidPostDragShowTimer?.cancel();
+    _androidPostDragShowTimer = null;
     hide();
+  }
+
+  final bool _hideToolbarWhenDraggingHandles =
+    <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }.contains(defaultTargetPlatform);
+
+  bool _isDraggingStartHandle = false;
+  bool _isDraggingEndHandle = false;
+  bool get _isDraggingHandles => _isDraggingStartHandle || _isDraggingEndHandle;
+
+  Future<void> _handleDragging() async {
+    // Hide toolbar while dragging either handle on Android and iOS.
+    if (!_hideToolbarWhenDraggingHandles) {
+      return;
+    }
+
+    if (_isDraggingHandles) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        _androidPostDragShowTimer?.cancel();
+        _androidPostDragShowTimer = null;
+      }
+      hideToolbar();
+    } else {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        _androidPostDragShowTimer = Timer(_kAndroidPostDragShowDelay, showToolbar);
+      } else {
+        showToolbar();
+      }
+    }
+  }
+
+  void _onStartHandleDragStart(DragStartDetails details) {
+    _isDraggingStartHandle = true;
+    _handleDragging();
+    onStartHandleDragStart?.call(details);
+  }
+
+  void _onStartHandleDragEnd(DragEndDetails details) {
+    _isDraggingStartHandle = false;
+    _handleDragging();
+    onStartHandleDragEnd?.call(details);
+  }
+
+  void _onEndHandleDragStart(DragStartDetails details) {
+    _isDraggingEndHandle = true;
+    _handleDragging();
+    onEndHandleDragStart?.call(details);
+  }
+
+  void _onEndHandleDragEnd(DragEndDetails details) {
+    _isDraggingEndHandle = false;
+    _handleDragging();
+    onEndHandleDragEnd?.call(details);
   }
 
   Widget _buildStartHandle(BuildContext context) {
@@ -1162,9 +1223,9 @@ class SelectionOverlay {
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onStartHandleDragStart,
+        onSelectionHandleDragStart: _onStartHandleDragStart,
         onSelectionHandleDragUpdate: onStartHandleDragUpdate,
-        onSelectionHandleDragEnd: onStartHandleDragEnd,
+        onSelectionHandleDragEnd: _onStartHandleDragEnd,
         selectionControls: selectionControls,
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
@@ -1189,9 +1250,9 @@ class SelectionOverlay {
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onEndHandleDragStart,
+        onSelectionHandleDragStart: _onEndHandleDragStart,
         onSelectionHandleDragUpdate: onEndHandleDragUpdate,
-        onSelectionHandleDragEnd: onEndHandleDragEnd,
+        onSelectionHandleDragEnd: _onEndHandleDragEnd,
         selectionControls: selectionControls,
         visibility: endHandlesVisible,
         preferredLineHeight: _lineHeightAtEnd,

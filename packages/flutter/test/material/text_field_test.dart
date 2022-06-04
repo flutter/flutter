@@ -3426,6 +3426,11 @@ void main() {
     expect(controller.selection.extentOffset, 50);
 
     if (!isContextMenuProvidedByPlatform) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        // There should be a delay before the toolbar is shown again on Android.
+        expect(find.text('Cut'), findsNothing);
+        await tester.pump(const Duration(milliseconds: 300));
+      }
       await tester.tap(find.text('Cut'));
       await tester.pump();
       expect(controller.selection.isCollapsed, true);

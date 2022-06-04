@@ -1232,7 +1232,12 @@ void main() {
     await gesture.moveTo(newHandlePos);
     await tester.pump();
     await gesture.up();
-    await tester.pump();
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      // There should be a delay before the toolbar is shown again on Android.
+      expect(find.text('Cut'), findsNothing);
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset, 50);
