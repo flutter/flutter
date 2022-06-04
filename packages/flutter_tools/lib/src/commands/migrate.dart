@@ -10,8 +10,8 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_utils.dart';
 import '../runner/flutter_command.dart';
-import 'migrate_status.dart';
 import 'migrate_abandon.dart';
+import 'migrate_status.dart';
 
 /// Base command for the migration tool.
 class MigrateCommand extends FlutterCommand {
