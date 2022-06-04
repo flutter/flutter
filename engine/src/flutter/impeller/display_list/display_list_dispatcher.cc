@@ -66,17 +66,26 @@ static std::optional<Entity::BlendMode> ToBlendMode(flutter::DlBlendMode mode) {
       return Entity::BlendMode::kModulate;
     case flutter::DlBlendMode::kScreen:
       return Entity::BlendMode::kScreen;
+    case flutter::DlBlendMode::kOverlay:
+      return Entity::BlendMode::kOverlay;
+    case flutter::DlBlendMode::kDarken:
+      return Entity::BlendMode::kDarken;
+    case flutter::DlBlendMode::kLighten:
+      return Entity::BlendMode::kLighten;
+    case flutter::DlBlendMode::kColorDodge:
+      return Entity::BlendMode::kColorDodge;
     case flutter::DlBlendMode::kColorBurn:
       return Entity::BlendMode::kColorBurn;
-    case flutter::DlBlendMode::kOverlay:
-    case flutter::DlBlendMode::kDarken:
-    case flutter::DlBlendMode::kLighten:
-    case flutter::DlBlendMode::kColorDodge:
     case flutter::DlBlendMode::kHardLight:
+      return Entity::BlendMode::kHardLight;
     case flutter::DlBlendMode::kSoftLight:
+      return Entity::BlendMode::kSoftLight;
     case flutter::DlBlendMode::kDifference:
+      return Entity::BlendMode::kDifference;
     case flutter::DlBlendMode::kExclusion:
+      return Entity::BlendMode::kExclusion;
     case flutter::DlBlendMode::kMultiply:
+      return Entity::BlendMode::kMultiply;
     case flutter::DlBlendMode::kHue:
     case flutter::DlBlendMode::kSaturation:
     case flutter::DlBlendMode::kColor:

@@ -534,7 +534,16 @@ TEST_P(AiksTest, ColorWheel) {
         {"Modulate", Entity::BlendMode::kModulate},
         // Advanced blends (color component blends)
         {"Screen", Entity::BlendMode::kScreen},
+        {"Overlay", Entity::BlendMode::kOverlay},
+        {"Darken", Entity::BlendMode::kDarken},
+        {"Lighten", Entity::BlendMode::kLighten},
+        {"ColorDodge", Entity::BlendMode::kColorDodge},
         {"ColorBurn", Entity::BlendMode::kColorBurn},
+        {"HardLight", Entity::BlendMode::kHardLight},
+        {"SoftLight", Entity::BlendMode::kSoftLight},
+        {"Difference", Entity::BlendMode::kDifference},
+        {"Exclusion", Entity::BlendMode::kExclusion},
+        {"Multiply", Entity::BlendMode::kMultiply},
     };
     assert(blends.size() ==
            static_cast<size_t>(Entity::BlendMode::kLastAdvancedBlendMode) + 1);
