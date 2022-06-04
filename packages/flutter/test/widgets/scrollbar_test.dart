@@ -272,10 +272,11 @@ void main() {
 
     for (final ScrollbarOrientation scrollbarOrientation in ScrollbarOrientation.values) {
       final AxisDirection axisDirection;
-      if (scrollbarOrientation == ScrollbarOrientation.left || scrollbarOrientation == ScrollbarOrientation.right)
+      if (scrollbarOrientation == ScrollbarOrientation.left || scrollbarOrientation == ScrollbarOrientation.right) {
         axisDirection = AxisDirection.down;
-      else
+      } else {
         axisDirection = AxisDirection.right;
+      }
 
       painter = _buildPainter(
         scrollMetrics: startingMetrics,
@@ -1326,7 +1327,6 @@ void main() {
     // the padding it not necessary.
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.down(const Offset(790.0, 45.0));
     await tester.pump();
     await gesture.moveTo(const Offset(790.0, 55.0));
@@ -2443,5 +2443,43 @@ void main() {
       );
     }
     expect(() => tester.pumpWidget(buildApp()), throwsAssertionError);
+  });
+
+  testWidgets('Skip the ScrollPosition check if the bar was unmounted', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103939
+    final ScrollController scrollController = ScrollController();
+    Widget buildApp(bool buildBar) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(
+            invertColors: buildBar, // Trigger a post frame check before unmount.
+          ),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                Widget content = const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0),
+                );
+                if (buildBar) {
+                  content = RawScrollbar(
+                    thumbVisibility: true,
+                    child: content,
+                  );
+                }
+                return content;
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(true));
+
+    await tester.pumpWidget(buildApp(false));
+
+    // Go without throw.
   });
 }

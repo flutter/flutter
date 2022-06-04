@@ -1289,6 +1289,7 @@ class WidgetsApp extends StatefulWidget {
     DirectionalFocusIntent: DirectionalFocusAction(),
     ScrollIntent: ScrollAction(),
     PrioritizedIntents: PrioritizedAction(),
+    VoidCallbackIntent: VoidCallbackAction(),
   };
 
   @override
@@ -1408,8 +1409,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       assert(route != null, 'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
       return route;
     }
-    if (widget.onGenerateRoute != null)
+    if (widget.onGenerateRoute != null) {
       return widget.onGenerateRoute!(settings);
+    }
     return null;
   }
 
@@ -1453,12 +1455,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(mounted);
     // The back button dispatcher should handle the pop route if we use a
     // router.
-    if (_usesRouterWithDelegates)
+    if (_usesRouterWithDelegates) {
       return false;
+    }
 
     final NavigatorState? navigator = _navigator?.currentState;
-    if (navigator == null)
+    if (navigator == null) {
       return false;
+    }
     return navigator.maybePop();
   }
 
@@ -1467,12 +1471,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(mounted);
     // The route name provider should handle the push route if we uses a
     // router.
-    if (_usesRouterWithDelegates)
+    if (_usesRouterWithDelegates) {
       return false;
+    }
 
     final NavigatorState? navigator = _navigator?.currentState;
-    if (navigator == null)
+    if (navigator == null) {
       return false;
+    }
     navigator.pushNamed(route);
     return true;
   }
@@ -1486,8 +1492,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     // Attempt to use localeListResolutionCallback.
     if (widget.localeListResolutionCallback != null) {
       final Locale? locale = widget.localeListResolutionCallback!(preferredLocales, widget.supportedLocales);
-      if (locale != null)
+      if (locale != null) {
         return locale;
+      }
     }
     // localeListResolutionCallback failed, falling back to localeResolutionCallback.
     if (widget.localeResolutionCallback != null) {
@@ -1495,8 +1502,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         preferredLocales != null && preferredLocales.isNotEmpty ? preferredLocales.first : null,
         widget.supportedLocales,
       );
-      if (locale != null)
+      if (locale != null) {
         return locale;
+      }
     }
     // Both callbacks failed, falling back to default algorithm.
     return basicLocaleListResolution(preferredLocales, supportedLocales);
@@ -1532,13 +1540,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       final Set<Type> unsupportedTypes =
         _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
       for (final LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
-        if (!unsupportedTypes.contains(delegate.type))
+        if (!unsupportedTypes.contains(delegate.type)) {
           continue;
-        if (delegate.isSupported(appLocale))
+        }
+        if (delegate.isSupported(appLocale)) {
           unsupportedTypes.remove(delegate.type);
+        }
       }
-      if (unsupportedTypes.isEmpty)
+      if (unsupportedTypes.isEmpty) {
         return true;
+      }
 
       FlutterError.reportError(FlutterErrorDetails(
         exception: "Warning: This application's locale, $appLocale, is not supported by all of its localization delegates.",
@@ -1729,7 +1740,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
               actions: widget.actions ?? WidgetsApp.defaultActions,
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
-                child: child,
+                child: ShortcutRegistrar(
+                  child: child,
+                ),
               ),
             ),
           ),

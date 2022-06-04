@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 void main() => runApp(const RefreshControlApp());
 
 class RefreshControlApp extends StatelessWidget {
-  const RefreshControlApp({Key? key}) : super(key: key);
+  const RefreshControlApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class RefreshControlApp extends StatelessWidget {
 }
 
 class RefreshControlExample extends StatefulWidget {
-  const RefreshControlExample({Key? key}) : super(key: key);
+  const RefreshControlExample({super.key});
 
   @override
   State<RefreshControlExample> createState() => _RefreshControlExampleState();

@@ -2,38 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// import 'package:process/process.dart';
+import 'package:process/process.dart';
 
-// import '../base/file_system.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
-// import '../base/platform.dart';
+import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_utils.dart';
 import '../runner/flutter_command.dart';
-// TODO(garyq): Add each of these back in as they land.
-// import 'migrate_abandon.dart';
-// import 'migrate_apply.dart';
-// import 'migrate_resolve_conflicts.dart';
-// import 'migrate_start.dart';
-// import 'migrate_status.dart';
+import 'migrate_status.dart';
 
 /// Base command for the migration tool.
 class MigrateCommand extends FlutterCommand {
   MigrateCommand({
-    // bool verbose = false,
+    bool verbose = false,
     required this.logger,
-    // TODO(garyq): Add each of these back in as they land.
-    // required FileSystem fileSystem,
-    // required Terminal terminal,
-    // required Platform platform,
-    // required ProcessManager processManager,
+    // TODO(garyq): Add parameter in as they are needed for subcommands.
+    required FileSystem fileSystem,
+    required Platform platform,
+    required ProcessManager processManager,
   }) {
-    // TODO(garyq): Add each of these back in as they land.
-    // addSubcommand(MigrateAbandonCommand(logger: logger, fileSystem: fileSystem, terminal: terminal, platform: platform, processManager: processManager));
-    // addSubcommand(MigrateApplyCommand(verbose: verbose, logger: logger, fileSystem: fileSystem, terminal: terminal, platform: platform, processManager: processManager));
-    // addSubcommand(MigrateResolveConflictsCommand(logger: logger, fileSystem: fileSystem, terminal: terminal));
-    // addSubcommand(MigrateStartCommand(verbose: verbose, logger: logger, fileSystem: fileSystem, platform: platform, processManager: processManager));
-    // addSubcommand(MigrateStatusCommand(verbose: verbose, logger: logger, fileSystem: fileSystem, platform: platform, processManager: processManager));
+    // TODO(garyq): Add each subcommand back in as they land.
+    addSubcommand(MigrateStatusCommand(
+      verbose: verbose,
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager
+    ));
   }
 
   final Logger logger;

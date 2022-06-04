@@ -9,7 +9,6 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
@@ -19,11 +18,6 @@ import 'package:flutter_tools/src/convert.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-
-final Platform kWindowsPlatform = FakePlatform(
-  operatingSystem: 'windows',
-  environment: <String, String>{},
-);
 
 void main() {
   testWithoutContext('UnpackWindows copies files to the correct windows/ cache directory', () async {

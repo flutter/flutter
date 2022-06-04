@@ -82,10 +82,12 @@ class FrictionSimulation extends Simulation {
   ///
   /// Returns `double.infinity` if the simulation will never reach [x].
   double timeAtX(double x) {
-    if (x == _x)
+    if (x == _x) {
       return 0.0;
-    if (_v == 0.0 || (_v > 0 ? (x < _x || x > finalX) : (x > _x || x < finalX)))
+    }
+    if (_v == 0.0 || (_v > 0 ? (x < _x || x > finalX) : (x > _x || x < finalX))) {
       return double.infinity;
+    }
     return math.log(_dragLog * (x - _x) / _v + 1.0) / _dragLog;
   }
 
@@ -115,14 +117,14 @@ class BoundedFrictionSimulation extends FrictionSimulation {
     super.velocity,
     this._minX,
     this._maxX,
-  ) : assert(position.clamp(_minX, _maxX) == position);
+  ) : assert(clampDouble(position, _minX, _maxX) == position);
 
   final double _minX;
   final double _maxX;
 
   @override
   double x(double time) {
-    return super.x(time).clamp(_minX, _maxX);
+    return clampDouble(super.x(time), _minX, _maxX);
   }
 
   @override

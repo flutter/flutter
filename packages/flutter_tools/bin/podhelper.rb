@@ -34,7 +34,7 @@ def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
   # [target.deployment_target] is a [String] formatted as "8.0".
-  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
+  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 11
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
@@ -60,7 +60,7 @@ def flutter_additional_ios_build_settings(target)
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
-      continue if xcframework_file.start_with?(".") # Hidden file, possibly on external disk.
+      next if xcframework_file.start_with?(".") # Hidden file, possibly on external disk.
       if xcframework_file.end_with?("-simulator") # ios-arm64_x86_64-simulator
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
       elsif xcframework_file.start_with?("ios-") # ios-arm64
@@ -177,9 +177,9 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
       Pod::Spec.new do |s|
         s.name             = 'Flutter'
         s.version          = '1.0.0'
-        s.summary          = 'High-performance, high-fidelity mobile apps.'
-        s.homepage         = 'https://flutter.io'
-        s.license          = { :type => 'MIT' }
+        s.summary          = 'A UI toolkit for beautiful and fast apps.'
+        s.homepage         = 'https://flutter.dev'
+        s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
         s.ios.deployment_target = '11.0'
@@ -215,9 +215,9 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
       Pod::Spec.new do |s|
         s.name             = 'FlutterMacOS'
         s.version          = '1.0.0'
-        s.summary          = 'High-performance, high-fidelity mobile apps.'
-        s.homepage         = 'https://flutter.io'
-        s.license          = { :type => 'MIT' }
+        s.summary          = 'A UI toolkit for beautiful and fast apps.'
+        s.homepage         = 'https://flutter.dev'
+        s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
         s.osx.deployment_target = '10.11'

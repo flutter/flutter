@@ -25,14 +25,23 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     required this.fileSystem,
     required this.platform,
     super.ipv6,
-    super.enableDds,
+    bool enableDds = true,
     super.enableAuthCodes,
     super.logger,
-  });
+  })  : _enableDds = enableDds,
+        // Always disable in the DAP layer as it's handled in the spawned
+        // 'flutter' process.
+        super(enableDds: false);
 
   FileSystem fileSystem;
   Platform platform;
   Process? _process;
+
+  /// Whether DDS should be enabled in the Flutter process.
+  ///
+  /// We never enable DDS in the DAP process for Flutter, so this value is not
+  /// the same as what is passed to the base class, which is always provided 'false'.
+  final bool _enableDds;
 
   @override
   final FlutterLaunchRequestArguments Function(Map<String, Object?> obj)
@@ -136,6 +145,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     final List<String> toolArgs = <String>[
       'attach',
       '--machine',
+      if (!_enableDds) '--no-dds',
       if (vmServiceUri != null)
       ...<String>['--debug-uri', vmServiceUri],
     ];
@@ -249,6 +259,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     final List<String> toolArgs = <String>[
       'run',
       '--machine',
+      if (!_enableDds) '--no-dds',
       if (enableDebugger) '--start-paused',
       // Structured errors are enabled by default, but since we don't connect
       // the VM Service for noDebug, we need to disable them so that error text

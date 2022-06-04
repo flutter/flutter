@@ -14,7 +14,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 
 /// The default name of the migrate working directory used to stage proposed changes.
-const String kDefaultMigrateWorkingDirectoryName = 'migrate_working_dir';
+const String kDefaultMigrateStagingDirectoryName = 'migrate_staging_dir';
 
 /// Utility class that contains methods that wrap git and other shell commands.
 class MigrateUtils {
@@ -179,14 +179,14 @@ class MigrateUtils {
   }
 
   /// Returns true if the workingDirectory git repo has any uncommited changes.
-  Future<bool> hasUncommittedChanges(String workingDirectory, {String? migrateWorkingDir}) async {
+  Future<bool> hasUncommittedChanges(String workingDirectory, {String? migrateStagingDir}) async {
     final List<String> cmdArgs = <String>[
       'git',
       'ls-files',
       '--deleted',
       '--modified',
       '--others',
-      '--exclude=${migrateWorkingDir ?? kDefaultMigrateWorkingDirectoryName}'
+      '--exclude=${migrateStagingDir ?? kDefaultMigrateStagingDirectoryName}'
     ];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: cmdArgs.join(' '));
@@ -242,32 +242,32 @@ class MigrateUtils {
     bool exit = true,
     bool silent = false
   }) {
-    if (!allowedExitCodes.contains(result.exitCode) && !allowedExitCodes.contains(-1)) {
-      if (!silent) {
-        _logger.printError('Command encountered an error with exit code ${result.exitCode}.');
-        if (commandDescription != null) {
-          _logger.printError('Command:');
-          _logger.printError(commandDescription, indent: 2);
-        }
-        _logger.printError('Stdout:');
-        _logger.printError(result.stdout, indent: 2);
-        _logger.printError('Stderr:');
-        _logger.printError(result.stderr, indent: 2);
-      }
-      if (exit) {
-        throwToolExit('Command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
-      }
-      return false;
+    if (allowedExitCodes.contains(result.exitCode) || allowedExitCodes.contains(-1)) {
+      return true;
     }
-    return true;
+    if (!silent) {
+      _logger.printError('Command encountered an error with exit code ${result.exitCode}.');
+      if (commandDescription != null) {
+        _logger.printError('Command:');
+        _logger.printError(commandDescription, indent: 2);
+      }
+      _logger.printError('Stdout:');
+      _logger.printError(result.stdout, indent: 2);
+      _logger.printError('Stderr:');
+      _logger.printError(result.stderr, indent: 2);
+    }
+    if (exit) {
+      throwToolExit('Command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
+    }
+    return false;
   }
 
   /// Returns true if the file does not contain any git conflit markers.
   bool conflictsResolved(String contents) {
-    if (contents.contains('>>>>>>>') && contents.contains('=======') && contents.contains('<<<<<<<')) {
-      return false;
-    }
-    return true;
+    final bool hasMarker = contents.contains('>>>>>>>') ||
+                           contents.contains('=======') ||
+                           contents.contains('<<<<<<<');
+    return !hasMarker;
   }
 }
 

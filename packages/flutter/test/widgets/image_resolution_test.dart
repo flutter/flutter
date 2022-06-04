@@ -62,8 +62,9 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<String> loadString(String key, { bool cache = true }) {
-    if (key == 'AssetManifest.json')
+    if (key == 'AssetManifest.json') {
       return SynchronousFuture<String>(manifest);
+    }
     return SynchronousFuture<String>('');
   }
 
@@ -83,7 +84,7 @@ class TestAssetImage extends AssetImage {
   final Map<double, ui.Image> images;
 
   @override
-  ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(AssetBundleImageKey key, DecoderBufferCallback decode) {
     late ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
       final ui.Image image = images[scaleOf(data)]!;

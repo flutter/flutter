@@ -27,7 +27,7 @@ const List<Widget> icons = <Widget>[
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'ToggleButtons Sample';
 
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ToggleButtonsSample extends StatefulWidget {
-  const ToggleButtonsSample({Key? key, required this.title}) : super(key: key);
+  const ToggleButtonsSample({super.key, required this.title});
 
   final String title;
 

@@ -349,8 +349,9 @@ class _TextButtonDefaultForeground extends MaterialStateProperty<Color?> {
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return onSurface?.withOpacity(0.38);
+    }
     return primary;
   }
 
@@ -368,10 +369,12 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.hovered))
+    if (states.contains(MaterialState.hovered)) {
       return primary.withOpacity(0.04);
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
+    }
+    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
       return primary.withOpacity(0.12);
+    }
     return null;
   }
 
@@ -390,8 +393,9 @@ class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
 
   @override
   MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
+    }
     return enabledCursor;
   }
 }
@@ -426,7 +430,7 @@ class _TextButtonWithIcon extends TextButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
+      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }
@@ -471,7 +475,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle =>
-    MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+    MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
@@ -480,20 +484,24 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
+      }
       return _colors.primary;
     });
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered))
+      if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
-      if (states.contains(MaterialState.focused))
+      }
+      if (states.contains(MaterialState.focused)) {
         return _colors.primary.withOpacity(0.12);
-      if (states.contains(MaterialState.pressed))
+      }
+      if (states.contains(MaterialState.pressed)) {
         return _colors.primary.withOpacity(0.12);
+      }
       return null;
     });
 
@@ -528,8 +536,9 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
+      }
       return SystemMouseCursors.click;
     });
 

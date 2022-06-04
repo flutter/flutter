@@ -353,6 +353,13 @@ TaskFunction createFullscreenTextfieldPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createClipperCachePerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/clipper_cache_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -408,6 +415,14 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/multi_widget_construction_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createListTextLayoutPerfE2ETest({bool enableImpeller = false}) {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/list_text_layout_perf_e2e.dart',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -1794,9 +1809,9 @@ class _UnzipListEntry {
   final String path;
 }
 
-/// Wait for up to 400 seconds for the file to appear.
+/// Wait for up to 1 hour for the file to appear.
 Future<File> waitForFile(String path) async {
-  for (int i = 0; i < 20; i += 1) {
+  for (int i = 0; i < 180; i += 1) {
     final File file = File(path);
     print('looking for ${file.path}');
     if (file.existsSync()) {
@@ -1804,7 +1819,7 @@ Future<File> waitForFile(String path) async {
     }
     await Future<void>.delayed(const Duration(seconds: 20));
   }
-  throw StateError('Did not find vmservice out file after 400 seconds');
+  throw StateError('Did not find vmservice out file after 1 hour');
 }
 
 String? _findIosAppInBuildDirectory(String searchDirectory) {

@@ -44,10 +44,12 @@ class _InputBorderGap extends ChangeNotifier {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _InputBorderGap
         && other.start == start
         && other.extent == extent;
@@ -264,12 +266,13 @@ class _Shaker extends AnimatedWidget {
   double get translateX {
     const double shakeDelta = 4.0;
     final double t = animation.value;
-    if (t <= 0.25)
+    if (t <= 0.25) {
       return -t * shakeDelta;
-    else if (t < 0.75)
+    } else if (t < 0.75) {
       return (t - 0.5) * shakeDelta;
-    else
+    } else {
       return (1.0 - t) * 4.0 * shakeDelta;
+    }
   }
 
   @override
@@ -432,11 +435,13 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       }
     }
 
-    if (_helper == null && widget.errorText != null)
+    if (_helper == null && widget.errorText != null) {
       return _buildError();
+    }
 
-    if (_error == null && widget.helperText != null)
+    if (_error == null && widget.helperText != null) {
       return _buildHelper();
+    }
 
     if (widget.errorText != null) {
       return Stack(
@@ -514,19 +519,23 @@ class FloatingLabelAlignment {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FloatingLabelAlignment
             && _x == other._x;
   }
 
   static String _stringify(double x) {
-    if (x == -1.0)
+    if (x == -1.0) {
       return 'FloatingLabelAlignment.start';
-    if (x == 0.0)
+    }
+    if (x == 0.0) {
       return 'FloatingLabelAlignment.center';
+    }
     return 'FloatingLabelAlignment(x: ${x.toStringAsFixed(1)})';
   }
 
@@ -604,10 +613,12 @@ class _Decoration {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _Decoration
         && other.contentPadding == contentPadding
         && other.isCollapsed == isCollapsed
@@ -745,8 +756,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   _Decoration _decoration;
   set decoration(_Decoration value) {
     assert(value != null);
-    if (_decoration == value)
+    if (_decoration == value) {
       return;
+    }
     _decoration = value;
     markNeedsLayout();
   }
@@ -755,8 +767,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsLayout();
   }
@@ -765,8 +778,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   TextBaseline _textBaseline;
   set textBaseline(TextBaseline value) {
     assert(value != null);
-    if (_textBaseline == value)
+    if (_textBaseline == value) {
       return;
+    }
     _textBaseline = value;
     markNeedsLayout();
   }
@@ -793,8 +807,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   bool _isFocused;
   set isFocused(bool value) {
     assert(value != null);
-    if (_isFocused == value)
+    if (_isFocused == value) {
       return;
+    }
     _isFocused = value;
     markNeedsSemanticsUpdate();
   }
@@ -803,8 +818,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   bool _expands = false;
   set expands(bool value) {
     assert(value != null);
-    if (_expands == value)
+    if (_expands == value) {
       return;
+    }
     _expands = value;
     markNeedsLayout();
   }
@@ -817,12 +833,15 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (icon != null)
+    if (icon != null) {
       visitor(icon!);
-    if (prefix != null)
+    }
+    if (prefix != null) {
       visitor(prefix!);
-    if (prefixIcon != null)
+    }
+    if (prefixIcon != null) {
       visitor(prefixIcon!);
+    }
 
     if (label != null) {
       visitor(label!);
@@ -835,18 +854,24 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       }
     }
 
-    if (input != null)
+    if (input != null) {
       visitor(input!);
-    if (suffixIcon != null)
+    }
+    if (suffixIcon != null) {
       visitor(suffixIcon!);
-    if (suffix != null)
+    }
+    if (suffix != null) {
       visitor(suffix!);
-    if (container != null)
+    }
+    if (container != null) {
       visitor(container!);
-    if (helperError != null)
+    }
+    if (helperError != null) {
       visitor(helperError!);
-    if (counter != null)
+    }
+    if (counter != null) {
       visitor(counter!);
+    }
   }
 
   @override
@@ -885,8 +910,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic)!;
 
     assert(() {
-      if (baseline >= 0)
+      if (baseline >= 0) {
         return true;
+      }
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary("One of InputDecorator's children reported a negative baseline offset."),
         ErrorDescription(
@@ -1204,8 +1230,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   double _lineHeight(double width, List<RenderBox?> boxes) {
     double height = 0.0;
     for (final RenderBox? box in boxes) {
-      if (box == null)
+      if (box == null) {
         continue;
+      }
       height = math.max(_minHeight(box, width), height);
     }
     return height;
@@ -1235,8 +1262,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
     final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
     double subtextHeight = math.max(counterHeight, helperErrorHeight);
-    if (subtextHeight > 0.0)
+    if (subtextHeight > 0.0) {
       subtextHeight += subtextGap;
+    }
 
     final double prefixHeight = _minHeight(prefix, width);
     final double prefixWidth = _minWidth(prefix, prefixHeight);
@@ -1355,18 +1383,22 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
             centerLayout(label!, start - label!.size.width);
           }
         }
-        if (prefix != null)
+        if (prefix != null) {
           start -= baselineLayout(prefix!, start - prefix!.size.width);
-        if (input != null)
+        }
+        if (input != null) {
           baselineLayout(input!, start - input!.size.width);
-        if (hint != null)
+        }
+        if (hint != null) {
           baselineLayout(hint!, start - hint!.size.width);
+        }
         if (suffixIcon != null) {
           end -= contentPadding.left;
           end += centerLayout(suffixIcon!, end);
         }
-        if (suffix != null)
+        if (suffix != null) {
           end += baselineLayout(suffix!, end);
+        }
         break;
       }
       case TextDirection.ltr: {
@@ -1383,18 +1415,22 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
             centerLayout(label!, start);
           }
         }
-        if (prefix != null)
+        if (prefix != null) {
           start += baselineLayout(prefix!, start);
-        if (input != null)
+        }
+        if (input != null) {
           baselineLayout(input!, start);
-        if (hint != null)
+        }
+        if (hint != null) {
           baselineLayout(hint!, start);
+        }
         if (suffixIcon != null) {
           end += contentPadding.right;
           end -= centerLayout(suffixIcon!, end - suffixIcon!.size.width);
         }
-        if (suffix != null)
+        if (suffix != null) {
           end -= baselineLayout(suffix!, end - suffix!.size.width);
+        }
         break;
       }
     }
@@ -1405,16 +1441,20 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
       switch (textDirection) {
         case TextDirection.rtl:
-          if (helperError != null)
+          if (helperError != null) {
             baselineLayout(helperError!, right - helperError!.size.width - _boxSize(icon).width);
-          if (counter != null)
+          }
+          if (counter != null) {
             baselineLayout(counter!, left);
+          }
           break;
         case TextDirection.ltr:
-          if (helperError != null)
+          if (helperError != null) {
             baselineLayout(helperError!, left + _boxSize(icon).width);
-          if (counter != null)
+          }
+          if (counter != null) {
             baselineLayout(counter!, right - counter!.size.width);
+          }
           break;
       }
     }
@@ -1460,8 +1500,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   @override
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox? child) {
-      if (child != null)
+      if (child != null) {
         context.paintChild(child, _boxParentData(child).offset + offset);
+      }
     }
     doPaint(container);
 
@@ -1537,8 +1578,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           return child.hitTest(result, position: transformed);
         },
       );
-      if (isHit)
+      if (isHit) {
         return true;
+      }
     }
     return false;
   }
@@ -1882,17 +1924,19 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   void didUpdateWidget(InputDecorator old) {
     super.didUpdateWidget(old);
-    if (widget.decoration != old.decoration)
+    if (widget.decoration != old.decoration) {
       _effectiveDecoration = null;
+    }
 
     final bool floatBehaviorChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
       if (_floatingLabelEnabled
-          && (widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always))
+          && (widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always)) {
         _floatingLabelController.forward();
-      else
+      } else {
         _floatingLabelController.reverse();
+      }
     }
 
     final String? errorText = decoration!.errorText;
@@ -1928,10 +1972,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getFillColor(ThemeData themeData) {
-    if (decoration!.filled != true) // filled == null same as filled == false
+    if (decoration!.filled != true) { // filled == null same as filled == false
       return Colors.transparent;
-    if (decoration!.fillColor != null)
+    }
+    if (decoration!.fillColor != null) {
       return MaterialStateProperty.resolveAs(decoration!.fillColor!, materialState);
+    }
 
     // dark theme: 10% white (enabled), 5% white (disabled)
     // light theme: 4% black (enabled), 2% black (disabled)
@@ -1949,18 +1995,21 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getHoverColor(ThemeData themeData) {
-    if (decoration!.filled == null || !decoration!.filled! || isFocused || !decoration!.enabled)
+    if (decoration!.filled == null || !decoration!.filled! || isFocused || !decoration!.enabled) {
       return Colors.transparent;
+    }
     return decoration!.hoverColor ?? themeData.inputDecorationTheme.hoverColor ?? themeData.hoverColor;
   }
 
   Color _getIconColor(ThemeData themeData) {
     Color resolveIconColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused))
+      if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
         return themeData.disabledColor;
+      }
 
-      if (states.contains(MaterialState.focused))
+      if (states.contains(MaterialState.focused)) {
         return themeData.colorScheme.primary;
+      }
 
       switch (themeData.brightness) {
         case Brightness.dark:
@@ -2092,10 +2141,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     final double borderWeight;
-    if (decoration!.isCollapsed || decoration?.border == InputBorder.none || !decoration!.enabled)
+    if (decoration!.isCollapsed || decoration?.border == InputBorder.none || !decoration!.enabled) {
       borderWeight = 0.0;
-    else
+    } else {
       borderWeight = isFocused ? 2.0 : 1.0;
+    }
 
     return border.copyWith(borderSide: BorderSide(color: borderColor, width: borderWeight));
   }
@@ -2124,12 +2174,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final bool isError = decoration!.errorText != null;
     InputBorder? border;
-    if (!decoration!.enabled)
+    if (!decoration!.enabled) {
       border = isError ? decoration!.errorBorder : decoration!.disabledBorder;
-    else if (isFocused)
+    } else if (isFocused) {
       border = isError ? decoration!.focusedErrorBorder : decoration!.focusedBorder;
-    else
+    } else {
       border = isError ? decoration!.errorBorder : decoration!.enabledBorder;
+    }
     border ??= _getDefaultBorder(themeData);
 
     final Widget container = _BorderContainer(
@@ -3498,10 +3549,12 @@ class InputDecoration {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is InputDecoration
         && other.icon == icon
         && other.iconColor == iconColor
@@ -4189,10 +4242,12 @@ class InputDecorationTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is InputDecorationTheme
         && other.labelStyle == labelStyle
         && other.floatingLabelStyle == floatingLabelStyle

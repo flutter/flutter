@@ -70,7 +70,6 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       // Start out of hoverTarget
       await gesture.moveTo(const Offset(100, 100));
 
@@ -140,7 +139,6 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       // Start out of hoverTarget
       await gesture.moveTo(const Offset(100, 100));
       await tester.pumpWidget(subject);
@@ -499,7 +497,6 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       // Start out of hoverTarget
       await gesture.moveTo(const Offset(100, 100));
 
@@ -569,7 +566,6 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       // Start out of hoverTarget
       await gesture.moveTo(const Offset(100, 100));
       await tester.pumpWidget(subject);
@@ -915,7 +911,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(ModalBarrier)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
