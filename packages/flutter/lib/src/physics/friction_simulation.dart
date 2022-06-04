@@ -24,12 +24,11 @@ class FrictionSimulation extends Simulation {
     double drag,
     double position,
     double velocity, {
-    Tolerance tolerance = Tolerance.defaultTolerance,
+    super.tolerance,
   }) : _drag = drag,
        _dragLog = math.log(drag),
        _x = position,
-       _v = velocity,
-       super(tolerance: tolerance);
+       _v = velocity;
 
   /// Creates a new friction simulation with its fluid drag coefficient (_cₓ_) set so
   /// as to ensure that the simulation starts and ends at the specified
@@ -111,13 +110,12 @@ class BoundedFrictionSimulation extends FrictionSimulation {
   /// in the same units as the initial position, and the initial position must
   /// be within the given range.
   BoundedFrictionSimulation(
-    double drag,
-    double position,
-    double velocity,
+    super.drag,
+    super.position,
+    super.velocity,
     this._minX,
     this._maxX,
-  ) : assert(position.clamp(_minX, _maxX) == position),
-      super(drag, position, velocity);
+  ) : assert(position.clamp(_minX, _maxX) == position);
 
   final double _minX;
   final double _maxX;

@@ -26,6 +26,8 @@ const String kStackSizeRouteName = '/stack_size';
 const String kAnimationWithMicrotasksRouteName = '/animation_with_microtasks';
 const String kAnimatedImageRouteName = '/animated_image';
 const String kOpacityPeepholeRouteName = '/opacity_peephole';
+const String kGradientPerfRouteName = '/gradient_perf';
+const String kAnimatedComplexOpacityPerfRouteName = '/animated_complex_opacity';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName = '$kOpacityPeepholeRouteName/column_of_opacity';
@@ -39,7 +41,12 @@ const String kOpacityPeepholeGridOfRectsWithAlphaRouteName = '$kOpacityPeepholeR
 const String kOpacityPeepholeGridOfAlphaSaveLayerRectsRouteName = '$kOpacityPeepholeRouteName/grid_of_alpha_savelayer_rects';
 const String kOpacityPeepholeColumnOfAlphaSaveLayerRowsOfRectsRouteName = '$kOpacityPeepholeRouteName/column_of_alpha_save_layer_rows_of_rects';
 
+const String kGradientPerfRecreateDynamicRouteName = '$kGradientPerfRouteName/recreate_dynamic';
+const String kGradientPerfRecreateConsistentRouteName = '$kGradientPerfRouteName/recreate_consistent';
+const String kGradientPerfStaticConsistentRouteName = '$kGradientPerfRouteName/static_consistent';
+
 const String kScrollableName = '/macrobenchmark_listview';
 const String kOpacityScrollableName = '$kOpacityPeepholeRouteName/listview';
+const String kGradientPerfScrollableName = '$kGradientPerfRouteName/listview';
 
 const String kStackSizeKey = 'stack_size';

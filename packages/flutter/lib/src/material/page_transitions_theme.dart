@@ -13,12 +13,10 @@ import 'theme.dart';
 // Android O.
 class _FadeUpwardsPageTransition extends StatelessWidget {
   _FadeUpwardsPageTransition({
-    Key? key,
     required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
     required this.child,
   }) : _positionAnimation = routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
-       _opacityAnimation = routeAnimation.drive(_easeInTween),
-       super(key: key);
+       _opacityAnimation = routeAnimation.drive(_easeInTween);
 
   // Fractional offset from 1/4 screen below the top to fully on screen.
   static final Tween<Offset> _bottomUpTween = Tween<Offset>(
@@ -48,11 +46,10 @@ class _FadeUpwardsPageTransition extends StatelessWidget {
 // This transition is intended to match the default for Android P.
 class _OpenUpwardsPageTransition extends StatelessWidget {
   const _OpenUpwardsPageTransition({
-    Key? key,
     required this.animation,
     required this.secondaryAnimation,
     required this.child,
-  }) : super(key: key);
+  });
 
   // The new page slides upwards just a little as its clip
   // rectangle exposes the page from bottom to top.
@@ -154,13 +151,11 @@ class _ZoomPageTransition extends StatelessWidget {
   /// The [animation] and [secondaryAnimation] argument are required and must
   /// not be null.
   const _ZoomPageTransition({
-    Key? key,
     required this.animation,
     required this.secondaryAnimation,
     this.child,
   }) : assert(animation != null),
-       assert(secondaryAnimation != null),
-       super(key: key);
+       assert(secondaryAnimation != null);
 
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
@@ -257,13 +252,11 @@ class _ZoomPageTransition extends StatelessWidget {
 
 class _ZoomEnterTransition extends StatelessWidget {
   const _ZoomEnterTransition({
-    Key? key,
     required this.animation,
     this.reverse = false,
     this.child,
   }) : assert(animation != null),
-       assert(reverse != null),
-       super(key: key);
+       assert(reverse != null);
 
   final Animation<double> animation;
   final Widget? child;
@@ -333,13 +326,11 @@ class _ZoomEnterTransition extends StatelessWidget {
 
 class _ZoomExitTransition extends StatelessWidget {
   const _ZoomExitTransition({
-    Key? key,
     required this.animation,
     this.reverse = false,
     this.child,
   }) : assert(animation != null),
-       assert(reverse != null),
-       super(key: key);
+       assert(reverse != null);
 
   final Animation<double> animation;
   final bool reverse;

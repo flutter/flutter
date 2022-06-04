@@ -29,13 +29,13 @@ void main() {
           permissionDeniedErrorHandler,
           flavorUndefinedHandler,
           r8FailureHandler,
-          minSdkVersion,
-          transformInputIssue,
-          lockFileDepMissing,
+          minSdkVersionHandler,
+          transformInputIssueHandler,
+          lockFileDepMissingHandler,
           multidexErrorHandler,
           incompatibleKotlinVersionHandler,
           minCompileSdkVersionHandler,
-          jvm11Required,
+          jvm11RequiredHandler,
         ])
       );
     });
@@ -427,7 +427,7 @@ Execution failed for task ':app:mergeDexDebug'.
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      AnsiTerminal: () => _TestPromptTerminal('y')
+      AnsiTerminal: () => _TestPromptTerminal('y'),
     });
 
     testUsingContext('exits if multidex support skipped', () async {
@@ -493,7 +493,7 @@ Execution failed for task ':app:mergeDexDebug'.
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      AnsiTerminal: () => _TestPromptTerminal('n')
+      AnsiTerminal: () => _TestPromptTerminal('n'),
     });
 
     testUsingContext('exits if multidex support disabled', () async {
@@ -754,13 +754,13 @@ assembleProfile
 
     testWithoutContext('pattern', () {
       expect(
-        minSdkVersion.test(stdoutLine),
+        minSdkVersionHandler.test(stdoutLine),
         isTrue,
       );
     });
 
     testUsingContext('suggestion', () async {
-      await minSdkVersion.handler(
+      await minSdkVersionHandler.handler(
         line: stdoutLine,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
@@ -798,7 +798,7 @@ assembleProfile
   group('transform input issue', () {
     testWithoutContext('pattern', () {
       expect(
-        transformInputIssue.test(
+        transformInputIssueHandler.test(
           'https://issuetracker.google.com/issues/158753935'
         ),
         isTrue,
@@ -806,7 +806,7 @@ assembleProfile
     });
 
     testUsingContext('suggestion', () async {
-      await transformInputIssue.handler(
+      await transformInputIssueHandler.handler(
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
@@ -836,7 +836,7 @@ assembleProfile
   group('Dependency mismatch', () {
     testWithoutContext('pattern', () {
       expect(
-        lockFileDepMissing.test('''
+        lockFileDepMissingHandler.test('''
 * What went wrong:
 Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 > Could not resolve all artifacts for configuration ':app:debugRuntimeClasspath'.
@@ -848,7 +848,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
     });
 
     testUsingContext('suggestion', () async {
-      await lockFileDepMissing.handler(
+      await lockFileDepMissingHandler.handler(
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
@@ -960,7 +960,7 @@ Execution failed for task ':app:checkDebugAarMetadata'.
   group('Java 11 requirement', () {
     testWithoutContext('pattern', () {
       expect(
-        jvm11Required.test('''
+        jvm11RequiredHandler.test('''
 * What went wrong:
 A problem occurred evaluating project ':flutter'.
 > Failed to apply plugin 'com.android.internal.library'.
@@ -975,7 +975,7 @@ A problem occurred evaluating project ':flutter'.
     });
 
     testUsingContext('suggestion', () async {
-      await jvm11Required.handler();
+      await jvm11RequiredHandler.handler();
 
       expect(
         testLogger.statusText,

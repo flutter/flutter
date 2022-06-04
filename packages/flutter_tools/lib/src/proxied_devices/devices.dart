@@ -519,21 +519,31 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         // Do nothing here.
       }));
       socket.listen((Uint8List data) {
-        connection.sendRequest('proxy.write', <String, Object>{
+        unawaited(connection.sendRequest('proxy.write', <String, Object>{
           'id': id,
-        }, data);
+        }, data).catchError((Object error, StackTrace stackTrace) {
+          // Log the error, but proceed normally. Network failure should not
+          // crash the tool. If this is critical, the place where the connection
+          // is being used would crash.
+          _logger.printWarning('Write to remote proxy error: $error');
+          _logger.printTrace('Write to remote proxy error: $error, stack trace: $stackTrace');
+        }));
       });
       _connectedSockets.add(socket);
 
-      unawaited(socket.done.then((dynamic value) {
-        connection.sendRequest('proxy.disconnect', <String, Object>{
+      unawaited(socket.done.catchError((Object error, StackTrace stackTrace) {
+        // Do nothing here. Everything will be handled in the `then` block below.
+        return false;
+      }).whenComplete(() {
+        // Send a proxy disconnect event just in case.
+        unawaited(connection.sendRequest('proxy.disconnect', <String, Object>{
           'id': id,
-        });
-        _connectedSockets.remove(socket);
-      }).onError((Object? error, StackTrace stackTrace) {
-        connection.sendRequest('proxy.disconnect', <String, Object>{
-          'id': id,
-        });
+        }).catchError((Object error, StackTrace stackTrace) {
+          // Ignore the error here. There might be a race condition when the
+          // remote end also disconnects. In any case, this request is just to
+          // notify the remote end to disconnect and we should not crash when
+          // there is an error here.
+        }));
         _connectedSockets.remove(socket);
       }));
     }, onError: (Object error, StackTrace stackTrace) {

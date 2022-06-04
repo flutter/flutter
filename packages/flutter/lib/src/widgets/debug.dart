@@ -114,7 +114,49 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///  * [debugProfileLayoutsEnabled], which does something similar for layout,
 ///    and [debugPrintLayouts], its console equivalent.
 ///  * [debugProfilePaintsEnabled], which does something similar for painting.
+///  * [debugProfileBuildsEnabledUserWidgets], which adds events for user-created
+///    [Widget] build times and incurs less overhead.
+///  * [debugEnhanceBuildTimelineArguments], which enhances the trace with
+///    debugging information related to [Widget] builds.
 bool debugProfileBuildsEnabled = false;
+
+/// Adds [Timeline] events for every user-created [Widget] built.
+///
+/// A user-created [Widget] is any [Widget] that is constructed in the root
+/// library. Often [Widget]s contain child [Widget]s that are constructed in
+/// libraries (for example, a [TextButton] having a [RichText] child). Timeline
+/// events for those children will be omitted with this flag. This works for any
+/// [Widget] not just ones declared in the root library.
+///
+/// See also:
+///
+///  * [debugProfileBuildsEnabled], which functions similarly but shows events
+///    for every widget and has a higher overhead cost.
+///  * [debugEnhanceBuildTimelineArguments], which enhances the trace with
+///    debugging information related to [Widget] builds.
+bool debugProfileBuildsEnabledUserWidgets = false;
+
+/// Adds debugging information to [Timeline] events related to [Widget] builds.
+///
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "BUILD" [Timeline] event and for
+/// all [Widget] build [Timeline] events, which are the [Timeline] events that
+/// are added when either of [debugProfileBuildsEnabled] and
+/// [debugProfileBuildsEnabledUserWidgets] are true. The debugging information
+/// that will be added in trace arguments includes stats around [Widget] dirty
+/// states and [Widget] diagnostic information (i.e. [Widget] properties).
+///
+/// See also:
+///
+///  * [debugProfileBuildsEnabled], which adds [Timeline] events for every
+///    [Widget] built.
+///  * [debugProfileBuildsEnabledUserWidgets], which adds [Timeline] events for
+///    every user-created [Widget] built.
+///  * [debugEnhanceLayoutTimelineArguments], which does something similar for
+///    events related to [RenderObject] layouts.
+///  * [debugEnhancePaintTimelineArguments], which does something similar for
+///    events related to [RenderObject] paints.
+bool debugEnhanceBuildTimelineArguments = false;
 
 /// Show banners for deprecated widgets.
 bool debugHighlightDeprecatedWidgets = false;
@@ -423,7 +465,8 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintScheduleBuildForStacks ||
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
-        debugHighlightDeprecatedWidgets) {
+        debugHighlightDeprecatedWidgets ||
+        debugProfileBuildsEnabledUserWidgets) {
       throw FlutterError(reason);
     }
     return true;

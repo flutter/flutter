@@ -11,12 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({
-    Key? key,
+    super.key,
     this.onHover,
     this.child,
     this.onEnter,
     this.onExit,
-  }) : super(key: key);
+  });
 
   final ValueChanged<bool>? onHover;
   final Widget? child;
@@ -49,7 +49,7 @@ class HoverClientState extends State<HoverClient> {
 }
 
 class HoverFeedback extends StatefulWidget {
-  const HoverFeedback({Key? key, this.onEnter, this.onExit}) : super(key: key);
+  const HoverFeedback({super.key, this.onEnter, this.onExit});
 
   final VoidCallback? onEnter;
   final VoidCallback? onExit;
@@ -793,7 +793,7 @@ void main() {
     await tester.pumpWidget(
       MouseRegion(
         onEnter: (PointerEnterEvent _) {},
-        child: const Opacity(opacity: 0.5, child: Placeholder()),
+        child: const RepaintBoundary(child: Placeholder()),
       ),
     );
 
@@ -1556,16 +1556,16 @@ void main() {
     await gesture.addPointer(location: const Offset(5, 5));
     addTearDown(gesture.removePointer);
 
-    void _handleHover(PointerHoverEvent _) {}
-    void _handlePaintChild() { logs.add('paint'); }
+    void handleHover(PointerHoverEvent _) {}
+    void handlePaintChild() { logs.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
-          onHover: _handleHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
+          onHover: handleHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: handlePaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
@@ -1584,8 +1584,8 @@ void main() {
           opaque: false,
           // Dummy callback so that MouseRegion stays affective after opaque
           // turns false.
-          onHover: _handleHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
+          onHover: handleHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: handlePaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),

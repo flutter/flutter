@@ -117,7 +117,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> create() async {}
+  Future<void> create({Size? size}) async {}
 
   @override
   List<PlatformViewCreatedCallback> get createdCallbacks => <PlatformViewCreatedCallback>[];

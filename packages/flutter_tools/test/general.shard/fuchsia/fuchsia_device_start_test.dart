@@ -267,7 +267,7 @@ void main() {
                 '--deterministic',
                 '--snapshot_kind=app-aot-elf',
                 '--elf=build/fuchsia/elf.aotsnapshot',
-                'build/fuchsia/app_name.dil'
+                'build/fuchsia/app_name.dil',
               ],
             ),
             FakeCommand(
@@ -300,7 +300,7 @@ void main() {
             '--deterministic',
             '--snapshot_kind=app-aot-elf',
             '--elf=build/fuchsia/elf.aotsnapshot',
-            'build/fuchsia/app_name.dil'
+            'build/fuchsia/app_name.dil',
           ],
         ),
         FakeCommand(

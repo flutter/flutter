@@ -16,7 +16,7 @@ import 'object.dart';
 
 // This class should only be used in debug builds.
 class _DebugSize extends Size {
-  _DebugSize(Size source, this._owner, this._canBeUsedByParent) : super.copy(source);
+  _DebugSize(super.source, this._owner, this._canBeUsedByParent) : super.copy();
   final RenderBox _owner;
   final bool _canBeUsedByParent;
 }
@@ -670,7 +670,7 @@ class BoxHitTestResult extends HitTestResult {
   ///    generic [HitTestResult].
   ///  * [SliverHitTestResult.wrap], which turns a [BoxHitTestResult] into a
   ///    [SliverHitTestResult] for hit testing on [RenderSliver] children.
-  BoxHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+  BoxHitTestResult.wrap(super.result) : super.wrap();
 
   /// Transforms `position` to the local coordinate system of a child for
   /// hit-testing the child.
@@ -890,9 +890,8 @@ class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
-  BoxHitTestEntry(RenderBox target, this.localPosition)
-    : assert(localPosition != null),
-      super(target);
+  BoxHitTestEntry(super.target, this.localPosition)
+    : assert(localPosition != null);
 
   /// The position of the hit test in the local coordinates of [target].
   final Offset localPosition;
@@ -1369,15 +1368,15 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
         } else {
-          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+          debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments['intrinsics dimension'] = describeEnum(dimension);
-        debugTimelineArguments['intrinsics argument'] = '$argument';
+        debugTimelineArguments!['intrinsics dimension'] = describeEnum(dimension);
+        debugTimelineArguments!['intrinsics argument'] = '$argument';
         return true;
       }());
       if (!kReleaseMode) {
@@ -1833,14 +1832,14 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
         } else {
-          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+          debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments['getDryLayout constraints'] = '$constraints';
+        debugTimelineArguments!['getDryLayout constraints'] = '$constraints';
         return true;
       }());
       if (!kReleaseMode) {

@@ -28,6 +28,12 @@ import 'toggle_buttons_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
 ///
+/// {@tool dartpad}
+/// This example showcase [ToggleButtons] in various configurations.
+///
+/// ** See code in examples/api/lib/material/toggle_buttons/toggle_buttons.0.dart **
+/// {@end-tool}
+///
 /// ## Customizing toggle buttons
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
 /// can update the [isSelected] list however it wants to.
@@ -168,7 +174,7 @@ class ToggleButtons extends StatelessWidget {
   /// list of non-null nodes. [renderBorder] and [direction] must not be null.
   /// If [direction] is [Axis.vertical], [verticalDirection] must not be null.
   const ToggleButtons({
-    Key? key,
+    super.key,
     required this.children,
     required this.isSelected,
     this.onPressed,
@@ -193,24 +199,12 @@ class ToggleButtons extends StatelessWidget {
     this.borderWidth,
     this.direction = Axis.horizontal,
     this.verticalDirection = VerticalDirection.down,
-    this.style,
   }) :
     assert(children != null),
     assert(isSelected != null),
     assert(children.length == isSelected.length),
-    assert(
-      !(style != null
-         && (mouseCursor != null
-         || textStyle != null
-         || fillColor != null
-         || focusColor != null
-         || highlightColor != null
-         || hoverColor != null
-         || splashColor != null)),
-      'You can only pass [style] or textStyle, fillColor, splashColor properties, not both.'),
     assert(direction != null),
-    assert(direction == Axis.horizontal || verticalDirection != null),
-    super(key: key);
+    assert(direction == Axis.horizontal || verticalDirection != null);
 
   static const double _defaultBorderWidth = 1.0;
 
@@ -428,14 +422,6 @@ class ToggleButtons extends StatelessWidget {
   /// If [direction] is [Axis.vertical], this parameter determines whether to lay out
   /// the buttons starting from the first or last child from top to bottom.
   final VerticalDirection verticalDirection;
-
-  /// Customizes this toggle button's appearance.
-  ///
-  /// When implemented this overrides the individual customizable properties
-  /// of toggle buttons such as [selectedColor], [disabledColor], [hoverColor].
-  ///
-  /// Null by default.
-  final ButtonStyle? style;
 
   // Determines if this is the first child that is being laid out
   // by the render object, _not_ the order of the children in its list.
@@ -712,14 +698,37 @@ class ToggleButtons extends StatelessWidget {
       final TextStyle currentTextStyle = textStyle
         ?? toggleButtonsTheme.textStyle
         ?? theme.textTheme.bodyText2!;
-      final BoxConstraints currentConstraints = constraints
-        ?? toggleButtonsTheme.constraints
-        ?? const BoxConstraints(
-             minWidth: kMinInteractiveDimension,
-             minHeight: kMinInteractiveDimension,
-           );
+      final BoxConstraints? currentConstraints = constraints
+        ?? toggleButtonsTheme.constraints;
+      final Size minimumSize = currentConstraints == null
+        ? const Size.square(kMinInteractiveDimension)
+        : Size(currentConstraints.minWidth, currentConstraints.minHeight);
+      final Size? maximumSize = currentConstraints == null
+        ? null
+        : Size(currentConstraints.maxWidth, currentConstraints.maxHeight);
+      final Size minPaddingSize;
+      switch (tapTargetSize ?? theme.materialTapTargetSize) {
+        case MaterialTapTargetSize.padded:
+          if (direction == Axis.horizontal) {
+            minPaddingSize = const Size(
+              0.0,
+              kMinInteractiveDimension,
+            );
+          } else {
+            minPaddingSize = const Size(
+              kMinInteractiveDimension,
+              0.0,
+            );
+          }
+          assert(minPaddingSize.width >= 0.0);
+          assert(minPaddingSize.height >= 0.0);
+          break;
+        case MaterialTapTargetSize.shrinkWrap:
+          minPaddingSize = Size.zero;
+          break;
+      }
 
-      return _SelectToggleButton(
+      Widget button = _SelectToggleButton(
         leadingBorderSide: leadingBorderSide,
         borderSide: borderSide,
         trailingBorderSide: trailingBorderSide,
@@ -750,14 +759,12 @@ class ToggleButtons extends StatelessWidget {
                 color: currentColor,
               )),
               padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero),
-              minimumSize: MaterialStateProperty.all<Size?>(
-                Size(currentConstraints.minWidth, currentConstraints.minHeight)),
-              maximumSize: MaterialStateProperty.all<Size?>(
-                Size(currentConstraints.maxWidth, currentConstraints.maxHeight)),
+              minimumSize: MaterialStateProperty.all<Size?>(minimumSize),
+              maximumSize: MaterialStateProperty.all<Size?>(maximumSize),
               shape: MaterialStateProperty.all<OutlinedBorder>(const RoundedRectangleBorder()),
               mouseCursor: MaterialStateProperty.all<MouseCursor?>(mouseCursor),
-              visualDensity: VisualDensity.adaptivePlatformDensity,
-              tapTargetSize: tapTargetSize ?? theme.materialTapTargetSize,
+              visualDensity: VisualDensity.standard,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               animationDuration: kThemeChangeDuration,
               enableFeedback: true,
               alignment: Alignment.center,
@@ -770,17 +777,26 @@ class ToggleButtons extends StatelessWidget {
           ),
         ),
       );
+
+      if (currentConstraints != null) {
+        button = Center(child: button);
+      }
+
+      return MergeSemantics(
+        child: Semantics(
+          container: true,
+          enabled: onPressed != null,
+          child: _InputPadding(
+            minSize: minPaddingSize,
+            direction: direction,
+            child: button,
+          ),
+        ),
+      );
     });
 
-    final Widget result = direction == Axis.horizontal
-      ? IntrinsicHeight(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: buttons,
-        ),
-      )
-      : IntrinsicWidth(
+    if (direction == Axis.vertical) {
+      return IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -788,8 +804,15 @@ class ToggleButtons extends StatelessWidget {
           children: buttons,
         ),
       );
+    }
 
-    return result;
+    return IntrinsicHeight(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: buttons,
+      ),
+    );
   }
 
   @override
@@ -913,8 +936,7 @@ class _ToggleButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 
 class _SelectToggleButton extends SingleChildRenderObjectWidget {
   const _SelectToggleButton({
-    Key? key,
-    required Widget child,
+    required Widget super.child,
     required this.leadingBorderSide,
     required this.borderSide,
     required this.trailingBorderSide,
@@ -923,10 +945,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
     required this.isLastButton,
     required this.direction,
     required this.verticalDirection,
-  }) : super(
-    key: key,
-    child: child,
-  );
+  });
 
   // The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
@@ -1455,5 +1474,142 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           break;
       }
     }
+  }
+}
+
+/// A widget to pad the area around a [ToggleButtons]'s children.
+///
+/// This widget is based on a similar one used in [ButtonStyleButton] but it
+/// only redirects taps along one axis to ensure the correct button is tapped
+/// within the [ToggleButtons].
+///
+/// This ensures that a widget takes up at least as much space as the minSize
+/// parameter to ensure adequate tap target size, while keeping the widget
+/// visually smaller to the user.
+class _InputPadding extends SingleChildRenderObjectWidget {
+  const _InputPadding({
+    super.child,
+    required this.minSize,
+    required this.direction,
+  });
+
+  final Size minSize;
+  final Axis direction;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderInputPadding(minSize, direction);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
+    renderObject.minSize = minSize;
+    renderObject.direction = direction;
+  }
+}
+
+class _RenderInputPadding extends RenderShiftedBox {
+  _RenderInputPadding(this._minSize, this._direction, [RenderBox? child]) : super(child);
+
+  Size get minSize => _minSize;
+  Size _minSize;
+  set minSize(Size value) {
+    if (_minSize == value)
+      return;
+    _minSize = value;
+    markNeedsLayout();
+  }
+
+  Axis get direction => _direction;
+  Axis _direction;
+  set direction(Axis value) {
+    if (_direction == value)
+      return;
+    _direction = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    if (child != null) {
+      final Size childSize = layoutChild(child!, constraints);
+      final double height = math.max(childSize.width, minSize.width);
+      final double width = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(height, width));
+    }
+    return Size.zero;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
+  @override
+  void performLayout() {
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
+    if (child != null) {
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
+    }
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    // The super.hitTest() method also checks hitTestChildren(). We don't
+    // want that in this case because we've padded around the children per
+    // tapTargetSize.
+    if (!size.contains(position)) {
+      return false;
+    }
+
+    // Only adjust one axis to ensure the correct button is tapped.
+    Offset center;
+    if (direction == Axis.horizontal) {
+      center = Offset(position.dx, child!.size.height / 2);
+    } else {
+      center = Offset(child!.size.width / 2, position.dy);
+    }
+    return result.addWithRawTransform(
+      transform: MatrixUtils.forceToPoint(center),
+      position: center,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        assert(position == center);
+        return child!.hitTest(result, position: center);
+      },
+    );
   }
 }

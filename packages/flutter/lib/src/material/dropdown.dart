@@ -94,14 +94,14 @@ class _DropdownMenuPainter extends CustomPainter {
 // The widget that is the button wrapping the menu items.
 class _DropdownMenuItemButton<T> extends StatefulWidget {
   const _DropdownMenuItemButton({
-    Key? key,
+    super.key,
     this.padding,
     required this.route,
     required this.buttonRect,
     required this.constraints,
     required this.itemIndex,
     required this.enableFeedback,
-  }) : super(key: key);
+  });
 
   final _DropdownRoute<T> route;
   final EdgeInsets? padding;
@@ -198,7 +198,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
 class _DropdownMenu<T> extends StatefulWidget {
   const _DropdownMenu({
-    Key? key,
+    super.key,
     this.padding,
     required this.route,
     required this.buttonRect,
@@ -206,7 +206,7 @@ class _DropdownMenu<T> extends StatefulWidget {
     this.dropdownColor,
     required this.enableFeedback,
     this.borderRadius,
-  }) : super(key: key);
+  });
 
   final _DropdownRoute<T> route;
   final EdgeInsets? padding;
@@ -569,7 +569,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
 class _DropdownRoutePage<T> extends StatelessWidget {
   const _DropdownRoutePage({
-    Key? key,
+    super.key,
     required this.route,
     required this.constraints,
     this.items,
@@ -582,7 +582,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     required this.dropdownColor,
     required this.enableFeedback,
     this.borderRadius,
-  }) : super(key: key);
+  });
 
   final _DropdownRoute<T> route;
   final BoxConstraints constraints;
@@ -652,10 +652,10 @@ class _DropdownRoutePage<T> extends StatelessWidget {
 // as closely as possible.
 class _MenuItem<T> extends SingleChildRenderObjectWidget {
   const _MenuItem({
-    Key? key,
+    super.key,
     required this.onLayout,
     required this.item,
-  }) : assert(onLayout != null), super(key: key, child: item);
+  }) : assert(onLayout != null), super(child: item);
 
   final ValueChanged<Size> onLayout;
   final DropdownMenuItem<T>? item;
@@ -691,11 +691,10 @@ class _DropdownMenuItemContainer extends StatelessWidget {
   ///
   /// The [child] argument is required.
   const _DropdownMenuItemContainer({
-    Key? key,
+    super.key,
     this.alignment = AlignmentDirectional.centerStart,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -733,14 +732,13 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   ///
   /// The [child] argument is required.
   const DropdownMenuItem({
-    Key? key,
+    super.key,
     this.onTap,
     this.value,
     this.enabled = true,
-    AlignmentGeometry alignment = AlignmentDirectional.centerStart,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, alignment:alignment, child: child);
+    super.alignment,
+    required super.child,
+  }) : assert(child != null);
 
   /// Called when the dropdown menu item is tapped.
   final VoidCallback? onTap;
@@ -761,15 +759,14 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
 ///
 /// This is used by [DataTable] to remove the underline from any
 /// [DropdownButton] widgets placed within material data tables, as
-/// required by the material design specification.
+/// required by the Material Design specification.
 class DropdownButtonHideUnderline extends InheritedWidget {
   /// Creates a [DropdownButtonHideUnderline]. A non-null [child] must
   /// be given.
   const DropdownButtonHideUnderline({
-    Key? key,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+    super.key,
+    required super.child,
+  }) : assert(child != null);
 
   /// Returns whether the underline of [DropdownButton] widgets should
   /// be hidden.
@@ -781,7 +778,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   bool updateShouldNotify(DropdownButtonHideUnderline oldWidget) => false;
 }
 
-/// A material design button for selecting from a list of items.
+/// A Material Design button for selecting from a list of items.
 ///
 /// A dropdown button lets the user select from a number of items. The button
 /// shows the currently selected item as well as an arrow that opens a menu for
@@ -851,7 +848,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// dropdown when it is open. If it is null, the current theme's
   /// [ThemeData.canvasColor] will be used instead.
   DropdownButton({
-    Key? key,
+    super.key,
     required this.items,
     this.selectedItemBuilder,
     this.value,
@@ -896,11 +893,10 @@ class DropdownButton<T> extends StatefulWidget {
        assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
        _inputDecoration = null,
        _isEmpty = false,
-       _isFocused = false,
-       super(key: key);
+       _isFocused = false;
 
   DropdownButton._formField({
-    Key? key,
+    super.key,
     required this.items,
     this.selectedItemBuilder,
     this.value,
@@ -948,8 +944,7 @@ class DropdownButton<T> extends StatefulWidget {
        assert(isFocused != null),
        _inputDecoration = inputDecoration,
        _isEmpty = isEmpty,
-       _isFocused = isFocused,
-       super(key: key);
+       _isFocused = isFocused;
 
   /// The list of items the user can select.
   ///
@@ -1534,7 +1529,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// The `items`, `elevation`, `iconSize`, `isDense`, `isExpanded`,
   /// `autofocus`, and `decoration`  parameters must not be null.
   DropdownButtonFormField({
-    Key? key,
+    super.key,
     required List<DropdownMenuItem<T>>? items,
     DropdownButtonBuilder? selectedItemBuilder,
     T? value,
@@ -1556,8 +1551,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool autofocus = false,
     Color? dropdownColor,
     InputDecoration? decoration,
-    FormFieldSetter<T>? onSaved,
-    FormFieldValidator<T>? validator,
+    super.onSaved,
+    super.validator,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,
     bool? enableFeedback,
@@ -1582,10 +1577,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(autofocus != null),
        decoration = decoration ?? InputDecoration(focusColor: focusColor),
        super(
-         key: key,
-         onSaved: onSaved,
          initialValue: value,
-         validator: validator,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;

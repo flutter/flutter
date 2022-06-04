@@ -367,7 +367,7 @@ class FlutterWebPlatform extends PlatformPlugin {
             'width': width.toDouble(),
             'height': height.toDouble(),
             'scale': 1.0,
-          }
+          },
         });
         bytes = base64.decode(response.result['data'] as String);
       } on WipError catch (ex) {
@@ -698,10 +698,7 @@ class BrowserManager {
       completer.completeError(error, stackTrace);
     }));
 
-    return completer.future.timeout(const Duration(seconds: 30), onTimeout: () {
-      chrome.close();
-      throwToolExit('Timed out waiting for ${runtime.name} to connect.');
-    });
+    return completer.future;
   }
 
   /// Loads [_BrowserEnvironment].

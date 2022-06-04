@@ -447,7 +447,7 @@ void main() {
               ),
               MyThemeExtensionB(
                 textStyle: TextStyle(fontSize: 50),
-              )
+              ),
             },
           ),
           home: Container(key: containerKey),
@@ -634,9 +634,6 @@ void main() {
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       buttonColor: Colors.black,
       secondaryHeaderColor: Colors.black,
-      textSelectionColor: Colors.black,
-      cursorColor: Colors.black,
-      textSelectionHandleColor: Colors.black,
       backgroundColor: Colors.black,
       dialogBackgroundColor: Colors.black,
       indicatorColor: Colors.black,
@@ -690,8 +687,6 @@ void main() {
       drawerTheme: const DrawerThemeData(),
       listTileTheme: const ListTileThemeData(),
       fixTextFieldOutlineLabel: false,
-      useTextSelectionTheme: false,
-      androidOverscrollIndicator: null,
       extensions: const <Object, ThemeExtension<dynamic>>{},
     );
 
@@ -735,9 +730,6 @@ void main() {
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
       buttonColor: Colors.white,
       secondaryHeaderColor: Colors.white,
-      textSelectionColor: Colors.white,
-      cursorColor: Colors.white,
-      textSelectionHandleColor: Colors.white,
       backgroundColor: Colors.white,
       dialogBackgroundColor: Colors.white,
       indicatorColor: Colors.white,
@@ -791,7 +783,6 @@ void main() {
       drawerTheme: const DrawerThemeData(),
       listTileTheme: const ListTileThemeData(),
       fixTextFieldOutlineLabel: true,
-      useTextSelectionTheme: true,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
       extensions: const <Object, ThemeExtension<dynamic>>{
         MyThemeExtensionB: MyThemeExtensionB(textStyle: TextStyle()),
@@ -822,9 +813,6 @@ void main() {
       toggleButtonsTheme: otherTheme.toggleButtonsTheme,
       buttonColor: otherTheme.buttonColor,
       secondaryHeaderColor: otherTheme.secondaryHeaderColor,
-      textSelectionColor: otherTheme.textSelectionTheme.selectionColor,
-      cursorColor: otherTheme.textSelectionTheme.cursorColor,
-      textSelectionHandleColor: otherTheme.textSelectionTheme.selectionHandleColor,
       backgroundColor: otherTheme.backgroundColor,
       dialogBackgroundColor: otherTheme.dialogBackgroundColor,
       indicatorColor: otherTheme.indicatorColor,
@@ -1076,10 +1064,6 @@ void main() {
       'tooltipTheme',
       'expansionTileTheme',
       // DEPRECATED (newest deprecations at the bottom)
-      'useTextSelectionTheme',
-      'textSelectionColor',
-      'cursorColor',
-      'textSelectionHandleColor',
       'accentColor',
       'accentColorBrightness',
       'accentTextTheme',

@@ -246,20 +246,18 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   LongPressGestureRecognizer({
     Duration? duration,
-    double? postAcceptSlopTolerance,
+    // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/3349 is fixed.
+    // ignore: avoid_init_to_null
+    super.postAcceptSlopTolerance = null,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-    Object? debugOwner,
+    super.kind,
+    super.supportedDevices,
+    super.debugOwner,
   }) : super(
          deadline: duration ?? kLongPressTimeout,
-         postAcceptSlopTolerance: postAcceptSlopTolerance,
-         kind: kind,
-         supportedDevices: supportedDevices,
-         debugOwner: debugOwner,
        );
 
   bool _longPressAccepted = false;

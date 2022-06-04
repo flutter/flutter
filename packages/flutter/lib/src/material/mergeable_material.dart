@@ -106,13 +106,13 @@ class MaterialGap extends MergeableMaterialItem {
 class MergeableMaterial extends StatefulWidget {
   /// Creates a mergeable Material list of items.
   const MergeableMaterial({
-    Key? key,
+    super.key,
     this.mainAxis = Axis.vertical,
     this.elevation = 2,
     this.hasDividers = false,
     this.children = const <MergeableMaterialItem>[],
     this.dividerColor,
-  }) : super(key: key);
+  });
 
   /// The children of the [MergeableMaterial].
   final List<MergeableMaterialItem> children;
@@ -644,11 +644,11 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 
 class _MergeableMaterialListBody extends ListBody {
   _MergeableMaterialListBody({
-    required List<Widget> children,
-    Axis mainAxis = Axis.vertical,
+    required super.children,
+    super.mainAxis,
     required this.items,
     required this.elevation,
-  }) : super(children: children, mainAxis: mainAxis);
+  });
 
   final List<MergeableMaterialItem> items;
   final double elevation;
@@ -676,11 +676,9 @@ class _MergeableMaterialListBody extends ListBody {
 
 class _RenderMergeableMaterialListBody extends RenderListBody {
   _RenderMergeableMaterialListBody({
-    List<RenderBox>? children,
-    AxisDirection axisDirection = AxisDirection.down,
+    super.axisDirection,
     double elevation = 0.0,
-  }) : _elevation = elevation,
-       super(children: children, axisDirection: axisDirection);
+  }) : _elevation = elevation;
 
   double get elevation => _elevation;
   double _elevation;

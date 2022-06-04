@@ -16,7 +16,7 @@ import 'theme.dart';
 import 'tooltip_theme.dart';
 import 'tooltip_visibility.dart';
 
-/// A material design tooltip.
+/// A Material Design tooltip.
 ///
 /// Tooltips provide text labels which help explain the function of a button or
 /// other user interface action. Wrap the button in a [Tooltip] widget and provide
@@ -92,7 +92,7 @@ class Tooltip extends StatefulWidget {
   ///
   /// Only one of [message] and [richMessage] may be non-null.
   const Tooltip({
-    Key? key,
+    super.key,
     this.message,
     this.richMessage,
     this.height,
@@ -114,8 +114,7 @@ class Tooltip extends StatefulWidget {
           'If `richMessage` is specified, `textStyle` will have no effect. '
           'If you wish to provide a `textStyle` for a rich tooltip, add the '
           '`textStyle` directly to the `richMessage` InlineSpan.',
-        ),
-        super(key: key);
+        );
 
   /// The text to display in the tooltip.
   ///
@@ -699,7 +698,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
     Widget result = Semantics(
-      label: _excludeFromSemantics
+      tooltip: _excludeFromSemantics
           ? null
           : _tooltipMessage,
       child: widget.child,
@@ -781,7 +780,6 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
 class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
-    Key? key,
     required this.height,
     required this.richMessage,
     this.padding,
@@ -794,7 +792,7 @@ class _TooltipOverlay extends StatelessWidget {
     required this.preferBelow,
     this.onEnter,
     this.onExit,
-  }) : super(key: key);
+  });
 
   final InlineSpan richMessage;
   final double height;

@@ -340,7 +340,8 @@ class NextContext extends Context {
             '\t$kLuciPackagingConsoleLink',
         );
         if (autoAccept == false) {
-          final bool response = await prompt('Have all packaging builds finished successfully?');
+          final bool response = await prompt(
+              'Have all packaging builds finished successfully and post release announcements been completed?');
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);

@@ -361,10 +361,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-    // This test is expected to be skipped when Platform.isWindows:
-    // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
-  }, skip: true); // Flake: https://github.com/flutter/flutter/issues/92042
-
+  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
@@ -615,6 +612,7 @@ void main() {
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
       'M Write SkSL shaders to a unique file in the project directory.',
       'g Run source code generators.',
+      'j Dump frame raster stats for the current frame.',
       'h Repeat this help message.',
       'd Detach (terminate "flutter run" but leave application running).',
       'c Clear the screen',

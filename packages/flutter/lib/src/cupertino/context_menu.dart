@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -97,13 +98,12 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// [child] is required and cannot be null.
   CupertinoContextMenu({
-    Key? key,
+    super.key,
     required this.actions,
     required this.child,
     this.previewBuilder,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(child != null),
-       super(key: key);
+       assert(child != null);
 
   /// The widget that can be "opened" with the [CupertinoContextMenu].
   ///
@@ -367,17 +367,20 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapCancel: _onTapCancel,
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTap: _onTap,
-      child: TickerMode(
-        enabled: !_childHidden,
-        child: Opacity(
-          key: _childGlobalKey,
-          opacity: _childHidden ? 0.0 : 1.0,
-          child: widget.child,
+    return MouseRegion(
+      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: GestureDetector(
+        onTapCancel: _onTapCancel,
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTap: _onTap,
+        child: TickerMode(
+          enabled: !_childHidden,
+          child: Opacity(
+            key: _childGlobalKey,
+            opacity: _childHidden ? 0.0 : 1.0,
+            child: widget.child,
+          ),
         ),
       ),
     );
@@ -399,12 +402,11 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 // siblings of the original child.
 class _DecoyChild extends StatefulWidget {
   const _DecoyChild({
-    Key? key,
     this.beginRect,
     required this.controller,
     this.endRect,
     this.child,
-  }) : super(key: key);
+  });
 
   final Rect? beginRect;
   final AnimationController controller;
@@ -517,19 +519,15 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     required _ContextMenuLocation contextMenuLocation,
     this.barrierLabel,
     _ContextMenuPreviewBuilderChildless? builder,
-    ui.ImageFilter? filter,
+    super.filter,
     required Rect previousChildRect,
-    RouteSettings? settings,
+    super.settings,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(contextMenuLocation != null),
        _actions = actions,
        _builder = builder,
        _contextMenuLocation = contextMenuLocation,
-       _previousChildRect = previousChildRect,
-       super(
-         filter: filter,
-         settings: settings,
-       );
+       _previousChildRect = previousChildRect;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
@@ -808,7 +806,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 // animating out.
 class _ContextMenuRouteStatic extends StatefulWidget {
   const _ContextMenuRouteStatic({
-    Key? key,
     this.actions,
     required this.child,
     this.childGlobalKey,
@@ -817,8 +814,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
     required this.orientation,
     this.sheetGlobalKey,
   }) : assert(contextMenuLocation != null),
-       assert(orientation != null),
-       super(key: key);
+       assert(orientation != null);
 
   final List<Widget>? actions;
   final Widget child;
@@ -1141,7 +1137,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 // list of actions that are typically CupertinoContextMenuActions.
 class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
-    Key? key,
+    super.key,
     required this.actions,
     required _ContextMenuLocation contextMenuLocation,
     required Orientation orientation,
@@ -1149,8 +1145,7 @@ class _ContextMenuSheet extends StatelessWidget {
        assert(contextMenuLocation != null),
        assert(orientation != null),
        _contextMenuLocation = contextMenuLocation,
-       _orientation = orientation,
-       super(key: key);
+       _orientation = orientation;
 
   final List<Widget> actions;
   final _ContextMenuLocation _contextMenuLocation;

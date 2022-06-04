@@ -1628,22 +1628,14 @@ void main() {
 
 class _TestRenderEditable extends RenderEditable {
   _TestRenderEditable({
-    required TextDirection textDirection,
-    required ViewportOffset offset,
-    required TextSelectionDelegate textSelectionDelegate,
-    TextSpan? text,
-    required LayerLink startHandleLayerLink,
-    required LayerLink endHandleLayerLink,
-    TextSelection? selection,
-  }) : super(
-      textDirection: textDirection,
-      offset: offset,
-      textSelectionDelegate: textSelectionDelegate,
-      text: text,
-      startHandleLayerLink: startHandleLayerLink,
-      endHandleLayerLink: endHandleLayerLink,
-      selection: selection,
-    );
+    required super.textDirection,
+    required super.offset,
+    required super.textSelectionDelegate,
+    TextSpan? super.text,
+    required super.startHandleLayerLink,
+    required super.endHandleLayerLink,
+    super.selection,
+  });
 
   int paintCount = 0;
 

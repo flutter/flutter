@@ -459,10 +459,10 @@ void main() {
 
 class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   const TestParentDataWidget({
-    Key? key,
+    super.key,
     required this.string,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final String string;
 
@@ -483,9 +483,9 @@ class DummyParentData extends ParentData {
 
 class OneAncestorWidget extends SingleChildRenderObjectWidget {
   const OneAncestorWidget({
-    Key? key,
-    required Widget child,
-  }) : super(key: key, child: child);
+    super.key,
+    required Widget super.child,
+  });
 
   @override
   RenderOne createRenderObject(BuildContext context) => RenderOne();
@@ -493,9 +493,9 @@ class OneAncestorWidget extends SingleChildRenderObjectWidget {
 
 class AnotherAncestorWidget extends SingleChildRenderObjectWidget {
   const AnotherAncestorWidget({
-    Key? key,
-    required Widget child,
-  }) : super(key: key, child: child);
+    super.key,
+    required Widget super.child,
+  });
 
   @override
   RenderAnother createRenderObject(BuildContext context) => RenderAnother();
@@ -518,7 +518,7 @@ class RenderAnother extends RenderProxyBox {
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({ Key? key, required this.child }) : super(key: key);
+  const DummyWidget({ super.key, required this.child });
 
   final Widget child;
 

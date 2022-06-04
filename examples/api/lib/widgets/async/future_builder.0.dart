@@ -54,7 +54,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: Text('Result: ${snapshot.data}'),
-              )
+              ),
             ];
           } else if (snapshot.hasError) {
             children = <Widget>[
@@ -66,7 +66,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: Text('Error: ${snapshot.error}'),
-              )
+              ),
             ];
           } else {
             children = const <Widget>[
@@ -78,7 +78,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               Padding(
                 padding: EdgeInsets.only(top: 16),
                 child: Text('Awaiting result...'),
-              )
+              ),
             ];
           }
           return Center(

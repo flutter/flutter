@@ -659,16 +659,11 @@ class RenderIndexedStack extends RenderStack {
   ///
   /// If the [index] parameter is null, nothing is displayed.
   RenderIndexedStack({
-    List<RenderBox>? children,
-    AlignmentGeometry alignment = AlignmentDirectional.topStart,
-    TextDirection? textDirection,
+    super.children,
+    super.alignment,
+    super.textDirection,
     int? index = 0,
-  }) : _index = index,
-       super(
-         children: children,
-         alignment: alignment,
-         textDirection: textDirection,
-       );
+  }) : _index = index;
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {

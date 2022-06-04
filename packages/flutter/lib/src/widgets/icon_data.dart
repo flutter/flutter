@@ -71,21 +71,15 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   ///
   /// The [showName], [style], and [level] arguments must not be null.
   IconDataProperty(
-    String name,
-    IconData? value, {
-    String? ifNull,
-    bool showName = true,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    String super.name,
+    super.value, {
+    super.ifNull,
+    super.showName,
+    super.style,
+    super.level,
   }) : assert(showName != null),
        assert(style != null),
-       assert(level != null),
-       super(name, value,
-         showName: showName,
-         ifNull: ifNull,
-         style: style,
-         level: level,
-       );
+       assert(level != null);
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {

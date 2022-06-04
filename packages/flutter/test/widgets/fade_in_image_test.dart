@@ -156,6 +156,82 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, 1);
     });
 
+    testWidgets("FadeInImage's image obeys gapless playback", (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+      final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+        fadeOutDuration: animationDuration,
+        fadeInDuration: animationDuration,
+      ));
+
+      imageProvider.complete();
+      placeholderProvider.complete();
+      await tester.pump();
+      await tester.pump(animationDuration * 2);
+      // Calls setState after the animation, which removes the placeholder image.
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: secondImageProvider,
+      ));
+      await tester.pump();
+
+      FadeInImageParts parts = findFadeInImage(tester);
+      // Continually shows previously loaded image,
+      expect(parts.placeholder, isNull);
+      expect(parts.target.rawImage.image!.isCloneOf(targetImage), isTrue);
+      expect(parts.target.opacity, 1);
+
+      // Until the new image provider provides the image.
+      secondImageProvider.complete();
+      await tester.pump();
+
+      parts = findFadeInImage(tester);
+      expect(parts.target.rawImage.image!.isCloneOf(replacementImage), isTrue);
+      expect(parts.target.opacity, 1);
+    });
+
+    testWidgets("FadeInImage's placeholder obeys gapless playback", (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider secondPlaceholderProvider = TestImageProvider(replacementImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+      ));
+
+      placeholderProvider.complete();
+      await tester.pump();
+
+      FadeInImageParts parts = findFadeInImage(tester);
+      expect(parts.placeholder!.rawImage.image!.isCloneOf(placeholderImage), true);
+      expect(parts.placeholder!.opacity, 1);
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: secondPlaceholderProvider,
+        image: imageProvider,
+      ));
+
+      parts = findFadeInImage(tester);
+      // continually shows previously loaded image.
+      expect(parts.placeholder!.rawImage.image!.isCloneOf(placeholderImage), true);
+      expect(parts.placeholder!.opacity, 1);
+
+      // Until the new image provider provides the image.
+      secondPlaceholderProvider.complete();
+      await tester.pump();
+
+      parts = findFadeInImage(tester);
+      expect(parts.placeholder!.rawImage.image!.isCloneOf(replacementImage), true);
+      expect(parts.placeholder!.opacity, 1);
+    });
+
     testWidgets('shows a cached image immediately when skipFadeOnSynchronousLoad=true', (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
@@ -224,48 +300,6 @@ Future<void> main() async {
       imageProvider.complete();
       await tester.pumpAndSettle();
       expect(find.byType(Image), findsOneWidget);
-    });
-
-    testWidgets('re-fades in the image when the target image is updated', (WidgetTester tester) async {
-      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
-      final TestImageProvider imageProvider = TestImageProvider(targetImage);
-      final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
-
-      await tester.pumpWidget(FadeInImage(
-        placeholder: placeholderProvider,
-        image: imageProvider,
-        fadeOutDuration: animationDuration,
-        fadeInDuration: animationDuration,
-        excludeFromSemantics: true,
-      ));
-
-      final State? state = findFadeInImage(tester).state;
-      placeholderProvider.complete();
-      imageProvider.complete();
-      await tester.pump();
-      await tester.pump(animationDuration * 2);
-
-      await tester.pumpWidget(FadeInImage(
-        placeholder: placeholderProvider,
-        image: secondImageProvider,
-        fadeOutDuration: animationDuration,
-        fadeInDuration: animationDuration,
-        excludeFromSemantics: true,
-      ));
-
-      secondImageProvider.complete();
-      await tester.pump();
-
-      expect(findFadeInImage(tester).target.rawImage.image!.isCloneOf(replacementImage), true);
-      expect(findFadeInImage(tester).state, same(state));
-      expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(1));
-      expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(0));
-      await tester.pump(animationDuration);
-      expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(0));
-      expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(0));
-      await tester.pump(animationDuration);
-      expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(0));
-      expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
     });
 
     testWidgets("doesn't interrupt in-progress animation when animation values are updated", (WidgetTester tester) async {

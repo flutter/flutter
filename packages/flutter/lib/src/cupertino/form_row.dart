@@ -100,13 +100,13 @@ class CupertinoFormRow extends StatelessWidget {
   /// be shown in [CupertinoColors.destructiveRed] coloring and
   /// medium-weighted font.
   const CupertinoFormRow({
-    Key? key,
+    super.key,
     required this.child,
     this.prefix,
     this.padding,
     this.helper,
     this.error,
-  }) : super(key: key);
+  });
 
   /// A widget that is displayed at the start of the row.
   ///

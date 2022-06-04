@@ -70,8 +70,8 @@ abstract class TokenTemplate {
   ///   * [componentColor], that provides support for an optional opacity.
   String color(String colorToken) {
     return tokens.containsKey(colorToken)
-        ? '$colorSchemePrefix${tokens[colorToken]}'
-        : 'null';
+      ? '$colorSchemePrefix${tokens[colorToken]}'
+      : 'null';
   }
 
   /// Generate a [ColorScheme] color name for the given component's color
@@ -91,15 +91,23 @@ abstract class TokenTemplate {
     if (!tokens.containsKey(colorToken))
       return 'null';
     String value = color(colorToken);
-    final String tokenOpacity = '$componentToken.opacity';
-    if (tokens.containsKey(tokenOpacity)) {
-      final dynamic opacityValue = tokens[tokenOpacity];
-      final String opacity = opacityValue is double
-       ? opacityValue.toString()
-       : tokens[tokens[tokenOpacity]!]!.toString();
-      value += '.withOpacity($opacity)';
+    final String opacityToken = '$componentToken.opacity';
+    if (tokens.containsKey(opacityToken)) {
+      value += '.withOpacity(${opacity(opacityToken)})';
     }
     return value;
+  }
+
+  /// Generate the opacity value for the given token.
+  String? opacity(String token) {
+    final dynamic value = tokens[token];
+    if (value == null) {
+      return null;
+    }
+    if (value is double) {
+      return value.toString();
+    }
+    return tokens[value].toString();
   }
 
   /// Generate an elevation value for the given component token.
@@ -135,7 +143,7 @@ abstract class TokenTemplate {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final double width = tokens['$componentToken.width'] as double;
+    final double width = (tokens['$componentToken.width'] ?? 1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 

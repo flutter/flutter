@@ -4,7 +4,7 @@ import 'package:{{projectName}}/{{projectName}}_platform_interface.dart';
 import 'package:{{projectName}}/{{projectName}}_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class Mock{{pluginDartClass}}Platform 
+class Mock{{pluginDartClass}}Platform
     with MockPlatformInterfaceMixin
     implements {{pluginDartClass}}Platform {
 
@@ -23,7 +23,7 @@ void main() {
     {{pluginDartClass}} {{pluginClassLowerCamelCase}} = {{pluginDartClass}}();
     Mock{{pluginDartClass}}Platform fakePlatform = Mock{{pluginDartClass}}Platform();
     {{pluginDartClass}}Platform.instance = fakePlatform;
-  
+
     expect(await {{pluginClassLowerCamelCase}}.getPlatformVersion(), '42');
   });
 }

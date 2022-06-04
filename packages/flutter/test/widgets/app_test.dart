@@ -305,6 +305,116 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
+  testWidgets('WidgetsApp.router route information parser is optional', (WidgetTester tester) async {
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      },
+    );
+    delegate.routeInformation = const RouteInformation(location: 'initial');
+    await tester.pumpWidget(WidgetsApp.router(
+      routerDelegate: delegate,
+      color: const Color(0xFF123456),
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+  });
+
+  testWidgets('WidgetsApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      },
+    );
+    delegate.routeInformation = const RouteInformation(location: 'initial');
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: const RouteInformation(
+        location: 'initial',
+      ),
+    );
+    await expectLater(() async {
+      await tester.pumpWidget(WidgetsApp.router(
+        routeInformationProvider: provider,
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ));
+    }, throwsAssertionError);
+  });
+
+  testWidgets('WidgetsApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      },
+    );
+    delegate.routeInformation = const RouteInformation(location: 'initial');
+    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+    await expectLater(() async {
+      await tester.pumpWidget(WidgetsApp.router(
+        routerDelegate: delegate,
+        routerConfig: routerConfig,
+        color: const Color(0xFF123456),
+      ));
+    }, throwsAssertionError);
+  });
+
+  testWidgets('WidgetsApp.router router config works', (WidgetTester tester) async {
+    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
+      routeInformationProvider: PlatformRouteInformationProvider(
+        initialRouteInformation: const RouteInformation(
+          location: 'initial',
+        ),
+      ),
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: SimpleNavigatorRouterDelegate(
+        builder: (BuildContext context, RouteInformation information) {
+          return Text(information.location!);
+        },
+        onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+          delegate.routeInformation = const RouteInformation(
+            location: 'popped',
+          );
+          return route.didPop(result);
+        },
+      ),
+      backButtonDispatcher: RootBackButtonDispatcher()
+    );
+    await tester.pumpWidget(WidgetsApp.router(
+      routerConfig: routerConfig,
+      color: const Color(0xFF123456),
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+  });
+
   testWidgets('WidgetsApp.router has correct default', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {

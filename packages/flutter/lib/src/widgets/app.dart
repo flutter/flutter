@@ -302,7 +302,7 @@ class WidgetsApp extends StatefulWidget {
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
   WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
-    Key? key,
+    super.key,
     this.navigatorKey,
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
@@ -400,15 +400,22 @@ class WidgetsApp extends StatefulWidget {
        routeInformationParser = null,
        routerDelegate = null,
        backButtonDispatcher = null,
-       super(key: key);
+       routerConfig = null;
 
   /// Creates a [WidgetsApp] that uses the [Router] instead of a [Navigator].
+  ///
+  /// {@template flutter.widgets.WidgetsApp.router}
+  /// If the [routerConfig] is provided, the other router related delegates,
+  /// [routeInformationParser], [routeInformationProvider], [routerDelegate],
+  /// and [backButtonDispatcher], must all be null.
+  /// {@endtemplate}
   WidgetsApp.router({
-    Key? key,
+    super.key,
     this.routeInformationProvider,
-    required RouteInformationParser<Object> this.routeInformationParser,
-    required RouterDelegate<Object> this.routerDelegate,
-    BackButtonDispatcher? backButtonDispatcher,
+    this.routeInformationParser,
+    this.routerDelegate,
+    this.routerConfig,
+    this.backButtonDispatcher,
     this.builder,
     this.title = '',
     this.onGenerateTitle,
@@ -430,11 +437,21 @@ class WidgetsApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.useInheritedMediaQuery = false,
-  }) : assert(
-         routeInformationParser != null &&
-         routerDelegate != null,
-         'The routeInformationParser and routerDelegate cannot be null.',
-       ),
+  }) : assert((){
+         if (routerConfig != null) {
+           assert(
+             (routeInformationProvider ?? routeInformationParser ?? routerDelegate ?? backButtonDispatcher) == null,
+             'If the routerConfig is provided, all the other router delegates must not be provided',
+           );
+           return true;
+         }
+         assert(routerDelegate != null, 'Either one of routerDelegate or routerConfig must be provided');
+         assert(
+           routeInformationProvider == null || routeInformationParser != null,
+           'If routeInformationProvider is provided, routeInformationParser must also be provided',
+         );
+         return true;
+       }()),
        assert(title != null),
        assert(color != null),
        assert(supportedLocales != null && supportedLocales.isNotEmpty),
@@ -445,7 +462,6 @@ class WidgetsApp extends StatefulWidget {
        assert(debugShowCheckedModeBanner != null),
        assert(debugShowWidgetInspector != null),
        navigatorObservers = null,
-       backButtonDispatcher = backButtonDispatcher ?? RootBackButtonDispatcher(),
        navigatorKey = null,
        onGenerateRoute = null,
        pageRouteBuilder = null,
@@ -453,8 +469,7 @@ class WidgetsApp extends StatefulWidget {
        onGenerateInitialRoutes = null,
        onUnknownRoute = null,
        routes = null,
-       initialRoute = null,
-       super(key: key);
+       initialRoute = null;
 
   /// {@template flutter.widgets.widgetsApp.navigatorKey}
   /// A key to use when building the [Navigator].
@@ -526,7 +541,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [Router.routeInformationParser]: which receives this object when this
+  ///  * [Router.routeInformationParser], which receives this object when this
   ///    widget builds the [Router].
   /// {@endtemplate}
   final RouteInformationParser<Object>? routeInformationParser;
@@ -542,7 +557,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [Router.routerDelegate]: which receives this object when this widget
+  ///  * [Router.routerDelegate], which receives this object when this widget
   ///    builds the [Router].
   /// {@endtemplate}
   final RouterDelegate<Object>? routerDelegate;
@@ -557,7 +572,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [Router.backButtonDispatcher]: which receives this object when this
+  ///  * [Router.backButtonDispatcher], which receives this object when this
   ///    widget builds the [Router].
   /// {@endtemplate}
   final BackButtonDispatcher? backButtonDispatcher;
@@ -575,10 +590,24 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [Router.routeInformationProvider]: which receives this object when this
+  ///  * [Router.routeInformationProvider], which receives this object when this
   ///    widget builds the [Router].
   /// {@endtemplate}
   final RouteInformationProvider? routeInformationProvider;
+
+  /// {@template flutter.widgets.widgetsApp.routerConfig}
+  /// An object to configure the underlying [Router].
+  ///
+  /// If the [routerConfig] is provided, the other router related delegates,
+  /// [routeInformationParser], [routeInformationProvider], [routerDelegate],
+  /// and [backButtonDispatcher], must all be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Router.withConfig], which receives this object when this
+  ///    widget builds the [Router].
+  /// {@endtemplate}
+  final RouterConfig<Object>? routerConfig;
 
   /// {@template flutter.widgets.widgetsApp.home}
   /// The widget for the default route of the app ([Navigator.defaultRouteName],
@@ -975,8 +1004,8 @@ class WidgetsApp extends StatefulWidget {
   /// Builds the widget the [WidgetInspector] uses to switch between view and
   /// inspect modes.
   ///
-  /// This lets [MaterialApp] to use a material button to toggle the inspector
-  /// select mode without requiring [WidgetInspector] to depend on the
+  /// This lets [MaterialApp] to use a Material Design button to toggle the
+  /// inspector select mode without requiring [WidgetInspector] to depend on the
   /// material package.
   final InspectorSelectButtonBuilder? inspectorSelectButtonBuilder;
 
@@ -1297,42 +1326,53 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  void _clearRouterResource() {
+    _defaultRouteInformationProvider?.dispose();
+    _defaultRouteInformationProvider = null;
+    _defaultBackButtonDispatcher = null;
+  }
+
+  void _clearNavigatorResource() {
+    _navigator = null;
+  }
+
   void _updateRouting({WidgetsApp? oldWidget}) {
-    if (_usesRouter) {
-      assert(!_usesNavigator);
-      _navigator = null;
-      if (oldWidget == null || oldWidget.routeInformationProvider != widget.routeInformationProvider) {
+    if (_usesRouterWithDelegates) {
+      assert(!_usesNavigator && !_usesRouterWithConfig);
+      _clearNavigatorResource();
+      if (widget.routeInformationProvider == null && widget.routeInformationParser != null) {
+        _defaultRouteInformationProvider ??= PlatformRouteInformationProvider(
+          initialRouteInformation: RouteInformation(
+            location: _initialRouteName,
+          ),
+        );
+      } else {
         _defaultRouteInformationProvider?.dispose();
         _defaultRouteInformationProvider = null;
-        if (widget.routeInformationProvider == null) {
-          _defaultRouteInformationProvider = PlatformRouteInformationProvider(
-            initialRouteInformation: RouteInformation(
-              location: _initialRouteName,
-            ),
-          );
-        }
       }
+      if (widget.backButtonDispatcher == null) {
+        _defaultBackButtonDispatcher ??= RootBackButtonDispatcher();
+      }
+
     } else if (_usesNavigator) {
-      assert(!_usesRouter);
-      _defaultRouteInformationProvider?.dispose();
-      _defaultRouteInformationProvider = null;
+      assert(!_usesRouterWithDelegates && !_usesRouterWithConfig);
+      _clearRouterResource();
       if (_navigator == null || widget.navigatorKey != oldWidget!.navigatorKey) {
         _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
       }
       assert(_navigator != null);
     } else {
-      assert(widget.builder != null);
-      assert(!_usesRouter);
-      assert(!_usesNavigator);
-      _navigator = null;
-      _defaultRouteInformationProvider?.dispose();
-      _defaultRouteInformationProvider = null;
+      assert(widget.builder != null || _usesRouterWithConfig);
+      assert(!_usesRouterWithDelegates && !_usesNavigator);
+      _clearRouterResource();
+      _clearNavigatorResource();
     }
     // If we use a navigator, we have a navigator key.
     assert(_usesNavigator == (_navigator != null));
   }
 
-  bool get _usesRouter => widget.routerDelegate != null;
+  bool get _usesRouterWithDelegates => widget.routerDelegate != null;
+  bool get _usesRouterWithConfig => widget.routerConfig != null;
   bool get _usesNavigator => widget.home != null
       || (widget.routes?.isNotEmpty ?? false)
       || widget.onGenerateRoute != null
@@ -1342,6 +1382,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   RouteInformationProvider? get _effectiveRouteInformationProvider => widget.routeInformationProvider ?? _defaultRouteInformationProvider;
   PlatformRouteInformationProvider? _defaultRouteInformationProvider;
+  BackButtonDispatcher get _effectiveBackButtonDispatcher => widget.backButtonDispatcher ?? _defaultBackButtonDispatcher!;
+  RootBackButtonDispatcher? _defaultBackButtonDispatcher;
 
   // NAVIGATOR
 
@@ -1411,7 +1453,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(mounted);
     // The back button dispatcher should handle the pop route if we use a
     // router.
-    if (_usesRouter)
+    if (_usesRouterWithDelegates)
       return false;
 
     final NavigatorState? navigator = _navigator?.currentState;
@@ -1425,7 +1467,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(mounted);
     // The route name provider should handle the push route if we uses a
     // router.
-    if (_usesRouter)
+    if (_usesRouterWithDelegates)
       return false;
 
     final NavigatorState? navigator = _navigator?.currentState;
@@ -1537,14 +1579,13 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     Widget? routing;
-    if (_usesRouter) {
-      assert(_effectiveRouteInformationProvider != null);
+    if (_usesRouterWithDelegates) {
       routing = Router<Object>(
         restorationScopeId: 'router',
         routeInformationProvider: _effectiveRouteInformationProvider,
         routeInformationParser: widget.routeInformationParser,
         routerDelegate: widget.routerDelegate!,
-        backButtonDispatcher: widget.backButtonDispatcher,
+        backButtonDispatcher: _effectiveBackButtonDispatcher,
       );
     } else if (_usesNavigator) {
       assert(_navigator != null);
@@ -1561,6 +1602,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers!,
         reportsRouteUpdateToEngine: true,
+      );
+    } else if (_usesRouterWithConfig) {
+      routing = Router<Object>.withConfig(
+        restorationScopeId: 'router',
+        config: widget.routerConfig!,
       );
     }
 

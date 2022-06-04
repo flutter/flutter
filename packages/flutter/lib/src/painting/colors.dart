@@ -421,9 +421,9 @@ class HSLColor {
 ///
 /// See also:
 ///
-///  * [MaterialColor] and [MaterialAccentColor], which define material design
+///  * [MaterialColor] and [MaterialAccentColor], which define Material Design
 ///    primary and accent color swatches.
-///  * [material.Colors], which defines all of the standard material design
+///  * [material.Colors], which defines all of the standard Material Design
 ///    colors.
 @immutable
 class ColorSwatch<T> extends Color {
@@ -433,7 +433,7 @@ class ColorSwatch<T> extends Color {
   /// values in the swatch, as would be passed to the [Color.new] constructor
   /// for that same color, and as is exposed by [value]. (This is distinct from
   /// the specific index of the color in the swatch.)
-  const ColorSwatch(int primary, this._swatch) : super(primary);
+  const ColorSwatch(super.primary, this._swatch);
 
   @protected
   final Map<T, Color> _swatch;
@@ -465,21 +465,15 @@ class ColorProperty extends DiagnosticsProperty<Color> {
   ///
   /// The [showName], [style], and [level] arguments must not be null.
   ColorProperty(
-    String name,
-    Color? value, {
-    bool showName = true,
-    Object? defaultValue = kNoDefaultValue,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    String super.name,
+    super.value, {
+    super.showName,
+    super.defaultValue,
+    super.style,
+    super.level,
   }) : assert(showName != null),
        assert(style != null),
-       assert(level != null),
-       super(name, value,
-         defaultValue: defaultValue,
-         showName: showName,
-         style: style,
-         level: level,
-       );
+       assert(level != null);
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {

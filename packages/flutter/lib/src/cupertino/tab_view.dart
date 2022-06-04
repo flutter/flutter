@@ -41,7 +41,7 @@ import 'route.dart';
 class CupertinoTabView extends StatefulWidget {
   /// Creates the content area for a tab in a [CupertinoTabScaffold].
   const CupertinoTabView({
-    Key? key,
+    super.key,
     this.builder,
     this.navigatorKey,
     this.defaultTitle,
@@ -50,8 +50,7 @@ class CupertinoTabView extends StatefulWidget {
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.restorationScopeId,
-  }) : assert(navigatorObservers != null),
-       super(key: key);
+  }) : assert(navigatorObservers != null);
 
   /// The widget builder for the default route of the tab view
   /// ([Navigator.defaultRouteName], which is `/`).

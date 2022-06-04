@@ -561,6 +561,7 @@ void main() {
       '   increasedValue: ""\n'
       '   decreasedValue: ""\n'
       '   hint: ""\n'
+      '   tooltip: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
       '   platformViewId: null\n'
@@ -659,6 +660,7 @@ void main() {
       '   increasedValue: ""\n'
       '   decreasedValue: ""\n'
       '   hint: ""\n'
+      '   tooltip: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
       '   platformViewId: null\n'
@@ -856,5 +858,5 @@ class TestRender extends RenderProxyBox {
 }
 
 class CustomSortKey extends OrdinalSortKey {
-  const CustomSortKey(double order, {String? name}) : super(order, name: name);
+  const CustomSortKey(super.order, {super.name});
 }

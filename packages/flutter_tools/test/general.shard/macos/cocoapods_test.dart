@@ -494,6 +494,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     final Map<String, String> possibleErrors = <String, String>{
       'symbol not found': 'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
       'incompatible architecture': "LoadError - (mach-o file, but is an incompatible architecture (have 'arm64', need 'x86_64')), '/usr/lib/ffi_c.bundle' (no such file) - /Library/Ruby/Gems/2.6.0/gems/ffi-1.15.4/lib/ffi_c.bundle",
+      'bus error': '/Library/Ruby/Gems/2.6.0/gems/ffi-1.15.5/lib/ffi/library.rb:275: [BUG] Bus Error at 0x000000010072c000',
     };
     possibleErrors.forEach((String errorName, String cocoaPodsError) {
       testUsingContext('ffi $errorName failure on ARM macOS prompts gem install', () async {
@@ -513,7 +514,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
               'LANG': 'en_US.UTF-8',
             },
             exitCode: 1,
-            stdout: cocoaPodsError,
+            stderr: cocoaPodsError,
           ),
           const FakeCommand(
             command: <String>['which', 'sysctl'],

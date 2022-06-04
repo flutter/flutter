@@ -117,6 +117,7 @@ class FlutterOptions {
   static const String kInitializeFromDill = 'initialize-from-dill';
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
+  static const String kUseApplicationBinary = 'use-application-binary';
 }
 
 /// flutter command categories for usage.
@@ -152,11 +153,11 @@ abstract class FlutterCommand extends Command<void> {
     ],
     'canvaskit': <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=true'
+      'FLUTTER_WEB_USE_SKIA=true',
     ],
     'html': <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=false'
+      'FLUTTER_WEB_USE_SKIA=false',
     ],
   };
 
@@ -603,6 +604,16 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kDeviceTimeout,
       help: 'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
       valueHelp: '10'
+    );
+  }
+
+  void usesApplicationBinaryOption() {
+    argParser.addOption(
+      FlutterOptions.kUseApplicationBinary,
+      help: 'Specify a pre-built application binary to use when running. For Android applications, '
+        'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
+        'do not yet support prebuilt application binaries.',
+      valueHelp: 'path/to/app.apk',
     );
   }
 
@@ -1290,8 +1301,14 @@ abstract class FlutterCommand extends Command<void> {
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
-      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
-      await globals.cache.updateAll(await requiredArtifacts);
+      final bool offline;
+      if (argParser.options.containsKey('offline')) {
+        offline = boolArg('offline');
+      } else {
+        offline = false;
+      }
+      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}, offline: offline);
+      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
     }
     globals.cache.releaseLock();
 
@@ -1574,10 +1591,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
-    case TargetPlatform.windows_uwp_x64:
-      if (featureFlags.isWindowsUwpEnabled) {
-        return DevelopmentArtifact.windowsUwp;
-      }
       return null;
   }
 }

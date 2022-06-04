@@ -71,13 +71,13 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
   r8FailureHandler,
-  minSdkVersion,
-  transformInputIssue,
-  lockFileDepMissing,
+  minSdkVersionHandler,
+  transformInputIssueHandler,
+  lockFileDepMissingHandler,
   multidexErrorHandler,
   incompatibleKotlinVersionHandler,
   minCompileSdkVersionHandler,
-  jvm11Required,
+  jvm11RequiredHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -381,7 +381,7 @@ final RegExp _minSdkVersionPattern = RegExp(r'uses-sdk:minSdkVersion ([0-9]+) ca
 
 /// Handler when a plugin requires a higher Android API level.
 @visibleForTesting
-final GradleHandledError minSdkVersion = GradleHandledError(
+final GradleHandledError minSdkVersionHandler = GradleHandledError(
   test: (String line) {
     return _minSdkVersionPattern.hasMatch(line);
   },
@@ -423,7 +423,7 @@ final GradleHandledError minSdkVersion = GradleHandledError(
 /// Handler when https://issuetracker.google.com/issues/141126614 or
 /// https://github.com/flutter/flutter/issues/58247 is triggered.
 @visibleForTesting
-final GradleHandledError transformInputIssue = GradleHandledError(
+final GradleHandledError transformInputIssueHandler = GradleHandledError(
   test: (String line) {
     return line.contains('https://issuetracker.google.com/issues/158753935');
   },
@@ -457,7 +457,7 @@ final GradleHandledError transformInputIssue = GradleHandledError(
 
 /// Handler when a dependency is missing in the lockfile.
 @visibleForTesting
-final GradleHandledError lockFileDepMissing = GradleHandledError(
+final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
   test: (String line) {
     return line.contains('which is not part of the dependency lock state');
   },
@@ -541,7 +541,7 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
 );
 
 @visibleForTesting
-final GradleHandledError jvm11Required = GradleHandledError(
+final GradleHandledError jvm11RequiredHandler = GradleHandledError(
   test: (String line) {
     return line.contains('Android Gradle plugin requires Java 11 to run');
   },

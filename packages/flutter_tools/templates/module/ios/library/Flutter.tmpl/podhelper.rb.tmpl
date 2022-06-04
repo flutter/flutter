@@ -15,6 +15,21 @@ require 'json'
 #                                          Optional, defaults to two levels up from the directory of this script.
 #                                          MyApp/my_flutter/.ios/Flutter/../..
 def install_all_flutter_pods(flutter_application_path = nil)
+  # defined_in_file is a Pathname to the Podfile set by CocoaPods.
+  pod_contents = File.read(defined_in_file)
+  unless pod_contents.include? 'flutter_post_install'
+    puts  <<~POSTINSTALL
+Add `flutter_post_install(installer)` to your Podfile `post_install` block to build Flutter plugins:
+
+post_install do |installer|
+  flutter_post_install(installer)
+end
+POSTINSTALL
+    raise 'Missing `flutter_post_install(installer)` in Podfile `post_install` block'
+  end
+
+  require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
   flutter_application_path ||= File.join('..', '..')
   install_flutter_engine_pod
   install_flutter_plugin_pods(flutter_application_path)
@@ -46,7 +61,7 @@ def install_flutter_engine_pod
   # Keep pod path relative so it can be checked into Podfile.lock.
   # Process will be run from project directory.
   engine_pathname = Pathname.new engine_dir
-  # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
+  # defined_in_file is a Pathname to the Podfile set by CocoaPods.
   project_directory_pathname = defined_in_file.dirname
   relative = engine_pathname.relative_path_from project_directory_pathname
 
@@ -77,7 +92,9 @@ def install_flutter_plugin_pods(flutter_application_path)
   FileUtils.mkdir_p(symlinks_dir)
 
   plugins_file = File.expand_path('.flutter-plugins-dependencies', flutter_application_path)
-  plugin_pods = flutter_parse_dependencies_file_for_ios_plugin(plugins_file)
+
+  # flutter_parse_plugins_file is in Flutter root podhelper.rb
+  plugin_pods = flutter_parse_plugins_file(plugins_file, 'ios')
   plugin_pods.each do |plugin_hash|
     plugin_name = plugin_hash['name']
     plugin_path = plugin_hash['path']
@@ -110,7 +127,7 @@ def install_flutter_application_pod(flutter_application_path)
     # Create a dummy dylib.
     FileUtils.mkdir_p(app_framework_dir)
     sdk_path = `xcrun --sdk iphoneos --show-sdk-path`.strip
-    `echo "static const int Moo = 88;" | xcrun clang -x c -arch arm64 -dynamiclib -miphoneos-version-min=9.0 -isysroot "#{sdk_path}" -o "#{app_framework_dylib}" -`
+    `echo "static const int Moo = 88;" | xcrun clang -x c -arch arm64 -dynamiclib -miphoneos-version-min=11.0 -isysroot "#{sdk_path}" -o "#{app_framework_dylib}" -`
   end
 
   # Keep pod and script phase paths relative so they can be checked into source control.
@@ -127,21 +144,6 @@ def install_flutter_application_pod(flutter_application_path)
     :execution_position => :before_compile
 end
 
-# .flutter-plugins-dependencies format documented at
-# https://flutter.dev/go/plugins-list-migration
-def flutter_parse_dependencies_file_for_ios_plugin(file)
-  file_path = File.expand_path(file)
-  return [] unless File.exists? file_path
-
-  dependencies_file = File.read(file)
-  dependencies_hash = JSON.parse(dependencies_file)
-
-  # dependencies_hash.dig('plugins', 'ios') not available until Ruby 2.3
-  return [] unless dependencies_hash.has_key?('plugins')
-  return [] unless dependencies_hash['plugins'].has_key?('ios')
-  dependencies_hash['plugins']['ios'] || []
-end
-
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('..', '..', 'Flutter', 'Generated.xcconfig'), __FILE__)
   unless File.exist?(generated_xcode_build_settings_path)
@@ -154,4 +156,24 @@ def flutter_root
   end
   # This should never happen...
   raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+# Run the post-install script to set build settings on Flutter plugins.
+#
+# @example
+#   post_install do |installer|
+#     flutter_post_install(installer)
+#   end
+# @param [Pod::Installer] installer Passed to the `post_install` block.
+# @param [boolean] skip Do not change any build configurations. Set to suppress
+#                       "Missing `flutter_post_install" exception.
+def flutter_post_install(installer, skip: false)
+  return if skip
+
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |build_configuration|
+      # flutter_additional_ios_build_settings is in Flutter root podhelper.rb
+      flutter_additional_ios_build_settings(target)
+    end
+  end
 end

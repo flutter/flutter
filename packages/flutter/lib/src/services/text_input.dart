@@ -1735,7 +1735,7 @@ class TextInput {
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
-        for (final dynamic encodedDelta in encoded['deltas']) {
+        for (final dynamic encodedDelta in encoded['deltas'] as List<dynamic>) {
           final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
           deltas.add(delta);
         }

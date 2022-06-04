@@ -208,7 +208,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   ///
   /// The [tabBar] and [tabBuilder] arguments must not be null.
   CupertinoTabScaffold({
-    Key? key,
+    super.key,
     required this.tabBar,
     required this.tabBuilder,
     this.controller,
@@ -221,8 +221,7 @@ class CupertinoTabScaffold extends StatefulWidget {
          controller == null || controller.index < tabBar.items.length,
          "The CupertinoTabController's current index ${controller.index} is "
          'out of bounds for the tab bar with ${tabBar.items.length} tabs',
-       ),
-       super(key: key);
+       );
 
   /// The [tabBar] is a [CupertinoTabBar] drawn at the bottom of the screen
   /// that lets the user switch between different tabs in the main content area

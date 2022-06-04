@@ -519,11 +519,10 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
   ///
   /// The [childManager] and [gridDelegate] arguments must not be null.
   RenderSliverGrid({
-    required RenderSliverBoxChildManager childManager,
+    required super.childManager,
     required SliverGridDelegate gridDelegate,
   }) : assert(gridDelegate != null),
-       _gridDelegate = gridDelegate,
-       super(childManager: childManager);
+       _gridDelegate = gridDelegate;
 
   @override
   void setupParentData(RenderObject child) {

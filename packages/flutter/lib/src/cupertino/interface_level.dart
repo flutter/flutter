@@ -41,12 +41,11 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// Creates a [CupertinoUserInterfaceLevel] to change descendant Cupertino widget's
   /// visual level.
   const CupertinoUserInterfaceLevel({
-    Key? key,
+    super.key,
     required CupertinoUserInterfaceLevelData data,
-    required Widget child,
+    required super.child,
   }) : assert(data != null),
-      _data = data,
-      super(key: key, child: child);
+      _data = data;
 
   final CupertinoUserInterfaceLevelData _data;
 

@@ -115,7 +115,7 @@ class Table extends RenderObjectWidget {
   /// The [children], [defaultColumnWidth], and [defaultVerticalAlignment]
   /// arguments must not be null.
   Table({
-    Key? key,
+    super.key,
     this.children = const <TableRow>[],
     this.columnWidths,
     this.defaultColumnWidth = const FlexColumnWidth(),
@@ -169,8 +169,7 @@ class Table extends RenderObjectWidget {
        }()),
        _rowDecorations = children.any((TableRow row) => row.decoration != null)
                               ? children.map<Decoration?>((TableRow row) => row.decoration).toList(growable: false)
-                              : null,
-       super(key: key) {
+                              : null {
     assert(() {
       final List<Widget> flatChildren = children.expand<Widget>((TableRow row) => row.children!).toList(growable: false);
       if (debugChildrenHaveDuplicateKeys(this, flatChildren)) {
@@ -282,7 +281,7 @@ class Table extends RenderObjectWidget {
 }
 
 class _TableElement extends RenderObjectElement {
-  _TableElement(Table widget) : super(widget);
+  _TableElement(Table super.widget);
 
   @override
   RenderTable get renderObject => super.renderObject as RenderTable;
@@ -421,10 +420,10 @@ class _TableElement extends RenderObjectElement {
 class TableCell extends ParentDataWidget<TableCellParentData> {
   /// Creates a widget that controls how a child of a [Table] is aligned.
   const TableCell({
-    Key? key,
+    super.key,
     this.verticalAlignment,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// How this cell is aligned vertically.
   final TableCellVerticalAlignment? verticalAlignment;

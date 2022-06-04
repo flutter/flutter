@@ -158,7 +158,7 @@ class AndroidEmulator extends Emulator {
       '-avd',
       id,
       if (coldBoot)
-        '-no-snapshot-load'
+        '-no-snapshot-load',
     ];
     final Process process = await _processUtils.start(command);
 

@@ -25,6 +25,7 @@ Future<void> buildWeb(
   bool sourceMaps,
   bool nativeNullAssertions,
   String? baseHref,
+  String? dart2jsOptimization,
 ) async {
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
@@ -51,6 +52,8 @@ Future<void> buildWeb(
         kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
+        if (dart2jsOptimization != null)
+         kDart2jsOptimization: dart2jsOptimization,
         ...buildInfo.toBuildSystemEnvironment(),
       },
       artifacts: globals.artifacts!,

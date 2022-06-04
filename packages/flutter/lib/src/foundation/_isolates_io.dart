@@ -19,7 +19,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   final RawReceivePort port = RawReceivePort();
   Timeline.finishSync();
 
-  void _timeEndAndCleanup() {
+  void timeEndAndCleanup() {
     Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
     port.close();
     Timeline.finishSync();
@@ -27,7 +27,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
 
   final Completer<dynamic> completer = Completer<dynamic>();
   port.handler = (dynamic msg) {
-    _timeEndAndCleanup();
+    timeEndAndCleanup();
     completer.complete(msg);
   };
 
@@ -47,7 +47,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
       debugName: debugLabel,
     );
   } on Object {
-    _timeEndAndCleanup();
+    timeEndAndCleanup();
     rethrow;
   }
 

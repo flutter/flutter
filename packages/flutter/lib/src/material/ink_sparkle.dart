@@ -89,7 +89,7 @@ class InkSparkle extends InteractiveInkFeature {
   ///     is clipped with [rectCallback].
   /// When the ripple is removed, [onRemoved] will be called.
   ///
-  /// [turbulenceSeed] can be passed if a non random seed shold be used for
+  /// [turbulenceSeed] can be passed if a non random seed should be used for
   /// the turbulence and sparkles. By default, the seed is a random number
   /// between 0.0 and 1000.0.
   ///
@@ -102,7 +102,7 @@ class InkSparkle extends InteractiveInkFeature {
   InkSparkle({
     required MaterialInkController controller,
     required RenderBox referenceBox,
-    required Color color,
+    required super.color,
     required Offset position,
     required TextDirection textDirection,
     bool containedInkWell = true,
@@ -110,7 +110,7 @@ class InkSparkle extends InteractiveInkFeature {
     BorderRadius? borderRadius,
     ShapeBorder? customBorder,
     double? radius,
-    VoidCallback? onRemoved,
+    super.onRemoved,
     double? turbulenceSeed,
   }) : assert(containedInkWell || rectCallback == null),
        _color = color,
@@ -120,7 +120,7 @@ class InkSparkle extends InteractiveInkFeature {
        _textDirection = textDirection,
        _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) * _targetRadiusMultiplier,
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
-       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
+       super(controller: controller, referenceBox: referenceBox) {
     // InkSparkle will not be painted until the async compilation completes.
     _InkSparkleFactory.compileShaderIfNeccessary();
     controller.addInkFeature(this);
@@ -291,7 +291,7 @@ class InkSparkle extends InteractiveInkFeature {
   double get _height => referenceBox.size.height;
 
   /// All double values for uniforms come from the Android 12 ripple
-  /// implentation from the following files:
+  /// implementation from the following files:
   /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
   /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
   /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
@@ -319,11 +319,11 @@ class InkSparkle extends InteractiveInkFeature {
       uSparkleAlpha: _sparkleAlpha.value,
 
       // The following uniforms are driven by the turbulence phase and change
-      // each frame of the animation. Theese unifroms are uses to modify the
+      // each frame of the animation. These uniforms are uses to modify the
       // default (if these fields are unset or 0) circular outer ring to a
       // non-uniform shape that is more like an actual ink splash. In addition
       // to the positional based triangular noise created in the shader, these
-      // uniforms also vary the appearence of the sparkles even when the same
+      // uniforms also vary the appearance of the sparkles even when the same
       // location is tapped.
       uTurbulencePhase: turbulencePhase,
       uNoisePhase: noisePhase / 1000.0,
@@ -674,7 +674,7 @@ class FragmentShaderManager {
   /// In general, this is not needed, but may be useful for debugging or edge cases.
   ui.FragmentProgram get program => _program;
 
-  /// Direct access to the the SPIR-V bytecode that was used to generate this class.
+  /// Direct access to the SPIR-V bytecode that was used to generate this class.
   ///
   /// In general, this is not needed, but may be useful for debugging or edge cases.
   ///

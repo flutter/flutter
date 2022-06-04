@@ -824,10 +824,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       );
     }
 
-    // The checks that follow verify that the layout and appearance of
-    // the default enabled Stepper buttons have not changed even
-    // though the FlatButtons have been replaced by TextButtons.
-
     const OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2)));
     const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.0, 260.0);
     const Rect cancelButtonRect = Rect.fromLTRB(176.0, 212.0, 292.0, 260.0);
@@ -881,10 +877,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
       );
     }
-
-    // The checks that follow verify that the appearance of the
-    // default disabled Stepper buttons have not changed even though
-    // the FlatButtons have been replaced by TextButtons.
 
     await tester.pumpWidget(buildFrame(ThemeData.light()));
 
@@ -1154,7 +1146,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 }
 
 class _TappableColorWidget extends StatefulWidget {
-  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, Key? key,}) : super(key: key);
+  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, super.key,});
 
   final Color tappedColor;
   final Color untappedColor;

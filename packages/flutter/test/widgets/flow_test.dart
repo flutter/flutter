@@ -47,7 +47,7 @@ class OpacityFlowDelegate extends FlowDelegate {
 
 // OpacityFlowDelegate that paints one of its children twice
 class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
-  DuplicatePainterOpacityFlowDelegate(double opacity) : super(opacity);
+  DuplicatePainterOpacityFlowDelegate(super.opacity);
 
   @override
   void paintChildren(FlowPaintingContext context) {

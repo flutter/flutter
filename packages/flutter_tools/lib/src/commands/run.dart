@@ -38,6 +38,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesWebRendererOption();
     addNativeNullAssertions(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
+    usesApplicationBinaryOption();
     argParser
       ..addFlag('trace-startup',
         negatable: false,
@@ -86,12 +87,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         hide: !verboseHelp,
         help: '(deprecated) Allow connections to the VM service without using authentication codes. '
               '(Not recommended! This can open your device to remote code execution attacks!)'
-      )
-      ..addOption('use-application-binary',
-        help: 'Specify a pre-built application binary to use when running. For Android applications, '
-              'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
-              'do not yet support prebuilt application binaries.',
-        valueHelp: 'path/to/app.apk',
       )
       ..addFlag('start-paused',
         defaultsTo: startPausedDefault,
@@ -168,7 +163,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
-  bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
+  bool get runningWithPrebuiltApplication => argResults[FlutterOptions.kUseApplicationBinary] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   bool get enableImpeller => boolArg('enable-impeller');
 
@@ -347,7 +342,7 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         help: 'Whether to quickly bootstrap applications with a minimal app. '
               'Currently this is only supported on Android devices. This option '
-              'cannot be paired with "--use-application-binary".',
+              'cannot be paired with "--${FlutterOptions.kUseApplicationBinary}".',
         hide: !verboseHelp,
       );
   }
@@ -484,7 +479,7 @@ class RunCommand extends RunCommandBase {
       throwToolExit(null);
     }
     if (globals.deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
-      throwToolExit('Using "-d all" with "--use-application-binary" is not supported');
+      throwToolExit('Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported');
     }
 
     if (userIdentifier != null
@@ -556,28 +551,34 @@ class RunCommand extends RunCommandBase {
     );
   }
 
+  @visibleForTesting
+  Daemon createMachineDaemon() {
+    final Daemon daemon = Daemon(
+      DaemonConnection(
+        daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
+        logger: globals.logger,
+      ),
+      notifyingLogger: (globals.logger is NotifyingLogger)
+        ? globals.logger as NotifyingLogger
+        : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
+      logToStdout: true,
+    );
+    return daemon;
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final BuildInfo buildInfo = await getBuildInfo();
     final bool hotMode = shouldUseHotMode(buildInfo);
-    final String applicationBinaryPath = stringArg('use-application-binary');
+    final String applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
 
     if (boolArg('machine')) {
       if (devices.length > 1) {
         throwToolExit('"--machine" does not support "-d all".');
       }
-      final Daemon daemon = Daemon(
-        DaemonConnection(
-          daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
-          logger: globals.logger,
-        ),
-        notifyingLogger: (globals.logger is NotifyingLogger)
-          ? globals.logger as NotifyingLogger
-          : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
-        logToStdout: true,
-      );
+      final Daemon daemon = createMachineDaemon();
       AppInstance app;
       try {
         app = await daemon.appDomain.startApp(
@@ -591,6 +592,7 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
+          multidexEnabled: boolArg('multidex'),
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

@@ -556,6 +556,34 @@ TaskFunction createOpacityPeepholeColOfAlphaSaveLayerRowsPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createGradientDynamicPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/gradient_dynamic_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createGradientConsistentPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/gradient_consistent_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createGradientStaticPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/gradient_static_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createAnimatedComplexOpacityPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/animated_complex_opacity_perf_e2e.dart',
+  ).run;
+}
+
 Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
   final Map<String, dynamic> tally = <String, dynamic>{};
   for (final Map<String, dynamic> item in results) {

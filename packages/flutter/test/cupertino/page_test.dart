@@ -556,7 +556,7 @@ class RtlOverrideWidgetsLocalization implements WidgetsLocalizations {
 }
 
 class KeepsStateTestWidget extends StatefulWidget {
-  const KeepsStateTestWidget({Key? key, this.navigatorKey}) : super(key: key);
+  const KeepsStateTestWidget({super.key, this.navigatorKey});
 
   final Key? navigatorKey;
 
@@ -591,7 +591,7 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
 }
 
 class TestRestorableWidget extends StatefulWidget {
-  const TestRestorableWidget({Key? key, required this.restorationId}) : super(key: key);
+  const TestRestorableWidget({super.key, required this.restorationId});
 
   final String restorationId;
 

@@ -1173,7 +1173,7 @@ void main() {
     });
 
     testWidgets('DatePicker golden tests', (WidgetTester tester) async {
-      Widget _buildApp(CupertinoDatePickerMode mode) {
+      Widget buildApp(CupertinoDatePickerMode mode) {
         return CupertinoApp(
           home: Center(
             child: SizedBox(
@@ -1192,19 +1192,19 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.time));
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.time));
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.time.initial.png'),
       );
 
-      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.date));
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.date));
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.date.initial.png'),
       );
 
-      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.dateAndTime));
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.datetime.initial.png'),

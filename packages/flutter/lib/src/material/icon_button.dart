@@ -21,7 +21,7 @@ import 'tooltip.dart';
 // See: <https://material.io/design/usability/accessibility.html#layout-typography>.
 const double _kMinButtonSize = kMinInteractiveDimension;
 
-/// A material design icon button.
+/// A Material Design icon button.
 ///
 /// An icon button is a picture printed on a [Material] widget that reacts to
 /// touches by filling with color (ink).
@@ -94,7 +94,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// See also:
 ///
-///  * [Icons], a library of predefined icons.
+///  * [Icons], the library of Material Icons.
 ///  * [BackButton], an icon button for a "back" affordance which adapts to the
 ///    current platform's conventions.
 ///  * [CloseButton], an icon button for closing pages.
@@ -115,7 +115,7 @@ class IconButton extends StatelessWidget {
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
   const IconButton({
-    Key? key,
+    super.key,
     this.iconSize,
     this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
@@ -139,8 +139,7 @@ class IconButton extends StatelessWidget {
        assert(alignment != null),
        assert(splashRadius == null || splashRadius > 0),
        assert(autofocus != null),
-       assert(icon != null),
-       super(key: key);
+       assert(icon != null);
 
   /// The size of the icon inside the button.
   ///

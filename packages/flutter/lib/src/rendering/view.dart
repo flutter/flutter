@@ -221,7 +221,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
     if (!kReleaseMode) {
-      Timeline.startSync('COMPOSITING', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Timeline.startSync('COMPOSITING');
     }
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();

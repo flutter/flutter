@@ -1855,4 +1855,42 @@ void main() {
     expect(tableBorder?.bottom.width, null);
     expect(tableBorder?.top.color, null);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/100952
+  testWidgets('Do not crashes when paint borders in a narrow space', (WidgetTester tester) async {
+    const List<DataColumn> columns = <DataColumn>[
+      DataColumn(label: Text('column1')),
+      DataColumn(label: Text('column2')),
+    ];
+
+    const List<DataCell> cells = <DataCell>[
+      DataCell(Text('cell1')),
+      DataCell(Text('cell2')),
+    ];
+
+    const List<DataRow> rows = <DataRow>[
+      DataRow(cells: cells),
+      DataRow(cells: cells),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 117.0,
+              child: DataTable(
+                border: TableBorder.all(width: 2, color: Colors.red),
+                columns: columns,
+                rows: rows,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Go without crashes.
+
+  });
 }

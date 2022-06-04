@@ -53,8 +53,8 @@ void main() {
       'ph': 'b',
       'ts': timeStamp,
       'args': <String, String>{
-        'vsync_transitions_missed': vsyncsMissed.toString()
-      }
+        'vsync_transitions_missed': vsyncsMissed.toString(),
+      },
     };
 
     Map<String, dynamic> lagEnd(int timeStamp, int vsyncsMissed) => <String, dynamic>{
@@ -62,8 +62,8 @@ void main() {
       'ph': 'e',
       'ts': timeStamp,
       'args': <String, String>{
-        'vsync_transitions_missed': vsyncsMissed.toString()
-      }
+        'vsync_transitions_missed': vsyncsMissed.toString(),
+      },
     };
 
     Map<String, dynamic> cpuUsage(int timeStamp, double cpuUsage) => <String, dynamic>{
@@ -71,8 +71,8 @@ void main() {
       'name': 'CpuUsage',
       'ts': timeStamp,
       'args': <String, String>{
-        'total_cpu_usage': cpuUsage.toString()
-      }
+        'total_cpu_usage': cpuUsage.toString(),
+      },
     };
 
     Map<String, dynamic> memoryUsage(int timeStamp, double dirty, double shared) => <String, dynamic>{
@@ -82,7 +82,7 @@ void main() {
       'args': <String, String>{
         'owned_shared_memory_usage': shared.toString(),
         'dirty_memory_usage': dirty.toString(),
-      }
+      },
     };
 
     Map<String, dynamic> platformVsync(int timeStamp) => <String, dynamic>{
@@ -98,10 +98,10 @@ void main() {
       'args': <String, dynamic>{
         'StartTime': startTime,
         'TargetTime': endTime,
-      }
+      },
     };
 
-    List<Map<String, dynamic>> _genGC(String name, int count, int startTime, int timeDiff) {
+    List<Map<String, dynamic>> genGC(String name, int count, int startTime, int timeDiff) {
       int ts = startTime;
       bool begin = true;
       final List<Map<String, dynamic>> ret = <Map<String, dynamic>>[];
@@ -125,11 +125,11 @@ void main() {
     }
 
     List<Map<String, dynamic>> newGenGC(int count, int startTime, int timeDiff) {
-      return _genGC('CollectNewGeneration', count, startTime, timeDiff);
+      return genGC('CollectNewGeneration', count, startTime, timeDiff);
     }
 
     List<Map<String, dynamic>> oldGenGC(int count, int startTime, int timeDiff) {
-      return _genGC('CollectOldGeneration', count, startTime, timeDiff);
+      return genGC('CollectOldGeneration', count, startTime, timeDiff);
     }
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
@@ -756,14 +756,14 @@ void main() {
     group('RefreshRateSummarizer tests', () {
 
       const double kCompareDelta = 0.01;
-      RefreshRateSummary _summarize(List<Map<String, dynamic>> traceEvents) {
+      RefreshRateSummary summarizeRefresh(List<Map<String, dynamic>> traceEvents) {
         final Timeline timeline = Timeline.fromJson(<String, dynamic>{
           'traceEvents': traceEvents,
         });
         return RefreshRateSummary(vsyncEvents: timeline.events!);
       }
 
-      List<Map<String, dynamic>> _populateEvents({required int numberOfEvents, required  int startTime, required int interval, required int margin}) {
+      List<Map<String, dynamic>> populateEvents({required int numberOfEvents, required  int startTime, required int interval, required int margin}) {
         final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
         int startTimeInNanoseconds = startTime;
         for (int i = 0; i < numberOfEvents; i ++) {
@@ -780,12 +780,12 @@ void main() {
         const int intervalInNanoseconds = 33333333;
         // allow some margins
         const int margin = 3000000;
-        final List<Map<String, dynamic>> events = _populateEvents(numberOfEvents: 100,
+        final List<Map<String, dynamic>> events = populateEvents(numberOfEvents: 100,
                                                                   startTime: startTimeInNanoseconds,
                                                                   interval: intervalInNanoseconds,
                                                                   margin: margin,
                                                                  );
-        final RefreshRateSummary summary = _summarize(events);
+        final RefreshRateSummary summary = summarizeRefresh(events);
         expect(summary.percentageOf30HzFrames, closeTo(100, kCompareDelta));
         expect(summary.percentageOf60HzFrames, 0);
         expect(summary.percentageOf90HzFrames, 0);
@@ -798,13 +798,13 @@ void main() {
         const int intervalInNanoseconds = 16666666;
         // allow some margins
         const int margin = 1200000;
-        final List<Map<String, dynamic>> events = _populateEvents(numberOfEvents: 100,
+        final List<Map<String, dynamic>> events = populateEvents(numberOfEvents: 100,
                                                                   startTime: startTimeInNanoseconds,
                                                                   interval: intervalInNanoseconds,
                                                                   margin: margin,
                                                                  );
 
-        final RefreshRateSummary summary = _summarize(events);
+        final RefreshRateSummary summary = summarizeRefresh(events);
         expect(summary.percentageOf30HzFrames, 0);
         expect(summary.percentageOf60HzFrames, closeTo(100, kCompareDelta));
         expect(summary.percentageOf90HzFrames, 0);
@@ -817,13 +817,13 @@ void main() {
         const int intervalInNanoseconds = 11111111;
         // allow some margins
         const int margin = 500000;
-        final List<Map<String, dynamic>> events = _populateEvents(numberOfEvents: 100,
+        final List<Map<String, dynamic>> events = populateEvents(numberOfEvents: 100,
                                                                   startTime: startTimeInNanoseconds,
                                                                   interval: intervalInNanoseconds,
                                                                   margin: margin,
                                                                  );
 
-        final RefreshRateSummary summary = _summarize(events);
+        final RefreshRateSummary summary = summarizeRefresh(events);
         expect(summary.percentageOf30HzFrames, 0);
         expect(summary.percentageOf60HzFrames, 0);
         expect(summary.percentageOf90HzFrames, closeTo(100, kCompareDelta));
@@ -836,12 +836,12 @@ void main() {
         const int intervalInNanoseconds = 8333333;
         // allow some margins
         const int margin = 300000;
-        final List<Map<String, dynamic>> events = _populateEvents(numberOfEvents: 100,
+        final List<Map<String, dynamic>> events = populateEvents(numberOfEvents: 100,
                                                                   startTime: startTimeInNanoseconds,
                                                                   interval: intervalInNanoseconds,
                                                                   margin: margin,
                                                                  );
-        final RefreshRateSummary summary = _summarize(events);
+        final RefreshRateSummary summary = summarizeRefresh(events);
         expect(summary.percentageOf30HzFrames, 0);
         expect(summary.percentageOf60HzFrames, 0);
         expect(summary.percentageOf90HzFrames, 0);
@@ -852,12 +852,12 @@ void main() {
       test('Identify illegal refresh rates.', () async {
         const int startTimeInNanoseconds = 2750850055430;
         const int intervalInNanoseconds = 10000000;
-        final List<Map<String, dynamic>> events = _populateEvents(numberOfEvents: 1,
+        final List<Map<String, dynamic>> events = populateEvents(numberOfEvents: 1,
                                                                   startTime: startTimeInNanoseconds,
                                                                   interval: intervalInNanoseconds,
                                                                   margin: 0,
                                                                  );
-        final RefreshRateSummary summary = _summarize(events);
+        final RefreshRateSummary summary = summarizeRefresh(events);
         expect(summary.percentageOf30HzFrames, 0);
         expect(summary.percentageOf60HzFrames, 0);
         expect(summary.percentageOf90HzFrames, 0);
@@ -878,48 +878,48 @@ void main() {
         const int totalFrames = num30Hz + num60Hz + num80Hz + num90Hz + num120Hz + numIllegal;
 
         // Add 30hz frames
-        events.addAll(_populateEvents(numberOfEvents: num30Hz,
+        events.addAll(populateEvents(numberOfEvents: num30Hz,
                                       startTime: 0,
                                       interval: 32000000,
                                       margin: 0,
                                       ));
 
         // Add 60hz frames
-        events.addAll(_populateEvents(numberOfEvents: num60Hz,
+        events.addAll(populateEvents(numberOfEvents: num60Hz,
                                       startTime: 0,
                                       interval: 16000000,
                                       margin: 0,
                                       ));
 
         // Add 80hz frames
-        events.addAll(_populateEvents(numberOfEvents: num80Hz,
+        events.addAll(populateEvents(numberOfEvents: num80Hz,
                                       startTime: 0,
                                       interval: 12000000,
                                       margin: 0,
                                       ));
 
         // Add 90hz frames
-        events.addAll(_populateEvents(numberOfEvents: num90Hz,
+        events.addAll(populateEvents(numberOfEvents: num90Hz,
                                       startTime: 0,
                                       interval: 11000000,
                                       margin: 0,
                                       ));
 
         // Add 120hz frames
-        events.addAll(_populateEvents(numberOfEvents: num120Hz,
+        events.addAll(populateEvents(numberOfEvents: num120Hz,
                                       startTime: 0,
                                       interval: 8000000,
                                       margin: 0,
                                       ));
 
         // Add illegal refresh rate frames
-        events.addAll(_populateEvents(numberOfEvents: numIllegal,
+        events.addAll(populateEvents(numberOfEvents: numIllegal,
                                       startTime: 0,
                                       interval: 60000,
                                       margin: 0,
                                       ));
 
-        final RefreshRateSummary summary  = _summarize(events);
+        final RefreshRateSummary summary  = summarizeRefresh(events);
 
         expect(summary.percentageOf30HzFrames, closeTo(num30Hz/totalFrames*100, kCompareDelta));
         expect(summary.percentageOf60HzFrames, closeTo(num60Hz/totalFrames*100, kCompareDelta));

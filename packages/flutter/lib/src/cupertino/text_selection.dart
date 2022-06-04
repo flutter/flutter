@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -26,7 +25,6 @@ const double _kArrowScreenPadding = 26.0;
 // Generates the child that's passed into CupertinoTextSelectionToolbar.
 class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
   const _CupertinoTextSelectionControlsToolbar({
-    Key? key,
     required this.clipboardStatus,
     required this.endpoints,
     required this.globalEditableRegion,
@@ -36,7 +34,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
     required this.handleSelectAll,
     required this.selectionMidpoint,
     required this.textLineHeight,
-  }) : super(key: key);
+  });
 
   final ClipboardStatusNotifier? clipboardStatus;
   final List<TextSelectionPoint> endpoints;

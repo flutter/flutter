@@ -335,7 +335,7 @@ abstract class UnpackIOS extends Target {
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
-      ...archList
+      ...archList,
     ]);
 
     if (verifyResult.exitCode != 0) {
@@ -444,7 +444,7 @@ abstract class IosAssetBundle extends Target {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/App.framework/App'),
-    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist')
+    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist'),
   ];
 
   @override
@@ -602,9 +602,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       '-fembed-bitcode-marker',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=9.0'
+        '-miphoneos-version-min=11.0'
       else
-        '-miphonesimulator-version-min=9.0',
+        '-miphonesimulator-version-min=11.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',

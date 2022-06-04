@@ -75,6 +75,10 @@ class CodesignCommand extends Command<void> {
   FrameworkRepository get framework {
     return _framework ??= FrameworkRepository(
       checkouts,
+      upstreamRemote: Remote(
+        name: RemoteName.upstream,
+        url: argResults![kUpstream] as String,
+      ),
     );
   }
 
@@ -185,11 +189,13 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/font-subset',
-      'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/darwin-x64/impellerc',
+      'artifacts/engine/darwin-x64/libtessellator.dylib',
+      'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-      'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-      'artifacts/engine/ios/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/ios/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/ios-deploy/ios-deploy',
     ]

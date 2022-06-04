@@ -254,7 +254,7 @@ void main() {
         containsPair('viewId', 'abc'),
         containsPair('assetDirectory', '/abc'),
         containsPair('isolateId', 'def'),
-      ]))
+      ])),
     ]));
   });
 
@@ -276,7 +276,7 @@ void main() {
       containsPair('method', kGetSkSLsMethod),
       containsPair('params', allOf(<Matcher>[
         containsPair('viewId', 'abc'),
-      ]))
+      ])),
     ]));
   });
 
@@ -298,7 +298,7 @@ void main() {
       containsPair('method', kFlushUIThreadTasksMethod),
       containsPair('params', allOf(<Matcher>[
         containsPair('isolateId', 'def'),
-      ]))
+      ])),
     ]));
   });
 
@@ -306,7 +306,7 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
-          'streamId': 'Isolate'
+          'streamId': 'Isolate',
         }),
         const FakeVmServiceRequest(method: kRunInViewMethod, args: <String, Object>{
           'viewId': '1234',
@@ -337,7 +337,7 @@ void main() {
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
           args: <String, Object>{
-            'isolateId': '1'
+            'isolateId': '1',
           },
           errorCode: RPCErrorCodes.kMethodNotFound,
         ),
@@ -356,7 +356,7 @@ void main() {
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
           args: <String, Object>{
-            'isolateId': '1'
+            'isolateId': '1',
           },
           errorCode: RPCErrorCodes.kMethodNotFound,
         ),
@@ -375,7 +375,7 @@ void main() {
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpLayerTree',
           args: <String, Object>{
-            'isolateId': '1'
+            'isolateId': '1',
           },
           errorCode: RPCErrorCodes.kMethodNotFound,
         ),
@@ -394,7 +394,7 @@ void main() {
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpRenderTree',
           args: <String, Object>{
-            'isolateId': '1'
+            'isolateId': '1',
           },
           errorCode: RPCErrorCodes.kMethodNotFound,
         ),
@@ -413,7 +413,7 @@ void main() {
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpApp',
           args: <String, Object>{
-            'isolateId': '1'
+            'isolateId': '1',
           },
           errorCode: RPCErrorCodes.kMethodNotFound,
         ),
@@ -459,6 +459,14 @@ void main() {
           method: 'getVMTimeline',
           errorCode: RPCErrorCodes.kServiceDisappeared,
         ),
+        const FakeVmServiceRequest(
+          method: kRenderFrameWithRasterStatsMethod,
+          args: <String, dynamic>{
+            'viewId': '1',
+            'isolateId': '12',
+          },
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
       ]
     );
 
@@ -482,6 +490,10 @@ void main() {
     final vm_service.Response timeline = await fakeVmServiceHost.vmService.getTimeline();
     expect(timeline, isNull);
 
+    final Map<String, Object> rasterStats =
+      await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: '1', uiIsolateId: '12');
+    expect(rasterStats, isNull);
+
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
@@ -498,6 +510,35 @@ void main() {
       'isolate/123',
     );
     expect(isolate, null);
+
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('renderWithStats forwards stats correctly', () async {
+    // ignore: always_specify_types
+    const Map<String, dynamic> response = {
+      'type': 'RenderFrameWithRasterStats',
+      'snapshots':<dynamic>[
+        // ignore: always_specify_types
+        {
+          'layer_unique_id':1512,
+          'duration_micros':477,
+          'snapshot':'',
+        },
+      ],
+    };
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: kRenderFrameWithRasterStatsMethod, args: <String, Object>{
+          'isolateId': 'isolate/123',
+          'viewId': 'view/1',
+        }, jsonResponse: response),
+      ]
+    );
+
+    final Map<String, Object> rasterStats =
+      await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: 'view/1', uiIsolateId: 'isolate/123');
+    expect(rasterStats, equals(response));
 
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });

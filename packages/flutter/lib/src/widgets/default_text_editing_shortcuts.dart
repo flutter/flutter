@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
-import 'framework.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 
@@ -150,17 +149,15 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   /// Creates a [Shortcuts] widget that provides the default text editing
   /// shortcuts on the current platform.
   DefaultTextEditingShortcuts({
-    Key? key,
-    required Widget child,
+    super.key,
+    required super.child,
   }) : super(
-    key: key,
     debugLabel: '<Default Text Editing Shortcuts>',
     shortcuts: _shortcuts,
-    child: child,
   );
 
   // These are shortcuts are shared between most platforms except macOS for it
-  // uses different modifier keys as the line/word modifer.
+  // uses different modifier keys as the line/word modifier.
   static final Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
     for (final bool pressShift in const <bool>[true, false])

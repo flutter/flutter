@@ -57,7 +57,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [cacheExtent] must be specified if the [cacheExtentStyle] is
   /// not [CacheExtentStyle.pixel].
   Viewport({
-    Key? key,
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     this.anchor = 0.0,
@@ -73,7 +73,7 @@ class Viewport extends MultiChildRenderObjectWidget {
        assert(cacheExtentStyle != null),
        assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        assert(clipBehavior != null),
-       super(key: key, children: slivers);
+       super(children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///
@@ -212,7 +212,7 @@ class Viewport extends MultiChildRenderObjectWidget {
 
 class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
   /// Creates an element that uses the given widget as its configuration.
-  _ViewportElement(Viewport widget) : super(widget);
+  _ViewportElement(Viewport super.widget);
 
   bool _doingMountOrUpdate = false;
   int? _centerSlotIndex;
@@ -330,14 +330,14 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   ///
   /// The [offset] argument must not be null.
   ShrinkWrappingViewport({
-    Key? key,
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     required this.offset,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
   }) : assert(offset != null),
-       super(key: key, children: slivers);
+       super(children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///

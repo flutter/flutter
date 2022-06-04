@@ -35,9 +35,9 @@ typedef BottomSheetDragEndHandler = void Function(
   required bool isClosing,
 });
 
-/// A material design bottom sheet.
+/// A Material Design bottom sheet.
 ///
-/// There are two kinds of bottom sheets in material design:
+/// There are two kinds of bottom sheets in Material Design:
 ///
 ///  * _Persistent_. A persistent bottom sheet shows information that
 ///    supplements the primary content of the app. A persistent bottom sheet
@@ -69,7 +69,7 @@ class BottomSheet extends StatefulWidget {
   /// [ScaffoldState.showBottomSheet], for persistent bottom sheets, or by
   /// [showModalBottomSheet], for modal bottom sheets.
   const BottomSheet({
-    Key? key,
+    super.key,
     this.animationController,
     this.enableDrag = true,
     this.onDragStart,
@@ -84,8 +84,7 @@ class BottomSheet extends StatefulWidget {
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
-       assert(elevation == null || elevation >= 0.0),
-       super(key: key);
+       assert(elevation == null || elevation >= 0.0);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -345,7 +344,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
-    Key? key,
+    super.key,
     this.route,
     this.backgroundColor,
     this.elevation,
@@ -355,8 +354,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.isScrollControlled = false,
     this.enableDrag = true,
   }) : assert(isScrollControlled != null),
-       assert(enableDrag != null),
-       super(key: key);
+       assert(enableDrag != null);
 
   final _ModalBottomSheetRoute<T>? route;
   final bool isScrollControlled;
@@ -464,13 +462,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.isDismissible = true,
     this.enableDrag = true,
     required this.isScrollControlled,
-    RouteSettings? settings,
+    super.settings,
     this.transitionAnimationController,
     this.anchorPoint,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
-       assert(enableDrag != null),
-       super(settings: settings);
+       assert(enableDrag != null);
 
   final WidgetBuilder? builder;
   final CapturedThemes capturedThemes;
@@ -603,7 +600,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   }
 }
 
-/// Shows a modal material design bottom sheet.
+/// Shows a modal Material Design bottom sheet.
 ///
 /// A modal bottom sheet is an alternative to a menu or a dialog and prevents
 /// the user from interacting with the rest of the app.
@@ -721,7 +718,7 @@ Future<T?> showModalBottomSheet<T>({
   ));
 }
 
-/// Shows a material design bottom sheet in the nearest [Scaffold] ancestor. If
+/// Shows a Material Design bottom sheet in the nearest [Scaffold] ancestor. If
 /// you wish to show a persistent bottom sheet, use [Scaffold.bottomSheet].
 ///
 /// Returns a controller that can be used to close and otherwise manipulate the

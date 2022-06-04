@@ -130,7 +130,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// To customize the X-Mark (suffix) action, pass a [VoidCallback] to
   /// [onSuffixTap]. This defaults to clearing the text.
   const CupertinoSearchTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.onChanged,
     this.onSubmitted,
@@ -173,8 +173,7 @@ class CupertinoSearchTextField extends StatefulWidget {
           'Cannot provide both a border radius and a decoration\n'
           'To provide both, use "decoration: BoxDecoration(borderRadius: '
           'borderRadius)"',
-        ),
-        super(key: key);
+        );
 
   /// Controls the text being edited.
   ///

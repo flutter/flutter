@@ -26,15 +26,14 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator that spins clockwise.
   const CupertinoActivityIndicator({
-    Key? key,
+    super.key,
     this.color,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
   })  : assert(animating != null),
         assert(radius != null),
         assert(radius > 0.0),
-        progress = 1.0,
-        super(key: key);
+        progress = 1.0;
 
   /// Creates a non-animated iOS-style activity indicator that displays
   /// a partial count of ticks based on the value of [progress].
@@ -43,7 +42,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// will be shown) and 1.0 (all ticks will be shown) inclusive. Defaults
   /// to 1.0.
   const CupertinoActivityIndicator.partiallyRevealed({
-    Key? key,
+    super.key,
     this.color,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
@@ -52,8 +51,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
         assert(progress != null),
         assert(progress >= 0.0),
         assert(progress <= 1.0),
-        animating = false,
-        super(key: key);
+        animating = false;
 
   /// Color of the activity indicator.
   ///

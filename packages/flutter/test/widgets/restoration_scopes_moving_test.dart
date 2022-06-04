@@ -111,7 +111,7 @@ void main() {
 }
 
 class TestWidgetWithCounterChild extends StatefulWidget {
-  const TestWidgetWithCounterChild({Key? key}) : super(key: key);
+  const TestWidgetWithCounterChild({super.key});
 
   @override
   State<TestWidgetWithCounterChild> createState() => TestWidgetWithCounterChildState();
@@ -161,7 +161,7 @@ class TestWidgetWithCounterChildState extends State<TestWidgetWithCounterChild> 
 }
 
 class Counter extends StatefulWidget {
-  const Counter({Key? key, this.restorationId}) : super(key: key);
+  const Counter({super.key, this.restorationId});
 
   final String? restorationId;
 
@@ -202,7 +202,7 @@ class CounterState extends State<Counter> with RestorationMixin {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget({Key? key, required this.restorationId}) : super(key: key);
+  const TestWidget({super.key, required this.restorationId});
 
   final String? restorationId;
 

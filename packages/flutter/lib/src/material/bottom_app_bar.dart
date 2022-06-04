@@ -55,7 +55,7 @@ class BottomAppBar extends StatefulWidget {
   /// If the corresponding [BottomAppBarTheme] property is null, then the default
   /// specified in the property's documentation will be used.
   const BottomAppBar({
-    Key? key,
+    super.key,
     this.color,
     this.elevation,
     this.shape,
@@ -64,8 +64,7 @@ class BottomAppBar extends StatefulWidget {
     this.child,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(notchMargin != null),
-       assert(clipBehavior != null),
-       super(key: key);
+       assert(clipBehavior != null);
 
   /// The widget below this widget in the tree.
   ///

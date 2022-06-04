@@ -65,13 +65,12 @@ typedef CupertinoToolbarBuilder = Widget Function(
 class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of CupertinoTextSelectionToolbar.
   const CupertinoTextSelectionToolbar({
-    Key? key,
+    super.key,
     required this.anchorAbove,
     required this.anchorBelow,
     required this.children,
     this.toolbarBuilder = _defaultToolbarBuilder,
-  }) : assert(children.length > 0),
-       super(key: key);
+  }) : assert(children.length > 0);
 
   /// {@macro flutter.material.TextSelectionToolbar.anchorAbove}
   final Offset anchorAbove;
@@ -148,13 +147,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 // The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget {
   const _CupertinoTextSelectionToolbarShape({
-    Key? key,
     required Offset anchor,
     required bool isAbove,
-    Widget? child,
+    super.child,
   }) : _anchor = anchor,
-       _isAbove = isAbove,
-       super(key: key, child: child);
+       _isAbove = isAbove;
 
   final Offset _anchor;
 
@@ -360,14 +357,12 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 // The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   const _CupertinoTextSelectionToolbarContent({
-    Key? key,
     required this.anchor,
     required this.isAbove,
     required this.toolbarBuilder,
     required this.children,
   }) : assert(children != null),
-       assert(children.length > 0),
-       super(key: key);
+       assert(children.length > 0);
 
   final Offset anchor;
   final List<Widget> children;
@@ -467,7 +462,6 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 // _CupertinoTextSelectionToolbarItemsElement, paginates the menu items.
 class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   _CupertinoTextSelectionToolbarItems({
-    Key? key,
     required this.page,
     required this.children,
     required this.backButton,
@@ -480,8 +474,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
        assert(dividerWidth != null),
        assert(nextButton != null),
        assert(nextButtonDisabled != null),
-       assert(page != null),
-       super(key: key);
+       assert(page != null);
 
   final Widget backButton;
   final List<Widget> children;
@@ -512,8 +505,8 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
 // The custom RenderObjectElement that helps paginate the menu items.
 class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   _CupertinoTextSelectionToolbarItemsElement(
-    _CupertinoTextSelectionToolbarItems widget,
-  ) : super(widget);
+    _CupertinoTextSelectionToolbarItems super.widget,
+  );
 
   late List<Element> _children;
   final Map<_CupertinoTextSelectionToolbarItemsSlot, Element> slotToChild = <_CupertinoTextSelectionToolbarItemsSlot, Element>{};

@@ -245,16 +245,16 @@ void main() {
   });
 
   testWidgets('Local DataTableTheme can override global DataTableTheme', (WidgetTester tester) async {
-    const BoxDecoration gloablThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
-    final MaterialStateProperty<Color> gloablThemeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff0));
-    const double gloablThemeDataRowHeight = 50.0;
-    const TextStyle gloablThemeDataTextStyle = TextStyle(fontSize: 11.5);
-    final MaterialStateProperty<Color> gloablThemeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
-    const double gloablThemeHeadingRowHeight = 51.0;
-    const TextStyle gloablThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
-    const double gloablThemeHorizontalMargin = 2.0;
-    const double gloablThemeColumnSpacing = 3.0;
-    const double gloablThemeDividerThickness = 4.0;
+    const BoxDecoration globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
+    final MaterialStateProperty<Color> globalThemeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff0));
+    const double globalThemeDataRowHeight = 50.0;
+    const TextStyle globalThemeDataTextStyle = TextStyle(fontSize: 11.5);
+    final MaterialStateProperty<Color> globalThemeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const double globalThemeHeadingRowHeight = 51.0;
+    const TextStyle globalThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
+    const double globalThemeHorizontalMargin = 2.0;
+    const double globalThemeColumnSpacing = 3.0;
+    const double globalThemeDividerThickness = 4.0;
 
     const BoxDecoration localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
     final MaterialStateProperty<Color> localThemeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
@@ -271,16 +271,16 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           dataTableTheme: DataTableThemeData(
-            decoration: gloablThemeDecoration,
-            dataRowColor: gloablThemeDataRowColor,
-            dataRowHeight: gloablThemeDataRowHeight,
-            dataTextStyle: gloablThemeDataTextStyle,
-            headingRowColor: gloablThemeHeadingRowColor,
-            headingRowHeight: gloablThemeHeadingRowHeight,
-            headingTextStyle: gloablThemeHeadingTextStyle,
-            horizontalMargin: gloablThemeHorizontalMargin,
-            columnSpacing: gloablThemeColumnSpacing,
-            dividerThickness: gloablThemeDividerThickness,
+            decoration: globalThemeDecoration,
+            dataRowColor: globalThemeDataRowColor,
+            dataRowHeight: globalThemeDataRowHeight,
+            dataTextStyle: globalThemeDataTextStyle,
+            headingRowColor: globalThemeHeadingRowColor,
+            headingRowHeight: globalThemeHeadingRowHeight,
+            headingTextStyle: globalThemeHeadingTextStyle,
+            horizontalMargin: globalThemeHorizontalMargin,
+            columnSpacing: globalThemeColumnSpacing,
+            dividerThickness: globalThemeDividerThickness,
           ),
         ),
         home: Scaffold(

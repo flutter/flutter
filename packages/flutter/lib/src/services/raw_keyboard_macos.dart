@@ -36,6 +36,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     this.charactersIgnoringModifiers = '',
     this.keyCode = 0,
     this.modifiers = 0,
+    this.specifiedLogicalKey,
   }) : assert(characters != null),
        assert(charactersIgnoringModifiers != null),
        assert(keyCode != null),
@@ -70,6 +71,15 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   ///  * [Apple's NSEvent documentation](https://developer.apple.com/documentation/appkit/nsevent/1535211-modifierflags?language=objc)
   final int modifiers;
 
+  /// A logical key specified by the embedding that should be used instead of
+  /// deriving from raw data.
+  ///
+  /// The macOS embedding detects the keyboard layout and maps some keys to
+  /// logical keys in a way that can not be derived from per-key information.
+  ///
+  /// This is not part of the native macOS key event.
+  final int? specifiedLogicalKey;
+
   @override
   String get keyLabel => charactersIgnoringModifiers;
 
@@ -78,6 +88,10 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
+    if (specifiedLogicalKey != null) {
+      final int key = specifiedLogicalKey!;
+      return LogicalKeyboardKey.findKeyByKeyId(key) ?? LogicalKeyboardKey(key);
+    }
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.

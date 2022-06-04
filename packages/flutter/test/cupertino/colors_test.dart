@@ -10,9 +10,9 @@ import '../rendering/mock_canvas.dart';
 
 class DependentWidget extends StatelessWidget {
   const DependentWidget({
-    Key? key,
+    super.key,
     required this.color,
-  }) : super(key: key);
+  });
 
   final Color color;
 

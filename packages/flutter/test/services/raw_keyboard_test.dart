@@ -1546,6 +1546,21 @@ void main() {
       expect(data.logicalKey, equals(const LogicalKeyboardKey(0x1400000000)));
     });
 
+    test('Prioritize logical key from specifiedLogicalKey', () {
+      final RawKeyEvent digit1FromFrench = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000012,
+        'characters': '&',
+        'charactersIgnoringModifiers': '&',
+        'specifiedLogicalKey': 0x000000031,
+        'modifiers': 0,
+      });
+      final RawKeyEventDataMacOs data = digit1FromFrench.data as RawKeyEventDataMacOs;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.digit1));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.digit1));
+    });
+
     test('data.toString', () {
       expect(RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -2128,7 +2143,7 @@ void main() {
 
     test('Code points with more than three Unicode scalar values are not allowed', () {
       // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
-      void _createFailingKey() {
+      void createFailingKey() {
         RawKeyEvent.fromMessage(const <String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
@@ -2140,7 +2155,7 @@ void main() {
         });
       }
 
-      expect(() => _createFailingKey(), throwsAssertionError);
+      expect(() => createFailingKey(), throwsAssertionError);
     });
 
     test('Control keyboard keys are correctly translated', () {
@@ -2360,7 +2375,7 @@ void main() {
 
     test('Code points with more than three Unicode scalar values are not allowed', () {
       // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
-      void _createFailingKey() {
+      void createFailingKey() {
         RawKeyEvent.fromMessage(const <String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
@@ -2372,7 +2387,7 @@ void main() {
         });
       }
 
-      expect(() => _createFailingKey(), throwsAssertionError);
+      expect(() => createFailingKey(), throwsAssertionError);
     });
 
     test('Control keyboard keys are correctly translated', () {

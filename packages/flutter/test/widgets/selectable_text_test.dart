@@ -297,6 +297,27 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, false);
   });
 
+  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
+    const Color selectionColor = Colors.orange;
+    const Color cursorColor = Colors.red;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: DefaultSelectionStyle(
+            selectionColor: selectionColor,
+            cursorColor: cursorColor,
+            child: SelectableText('text'),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.selectionColor, selectionColor);
+    expect(state.widget.cursorColor, cursorColor);
+  });
+
   testWidgets('Selectable Text has adaptive size', (WidgetTester tester) async {
     await tester.pumpWidget(
         boilerplate(
@@ -2176,7 +2197,7 @@ void main() {
           actions: <SemanticsAction>[SemanticsAction.longPress],
           label: 'German greeting for good day',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
   });
@@ -2377,7 +2398,7 @@ void main() {
                                 TestSemantics(
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHidden,
-                                    SemanticsFlag.isLink
+                                    SemanticsFlag.isLink,
                                   ],
                                   actions: <SemanticsAction>[SemanticsAction.tap],
                                   label: 'off screen',
@@ -4613,8 +4634,8 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(newSelection!.baseOffset, 4);
-    expect(newSelection!.extentOffset, 7);
+    expect(newSelection!.isCollapsed, isTrue);
+    expect(newSelection!.baseOffset, 5);
     newSelection = null;
 
     await tester.tap(find.text('Select all'));

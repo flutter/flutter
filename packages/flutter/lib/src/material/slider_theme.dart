@@ -51,12 +51,11 @@ class SliderTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   const SliderTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Specifies the color and shape values for descendant slider widgets.
   final SliderThemeData data;
@@ -151,7 +150,7 @@ enum Thumb {
   end,
 }
 
-/// Holds the color, shape, and typography values for a material design slider
+/// Holds the color, shape, and typography values for a Material Design slider
 /// theme.
 ///
 /// Use this class to configure a [SliderTheme] widget, or to set the
@@ -2287,7 +2286,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
-  /// If it is not provided, then the material default of 10 is used.
+  /// If it is not provided, then the Material Design default of 10 is used.
   final double enabledThumbRadius;
 
   /// The preferred radius of the round thumb shape when the slider is disabled.
@@ -2395,7 +2394,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
-  /// If it is not provided, then the material default of 10 is used.
+  /// If it is not provided, then the Material Design default of 10 is used.
   final double enabledThumbRadius;
 
   /// The preferred radius of the round thumb shape when the slider is disabled.

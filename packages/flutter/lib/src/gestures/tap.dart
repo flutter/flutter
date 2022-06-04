@@ -138,8 +138,8 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// Creates a tap gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  BaseTapGestureRecognizer({ Object? debugOwner, Set<PointerDeviceKind>? supportedDevices })
-    : super(deadline: kPressTimeout , debugOwner: debugOwner, supportedDevices: supportedDevices);
+  BaseTapGestureRecognizer({ super.debugOwner, super.supportedDevices })
+    : super(deadline: kPressTimeout);
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
@@ -350,8 +350,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// Creates a tap gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  TapGestureRecognizer({ Object? debugOwner, Set<PointerDeviceKind>? supportedDevices })
-    : super(debugOwner: debugOwner, supportedDevices: supportedDevices);
+  TapGestureRecognizer({ super.debugOwner, super.supportedDevices });
 
   /// A pointer has contacted the screen at a particular location with a primary
   /// button, which might be the start of a tap.

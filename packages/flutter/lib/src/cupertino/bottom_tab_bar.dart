@@ -5,7 +5,6 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -59,7 +58,7 @@ const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a tab bar in the iOS style.
   const CupertinoTabBar({
-    Key? key,
+    super.key,
     required this.items,
     this.onTap,
     this.currentIndex = 0,
@@ -83,8 +82,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        assert(height != null && height >= 0.0),
-       assert(inactiveColor != null),
-       super(key: key);
+       assert(inactiveColor != null);
 
   /// The interactive items laid out within the bottom navigation bar.
   ///

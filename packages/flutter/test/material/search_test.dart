@@ -554,8 +554,13 @@ void main() {
     await tester.pumpAndSettle();
 
     final Text hintText = tester.widget(find.text(searchHintText));
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
     expect(hintText.style?.color, delegate.searchFieldStyle?.color);
     expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+    expect(textField.style?.color, delegate.searchFieldStyle?.color);
+    expect(textField.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+
   });
 
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
@@ -616,7 +621,7 @@ void main() {
                               SemanticsFlag.isFocusable,
                             ],
                             actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Back',
+                            tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
                           TestSemantics(
@@ -882,13 +887,13 @@ void main() {
 
 class TestHomePage extends StatelessWidget {
   const TestHomePage({
-    Key? key,
+    super.key,
     this.results,
     required this.delegate,
     this.passInInitialQuery = false,
     this.initialQuery,
     this.themeData,
-  }) : super(key: key);
+  });
 
   final List<String?>? results;
   final SearchDelegate<String> delegate;
@@ -940,15 +945,12 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.result = 'Result',
     this.actions = const <Widget>[],
     this.defaultAppBarTheme = false,
-    InputDecorationTheme? searchFieldDecorationTheme,
-    TextStyle? searchFieldStyle,
+    super.searchFieldDecorationTheme,
+    super.searchFieldStyle,
     String? searchHint,
-    TextInputAction textInputAction = TextInputAction.search,
+    super.textInputAction,
   }) : super(
           searchFieldLabel: searchHint,
-          textInputAction: textInputAction,
-          searchFieldStyle: searchFieldStyle,
-          searchFieldDecorationTheme: searchFieldDecorationTheme,
         );
 
   final bool defaultAppBarTheme;
