@@ -107,6 +107,11 @@ if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
   zip_bundle("dart_sdk_archive") {
     deps = []
     output = "dart-sdk-$full_target_platform_name.zip"
+    if (is_mac) {
+      # Mac artifacts sometimes use mac and sometimes darwin. Standardizing the
+      # names will require changes in the list of artifacts the tool is downloading.
+      output = "dart-sdk-darwin-$target_cpu.zip"
+    }
     files = [
       {
         source = prebuilt_dart_sdk
