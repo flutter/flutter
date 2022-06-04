@@ -44,7 +44,7 @@ void main() {
 
   testUsingContext('abandon deletes staging directory', () async {
     final MigrateCommand command = MigrateCommand(
-      // verbose: true,
+      verbose: true,
       logger: logger,
       fileSystem: fileSystem,
       terminal: terminal,
