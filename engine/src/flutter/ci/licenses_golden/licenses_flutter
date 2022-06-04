@@ -12,6 +12,7 @@ LIBRARY: txt
 ORIGIN: ../../../flutter/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/.clang-tidy
+FILE: ../../../flutter/.pylintrc
 FILE: ../../../flutter/.style.yapf
 FILE: ../../../flutter/DEPS
 FILE: ../../../flutter/assets/asset_manager.cc
