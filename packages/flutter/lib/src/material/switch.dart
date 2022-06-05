@@ -848,7 +848,6 @@ class _SwitchPainter extends ToggleablePainter {
   Color get activeTrackColor => _activeTrackColor!;
   Color? _activeTrackColor;
   set activeTrackColor(Color value) {
-    assert(value != null);
     if (value == _activeTrackColor) {
       return;
     }
