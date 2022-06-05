@@ -13,6 +13,7 @@ import 'dart:ui' show
   TextDirection;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/widgets/default_text_editing_shortcuts.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
@@ -1818,6 +1819,9 @@ class TextInput {
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.performIntent':
+        performEditingIntent(args[1] as String);
         break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;

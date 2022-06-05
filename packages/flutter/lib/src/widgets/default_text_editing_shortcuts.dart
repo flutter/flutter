@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/widgets/focus_manager.dart';
 
 import 'actions.dart';
 import 'framework.dart';
@@ -258,6 +259,39 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   // The macOS shortcuts uses different word/line modifiers than most other
   // platforms.
   static final Map<ShortcutActivator, Intent> _macShortcuts = <ShortcutActivator, Intent>{
+    const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
+    const SingleActivator(LogicalKeyboardKey.keyV, meta: true): const PasteTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyA, meta: true): const SelectAllTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): const UndoTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, shift: true, meta: true): const RedoTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyE, control: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyA, control: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyF, control: true): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyB, control: true): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyN, control: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyP, control: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    // These keys should go to the IME when a field is focused, not to other
+    // Shortcuts.
+    const SingleActivator(LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.enter): const DoNothingAndStopPropagationTextIntent(),
+    // The following key combinations have no effect on text editing on this
+    // platform:
+    //   * End
+    //   * Home
+    //   * Control + shift? + end
+    //   * Control + shift? + home
+    //   * Control + shift? + Z
+  };
+
+  // There is no complete documentation of iOS shortcuts. Use mac shortcuts for
+  // now.
+  static final Map<ShortcutActivator, Intent> _iOSShortcuts = <ShortcutActivator, Intent>{
     for (final bool pressShift in const <bool>[true, false])
       ...<SingleActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): const DeleteCharacterIntent(forward: false),
@@ -331,9 +365,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     //   * Control + shift? + Z
   };
 
-  // There is no complete documentation of iOS shortcuts. Use mac shortcuts for
-  // now.
-  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _macShortcuts;
 
   // The following key combinations have no effect on text editing on this
   // platform:
@@ -459,5 +490,77 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       shortcuts: _shortcuts,
       child: result
     );
+  }
+}
+
+// These constants are based on NSStandardKeyBindingResponding method names
+final Map<String, Intent> _stringToIntent = <String, Intent>{
+  'deleteBackward': const DeleteCharacterIntent(forward: false),
+  'deleteWordBackward': const DeleteToNextWordBoundaryIntent(forward: false),
+  'deleteToBeginningOfLine': const DeleteToLineBreakIntent(forward: false),
+  'deleteForward': const DeleteCharacterIntent(forward: true),
+  'deleteWordForward': const DeleteToNextWordBoundaryIntent(forward: true),
+  'deleteToEndOfLine': const DeleteToLineBreakIntent(forward: true),
+
+  'moveLeft': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+  'moveRight': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+  'moveUp': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+  'moveDown': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+
+  'moveLeftAndModifySelection': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
+  'moveRightAndModifySelection': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
+  'moveUpAndModifySelection': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+  'moveDownAndModifySelection': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+
+  'moveWordLeft': const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
+  'moveWordRight': const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
+  'moveToBeginningOfParagraph': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+  'moveToEndOfParagraph': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+
+  'moveWordLeftAndModifySelection': const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
+  'moveWordRightAndModifySelection': const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
+  'moveParagraphBackwardAndModifySelection': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+  'moveParagraphForwardAndModifySelection': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+
+  'moveToLeftEndOfLine': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+  'moveToEndEndOfLine': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+  'moveToBeginningOfDocument': const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+  'moveToEndOfDocument': const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+
+  'moveToLeftEndOfLineAndModifySelection': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+  'moveToRightEndOfLineAndModifySelection': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+  'moveToBeginningOfDocumentAndModifySelection': const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+  'moveToEndOfDocumentAndModifySelection': const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+
+  'transpose': const TransposeCharactersIntent(),
+
+  // TODO(knopp): Page Up/Down intents are missing
+  'scrollPageUp': const ScrollToDocumentBoundaryIntent(forward: false),
+  'scrollPageDown': const ScrollToDocumentBoundaryIntent(forward: true),
+  'pageUpAndModifySelection': const ExpandSelectionToDocumentBoundaryIntent(forward: false),
+  'pageDownAndModifySelection': const ExpandSelectionToDocumentBoundaryIntent(forward: true),
+
+  // TODO(knopp): Figure out the best way to handle escape/cancel (needs to go through intent on macOS)
+  // 'cancelOperation': const CancelOperationIntent(),
+};
+
+/// If this is a recognized editing intent name, performs the appropriate action.
+/// If the intent name is unknown, no action is invoked and `false` is returned.
+bool performEditingIntent(String intentName) {
+  final Intent? intent = _stringToIntent[intentName];
+  if (intent != null) {
+    final BuildContext? primaryContext = primaryFocus?.context;
+    if (primaryContext != null) {
+      final Action<Intent>? action = Actions.maybeFind<Intent>(
+        primaryContext,
+        intent: intent,
+      );
+      if (action != null && action.isEnabled(intent)) {
+        Actions.of(primaryContext).invokeAction(action, intent, primaryContext);
+      }
+    }
+    return true;
+  } else {
+    return false;
   }
 }
