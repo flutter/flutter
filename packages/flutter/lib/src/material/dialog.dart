@@ -1264,7 +1264,7 @@ double _paddingScaleFactor(double textScaleFactor) {
 class _DefaultsM2 extends DialogTheme {
   _DefaultsM2(this.context)
     : _textTheme = Theme.of(context).textTheme,
-      _theme = Theme.of(context),
+      _iconTheme = Theme.of(context).iconTheme,
       super(
         alignment: Alignment.center,
         elevation: 24.0,
@@ -1273,10 +1273,10 @@ class _DefaultsM2 extends DialogTheme {
 
   final BuildContext context;
   final TextTheme _textTheme;
-  final ThemeData _theme;
+  final IconThemeData _iconTheme;
 
   @override
-  Color? get iconColor => _theme.iconTheme.color;
+  Color? get iconColor => _iconTheme.color;
 
   @override
   Color? get backgroundColor => Theme.of(context).dialogBackgroundColor;
