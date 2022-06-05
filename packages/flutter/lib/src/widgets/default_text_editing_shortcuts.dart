@@ -538,8 +538,8 @@ final Map<String, Intent> _stringToIntent = <String, Intent>{
   'pageUpAndModifySelection': const ExpandSelectionToDocumentBoundaryIntent(forward: false),
   'pageDownAndModifySelection': const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
-  // TODO(knopp): Figure out the best way to handle escape/cancel (needs to go through intent on macOS)
-  // 'cancelOperation': const CancelOperationIntent(),
+  // Escape when there's no IME selection
+  'cancelOperation': const DismissIntent(),
 };
 
 /// If this is a recognized editing intent name, performs the appropriate action.
