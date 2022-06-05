@@ -3,49 +3,45 @@
 # found in the LICENSE file.
 
 import("//build/compiled_action.gni")
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 if (enable_unittests) {
-  compiled_action_foreach("spirv_compile_supported_op_shaders") {
-    tool = "//flutter/lib/spirv/test:glsl_to_spirv"
-
-    sources = [
-      "127_OpFNegate.glsl",
-      "129_OpFAdd.glsl",
-      "131_OpFSub.glsl",
-      "142_OpVectorTimesScalar.glsl",
-      "143_OpMatrixTimesScalar.glsl",
-      "144_OpVectorTimesMatrix.glsl",
-      "145_OpMatrixTimesVector.glsl",
-      "146_OpMatrixTimesMatrix.glsl",
-      "148_OpDot.glsl",
-      "164_OpLogicalEqual.glsl",
-      "165_OpLogicalNotEqual.glsl",
-      "166_OpLogicalOr.glsl",
-      "167_OpLogicalAnd.glsl",
-      "168_OpLogicalNot.glsl",
-      "180_OpFOrdEqual.glsl",
-      "183_OpFUnordNotEqual.glsl",
-      "184_OpFOrdLessThan.glsl",
-      "186_OpFOrdGreaterThan.glsl",
-      "188_OpFOrdLessThanEqual.glsl",
-      "190_OpFOrdGreaterThanEqual.glsl",
-      "19_OpTypeVoid.glsl",
-      "20_OpTypeBool.glsl",
-      "21_OpTypeInt.glsl",
-      "22_OpTypeFloat.glsl",
-      "23_OpTypeVector.glsl",
-      "246_OpLoopMerge.glsl",
-      "24_OpTypeMatrix.glsl",
-      "250_OpBranchConditional.glsl",
-      "33_OpTypeFunction.glsl",
+  impellerc("spirv_compile_supported_op_shaders") {
+    shaders = [
+      "127_OpFNegate.frag",
+      "129_OpFAdd.frag",
+      "131_OpFSub.frag",
+      "142_OpVectorTimesScalar.frag",
+      "143_OpMatrixTimesScalar.frag",
+      "144_OpVectorTimesMatrix.frag",
+      "145_OpMatrixTimesVector.frag",
+      "146_OpMatrixTimesMatrix.frag",
+      "148_OpDot.frag",
+      "164_OpLogicalEqual.frag",
+      "165_OpLogicalNotEqual.frag",
+      "166_OpLogicalOr.frag",
+      "167_OpLogicalAnd.frag",
+      "168_OpLogicalNot.frag",
+      "180_OpFOrdEqual.frag",
+      "183_OpFUnordNotEqual.frag",
+      "184_OpFOrdLessThan.frag",
+      "186_OpFOrdGreaterThan.frag",
+      "188_OpFOrdLessThanEqual.frag",
+      "190_OpFOrdGreaterThanEqual.frag",
+      "19_OpTypeVoid.frag",
+      "20_OpTypeBool.frag",
+      "21_OpTypeInt.frag",
+      "22_OpTypeFloat.frag",
+      "23_OpTypeVector.frag",
+      "246_OpLoopMerge.frag",
+      "24_OpTypeMatrix.frag",
+      "250_OpBranchConditional.frag",
+      "33_OpTypeFunction.frag",
     ]
 
-    outputs = [ "$target_gen_dir/{{source_name_part}}.spv" ]
+    sl_file_extension = ".spirv"
 
-    args = [
-      "{{source}}",
-      rebase_path(target_gen_dir, root_build_dir) + "/{{source_name_part}}.spv",
-    ]
+    shader_target_flag = "--flutter-spirv"
   }
 }

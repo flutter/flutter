@@ -24,7 +24,7 @@ void main() {
   });
 
   test('simple shader renders correctly', () async {
-    final Uint8List shaderBytes = await spvFile('general_shaders', 'functions.spv').readAsBytes();
+    final Uint8List shaderBytes = await spvFile('general_shaders', 'functions.frag.spirv').readAsBytes();
     final FragmentProgram program = await FragmentProgram.compile(
       spirv: shaderBytes.buffer,
     );
@@ -35,7 +35,7 @@ void main() {
   });
 
   test('shader with functions renders green', () async {
-    final ByteBuffer spirv = spvFile('general_shaders', 'functions.spv').readAsBytesSync().buffer;
+    final ByteBuffer spirv = spvFile('general_shaders', 'functions.frag.spirv').readAsBytesSync().buffer;
     final FragmentProgram program = await FragmentProgram.compile(
       spirv: spirv,
     );
@@ -46,7 +46,7 @@ void main() {
   });
 
   test('blue-green image renders green', () async {
-    final ByteBuffer spirv = spvFile('general_shaders', 'blue_green_sampler.spv').readAsBytesSync().buffer;
+    final ByteBuffer spirv = spvFile('general_shaders', 'blue_green_sampler.frag.spirv').readAsBytesSync().buffer;
     final FragmentProgram program = await FragmentProgram.compile(
       debugPrint: true,
       spirv: spirv,
@@ -61,7 +61,7 @@ void main() {
   });
 
   test('shader with uniforms renders correctly', () async {
-    final Uint8List shaderBytes = await spvFile('general_shaders', 'uniforms.spv').readAsBytes();
+    final Uint8List shaderBytes = await spvFile('general_shaders', 'uniforms.frag.spirv').readAsBytes();
     final FragmentProgram program = await FragmentProgram.compile(spirv: shaderBytes.buffer);
 
     final Shader shader = program.shader(
@@ -100,7 +100,7 @@ void main() {
   _expectShadersHaveOp(supportedOpShaders, false /* glsl ops */);
 
   test('equality depends on floatUniforms', () async {
-    final ByteBuffer spirv = spvFile('general_shaders', 'simple.spv')
+    final ByteBuffer spirv = spvFile('general_shaders', 'simple.frag.spirv')
         .readAsBytesSync().buffer;
     final FragmentProgram program = await FragmentProgram.compile(spirv: spirv);
     final Float32List ones = Float32List.fromList(<double>[1]);
@@ -122,9 +122,9 @@ void main() {
   });
 
   test('equality depends on spirv', () async {
-    final ByteBuffer spirvA = spvFile('general_shaders', 'simple.spv')
+    final ByteBuffer spirvA = spvFile('general_shaders', 'simple.frag.spirv')
         .readAsBytesSync().buffer;
-    final ByteBuffer spirvB = spvFile('general_shaders', 'uniforms.spv')
+    final ByteBuffer spirvB = spvFile('general_shaders', 'uniforms.frag.spirv')
         .readAsBytesSync().buffer;
     final FragmentProgram programA = await FragmentProgram.compile(spirv: spirvA);
     final FragmentProgram programB = await FragmentProgram.compile(spirv: spirvB);
@@ -136,7 +136,7 @@ void main() {
   });
 
   test('Compilation does not create a Timer object', () async {
-    final ByteBuffer spirvA = spvFile('general_shaders', 'simple.spv')
+    final ByteBuffer spirvA = spvFile('general_shaders', 'simple.frag.spirv')
         .readAsBytesSync().buffer;
     bool createdTimer = false;
     final ZoneSpecification specification = ZoneSpecification(createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
@@ -254,7 +254,7 @@ Map<String, ByteBuffer> _loadSpv(String leafFolderName) {
 
   directory
       .listSync()
-      .where((FileSystemEntity entry) => path.extension(entry.path) == '.spv')
+      .where((FileSystemEntity entry) => path.extension(entry.path) == '.spirv')
       .forEach((FileSystemEntity entry) {
     final String key = path.basenameWithoutExtension(entry.path);
     out[key] = (entry as File).readAsBytesSync().buffer;

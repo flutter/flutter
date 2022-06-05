@@ -15,12 +15,4 @@ if (enable_unittests) {
       "//third_party/swiftshader_flutter:spvtools_val",
     ]
   }
-
-  executable("glsl_to_spirv") {
-    sources = [ "glsl_to_spirv.cc" ]
-
-    configs += [ "//third_party/shaderc_flutter:shaderc_util_config" ]
-
-    deps = [ "//third_party/shaderc_flutter" ]
-  }
 }
