@@ -295,15 +295,17 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
-    if (overscroll)
+    if (overscroll) {
       return delegate.buildOverscrollIndicator(context, child, details);
+    }
     return child;
   }
 
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
-    if (scrollbars)
+    if (scrollbars) {
       return delegate.buildScrollbar(context, child, details);
+    }
     return child;
   }
 

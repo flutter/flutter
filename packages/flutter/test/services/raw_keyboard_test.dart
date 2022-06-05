@@ -1936,6 +1936,28 @@ void main() {
       const  String platform = 'windows';
       bool lastHandled = true;
       final List<RawKeyEvent> events = <RawKeyEvent>[];
+
+      // Test both code paths: addListener, and FocusNode.onKey.
+      RawKeyboard.instance.addListener(events.add);
+      final FocusNode node = FocusNode(
+        onKey: (_, RawKeyEvent event) {
+          events.add(event);
+          return KeyEventResult.ignored;
+        },
+      );
+      await tester.pumpWidget(RawKeyboardListener(
+        focusNode: node,
+        child: Container(),
+      ));
+      node.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Dispatch an arbitrary key press for the correct transit mode.
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
+      await simulateKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(events, hasLength(4));
+      events.clear();
+
       // Simulate raw events because VK_PROCESSKEY does not exist in the key mapping.
       Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
         return ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -1953,7 +1975,7 @@ void main() {
           },
         );
       }
-      RawKeyboard.instance.addListener(events.add);
+
       await simulateKeyEventMessage('keydown', 229, 30);
       expect(events, isEmpty);
       expect(lastHandled, true);
@@ -1962,7 +1984,7 @@ void main() {
       expect(events, isEmpty);
       expect(lastHandled, true);
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-    });
+    }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
     test('data.toString', () {
       expect(RawKeyEvent.fromMessage(const <String, Object?>{

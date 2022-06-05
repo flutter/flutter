@@ -1032,7 +1032,7 @@ void main() {
   });
 
   testWidgets('detects pointer enter with closure arguments', (WidgetTester tester) async {
-    await tester.pumpWidget(_HoverClientWithClosures());
+    await tester.pumpWidget(const _HoverClientWithClosures());
     expect(find.text('not hovering'), findsOneWidget);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1896,6 +1896,8 @@ class _DelegatedPainter extends CustomPainter {
 }
 
 class _HoverClientWithClosures extends StatefulWidget {
+  const _HoverClientWithClosures();
+
   @override
   _HoverClientWithClosuresState createState() => _HoverClientWithClosuresState();
 }

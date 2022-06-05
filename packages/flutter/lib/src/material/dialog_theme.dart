@@ -15,16 +15,13 @@ import 'theme.dart';
 /// `DialogTheme.of(context)`. Instances of [DialogTheme] can be customized with
 /// [DialogTheme.copyWith].
 ///
-/// When Shape is `null`, the dialog defaults to a [RoundedRectangleBorder] with
-/// a border radius of 2.0 on all corners.
-///
-/// [titleTextStyle] and [contentTextStyle] are used in [AlertDialog]s.
-/// If null, they default to [TextTheme.headline6] and [TextTheme.subtitle1],
-/// respectively.
+/// [titleTextStyle] and [contentTextStyle] are used in [AlertDialog]s and [SimpleDialog]s.
 ///
 /// See also:
 ///
-///  * [Dialog], a Material Design dialog that can be customized using this [DialogTheme].
+///  * [Dialog], a dialog that can be customized using this [DialogTheme].
+///  * [AlertDialog], a dialog that can be customized using this [DialogTheme].
+///  * [SimpleDialog], a dialog that can be customized using this [DialogTheme].
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 @immutable
@@ -39,33 +36,24 @@ class DialogTheme with Diagnosticable {
     this.contentTextStyle,
   });
 
-  /// Default value for [Dialog.backgroundColor].
-  ///
-  /// If null, [ThemeData.dialogBackgroundColor] is used, if that's null,
-  /// defaults to [Colors.white].
+  /// Overrides the default value for [Dialog.backgroundColor].
   final Color? backgroundColor;
 
-  /// Default value for [Dialog.elevation].
-  ///
-  /// If null, the [Dialog] elevation defaults to `24.0`.
+  /// Overrides the default value for [Dialog.elevation].
   final double? elevation;
 
-  /// Default value for [Dialog.shape].
+  /// Overrides the default value for [Dialog.shape].
   final ShapeBorder? shape;
 
-  /// Default value for [Dialog.alignment].
-  ///
-  /// If null, the [Dialog] alignment defaults to [Alignment.center].
+  /// Overrides the default value for [Dialog.alignment].
   final AlignmentGeometry? alignment;
 
-  /// Used to configure the [DefaultTextStyle] for the [AlertDialog.title] widget.
-  ///
-  /// If null, defaults to [TextTheme.headline6] of [ThemeData.textTheme].
+  /// Overrides the default value for [DefaultTextStyle] for [SimpleDialog.title] and
+  /// [AlertDialog.title].
   final TextStyle? titleTextStyle;
 
-  /// Used to configure the [DefaultTextStyle] for the [AlertDialog.content] widget.
-  ///
-  /// If null, defaults to [TextTheme.subtitle1] of [ThemeData.textTheme].
+  /// Overrides the default value for [DefaultTextStyle] for [SimpleDialog.children] and
+  /// [AlertDialog.content].
   final TextStyle? contentTextStyle;
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -115,10 +103,12 @@ class DialogTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DialogTheme
         && other.backgroundColor == backgroundColor
         && other.elevation == elevation

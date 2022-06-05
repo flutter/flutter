@@ -331,8 +331,9 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   void _defaultOnSuffixTap() {
     final bool textChanged = _effectiveController.text.isNotEmpty;
     _effectiveController.clear();
-    if (widget.onChanged != null && textChanged)
+    if (widget.onChanged != null && textChanged) {
       widget.onChanged!(_effectiveController.text);
+    }
   }
 
   @override

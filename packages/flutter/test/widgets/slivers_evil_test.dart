@@ -56,21 +56,6 @@ class TestScrollPhysics extends ClampingScrollPhysics {
   Tolerance get tolerance => const Tolerance(velocity: 20.0, distance: 1.0);
 }
 
-class TestViewportScrollPosition extends ScrollPositionWithSingleContext {
-  TestViewportScrollPosition({
-    required super.physics,
-    required super.context,
-    super.oldPosition,
-  });
-
-  @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    expect(minScrollExtent, moreOrLessEquals(-3895.0));
-    expect(maxScrollExtent, moreOrLessEquals(8575.0));
-    return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
-  }
-}
-
 void main() {
   testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = GlobalKey();

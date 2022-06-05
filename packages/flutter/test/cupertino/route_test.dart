@@ -442,8 +442,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(0.0, epsilon: 0.1));
 
-    await tester.pumpAndSettle();
-
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
@@ -549,8 +547,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-267.0, epsilon: 1.0));
 
-    await tester.pumpAndSettle();
-
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
@@ -640,8 +636,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
 
-    await tester.pumpAndSettle();
-
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
@@ -659,221 +653,6 @@ void main() {
 
   testWidgets('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: true);
-  });
-
-  group('Route interactivity during transition animations', () {
-    testWidgets('CupertinoPageRoute ignores pointers when route on top of it pops', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-      bool homeTapped = false;
-      await tester.pumpWidget(
-        CupertinoApp(
-          navigatorKey: navigatorKey,
-          home: TextButton(
-            onPressed: () => homeTapped = true,
-            child: const Text('Home'),
-          ),
-        ),
-      );
-
-      navigatorKey.currentState!.push<void>(
-        CupertinoPageRoute<void>(
-          builder: (_) => const Text('Page 2'),
-        )
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Page 2'), findsOneWidget);
-
-      navigatorKey.currentState!.pop();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.text('Page 2'), findsOneWidget); // Transition still in progress
-
-      await tester.tap(find.text('Home'), warnIfMissed: false); // Home route is not tappable
-      expect(homeTapped, false);
-
-      await tester.pumpAndSettle(); // Transition completes
-
-      await tester.tap(find.text('Home'));
-      expect(homeTapped, true);
-    });
-
-    testWidgets('fullscreenDialog CupertinoPageRoute ignores pointers when route on top of it pops', (WidgetTester tester) async {
-      bool homeTapped = false;
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: TextButton(
-            onPressed: () => homeTapped = true,
-            child: const Text('Home'),
-          ),
-        ),
-      );
-
-      tester.state<NavigatorState>(find.byType(Navigator)).push<void>(
-        CupertinoPageRoute<void>(
-          fullscreenDialog: true,
-          builder: (_) => const Text('Page 2'),
-        )
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Page 2'), findsOneWidget);
-
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.text('Page 2'), findsOneWidget); // Transition still in progress
-
-      await tester.tap(find.text('Home'), warnIfMissed: false); // Home route is not tappable
-      expect(homeTapped, false);
-
-      await tester.pumpAndSettle(); // Transition completes
-
-      await tester.tap(find.text('Home'));
-      expect(homeTapped, true);
-    });
-
-    testWidgets('CupertinoPageRoute ignores pointers when user pop gesture is in progress', (WidgetTester tester) async {
-      bool homeTapped = false;
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: TextButton(
-            onPressed: () => homeTapped = true,
-            child: const Text('Page 1'),
-          ),
-        ),
-      );
-
-      tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
-          builder: (_) => const Text('Page 2'),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Page 1'), findsNothing);
-
-      final TestGesture swipeGesture = await tester.startGesture(const Offset(5, 100));
-
-      await swipeGesture.moveBy(const Offset(100, 0));
-      await tester.pump();
-
-      expect(find.text('Page 1'), findsOneWidget);
-      expect(tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress, true);
-
-      await tester.tap(find.text('Page 1'), warnIfMissed: false);
-      expect(homeTapped, false);
-    });
-
-    testWidgets('CupertinoPageRoute ignores pointers when it is pushed on top of other route', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          onGenerateRoute: (_) => CupertinoPageRoute<void>(
-            builder: (_) => const Text('Home'),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Home'));
-      tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
-          builder: (_) => const Text('Page 2'),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.text('Home'), findsOneWidget); // Transition still in progress
-
-      // Can't test directly for taps because route is interactive but offstage
-      // One ignore pointer for each of two overlay entries (ModalScope, ModalBarrier) on each of two routes
-      expect(find.byType(IgnorePointer, skipOffstage: false), findsNWidgets(4));
-      final List<Element> ignorePointers = find.byType(IgnorePointer, skipOffstage: false).evaluate().toList();
-      expect((ignorePointers.first.widget as IgnorePointer).ignoring, true); // Home modalBarrier
-      expect((ignorePointers[1].widget as IgnorePointer).ignoring, true);    // Home modalScope
-      expect((ignorePointers[2].widget as IgnorePointer).ignoring, true);    // Page 2 modalBarrier
-      expect((ignorePointers.last.widget as IgnorePointer).ignoring, true);  // Page 2 modalScope
-    });
-
-    testWidgets('showCupertinoDialog ignores pointers until transition completes', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Builder(
-            builder: (BuildContext context) {
-              return TextButton(
-                onPressed: () {
-                  showCupertinoModalPopup<void>(
-                    context: context,
-                    builder: (BuildContext innerContext) => TextButton(
-                      onPressed: Navigator.of(innerContext).pop,
-                      child: const Text('dialog'),
-                    ),
-                  );
-                },
-                child: const Text('Show Dialog'),
-              );
-            },
-          ),
-        ),
-      );
-
-      // Open the dialog.
-      await tester.tap(find.byType(TextButton));
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Trigger pop while the transition is in progress
-      await tester.tap(find.text('dialog'), warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      // Transition is over and the dialog has not been dismissed
-      expect(find.text('dialog'), findsOneWidget);
-
-      await tester.tap(find.text('dialog'));
-      await tester.pumpAndSettle();
-
-      // The dialog has not been dismissed
-      expect(find.text('dialog'), findsNothing);
-    });
-
-    testWidgets('showCupertinoModalPopup ignores pointers until transition completes', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Builder(
-            builder: (BuildContext context) {
-              return TextButton(
-                onPressed: () {
-                  showCupertinoModalPopup<void>(
-                    context: context,
-                    builder: (BuildContext innerContext) => TextButton(
-                      onPressed: Navigator.of(innerContext).pop,
-                      child: const Text('modal'),
-                    ),
-                  );
-                },
-                child: const Text('Show modal'),
-              );
-            },
-          ),
-        ),
-      );
-
-      // Open the modal popup
-      await tester.tap(find.byType(TextButton));
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Trigger pop while the transition is in progress
-      await tester.tap(find.text('modal'), warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      // Transition is over and the dialog has not been dismissed
-      expect(find.text('modal'), findsOneWidget);
-
-      await tester.tap(find.text('modal'));
-      await tester.pumpAndSettle();
-
-      // The dialog has not been dismissed
-      expect(find.text('modal'), findsNothing);
-    });
   });
 
   testWidgets('Animated push/pop is not linear', (WidgetTester tester) async {
@@ -1202,20 +981,24 @@ void main() {
     testWidgets('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsShadowRect({required double dx, required Color color}) {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
-          if (methodName != #drawRect)
+          if (methodName != #drawRect) {
             return true;
+          }
           final Rect rect = arguments[0] as Rect;
           final Color paintColor = (arguments[1] as Paint).color;
-          if (rect.top != 0 || rect.width != 1.0 || rect.height != 600)
-            // _CupertinoEdgeShadowDecoration draws the shadows with a series of
-            // differently colored 1px-wide rects. Skip rects that aren't being
-            // drawn by the _CupertinoEdgeShadowDecoration.
+          // _CupertinoEdgeShadowDecoration draws the shadows with a series of
+          // differently colored 1px-wide rects. Skip rects that aren't being
+          // drawn by the _CupertinoEdgeShadowDecoration.
+          if (rect.top != 0 || rect.width != 1.0 || rect.height != 600) {
             return true;
-          if ((rect.left - dx).abs() >= 1)
-            // Skip calls for rects until the one with the given position offset
+          }
+          // Skip calls for rects until the one with the given position offset
+          if ((rect.left - dx).abs() >= 1) {
             return true;
-          if (paintColor.value == color.value)
+          }
+          if (paintColor.value == color.value) {
             return true;
+          }
           throw '''
   For a rect with an expected left-side position: $dx (drawn at ${rect.left}):
               Expected a rect with color: $color,
@@ -1288,14 +1071,16 @@ void main() {
     testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsNoShadows() {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
-          if (methodName != #drawRect)
+          if (methodName != #drawRect) {
             return true;
+          }
           final Rect rect = arguments[0] as Rect;
           // _CupertinoEdgeShadowDecoration draws the shadows with a series of
           // differently colored 1px rects. Skip all rects not drawn by a
           // _CupertinoEdgeShadowDecoration.
-          if (rect.width != 1.0)
+          if (rect.width != 1.0) {
             return true;
+          }
           throw '''
     Expected: no rects with a width of 1px.
           Found: $rect.
@@ -2005,7 +1790,7 @@ void main() {
   });
 
   testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
-    await tester.pumpWidget(_TestPostRouteCancel());
+    await tester.pumpWidget(const _TestPostRouteCancel());
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.down(tester.getCenter(find.text('PointerCancelEvents: 0')));
@@ -2076,7 +1861,7 @@ void main() {
 
   testWidgets('CupertinoModalPopupRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         restorationScopeId: 'app',
         home: _RestorableModalTestWidget(),
       ),
@@ -2464,6 +2249,8 @@ Widget buildNavigator({
 // Holding the 'Hold' button at the moment of popping will force the navigator to
 // cancel the down event, increasing the Home counter by 1.
 class _TestPostRouteCancel extends StatefulWidget {
+  const _TestPostRouteCancel();
+
   @override
   State<StatefulWidget> createState() => _TestPostRouteCancelState();
 }
@@ -2523,6 +2310,8 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
 }
 
 class _RestorableModalTestWidget extends StatelessWidget {
+  const _RestorableModalTestWidget();
+
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {
