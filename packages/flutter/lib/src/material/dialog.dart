@@ -306,10 +306,11 @@ class AlertDialog extends StatelessWidget {
   /// padding is used.
   ///
   /// This property defaults to providing 24 pixels on the top, left, and right
-  /// of the [icon]. If the [title] is null and [content] is _not_ null, then no
-  /// bottom padding is provided (but see [contentPadding]). In any other case
-  /// an extra 16 pixels of bottom padding is added to separate the [icon] from
-  /// the [title].
+  /// of the [icon]. If [title] is _not_ null, an extra 16 pixels of bottom
+  /// padding is added to separate the [icon] from the [title]. If the [title]
+  /// is null and [content] is _not_ null, then no bottom padding is provided
+  /// (but see [contentPadding]). In any other case an extra 24 pixels of bottom
+  /// padding is added.
   final EdgeInsetsGeometry? iconPadding;
 
   /// The (optional) title of the dialog is displayed in a large font at the top
