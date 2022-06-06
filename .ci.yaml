@@ -1969,7 +1969,8 @@ targets:
 
   - name: Linux_android flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1980,6 +1981,7 @@ targets:
   - name: Linux_android flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1990,6 +1992,7 @@ targets:
   - name: Linux_android flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2000,6 +2003,7 @@ targets:
   - name: Linux_android flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2020,6 +2024,7 @@ targets:
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
