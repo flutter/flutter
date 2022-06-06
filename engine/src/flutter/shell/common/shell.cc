@@ -1819,11 +1819,11 @@ static rapidjson::Value SerializeLayerSnapshot(
   result.AddMember("duration_micros", snapshot.GetDuration().ToMicroseconds(),
                    allocator);
 
-  const SkRect bounds = snapshot.GetBounds();
-  result.AddMember("top", bounds.top() * device_pixel_ratio, allocator);
-  result.AddMember("left", bounds.left() * device_pixel_ratio, allocator);
-  result.AddMember("width", bounds.width() * device_pixel_ratio, allocator);
-  result.AddMember("height", bounds.height() * device_pixel_ratio, allocator);
+  const SkIRect bounds = snapshot.GetBounds();
+  result.AddMember("top", bounds.top(), allocator);
+  result.AddMember("left", bounds.left(), allocator);
+  result.AddMember("width", bounds.width(), allocator);
+  result.AddMember("height", bounds.height(), allocator);
 
   sk_sp<SkData> snapshot_bytes = snapshot.GetSnapshot();
   if (snapshot_bytes) {
