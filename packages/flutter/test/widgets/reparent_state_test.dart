@@ -18,12 +18,7 @@ class StateMarkerState extends State<StateMarker> {
   String? marker;
 
   @override
-  Widget build(BuildContext context) {
-    if (widget.child != null) {
-      return widget.child!;
-    }
-    return Container();
-  }
+  Widget build(BuildContext context) => widget.child ?? Container();
 }
 
 class DeactivateLogger extends StatefulWidget {
@@ -393,5 +388,32 @@ void main() {
         ],
       ),
     );
+  });
+
+  testWidgets('Reparenting between dirty elements', (WidgetTester tester) async {
+    final Widget keyedWidget = StateMarker(key: GlobalKey(debugLabel: 'key'));
+    late StateSetter setState1, setState2;
+    bool reparented = false;
+
+    await tester.pumpWidget(
+      Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            setState1 = setState;
+            return reparented ? keyedWidget : const SizedBox();
+          }),
+          StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            setState2 = setState;
+            return reparented ? const SizedBox() : keyedWidget;
+          }),
+        ],
+      ),
+    );
+
+    setState1(() { reparented = true; });
+    setState2(() { });
+
+    await tester.pump();
   });
 }

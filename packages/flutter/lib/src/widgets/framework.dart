@@ -2608,7 +2608,6 @@ class BuildOwner {
             context._debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
             assert(_debugCurrentBuildTarget == context);
             _debugCurrentBuildTarget = debugPreviousBuildTarget;
-            _debugElementWasRebuilt(context);
             return true;
           }());
         }
@@ -2665,6 +2664,10 @@ class BuildOwner {
         }
         try {
           element.rebuild();
+          assert(() {
+            _debugElementWasRebuilt(element);
+            return true;
+          }());
         } catch (e, stack) {
           _debugReportException(
             ErrorDescription('while rebuilding dirty elements'),
@@ -3501,6 +3504,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (child != null) {
         deactivateChild(child);
       }
+      assert(() {
+        owner!._debugElementWasRebuilt(this);
+        return true;
+      }());
       return null;
     }
 
@@ -3588,6 +3595,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         assert(owner != null);
         owner!._debugReserveGlobalKeyFor(this, newChild, key);
       }
+      return true;
+    }());
+    assert(() {
+      owner!._debugElementWasRebuilt(this);
       return true;
     }());
 
