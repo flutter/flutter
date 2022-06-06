@@ -105,8 +105,6 @@ class MigrateApplyCommand extends FlutterCommand {
 
     final bool force = boolArg('force') ?? false;
 
-    terminal.usesTerminalUi = true;
-
     Directory stagingDirectory = project.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
     final String? customStagingDirectoryPath = stringArg('staging-directory');
     if (customStagingDirectoryPath != null) {

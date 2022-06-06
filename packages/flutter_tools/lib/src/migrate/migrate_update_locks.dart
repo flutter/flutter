@@ -25,6 +25,7 @@ Future<void> updatePubspecDependencies(
     return;
   }
   logger.printStatus('\nDart dependency locking detected in pubspec.yaml.');
+  terminal.usesTerminalUi = true;
   String selection = 'y';
   try {
     selection = await terminal.promptForCharInput(
@@ -89,6 +90,7 @@ Future<void> updateGradleDependencyLocking(
     logger.printStatus('\nGradle dependency locking detected.');
     logger.printStatus('Flutter can backup the lockfiles and regenerate updated '
                        'lockfiles.');
+    terminal.usesTerminalUi = true;
     String selection = 'y';
     try {
       selection = await terminal.promptForCharInput(
