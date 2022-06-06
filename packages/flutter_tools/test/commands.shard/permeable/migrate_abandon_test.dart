@@ -42,7 +42,7 @@ void main() {
     tryToDelete(appDir);
   });
 
-  testUsingContext('Status produces all outputs', () async {
+  testUsingContext('abandon deletes staging directory', () async {
     final MigrateCommand command = MigrateCommand(
       verbose: true,
       logger: logger,
@@ -52,6 +52,7 @@ void main() {
       processManager: processManager,
     );
     final Directory stagingDir = appDir.childDirectory(kDefaultMigrateStagingDirectoryName);
+    appDir.childFile('lib/main.dart').createSync(recursive: true);
     final File pubspecOriginal = appDir.childFile('pubspec.yaml');
     pubspecOriginal.createSync();
     pubspecOriginal.writeAsStringSync('''
@@ -68,6 +69,28 @@ dev_dependencies:
     sdk: flutter
 flutter:
   uses-material-design: true''', flush: true);
+
+    expect(stagingDir.existsSync(), false);
+    await createTestCommandRunner(command).run(
+      <String>[
+        'migrate',
+        'abandon',
+        '--staging-directory=${stagingDir.path}',
+        '--project-directory=${appDir.path}',
+      ]
+    );
+    expect(logger.errorText, contains('Provided staging directory'));
+    expect(logger.errorText, contains('migrate_staging_dir` does not exist or is not valid.'));
+
+    logger.clear();
+    await createTestCommandRunner(command).run(
+      <String>[
+        'migrate',
+        'abandon',
+        '--project-directory=${appDir.path}',
+      ]
+    );
+    expect(logger.statusText, contains('No migration in progress. Start a new migration with:'));
 
     final File pubspecModified = stagingDir.childFile('pubspec.yaml');
     pubspecModified.createSync(recursive: true);
@@ -102,96 +125,21 @@ added_files:
 deleted_files:
 ''');
 
-    await createTestCommandRunner(command).run(
-      <String>[
-        'migrate',
-        'status',
-        '--staging-directory=${stagingDir.path}',
-        '--project-directory=${appDir.path}',
-      ]
-    );
+    expect(appDir.childFile('lib/main.dart').existsSync(), true);
 
-    expect(logger.statusText, contains('''
-Newly added file at added.file:
-
-new file contents'''));
-    expect(logger.statusText, contains(r'''
-Added files:
-  - added.file
-Modified files:
-  - pubspec.yaml
-
-All conflicts resolved. Review changes above and apply the migration with:
-
-    $ flutter migrate apply
-'''));
-
-    expect(logger.statusText, contains(r'''
-@@ -1,5 +1,5 @@
--name: originalname
--description: A new Flutter project.
-+name: newname
-+description: new description of the test project
- version: 1.0.0+1
- environment:
-   sdk: '>=2.18.0-58.0.dev <3.0.0'
-@@ -10,4 +10,5 @@ dev_dependencies:
-   flutter_test:
-     sdk: flutter
- flutter:
--  uses-material-design: true
-\ No newline at end of file
-+  uses-material-design: false
-+  EXTRALINE'''));
-
-    // Add conflict file
-    final File conflictFile = stagingDir.childDirectory('conflict').childFile('conflict.file');
-    conflictFile.createSync(recursive: true);
-    conflictFile.writeAsStringSync('''
-line1
-<<<<<<< /conflcit/conflict.file
-line2
-=======
-linetwo
->>>>>>> /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/flutter_tools.4Xdep8/generatedTargetTemplatetlN44S/conflict/conflict.file
-line3
-''', flush: true);
-    final File conflictFileOriginal = appDir.childDirectory('conflict').childFile('conflict.file');
-    conflictFileOriginal.createSync(recursive: true);
-    conflictFileOriginal.writeAsStringSync('''
-line1
-line2
-line3
-''', flush: true);
-
-    manifestFile.writeAsStringSync('''
-merged_files:
-  - pubspec.yaml
-conflict_files:
-  - conflict/conflict.file
-added_files:
-  - added.file
-deleted_files:
-''');
-
+    expect(stagingDir.existsSync(), true);
     logger.clear();
     await createTestCommandRunner(command).run(
       <String>[
         'migrate',
-        'status',
+        'abandon',
         '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
+        '--force',
       ]
     );
-
-    expect(logger.statusText, contains('''
-@@ -1,3 +1,7 @@
- line1
-+<<<<<<< /conflcit/conflict.file
- line2
-+=======
-+linetwo
-+>>>>>>>'''));
+    expect(logger.statusText, contains('Abandon complete. Start a new migration with:'));
+    expect(stagingDir.existsSync(), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
