@@ -6387,7 +6387,8 @@ class DebugCreator {
   Element get element => _elementRef.target!;
 
   @override
-  String toString() => _elementRef.target?.debugGetCreatorChain(12) ?? '<element was garbage collected>';
+  String toString() => 
+    _elementRef.target?.debugGetCreatorChain(12) ?? '<element was garbage collected>';
 }
 
 FlutterErrorDetails _debugReportException(
