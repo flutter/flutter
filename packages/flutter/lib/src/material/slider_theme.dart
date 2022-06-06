@@ -2366,7 +2366,27 @@ class RoundSliderThumbShape extends SliderComponentShape {
     final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
     final Path path = Path()
       ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-    canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
+
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        if (evaluatedElevation > 0.0) {
+          canvas.drawPath(
+            path,
+            Paint()
+              ..color = Colors.black
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = evaluatedElevation * 2.0,
+          );
+        }
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    if (paintShadows) {
+      canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
+    }
 
     canvas.drawCircle(
       center,
@@ -2475,7 +2495,27 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     final double evaluatedElevation = isPressed! ? elevationTween.evaluate(activationAnimation) : elevation;
     final Path shadowPath = Path()
       ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-    canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
+
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        if (evaluatedElevation > 0.0) {
+          canvas.drawPath(
+            shadowPath,
+            Paint()
+              ..color = Colors.black
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = evaluatedElevation * 2.0,
+          );
+        }
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    if (paintShadows) {
+      canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
+    }
 
     canvas.drawCircle(
       center,
