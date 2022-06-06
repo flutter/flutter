@@ -2370,15 +2370,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     bool paintShadows = true;
     assert(() {
       if (debugDisableShadows) {
-        if (evaluatedElevation > 0.0) {
-          canvas.drawPath(
-            path,
-            Paint()
-              ..color = Colors.black
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = evaluatedElevation * 2.0,
-          );
-        }
+        _debugDrawShadow(canvas, path, evaluatedElevation);
         paintShadows = false;
       }
       return true;
@@ -2499,15 +2491,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     bool paintShadows = true;
     assert(() {
       if (debugDisableShadows) {
-        if (evaluatedElevation > 0.0) {
-          canvas.drawPath(
-            shadowPath,
-            Paint()
-              ..color = Colors.black
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = evaluatedElevation * 2.0,
-          );
-        }
+        _debugDrawShadow(canvas, shadowPath, evaluatedElevation);
         paintShadows = false;
       }
       return true;
@@ -3397,5 +3381,17 @@ class RangeLabels {
   @override
   String toString() {
     return '${objectRuntimeType(this, 'RangeLabels')}($start, $end)';
+  }
+}
+
+void _debugDrawShadow(Canvas canvas, Path path, double elevation) {
+  if (elevation > 0.0) {
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = Colors.black
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = elevation * 2.0,
+    );
   }
 }
