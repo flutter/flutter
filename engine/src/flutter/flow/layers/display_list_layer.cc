@@ -8,6 +8,7 @@
 #include "flutter/display_list/display_list_flags.h"
 #include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/offscreen_surface.h"
+#include "flutter/flow/raster_cache.h"
 
 namespace flutter {
 
@@ -139,22 +140,26 @@ void DisplayListLayer::Paint(PaintContext& context) const {
     auto offscreen_surface =
         std::make_unique<OffscreenSurface>(context.gr_context, canvas_size);
 
+    const auto& ctm = context.leaf_nodes_canvas->getTotalMatrix();
+
     const auto start_time = fml::TimePoint::Now();
     {
       // render display list to offscreen surface.
       auto* canvas = offscreen_surface->GetCanvas();
       SkAutoCanvasRestore save(canvas, true);
       canvas->clear(SK_ColorTRANSPARENT);
-      canvas->setMatrix(context.leaf_nodes_canvas->getTotalMatrix());
+      canvas->setMatrix(ctm);
       display_list()->RenderTo(canvas, context.inherited_opacity);
       canvas->flush();
     }
     const fml::TimeDelta offscreen_render_time =
         fml::TimePoint::Now() - start_time;
 
+    const SkIRect device_bounds =
+        RasterCache::GetDeviceBounds(paint_bounds(), ctm);
     sk_sp<SkData> raster_data = offscreen_surface->GetRasterData(true);
     LayerSnapshotData snapshot_data(unique_id(), offscreen_render_time,
-                                    raster_data, paint_bounds());
+                                    raster_data, device_bounds);
     context.layer_snapshot_store->Add(snapshot_data);
   }
 
