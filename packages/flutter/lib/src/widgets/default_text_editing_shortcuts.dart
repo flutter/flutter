@@ -198,6 +198,12 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
 
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollByPageIntent(forward: false),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollByPageIntent(forward: true),
+    // TODO(justinmc): Select pageup/down.
+    //const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ScrollByPageIntent(forward: false),
+    //const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ScrollByPageIntent(forward: true),
+
     const SingleActivator(LogicalKeyboardKey.keyX, control: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
     const SingleActivator(LogicalKeyboardKey.keyV, control: true): const PasteTextIntent(SelectionChangedCause.keyboard),
@@ -305,6 +311,12 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.end): const ScrollToDocumentBoundaryIntent(forward: true),
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: true),
+
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollByPageIntent(forward: false),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollByPageIntent(forward: true),
+    // TODO(justinmc): Select pageup/down.
+    //const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ScrollByPageIntent(forward: false),
+    //const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ScrollByPageIntent(forward: true),
 
     const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,

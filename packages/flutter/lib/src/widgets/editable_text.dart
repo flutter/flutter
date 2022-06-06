@@ -30,6 +30,7 @@ import 'media_query.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
+import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'shortcuts.dart';
 import 'text.dart';
@@ -3292,6 +3293,34 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Scrolls down by page if the `forward` parameter is true, or up by page
+  /// otherwise.
+  void _scrollByPage(ScrollByPageIntent intent) {
+    final ScrollPosition position = _scrollController.position;
+    if (intent.forward) {
+      if (position.pixels >= position.maxScrollExtent) {
+        return;
+      }
+      _scrollController.jumpTo(
+        math.min(
+          position.maxScrollExtent,
+          position.pixels + position.viewportDimension,
+        ),
+      );
+    } else {
+      if (position.pixels <= position.minScrollExtent) {
+        return;
+      }
+
+      _scrollController.jumpTo(
+        math.max(
+          position.minScrollExtent,
+          position.pixels - position.viewportDimension,
+        ),
+      );
+    }
+  }
+
   void _updateSelection(UpdateSelectionIntent intent) {
     bringIntoView(intent.newSelection.extent);
     userUpdateTextEditingValue(
@@ -3367,6 +3396,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
+    ScrollByPageIntent: _makeOverridable(CallbackAction<ScrollByPageIntent>(onInvoke: _scrollByPage)),
 
     // Copy Paste
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
