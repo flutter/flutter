@@ -68,7 +68,7 @@ import 'text_editing_intents.dart';
 /// class DecrementCounterIntent extends Intent {}
 ///
 /// class MyWidget extends StatefulWidget {
-///   const MyWidget({ Key? key }) : super(key: key);
+///   const MyWidget({ super.key });
 ///
 ///   @override
 ///   MyWidgetState createState() => MyWidgetState();
@@ -299,6 +299,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
 
+    const SingleActivator(LogicalKeyboardKey.keyT, control: true): const TransposeCharactersIntent(),
+
     const SingleActivator(LogicalKeyboardKey.home): const ScrollToDocumentBoundaryIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.end): const ScrollToDocumentBoundaryIntent(forward: true),
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
@@ -310,6 +312,12 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.keyA, meta: true): const SelectAllTextIntent(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): const UndoTextIntent(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyZ, shift: true, meta: true): const RedoTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyE, control: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyA, control: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyF, control: true): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyB, control: true): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyN, control: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyP, control: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
     // These keys should go to the IME when a field is focused, not to other
     // Shortcuts.
     const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),

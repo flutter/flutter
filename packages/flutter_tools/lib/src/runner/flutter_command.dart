@@ -12,6 +12,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
+import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -964,7 +965,7 @@ abstract class FlutterCommand extends Command<void> {
         negatable: false,
         hide: !verboseHelp,
         help: 'Whether to enable the experimental Impeller rendering engine. '
-              'Impeller is currently only supported on iOS. This flag will '
+              'Impeller is currently only supported on iOS and Android. This flag will '
               'be ignored when targeting other platforms.',
     );
   }
@@ -1475,16 +1476,12 @@ abstract class FlutterCommand extends Command<void> {
 
       // If there is no pubspec in the current directory, look in the parent
       // until one can be found.
-      bool changedDirectory = false;
-      while (!globals.fs.isFileSync('pubspec.yaml')) {
-        final Directory nextCurrent = globals.fs.currentDirectory.parent;
-        if (nextCurrent == null || nextCurrent.path == globals.fs.currentDirectory.path) {
-          throw ToolExit(userMessages.flutterNoPubspec);
-        }
-        globals.fs.currentDirectory = nextCurrent;
-        changedDirectory = true;
+      final String? path = findProjectRoot(globals.fs, globals.fs.currentDirectory.path);
+      if (path == null) {
+        throwToolExit(userMessages.flutterNoPubspec);
       }
-      if (changedDirectory) {
+      if (path != globals.fs.currentDirectory.path) {
+        globals.fs.currentDirectory = path;
         globals.printStatus('Changing current working directory to: ${globals.fs.currentDirectory.path}');
       }
     }
@@ -1519,25 +1516,25 @@ abstract class FlutterCommand extends Command<void> {
   ApplicationPackageFactory? applicationPackages;
 
   /// Gets the parsed command-line option named [name] as a `bool`.
-  /// This has been deprecated, use [boolArgDeprecated] instead.
+  /// This has been deprecated, use [boolArg] instead.
   bool boolArgDeprecated(String name) => argResults?[name] as bool? ?? false;
 
   /// Gets the parsed command-line option named [name] as a `bool?`.
   bool? boolArg(String name) {
-    if (argResults == null || !argParser.options.containsKey(name)) {
+    if (!argParser.options.containsKey(name)) {
       return null;
     }
-    return argResults?[name] as bool?;
+    return argResults![name] as bool;
   }
 
   /// Gets the parsed command-line option named [name] as a `String`.
   String? stringArgDeprecated(String name) => argResults?[name] as String?;
 
   String? stringArg(String name) {
-    if (argResults == null || !argParser.options.containsKey(name)) {
+    if (!argParser.options.containsKey(name)) {
       return null;
     }
-    return argResults?[name] as String?;
+    return argResults![name] as String;
   }
 
   /// Gets the parsed command-line option named [name] as an `int`.

@@ -656,8 +656,9 @@ abstract class BoxScrollView extends ScrollView {
       }
     }
 
-    if (effectivePadding != null)
+    if (effectivePadding != null) {
       sliver = SliverPadding(padding: effectivePadding, sliver: sliver);
+    }
     return <Widget>[ sliver ];
   }
 
@@ -1252,7 +1253,7 @@ class ListView extends BoxScrollView {
   ///
   /// ```dart
   /// class MyListView extends StatefulWidget {
-  ///   const MyListView({Key? key}) : super(key: key);
+  ///   const MyListView({super.key});
   ///
   ///   @override
   ///   State<MyListView> createState() => _MyListViewState();

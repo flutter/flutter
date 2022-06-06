@@ -14,7 +14,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 
 /// The default name of the migrate working directory used to stage proposed changes.
-const String kDefaultMigrateWorkingDirectoryName = 'migrate_working_dir';
+const String kDefaultMigrateStagingDirectoryName = 'migrate_staging_dir';
 
 /// Utility class that contains methods that wrap git and other shell commands.
 class MigrateUtils {
@@ -179,14 +179,14 @@ class MigrateUtils {
   }
 
   /// Returns true if the workingDirectory git repo has any uncommited changes.
-  Future<bool> hasUncommittedChanges(String workingDirectory, {String? migrateWorkingDir}) async {
+  Future<bool> hasUncommittedChanges(String workingDirectory, {String? migrateStagingDir}) async {
     final List<String> cmdArgs = <String>[
       'git',
       'ls-files',
       '--deleted',
       '--modified',
       '--others',
-      '--exclude=${migrateWorkingDir ?? kDefaultMigrateWorkingDirectoryName}'
+      '--exclude=${migrateStagingDir ?? kDefaultMigrateStagingDirectoryName}'
     ];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: cmdArgs.join(' '));

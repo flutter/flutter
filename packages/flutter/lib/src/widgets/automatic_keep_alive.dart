@@ -42,6 +42,8 @@ class AutomaticKeepAlive extends StatefulWidget {
 
 class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   Map<Listenable, VoidCallback>? _handles;
+  // In order to apply parent data out of turn, the child of the KeepAlive
+  // widget must be the same across frames.
   late Widget _child;
   bool _keepingAlive = false;
 
@@ -67,8 +69,9 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   @override
   void dispose() {
     if (_handles != null) {
-      for (final Listenable handle in _handles!.keys)
+      for (final Listenable handle in _handles!.keys) {
         handle.removeListener(_handles![handle]!);
+      }
     }
     super.dispose();
   }
@@ -366,33 +369,38 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   @protected
   void updateKeepAlive() {
     if (wantKeepAlive) {
-      if (_keepAliveHandle == null)
+      if (_keepAliveHandle == null) {
         _ensureKeepAlive();
+      }
     } else {
-      if (_keepAliveHandle != null)
+      if (_keepAliveHandle != null) {
         _releaseKeepAlive();
+      }
     }
   }
 
   @override
   void initState() {
     super.initState();
-    if (wantKeepAlive)
+    if (wantKeepAlive) {
       _ensureKeepAlive();
+    }
   }
 
   @override
   void deactivate() {
-    if (_keepAliveHandle != null)
+    if (_keepAliveHandle != null) {
       _releaseKeepAlive();
+    }
     super.deactivate();
   }
 
   @mustCallSuper
   @override
   Widget build(BuildContext context) {
-    if (wantKeepAlive && _keepAliveHandle == null)
+    if (wantKeepAlive && _keepAliveHandle == null) {
       _ensureKeepAlive();
+    }
     return const _NullWidget();
   }
 }

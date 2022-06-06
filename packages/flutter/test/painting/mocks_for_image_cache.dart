@@ -30,8 +30,9 @@ class TestImageInfo extends ImageInfo {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TestImageInfo
         && other.value == value
         && other.image.isCloneOf(image)
@@ -86,6 +87,11 @@ Future<ImageInfo> extractOneFrame(ImageStream stream) {
 
 class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
   @override
+  ImageStreamCompleter loadBuffer(ErrorImageProvider key, DecoderBufferCallback decode) {
+    throw Error();
+  }
+
+  @override
   ImageStreamCompleter load(ErrorImageProvider key, DecoderCallback decode) {
     throw Error();
   }
@@ -98,7 +104,7 @@ class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
 
 class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvider> {
   @override
-  ImageStreamCompleter load(ObtainKeyErrorImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(ObtainKeyErrorImageProvider key, DecoderBufferCallback decode) {
     throw Error();
   }
 
@@ -106,17 +112,27 @@ class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvi
   Future<ObtainKeyErrorImageProvider> obtainKey(ImageConfiguration configuration) {
     throw Error();
   }
+
+  @override
+  ImageStreamCompleter load(ObtainKeyErrorImageProvider key, DecoderCallback decode) {
+    throw UnimplementedError();
+  }
 }
 
 class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
   @override
-  ImageStreamCompleter load(LoadErrorImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(LoadErrorImageProvider key, DecoderBufferCallback decode) {
     throw Error();
   }
 
   @override
   Future<LoadErrorImageProvider> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<LoadErrorImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(LoadErrorImageProvider key, DecoderCallback decode) {
+    throw UnimplementedError();
   }
 }
 

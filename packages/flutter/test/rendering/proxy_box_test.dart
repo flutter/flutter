@@ -197,7 +197,7 @@ void main() {
 
     expect(data.lengthInBytes, equals(20 * 20 * 4));
     expect(data.elementSizeInBytes, equals(1));
-    expect(getPixel(0, 0), equals(0x00000080));
+    expect(getPixel(0, 0), equals(0x0000007F));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
@@ -206,7 +206,7 @@ void main() {
     expect(image.width, equals(20));
     expect(image.height, equals(20));
     data = (await image.toByteData())!;
-    expect(getPixel(0, 0), equals(0x00000080));
+    expect(getPixel(0, 0), equals(0x0000007F));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     // non-zero offsets.
@@ -215,7 +215,7 @@ void main() {
     expect(image.height, equals(30));
     data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000000));
-    expect(getPixel(10, 10), equals(0x00000080));
+    expect(getPixel(10, 10), equals(0x0000007F));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 10), equals(0xffffffff));
 
@@ -225,7 +225,7 @@ void main() {
     expect(image.height, equals(60));
     data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000000));
-    expect(getPixel(20, 20), equals(0x00000080));
+    expect(getPixel(20, 20), equals(0x0000007F));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 20), equals(0xffffffff));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
@@ -240,13 +240,13 @@ void main() {
     expect(renderOpacity.needsCompositing, false);
   });
 
-  test('RenderOpacity does composite if it is opaque', () {
+  test('RenderOpacity does not composite if it is opaque', () {
     final RenderOpacity renderOpacity = RenderOpacity(
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);
-    expect(renderOpacity.needsCompositing, true);
+    expect(renderOpacity.needsCompositing, false);
   });
 
   test('RenderOpacity reuses its layer', () {
@@ -685,6 +685,91 @@ void main() {
     childBox.markNeedsCompositingBitsUpdate();
 
     expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+  });
+
+  test('Offstage implements paintsChild correctly', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
+    parent.adoptChild(offstage);
+
+    expect(offstage.paintsChild(box), true);
+
+    offstage.offstage = true;
+
+    expect(offstage.paintsChild(box), false);
+  });
+
+  test('Opacity implements paintsChild correctly', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderOpacity opacity = RenderOpacity(child: box);
+    parent.adoptChild(opacity);
+
+    expect(opacity.paintsChild(box), true);
+
+    opacity.opacity = 0;
+
+    expect(opacity.paintsChild(box), false);
+  });
+
+  test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
+    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
+    parent.adoptChild(opacity);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    expect(opacity.paintsChild(box), true);
+
+    opacityAnimation.value = 0;
+
+    expect(opacity.paintsChild(box), false);
+  });
+
+  test('AnimatedOpacity sets paint matrix to zero when alpha == 0 (sliver)', () {
+    final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
+    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
+    parent.adoptChild(opacity);
+
+    // Make it listen to the animation.
+    opacity.attach(PipelineOwner());
+
+    expect(opacity.paintsChild(sliver), true);
+
+    opacityAnimation.value = 0;
+
+    expect(opacity.paintsChild(sliver), false);
+  });
+
+  test('RenderCustomClip extenders respect clipBehavior when asked to describeApproximateClip', () {
+    final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
+    final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: Clip.none, child: child);
+    layout(renderClipRect);
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      null,
+    );
+    renderClipRect.clipBehavior = Clip.hardEdge;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+    renderClipRect.clipBehavior = Clip.antiAlias;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
+    renderClipRect.clipBehavior = Clip.antiAliasWithSaveLayer;
+    expect(
+      renderClipRect.describeApproximatePaintClip(child),
+      Offset.zero & renderClipRect.size,
+    );
   });
 }
 

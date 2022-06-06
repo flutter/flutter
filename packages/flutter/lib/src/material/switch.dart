@@ -44,6 +44,20 @@ enum _SwitchType { material, adaptive }
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [Switch]. When the thumb slides to the other
+/// side of the track, the switch is toggled between on/off.
+///
+/// ** See code in examples/api/lib/material/switch/switch.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to customize [Switch] using [MaterialStateProperty]
+/// switch properties.
+///
+/// ** See code in examples/api/lib/material/switch/switch.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
@@ -51,6 +65,8 @@ enum _SwitchType { material, adaptive }
 ///  * [Checkbox], another widget with similar semantics.
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
+///  * [MaterialStateProperty], an interface for objects that "resolve" to
+///    different values depending on a widget's material state.
 ///  * <https://material.io/design/components/selection-controls.html#switches>
 class Switch extends StatelessWidget {
   /// Creates a Material Design switch.
@@ -637,8 +653,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
   double get _trackInnerLength => widget.size.width - _kSwitchMinSize;
 
   void _handleDragStart(DragStartDetails details) {
-    if (isInteractive)
+    if (isInteractive) {
       reactionController.forward();
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -791,8 +808,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageProvider? get activeThumbImage => _activeThumbImage;
   ImageProvider? _activeThumbImage;
   set activeThumbImage(ImageProvider? value) {
-    if (value == _activeThumbImage)
+    if (value == _activeThumbImage) {
       return;
+    }
     _activeThumbImage = value;
     notifyListeners();
   }
@@ -810,8 +828,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageProvider? get inactiveThumbImage => _inactiveThumbImage;
   ImageProvider? _inactiveThumbImage;
   set inactiveThumbImage(ImageProvider? value) {
-    if (value == _inactiveThumbImage)
+    if (value == _inactiveThumbImage) {
       return;
+    }
     _inactiveThumbImage = value;
     notifyListeners();
   }
@@ -830,8 +849,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _activeTrackColor;
   set activeTrackColor(Color value) {
     assert(value != null);
-    if (value == _activeTrackColor)
+    if (value == _activeTrackColor) {
       return;
+    }
     _activeTrackColor = value;
     notifyListeners();
   }
@@ -840,8 +860,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _inactiveTrackColor;
   set inactiveTrackColor(Color value) {
     assert(value != null);
-    if (value == _inactiveTrackColor)
+    if (value == _inactiveTrackColor) {
       return;
+    }
     _inactiveTrackColor = value;
     notifyListeners();
   }
@@ -850,8 +871,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageConfiguration? _configuration;
   set configuration(ImageConfiguration value) {
     assert(value != null);
-    if (value == _configuration)
+    if (value == _configuration) {
       return;
+    }
     _configuration = value;
     notifyListeners();
   }
@@ -860,8 +882,9 @@ class _SwitchPainter extends ToggleablePainter {
   TextDirection? _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     notifyListeners();
   }
@@ -870,8 +893,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _surfaceColor;
   set surfaceColor(Color value) {
     assert(value != null);
-    if (value == _surfaceColor)
+    if (value == _surfaceColor) {
       return;
+    }
     _surfaceColor = value;
     notifyListeners();
   }
@@ -917,8 +941,9 @@ class _SwitchPainter extends ToggleablePainter {
     // during paint. There's no reason to mark ourselves as needing paint if we
     // are already in the middle of painting. (In fact, doing so would trigger
     // an assert).
-    if (!_isPainting)
+    if (!_isPainting) {
       notifyListeners();
+    }
   }
 
   @override
