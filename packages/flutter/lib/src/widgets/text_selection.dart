@@ -2181,7 +2181,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 }
 
 class SelectionGesturesDetector extends StatefulWidget {
-  const SelectionGesturesDetector({Key? key, required this.child}) : super(key: key);
+  const SelectionGesturesDetector({super.key, required this.child});
 
   final Widget child;
 

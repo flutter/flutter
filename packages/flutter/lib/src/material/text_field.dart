@@ -1222,7 +1222,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+    late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
       ExpandSelectionToPositionIntent : SelectionCallbackAction<ExpandSelectionToPositionIntent>(
           onInvoke: (ExpandSelectionToPositionIntent intent) => _editableText!.expandSelection(intent),
           enabledPredicate: (ExpandSelectionToPositionIntent intent) {
@@ -1255,9 +1255,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onInvoke: (SelectWordEdgeIntent intent) => _editableText!.selectWordEdge(intent),
           enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
       ),
-      SelectTapPositionIntent : SelectionCallbackAction<SelectTapPositionIntent>(
-          onInvoke: (SelectTapPositionIntent intent) => _editableText!.selectPosition(intent),
-          enabledPredicate: (SelectTapPositionIntent intent) => widget.selectionEnabled,
+      SelectPositionIntent : SelectionCallbackAction<SelectPositionIntent>(
+          onInvoke: (SelectPositionIntent intent) => _editableText!.selectPosition(intent),
+          enabledPredicate: (SelectPositionIntent intent) => widget.selectionEnabled,
       ),
       SelectionOnDragStartControlIntent : SelectionCallbackAction<SelectionOnDragStartControlIntent>(
         onInvoke: (SelectionOnDragStartControlIntent intent) {
@@ -1302,7 +1302,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         onEnter: (PointerEnterEvent event) => _handleHover(true),
         onExit: (PointerExitEvent event) => _handleHover(false),
         child: Actions(
-          actions: _actions,
+          actions: actions,
           child: IgnorePointer(
             ignoring: !_isEnabled,
             child: AnimatedBuilder(
@@ -1332,15 +1332,22 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
+/// TODO: (Renzo-Olivares) Document [SelectionCallbackAction].
 class SelectionCallbackAction<T extends Intent> extends Action<T> {
+  /// A constructor for a [SelectionCallbackAction].
   SelectionCallbackAction({ required this.onInvoke, this.enabledPredicate });
 
+  /// The callback to invoke.
   final void Function(T intent) onInvoke;
+
+  /// A method defining the conditions required to enable this [Action].
   final bool Function(T)? enabledPredicate;
 
+  /// TODO: (Renzo-Olivares) document.
   @override
   void invoke(T intent) => onInvoke(intent);
 
+  /// TODO: (Renzo-Olivares) document.
   @override
   bool isEnabled(T intent) => enabledPredicate?.call(intent) ?? true;
 }

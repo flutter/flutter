@@ -2019,10 +2019,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
   }
 
-  void selectWordAt({ required Offset position, required SelectionChangedCause cause }) {
-    selectWordsInRange(from: position, cause: cause);
-  }
-
   /// Selects the set words of a paragraph in a given range of global positions.
   ///
   /// The first and last endpoints of the selection will always be at the
@@ -2128,12 +2124,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
+  /// TODO: (Renzo-Olivares) document.
   TextSelection getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     final TextRange word = _textPainter.getWordBoundary(position);
     // When long-pressing past the end of the text, we want a collapsed cursor.
-    if (position.offset >= word.end)
+    if (position.offset >= word.end) {
       return TextSelection.fromPosition(position);
+    }
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);

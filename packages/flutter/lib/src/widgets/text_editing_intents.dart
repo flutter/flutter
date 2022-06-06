@@ -339,23 +339,38 @@ class TransposeCharactersIntent extends Intent {
 }
 
 // ---------- Selection Gesture Intents ----------
+/// An [Intent] that requests the selection in an input field be expanded from
+/// either the [TextSelection.baseOffset] or [TextSelection.extentOffset] to the
+/// given [position], whichever is closest.
 class ExpandSelectionToPositionIntent extends Intent {
   /// Creates an [ExpandSelectionToPositionIntent].
   const ExpandSelectionToPositionIntent({required this.cause, this.fromSelection, required this.position});
 
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
+
+  /// An optional starting selection which should be expanded from.
   final TextSelection? fromSelection;
+
+  /// The global position which to expand the selection to.
   final Offset position;
 }
 
+/// An [Intent] that requests the selection in an input field be extended from
+/// the [TextSelection.baseOffset] to the given [position].
 class ExtendSelectionToPositionIntent extends Intent {
   /// Creates an [ExtendSelectionToPositionIntent].
   const ExtendSelectionToPositionIntent({required this.cause, required this.position});
 
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
+
+  /// The global position which to extend the selection to.
   final Offset position;
 }
 
+/// An [Intent] that represents a user interaction that attempts to request
+/// hardware generated feedback such as haptic feedback.
 class FeedbackRequestIntent extends Intent {
   /// Creates an [FeedbackRequestIntent].
   const FeedbackRequestIntent();
@@ -368,30 +383,73 @@ class KeyboardRequestIntent extends Intent {
   const KeyboardRequestIntent();
 }
 
+/// An [Intent] that saves or clears the selection when a drag starts.
 class SelectionOnDragStartControlIntent extends Intent {
+  /// Creates an [SelectionOnDragStartControlIntent].
   const SelectionOnDragStartControlIntent._({required this.store});
 
+  /// Creates an [SelectionOnDragStartControlIntent] that requests the selection
+  /// be saved at the beginning of a drag gesture.
   static const SelectionOnDragStartControlIntent save = SelectionOnDragStartControlIntent._(store: true);
+
+  /// Creates an [SelectionOnDragStartControlIntent] that requests the selection
+  /// be cleared, usually at the end of a drag gesture.
   static const SelectionOnDragStartControlIntent clear = SelectionOnDragStartControlIntent._(store: false);
 
+  /// Whether the selection should be saved or not.
   final bool store;
 }
 
+/// An [Intent] that saves or clears the selection when a drag starts.
 class ViewportOffsetOnDragStartControlIntent extends Intent {
+  /// Creates an [ViewportOffsetOnDragStartControlIntent].
   const ViewportOffsetOnDragStartControlIntent._({required this.store});
 
+  /// Creates an [ViewportOffsetOnDragStartControlIntent] that requests the viewport
+  /// offset be saved at the beginning of a drag gesture.
   static const ViewportOffsetOnDragStartControlIntent save = ViewportOffsetOnDragStartControlIntent._(store: true);
+
+  /// Creates an [ViewportOffsetOnDragStartControlIntent] that requests the viewport
+  /// offset be cleared, usually at the end of a drag gesture.
   static const ViewportOffsetOnDragStartControlIntent clear = ViewportOffsetOnDragStartControlIntent._(store: false);
 
+  /// Whether the viewport offset should be saved or not.
   final bool store;
 }
 
+/// An [Intent] that requests the selection in an input field be moved to the
+/// given [from] and [to] positions when a drag gesture occurs.
 class SelectDragPositionIntent extends Intent {
   /// Creates an [SelectDragPositionIntent].
   const SelectDragPositionIntent({required this.cause, required this.from, this.to});
 
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
+
+  /// {@template flutter.widgets.TextEditingIntents.from}
+  /// The starting position of the requested selection.
+  /// {@endtemplate}
   final Offset from;
+
+  /// {@template flutter.widgets.TextEditingIntents.to}
+  /// The ending position of the requested selection.
+  /// {@endtemplate}
+  final Offset? to;
+}
+
+/// An [Intent] that requests the selection in an input field be moved to the
+/// given [from] and [to] positions.
+class SelectPositionIntent extends Intent {
+  /// Creates an [SelectPositionIntent].
+  const SelectPositionIntent({required this.cause, required this.from, this.to});
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
+  final SelectionChangedCause cause;
+
+  /// {@macro flutter.widgets.TextEditingIntents.from}
+  final Offset from;
+
+  /// {@macro flutter.widgets.TextEditingIntents.to}
   final Offset? to;
 }
 
@@ -401,7 +459,10 @@ class SelectWordEdgeIntent extends Intent {
   /// Creates an [SelectWordEdgeIntent].
   const SelectWordEdgeIntent({required this.cause, required this.position});
 
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
+
+  /// The global position selected by the user.
   final Offset position;
 }
 
@@ -411,32 +472,41 @@ class SelectRangeIntent extends Intent {
   /// Creates an [SelectRangeIntent].
   const SelectRangeIntent({required this.cause, required this.from, this.to});
 
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
-  final Offset from;
-  final Offset? to;
-}
 
-class SelectTapPositionIntent extends Intent {
-  /// Creates an [SelectTapPositionIntent].
-  const SelectTapPositionIntent({required this.cause, required this.from, this.to});
-
-  final SelectionChangedCause cause;
+  /// {@macro flutter.widgets.TextEditingIntents.from}
   final Offset from;
+
+  /// {@macro flutter.widgets.TextEditingIntents.to}
   final Offset? to;
 }
 
 /// An [Intent] that represents a user interaction that attempts to hide, show,
 /// or toggle the selection toolbar overlay.
 class SelectionToolbarControlIntent extends Intent {
-  /// Creates an [SelectToolbarControlIntent].
+  /// Creates an [SelectionToolbarControlIntent].
   const SelectionToolbarControlIntent._({this.positionToDisplay, this.showSelectionToolbar, this.toggleSelectionToolbar});
 
+  /// Creates an [SelectionToolbarControlIntent] that requests the toolbar to be
+  /// shown.
   const SelectionToolbarControlIntent.show({required Offset position}) : this._(positionToDisplay: position, showSelectionToolbar: true, toggleSelectionToolbar: false);
+
+  /// Creates an [SelectionToolbarControlIntent] that requests the toolbar to be
+  /// hidden.
   static const SelectionToolbarControlIntent hide = SelectionToolbarControlIntent._(positionToDisplay: null, showSelectionToolbar: false, toggleSelectionToolbar: null);
+
+  /// Creates an [SelectionToolbarControlIntent] that requests the toolbar to be
+  /// toggled.
   const SelectionToolbarControlIntent.toggle({required Offset position}) : this._(positionToDisplay: position, showSelectionToolbar: null, toggleSelectionToolbar: true);
 
+  /// The global position where the toolbar should be displayed at.
   final Offset? positionToDisplay;
+
+  /// Whether the selection toolbar should be shown.
   final bool? showSelectionToolbar;
+
+  /// Whether the selection toolbar should be toggled.
   final bool? toggleSelectionToolbar;
 }
 

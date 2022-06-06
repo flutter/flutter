@@ -3174,6 +3174,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // inversion of the base and offset happens.
   TextSelection? _shiftTapDragSelection;
 
+  /// Saves the selection when a drag has started, or clears it depending on the
+  /// given intent's `store` parameter.
   void controlSelectionOnDragStart(SelectionOnDragStartControlIntent intent) {
     if (intent.store) {
       _shiftTapDragSelection = textEditingValue.selection;
@@ -3182,6 +3184,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Saves the viewport offset when a drag has started, or clears it depending on the
+  /// given intent's `store` parameter.
   void controlViewportOffsetOnDragStart(ViewportOffsetOnDragStartControlIntent intent) {
     if (intent.store) {
       _dragStartViewportOffset = renderEditable.offset.pixels;
@@ -3190,6 +3194,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Expand the selection to the given intent's global `position` parameter.
+  ///
+  /// Either base or extent will be moved to the given position, whichever
+  /// is closest. The selection will never shrink or pivot, only grow.
+  ///
+  /// If fromSelection is given, will expand from that selection instead of the
+  /// current selection in renderEditable.
+  ///
+  /// See also:
+  ///
+  ///   * [_extendSelection], which is similar but pivots the selection around
+  ///     the base.
   void expandSelection(ExpandSelectionToPositionIntent intent) {
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
     final TextSelection selection = intent.fromSelection ?? textEditingValue.selection!;
@@ -3208,6 +3224,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
   }
 
+  /// Extend the selection to the given intent's global `position` parameter.
+  ///
+  /// Holds the base in place and moves the extent.
+  ///
+  /// See also:
+  ///
+  ///   * [_expandSelection], which is similar but always increases the size of
+  ///     the selection.
   void extendSelection(ExtendSelectionToPositionIntent intent) {
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
     final TextSelection selection = textEditingValue.selection!;
@@ -3223,6 +3247,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
   }
 
+  /// Similar to selectPosition, but adjusts the start offset based on the
+  /// viewport offset saved at the beginning of a drag. This is to keep the
+  /// [TextSelection.baseOffset] at the same position it was when the drag began.
   void selectDragPosition(SelectDragPositionIntent intent) {
     final Offset startOffset = renderEditable.maxLines == 1
         ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
@@ -3231,7 +3258,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     selectPosition(SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: intent.from - startOffset, to: intent.to));
   }
 
-  void selectPosition(SelectTapPositionIntent intent) {
+  /// Select text between the given intent's `from` and `to` global position
+  /// parameters.
+  ///
+  /// `from` corresponds to the [TextSelection.baseOffset], and `to`
+  /// corresponds to the [TextSelection.extentOffset].
+  ///
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
+  void selectPosition(SelectPositionIntent intent) {
     final TextPosition fromPosition = renderEditable.getPositionForPoint(intent.from);
     final TextPosition? toPosition = intent.to == null
       ? null
@@ -3246,22 +3280,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       affinity: fromPosition.affinity,
     );
 
-    if (newSelection.isValid) {
-      final int textLength = textEditingValue.text.length;
-      newSelection = newSelection.copyWith(
-        baseOffset: math.min(newSelection.baseOffset, textLength),
-        extentOffset: math.min(newSelection.extentOffset, textLength),
-      );
-    }
-
-    userUpdateTextEditingValue(
-      textEditingValue.copyWith(
-        selection: newSelection,
-      ),
-      intent.cause,
-    );
+    _validateAndSetSelection(newSelection, intent.cause);
   }
 
+  /// Move the selection to the beginning or end of a word closest to the given
+  /// intent's `position` parameter.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordEdge(SelectWordEdgeIntent intent) {
     final TextPosition textPosition = renderEditable.getPositionForPoint(intent.position);
     final TextRange word = renderEditable.getWordBoundary(textPosition);
@@ -3272,22 +3297,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
     }
 
-    if (newSelection.isValid) {
-      final int textLength = textEditingValue.text.length;
-      newSelection = newSelection.copyWith(
-        baseOffset: math.min(newSelection.baseOffset, textLength),
-        extentOffset: math.min(newSelection.extentOffset, textLength),
-      );
-    }
-
-    userUpdateTextEditingValue(
-      textEditingValue.copyWith(
-        selection: newSelection,
-      ),
-      intent.cause,
-    );
+    _validateAndSetSelection(newSelection, intent.cause);
   }
 
+  /// Selects the given intent's range of global positions in a paragraph. This
+  /// range is given by the intent's `from` and `to` parameters.
+  ///
+  /// The first and last endpoints of the selection will always be at the
+  /// beginning and end of a word respectively.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectRange(SelectRangeIntent intent) {
     final TextPosition firstPosition = renderEditable.getPositionForPoint(intent.from);
     final TextSelection firstWord = renderEditable.getWordAtOffset(firstPosition);
@@ -3300,6 +3319,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       affinity: firstWord.affinity,
     );
 
+    _validateAndSetSelection(newSelection, intent.cause);
+  }
+
+  void _validateAndSetSelection(TextSelection newSelection, SelectionChangedCause cause) {
     if (newSelection.isValid) {
       final int textLength = textEditingValue.text.length;
       newSelection = newSelection.copyWith(
@@ -3312,7 +3335,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       textEditingValue.copyWith(
         selection: newSelection,
       ),
-      intent.cause,
+      cause,
     );
   }
 
