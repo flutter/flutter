@@ -1038,152 +1038,157 @@ void main() {
   });
 
   testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
-    final Key sliderKey = UniqueKey();
-    double value = 0.0;
+    debugDisableShadows = false;
+    try {
+      final Key sliderKey = UniqueKey();
+      double value = 0.0;
 
-    Widget buildSlider({
-      required double textScaleFactor,
-      bool isDiscrete = true,
-      ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
-    }) {
-      return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return MediaQuery(
-                data: MediaQueryData(textScaleFactor: textScaleFactor),
-                child: Material(
-                  child: Theme(
-                    data: Theme.of(context).copyWith(
-                      sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
-                    ),
-                    child: Center(
-                      child: OverflowBox(
-                        maxWidth: double.infinity,
-                        maxHeight: double.infinity,
-                        child: Slider(
-                          key: sliderKey,
-                          max: 100.0,
-                          divisions: isDiscrete ? 10 : null,
-                          label: '${value.round()}',
-                          value: value,
-                          onChanged: (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          },
+      Widget buildSlider({
+        required double textScaleFactor,
+        bool isDiscrete = true,
+        ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
+      }) {
+        return MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return MediaQuery(
+                  data: MediaQueryData(textScaleFactor: textScaleFactor),
+                  child: Material(
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
+                      ),
+                      child: Center(
+                        child: OverflowBox(
+                          maxWidth: double.infinity,
+                          maxHeight: double.infinity,
+                          child: Slider(
+                            key: sliderKey,
+                            max: 100.0,
+                            divisions: isDiscrete ? 10 : null,
+                            label: '${value.round()}',
+                            value: value,
+                            onChanged: (double newValue) {
+                              setState(() {
+                                value = newValue;
+                              });
+                            },
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
+        );
+      }
+
+      await tester.pumpWidget(buildSlider(textScaleFactor: 1.0));
+      Offset center = tester.getCenter(find.byType(Slider));
+      TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.renderObject(find.byType(Overlay)),
+        paints
+          ..path(
+            includes: const <Offset>[
+              Offset.zero,
+              Offset(0.0, -8.0),
+              Offset(-276.0, -16.0),
+              Offset(-216.0, -16.0),
+            ],
+            color: const Color(0xf55f5f5f),
+          )
+          ..paragraph(),
       );
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildSlider(textScaleFactor: 2.0));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.renderObject(find.byType(Overlay)),
+        paints
+          ..path(
+            includes: const <Offset>[
+              Offset.zero,
+              Offset(0.0, -8.0),
+              Offset(-304.0, -16.0),
+              Offset(-216.0, -16.0),
+            ],
+            color: const Color(0xf55f5f5f),
+          )
+          ..paragraph(),
+      );
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Check continuous
+      await tester.pumpWidget(buildSlider(
+        textScaleFactor: 1.0,
+        isDiscrete: false,
+        show: ShowValueIndicator.onlyForContinuous,
+      ));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(tester.renderObject(find.byType(Overlay)),
+        paints
+          ..path(
+            includes: const <Offset>[
+              Offset.zero,
+              Offset(0.0, -8.0),
+              Offset(-276.0, -16.0),
+              Offset(-216.0, -16.0),
+            ],
+            color: const Color(0xf55f5f5f),
+          )
+          ..paragraph(),
+      );
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildSlider(
+        textScaleFactor: 2.0,
+        isDiscrete: false,
+        show: ShowValueIndicator.onlyForContinuous,
+      ));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.renderObject(find.byType(Overlay)),
+        paints
+          ..path(
+            includes: const <Offset>[
+              Offset.zero,
+              Offset(0.0, -8.0),
+              Offset(-276.0, -16.0),
+              Offset(-216.0, -16.0),
+            ],
+            color: const Color(0xf55f5f5f),
+          )
+          ..paragraph(),
+      );
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    } finally {
+      debugDisableShadows = true;
     }
-
-    await tester.pumpWidget(buildSlider(textScaleFactor: 1.0));
-    Offset center = tester.getCenter(find.byType(Slider));
-    TestGesture gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.renderObject(find.byType(Overlay)),
-      paints
-        ..path(
-          includes: const <Offset>[
-            Offset.zero,
-            Offset(0.0, -8.0),
-            Offset(-276.0, -16.0),
-            Offset(-216.0, -16.0),
-          ],
-          color: const Color(0xf55f5f5f),
-        )
-        ..paragraph(),
-    );
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    await tester.pumpWidget(buildSlider(textScaleFactor: 2.0));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.renderObject(find.byType(Overlay)),
-      paints
-        ..path(
-          includes: const <Offset>[
-            Offset.zero,
-            Offset(0.0, -8.0),
-            Offset(-304.0, -16.0),
-            Offset(-216.0, -16.0),
-          ],
-          color: const Color(0xf55f5f5f),
-        )
-        ..paragraph(),
-    );
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    // Check continuous
-    await tester.pumpWidget(buildSlider(
-      textScaleFactor: 1.0,
-      isDiscrete: false,
-      show: ShowValueIndicator.onlyForContinuous,
-    ));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    expect(tester.renderObject(find.byType(Overlay)),
-      paints
-        ..path(
-          includes: const <Offset>[
-            Offset.zero,
-            Offset(0.0, -8.0),
-            Offset(-276.0, -16.0),
-            Offset(-216.0, -16.0),
-          ],
-          color: const Color(0xf55f5f5f),
-        )
-        ..paragraph(),
-    );
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    await tester.pumpWidget(buildSlider(
-      textScaleFactor: 2.0,
-      isDiscrete: false,
-      show: ShowValueIndicator.onlyForContinuous,
-    ));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.renderObject(find.byType(Overlay)),
-      paints
-        ..path(
-          includes: const <Offset>[
-            Offset.zero,
-            Offset(0.0, -8.0),
-            Offset(-276.0, -16.0),
-            Offset(-216.0, -16.0),
-          ],
-          color: const Color(0xf55f5f5f),
-        )
-        ..paragraph(),
-    );
-
-    await gesture.up();
-    await tester.pumpAndSettle();
   });
 
   testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
@@ -2557,7 +2562,7 @@ void main() {
         ..paragraph(),
     );
 
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 3));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 4));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 2));
 
     await tester.tap(find.text('Next'));
