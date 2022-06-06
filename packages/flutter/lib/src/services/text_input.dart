@@ -948,8 +948,9 @@ class TextEditingValue {
   // This can't be perform during constructors, so perform this wherever else
   // possible.
   static bool _verifyRange(TextRange range, String text) {
-    if (range == TextRange.empty)
+    if (range.start == -1 && range.end == -1) {
       return true;
+    }
     assert(range.start >= 0 && range.start <= text.length,
         'Range start ${range.start} is out of text of length ${text.length}');
     assert(range.end >= 0 && range.end <= text.length,
