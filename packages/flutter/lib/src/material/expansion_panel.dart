@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'expand_icon.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
@@ -11,12 +12,11 @@ import 'mergeable_material.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
-// Fix for #5848. The height of the collasped header should be the same as the
-// height (24px icon size + 2 * 16px padding) Icon Button used in the header.
-const double _kPanelHeaderCollapsedHeight = 24 + 16 * 2;
+const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
-    vertical: 12,
+    vertical: 64.0 - _kPanelHeaderCollapsedHeight,
 );
+const EdgeInsets _kExpandIconPadding = EdgeInsets.all(12.0);
 
 class _SaltedKey<S, V> extends LocalKey {
   const _SaltedKey(this.salt, this.value);
@@ -358,7 +358,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         margin: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
           isExpanded: _isChildExpanded(index),
-          padding: const EdgeInsets.all(16.0),
+          padding: _kExpandIconPadding,
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
