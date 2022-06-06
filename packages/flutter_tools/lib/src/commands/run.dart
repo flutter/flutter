@@ -716,6 +716,10 @@ class RunCommand extends RunCommandBase {
         throwToolExit('Lost connection to device.');
       }
       rethrow;
+    } finally {
+      // However we exited from the runner, ensure the terminal has line mode
+      // and echo mode enabled before we return the user to the shell.
+      globals.terminal.singleCharMode = false;
     }
     return FlutterCommandResult(
       ExitStatus.success,
