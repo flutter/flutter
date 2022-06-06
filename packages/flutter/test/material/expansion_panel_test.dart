@@ -1325,6 +1325,7 @@ void main() {
     final RenderBox boxOfContainer = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     final RenderBox boxOfIconButton = tester.renderObject(find.byType(IconButton).first);
     expect(boxOfContainer.size.height, equals(boxOfIconButton.size.height));
+    expect(boxOfContainer.size.height, equals(48.0)); // Header should have 48px height according to Material 2 Design spec.
   });
 
   testWidgets("The AnimatedContainer's height is at least kMinInteractiveDimension", (WidgetTester tester) async {
