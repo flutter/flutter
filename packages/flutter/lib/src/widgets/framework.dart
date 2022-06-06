@@ -6463,7 +6463,7 @@ class DebugCreator {
   Element get element => _elementRef.target!;
 
   @override
-  String toString() => 
+  String toString() =>
     _elementRef.target?.debugGetCreatorChain(12) ?? '<element was garbage collected>';
 }
 
