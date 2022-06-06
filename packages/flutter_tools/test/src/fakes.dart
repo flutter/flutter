@@ -240,7 +240,7 @@ class FakeStdio extends Stdio {
   }
 
   @override
-  bool stdinHasTerminal = true;
+  bool hasTerminal = true;
 
   List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();

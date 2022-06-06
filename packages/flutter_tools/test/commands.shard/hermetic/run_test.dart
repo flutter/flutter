@@ -405,7 +405,6 @@ void main() {
         Usage: () => usage,
       });
 
-
       testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
@@ -441,7 +440,7 @@ void main() {
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        Stdio: () => FakeStdio()..stdout,
+        Stdio: () => FakeStdio(),
         Usage: () => usage,
       });
 
