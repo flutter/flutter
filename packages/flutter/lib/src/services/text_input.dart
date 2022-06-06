@@ -1467,7 +1467,7 @@ TextInputAction _toTextInputAction(String action) {
       return TextInputAction.next;
     case 'TextInputAction.previous':
       return TextInputAction.previous;
-    case 'TextInputAction.continue_action':
+    case 'TextInputAction.continueAction':
       return TextInputAction.continueAction;
     case 'TextInputAction.join':
       return TextInputAction.join;
