@@ -6392,7 +6392,7 @@ class DebugCreator {
   final  WeakReference<Element> _elementRef;
 
   /// The creator of the [RenderObject].
-  Element get element => _elementRef.target!;
+  Element? get element => _elementRef.target;
 
   @override
   String toString() => _elementRef.target?.debugGetCreatorChain(12) ?? '<element GCed>';
