@@ -927,13 +927,13 @@ mixin _CoordinatorMixin implements ScrollActivityDelegate, ScrollHoldController 
     _outerPosition!.updateCanDrag(maxInnerExtent);
   }
 
-  Future<void> animateTo(
-    double offset, {
+  Future<void> _animateTo(
+    double to, {
     required Duration duration,
     required Curve curve,
   }) async {
     final DrivenScrollActivity outerActivity = _outerPosition!.createDrivenScrollActivity(
-      nestOffset(offset, _outerPosition!),
+      nestOffset(to, _outerPosition!),
       duration,
       curve,
     );
@@ -942,7 +942,7 @@ mixin _CoordinatorMixin implements ScrollActivityDelegate, ScrollHoldController 
       outerActivity,
       (_NestedScrollPosition position) {
         final DrivenScrollActivity innerActivity = position.createDrivenScrollActivity(
-          nestOffset(offset, position),
+          nestOffset(to, position),
           duration,
           curve,
         );
@@ -953,11 +953,11 @@ mixin _CoordinatorMixin implements ScrollActivityDelegate, ScrollHoldController 
     await Future.wait<void>(resultFutures);
   }
 
-  void jumpTo(double value) {
+  void _jumpTo(double to) {
     goIdle();
-    _outerPosition!.localJumpTo(nestOffset(value, _outerPosition!));
+    _outerPosition!.localJumpTo(nestOffset(to, _outerPosition!));
     for (final _NestedScrollPosition position in _innerPositions) {
-      position.localJumpTo(nestOffset(value, position));
+      position.localJumpTo(nestOffset(to, position));
     }
     goBallistic(0.0);
   }
@@ -1450,7 +1450,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     required Duration duration,
     required Curve curve,
   }) {
-    return coordinator.animateTo(
+    return coordinator._animateTo(
       coordinator.unnestOffset(to, this),
       duration: duration,
       curve: curve,
@@ -1459,7 +1459,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   void jumpTo(double value) {
-    return coordinator.jumpTo(coordinator.unnestOffset(value, this));
+    return coordinator._jumpTo(coordinator.unnestOffset(value, this));
   }
 
   @override
@@ -2230,6 +2230,20 @@ class NestedScrollController extends ScrollController with _CoordinatorMixin {
 
   @override
   double get offset => _outerController.offset;
+
+  @override
+  Future<void> animateTo(
+    double offset, {
+    required Duration duration,
+    required Curve curve,
+  }) async {
+    _animateTo(offset, duration: duration, curve: curve);
+  }
+
+  @override
+  void jumpTo(double value) {
+    _jumpTo(value);
+  }
 
   @override
   void attach(ScrollPosition position) {
