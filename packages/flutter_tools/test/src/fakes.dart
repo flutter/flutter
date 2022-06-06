@@ -259,6 +259,11 @@ class FakeStdin extends Fake implements Stdin {
   bool lineMode = true;
 
   @override
+  Stream<S> transform<S>(StreamTransformer<List<int>, S> transformer) {
+    return controller.stream.transform(transformer);
+  }
+
+  @override
   StreamSubscription<List<int>> listen(
     void Function(List<int> event)? onData, {
     Function? onError,
