@@ -170,6 +170,58 @@ void testMain() {
       return chain;
     }
 
+    test('correctly offsets when clip chain length is changed', () async {
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (int viewId) => html.DivElement()..id = 'view-0',
+      );
+      await createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+      LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(3, 3);
+      sb.pushClipRect(ui.Rect.largest);
+      sb.pushOffset(6, 6);
+      sb.addPlatformView(0, width: 10, height: 10);
+      sb.pop();
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      // Transformations happen on the slot element.
+      html.Element slotHost =
+          flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot')!;
+
+      expect(
+        getTransformChain(slotHost),
+        <String>[
+          'matrix(1, 0, 0, 1, 6, 6)',
+          'matrix(1, 0, 0, 1, 3, 3)',
+        ],
+      );
+
+      sb = LayerSceneBuilder();
+      sb.pushOffset(3, 3);
+      sb.pushClipRect(ui.Rect.largest);
+      sb.pushOffset(6, 6);
+      sb.pushClipRect(ui.Rect.largest);
+      sb.pushOffset(9, 9);
+      sb.addPlatformView(0, width: 10, height: 10);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      // Transformations happen on the slot element.
+      slotHost =
+          flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot')!;
+
+      expect(
+        getTransformChain(slotHost),
+        <String>[
+          'matrix(1, 0, 0, 1, 9, 9)',
+          'matrix(1, 0, 0, 1, 6, 6)',
+          'matrix(1, 0, 0, 1, 3, 3)',
+        ],
+      );
+    });
+
     test('converts device pixels to logical pixels (no clips)', () async {
       window.debugOverrideDevicePixelRatio(4);
       ui.platformViewRegistry.registerViewFactory(

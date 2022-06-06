@@ -149,6 +149,7 @@ extension DomNodeExtension on DomNode {
   DomElement? get parent => js_util.getProperty(this, 'parentElement');
   String? get text => js_util.getProperty(this, 'textContent');
   external DomNode? get parentNode;
+  external DomNode? get nextSibling;
   external DomNode insertBefore(DomNode newNode, DomNode? referenceNode);
   void remove() {
     if (parentNode != null) {
