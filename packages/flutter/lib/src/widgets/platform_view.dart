@@ -144,8 +144,8 @@ class AndroidView extends StatefulWidget {
   ///     child: AndroidView(
   ///       viewType: 'webview',
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-  ///         new Factory<OneSequenceGestureRecognizer>(
-  ///           () => new EagerGestureRecognizer(),
+  ///         Factory<OneSequenceGestureRecognizer>(
+  ///           () => EagerGestureRecognizer(),
   ///         ),
   ///       ].toSet(),
   ///     ),
@@ -284,8 +284,8 @@ class UiKitView extends StatefulWidget {
   ///     child: UiKitView(
   ///       viewType: 'webview',
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-  ///         new Factory<OneSequenceGestureRecognizer>(
-  ///           () => new EagerGestureRecognizer(),
+  ///         Factory<OneSequenceGestureRecognizer>(
+  ///           () => EagerGestureRecognizer(),
   ///         ),
   ///       ].toSet(),
   ///     ),
@@ -994,8 +994,8 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///     height: 100.0,
   ///     child: PlatformViewSurface(
   ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-  ///         new Factory<OneSequenceGestureRecognizer>(
-  ///           () => new EagerGestureRecognizer(),
+  ///         Factory<OneSequenceGestureRecognizer>(
+  ///           () => EagerGestureRecognizer(),
   ///         ),
   ///       ].toSet(),
   ///     ),

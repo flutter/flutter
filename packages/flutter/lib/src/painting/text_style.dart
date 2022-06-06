@@ -14,10 +14,10 @@ import 'text_painter.dart';
 const String _kDefaultDebugLabel = 'unknown';
 
 const String _kColorForegroundWarning = 'Cannot provide both a color and a foreground\n'
-    'The color argument is just a shorthand for "foreground: new Paint()..color = color".';
+    'The color argument is just a shorthand for "foreground: Paint()..color = color".';
 
 const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor and a background\n'
-    'The backgroundColor argument is just a shorthand for "background: new Paint()..color = color".';
+    'The backgroundColor argument is just a shorthand for "background: Paint()..color = color".';
 
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_painter.dart, as well as the

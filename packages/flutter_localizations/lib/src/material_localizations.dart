@@ -30,7 +30,7 @@ import 'widgets_localizations.dart';
 /// app supports with [MaterialApp.supportedLocales]:
 ///
 /// ```dart
-/// new MaterialApp(
+/// MaterialApp(
 ///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
 ///   supportedLocales: [
 ///     const Locale('en', 'US'), // American English
@@ -682,7 +682,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// app supports with [MaterialApp.supportedLocales]:
   ///
   /// ```dart
-  /// new MaterialApp(
+  /// MaterialApp(
   ///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
   ///   supportedLocales: [
   ///     const Locale('en', 'US'), // English
