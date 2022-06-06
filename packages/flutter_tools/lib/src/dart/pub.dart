@@ -36,6 +36,25 @@ const int _kPubExitCodeUnavailable = 69;
 
 typedef MessageFilter = String? Function(String message);
 
+/// targetPath is the directory in which the content of the extraPath will be moved in
+void joinCaches(FileSystem fileSystem, String targetPath, String extraPath) {
+  final Directory targetDirectory = fileSystem.directory(targetPath);
+  final Directory extraDirectory = fileSystem.directory(extraPath);
+
+  for (final FileSystemEntity entity in extraDirectory.listSync()) {
+    final File file = fileSystem.file(entity.path);
+    if (file.existsSync()) {
+      targetDirectory.childFile(entity.basename).writeAsBytesSync(file.readAsBytesSync());
+    }
+    else if(fileSystem.directory(entity.path).existsSync()) {
+      final Directory newDirectory = targetDirectory.childDirectory(entity.basename);
+      newDirectory.createSync();
+      joinCaches(fileSystem, newDirectory.path, fileSystem.directory(entity.path).path);
+    }
+  }
+  extraDirectory.delete(recursive: true);
+}
+
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
 /// environment variable and allows understanding the type of requests made to
 /// the package site on Flutter's behalf.
@@ -509,17 +528,6 @@ class _DefaultPub implements Pub {
 
     // Use pub's default location by returning null.
     return null;
-  }
-
-  @visibleForTesting
-  /// targetPath is the directory in which the content of the extraPath will be moved in
-  void joinCaches(FileSystem fileSystem, String targetPath, String extraPath) {
-    final Directory targetDirectory = fileSystem.directory(targetPath);
-    final Directory extraDirectory = fileSystem.directory(extraPath);
-    extraDirectory.list(recursive: true).listen((FileSystemEntity entity) {
-      targetDirectory.childFile(entity.path);
-    });
-    extraDirectory.delete(recursive: true);
   }
 
   /// The full environment used when running pub.
