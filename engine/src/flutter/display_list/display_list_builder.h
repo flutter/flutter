@@ -154,15 +154,20 @@ class DisplayListBuilder final : public virtual Dispatcher,
   // Only the |renders_with_attributes()| option will be accepted here. Any
   // other flags will be ignored and calculated anew as the DisplayList is
   // built. Alternatively, use the |saveLayer(SkRect, bool)| method.
-  void saveLayer(const SkRect* bounds, const SaveLayerOptions options) override;
+  void saveLayer(const SkRect* bounds,
+                 const SaveLayerOptions options,
+                 const DlImageFilter* backdrop) override;
   // Convenience method with just a boolean to indicate whether the saveLayer
   // should apply the rendering attributes.
   void saveLayer(const SkRect* bounds, bool renders_with_attributes) {
-    saveLayer(bounds, renders_with_attributes
-                          ? SaveLayerOptions::kWithAttributes
-                          : SaveLayerOptions::kNoAttributes);
+    saveLayer(bounds,
+              renders_with_attributes ? SaveLayerOptions::kWithAttributes
+                                      : SaveLayerOptions::kNoAttributes,
+              nullptr);
   }
-  void saveLayer(const SkRect* bounds, const DlPaint* paint);
+  void saveLayer(const SkRect* bounds,
+                 const DlPaint* paint,
+                 const DlImageFilter* backdrop = nullptr);
   void restore() override;
   int getSaveCount() { return layer_stack_.size(); }
   void restoreToCount(int restore_count);

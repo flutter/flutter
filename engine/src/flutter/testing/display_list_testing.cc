@@ -115,7 +115,7 @@ static std::ostream& operator<<(std::ostream& os, const SkRect& rect) {
 }
 
 static std::ostream& operator<<(std::ostream& os, const SkRect* rect) {
-  return rect ? os << *rect : os << "no rect";
+  return rect ? (os << "&" << *rect) : os << "no rect";
 }
 
 static std::ostream& operator<<(std::ostream& os, const SkRRect& rrect) {
@@ -148,7 +148,7 @@ static std::ostream& operator<<(std::ostream& os, const SkMatrix& matrix) {
 }
 
 static std::ostream& operator<<(std::ostream& os, const SkMatrix* matrix) {
-  if (matrix) return os << *matrix;
+  if (matrix) return os << "&" << *matrix;
   return os << "no matrix";
 }
 
@@ -255,7 +255,7 @@ static std::ostream& operator<<(std::ostream& os, const SkTextBlob* blob) {
   if (blob == nullptr) {
     return os << "no text";
   }
-  return os << "SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
+  return os << "&SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
 }
 
 static std::ostream& operator<<(std::ostream& os, const DlVertexMode& mode) {
@@ -283,7 +283,7 @@ static std::ostream& operator<<(std::ostream& os, const DlImage* image) {
   if (image == nullptr) {
     return os << "null image";
   }
-  os << "DlImage(" << image->width() << " x " << image->height() << ", ";
+  os << "&DlImage(" << image->width() << " x " << image->height() << ", ";
   if (image->skia_image()) {
     os << "skia(" << image->skia_image().get() << "), ";
   }
@@ -359,7 +359,7 @@ void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
     case DlColorSourceType::kImage: {
       const DlImageColorSource* image_src = source->asImage();
       FML_DCHECK(image_src);
-      os_ << "DlImageColorSource(" << image_src->image()
+      os_ << "DlImageColorSource(image: " << image_src->image()
                            << ", hMode: " << image_src->horizontal_tile_mode()
                            << ", vMode: " << image_src->vertical_tile_mode()
                            << ", " << image_src->sampling()
@@ -420,17 +420,17 @@ void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
   }
   os_ << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::out(const DlColorFilter* filter) {
-  switch (filter->type()) {
+void DisplayListStreamDispatcher::out(const DlColorFilter& filter) {
+  switch (filter.type()) {
     case DlColorFilterType::kBlend: {
-      const DlBlendColorFilter* blend = filter->asBlend();
+      const DlBlendColorFilter* blend = filter.asBlend();
       FML_DCHECK(blend);
       os_ << "DlBlendColorFilter(" << blend->color() << ", "
                                    << static_cast<int>(blend->mode()) << ")";
       break;
     }
     case DlColorFilterType::kMatrix: {
-      const DlMatrixColorFilter* matrix = filter->asMatrix();
+      const DlMatrixColorFilter* matrix = filter.asMatrix();
       FML_DCHECK(matrix);
       float values[20];
       matrix->get_matrix(values);
@@ -444,8 +444,8 @@ void DisplayListStreamDispatcher::out(const DlColorFilter* filter) {
                  << values[i+4] << ","
                  << std::endl;
       }
-      startl() << "]";
       outdent();
+      startl() << "]";
       break;
     }
     case DlColorFilterType::kSrgbToLinearGamma: {
@@ -457,15 +457,19 @@ void DisplayListStreamDispatcher::out(const DlColorFilter* filter) {
       break;
     }
     default:
-      os_ << "DlUnknownColorFilter(" << filter->skia_object().get() << ")";
+      os_ << "DlUnknownColorFilter(" << filter.skia_object().get() << ")";
       break;
   }
 }
-void DisplayListStreamDispatcher::setColorFilter(const DlColorFilter* filter) {
+void DisplayListStreamDispatcher::out(const DlColorFilter* filter) {
   if (filter == nullptr) {
-    startl() << "setColorFilter(no ColorFilter);" << std::endl;
-    return;
+    os_ << "no ColorFilter";
+  } else {
+    os_ << "&";
+    out(*filter);
   }
+}
+void DisplayListStreamDispatcher::setColorFilter(const DlColorFilter* filter) {
   startl() << "setColorFilter(";
   out(filter);
   os_ << ");" << std::endl;
@@ -501,15 +505,10 @@ void DisplayListStreamDispatcher::setMaskFilter(const DlMaskFilter* filter) {
   }
   os_ << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::setImageFilter(const DlImageFilter* filter) {
-  if (filter == nullptr) {
-    startl() << "setImageFilter(no ImageFilter);" << std::endl;
-    return;
-  }
-  startl() << "setImageFilter(";
-  switch (filter->type()) {
+void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
+  switch (filter.type()) {
     case DlImageFilterType::kBlur: {
-      const DlBlurImageFilter* blur = filter->asBlur();
+      const DlBlurImageFilter* blur = filter.asBlur();
       FML_DCHECK(blur);
       os_ << "DlBlurImageFilter(" << blur->sigma_x() << ", "
                                   << blur->sigma_y() << ", "
@@ -517,44 +516,62 @@ void DisplayListStreamDispatcher::setImageFilter(const DlImageFilter* filter) {
       break;
     }
     case DlImageFilterType::kDilate: {
-      const DlDilateImageFilter* dilate = filter->asDilate();
+      const DlDilateImageFilter* dilate = filter.asDilate();
       FML_DCHECK(dilate);
       os_ << "DlDilateImageFilter(" << dilate->radius_x() << ", " << dilate->radius_y() << ")";
       break;
     }
     case DlImageFilterType::kErode: {
-      const DlErodeImageFilter* erode = filter->asErode();
+      const DlErodeImageFilter* erode = filter.asErode();
       FML_DCHECK(erode);
       os_ << "DlDilateImageFilter(" << erode->radius_x() << ", " << erode->radius_y() << ")";
       break;
     }
     case DlImageFilterType::kMatrix: {
-      const DlMatrixImageFilter* matrix = filter->asMatrix();
+      const DlMatrixImageFilter* matrix = filter.asMatrix();
       FML_DCHECK(matrix);
       os_ << "DlMatrixImageFilter(" << matrix->matrix() << ", " << matrix->sampling() << ")";
       break;
     }
     case DlImageFilterType::kComposeFilter: {
-      const DlComposeImageFilter* compose = filter->asCompose();
+      const DlComposeImageFilter* compose = filter.asCompose();
       FML_DCHECK(compose);
       os_ << "DlComposeImageFilter(" << std::endl;
       indent();
-      startl() << "outer: " << compose->outer() << "," << std::endl;
-      startl() << "inner: " << compose->inner() << "," << std::endl;
+      startl() << "outer: ";
+      out(compose->outer().get());
+      os_ << "," << std::endl;
+      startl() << "inner: ";
+      out(compose->inner().get());
+      os_ << "," << std::endl;
       outdent();
       startl() << ")";
       break;
     }
     case DlImageFilterType::kColorFilter: {
-      const DlColorFilterImageFilter* color_filter = filter->asColorFilter();
+      const DlColorFilterImageFilter* color_filter = filter.asColorFilter();
       FML_DCHECK(color_filter);
-      out(color_filter->color_filter().get());
+      os_ << "DlColorFilterImageFilter(";
+      out(*color_filter->color_filter());
+      os_ << ")";
       break;
     }
     default:
-      os_ << "DlUnknownImageFilter(" << filter->skia_object().get() << ")";
+      os_ << "DlUnknownImageFilter(" << filter.skia_object().get() << ")";
       break;
   }
+}
+void DisplayListStreamDispatcher::out(const DlImageFilter* filter) {
+  if (filter == nullptr) {
+    os_ << "no ImageFilter";
+  } else {
+    os_ << "&";
+    out(*filter);
+  }
+}
+void DisplayListStreamDispatcher::setImageFilter(const DlImageFilter* filter) {
+  startl() << "setImageFilter(";
+  out(filter);
   os_ << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::save() {
@@ -563,8 +580,19 @@ void DisplayListStreamDispatcher::save() {
   indent();
 }
 void DisplayListStreamDispatcher::saveLayer(const SkRect* bounds,
-                                            const SaveLayerOptions options) {
-  startl() << "saveLayer(" << bounds << ", " << options << ");" << std::endl;
+                                            const SaveLayerOptions options,
+                                            const DlImageFilter* backdrop) {
+  startl() << "saveLayer(" << bounds << ", " << options;
+  if (backdrop) {
+    os_ << "," << std::endl;
+    indent(10);
+    startl() << "backdrop: ";
+    out(backdrop);
+    outdent(10);
+  } else {
+    os_ << ", no backdrop";
+  }
+  os_ << ");" << std::endl;
   startl() << "{" << std::endl;
   indent();
 }

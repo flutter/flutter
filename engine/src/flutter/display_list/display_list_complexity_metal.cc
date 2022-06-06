@@ -64,9 +64,16 @@ DisplayListMetalComplexityCalculator::MetalHelper::BatchedComplexity() {
 
 void DisplayListMetalComplexityCalculator::MetalHelper::saveLayer(
     const SkRect* bounds,
-    const SaveLayerOptions options) {
+    const SaveLayerOptions options,
+    const DlImageFilter* backdrop) {
   if (IsComplex()) {
     return;
+  }
+  if (backdrop) {
+    // Flutter does not offer this operation so this value can only ever be
+    // non-null for a frame-wide builder which is not currently evaluated for
+    // complexity.
+    AccumulateComplexity(Ceiling());
   }
   save_layer_count_++;
 }

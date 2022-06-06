@@ -59,7 +59,9 @@ class DisplayListStreamDispatcher final : public Dispatcher {
   void setImageFilter(const DlImageFilter* filter) override;
 
   void save() override;
-  void saveLayer(const SkRect* bounds, const SaveLayerOptions options) override;
+  void saveLayer(const SkRect* bounds,
+                 const SaveLayerOptions options,
+                 const DlImageFilter* backdrop) override;
   void restore() override;
 
   void translate(SkScalar tx, SkScalar ty) override;
@@ -147,15 +149,20 @@ class DisplayListStreamDispatcher final : public Dispatcher {
   int cur_indent_;
   int indent_;
 
-  void indent() { cur_indent_ += indent_; }
-  void outdent() { cur_indent_ -= indent_; }
+  void indent() { indent(indent_); }
+  void outdent() { outdent(indent_); }
+  void indent(int spaces) { cur_indent_ += spaces; }
+  void outdent(int spaces) { cur_indent_ -= spaces; }
 
   template <class T>
   std::ostream& out_array(std::string name, int count, const T array[]);
 
   std::ostream& startl();
 
+  void out(const DlColorFilter& filter);
   void out(const DlColorFilter* filter);
+  void out(const DlImageFilter& filter);
+  void out(const DlImageFilter* filter);
 };
 
 }  // namespace testing

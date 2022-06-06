@@ -69,8 +69,11 @@ class Dispatcher {
   // to avoid creating a temporary layer, these optimization options will
   // be determined as the |DisplayList| is constructed and should not be
   // specified in calling a |DisplayListBuilder| as they will be ignored.
+  // The |backdrop| filter, if not null, is used to initialize the new
+  // layer before further rendering happens.
   virtual void saveLayer(const SkRect* bounds,
-                         const SaveLayerOptions options) = 0;
+                         const SaveLayerOptions options,
+                         const DlImageFilter* backdrop = nullptr) = 0;
   virtual void restore() = 0;
 
   virtual void translate(SkScalar tx, SkScalar ty) = 0;

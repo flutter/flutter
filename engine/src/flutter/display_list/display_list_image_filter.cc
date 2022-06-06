@@ -6,7 +6,8 @@
 
 namespace flutter {
 
-std::shared_ptr<DlImageFilter> DlImageFilter::From(SkImageFilter* sk_filter) {
+std::shared_ptr<DlImageFilter> DlImageFilter::From(
+    const SkImageFilter* sk_filter) {
   if (sk_filter == nullptr) {
     return nullptr;
   }

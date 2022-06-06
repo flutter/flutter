@@ -290,7 +290,8 @@ void DisplayListBoundsCalculator::save() {
   accumulator_ = layer_infos_.back()->layer_accumulator();
 }
 void DisplayListBoundsCalculator::saveLayer(const SkRect* bounds,
-                                            const SaveLayerOptions options) {
+                                            const SaveLayerOptions options,
+                                            const DlImageFilter* backdrop) {
   SkMatrixDispatchHelper::save();
   ClipBoundsDispatchHelper::save();
   if (options.renders_with_attributes()) {
@@ -317,6 +318,10 @@ void DisplayListBoundsCalculator::saveLayer(const SkRect* bounds,
   // we set them as if a clip operation were performed.
   if (bounds) {
     clipRect(*bounds, SkClipOp::kIntersect, false);
+  }
+  if (backdrop) {
+    // A backdrop will affect up to the entire surface, bounded by the clip
+    AccumulateUnbounded();
   }
 }
 void DisplayListBoundsCalculator::restore() {

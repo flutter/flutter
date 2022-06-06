@@ -245,8 +245,7 @@ struct SetImageColorSourceOp : DLOp {
   }
 };
 
-// 4 byte header + 24 bytes for the DlColorFilterImageFilter
-// uses 32 total bytes (4 bytes unused)
+// 4 byte header + 16 byte payload uses 24 total bytes (4 bytes unused)
 struct SetSharedImageFilterOp : DLOp {
   static const auto kType = DisplayListOpType::kSetSharedImageFilter;
 
@@ -297,6 +296,51 @@ struct SaveLayerBoundsOp final : DLOp {
 
   void dispatch(Dispatcher& dispatcher) const {
     dispatcher.saveLayer(&rect, options);
+  }
+};
+// 4 byte header + 20 byte payload packs into minimum 24 bytes
+struct SaveLayerBackdropOp final : DLOp {
+  static const auto kType = DisplayListOpType::kSaveLayerBackdrop;
+
+  explicit SaveLayerBackdropOp(const SaveLayerOptions options,
+                               const DlImageFilter* backdrop)
+      : options(options), backdrop(backdrop->shared()) {}
+
+  SaveLayerOptions options;
+  const std::shared_ptr<DlImageFilter> backdrop;
+
+  void dispatch(Dispatcher& dispatcher) const {
+    dispatcher.saveLayer(nullptr, options, backdrop.get());
+  }
+
+  DisplayListCompare equals(const SaveLayerBackdropOp* other) const {
+    return options == other->options && Equals(backdrop, other->backdrop)
+               ? DisplayListCompare::kEqual
+               : DisplayListCompare::kNotEqual;
+  }
+};
+// 4 byte header + 36 byte payload packs evenly into 36 bytes
+struct SaveLayerBackdropBoundsOp final : DLOp {
+  static const auto kType = DisplayListOpType::kSaveLayerBackdropBounds;
+
+  SaveLayerBackdropBoundsOp(SkRect rect,
+                            const SaveLayerOptions options,
+                            const DlImageFilter* backdrop)
+      : options(options), rect(rect), backdrop(backdrop->shared()) {}
+
+  SaveLayerOptions options;
+  const SkRect rect;
+  const std::shared_ptr<DlImageFilter> backdrop;
+
+  void dispatch(Dispatcher& dispatcher) const {
+    dispatcher.saveLayer(&rect, options, backdrop.get());
+  }
+
+  DisplayListCompare equals(const SaveLayerBackdropBoundsOp* other) const {
+    return (options == other->options && rect == other->rect &&
+            Equals(backdrop, other->backdrop))
+               ? DisplayListCompare::kEqual
+               : DisplayListCompare::kNotEqual;
   }
 };
 // 4 byte header + no payload uses minimum 8 bytes (4 bytes unused)

@@ -450,6 +450,13 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "Save(Layer)+Restore", {
+      {5, 104, 5, 104, [](DisplayListBuilder& b) {
+        b.saveLayer(nullptr, SaveLayerOptions::kNoAttributes, &kTestCFImageFilter1);
+        b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
+        b.drawRect({5, 5, 15, 15});
+        b.drawRect({10, 10, 20, 20});
+        b.restore();
+      }},
     // There are many reasons that save and restore can elide content, including
     // whether or not there are any draw operations between them, whether or not
     // there are any state changes to restore, and whether group rendering (opacity)
@@ -486,6 +493,36 @@ std::vector<DisplayListInvocationGroup> allGroups = {
       }},
       {5, 104, 5, 104, [](DisplayListBuilder& b) {
         b.saveLayer(&kTestBounds, true);
+        b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
+        b.drawRect({5, 5, 15, 15});
+        b.drawRect({10, 10, 20, 20});
+        b.restore();
+      }},
+      // backdrop variants - using the TestCFImageFilter because it can be
+      // reconstituted in the DL->SkCanvas->DL stream
+      // {5, 104, 5, 104, [](DisplayListBuilder& b) {
+      //   b.saveLayer(nullptr, SaveLayerOptions::kNoAttributes, &kTestCFImageFilter1);
+      //   b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
+      //   b.drawRect({5, 5, 15, 15});
+      //   b.drawRect({10, 10, 20, 20});
+      //   b.restore();
+      // }},
+      {5, 104, 5, 104, [](DisplayListBuilder& b) {
+        b.saveLayer(nullptr, SaveLayerOptions::kWithAttributes, &kTestCFImageFilter1);
+        b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
+        b.drawRect({5, 5, 15, 15});
+        b.drawRect({10, 10, 20, 20});
+        b.restore();
+      }},
+      {5, 120, 5, 120, [](DisplayListBuilder& b) {
+        b.saveLayer(&kTestBounds, SaveLayerOptions::kNoAttributes, &kTestCFImageFilter1);
+        b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
+        b.drawRect({5, 5, 15, 15});
+        b.drawRect({10, 10, 20, 20});
+        b.restore();
+      }},
+      {5, 120, 5, 120, [](DisplayListBuilder& b) {
+        b.saveLayer(&kTestBounds, SaveLayerOptions::kWithAttributes, &kTestCFImageFilter1);
         b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
         b.drawRect({5, 5, 15, 15});
         b.drawRect({10, 10, 20, 20});
@@ -1603,7 +1640,8 @@ class SaveLayerOptionsExpector : public virtual Dispatcher,
       : expected_(expected) {}
 
   void saveLayer(const SkRect* bounds,
-                 const SaveLayerOptions options) override {
+                 const SaveLayerOptions options,
+                 const DlImageFilter* backdrop) override {
     EXPECT_EQ(options, expected_[save_layer_count_]);
     save_layer_count_++;
   }
@@ -1877,7 +1915,8 @@ TEST(DisplayList, FlutterSvgIssue661BoundsWereEmpty) {
         builder.save();
         builder.clipRect({1172, 245, 1218, 294}, SkClipOp::kIntersect, true);
         {
-          builder.saveLayer(nullptr, SaveLayerOptions::kWithAttributes);
+          builder.saveLayer(nullptr, SaveLayerOptions::kWithAttributes,
+                            nullptr);
           {
             builder.save();
             builder.transform2DAffine(1.4375, 0, 1164.09,  //

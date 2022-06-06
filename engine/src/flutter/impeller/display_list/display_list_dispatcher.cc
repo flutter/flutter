@@ -379,7 +379,11 @@ static std::optional<Rect> ToRect(const SkRect* rect) {
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::saveLayer(const SkRect* bounds,
-                                      const flutter::SaveLayerOptions options) {
+                                      const flutter::SaveLayerOptions options,
+                                      const flutter::DlImageFilter* backdrop) {
+  if (backdrop) {
+    UNIMPLEMENTED;
+  }
   canvas_.SaveLayer(options.renders_with_attributes() ? paint_ : Paint{},
                     ToRect(bounds));
 }

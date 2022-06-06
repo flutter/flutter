@@ -40,10 +40,13 @@ void DisplayListCanvasDispatcher::restore() {
   restore_opacity();
 }
 void DisplayListCanvasDispatcher::saveLayer(const SkRect* bounds,
-                                            const SaveLayerOptions options) {
-  if (bounds == nullptr && options.can_distribute_opacity()) {
+                                            const SaveLayerOptions options,
+                                            const DlImageFilter* backdrop) {
+  if (bounds == nullptr && options.can_distribute_opacity() &&
+      backdrop == nullptr) {
     // We know that:
     // - no bounds is needed for clipping here
+    // - no backdrop filter is used to initialize the layer
     // - the current attributes only have an alpha
     // - the children are compatible with individually rendering with
     //   an inherited opacity
@@ -58,7 +61,11 @@ void DisplayListCanvasDispatcher::saveLayer(const SkRect* bounds,
                                                    : opacity());
   } else {
     TRACE_EVENT0("flutter", "Canvas::saveLayer");
-    canvas_->saveLayer(bounds, safe_paint(options.renders_with_attributes()));
+    const SkPaint* paint = safe_paint(options.renders_with_attributes());
+    const sk_sp<SkImageFilter> sk_backdrop =
+        backdrop ? backdrop->skia_object() : nullptr;
+    canvas_->saveLayer(
+        SkCanvas::SaveLayerRec(bounds, paint, sk_backdrop.get(), 0));
     // saveLayer will apply the current opacity on behalf of the children
     // so they will inherit an opaque opacity.
     save_opacity(SK_Scalar1);

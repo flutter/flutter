@@ -831,6 +831,78 @@ class CanvasCompareTester {
                      b.setColor(default_color);
                    })
                    .with_restore(cv_safe_restore, dl_safe_restore, true));
+    {
+      // Being able to see a backdrop blur requires a non-default background
+      // so we create a new environment for these tests that has a checkerboard
+      // background that can be blurred by the backdrop filter. We also want
+      // to avoid the rendered primitive from obscuring the blurred background
+      // so we set an alpha value which works for all primitives except for
+      // drawColor which can override the alpha with its color, but it now uses
+      // a non-opaque color to avoid that problem.
+      RenderEnvironment backdrop_env = RenderEnvironment::MakeN32();
+      CvSetup cv_backdrop_setup = [=](SkCanvas* cv, SkPaint& p) {
+        SkPaint setup_p;
+        setup_p.setShader(kTestImageColorSource.skia_object());
+        cv->drawPaint(setup_p);
+        p.setAlpha(p.getAlpha() / 2);
+      };
+      DlRenderer dl_backdrop_setup = [=](DisplayListBuilder& b) {
+        b.setColorSource(&kTestImageColorSource);
+        b.drawPaint();
+        b.setColorSource(nullptr);
+        DlColor current_color = b.getColor();
+        b.setColor(current_color.withAlpha(current_color.getAlpha() / 2));
+      };
+      backdrop_env.init_ref(cv_backdrop_setup, testP.cv_renderer(),
+                            dl_backdrop_setup);
+
+      DlBlurImageFilter backdrop(5, 5, DlTileMode::kDecal);
+      RenderWith(testP, backdrop_env, tolerance,
+                 CaseParameters(
+                     "saveLayer with backdrop",
+                     [=](SkCanvas* cv, SkPaint& p) {
+                       cv_backdrop_setup(cv, p);
+                       cv->saveLayer(SkCanvas::SaveLayerRec(
+                           nullptr, nullptr, backdrop.skia_object().get(), 0));
+                     },
+                     [=](DisplayListBuilder& b) {
+                       dl_backdrop_setup(b);
+                       b.saveLayer(nullptr, SaveLayerOptions::kNoAttributes,
+                                   &backdrop);
+                     })
+                     .with_restore(cv_safe_restore, dl_safe_restore, true));
+      RenderWith(
+          testP, backdrop_env, tolerance,
+          CaseParameters(
+              "saveLayer with bounds and backdrop",
+              [=](SkCanvas* cv, SkPaint& p) {
+                cv_backdrop_setup(cv, p);
+                cv->saveLayer(SkCanvas::SaveLayerRec(
+                    &layer_bounds, nullptr, backdrop.skia_object().get(), 0));
+              },
+              [=](DisplayListBuilder& b) {
+                dl_backdrop_setup(b);
+                b.saveLayer(&layer_bounds, SaveLayerOptions::kNoAttributes,
+                            &backdrop);
+              })
+              .with_restore(cv_safe_restore, dl_safe_restore, true));
+      RenderWith(testP, backdrop_env, tolerance,
+                 CaseParameters(
+                     "clipped saveLayer with backdrop",
+                     [=](SkCanvas* cv, SkPaint& p) {
+                       cv_backdrop_setup(cv, p);
+                       cv->clipRect(layer_bounds);
+                       cv->saveLayer(SkCanvas::SaveLayerRec(
+                           nullptr, nullptr, backdrop.skia_object().get(), 0));
+                     },
+                     [=](DisplayListBuilder& b) {
+                       dl_backdrop_setup(b);
+                       b.clipRect(layer_bounds, SkClipOp::kIntersect, false);
+                       b.saveLayer(nullptr, SaveLayerOptions::kNoAttributes,
+                                   &backdrop);
+                     })
+                     .with_restore(cv_safe_restore, dl_safe_restore, true));
+    }
 
     {
       // clang-format off
@@ -2174,13 +2246,14 @@ TEST_F(DisplayListCanvas, DrawPaint) {
 }
 
 TEST_F(DisplayListCanvas, DrawColor) {
+  // We use a non-opaque color to avoid obliterating any backdrop filter output
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {
-            canvas->drawColor(SK_ColorMAGENTA);
+            canvas->drawColor(0x7FFF00FF);
           },
           [=](DisplayListBuilder& builder) {
-            builder.drawColor(SK_ColorMAGENTA, DlBlendMode::kSrcOver);
+            builder.drawColor(0x7FFF00FF, DlBlendMode::kSrcOver);
           },
           kDrawColorFlags));
 }
