@@ -503,7 +503,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
         final bool specialBeta = major == 3 && minor == 1 && patch == 0;
         if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
           if (!hasBuild)
-            throw 'Deprecation notice does not accurately indicate a dev branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest dev build version number.';
+            throw 'Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.';
         }
         if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
           throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
