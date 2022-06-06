@@ -27,19 +27,12 @@ Future<void> updatePubspecDependencies(
   logger.printStatus('\nDart dependency locking detected in pubspec.yaml.');
   terminal.usesTerminalUi = true;
   String selection = 'y';
-  try {
-    selection = await terminal.promptForCharInput(
-      <String>['y', 'n'],
-      logger: logger,
-      prompt: 'Do you want the tool to run `flutter pub upgrade --major-versions`? (y)es, (n)o',
-      defaultChoiceIndex: 1,
-    );
-  } on StateError catch(e) {
-    logger.printError(
-      e.message,
-      indent: 0,
-    );
-  }
+  selection = await terminal.promptForCharInput(
+    <String>['y', 'n'],
+    logger: logger,
+    prompt: 'Do you want the tool to run `flutter pub upgrade --major-versions`? (y)es, (n)o',
+    defaultChoiceIndex: 1,
+  );
   if (selection == 'y') {
     // Runs `flutter pub upgrade --major-versions`
     await migrateUtils.flutterPubUpgrade(flutterProject.directory.path);
@@ -47,7 +40,7 @@ Future<void> updatePubspecDependencies(
 }
 
 /// Checks if gradle dependency locking is used and prompts the developer to
-/// remove and back up the gradle dependenc lockfile.
+/// remove and back up the gradle dependency lockfile.
 Future<void> updateGradleDependencyLocking(
     FlutterProject flutterProject,
     MigrateUtils migrateUtils,
@@ -92,19 +85,12 @@ Future<void> updateGradleDependencyLocking(
                        'lockfiles.');
     terminal.usesTerminalUi = true;
     String selection = 'y';
-    try {
-      selection = await terminal.promptForCharInput(
-        <String>['y', 'n'],
-        logger: logger,
-        prompt: 'Do you want the tool to update locked dependencies? (y)es, (n)o',
-        defaultChoiceIndex: 1,
-      );
-    } on StateError catch(e) {
-      logger.printError(
-        e.message,
-        indent: 0,
-      );
-    }
+    selection = await terminal.promptForCharInput(
+      <String>['y', 'n'],
+      logger: logger,
+      prompt: 'Do you want the tool to update locked dependencies? (y)es, (n)o',
+      defaultChoiceIndex: 1,
+    );
     if (selection == 'y') {
       for (final File file in lockfiles) {
         int counter = 0;
@@ -119,7 +105,7 @@ Future<void> updateGradleDependencyLocking(
           }
         }
       }
-      // Runs `./gradelw tasks`in the project's android directory.
+      // Runs `./gradlew tasks`in the project's android directory.
       await migrateUtils.gradlewTasks(flutterProject.directory.childDirectory('android').path);
       logger.printStatus('Old lockfiles renamed to:');
       for (final String path in backedUpFilePaths) {
