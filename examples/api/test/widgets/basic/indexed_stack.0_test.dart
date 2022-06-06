@@ -31,9 +31,7 @@ void main() {
     expect(containerFinder2.renderObject!.debugNeedsPaint, false);
   });
   testWidgets('has correct backward rendering mechanism', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.MyApp(),
-    );
+    await tester.pumpWidget(const example.MyApp());
 
     final Finder gesture1 = find.byKey(const Key('gesture1'));
     final Element containerFinder = find.byKey(const Key('Dash')).evaluate().first;
@@ -66,5 +64,30 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
     expect(find.byType(example.PersonTracker), findsNWidgets(5));
+  });
+  testWidgets('has state preservation', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.MyApp());
+
+    final Finder gesture1 = find.byKey(const Key('gesture1'));
+    final Finder gesture2 = find.byKey(const Key('gesture2'));
+    final Finder containerFinder = find.byKey(const Key('Dash'));
+    final Finder incrementFinder = find.byKey(const Key('incrementDash'));
+    Finder counterFinder(int score) {
+      return find.descendant(of: containerFinder, matching: find.text('Score: $score'));
+    }
+
+    expect(counterFinder(0), findsOneWidget);
+    await tester.tap(incrementFinder);
+    await tester.pump();
+
+    expect(counterFinder(1), findsOneWidget);
+
+    await tester.tap(gesture2);
+    await tester.pump();
+    await tester.tap(gesture1);
+    await tester.pump();
+
+    expect(counterFinder(1), findsOneWidget);
+    expect(counterFinder(0), findsNothing);
   });
 }

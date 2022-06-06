@@ -128,6 +128,7 @@ class _PersonTrackerState extends State<PersonTracker> {
           Text('Name: ${widget.name}'),
           Text('Score: $counter'),
           TextButton.icon(
+            key: Key('increment${widget.name}'),
             icon: const Icon(Icons.add),
             onPressed: () {
               setState(() {
