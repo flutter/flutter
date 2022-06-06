@@ -8,6 +8,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:memory_tools/lib_leak_detector.dart' as leak_detector;
 
 import 'binding.dart';
 import 'debug.dart';
@@ -15,7 +16,6 @@ import 'focus_manager.dart';
 import 'inherited_model.dart';
 import 'notification_listener.dart';
 import 'widget_inspector.dart';
-import 'package:memory_tools/lib_leak_detector.dart' as leak_detector;
 
 export 'package:flutter/foundation.dart' show
   factory,
@@ -6387,13 +6387,15 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 /// error messages.
 class DebugCreator {
   /// Create a [DebugCreator] instance with input [Element].
-  DebugCreator(this.element);
+  DebugCreator(Element element): _elementRef = WeakReference<Element>(element);
+
+  final  WeakReference<Element> _elementRef;
 
   /// The creator of the [RenderObject].
-  final Element element;
+  Element get element => _elementRef.target!;
 
   @override
-  String toString() => element.debugGetCreatorChain(12);
+  String toString() => _elementRef.target?.debugGetCreatorChain(12) ?? '<element GCed>';
 }
 
 FlutterErrorDetails _debugReportException(
