@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/migrate.dart';
-import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
