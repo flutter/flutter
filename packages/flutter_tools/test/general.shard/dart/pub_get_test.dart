@@ -733,13 +733,12 @@ last line of pub output: "err3"
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('pub cache in root is used', () async {
+  testWithoutContext('pub cache in flutter root is ignored', () async {
     String? error;
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Directory pubCache = fileSystem.directory(Cache.flutterRoot).childDirectory('.pub-cache')..createSync();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>[
+      const FakeCommand(
+        command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
           '--verbosity=warning',
@@ -749,8 +748,7 @@ last line of pub output: "err3"
         exitCode: 69,
         environment: <String, String>{
           'FLUTTER_ROOT': '',
-          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
-          'PUB_CACHE': pubCache.path,
+          'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'
         },
       ),
     ]);

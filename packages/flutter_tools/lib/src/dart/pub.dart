@@ -515,7 +515,7 @@ class _DefaultPub implements Pub {
   /// targetPath is the directory in which the content of the extraPath will be moved in
   void joinCaches(FileSystem fileSystem, String targetPath, String extraPath) {
     final Directory targetDirectory = fileSystem.directory(targetPath);
-    final extraDirectory = fileSystem.directory(extraPath);
+    final Directory extraDirectory = fileSystem.directory(extraPath);
     extraDirectory.list(recursive: true).listen((FileSystemEntity entity) {
       targetDirectory.childFile(entity.path);
     });
