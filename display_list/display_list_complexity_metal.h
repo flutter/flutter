@@ -38,7 +38,8 @@ class DisplayListMetalComplexityCalculator
           draw_text_blob_count_(0) {}
 
     void saveLayer(const SkRect* bounds,
-                   const SaveLayerOptions options) override;
+                   const SaveLayerOptions options,
+                   const DlImageFilter* backdrop) override;
 
     void drawLine(const SkPoint& p0, const SkPoint& p1) override;
     void drawRect(const SkRect& rect) override;

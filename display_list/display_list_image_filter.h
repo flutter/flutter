@@ -52,7 +52,7 @@ class DlImageFilter
   // This method can only detect the ColorFilter type of ImageFilter from an
   // analogous SkImageFilter as there are no "asA..." methods for the other
   // types on SkImageFilter.
-  static std::shared_ptr<DlImageFilter> From(SkImageFilter* sk_filter);
+  static std::shared_ptr<DlImageFilter> From(const SkImageFilter* sk_filter);
 
   // Return a shared_ptr holding a DlImageFilter representing the indicated
   // Skia SkImageFilter pointer.
@@ -60,7 +60,8 @@ class DlImageFilter
   // This method can only detect the ColorFilter type of ImageFilter from an
   // analogous SkImageFilter as there are no "asA..." methods for the other
   // types on SkImageFilter.
-  static std::shared_ptr<DlImageFilter> From(sk_sp<SkImageFilter> sk_filter) {
+  static std::shared_ptr<DlImageFilter> From(
+      const sk_sp<SkImageFilter> sk_filter) {
     return From(sk_filter.get());
   }
 

@@ -100,6 +100,8 @@ namespace flutter {
   V(Save)                           \
   V(SaveLayer)                      \
   V(SaveLayerBounds)                \
+  V(SaveLayerBackdrop)              \
+  V(SaveLayerBackdropBounds)        \
   V(Restore)                        \
                                     \
   V(Translate)                      \
