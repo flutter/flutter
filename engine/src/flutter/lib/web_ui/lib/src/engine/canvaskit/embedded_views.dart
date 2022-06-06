@@ -260,9 +260,11 @@ class HtmlViewEmbedder {
     DomElement platformView,
     DomElement headClipView,
   ) {
-    int indexInFlutterView = -1;
-    if (headClipView.parent != null) {
-      indexInFlutterView = skiaSceneHost!.children.indexOf(headClipView);
+    DomNode? headClipViewNextSibling;
+    bool headClipViewWasAttached = false;
+    if (headClipView.parentNode != null) {
+      headClipViewWasAttached = true;
+      headClipViewNextSibling = headClipView.nextSibling;
       headClipView.remove();
     }
     DomElement head = platformView;
@@ -282,8 +284,8 @@ class HtmlViewEmbedder {
     head.remove();
 
     // If the chain was previously attached, attach it to the same position.
-    if (indexInFlutterView > -1) {
-      skiaSceneHost!.children.insert(indexInFlutterView, head);
+    if (headClipViewWasAttached) {
+      skiaSceneHost!.insertBefore(head, headClipViewNextSibling);
     }
     return head;
   }
@@ -732,7 +734,12 @@ class HtmlViewEmbedder {
 
   /// Deletes SVG clip paths, useful for tests.
   void debugCleanupSvgClipPaths() {
-    _svgPathDefs?.children.single.children.forEach(removeElement);
+    final DomElement? parent = _svgPathDefs?.children.single;
+    if (parent != null) {
+      for (DomNode? child = parent.lastChild; child != null; child = parent.lastChild) {
+        parent.removeChild(child);
+      }
+    }
     _svgClipDefs.clear();
   }
 
