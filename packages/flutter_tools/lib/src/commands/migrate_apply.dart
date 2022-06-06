@@ -40,7 +40,7 @@ class MigrateApplyCommand extends FlutterCommand {
       help: 'Specifies the custom migration working directory used to stage '
             'and edit proposed changes. This path can be absolute or relative '
             'to the flutter project root. This defaults to '
-            '`$kDefaultMigrateWorkingDirectoryName`',
+            '`$kDefaultMigrateStagingDirectoryName`',
       valueHelp: 'path',
     );
     argParser.addOption(
@@ -52,7 +52,8 @@ class MigrateApplyCommand extends FlutterCommand {
     argParser.addFlag(
       'force',
       abbr: 'f',
-      help: 'Ignore unresolved merge conflicts and apply staged changes by force.',
+      help: 'Ignore unresolved merge conflicts and uncommitted changes and '
+            'apply staged changes by force.',
     );
     argParser.addFlag(
       'keep-working-directory',
@@ -106,24 +107,24 @@ class MigrateApplyCommand extends FlutterCommand {
 
     terminal.usesTerminalUi = true;
 
-    Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    final String? customWorkingDirectoryPath = stringArg('staging-directory');
-    if (customWorkingDirectoryPath != null) {
-      if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
-        workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
+    Directory stagingDirectory = project.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
+    final String? customStagingDirectoryPath = stringArg('staging-directory');
+    if (customStagingDirectoryPath != null) {
+      if (fileSystem.path.isAbsolute(customStagingDirectoryPath)) {
+        stagingDirectory = fileSystem.directory(customStagingDirectoryPath);
       } else {
-        workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
+        stagingDirectory = project.directory.childDirectory(customStagingDirectoryPath);
       }
     }
-    if (!workingDirectory.existsSync()) {
-      logger.printStatus('No migration in progress at $workingDirectory. Please run:');
+    if (!stagingDirectory.existsSync()) {
+      logger.printStatus('No migration in progress at $stagingDirectory. Please run:');
       printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
+    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(stagingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
-    if (!checkAndPrintMigrateStatus(manifest, workingDirectory, warnConflict: true, logger: logger) && !force) {
+    if (!checkAndPrintMigrateStatus(manifest, stagingDirectory, warnConflict: true, logger: logger) && !force) {
       logger.printStatus('Conflicting files found. Resolve these conflicts and try again.');
       logger.printStatus('Guided conflict resolution wizard:');
       printCommandText('flutter migrate resolve-conflicts', logger);
@@ -147,7 +148,7 @@ class MigrateApplyCommand extends FlutterCommand {
       if (_verbose) {
         logger.printStatus('Writing $localPath');
       }
-      final File workingFile = workingDirectory.childFile(localPath);
+      final File workingFile = stagingDirectory.childFile(localPath);
       final File targetFile = project.directory.childFile(localPath);
       if (!workingFile.existsSync()) {
         continue;
@@ -188,7 +189,7 @@ class MigrateApplyCommand extends FlutterCommand {
     // Clean up the working directory
     final bool keepWorkingDirectory = boolArg('keep-working-directory') ?? false;
     if (!keepWorkingDirectory) {
-      workingDirectory.deleteSync(recursive: true);
+      stagingDirectory.deleteSync(recursive: true);
     }
 
     // Detect pub dependency locking. Run flutter pub upgrade --major-versions

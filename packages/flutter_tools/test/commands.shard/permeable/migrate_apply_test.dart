@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/migrate.dart';
+import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -50,7 +51,7 @@ void main() {
       platform: platform,
       processManager: processManager,
     );
-    final Directory workingDir = appDir.childDirectory('migrate_working_dir');
+    final Directory workingDir = appDir.childDirectory(kDefaultMigrateStagingDirectoryName);
     appDir.childFile('lib/main.dart').createSync(recursive: true);
     final File pubspecOriginal = appDir.childFile('pubspec.yaml');
     pubspecOriginal.createSync();
@@ -71,7 +72,7 @@ flutter:
 
     final File gitignore = appDir.childFile('.gitignore');
     gitignore.createSync();
-    gitignore.writeAsStringSync('migrate_working_dir', flush: true);
+    gitignore.writeAsStringSync(kDefaultMigrateStagingDirectoryName, flush: true);
 
     logger.clear();
     await createTestCommandRunner(command).run(
