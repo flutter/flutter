@@ -4,12 +4,6 @@
 
 // @dart = 2.8
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 
 import 'package:file/file.dart';
