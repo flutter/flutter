@@ -1988,7 +1988,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_e2e
     scheduler: luci
-  
+
   - name: Linux_android flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2010,7 +2010,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_with_semantics
     scheduler: luci
-  
+
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2021,7 +2021,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery_sksl_warmup__transition_perf
     scheduler: luci
-  
+
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
     recipe: devicelab/devicelab_drone
     presubmit: false
