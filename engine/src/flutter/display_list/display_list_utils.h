@@ -96,7 +96,8 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
  public:
   void save() override {}
   void saveLayer(const SkRect* bounds,
-                 const SaveLayerOptions options) override {}
+                 const SaveLayerOptions options,
+                 const DlImageFilter* backdrop) override {}
   void restore() override {}
   void drawColor(DlColor color, DlBlendMode mode) override {}
   void drawPaint() override {}
@@ -408,7 +409,9 @@ class DisplayListBoundsCalculator final
   void setMaskFilter(const DlMaskFilter* filter) override;
 
   void save() override;
-  void saveLayer(const SkRect* bounds, const SaveLayerOptions options) override;
+  void saveLayer(const SkRect* bounds,
+                 const SaveLayerOptions options,
+                 const DlImageFilter* backdrop) override;
   void restore() override;
 
   void drawPaint() override;

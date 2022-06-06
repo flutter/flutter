@@ -75,7 +75,8 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
 
   // |flutter::Dispatcher|
   void saveLayer(const SkRect* bounds,
-                 const flutter::SaveLayerOptions options) override;
+                 const flutter::SaveLayerOptions options,
+                 const flutter::DlImageFilter* backdrop) override;
 
   // |flutter::Dispatcher|
   void restore() override;

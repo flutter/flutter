@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/display_list_image_filter.h"
 
 namespace flutter {
 
@@ -59,11 +60,14 @@ void DisplayListCanvasRecorder::willSave() {
 }
 SkCanvas::SaveLayerStrategy DisplayListCanvasRecorder::getSaveLayerStrategy(
     const SaveLayerRec& rec) {
+  std::shared_ptr<DlImageFilter> backdrop = DlImageFilter::From(rec.fBackdrop);
   if (rec.fPaint) {
     builder_->setAttributesFromPaint(*rec.fPaint, kSaveLayerWithPaintFlags);
-    builder_->saveLayer(rec.fBounds, true);
+    builder_->saveLayer(rec.fBounds, SaveLayerOptions::kWithAttributes,
+                        backdrop.get());
   } else {
-    builder_->saveLayer(rec.fBounds, false);
+    builder_->saveLayer(rec.fBounds, SaveLayerOptions::kNoAttributes,
+                        backdrop.get());
   }
   return SaveLayerStrategy::kNoLayer_SaveLayerStrategy;
 }

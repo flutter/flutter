@@ -462,12 +462,19 @@ void DisplayListBuilder::restoreToCount(int restore_count) {
   }
 }
 void DisplayListBuilder::saveLayer(const SkRect* bounds,
-                                   const SaveLayerOptions in_options) {
+                                   const SaveLayerOptions in_options,
+                                   const DlImageFilter* backdrop) {
   SaveLayerOptions options = in_options.without_optimizations();
   size_t save_layer_offset = used_;
-  bounds  //
-      ? Push<SaveLayerBoundsOp>(0, 1, *bounds, options)
-      : Push<SaveLayerOp>(0, 1, options);
+  if (backdrop) {
+    bounds  //
+        ? Push<SaveLayerBackdropBoundsOp>(0, 1, *bounds, options, backdrop)
+        : Push<SaveLayerBackdropOp>(0, 1, options, backdrop);
+  } else {
+    bounds  //
+        ? Push<SaveLayerBoundsOp>(0, 1, *bounds, options)
+        : Push<SaveLayerOp>(0, 1, options);
+  }
   CheckLayerOpacityCompatibility(options.renders_with_attributes());
   layer_stack_.emplace_back(save_layer_offset, true);
   current_layer_ = &layer_stack_.back();
@@ -482,13 +489,15 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
     }
   }
 }
-void DisplayListBuilder::saveLayer(const SkRect* bounds, const DlPaint* paint) {
+void DisplayListBuilder::saveLayer(const SkRect* bounds,
+                                   const DlPaint* paint,
+                                   const DlImageFilter* backdrop) {
   if (paint != nullptr) {
     setAttributesFromDlPaint(*paint,
                              DisplayListOpFlags::kSaveLayerWithPaintFlags);
-    saveLayer(bounds, true);
+    saveLayer(bounds, SaveLayerOptions::kWithAttributes, backdrop);
   } else {
-    saveLayer(bounds, false);
+    saveLayer(bounds, SaveLayerOptions::kNoAttributes, backdrop);
   }
 }
 
