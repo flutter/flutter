@@ -224,7 +224,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
 class FakeStdio extends Stdio {
   final MemoryStdout _stdout = MemoryStdout()..terminalColumns = 80;
   final MemoryIOSink _stderr = MemoryIOSink();
-  //final StreamController<List<int>> _stdin = StreamController<List<int>>();
   final FakeStdin _stdin = FakeStdin();
 
   @override
