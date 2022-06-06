@@ -495,6 +495,16 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             throw 'Incomplete deprecation notice.';
           versionMatch = _deprecationVersionPattern.firstMatch(lines[lineNumber]);
         } while (versionMatch == null);
+        final int major = int.parse(versionMatch.namedGroup('major')!);
+        final int minor = int.parse(versionMatch.namedGroup('minor')!);
+        final int patch = int.parse(versionMatch.namedGroup('patch')!);
+        final bool hasBuild = versionMatch.namedGroup('build') != null;
+        // There was a beta release that was mistakenly labeled 3.1.0 without a build.
+        final bool specialBeta = major == 3 && minor == 1 && patch == 0;
+        if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
+          if (!hasBuild)
+            throw 'Deprecation notice does not accurately indicate a dev branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest dev build version number.';
+        }
         if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
           throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
         if (!lines[lineNumber].startsWith("$indent  '"))
