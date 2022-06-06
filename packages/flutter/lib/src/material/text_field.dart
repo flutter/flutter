@@ -1223,49 +1223,49 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
 
     late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
-      ExpandSelectionToPositionIntent : SelectionCallbackAction<ExpandSelectionToPositionIntent>(
+      ExpandSelectionToPositionIntent : SelectionGestureCallbackAction<ExpandSelectionToPositionIntent>(
           onInvoke: (ExpandSelectionToPositionIntent intent) => _editableText!.expandSelection(intent),
           enabledPredicate: (ExpandSelectionToPositionIntent intent) {
             return widget.selectionEnabled && _effectiveController.value.selection.isValid;
           },
       ),
-      ExtendSelectionToPositionIntent : SelectionCallbackAction<ExtendSelectionToPositionIntent>(
+      ExtendSelectionToPositionIntent : SelectionGestureCallbackAction<ExtendSelectionToPositionIntent>(
           onInvoke: (ExtendSelectionToPositionIntent intent) => _editableText!.extendSelection(intent),
           enabledPredicate: (ExtendSelectionToPositionIntent intent) {
             return widget.selectionEnabled && _effectiveController.value.selection.isValid;
           }
       ),
-      FeedbackRequestIntent : SelectionCallbackAction<FeedbackRequestIntent>(
+      FeedbackRequestIntent : SelectionGestureCallbackAction<FeedbackRequestIntent>(
         onInvoke: (FeedbackRequestIntent intent) => Feedback.forLongPress(this.context),
         enabledPredicate: (FeedbackRequestIntent intent) => widget.selectionEnabled,
       ),
-      KeyboardRequestIntent : SelectionCallbackAction<KeyboardRequestIntent>(
+      KeyboardRequestIntent : SelectionGestureCallbackAction<KeyboardRequestIntent>(
         onInvoke: (KeyboardRequestIntent intent) => _requestKeyboard(),
         enabledPredicate: (KeyboardRequestIntent intent) => widget.selectionEnabled,
       ),
-      SelectDragPositionIntent : SelectionCallbackAction<SelectDragPositionIntent>(
+      SelectDragPositionIntent : SelectionGestureCallbackAction<SelectDragPositionIntent>(
         onInvoke: (SelectDragPositionIntent intent) => _editableText!.selectDragPosition(intent),
         enabledPredicate: (SelectDragPositionIntent intent) => widget.selectionEnabled,
       ),
-      SelectRangeIntent : SelectionCallbackAction<SelectRangeIntent>(
+      SelectRangeIntent : SelectionGestureCallbackAction<SelectRangeIntent>(
           onInvoke: (SelectRangeIntent intent) => _editableText!.selectRange(intent),
           enabledPredicate: (SelectRangeIntent intent) => widget.selectionEnabled,
       ),
-      SelectWordEdgeIntent : SelectionCallbackAction<SelectWordEdgeIntent>(
+      SelectWordEdgeIntent : SelectionGestureCallbackAction<SelectWordEdgeIntent>(
           onInvoke: (SelectWordEdgeIntent intent) => _editableText!.selectWordEdge(intent),
           enabledPredicate: (SelectWordEdgeIntent intent) => widget.selectionEnabled,
       ),
-      SelectPositionIntent : SelectionCallbackAction<SelectPositionIntent>(
+      SelectPositionIntent : SelectionGestureCallbackAction<SelectPositionIntent>(
           onInvoke: (SelectPositionIntent intent) => _editableText!.selectPosition(intent),
           enabledPredicate: (SelectPositionIntent intent) => widget.selectionEnabled,
       ),
-      SelectionOnDragStartControlIntent : SelectionCallbackAction<SelectionOnDragStartControlIntent>(
+      SelectionOnDragStartControlIntent : SelectionGestureCallbackAction<SelectionOnDragStartControlIntent>(
         onInvoke: (SelectionOnDragStartControlIntent intent) {
           _editableText!.controlSelectionOnDragStart(intent);
         },
         enabledPredicate: (SelectionOnDragStartControlIntent intent) => widget.selectionEnabled,
       ),
-      SelectionToolbarControlIntent : SelectionCallbackAction<SelectionToolbarControlIntent>(
+      SelectionToolbarControlIntent : SelectionGestureCallbackAction<SelectionToolbarControlIntent>(
           onInvoke: (SelectionToolbarControlIntent intent) {
             if (intent.showSelectionToolbar != null) {
               if (intent.showSelectionToolbar!) {
@@ -1283,13 +1283,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           },
           enabledPredicate: (SelectionToolbarControlIntent intent) => widget.selectionEnabled,
       ),
-      ViewportOffsetOnDragStartControlIntent : SelectionCallbackAction<ViewportOffsetOnDragStartControlIntent>(
+      ViewportOffsetOnDragStartControlIntent : SelectionGestureCallbackAction<ViewportOffsetOnDragStartControlIntent>(
         onInvoke: (ViewportOffsetOnDragStartControlIntent intent) {
           _editableText!.controlViewportOffsetOnDragStart(intent);
         },
         enabledPredicate: (ViewportOffsetOnDragStartControlIntent intent) => widget.selectionEnabled,
       ),
-      UserOnTapCallbackIntent : SelectionCallbackAction<UserOnTapCallbackIntent>(
+      UserOnTapCallbackIntent : SelectionGestureCallbackAction<UserOnTapCallbackIntent>(
         onInvoke: (UserOnTapCallbackIntent intent) => widget.onTap?.call(),
         enabledPredicate: (UserOnTapCallbackIntent intent) => widget.selectionEnabled,
       ),
@@ -1332,22 +1332,21 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
-/// TODO: (Renzo-Olivares) Document [SelectionCallbackAction].
-class SelectionCallbackAction<T extends Intent> extends Action<T> {
-  /// A constructor for a [SelectionCallbackAction].
-  SelectionCallbackAction({ required this.onInvoke, this.enabledPredicate });
+/// An [Action] that takes a callback and conditions required to enable the
+/// [Action].
+class SelectionGestureCallbackAction<T extends Intent> extends Action<T> {
+  /// A constructor for a [SelectionGestureCallbackAction].
+  SelectionGestureCallbackAction({ required this.onInvoke, this.enabledPredicate });
 
-  /// The callback to invoke.
+  /// The callback to be called when invoked by a gesture.
   final void Function(T intent) onInvoke;
 
   /// A method defining the conditions required to enable this [Action].
   final bool Function(T)? enabledPredicate;
 
-  /// TODO: (Renzo-Olivares) document.
   @override
   void invoke(T intent) => onInvoke(intent);
 
-  /// TODO: (Renzo-Olivares) document.
   @override
   bool isEnabled(T intent) => enabledPredicate?.call(intent) ?? true;
 }

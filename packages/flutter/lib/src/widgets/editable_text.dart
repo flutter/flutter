@@ -3208,7 +3208,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///     the base.
   void expandSelection(ExpandSelectionToPositionIntent intent) {
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
-    final TextSelection selection = intent.fromSelection ?? textEditingValue.selection!;
+    final TextSelection selection = intent.fromSelection ?? textEditingValue.selection;
     final bool baseIsCloser = (tappedPosition.offset - selection.baseOffset).abs()
         < (tappedPosition.offset - selection.extentOffset).abs();
     final TextSelection nextSelection = selection.copyWith(
@@ -3234,7 +3234,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///     the selection.
   void extendSelection(ExtendSelectionToPositionIntent intent) {
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.position);
-    final TextSelection selection = textEditingValue.selection!;
+    final TextSelection selection = textEditingValue.selection;
     final TextSelection nextSelection = selection.copyWith(
       extentOffset: tappedPosition.offset,
     );
@@ -3255,7 +3255,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
         : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
 
-    selectPosition(SelectTapPositionIntent(cause: SelectionChangedCause.drag, from: intent.from - startOffset, to: intent.to));
+    selectPosition(SelectPositionIntent(cause: SelectionChangedCause.drag, from: intent.from - startOffset, to: intent.to));
   }
 
   /// Select text between the given intent's `from` and `to` global position
@@ -3274,7 +3274,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final int baseOffset = fromPosition.offset;
     final int extentOffset = toPosition?.offset ?? fromPosition.offset;
 
-    TextSelection newSelection = TextSelection(
+    final TextSelection newSelection = TextSelection(
       baseOffset: baseOffset,
       extentOffset: extentOffset,
       affinity: fromPosition.affinity,
@@ -3313,7 +3313,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextSelection lastWord = intent.to == null ?
         firstWord : renderEditable.getWordAtOffset(renderEditable.getPositionForPoint(intent.to!));
 
-    TextSelection newSelection = TextSelection(
+    final TextSelection newSelection = TextSelection(
       baseOffset: firstWord.base.offset,
       extentOffset: lastWord.extent.offset,
       affinity: firstWord.affinity,
@@ -3323,17 +3323,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _validateAndSetSelection(TextSelection newSelection, SelectionChangedCause cause) {
-    if (newSelection.isValid) {
+    TextSelection validatedSelection = newSelection;
+    if (validatedSelection.isValid) {
       final int textLength = textEditingValue.text.length;
-      newSelection = newSelection.copyWith(
-        baseOffset: math.min(newSelection.baseOffset, textLength),
-        extentOffset: math.min(newSelection.extentOffset, textLength),
+      validatedSelection = validatedSelection.copyWith(
+        baseOffset: math.min(validatedSelection.baseOffset, textLength),
+        extentOffset: math.min(validatedSelection.extentOffset, textLength),
       );
     }
 
     userUpdateTextEditingValue(
       textEditingValue.copyWith(
-        selection: newSelection,
+        selection: validatedSelection,
       ),
       cause,
     );

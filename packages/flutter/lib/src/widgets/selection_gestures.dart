@@ -6,8 +6,8 @@ import 'package:async/async.dart';
 
 import 'package:flutter/foundation.dart';//for shiftaware
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';//for shiftaware
+import 'package:flutter/widgets.dart';
 
 class SelectionGestures extends StatefulWidget {
   const SelectionGestures({
@@ -66,7 +66,7 @@ class _SelectionGesturesState extends State<SelectionGestures> {
   @override
   Widget build(BuildContext context) {
     return _SelectionGesturesMarker(
-      manager: manager,
+      notifier: manager,
       child: widget.child,
     );
   }
@@ -93,10 +93,7 @@ class SelectionGesturesManager extends ChangeNotifier {
 }
 
 class _SelectionGesturesMarker extends InheritedNotifier<SelectionGesturesManager> {
-  const _SelectionGesturesMarker({
-    required SelectionGesturesManager manager,
-    required Widget child
-  }) : super(notifier: manager, child: child);
+  const _SelectionGesturesMarker({ required super.notifier, required super.child });
 
   SelectionGesturesManager get manager => super.notifier!;
 }
@@ -1059,7 +1056,7 @@ class ShiftAwarePanGestureRecognizer extends ShiftAwareDragGestureRecognizer {
 class LoggingSelectionGesturesManager extends SelectionGesturesManager {
   @override
   void handlePointerDown(BuildContext context, PointerDownEvent event, Map<Type, GestureRecognizer> recognizers) {
-    for(GestureRecognizer recognizer in recognizers.values) {
+    for(final GestureRecognizer recognizer in recognizers.values) {
       if (recognizer.isPointerAllowed(event)) {
         print('Handled text selection gesture $recognizer $event in $context');
       }

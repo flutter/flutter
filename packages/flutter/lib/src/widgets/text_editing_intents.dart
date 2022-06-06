@@ -489,16 +489,16 @@ class SelectionToolbarControlIntent extends Intent {
   const SelectionToolbarControlIntent._({this.positionToDisplay, this.showSelectionToolbar, this.toggleSelectionToolbar});
 
   /// Creates an [SelectionToolbarControlIntent] that requests the toolbar to be
-  /// shown.
-  const SelectionToolbarControlIntent.show({required Offset position}) : this._(positionToDisplay: position, showSelectionToolbar: true, toggleSelectionToolbar: false);
+  /// hidden.
+  static const SelectionToolbarControlIntent hide = SelectionToolbarControlIntent._(showSelectionToolbar: false);
 
   /// Creates an [SelectionToolbarControlIntent] that requests the toolbar to be
-  /// hidden.
-  static const SelectionToolbarControlIntent hide = SelectionToolbarControlIntent._(positionToDisplay: null, showSelectionToolbar: false, toggleSelectionToolbar: null);
+  /// shown.
+  const SelectionToolbarControlIntent.show({required Offset position}) : this._(positionToDisplay: position, showSelectionToolbar: true);
 
   /// Creates an [SelectionToolbarControlIntent] that requests the toolbar to be
   /// toggled.
-  const SelectionToolbarControlIntent.toggle({required Offset position}) : this._(positionToDisplay: position, showSelectionToolbar: null, toggleSelectionToolbar: true);
+  const SelectionToolbarControlIntent.toggle({required Offset position}) : this._(positionToDisplay: position, toggleSelectionToolbar: true);
 
   /// The global position where the toolbar should be displayed at.
   final Offset? positionToDisplay;
