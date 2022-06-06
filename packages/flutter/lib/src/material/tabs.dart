@@ -914,6 +914,7 @@ class _TabBarState extends State<TabBar> {
   int? _currentIndex;
   late double _tabStripWidth;
   late List<GlobalKey> _tabKeys;
+  bool _debugHasScheduledValidTabsCountCheck = false;
 
   @override
   void initState() {
@@ -1148,7 +1149,11 @@ class _TabBarState extends State<TabBar> {
   }
 
   bool _debugScheduleCheckHasValidTabsCount() {
+    if (_debugHasScheduledValidTabsCountCheck) {
+      return true;
+    }
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      _debugHasScheduledValidTabsCountCheck = false;
       if (!mounted) {
         return;
       }
@@ -1162,6 +1167,7 @@ class _TabBarState extends State<TabBar> {
         return true;
       }());
     });
+    _debugHasScheduledValidTabsCountCheck = true;
     return true;
   }
 
@@ -1386,6 +1392,7 @@ class _TabBarViewState extends State<TabBarView> {
   late List<Widget> _childrenWithKey;
   int? _currentIndex;
   int _warpUnderwayCount = 0;
+  bool _debugHasScheduledValidChildrenCountCheck = false;
 
   // If the TabBarView is rebuilt with a new tab controller, the caller should
   // dispose the old one. In that case the old controller's animation will be
@@ -1562,7 +1569,11 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   bool _debugScheduleCheckHasValidChildrenCount() {
+    if (_debugHasScheduledValidChildrenCountCheck) {
+      return true;
+    }
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      _debugHasScheduledValidChildrenCountCheck = false;
       if (!mounted) {
         return;
       }
@@ -1576,6 +1587,7 @@ class _TabBarViewState extends State<TabBarView> {
         return true;
       }());
     });
+    _debugHasScheduledValidChildrenCountCheck = true;
     return true;
   }
 
