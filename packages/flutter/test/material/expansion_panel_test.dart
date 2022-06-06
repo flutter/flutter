@@ -310,37 +310,37 @@ void main() {
 
     await tester.pumpWidget(build(false, false, false));
     expect(tester.renderObjectList(find.byType(AnimatedSize)), hasLength(3));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0));
 
     await tester.pump(const Duration(milliseconds: 200));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0));
 
     await tester.pumpWidget(build(false, true, false));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0));
 
     await tester.pump(kSizeAnimationDuration ~/ 2);
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     final Rect rect1 = tester.getRect(find.byType(AnimatedSize).at(1));
     expect(rect1.left, 0.0);
-    expect(rect1.top, inExclusiveRange(113.0, 113.0 + 16.0 + 32.0)); // 16.0 material gap, plus 16.0 top and bottom margins added to the header
+    expect(rect1.top, inExclusiveRange(113.0, 113.0 + 16.0 + 24.0)); // 16.0 material gap, plus 12.0 top and bottom margins added to the header
     expect(rect1.width, 800.0);
     expect(rect1.height, inExclusiveRange(0.0, 100.0));
     final Rect rect2 = tester.getRect(find.byType(AnimatedSize).at(2));
-    expect(rect2, Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 56.0, 800.0, 0.0)); // the 16.0 comes from the MaterialGap being introduced, the 56.0 is the header height.
+    expect(rect2, Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 48.0, 800.0, 0.0)); // the 16.0 comes from the MaterialGap being introduced, the 48.0 is the header height.
 
     await tester.pumpWidget(build(false, false, false));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
     await tester.pumpWidget(build(false, false, true));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
@@ -348,14 +348,14 @@ void main() {
     await tester.pump();
     await tester.pump();
     await tester.pump();
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
   });
 
   testWidgets('Radio mode has max of one panel open at a time',  (WidgetTester tester) async {
@@ -1285,8 +1285,8 @@ void main() {
 
     // No padding applied to closed header
     RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(56.0)); // _kPanelHeaderCollapsedHeight
-    expect(box.size.width, equals(736.0));
+    expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
+    expect(box.size.width, equals(744.0));
 
     // Now, expand the child panel.
     await tester.tap(find.byKey(firstPanelKey));
@@ -1299,11 +1299,11 @@ void main() {
     // Padding is added to expanded header
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(80.0)); // _kPanelHeaderCollapsedHeight + 24.0 (double default padding)
-    expect(box.size.width, equals(736.0));
+    expect(box.size.width, equals(744.0));
   });
 
   // Regression test for #5848
-  testWidgets('The AnimatedContainer and IconButton have the same height so that animations are smooth', (WidgetTester tester) async {
+  testWidgets('The AnimatedContainer and IconButton have the same height of 48px', (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
 
     await tester.pumpWidget(
@@ -1371,8 +1371,8 @@ void main() {
 
     // No padding applied to closed header
     RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(56.0)); // _kPanelHeaderCollapsedHeight
-    expect(box.size.width, equals(736.0));
+    expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
+    expect(box.size.width, equals(744.0));
 
     // Now, expand the child panel.
     await tester.tap(find.byKey(firstPanelKey));
@@ -1384,8 +1384,8 @@ void main() {
 
     // Padding is added to expanded header
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(136.0)); // _kPanelHeaderCollapsedHeight + 80.0 (double padding)
-    expect(box.size.width, equals(736.0));
+    expect(box.size.height, equals(128.0)); // _kPanelHeaderCollapsedHeight + 80.0 (double padding)
+    expect(box.size.width, equals(744.0));
   });
 
   testWidgets('ExpansionPanelList respects dividerColor', (WidgetTester tester) async {
