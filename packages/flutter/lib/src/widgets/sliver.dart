@@ -295,7 +295,7 @@ typedef ChildIndexGetter = int? Function(Key key);
 /// {@end-tool}
 ///
 /// In certain cases, only a subset of child widgets should be annotated
-/// with a semantic index. For example, in [new ListView.separated()] the
+/// with a semantic index. For example, in [ListView.separated()] the
 /// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
@@ -541,7 +541,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// second delegate should offset its children by 10.
 ///
 /// In certain cases, only a subset of child widgets should be annotated
-/// with a semantic index. For example, in [new ListView.separated()] the
+/// with a semantic index. For example, in [ListView.separated()] the
 /// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
