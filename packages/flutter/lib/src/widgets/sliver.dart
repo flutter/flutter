@@ -372,12 +372,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Will be called only for indices greater than or equal to zero and less
   /// than [childCount] (if [childCount] is non-null).
   ///
-  /// May result in an infinite loop or run out of memory if [childCount] is null
-  /// and the [builder] always provide a zero-size widget, such as `Container()`
-  /// or `SizedBox.shrink()`.
-  ///
   /// Should return null if asked to build a widget with a greater index than
   /// exists.
+  ///
+  /// May result in an infinite loop or run out of memory if [childCount] is null
+  /// and the [builder] always provides a zero-size widget (such as `Container()`
+  /// or `SizedBox.shrink()`). If possible, provide children with non-zero size,
+  /// return null from [builder], or set a [childCount].
   ///
   /// The delegate wraps the children returned by this builder in
   /// [RepaintBoundary] widgets.
@@ -388,9 +389,10 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// If null, the number of children is determined by the least index for which
   /// [builder] returns null.
   ///
-  /// May result in an infinite loop or run out of memory if this is null and the
-  /// [builder] always provide a zero size widget, such as `Container()`
-  /// or `SizedBox.shrink()`.
+  /// May result in an infinite loop or run out of memory if [childCount] is null
+  /// and the [builder] always provides a zero-size widget (such as `Container()`
+  /// or `SizedBox.shrink()`). If possible, provide children with non-zero size,
+  /// return null from [builder], or set a [childCount].
   final int? childCount;
 
   /// Whether to wrap each child in an [AutomaticKeepAlive].
