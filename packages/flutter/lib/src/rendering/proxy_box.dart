@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
-import 'debug.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
@@ -885,6 +884,16 @@ class RenderOpacity extends RenderProxyBox {
        _alpha = ui.Color.getAlphaFromOpacity(opacity),
        super(child);
 
+  @override
+  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
+    return updatedLayer;
+  }
+
   int _alpha;
 
   /// The fraction to scale the child's alpha value.
@@ -905,9 +914,13 @@ class RenderOpacity extends RenderProxyBox {
     if (_opacity == value) {
       return;
     }
+    final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
+    if (didNeedCompositing != alwaysNeedsCompositing) {
+      markNeedsCompositingBitsUpdate();
+    }
     markNeedsPaint();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics) {
       markNeedsSemanticsUpdate();
@@ -937,40 +950,19 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child == null) {
-      return;
-    }
-    if (_alpha == 0) {
-      // No need to keep the layer. We'll create a new one if necessary.
-      layer = null;
-      return;
-    }
-    if (_alpha == 255) {
-      layer = null;
-      return super.paint(context, offset);
-    }
-    // Due to https://github.com/flutter/flutter/issues/48417 this will always need to be
-    // composited on the web.
-    if (needsCompositing || kIsWeb) {
+    if (child != null) {
+      if (_alpha == 0) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
+        return;
+      }
+      assert(needsCompositing);
       layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
       assert(() {
-        layer?.debugCreator = debugCreator;
+        layer!.debugCreator = debugCreator;
         return true;
       }());
-      return;
     }
-
-    // debugDisableOpacityLayers is used by the SceneBuilder to remove opacity layers, but
-    // if the framework is not asked to composite will also need to remove the opacity here.
-    if (kDebugMode && debugDisableOpacityLayers) {
-      super.paint(context, offset);
-      return;
-    }
-    final Color color = Color.fromRGBO(0, 0, 0, opacity);
-    final Canvas canvas = context.canvas;
-    canvas.saveLayer(size != null ? offset & size : null, Paint()..color = color);
-    super.paint(context, offset);
-    canvas.restore();
   }
 
   @override

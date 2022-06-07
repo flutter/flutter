@@ -285,8 +285,8 @@ void main() {
                   child: Placeholder(),
                 ),
                 const Opacity(
-                  opacity: 0.9, // ensure compositing is used.
-                  child: RepaintBoundary(child: Placeholder()),
+                  opacity: 1.0,
+                  child: Placeholder(),
                 ),
                 ImageFiltered(
                   imageFilter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
