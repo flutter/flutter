@@ -30,8 +30,8 @@ class MigrateStartCommand extends FlutterCommand {
        ) {
     requiresPubspecYaml();
     argParser.addOption(
-      'working-directory',
-      help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
+      'staging-directory',
+      help: 'Specifies the custom migration staging directory used to stage and edit proposed changes. '
             'This path can be absolute or relative to the flutter project root.',
       valueHelp: 'path',
     );
@@ -128,18 +128,18 @@ class MigrateStartCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    final String? customWorkingDirectoryPath = stringArg('working-directory');
-    if (customWorkingDirectoryPath != null) {
-      if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
-        workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
+    Directory stagingDirectory = project.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
+    final String? customStagingDirectoryPath = stringArg('staging-directory');
+    if (customStagingDirectoryPath != null) {
+      if (fileSystem.path.isAbsolute(customStagingDirectoryPath)) {
+        stagingDirectory = fileSystem.directory(customStagingDirectoryPath);
       } else {
-        workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
+        stagingDirectory = project.directory.childDirectory(customStagingDirectoryPath);
       }
     }
-    if (workingDirectory.existsSync()) {
+    if (stagingDirectory.existsSync()) {
       logger.printStatus('Old migration already in progress.', emphasis: true);
-      logger.printStatus('Pending migration files exist in `${workingDirectory.path}/$kDefaultMigrateWorkingDirectoryName`');
+      logger.printStatus('Pending migration files exist in `${stagingDirectory.path}/$kDefaultMigrateStagingDirectoryName`');
       logger.printStatus('Resolve merge conflicts and accept changes with by running:');
       printCommandText('flutter migrate apply', logger);
       logger.printStatus('You may also abandon the existing migration and start a new one with:');

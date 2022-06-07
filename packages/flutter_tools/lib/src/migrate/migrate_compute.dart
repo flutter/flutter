@@ -755,7 +755,7 @@ Future<void> computeMerge(
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
 Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool verbose = false, FlutterProject? flutterProject}) async {
   flutterProject ??= FlutterProject.current();
-  final Directory workingDir = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+  final Directory workingDir = flutterProject.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
   if (verbose) {
     logger.printStatus('Writing migrate working directory at `${workingDir.path}`');
   }
