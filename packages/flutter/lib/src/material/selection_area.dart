@@ -104,22 +104,19 @@ class _SelectionAreaState extends State<SelectionArea> {
     return SelectableRegion(
       selectionControls: controls,
       focusNode: _effectiveFocusNode,
-      buildContextMenu: widget.buildContextMenu ?? (BuildContext context, ContextMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+      buildContextMenu: (BuildContext context, ContextMenuController controller, List<ContextualMenuButtonData> buttonDatas, Offset primaryAnchor, Offset? secondaryAnchor) {
+        if (widget.buildContextMenu != null) {
+          return widget.buildContextMenu!(
+            context,
+            controller,
+            primaryAnchor,
+            secondaryAnchor,
+          );
+        }
         return DefaultTextSelectionToolbar(
           primaryAnchor: primaryAnchor,
           secondaryAnchor: secondaryAnchor,
-          buttonDatas: <ContextualMenuButtonData>[
-            // TODO(justinmc): Only show copy button when there's a selection?
-            // TODO(justinmc): Select all?
-            ContextualMenuButtonData(
-              onPressed: () {
-                // TODO(justinmc): Actually do copy, without EditableTextState.
-                // How did TextSelectionControls do it?
-                controller.dispose();
-              },
-              type: DefaultContextualMenuButtonType.copy,
-            ),
-          ],
+          buttonDatas: buttonDatas,
         );
       },
       child: widget.child,

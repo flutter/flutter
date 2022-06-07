@@ -29,6 +29,22 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.invertedStylus,
 };
 
+/// A builder specifically for the SelectableRegion context menu.
+///
+/// Includes the buttonDatas that SelectableRegion would normally build in its
+/// context menu.
+///
+/// See also:
+///
+///  * [ContextMenuBuilder], which doesn't include the buttonDatas.
+typedef SelectableRegionContextMenuBuilder = Widget Function(
+  BuildContext context,
+  ContextMenuController controller,
+  List<ContextualMenuButtonData> buttonDatas,
+  Offset primaryAnchor,
+  Offset? secondaryAnchor,
+);
+
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. To enable selection for
@@ -191,7 +207,7 @@ class SelectableRegion extends StatefulWidget {
   final Widget child;
 
   /// {@macro flutter.widgets.EditableText.buildContextMenu}
-  final ContextMenuBuilder buildContextMenu;
+  final SelectableRegionContextMenuBuilder buildContextMenu;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
@@ -617,9 +633,28 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         Offset primaryAnchor,
         Offset? secondaryAnchor,
       ) {
+        final String? selectedText =
+            _selectable?.getSelectedContent()?.plainText;
         return widget.buildContextMenu(
           context,
           controller,
+          <ContextualMenuButtonData>[
+            if (selectedText != null && selectedText != '')
+              ContextualMenuButtonData(
+                onPressed: () {
+                  copySelection(SelectionChangedCause.toolbar);
+                  controller.dispose();
+                },
+                type: DefaultContextualMenuButtonType.copy,
+              ),
+            ContextualMenuButtonData(
+              onPressed: () {
+                selectAll(SelectionChangedCause.toolbar);
+                controller.dispose();
+              },
+              type: DefaultContextualMenuButtonType.selectAll,
+            ),
+          ],
           primaryAnchor,
           secondaryAnchor,
         );
