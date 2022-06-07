@@ -180,19 +180,12 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       logger.printStatus('\nConflict in $localPath.');
       // Select action
       String selection = 's';
-      try {
-        selection = await terminal.promptForCharInput(
-          <String>['o', 'n', 's'],
-          logger: logger,
-          prompt: 'Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually?',
-          defaultChoiceIndex: 2,
-        );
-      } on StateError catch(e) {
-        logger.printError(
-          e.message,
-          indent: 0,
-        );
-      }
+      selection = await terminal.promptForCharInput(
+        <String>['o', 'n', 's'],
+        logger: logger,
+        prompt: 'Accept the (o)riginal lines, (n)ew lines, or (s)kip and resolve the conflict manually?',
+        defaultChoiceIndex: 2,
+      );
 
       switch(selection) {
         case 'o': {
@@ -266,19 +259,12 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       logger.printStatus('Conflicts in $localPath complete.\n');
       logger.printStatus('You chose to:\n  Skip $skipCount conflicts\n  Acccept the original lines for $originalCount conflicts\n  Accept the new lines for $newCount conflicts\n');
       String selection = 'n';
-      try {
-        selection = await terminal.promptForCharInput(
-          <String>['y', 'n', 'r'],
-          logger: logger,
-          prompt: 'Commit the changes to the working directory? (y)es, (n)o, (r)etry this file',
-          defaultChoiceIndex: 1,
-        );
-      } on StateError catch(e) {
-        logger.printError(
-          e.message,
-          indent: 0,
-        );
-      }
+      selection = await terminal.promptForCharInput(
+        <String>['y', 'n', 'r'],
+        logger: logger,
+        prompt: 'Commit the changes to the working directory? (y)es, (n)o, (r)etry this file',
+        defaultChoiceIndex: 1,
+      );
       switch(selection) {
         case 'y': {
           if (hasChanges) {
