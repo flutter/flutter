@@ -7796,8 +7796,6 @@ void main() {
   );
 
   testWidgets('pageup/pagedown keys', (WidgetTester tester) async {
-    final String targetPlatformString = defaultTargetPlatform.toString();
-    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -7877,6 +7875,134 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
     expect(scrollController.position.pixels, 0.0);
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('shift + pageup/pagedown keys', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    final ScrollController scrollController = ScrollController();
+    const int heightInLines = 2;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            minLines: heightInLines,
+            maxLines: heightInLines,
+            controller: controller,
+            scrollController: scrollController,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(scrollController.position.pixels, 0.0);
+    final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+    expect(scrollController.position.viewportDimension, lineHeight * heightInLines);
+
+    // Shift + Page Up does nothing at the top.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, 0.0);
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+
+    // Shift + Page Down selects to the midpoint.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageDown,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * 1);
+    expect(controller.value.selection.isCollapsed, isFalse);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(controller.value.selection.extentOffset, 36);
+
+    // Another Page Down selects everything.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageDown,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * heightInLines);
+    expect(controller.value.selection.isCollapsed, isFalse);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(controller.value.selection.extentOffset, controller.text.length);
+
+
+    // Another Page Down does nothing, since it's now at the bottom.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageDown,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * heightInLines);
+    expect(controller.value.selection.isCollapsed, isFalse);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(controller.value.selection.extentOffset, controller.text.length);
+
+    // Shift + Page Up now scrolls back up.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * 1);
+    expect(controller.value.selection.isCollapsed, isFalse);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(controller.value.selection.extentOffset, 35);
+
+    // Another Shift + Page Up collapses the selection back at the top.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, 0.0);
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
     variant: TargetPlatformVariant.all(),

@@ -3335,7 +3335,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       final Offset nextExtentOffset =
           Offset(extentRect.left, extentRect.top + position.viewportDimension);
-      final TextPosition nextExtent = nextExtentOffset.dy + _scrollController.position.pixels >= _scrollController.position.maxScrollExtent
+      final double height = _scrollController.position.maxScrollExtent + renderEditable.size.height;
+      final TextPosition nextExtent = nextExtentOffset.dy + _scrollController.position.pixels >= height
           ? TextPosition(offset: _value.text.length)
           : renderEditable.getPositionForPoint(
               renderEditable.localToGlobal(nextExtentOffset),
