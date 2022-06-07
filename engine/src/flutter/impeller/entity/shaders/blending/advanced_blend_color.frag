@@ -5,8 +5,8 @@
 #include "advanced_blend_utils.glsl"
 
 vec3 Blend(vec3 dst, vec3 src) {
-  // https://www.w3.org/TR/compositing-1/#blendinghardlight
-  return BlendHardLight(dst, src);
+  // https://www.w3.org/TR/compositing-1/#blendingcolor
+  return SetLuminosity(src, Luminosity(dst));
 }
 
 #include "advanced_blend.glsl"

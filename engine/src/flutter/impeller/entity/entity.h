@@ -53,9 +53,13 @@ class Entity {
     kDifference,
     kExclusion,
     kMultiply,
+    kHue,
+    kSaturation,
+    kColor,
+    kLuminosity,
 
     kLastPipelineBlendMode = kModulate,
-    kLastAdvancedBlendMode = kMultiply,
+    kLastAdvancedBlendMode = kLuminosity,
   };
 
   enum class ClipOperation {

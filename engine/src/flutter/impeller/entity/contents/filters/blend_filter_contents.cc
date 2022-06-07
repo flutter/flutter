@@ -238,7 +238,7 @@ void BlendFilterContents::SetBlendMode(Entity::BlendMode blend_mode) {
 
   if (blend_mode > Entity::BlendMode::kLastPipelineBlendMode) {
     static_assert(Entity::BlendMode::kLastAdvancedBlendMode ==
-                  Entity::BlendMode::kMultiply);
+                  Entity::BlendMode::kLuminosity);
 
     switch (blend_mode) {
       BLEND_CASE(Screen)
@@ -252,6 +252,10 @@ void BlendFilterContents::SetBlendMode(Entity::BlendMode blend_mode) {
       BLEND_CASE(Difference)
       BLEND_CASE(Exclusion)
       BLEND_CASE(Multiply)
+      BLEND_CASE(Hue)
+      BLEND_CASE(Saturation)
+      BLEND_CASE(Color)
+      BLEND_CASE(Luminosity)
       default:
         FML_UNREACHABLE();
     }

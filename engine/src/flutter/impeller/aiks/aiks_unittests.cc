@@ -10,6 +10,7 @@
 #include "impeller/aiks/aiks_playground.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/image.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_unittests.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/widgets.h"
@@ -544,6 +545,10 @@ TEST_P(AiksTest, ColorWheel) {
         {"Difference", Entity::BlendMode::kDifference},
         {"Exclusion", Entity::BlendMode::kExclusion},
         {"Multiply", Entity::BlendMode::kMultiply},
+        {"Hue", Entity::BlendMode::kHue},
+        {"Saturation", Entity::BlendMode::kSaturation},
+        {"Color", Entity::BlendMode::kColor},
+        {"Luminosity", Entity::BlendMode::kLuminosity},
     };
     assert(blends.size() ==
            static_cast<size_t>(Entity::BlendMode::kLastAdvancedBlendMode) + 1);
@@ -594,19 +599,25 @@ TEST_P(AiksTest, ColorWheel) {
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     if (first_frame) {
       first_frame = false;
-      ImGui::SetNextWindowSize({350, 200});
-      ImGui::SetNextWindowPos({325, 550});
+      ImGui::SetNextWindowSize({350, 260});
+      ImGui::SetNextWindowPos({25, 25});
     }
 
     // UI state.
     static int current_blend_index = 3;
     static float alpha = 1;
+    static Color color0 = Color::Red();
+    static Color color1 = Color::Green();
+    static Color color2 = Color::Blue();
 
     ImGui::Begin("Controls");
     {
       ImGui::ListBox("Blending mode", &current_blend_index,
                      blend_mode_names.data(), blend_mode_names.size());
       ImGui::SliderFloat("Alpha", &alpha, 0, 1);
+      ImGui::ColorEdit4("Color A", reinterpret_cast<float*>(&color0));
+      ImGui::ColorEdit4("Color B", reinterpret_cast<float*>(&color1));
+      ImGui::ColorEdit4("Color C", reinterpret_cast<float*>(&color2));
     }
     ImGui::End();
 
@@ -629,11 +640,11 @@ TEST_P(AiksTest, ColorWheel) {
       paint.blend_mode = Entity::BlendMode::kPlus;
       const Scalar x = std::sin(k2Pi / 3);
       const Scalar y = -std::cos(k2Pi / 3);
-      paint.color = Color::Red();
+      paint.color = color0;
       canvas.DrawCircle(Point(-x, y) * 45, 65, paint);
-      paint.color = Color::Green();
+      paint.color = color1;
       canvas.DrawCircle(Point(0, -1) * 45, 65, paint);
-      paint.color = Color::Blue();
+      paint.color = color2;
       canvas.DrawCircle(Point(x, y) * 45, 65, paint);
     }
     canvas.Restore();
