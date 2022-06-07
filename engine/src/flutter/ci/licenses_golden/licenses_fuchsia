@@ -1,4 +1,4 @@
-Signature: 52614cb4b3c8c25f13914e8938d19961
+Signature: b8c7fbd76b07be7e3c19eb4c8c25d39b
 
 UNUSED LICENSES:
 
@@ -2558,7 +2558,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/internal/prox
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/internal/stub.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/internal/stub_controller.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/internal/weak_stub_controller.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/thread_safe_binding_set.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/type_converter.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/internal/message_handler.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/internal/message_reader.cc
