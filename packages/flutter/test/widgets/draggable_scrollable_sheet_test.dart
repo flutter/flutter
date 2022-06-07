@@ -745,6 +745,58 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Transitioning between scrollable children sharing a scroll controller will not throw', (WidgetTester tester) async {
+    late StateSetter setState;
+    int s = 0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DraggableScrollableSheet(
+          initialChildSize: 0.25,
+          snap: true,
+          snapSizes: const <double>[0.25, 0.5, 1.0],
+          builder: (BuildContext context, ScrollController scrollController) {
+            return PrimaryScrollController(
+              controller: scrollController,
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setter) {
+                  setState = setter;
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    child: (s.isEven)
+                      ? ListView(
+                          children: List<Widget>.generate(
+                            50,
+                            (int index) => Text('ListView 1 - $index'),
+                          ),
+                        )
+                      : ListView(
+                          children: List<Widget>.generate(
+                            50,
+                            (int index) => Text('ListView 2 - $index'),
+                          ),
+                        ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      )
+    ));
+
+    // Trigger the AnimatedSwitcher between ListViews
+    setState((){
+      s++;
+    });
+    await tester.pumpAndSettle();
+    // Trigger the AnimatedSwitcher between ListViews
+    setState((){
+      s++;
+    });
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];
     await tester.pumpWidget(boilerplateWidget(
