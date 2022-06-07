@@ -22,6 +22,7 @@ import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/fab_template.dart';
+import 'package:gen_defaults/icon_button_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/navigation_rail_template.dart';
 import 'package:gen_defaults/surface_tint.dart';
@@ -55,6 +56,9 @@ Future<void> main(List<String> args) async {
     'fab_large_primary.json',
     'fab_primary.json',
     'fab_small_primary.json',
+    'icon_button.json',
+    'icon_button_filled.json',
+    'icon_button_filled_tonal.json',
     'motion.json',
     'navigation_bar.json',
     'navigation_rail.json',
@@ -86,6 +90,7 @@ Future<void> main(List<String> args) async {
   CardTemplate('$materialLib/card.dart', tokens).updateFile();
   DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
+  IconButtonTemplate('$materialLib/icon_button.dart', tokens).updateFile();
   NavigationBarTemplate('$materialLib/navigation_bar.dart', tokens).updateFile();
   NavigationRailTemplate('$materialLib/navigation_rail.dart', tokens).updateFile();
   SurfaceTintTemplate('$materialLib/elevation_overlay.dart', tokens).updateFile();
