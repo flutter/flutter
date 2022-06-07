@@ -1948,7 +1948,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         );
       }
     }
-    if (widget.selectionEnabled && pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false)) {
+    if (widget.selectionEnabled && pasteEnabled
+        && TextSelectionToolbarButtonDatasBuilder.canPaste(this)) {
       clipboardStatus?.update();
     }
   }
@@ -3171,33 +3172,31 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
-  // TODO(justinmc): Do canCopy et. al. without TextSelectionControls, since
-  // those are deprecated.
-  VoidCallback? _semanticsOnCopy(TextSelectionControls? controls) {
+  VoidCallback? _semanticsOnCopy() {
     return widget.selectionEnabled
         && copyEnabled
         && _hasFocus
-        && (controls?.canCopy(this) ?? false)
-      ? () => controls!.handleCopy(this, clipboardStatus)
+        && TextSelectionToolbarButtonDatasBuilder.canCopy(this)
+      ? () => copySelection(SelectionChangedCause.toolbar)
       : null;
   }
 
-  VoidCallback? _semanticsOnCut(TextSelectionControls? controls) {
+  VoidCallback? _semanticsOnCut() {
     return widget.selectionEnabled
         && cutEnabled
         && _hasFocus
-        && (controls?.canCut(this) ?? false)
-      ? () => controls!.handleCut(this, clipboardStatus)
+        && TextSelectionToolbarButtonDatasBuilder.canCut(this)
+      ? () => cutSelection(SelectionChangedCause.toolbar)
       : null;
   }
 
-  VoidCallback? _semanticsOnPaste(TextSelectionControls? controls) {
+  VoidCallback? _semanticsOnPaste() {
     return widget.selectionEnabled
         && pasteEnabled
         && _hasFocus
-        && (controls?.canPaste(this) ?? false)
+        && TextSelectionToolbarButtonDatasBuilder.canPaste(this)
         && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
-      ? () => controls!.handlePaste(this)
+      ? () => pasteText(SelectionChangedCause.toolbar)
       : null;
   }
 
@@ -3418,7 +3417,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(debugCheckHasMediaQuery(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
-    final TextSelectionControls? controls = widget.selectionControls;
     final Widget child = MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
@@ -3450,9 +3448,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 return CompositedTransformTarget(
                   link: _toolbarLayerLink,
                   child: Semantics(
-                    onCopy: _semanticsOnCopy(controls),
-                    onCut: _semanticsOnCut(controls),
-                    onPaste: _semanticsOnPaste(controls),
+                    onCopy: _semanticsOnCopy(),
+                    onCut: _semanticsOnCut(),
+                    onPaste: _semanticsOnPaste(),
                     child: _ScribbleFocusable(
                       focusNode: widget.focusNode,
                       editableKey: _editableKey,

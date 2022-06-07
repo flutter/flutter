@@ -309,37 +309,36 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   /// toolbar.
   final EditableTextState editableTextState;
 
-  @override
-  State<TextSelectionToolbarButtonDatasBuilder> createState() => _TextSelectionToolbarButtonDatasBuilderState();
-}
-
-class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionToolbarButtonDatasBuilder> with TickerProviderStateMixin {
-  bool get _cutEnabled {
-    return !widget.editableTextState.widget.readOnly
-        && !widget.editableTextState.widget.obscureText
-        && !widget.editableTextState.textEditingValue.selection.isCollapsed;
+  /// Returns true if the given [EditableTextState] supports cut.
+  static bool canCut(EditableTextState editableTextState) {
+    return !editableTextState.widget.readOnly
+        && !editableTextState.widget.obscureText
+        && !editableTextState.textEditingValue.selection.isCollapsed;
   }
 
-  bool get _copyEnabled {
-    return !widget.editableTextState.widget.obscureText
-        && !widget.editableTextState.textEditingValue.selection.isCollapsed;
+  /// Returns true if the given [EditableTextState] supports copy.
+  static bool canCopy(EditableTextState editableTextState) {
+    return !editableTextState.widget.obscureText
+        && !editableTextState.textEditingValue.selection.isCollapsed;
   }
 
-  bool get _pasteEnabled {
-    return !widget.editableTextState.widget.readOnly;
+  /// Returns true if the given [EditableTextState] supports paste.
+  static bool canPaste(EditableTextState editableTextState) {
+    return !editableTextState.widget.readOnly;
   }
 
-  bool get _selectAllEnabled {
-    if (!widget.editableTextState.widget.enableInteractiveSelection
-        || (widget.editableTextState.widget.readOnly
-            && widget.editableTextState.widget.obscureText)) {
+  /// Returns true if the given [EditableTextState] supports select all.
+  static bool canSelectAll(EditableTextState editableTextState) {
+    if (!editableTextState.widget.enableInteractiveSelection
+        || (editableTextState.widget.readOnly
+            && editableTextState.widget.obscureText)) {
       return false;
     }
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return widget.editableTextState.textEditingValue.text.isNotEmpty
-            && widget.editableTextState.textEditingValue.selection.isCollapsed;
+        return editableTextState.textEditingValue.text.isNotEmpty
+            && editableTextState.textEditingValue.selection.isCollapsed;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
       case TargetPlatform.fuchsia:
@@ -348,6 +347,19 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
         return true;
     }
   }
+
+  @override
+  State<TextSelectionToolbarButtonDatasBuilder> createState() => _TextSelectionToolbarButtonDatasBuilderState();
+}
+
+class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionToolbarButtonDatasBuilder> with TickerProviderStateMixin {
+  bool get _cutEnabled => TextSelectionToolbarButtonDatasBuilder.canCut(widget.editableTextState);
+
+  bool get _copyEnabled => TextSelectionToolbarButtonDatasBuilder.canCopy(widget.editableTextState);
+
+  bool get _pasteEnabled => TextSelectionToolbarButtonDatasBuilder.canPaste(widget.editableTextState);
+
+  bool get _selectAllEnabled => TextSelectionToolbarButtonDatasBuilder.canSelectAll(widget.editableTextState);
 
   void _handleCut() {
     widget.editableTextState.cutSelection(SelectionChangedCause.toolbar);
