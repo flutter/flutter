@@ -1290,6 +1290,7 @@ class EmulatorDomain extends Domain {
     androidSdk: globals.androidSdk,
     processManager: globals.processManager,
     androidWorkflow: androidWorkflow,
+    operatingSystemUtils: globals.os,
   );
 
   Future<List<Map<String, dynamic>>> getEmulators([ Map<String, dynamic> args ]) async {

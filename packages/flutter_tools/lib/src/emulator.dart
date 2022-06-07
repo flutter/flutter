@@ -13,6 +13,7 @@ import 'android/android_workflow.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/os.dart' show OperatingSystemUtils, HostPlatform;
 import 'base/process.dart';
 import 'device.dart';
 import 'ios/ios_emulators.dart';
@@ -27,21 +28,24 @@ class EmulatorManager {
     required ProcessManager processManager,
     required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
-  }) : _androidSdk = androidSdk,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _androidEmulators = AndroidEmulators(
-        androidSdk: androidSdk,
-        logger: logger,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        androidWorkflow: androidWorkflow
-      ) {
+    required OperatingSystemUtils operatingSystemUtils,
+  })  : _androidSdk = androidSdk,
+        _processUtils =
+        ProcessUtils(logger: logger, processManager: processManager),
+        _androidEmulators = AndroidEmulators(
+            androidSdk: androidSdk,
+            logger: logger,
+            processManager: processManager,
+            fileSystem: fileSystem,
+            androidWorkflow: androidWorkflow),
+        _operatingSystemUtils = operatingSystemUtils {
     _emulatorDiscoverers.add(_androidEmulators);
   }
 
   final AndroidSdk? _androidSdk;
   final AndroidEmulators _androidEmulators;
   final ProcessUtils _processUtils;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   // Constructing EmulatorManager is cheap; they only do expensive work if some
   // of their methods are called.
@@ -126,7 +130,7 @@ class EmulatorManager {
           error:
               'No suitable Android AVD system images are available. You may need to install these'
               ' using sdkmanager, for example:\n'
-              '  sdkmanager "system-images;android-27;google_apis_playstore;x86"');
+              '  sdkmanager "system-images;android-31;google_apis_playstore;$_hostPlatformArchitecture"');
     }
 
     // Cleans up error output from avdmanager to make it more suitable to show
@@ -194,6 +198,9 @@ class EmulatorManager {
   }
 
   static final RegExp _androidApiVersion = RegExp(r';android-(\d+);');
+  String get _hostPlatformArchitecture =>
+      _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm ?
+      'arm64-v8a' : 'x86_64';
 
   Future<String?> _getPreferredSdkId(String avdManagerPath) async {
     // It seems that to get the available list of images, we need to send a

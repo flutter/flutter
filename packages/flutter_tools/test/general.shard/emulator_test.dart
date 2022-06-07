@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
@@ -20,7 +21,7 @@ import '../src/context.dart';
 import '../src/fakes.dart';
 
 const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
-const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
+const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_31_x86', 'Nexus 5X', 'Google');
 const FakeEmulator emulator3 = FakeEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
 const List<Emulator> emulators = <Emulator>[
   emulator1,
@@ -31,11 +32,11 @@ const List<Emulator> emulators = <Emulator>[
 // We have to send a command that fails in order to get the list of valid
 // system images paths. This is an example of the output to use in the fake.
 const String fakeCreateFailureOutput =
-  'Error: Package path (-k) not specified. Valid system image paths are:\n'
-  'system-images;android-27;google_apis;x86\n'
-  'system-images;android-P;google_apis;x86\n'
-  'system-images;android-27;google_apis_playstore;x86\n'
-  'null\n'; // Yep, these really end with null (on dantup's machine at least)
+    'Error: Package path (-k) not specified. Valid system image paths are:\n'
+    'system-images;android-31;google_apis;x86\n'
+    'system-images;android-P;google_apis;x86\n'
+    'system-images;android-31;google_apis_playstore;x86\n'
+    'null\n'; // Yep, these really end with null (on dantup's machine at least)
 
 const FakeCommand kListEmulatorsCommand = FakeCommand(
   command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
@@ -66,20 +67,21 @@ void main() {
     testUsingContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
       final EmulatorManager emulatorManager = EmulatorManager(
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['emulator', '-list-avds'],
-            stdout: 'existing-avd-1',
-          ),
-        ]),
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout: 'existing-avd-1',
+            ),
+          ]),
           androidSdk: sdk,
-          featureFlags: TestFeatureFlags(),
+          androidWorkflow: AndroidWorkflow(
+            androidSdk: sdk,
+            featureFlags: TestFeatureFlags(),
+            operatingSystemUtils: FakeOperatingSystemUtils(),
+          ),
           operatingSystemUtils: FakeOperatingSystemUtils(),
-        ),
       );
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
@@ -89,19 +91,20 @@ void main() {
     testUsingContext('getEmulators with no Android SDK', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
       final EmulatorManager emulatorManager = EmulatorManager(
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['emulator', '-list-avds'],
-            stdout: 'existing-avd-1',
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout: 'existing-avd-1',
+            ),
+          ]),
+          androidWorkflow: AndroidWorkflow(
+            androidSdk: sdk,
+            featureFlags: TestFeatureFlags(),
+            operatingSystemUtils: FakeOperatingSystemUtils(),
           ),
-        ]),
-        androidWorkflow: AndroidWorkflow(
-          androidSdk: sdk,
-          featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
-        ),
       );
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
@@ -113,7 +116,7 @@ void main() {
 
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5'), <Emulator>[emulator1]);
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X'), <Emulator>[emulator2]);
-      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X_API_27_x86'),  <Emulator>[emulator2]);
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X_API_31_x86'),  <Emulator>[emulator2]);
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus'), <Emulator>[emulator1, emulator2]);
       expect(await testEmulatorManager.getEmulatorsMatching('iOS Simulator'), <Emulator>[emulator3]);
       expect(await testEmulatorManager.getEmulatorsMatching('ios'),  <Emulator>[emulator3]);
@@ -122,20 +125,21 @@ void main() {
     testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
       sdk.avdManagerPath = null;
       final EmulatorManager emulatorManager = EmulatorManager(
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['emulator', '-list-avds'],
-            stdout: 'existing-avd-1',
-          ),
-        ]),
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout: 'existing-avd-1',
+            ),
+          ]),
           androidSdk: sdk,
-          featureFlags: TestFeatureFlags(),
+          androidWorkflow: AndroidWorkflow(
+            androidSdk: sdk,
+            featureFlags: TestFeatureFlags(),
+            operatingSystemUtils: FakeOperatingSystemUtils(),
+          ),
           operatingSystemUtils: FakeOperatingSystemUtils(),
-        ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
@@ -166,7 +170,7 @@ void main() {
               '-n',
               'flutter_emulator',
               '-k',
-              'system-images;android-27;google_apis_playstore;x86',
+              'system-images;android-31;google_apis_playstore;x86',
               '-d',
               'pixel',
             ],
@@ -178,6 +182,7 @@ void main() {
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
@@ -203,7 +208,7 @@ void main() {
               '-n',
               'test',
               '-k',
-              'system-images;android-27;google_apis_playstore;x86',
+              'system-images;android-31;google_apis_playstore;x86',
               '-d',
               'pixel',
             ],
@@ -215,10 +220,67 @@ void main() {
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
 
       expect(result.success, true);
+    });
+
+    testWithoutContext('create emulator show error with x86 arch', () async {
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['avdmanager', 'list', 'device', '-c'],
+            stdout: 'test\ntest2\npixel\npixel-xl\n',
+          ),
+          const FakeCommand(
+            command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+            exitCode: 1,
+          )
+        ]),
+        androidSdk: sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        ),
+        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+      );
+      final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+      expect(result.success, false);
+      expect(result.error, contains('x86_64'));
+    });
+
+    testWithoutContext('create emulator show error with arm arch', () async {
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['avdmanager', 'list', 'device', '-c'],
+            stdout: 'test\ntest2\npixel\npixel-xl\n',
+          ),
+          const FakeCommand(
+            command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+            exitCode: 1,
+          )
+        ]),
+        androidSdk: sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        ),
+        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
+      );
+      final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+      expect(result.success, false);
+      expect(result.error, contains('arm64-v8a'));
     });
 
     testWithoutContext('create emulator with an existing name errors', () async {
@@ -232,21 +294,21 @@ void main() {
           ),
           kListEmulatorsCommand,
           const FakeCommand(
-            command: <String>[
-              'avdmanager',
-              'create',
-              'avd',
-              '-n',
-              'existing-avd-1',
-              '-k',
-              'system-images;android-27;google_apis_playstore;x86',
-              '-d',
-              'pixel',
-            ],
-            exitCode: 1,
-            stderr: "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
-              'Use --force if you want to replace it.',
-          ),
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                '-n',
+                'existing-avd-1',
+                '-k',
+                'system-images;android-31;google_apis_playstore;x86',
+                '-d',
+                'pixel',
+              ],
+              exitCode: 1,
+              stderr: "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
+                  'Use --force if you want to replace it.'
+          )
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -254,6 +316,7 @@ void main() {
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'existing-avd-1');
 
@@ -284,11 +347,11 @@ void main() {
               '-n',
               'flutter_emulator_2',
               '-k',
-              'system-images;android-27;google_apis_playstore;x86',
+              'system-images;android-31;google_apis_playstore;x86',
               '-d',
               'pixel',
             ],
-          ),
+          )
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -296,6 +359,7 @@ void main() {
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
 

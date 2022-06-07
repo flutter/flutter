@@ -221,6 +221,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         fileSystem: globals.fs,
         androidWorkflow: androidWorkflow,
+        operatingSystemUtils: globals.os,
       ),
       FeatureFlags: () => FlutterFeatureFlags(
         flutterVersion: globals.flutterVersion,
