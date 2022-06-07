@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart';
-
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
@@ -25,7 +23,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     argParser.addOption(
       'staging-directory',
       help: 'Specifies the custom migration staging directory used to stage and edit proposed changes. '
-            'This path can be absolute or relative to the flutter project root. This defaults to `$kDefaultMigrateWorkingDirectoryName`',
+            'This path can be absolute or relative to the flutter project root. This defaults to `$kDefaultMigrateStagingDirectoryName`',
       valueHelp: 'path',
     );
     argParser.addOption(
@@ -75,33 +73,33 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       ? FlutterProject.current()
       : flutterProjectFactory.fromDirectory(fileSystem.directory(projectDirectory));
 
-    Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    final String? customWorkingDirectoryPath = stringArg('staging-directory');
-    if (customWorkingDirectoryPath != null) {
-      if (fileSystem.path.isAbsolute(customWorkingDirectoryPath)) {
-        workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
+    Directory stagingDirectory = project.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
+    final String? customStagingDirectoryPath = stringArg('staging-directory');
+    if (customStagingDirectoryPath != null) {
+      if (fileSystem.path.isAbsolute(customStagingDirectoryPath)) {
+        stagingDirectory = fileSystem.directory(customStagingDirectoryPath);
       } else {
-        workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
+        stagingDirectory = project.directory.childDirectory(customStagingDirectoryPath);
       }
     }
-    if (!workingDirectory.existsSync()) {
+    if (!stagingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Start a new migration with:');
       printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
+    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(stagingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
-    checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
+    checkAndPrintMigrateStatus(manifest, stagingDirectory, logger: logger);
 
-    final List<String> conflictFiles = manifest.remainingConflictFiles(workingDirectory);
+    final List<String> conflictFiles = manifest.remainingConflictFiles(stagingDirectory);
 
     terminal.usesTerminalUi = true;
 
     for (int i = 0; i < conflictFiles.length; i++) {
       final String localPath = conflictFiles[i];
-      final File file = workingDirectory.childFile(localPath);
+      final File file = stagingDirectory.childFile(localPath);
       final List<String> lines = file.readAsStringSync().split('\n');
       // We write a newline in the output, this counteracts it.
       if (lines.last == '') {

@@ -29,7 +29,7 @@ void main() {
   FakeTerminal terminal;
   ProcessManager processManager;
   Directory appDir;
-  Directory workingDir;
+  Directory stagingDir;
   MigrateCommand command;
 
   setUp(() {
@@ -37,8 +37,8 @@ void main() {
     appDir = fileSystem.systemTempDirectory.createTempSync('apptestdir');
     appDir.createSync(recursive: true);
     appDir.childFile('lib/main.dart').createSync(recursive: true);
-    workingDir = appDir.childDirectory('migrate_working_dir');
-    workingDir.createSync(recursive: true);
+    stagingDir = appDir.childDirectory('migrate_working_dir');
+    stagingDir.createSync(recursive: true);
     logger = BufferLogger.test();
     platform = FakePlatform();
     terminal = FakeTerminal(platform: platform);
@@ -64,6 +64,9 @@ flutter:
       logger: logger,
       fileSystem: fileSystem,
       terminal: terminal,
+      platform: platform,
+      processManager: processManager,
+      verbose: true,
     );
   });
 
@@ -76,11 +79,11 @@ flutter:
   });
 
   testUsingContext('commits new simple conflict', () async {
-    final File conflictFile = workingDir.childFile('conflict_file');
+    final File conflictFile = stagingDir.childFile('conflict_file');
     conflictFile.createSync(recursive: true);
     conflictFile.writeAsStringSync('hello\nwow a bunch of lines\n<<<<<<<\noriginal\n=======\nnew\n>>>>>>>\nhi\n', flush: true);
 
-    final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, migrateResult: MigrateResult(
+    final MigrateManifest manifest = MigrateManifest(migrateRootDir: stagingDir, migrateResult: MigrateResult(
       mergeResults: <MergeResult>[
         StringMergeResult.explicit(
           localPath: 'merged_file',
@@ -105,12 +108,12 @@ flutter:
     ));
     manifest.writeFile();
 
-    expect(workingDir.existsSync(), true);
+    expect(stagingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
       <String>[
         'migrate',
         'resolve-conflicts',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -149,11 +152,11 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
   });
 
   testUsingContext('skip commit simple conflict leaves intact', () async {
-    final File conflictFile = workingDir.childFile('conflict_file');
+    final File conflictFile = stagingDir.childFile('conflict_file');
     conflictFile.createSync(recursive: true);
     conflictFile.writeAsStringSync('hello\nwow a bunch of lines\n<<<<<<<\noriginal\n=======\nnew\n>>>>>>>\nhi\n', flush: true);
 
-    final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, migrateResult: MigrateResult(
+    final MigrateManifest manifest = MigrateManifest(migrateRootDir: stagingDir, migrateResult: MigrateResult(
       mergeResults: <MergeResult>[
         StringMergeResult.explicit(
           localPath: 'merged_file',
@@ -178,12 +181,12 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     ));
     manifest.writeFile();
 
-    expect(workingDir.existsSync(), true);
+    expect(stagingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
       <String>[
         'migrate',
         'resolve-conflicts',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -222,11 +225,11 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
   });
 
   testUsingContext('commits original simple conflict', () async {
-    final File conflictFile = workingDir.childFile('conflict_file');
+    final File conflictFile = stagingDir.childFile('conflict_file');
     conflictFile.createSync(recursive: true);
     conflictFile.writeAsStringSync('hello\nwow a bunch of lines\n<<<<<<<\noriginal\n=======\nnew\n>>>>>>>\nhi\n', flush: true);
 
-    final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, migrateResult: MigrateResult(
+    final MigrateManifest manifest = MigrateManifest(migrateRootDir: stagingDir, migrateResult: MigrateResult(
       mergeResults: <MergeResult>[
         StringMergeResult.explicit(
           localPath: 'merged_file',
@@ -251,12 +254,12 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     ));
     manifest.writeFile();
 
-    expect(workingDir.existsSync(), true);
+    expect(stagingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
       <String>[
         'migrate',
         'resolve-conflicts',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -295,11 +298,11 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
   });
 
   testUsingContext('skip conflict leaves file unchanged', () async {
-    final File conflictFile = workingDir.childFile('conflict_file');
+    final File conflictFile = stagingDir.childFile('conflict_file');
     conflictFile.createSync(recursive: true);
     conflictFile.writeAsStringSync('hello\nwow a bunch of lines\n<<<<<<<\noriginal\n=======\nnew\n>>>>>>>\nhi\n', flush: true);
 
-    final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, migrateResult: MigrateResult(
+    final MigrateManifest manifest = MigrateManifest(migrateRootDir: stagingDir, migrateResult: MigrateResult(
       mergeResults: <MergeResult>[
         StringMergeResult.explicit(
           localPath: 'merged_file',
@@ -324,12 +327,12 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     ));
     manifest.writeFile();
 
-    expect(workingDir.existsSync(), true);
+    expect(stagingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
       <String>[
         'migrate',
         'resolve-conflicts',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -355,11 +358,11 @@ Cyan = Original lines.  Green = New lines.
   });
 
   testUsingContext('partial conflict skipped.', () async {
-    final File conflictFile = workingDir.childFile('conflict_file');
+    final File conflictFile = stagingDir.childFile('conflict_file');
     conflictFile.createSync(recursive: true);
     conflictFile.writeAsStringSync('hello\nwow a bunch of lines\n<<<<<<<\noriginal\n=======\nnew\n>>>>>>>\nhi\n<<<<<<<\nskip this partial conflict\n=======\nblah blah', flush: true);
 
-    final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, migrateResult: MigrateResult(
+    final MigrateManifest manifest = MigrateManifest(migrateRootDir: stagingDir, migrateResult: MigrateResult(
       mergeResults: <MergeResult>[
         StringMergeResult.explicit(
           localPath: 'merged_file',
@@ -384,12 +387,12 @@ Cyan = Original lines.  Green = New lines.
     ));
     manifest.writeFile();
 
-    expect(workingDir.existsSync(), true);
+    expect(stagingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
       <String>[
         'migrate',
         'resolve-conflicts',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -428,14 +431,14 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
   });
 
   testUsingContext('multiple files sequence', () async {
-    final File conflictFile = workingDir.childFile('conflict_file');
+    final File conflictFile = stagingDir.childFile('conflict_file');
     conflictFile.createSync(recursive: true);
     conflictFile.writeAsStringSync('hello\nwow a bunch of lines\n<<<<<<<\noriginal\n=======\nnew\n>>>>>>>\nhi\n', flush: true);
-    final File conflictFile2 = workingDir.childFile('conflict_file2');
+    final File conflictFile2 = stagingDir.childFile('conflict_file2');
     conflictFile2.createSync(recursive: true);
     conflictFile2.writeAsStringSync('MoreConflicts\n<<<<<<<\noriginal\nmultiple\nlines\n=======\nnew\n>>>>>>>\nhi\n', flush: true);
 
-    final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, migrateResult: MigrateResult(
+    final MigrateManifest manifest = MigrateManifest(migrateRootDir: stagingDir, migrateResult: MigrateResult(
       mergeResults: <MergeResult>[
         StringMergeResult.explicit(
           localPath: 'merged_file',
@@ -466,12 +469,12 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     ));
     manifest.writeFile();
 
-    expect(workingDir.existsSync(), true);
+    expect(stagingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
       <String>[
         'migrate',
         'resolve-conflicts',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
@@ -537,11 +540,11 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
   });
 
   testUsingContext('retry works', () async {
-    final File conflictFile = workingDir.childFile('conflict_file');
+    final File conflictFile = stagingDir.childFile('conflict_file');
     conflictFile.createSync(recursive: true);
     conflictFile.writeAsStringSync('hello\nwow a bunch of lines\n<<<<<<<\noriginal\n=======\nnew\n>>>>>>>\nhi\n<<<<<<<\noriginal2\n=======\nnew2\n>>>>>>>\n', flush: true);
 
-    final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, migrateResult: MigrateResult(
+    final MigrateManifest manifest = MigrateManifest(migrateRootDir: stagingDir, migrateResult: MigrateResult(
       mergeResults: <MergeResult>[
         StringMergeResult.explicit(
           localPath: 'merged_file',
@@ -566,12 +569,12 @@ Commit the changes to the working directory? (y)es, (n)o, (r)etry this file [y|n
     ));
     manifest.writeFile();
 
-    expect(workingDir.existsSync(), true);
+    expect(stagingDir.existsSync(), true);
     final Future<void> commandFuture = createTestCommandRunner(command).run(
       <String>[
         'migrate',
         'resolve-conflicts',
-        '--working-directory=${workingDir.path}',
+        '--staging-directory=${stagingDir.path}',
         '--project-directory=${appDir.path}',
       ]
     );
