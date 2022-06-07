@@ -22,8 +22,8 @@ class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
   SpellCheckConfiguration(
-    {this.spellCheckService, this.spellCheckSuggestionsHandler}
-  );
+    {this.spellCheckService, this.spellCheckSuggestionsHandler
+  });
 
   /// The service used to fetch spell check results for text input.
   final SpellCheckService? spellCheckService;
@@ -51,12 +51,12 @@ mixin SpellCheckSuggestionsHandler {
   /// Builds the [TextSpan] tree given the current state of the text input and
   /// spell check results.
   TextSpan buildTextSpanWithSpellCheckSuggestions(
-      TextEditingValue value,
-      bool composingWithinCurrentTextRange,
-      TextStyle? style,
-      SpellCheckResults spellCheckResults
-    );
-
+    TextEditingValue value,
+    bool composingWithinCurrentTextRange,
+    TextStyle? style,
+    SpellCheckResults spellCheckResults
+  );
+  
   /// NOTE: NOT INCLUDED IN PR 1.1:
   Widget buildSpellCheckSuggestionsToolbar(
       TextSelectionDelegate delegate,

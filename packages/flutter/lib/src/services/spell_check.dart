@@ -12,7 +12,9 @@ import 'package:flutter/src/services/system_channels.dart';
 ////////////////////////////////////////////////////////////////////////////////
 
 /// A data structure representing a range of misspelled text and the suggested
-/// replacements for this range. For example, one [SuggestionSpan] of the
+/// replacements for this range.
+///
+/// For example, one [SuggestionSpan] of the
 /// [List<SuggestionSpan>] suggestions of the [SpellCheckResults] corresponding
 /// to "Hello, wrold!" may be:
 /// ```dart
@@ -32,7 +34,7 @@ class SuggestionSpan {
   /// The misspelled range of text.
   final TextRange range;
 
-  /// The alternate suggestions for misspelled range of text.
+  /// The alternate suggestions for the misspelled range of text.
   final List<String> suggestions;
 
   @override
@@ -48,18 +50,6 @@ class SuggestionSpan {
   @override
   int get hashCode => Object.hash(range.start, range.end, hashList(suggestions));
 }
-
-/// Determines how spell check results are received for text input.
-abstract class SpellCheckService {
-  /// Facilitates a spell check request.
-  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
-      Locale locale, String text
-    );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///                             END OF PR #1.1                               ///
-////////////////////////////////////////////////////////////////////////////////
 
 /// A data structure grouping together the [SuggestionSpan]s and related text of
 /// results returned by a spell checker.
@@ -93,6 +83,21 @@ class SpellCheckResults {
   @override
   int get hashCode => Object.hash(spellCheckedText, hashList(suggestionSpans));
 }
+
+/// Determines how spell check results are received for text input.
+abstract class SpellCheckService {
+  /// Facilitates a spell check request.
+  ///
+  /// Returns a [Future] that resolves with a [List] of [SuggestionSpan]s for
+  /// all misspelled words in [text] for the given [locale].
+  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
+    Locale locale, String text
+  );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///                             END OF PR #1.1                               ///
+////////////////////////////////////////////////////////////////////////////////
 
 class DefaultSpellCheckService implements SpellCheckService {
   late MethodChannel spellCheckChannel;
