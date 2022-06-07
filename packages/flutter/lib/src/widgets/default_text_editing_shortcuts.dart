@@ -541,7 +541,7 @@ final Map<String, Intent> _macosSelectorToIntent = <String, Intent>{
 };
 
 /// Returns editing intent for selector from NSStandardKeyBindingResponding
-/// if action is supported.
+/// if the selector is recognized.
 Intent? intentForMacOSSelector(String selectorName) {
   return _macosSelectorToIntent[selectorName];
 }
