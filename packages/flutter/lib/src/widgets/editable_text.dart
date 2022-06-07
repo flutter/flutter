@@ -3321,6 +3321,51 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Extend the selection down by page if the `forward` parameter is true, or
+  /// up by page otherwise.
+  void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
+    final ScrollPosition position = _scrollController.position;
+    final TextSelection nextSelection;
+    final Rect extentRect = renderEditable.getLocalRectForCaret(
+      _value.selection.extent,
+    );
+    if (intent.forward) {
+      if (_value.selection.extentOffset >= _value.text.length) {
+        return;
+      }
+      final Offset nextExtentOffset =
+          Offset(extentRect.left, extentRect.top + position.viewportDimension);
+      final TextPosition nextExtent = nextExtentOffset.dy + _scrollController.position.pixels >= _scrollController.position.maxScrollExtent
+          ? TextPosition(offset: _value.text.length)
+          : renderEditable.getPositionForPoint(
+              renderEditable.localToGlobal(nextExtentOffset),
+            );
+      nextSelection = _value.selection.copyWith(
+        extentOffset: nextExtent.offset,
+      );
+    } else {
+      if (_value.selection.extentOffset <= 0) {
+        return;
+      }
+      final Offset nextExtentOffset =
+          Offset(extentRect.left, extentRect.top - position.viewportDimension);
+      final TextPosition nextExtent = nextExtentOffset.dy + _scrollController.position.pixels <= 0
+          ? const TextPosition(offset: 0)
+          : renderEditable.getPositionForPoint(
+              renderEditable.localToGlobal(nextExtentOffset),
+            );
+      nextSelection = _value.selection.copyWith(
+        extentOffset: nextExtent.offset,
+      );
+    }
+
+    bringIntoView(nextSelection.extent);
+    userUpdateTextEditingValue(
+      _value.copyWith(selection: nextSelection),
+      SelectionChangedCause.keyboard,
+    );
+  }
+
   void _updateSelection(UpdateSelectionIntent intent) {
     bringIntoView(intent.newSelection.extent);
     userUpdateTextEditingValue(
@@ -3388,6 +3433,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // Extend/Move Selection
     ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary)),
+    ExtendSelectionByPageIntent: _makeOverridable(CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, true, _nextWordBoundary)),
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _linebreak)),
     ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
