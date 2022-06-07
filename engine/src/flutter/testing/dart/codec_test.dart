@@ -85,6 +85,20 @@ void main() {
       <int>[0, 240, 246],
     ]));
   });
+
+  test('disposed decoded image', () async {
+    Uint8List data = await _getSkiaResource('flutter_logo.jpg').readAsBytes();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+    expect(frameInfo.image, isNotNull);
+    frameInfo.image.dispose();
+    try {
+      await codec.getNextFrame();
+      fail('exception not thrown');
+    } on Exception catch (e) {
+      expect(e.toString(), contains('Decoded image has been disposed'));
+    }
+  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.
