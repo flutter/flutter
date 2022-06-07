@@ -726,7 +726,7 @@ class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_99
 class _TokenDefaultsM3 extends ButtonStyle {
   _TokenDefaultsM3(this.context)
     : super(
@@ -747,24 +747,20 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(MaterialState.disabled))
         return _colors.onSurface.withOpacity(0.38);
-      }
       return _colors.onSurfaceVariant;
     });
 
  @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(MaterialState.hovered))
         return _colors.onSurfaceVariant.withOpacity(0.08);
-      }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(MaterialState.focused))
         return _colors.onSurfaceVariant.withOpacity(0.08);
-      }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(MaterialState.pressed))
         return _colors.onSurfaceVariant.withOpacity(0.12);
-      }
       return null;
     });
 
@@ -799,9 +795,8 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(MaterialState.disabled))
         return SystemMouseCursors.basic;
-      }
       return SystemMouseCursors.click;
     });
 
