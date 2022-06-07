@@ -501,7 +501,6 @@ class TextSelectionOverlay {
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
 
   /// Whether the toolbar is currently visible.
-  //bool get toolbarIsVisible => _selectionOverlay._toolbar != null;
   bool get toolbarIsVisible => _contextMenuController != null;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}

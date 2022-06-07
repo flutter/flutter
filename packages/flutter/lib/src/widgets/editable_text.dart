@@ -3070,8 +3070,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return true;
   }
 
-  // TODO(justinmc): This doesn't work with ContextualMenu because toolbarIsVisible
-  // doesn't work with it.
   @override
   void hideToolbar([bool hideHandles = true]) {
     if (hideHandles) {
