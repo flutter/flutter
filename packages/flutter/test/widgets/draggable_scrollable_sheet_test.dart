@@ -746,55 +746,60 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('Transitioning between scrollable children sharing a scroll controller will not throw', (WidgetTester tester) async {
-    late StateSetter setState;
     int s = 0;
-
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: DraggableScrollableSheet(
-          initialChildSize: 0.25,
-          snap: true,
-          snapSizes: const <double>[0.25, 0.5, 1.0],
-          builder: (BuildContext context, ScrollController scrollController) {
-            return PrimaryScrollController(
-              controller: scrollController,
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setter) {
-                  setState = setter;
-                  return AnimatedSwitcher(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: DraggableScrollableSheet(
+              initialChildSize: 0.25,
+              snap: true,
+              snapSizes: const <double>[0.25, 0.5, 1.0],
+              builder: (BuildContext context, ScrollController scrollController) {
+                return PrimaryScrollController(
+                  controller: scrollController,
+                  child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 500),
                     child: (s.isEven)
                       ? ListView(
-                          children: List<Widget>.generate(
-                            50,
-                            (int index) => Text('ListView 1 - $index'),
+                        children: <Widget>[
+                          ElevatedButton(
+                            onPressed: () => setState(() => ++s),
+                            child: const Text('Switch to 2'),
                           ),
+                          Container(
+                            height: 400,
+                            color: Colors.blue,
+                          ),
+                        ],
+                      )
+                      : SingleChildScrollView(
+                        child: Column(
+                          children: <Widget>[
+                            ElevatedButton(
+                              onPressed: () => setState(() => ++s),
+                              child: const Text('Switch to 1'),
+                            ),
+                            Container(
+                              height: 400,
+                              color: Colors.blue,
+                            ),
+                          ],
                         )
-                      : ListView(
-                          children: List<Widget>.generate(
-                            50,
-                            (int index) => Text('ListView 2 - $index'),
-                          ),
-                        ),
-                  );
-                },
-              ),
-            );
-          },
-        ),
-      )
+                      ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
     ));
 
     // Trigger the AnimatedSwitcher between ListViews
-    setState((){
-      s++;
-    });
-    await tester.pumpAndSettle();
-    // Trigger the AnimatedSwitcher between ListViews
-    setState((){
-      s++;
-    });
-    await tester.pumpAndSettle();
+    await tester.tap(find.text('Switch to 2'));
+    await tester.pump();
+    // Completes without throwing
   });
 
   testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
