@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -47,13 +48,13 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
   group('run', () {
     FakeDeviceManager mockDeviceManager;
     FileSystem fileSystem;
-
-    setUpAll(() {
-      Cache.disableLocking();
-    });
 
     setUp(() {
       mockDeviceManager = FakeDeviceManager();
@@ -657,6 +658,35 @@ void main() {
     });
   });
 
+  group('terminal', () {
+    FakeAnsiTerminal fakeTerminal;
+
+    setUp(() {
+      fakeTerminal = FakeAnsiTerminal();
+    });
+
+    testUsingContext('Flutter run sets terminal singleCharMode to false on exit', () async {
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      await createTestCommandRunner(command).run(<String>[
+        'run',
+        '--no-pub',
+      ]);
+      // The sync completer where we initially set `terminal.singleCharMode` to
+      // `true` does not execute in unit tests, so explicitly check the
+      // `setSingleCharModeHistory` that the finally block ran, setting this
+      // back to `false`.
+      expect(fakeTerminal.setSingleCharModeHistory, contains(false));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => fakeTerminal,
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
   testUsingContext('Flutter run catches service has disappear errors and throws a tool exit', () async {
     final FakeResidentRunner residentRunner = FakeResidentRunner();
     residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
@@ -734,6 +764,7 @@ void main() {
       '--null-assertions',
       '--native-null-assertions',
       '--enable-impeller',
+      '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
     ]), throwsToolExit());
@@ -748,6 +779,7 @@ void main() {
     expect(options.verboseSystemLogs, true);
     expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
+    expect(options.traceSystrace, true);
     expect(options.enableImpeller, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
@@ -1018,4 +1050,18 @@ class CapturingAppDomain extends AppDomain {
     this.multidexEnabled = multidexEnabled;
     throwToolExit('');
   }
+}
+
+class FakeAnsiTerminal extends Fake implements AnsiTerminal {
+  @override
+  bool usesTerminalUi = false;
+
+  /// A list of all the calls to the [singleCharMode] setter.
+  List<bool> setSingleCharModeHistory = <bool>[];
+
+  @override
+  set singleCharMode(bool value) => setSingleCharModeHistory.add(value);
+
+  @override
+  bool get singleCharMode => setSingleCharModeHistory.last;
 }
