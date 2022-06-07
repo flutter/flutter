@@ -494,10 +494,7 @@ class TextSelectionOverlay {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        final int endOffset = math.max(
-          _selection.baseOffset,
-          _selection.extentOffset,
-        );
+        final int endOffset = _selection.extent.offset;
         newSelection = TextSelection(
           extentOffset: position.offset,
           baseOffset: endOffset,
