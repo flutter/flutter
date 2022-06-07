@@ -266,9 +266,9 @@ class MigrateConfig {
     bool update = true,
     required Logger logger,
   }) {
-    final FlutterProject flutterProject = 
+    final FlutterProject flutterProject =
       projectDirectory == null ||
-      FlutterProject.current().directory.path == projectDirectory.path ?
+        FlutterProject.current().directory.path == projectDirectory.path ?
         FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
     platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
 
@@ -357,7 +357,7 @@ migration:
     for (final MapEntry<SupportedPlatform, MigratePlatformConfig> entry in current.platformConfigs.entries) {
       if (target.platformConfigs.containsKey(entry.key)) {
         platformConfigs[entry.key] = MigratePlatformConfig(
-          platform: entry.value.platform, 
+          platform: entry.value.platform,
           createRevision: entry.value.createRevision,
           baseRevision: target.platformConfigs[entry.key]?.baseRevision
         );

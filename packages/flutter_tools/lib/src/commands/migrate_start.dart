@@ -186,7 +186,7 @@ class MigrateStartCommand extends FlutterCommand {
       directories: migrateResult.tempDirectories,
     );
 
-    await writeWorkingDir(migrateResult, logger, verbose: _verbose, flutterProject: project);
+    await writeStagingDir(migrateResult, logger, verbose: _verbose, flutterProject: project);
 
     logger.printStatus('The migrate tool has staged proposed changes in the migrate working directory.\n');
     logger.printStatus('Guided conflict resolution wizard:');

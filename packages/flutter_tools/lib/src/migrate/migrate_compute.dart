@@ -19,8 +19,8 @@ import 'migrate_utils.dart';
 // This defines files and directories that should be skipped regardless
 // of gitignore and config settings
 const List<String> _skippedFiles = <String>[
-  'lib/main.dart',
-  'ios/Runner.xcodeproj/project.pbxproj',
+  'lib/main.dart', // Almost always user owned.
+  'ios/Runner.xcodeproj/project.pbxproj', // Xcode managed configs that may not merge cleanly.
   'README.md', // changes to this shouldn't be overwritten since is is user owned.
 ];
 
@@ -57,6 +57,8 @@ const List<String> _skippedMergeFileExt = <String>[
   '.jpg',
   '.jpeg',
   '.gif',
+  '.bmp',
+  '.svg',
   // Don't merge compiled artifacts and executables
   '.jar',
   '.so',
@@ -94,7 +96,7 @@ bool _skippedMerge(String localPath) {
 /// still work, but will likely generate slightly less accurate merges.
 ///
 /// Operations the computation performs:
-/// 
+///
 ///  - Parse .metadata file
 ///  - Collect revisions to use for each platform
 ///  - Download each flutter revision and call `flutter create` for each.
@@ -157,7 +159,7 @@ Future<MigrateResult?> computeMigration({
   final Set<String> revisions = <String>{};
   if (baseRevision == null) {
     for (final MigratePlatformConfig platform in config.platformConfigs.values) {
-      final String effectiveRevision = platform.baseRevision == null ? 
+      final String effectiveRevision = platform.baseRevision == null ?
           metadataRevision ?? _getFallbackBaseRevision(allowFallbackBaseRevision, verbose, logger, status) :
           platform.baseRevision!;
       if (platforms != null && !platforms.contains(platform.platform)) {
@@ -396,7 +398,7 @@ Future<void> createBase(
   MigrateResult migrateResult,
   FlutterProject flutterProject,
   String? baseAppPath,
-  List<String> revisionsList, 
+  List<String> revisionsList,
   Map<String, List<MigratePlatformConfig>> revisionToConfigs,
   String fallbackRevision,
   String targetRevision,
@@ -683,9 +685,9 @@ Future<void> computeMerge(
         }
       }
       if (result == null) {
-        late String basePath; 
-        late String currentPath; 
-        late String targetPath; 
+        late String basePath;
+        late String currentPath;
+        late String targetPath;
 
         // Use two way merge if diff between base and target are the same.
         // This prevents the three way merge re-deleting the base->target changes.
@@ -753,15 +755,15 @@ Future<void> computeMerge(
 }
 
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
-Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool verbose = false, FlutterProject? flutterProject}) async {
+Future<void> writeStagingDir(MigrateResult migrateResult, Logger logger, {bool verbose = false, FlutterProject? flutterProject}) async {
   flutterProject ??= FlutterProject.current();
-  final Directory workingDir = flutterProject.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
+  final Directory stagingDir = flutterProject.directory.childDirectory(kDefaultMigrateStagingDirectoryName);
   if (verbose) {
-    logger.printStatus('Writing migrate working directory at `${workingDir.path}`');
+    logger.printStatus('Writing migrate staging directory at `${stagingDir.path}`');
   }
   // Write files in working dir
   for (final MergeResult result in migrateResult.mergeResults) {
-    final File file = workingDir.childFile(result.localPath);
+    final File file = stagingDir.childFile(result.localPath);
     file.createSync(recursive: true);
     if (result is StringMergeResult) {
       file.writeAsStringSync(result.mergedString, flush: true);
@@ -771,7 +773,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
   }
   // Write all files that are newly added in target
   for (final FilePendingMigration addedFile in migrateResult.addedFiles) {
-    final File file = workingDir.childFile(addedFile.localPath);
+    final File file = stagingDir.childFile(addedFile.localPath);
     file.createSync(recursive: true);
     try {
       file.writeAsStringSync(addedFile.file.readAsStringSync(), flush: true);
@@ -782,13 +784,13 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
 
   // Write the MigrateManifest.
   final MigrateManifest manifest = MigrateManifest(
-    migrateRootDir: workingDir,
+    migrateRootDir: stagingDir,
     migrateResult: migrateResult,
   );
   manifest.writeFile();
 
   // output the manifest contents.
-  checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
+  checkAndPrintMigrateStatus(manifest, stagingDir, logger: logger);
 
-  logger.printBox('Working directory created at `${workingDir.path}`');
+  logger.printBox('Staging directory created at `${stagingDir.path}`');
 }
