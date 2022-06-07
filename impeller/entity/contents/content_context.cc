@@ -155,6 +155,8 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<SolidFillPipeline>(*context_);
   texture_blend_pipelines_[{}] =
       CreateDefaultPipeline<BlendPipeline>(*context_);
+  blend_color_pipelines_[{}] =
+      CreateDefaultPipeline<BlendColorPipeline>(*context_);
   blend_colorburn_pipelines_[{}] =
       CreateDefaultPipeline<BlendColorBurnPipeline>(*context_);
   blend_colordodge_pipelines_[{}] =
@@ -167,12 +169,17 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<BlendExclusionPipeline>(*context_);
   blend_hardlight_pipelines_[{}] =
       CreateDefaultPipeline<BlendHardLightPipeline>(*context_);
+  blend_hue_pipelines_[{}] = CreateDefaultPipeline<BlendHuePipeline>(*context_);
   blend_lighten_pipelines_[{}] =
       CreateDefaultPipeline<BlendLightenPipeline>(*context_);
+  blend_luminosity_pipelines_[{}] =
+      CreateDefaultPipeline<BlendLuminosityPipeline>(*context_);
   blend_multiply_pipelines_[{}] =
       CreateDefaultPipeline<BlendMultiplyPipeline>(*context_);
   blend_overlay_pipelines_[{}] =
       CreateDefaultPipeline<BlendOverlayPipeline>(*context_);
+  blend_saturation_pipelines_[{}] =
+      CreateDefaultPipeline<BlendSaturationPipeline>(*context_);
   blend_screen_pipelines_[{}] =
       CreateDefaultPipeline<BlendScreenPipeline>(*context_);
   blend_softlight_pipelines_[{}] =
