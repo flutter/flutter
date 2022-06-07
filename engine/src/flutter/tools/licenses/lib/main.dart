@@ -1916,14 +1916,14 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
         && entry.name != 'skia' // treated as a separate component
         && entry.name != 'fontconfig' // not used in standard configurations
         && entry.name != 'swiftshader' // only used on hosts for tests
-        && entry.name != 'shaderc' // only used on hosts for tests
+        && entry.name != 'shaderc' // Used by impellerc with separate license and host tests. See //flutter/impeller/compiler:impellerc_license
         && entry.name != 'glslang' // only used on hosts for tests
         && entry.name != 'spirv_tools' // only used on hosts for tests
         && entry.name != 'spirv_headers' // only used on hosts for tests
-        && entry.name != 'spirv_cross' // only used on hosts for tests
+        && entry.name != 'spirv_cross' // Used by impellerc with separate license and host tests. See //flutter/impeller/compiler:impellerc_license
         && entry.name != 'ocmock' // only used for tests
         && entry.name != 'java' // only used for Android builds
-        && entry.name != 'inja' // only used on hosts for builds
+        && entry.name != 'inja' // Only used by impellerc, which ships a separate license. See //flutter/impeller/compiler:impellerc_license
         && super.shouldRecurse(entry);
   }
 
