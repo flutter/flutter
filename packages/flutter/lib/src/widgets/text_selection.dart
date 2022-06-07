@@ -1454,6 +1454,9 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
   void onTapDown(TapDownDetails details) {
+    if (!delegate.selectionEnabled) {
+      return;
+    }
     renderEditable.handleTapDown(details);
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
