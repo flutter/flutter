@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/shell/version/version.gni")
 
 impeller_component("compiler_lib") {
   sources = [
@@ -31,9 +32,49 @@ impeller_component("compiler_lib") {
     "../base",
     "../geometry",
     "//flutter/fml",
+
+    # All third_party deps must be reflected below in the impellerc_license
+    # target.
     "//third_party/inja",
     "//third_party/shaderc_flutter",
     "//third_party/spirv_cross_flutter",
+  ]
+}
+
+generated_file("impellerc_license") {
+  source_path = rebase_path(".", "//flutter")
+  git_url = "https://github.com/flutter/engine/tree/$engine_version"
+  outputs = [ "$target_gen_dir/LICENSE.impellerc.md" ]
+  contents = [
+    "# impellerc",
+    "",
+    "This tool is used by the Flutter SDK to compile shaders.",
+    "",
+    "Source code for this tool: [flutter/engine/$source_path]($git_url/$source_path).",
+    "",
+    "## Licenses",
+    "",
+    "### impellerc",
+    "",
+    read_file("//flutter/sky/packages/sky_engine/LICENSE", "string"),
+    "",
+
+    # These licenses are ignored by the main license checker, since they are not
+    # shipped to end-application binaries and only shipped as part of developer
+    # tooling in impellerc. Add them here.
+    "## Additional open source licenses",
+    "",
+    "### inja",
+    "",
+    read_file("//third_party/inja/LICENSE", "string"),
+    "",
+    "### shaderc",
+    "",
+    read_file("//third_party/shaderc/LICENSE", "string"),
+    "",
+    "### spirv_cross",
+    "",
+    read_file("//third_party/spirv_cross/LICENSE", "string"),
   ]
 }
 
@@ -46,7 +87,10 @@ impeller_component("impellerc") {
 }
 
 group("compiler") {
-  deps = [ ":impellerc" ]
+  deps = [
+    ":impellerc",
+    ":impellerc_license",
+  ]
 }
 
 impeller_component("compiler_unittests") {
