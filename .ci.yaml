@@ -2299,7 +2299,6 @@ targets:
       task_name: gradient_dynamic_perf__e2e_summary
 
   - name: Linux_android gradient_consistent_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
