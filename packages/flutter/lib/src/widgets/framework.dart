@@ -2665,6 +2665,10 @@ class BuildOwner {
         }
         try {
           element.rebuild();
+          assert(() {
+            _debugElementWasRebuilt(element);
+            return true;
+          }());
         } catch (e, stack) {
           _debugReportException(
             ErrorDescription('while rebuilding dirty elements'),
