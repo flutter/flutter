@@ -32,20 +32,24 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return ${componentColor('md.comp.icon-button.disabled.icon')};
+      }
       return ${componentColor('md.comp.icon-button.unselected.icon')};
     });
 
  @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered))
+      if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.icon-button.unselected.hover.state-layer')};
-      if (states.contains(MaterialState.focused))
+      }
+      if (states.contains(MaterialState.focused)) {
         return ${componentColor('md.comp.icon-button.unselected.focus.state-layer')};
-      if (states.contains(MaterialState.pressed))
+      }
+      if (states.contains(MaterialState.pressed)) {
         return ${componentColor('md.comp.icon-button.unselected.pressed.state-layer')};
+      }
       return null;
     });
 
@@ -80,8 +84,9 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
+      }
       return SystemMouseCursors.click;
     });
 
