@@ -3531,9 +3531,9 @@ class _ImageFilter extends NativeFieldWrapperClass1 {
       creator = filter {    // ignore: prefer_initializing_formals
     _constructor();
     final _ColorFilter? nativeFilter = filter._toNativeColorFilter();
-    _initColorFilter(nativeFilter);
+    _initColorFilter(nativeFilter!);
   }
-  void _initColorFilter(_ColorFilter? colorFilter) native 'ImageFilter_initColorFilter';
+  void _initColorFilter(_ColorFilter colorFilter) native 'ImageFilter_initColorFilter';
 
   /// Composes `_innerFilter` with `_outerFilter`.
   _ImageFilter.composed(_ComposeImageFilter filter)

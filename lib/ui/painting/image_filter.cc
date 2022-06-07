@@ -92,14 +92,15 @@ void ImageFilter::initMatrix(const tonic::Float64List& matrix4,
 }
 
 void ImageFilter::initColorFilter(ColorFilter* colorFilter) {
-  filter_ = std::make_shared<DlColorFilterImageFilter>(
-      colorFilter ? colorFilter->dl_filter() : nullptr);
+  FML_DCHECK(colorFilter);
+  filter_ =
+      std::make_shared<DlColorFilterImageFilter>(colorFilter->dl_filter());
 }
 
 void ImageFilter::initComposeFilter(ImageFilter* outer, ImageFilter* inner) {
-  filter_ = std::make_shared<DlComposeImageFilter>(
-      outer ? outer->dl_filter() : nullptr,
-      inner ? inner->dl_filter() : nullptr);
+  FML_DCHECK(outer && inner);
+  filter_ = std::make_shared<DlComposeImageFilter>(outer->dl_filter(),
+                                                   inner->dl_filter());
 }
 
 }  // namespace flutter
