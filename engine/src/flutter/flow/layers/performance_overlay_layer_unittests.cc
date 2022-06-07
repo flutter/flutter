@@ -191,6 +191,31 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
                                             text_position}}}));
 }
 
+TEST_F(PerformanceOverlayLayerTest, MarkAsDirtyWhenResized) {
+  // Regression test for https://github.com/flutter/flutter/issues/54188
+
+  // Create a PerformanceOverlayLayer.
+  const uint64_t overlay_opts = kVisualizeRasterizerStatistics;
+  auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
+  layer->set_paint_bounds(SkRect::MakeLTRB(0.0f, 0.0f, 48.0f, 48.0f));
+  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Paint(paint_context());
+  auto data = mock_canvas().draw_calls().front().data;
+  auto imageData = std::get<MockCanvas::DrawImageDataNoPaint>(data);
+  auto first_draw_width = imageData.image->width();
+
+  // Create a second PerformanceOverlayLayer with different bounds.
+  layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
+  layer->set_paint_bounds(SkRect::MakeLTRB(0.0f, 0.0f, 64.0f, 64.0f));
+  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Paint(paint_context());
+  data = mock_canvas().draw_calls().back().data;
+  imageData = std::get<MockCanvas::DrawImageDataNoPaint>(data);
+  auto refreshed_draw_width = imageData.image->width();
+
+  EXPECT_NE(first_draw_width, refreshed_draw_width);
+}
+
 TEST(PerformanceOverlayLayerDefault, Gold) {
   TestPerformanceOverlayLayerGold(60);
 }

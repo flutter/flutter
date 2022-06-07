@@ -86,6 +86,14 @@ fml::TimeDelta Stopwatch::AverageDelta() const {
 // Initialize the SkSurface for drawing into. Draws the base background and any
 // timing data from before the initial Visualize() call.
 void Stopwatch::InitVisualizeSurface(const SkRect& rect) const {
+  // Mark as dirty if the size has changed.
+  if (visualize_cache_surface_) {
+    if (rect.width() != visualize_cache_surface_->width() ||
+        rect.height() != visualize_cache_surface_->height()) {
+      cache_dirty_ = true;
+    };
+  }
+
   if (!cache_dirty_) {
     return;
   }
