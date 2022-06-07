@@ -487,7 +487,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   }
 }
 
-// These constants are based on NSStandardKeyBindingResponding method names
 final Map<String, Intent> _macosSelectorToIntent = <String, Intent>{
   'deleteBackward:': const DeleteCharacterIntent(forward: false),
   'deleteWordBackward:': const DeleteToNextWordBoundaryIntent(forward: false),
