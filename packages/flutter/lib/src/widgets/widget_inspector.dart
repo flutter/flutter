@@ -3002,7 +3002,9 @@ Iterable<DiagnosticsNode> _parseDiagnosticsNode(
   try {
     final DebugCreator debugCreator = node.value! as DebugCreator;
     final Element? element = debugCreator.element;
-    if (element == null) return [];
+    if (element == null) {
+      return <DiagnosticsNode>[];
+    }
     return _describeRelevantUserCode(element, errorSummary);
   } catch (error, stack) {
     scheduleMicrotask(() {
