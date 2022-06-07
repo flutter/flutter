@@ -15,9 +15,8 @@ $ fx build
 ```
 
 Note 1: You could use `--with-base` here, instead of `--with`, but if so, you
-would also need to add
-`--with-base //garnet/packages/testing:run_test_component`.  More on this below,
-under [Start the package servers](#start-the-package-servers).
+would also need to add `--with-base //garnet/bin/run_test_component`. More on
+this below, under [Start the package servers](#start-the-package-servers).
 
 Note 2: The `fx set` flags, above, offer a minimized fuchsia platform
 configuration to successfully execute the test, but some optional services may
@@ -89,8 +88,7 @@ $ fx pm publish -a -repo "$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files/" \
 ## Run the test (using the package server at `fuchsia.com`)
 
 ```shell
-$ fx shell run-test-component \
-    fuchsia-pkg://fuchsia.com/flutter-embedder-test2#meta/flutter-embedder-test2.cmx
+$ fx test flutter-embedder-test2
 ```
 
 ## Make a change and re-run the test
@@ -104,8 +102,7 @@ $ ninja -C out/fuchsia_debug_x64 \
     flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/embedder/parent-view2:package
 $ fx pm publish -a -repo "$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files/" \
   -f $(find "$FLUTTER_ENGINE_DIR"/src/out/fuchsia_*64 -name parent-view2.far)
-$ fx shell run-test-component \
-    fuchsia-pkg://fuchsia.com/flutter-embedder-test2#meta/flutter-embedder-test2.cmx
+$ fx test flutter-embedder-test2
 ```
 
 From here, you can modify the Flutter test, rebuild flutter, and usually rerun
@@ -135,14 +132,13 @@ with `fx set ... --with-base <package>` (instead of using `--with`). For
 example, in the `fx set` command above, using, `--with-base scenic`, and so on.
 Note, however, that the default `core.x64` configuration bundles the test
 runner as if it was included via
-`--with //garnet/packages/testing:run_test_component`, so to include the test
-runner in the system image requires adding that package as well, via
-`--with-base`, instead.
+`--with //garnet/bin/run_test_component`, so to include the test runner in the
+system image requires adding that package as well, via `--with-base`, instead.
 
-In order to serve fuchsia package dependencies (like `run_test_component`,
-`scenic`, `root_presenter`, and `hardware-display-controller-provider`),
-without forcing them into the system image, you will need to run the fuchsia
-default package server, via `fx serve`.
+In order to serve fuchsia package dependencies (like `scenic`, `root_presenter`,
+and `hardware-display-controller-provider`), without forcing them into the
+system image, you will need to run the fuchsia default package server, via `fx
+serve`.
 
 The `flutter/engine` packages (tests and flutter runners, for dart-based tests)
 are served from a separate package server. The `flutter/engine` repo's
@@ -171,8 +167,7 @@ $ flutter/tools/fuchsia/devshell/serve.sh --out out/fuchsia_debug_x64 --only-ser
 ## Run the test, using `engine` as the package server domain
 
 ```shell
-$ fx shell run-test-component \
-    fuchsia-pkg://engine/flutter-embedder-test2#meta/flutter-embedder-test2.cmx
+$ fx test flutter-embedder-test2
 ```
 
 You can recompile and run the test without needing to re-publish the `.far`.
