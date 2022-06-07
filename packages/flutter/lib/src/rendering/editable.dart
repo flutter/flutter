@@ -2124,7 +2124,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
-  /// TODO: (Renzo-Olivares) document.
+  /// Returns the word at the given [TextPosition].
   TextSelection getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     final TextRange word = _textPainter.getWordBoundary(position);

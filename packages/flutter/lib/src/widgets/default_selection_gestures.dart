@@ -11,15 +11,25 @@ import 'framework.dart';
 import 'selection_gestures.dart';
 import 'text_editing_intents.dart';
 
-/// TODO: (Renzo-Olivares) document.
+/// A widget with the gesture recognizers used for the default selection
+/// behavior in an input field.
+///
+/// This default behavior can be overridden by placing a [SelectionGestures]
+/// widget lower in the widget tree than this. See the [Action] class for an
+/// example of remapping an [Intent] to a custom [Action].
+///
+/// See also:
+///
+///   * [WidgetsApp], which creates a DefaultSelectionGestures.
 class DefaultSelectionGestures extends StatelessWidget {
-  /// TODO: (Renzo-Olivares) document.
+  /// Creates a [DefaultSelectionGestures] widget that provides the default
+  /// gesture recognizer mapping for selection behavior on the current platform.
   const DefaultSelectionGestures({
     super.key,
     required this.child,
   });
 
-  /// TODO: (Renzo-Olivares) document.
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   static bool get _isShiftPressed {
@@ -95,8 +105,8 @@ class DefaultSelectionGestures extends StatelessWidget {
                     }
                   }
                 }
-                Actions.invoke(context, KeyboardRequestIntent());
-                Actions.invoke(context, UserOnTapCallbackIntent());
+                Actions.invoke(context, const KeyboardRequestIntent());
+                Actions.invoke(context, const UserOnTapCallbackIntent());
               }
               ..onTapCancel = () {
                 print('onTapCancel');
@@ -204,6 +214,10 @@ class DefaultSelectionGestures extends StatelessWidget {
                 ..onTapDown = (TapDownDetails details, int tapCount) {
                   print('onTapDown , tapCount  $tapCount');
                   switch (defaultTargetPlatform) {
+                    case TargetPlatform.macOS:
+                    case TargetPlatform.iOS:
+                      // Not for these platforms.
+                      break;
                     case TargetPlatform.android:
                     case TargetPlatform.fuchsia:
                       break;
@@ -232,6 +246,10 @@ class DefaultSelectionGestures extends StatelessWidget {
                   }
                   Actions.invoke(context, SelectionToolbarControlIntent.hide);
                   switch (defaultTargetPlatform) {
+                    case TargetPlatform.macOS:
+                    case TargetPlatform.iOS:
+                    // Not for these platforms.
+                      break;
                     case TargetPlatform.android:
                     case TargetPlatform.fuchsia:
                       if (_isShiftPressed) {
@@ -244,8 +262,8 @@ class DefaultSelectionGestures extends StatelessWidget {
                     case TargetPlatform.windows:
                       break;
                   }
-                  Actions.invoke(context, KeyboardRequestIntent());
-                  Actions.invoke(context, UserOnTapCallbackIntent());
+                  Actions.invoke(context, const KeyboardRequestIntent());
+                  Actions.invoke(context, const UserOnTapCallbackIntent());
                 }
                 ..onTapCancel = () {
                   print('onTapCancel');
@@ -259,7 +277,7 @@ class DefaultSelectionGestures extends StatelessWidget {
                 ..onLongPressStart = (LongPressStartDetails details) {
                   print('onLongPressStart');
                   Actions.invoke(context, SelectRangeIntent(cause: SelectionChangedCause.longPress, from: details.globalPosition));
-                  Actions.invoke(context, FeedbackRequestIntent());
+                  Actions.invoke(context, const FeedbackRequestIntent());
                 }
                 ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
                   print('onLongPressMoveUpdate');
@@ -347,7 +365,7 @@ class DefaultSelectionGestures extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    /// TODO: (Renzo-Olivares) web gestures differ from default platform behaviors.
+    // TODO(Renzo-Olivares): Web gestures differ from default platform behaviors.
     return SelectionGestures(
       // gestures: kIsWeb ? _webGestures : _defaultGestures,
       gestures: _defaultGestures,

@@ -472,10 +472,7 @@ class SelectionConsecutiveTapGestureRecognizer extends BaseTapGestureRecognizer 
       default:
     }
 
-    if (_consecutiveTapTimer == null) {
-      _consecutiveTapTimer = RestartableTimer(kDoubleTapTimeout, _consecutiveTapTimeout);
-    }
-
+    _consecutiveTapTimer ??= RestartableTimer(kDoubleTapTimeout, _consecutiveTapTimeout);
   }
 
   @protected
