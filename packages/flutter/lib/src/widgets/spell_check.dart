@@ -16,8 +16,8 @@ class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
   SpellCheckConfiguration(
-    {this.spellCheckService, this.spellCheckSuggestionsHandler}
-  );
+    {this.spellCheckService, this.spellCheckSuggestionsHandler
+  });
 
   /// The service used to fetch spell check results for text input.
   final SpellCheckService? spellCheckService;

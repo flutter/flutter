@@ -7,7 +7,9 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 /// A data structure representing a range of misspelled text and the suggested
-/// replacements for this range. For example, one [SuggestionSpan] of the
+/// replacements for this range.
+///
+/// For example, one [SuggestionSpan] of the
 /// [List<SuggestionSpan>] suggestions of the [SpellCheckResults] corresponding
 /// to "Hello, wrold!" may be:
 /// ```dart
@@ -27,7 +29,7 @@ class SuggestionSpan {
   /// The misspelled range of text.
   final TextRange range;
 
-  /// The alternate suggestions for misspelled range of text.
+  /// The alternate suggestions for the misspelled range of text.
   final List<String> suggestions;
 
   @override
@@ -80,6 +82,9 @@ class SpellCheckResults {
 /// Determines how spell check results are received for text input.
 abstract class SpellCheckService {
   /// Facilitates a spell check request.
+  ///
+  /// Returns a [Future] that resolves with a [List] of [SuggestionSpan]s for
+  /// all misspelled words in [text] for the given [locale].
   Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
     Locale locale, String text
   );
