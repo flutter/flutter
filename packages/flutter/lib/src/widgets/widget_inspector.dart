@@ -2970,7 +2970,8 @@ Iterable<DiagnosticsNode> _parseDiagnosticsNode(
   assert(_isDebugCreator(node));
   try {
     final DebugCreator debugCreator = node.value! as DebugCreator;
-    final Element element = debugCreator.element;
+    final Element? element = debugCreator.element;
+    if (element == null) return [];
     return _describeRelevantUserCode(element, errorSummary);
   } catch (error, stack) {
     scheduleMicrotask(() {
