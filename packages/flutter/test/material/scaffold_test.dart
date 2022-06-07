@@ -276,12 +276,17 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.only(bottom: 20.0),
+          viewPadding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
       ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    expect(
+      tester.getBottomLeft(find.byType(Placeholder)).dy,
+      moreOrLessEquals(600.0 - 20.0 - kFloatingActionButtonMargin)
+    );
+
     // Consume bottom padding - as if by the keyboard opening
     await tester.pumpWidget(
       MediaQuery(
@@ -294,6 +299,37 @@ void main() {
     );
     final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
     expect(initialPoint, finalPoint);
+  });
+
+  testWidgets('viewPadding change should trigger _ScaffoldLayout re-layout', (WidgetTester tester) async {
+    Widget buildFrame(EdgeInsets viewPadding) {
+      return MediaQuery(
+        data: MediaQueryData(
+          viewPadding: viewPadding,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: Container(),
+            floatingActionButton: const Placeholder(),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const EdgeInsets.only(bottom: 300)));
+
+    final RenderBox renderBox = tester.renderObject<RenderBox>(find.byType(CustomMultiChildLayout));
+    expect(renderBox.debugNeedsLayout, false);
+
+    await tester.pumpWidget(
+      buildFrame(const EdgeInsets.only(bottom: 400)),
+      null,
+      EnginePhase.build,
+    );
+
+    expect(renderBox.debugNeedsLayout, true);
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
