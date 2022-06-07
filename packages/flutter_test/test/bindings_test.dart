@@ -33,6 +33,34 @@ void main() {
     });
   });
 
+  test('frameNumber', () async {
+    binding.window.clearAllTestValues();
+    expect(binding.window.frameData.frameNumber, 0);
+    await binding.runTest(() async {
+      // runTest pumps a frame.
+      expect(binding.window.frameData.frameNumber, 1);
+
+      // Scheduling should not pump
+      binding.scheduleFrame();
+      expect(binding.window.frameData.frameNumber, 1);
+      binding.handleBeginFrame(null);
+      expect(binding.window.frameData.frameNumber, 2);
+      binding.handleDrawFrame();
+      expect(binding.window.frameData.frameNumber, 2);
+
+      // Pump with no scheduled frame.
+      await binding.pump();
+      expect(binding.window.frameData.frameNumber, 2);
+
+      // Schedule and pump, similar to handleBeginFrame.
+      binding.scheduleFrame();
+      await binding.pump();
+      expect(binding.window.frameData.frameNumber, 3);
+    }, () {});
+    binding.window.clearAllTestValues();
+    expect(binding.window.frameData.frameNumber, 0);
+  });
+
   // The next three tests must run in order -- first using `test`, then `testWidgets`, then `test` again.
 
   int order = 0;
