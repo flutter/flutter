@@ -802,6 +802,58 @@ void main() {
         expect(find.text(errorInvalidText!), findsOneWidget);
       });
     });
+
+    testWidgets('selectableDayPredicate is not called after selecting a date', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () async {
+                      final Future<DateTime?> pickedDate = showDatePicker(
+                        context: context,
+                        initialDate: DateTime(2016, DateTime.january, 15),
+                        firstDate:DateTime(2001),
+                        lastDate: DateTime(2031, DateTime.december, 31),
+                        initialEntryMode: DatePickerEntryMode.input,
+                        selectableDayPredicate: (DateTime day) {
+                          logs.add('selectableDayPredicate called');
+                          return true;
+                        },
+                        builder: (BuildContext context, Widget? child) {
+                          return Directionality(
+                            textDirection: textDirection,
+                            child: child ?? const SizedBox(),
+                          );
+                        },
+                      );
+                      logs.add('${await pickedDate}');
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(logs.last, 'selectableDayPredicate called');
+
+      // Test picked date is the last log entry.
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(logs.last, '2016-01-15 00:00:00.000');
+
+      logs.clear();
+    });
   });
 
   group('Semantics', () {

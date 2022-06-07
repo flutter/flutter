@@ -519,7 +519,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   firstDate: widget.firstDate,
                   lastDate: widget.lastDate,
                   onDateSubmitted: _handleDateChanged,
-                  onDateSaved: _handleDateChanged,
+                  onDateSaved: (DateTime savedDate) {
+                    _selectedDate.value = savedDate;
+                  },
                   selectableDayPredicate: widget.selectableDayPredicate,
                   errorFormatText: widget.errorFormatText,
                   errorInvalidText: widget.errorInvalidText,
