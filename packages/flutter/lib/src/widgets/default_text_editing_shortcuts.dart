@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/focus_manager.dart';
 
 import 'actions.dart';
 import 'framework.dart';
@@ -489,76 +488,61 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 }
 
 // These constants are based on NSStandardKeyBindingResponding method names
-final Map<String, Intent> _stringToIntent = <String, Intent>{
-  'deleteBackward': const DeleteCharacterIntent(forward: false),
-  'deleteWordBackward': const DeleteToNextWordBoundaryIntent(forward: false),
-  'deleteToBeginningOfLine': const DeleteToLineBreakIntent(forward: false),
-  'deleteForward': const DeleteCharacterIntent(forward: true),
-  'deleteWordForward': const DeleteToNextWordBoundaryIntent(forward: true),
-  'deleteToEndOfLine': const DeleteToLineBreakIntent(forward: true),
+final Map<String, Intent> _macosSelectorToIntent = <String, Intent>{
+  'deleteBackward:': const DeleteCharacterIntent(forward: false),
+  'deleteWordBackward:': const DeleteToNextWordBoundaryIntent(forward: false),
+  'deleteToBeginningOfLine:': const DeleteToLineBreakIntent(forward: false),
+  'deleteForward:': const DeleteCharacterIntent(forward: true),
+  'deleteWordForward:': const DeleteToNextWordBoundaryIntent(forward: true),
+  'deleteToEndOfLine:': const DeleteToLineBreakIntent(forward: true),
 
-  'moveLeft': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
-  'moveRight': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
-  'moveForward': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
-  'moveBackward': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+  'moveLeft:': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+  'moveRight:': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+  'moveForward:': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+  'moveBackward:': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
 
-  'moveUp': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
-  'moveDown': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+  'moveUp:': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+  'moveDown:': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
 
-  'moveLeftAndModifySelection': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
-  'moveRightAndModifySelection': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
-  'moveUpAndModifySelection': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
-  'moveDownAndModifySelection': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+  'moveLeftAndModifySelection:': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
+  'moveRightAndModifySelection:': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
+  'moveUpAndModifySelection:': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+  'moveDownAndModifySelection:': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
 
-  'moveWordLeft': const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
-  'moveWordRight': const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
-  'moveToBeginningOfParagraph': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-  'moveToEndOfParagraph': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+  'moveWordLeft:': const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
+  'moveWordRight:': const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
+  'moveToBeginningOfParagraph:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+  'moveToEndOfParagraph:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
 
-  'moveWordLeftAndModifySelection': const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
-  'moveWordRightAndModifySelection': const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
-  'moveParagraphBackwardAndModifySelection': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-  'moveParagraphForwardAndModifySelection': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+  'moveWordLeftAndModifySelection:': const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
+  'moveWordRightAndModifySelection:': const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
+  'moveParagraphBackwardAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+  'moveParagraphForwardAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
 
-  'moveToLeftEndOfLine': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-  'moveToEndEndOfLine': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-  'moveToBeginningOfDocument': const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
-  'moveToEndOfDocument': const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+  'moveToLeftEndOfLine:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+  'moveToEndEndOfLine:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+  'moveToBeginningOfDocument:': const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+  'moveToEndOfDocument:': const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
 
-  'moveToLeftEndOfLineAndModifySelection': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-  'moveToRightEndOfLineAndModifySelection': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
-  'moveToBeginningOfDocumentAndModifySelection': const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-  'moveToEndOfDocumentAndModifySelection': const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+  'moveToLeftEndOfLineAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+  'moveToRightEndOfLineAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+  'moveToBeginningOfDocumentAndModifySelection:': const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+  'moveToEndOfDocumentAndModifySelection:': const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
 
-  'transpose': const TransposeCharactersIntent(),
+  'transpose:': const TransposeCharactersIntent(),
 
   // TODO(knopp): Page Up/Down intents are missing
-  'scrollPageUp': const ScrollToDocumentBoundaryIntent(forward: false),
-  'scrollPageDown': const ScrollToDocumentBoundaryIntent(forward: true),
+  'scrollPageUp:': const ScrollToDocumentBoundaryIntent(forward: false),
+  'scrollPageDown:': const ScrollToDocumentBoundaryIntent(forward: true),
   'pageUpAndModifySelection': const ExpandSelectionToDocumentBoundaryIntent(forward: false),
-  'pageDownAndModifySelection': const ExpandSelectionToDocumentBoundaryIntent(forward: true),
+  'pageDownAndModifySelection:': const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
   // Escape when there's no IME selection
-  'cancelOperation': const DismissIntent(),
+  'cancelOperation:': const DismissIntent(),
 };
 
-/// If this is a recognized editing intent name, performs the appropriate action.
-/// If the intent name is unknown, no action is invoked and `false` is returned.
-bool performEditingIntent(String intentName) {
-  final Intent? intent = _stringToIntent[intentName];
-  if (intent != null) {
-    final BuildContext? primaryContext = primaryFocus?.context;
-    if (primaryContext != null) {
-      final Action<Intent>? action = Actions.maybeFind<Intent>(
-        primaryContext,
-        intent: intent,
-      );
-      if (action != null && action.isEnabled(intent)) {
-        Actions.of(primaryContext).invokeAction(action, intent, primaryContext);
-      }
-    }
-    return true;
-  } else {
-    return false;
-  }
+/// Returns editing intent for selector from NSStandardKeyBindingResponding
+/// if action is supported.
+Intent? intentForMacOSSelector(String selectorName) {
+  return _macosSelectorToIntent[selectorName];
 }

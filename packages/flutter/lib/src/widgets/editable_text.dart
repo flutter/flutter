@@ -21,6 +21,7 @@ import 'binding.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
+import 'default_text_editing_shortcuts.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
@@ -3163,6 +3164,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     setState(() {
       _placeholderLocation = -1;
     });
+  }
+
+  @override
+  void performSelector(String selectorName) {
+    final Intent? intent = intentForMacOSSelector(selectorName);
+    if (intent != null) {
+      final BuildContext? primaryContext = primaryFocus?.context;
+      if (primaryContext != null) {
+        final Action<Intent>? action = Actions.maybeFind<Intent>(
+          primaryContext,
+          intent: intent,
+        );
+        if (action != null && action.isEnabled(intent)) {
+          Actions.of(primaryContext).invokeAction(action, intent, primaryContext);
+        }
+      }
+    }
   }
 
   @override

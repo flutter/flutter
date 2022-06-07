@@ -757,4 +757,9 @@ class FakeTextInputClient with TextInputClient {
   void removeTextPlaceholder() {
     latestMethodCall = 'removeTextPlaceholder';
   }
+
+  @override
+  void performSelector(String selectorName) {
+    latestMethodCall = 'performSelector';
+  }
 }

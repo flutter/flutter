@@ -13,7 +13,6 @@ import 'dart:ui' show
   TextDirection;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/widgets/default_text_editing_shortcuts.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
@@ -1166,6 +1165,10 @@ mixin TextInputClient {
 
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
+
+  /// Performs macOS specific selector from the NSStandardKeyBindingResponding
+  /// protocol.
+  void performSelector(String selectorName) {}
 }
 
 /// An interface to receive focus from the engine.
@@ -1820,8 +1823,8 @@ class TextInput {
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
         break;
-      case 'TextInputClient.performIntent':
-        performEditingIntent(args[1] as String);
+      case 'TextInputClient.performSelector':
+        _currentConnection!._client.performSelector(args[1] as String);
         break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
