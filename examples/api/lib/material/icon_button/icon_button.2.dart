@@ -104,8 +104,9 @@ class ButtonTypesGroup extends StatelessWidget {
                 : BorderSide(color: colors.outline),
             ).copyWith(
               foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed))
+                if (states.contains(MaterialState.pressed)) {
                   return colors.onSurface;
+                }
                 return null;
               }),
             ),
