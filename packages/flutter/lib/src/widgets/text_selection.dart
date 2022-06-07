@@ -978,6 +978,10 @@ class SelectionOverlay {
   /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
+  @Deprecated(
+    'Use `ContextMenuController` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   void showToolbar() {
     if (_toolbar != null) {
       return;
