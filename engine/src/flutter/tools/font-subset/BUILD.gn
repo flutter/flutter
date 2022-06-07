@@ -29,7 +29,7 @@ generated_file("_font-subset-license") {
   license_path =
       rebase_path("//flutter/sky/packages/sky_engine/LICENSE", "//flutter")
   git_url = "https://github.com/flutter/engine/tree/$engine_version"
-  outputs = [ "$target_gen_dir/README.md" ]
+  outputs = [ "$target_gen_dir/LICENSE.font-subset.md" ]
   contents = [
     "# font-subset",
     "",
@@ -64,8 +64,8 @@ zip_bundle("font-subset") {
       destination = "const_finder.dart.snapshot"
     },
     {
-      source = "$target_gen_dir/README.md"
-      destination = "README.md"
+      source = "$target_gen_dir/LICENSE.font-subset.md"
+      destination = "LICENSE.font-subset.md"
     },
   ]
 
