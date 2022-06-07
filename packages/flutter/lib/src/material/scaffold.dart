@@ -1617,7 +1617,7 @@ class Scaffold extends StatefulWidget {
   /// [Navigator.pop].
   ///
   /// {@tool dartpad}
-  /// To disable the drawer edge swipe, set the
+  /// To disable the drawer edge swipe on mobile, set the
   /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
   /// it.
@@ -1739,15 +1739,19 @@ class Scaffold extends StatefulWidget {
   final double? drawerEdgeDragWidth;
 
   /// Determines if the [Scaffold.drawer] can be opened with a drag
-  /// gesture.
+  /// gesture on mobile.
   ///
-  /// By default, the drag gesture is enabled.
+  /// On desktop platforms, the drawer is not draggable.
+  ///
+  /// By default, the drag gesture is enabled on mobile.
   final bool drawerEnableOpenDragGesture;
 
   /// Determines if the [Scaffold.endDrawer] can be opened with a
-  /// drag gesture.
+  /// gesture on mobile.
   ///
-  /// By default, the drag gesture is enabled.
+  /// On desktop platforms, the drawer is not draggable.
+  ///
+  /// By default, the drag gesture is enabled on mobile.
   final bool endDrawerEnableOpenDragGesture;
 
   /// Restoration ID to save and restore the state of the [Scaffold].
