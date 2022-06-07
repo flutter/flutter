@@ -45,6 +45,7 @@ Future<void> main(List<String> args) async {
     'card_elevated.json',
     'card_filled.json',
     'card_outlined.json',
+    'checkbox.json',
     'chip_assist.json',
     'chip_filter.json',
     'chip_input.json',
