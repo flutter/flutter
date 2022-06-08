@@ -116,7 +116,7 @@ class DatePickerThemeData with Diagnosticable {
 
   @override
   int get hashCode {
-    return hashValues(
+    return Object.hash(
       backgroundColor,
       entryModeIconColor,
       helpTextStyle,
@@ -129,10 +129,12 @@ class DatePickerThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DatePickerThemeData &&
         other.backgroundColor == backgroundColor &&
         other.entryModeIconColor == entryModeIconColor &&
@@ -165,11 +167,10 @@ class DatePickerTheme extends InheritedTheme {
   /// Creates a date picker theme that controls the configurations for
   /// date pickers displayed in its widget subtree.
   const DatePickerTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+    required super.child,
+  })  : assert(data != null);
 
   /// The properties for descendant date picker widgets.
   final DatePickerThemeData data;

@@ -261,11 +261,10 @@ DatePickerThemeData _datePickerTheme() {
 
 class _DatePickerLauncher extends StatelessWidget {
   const _DatePickerLauncher({
-    Key? key,
     this.themeData,
     this.entryMode = DatePickerEntryMode.calendar,
     this.initialDate,
-  }) : super(key: key);
+  });
 
   final ThemeData? themeData;
   final DatePickerEntryMode entryMode;
