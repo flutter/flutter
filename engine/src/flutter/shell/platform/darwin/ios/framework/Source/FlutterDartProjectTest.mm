@@ -71,6 +71,15 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(settings.enable_impeller, NO);
 }
 
+- (void)testEnableTraceSystraceSettingIsCorrectlyParsed {
+  NSBundle* mainBundle = [NSBundle mainBundle];
+  NSNumber* enableTraceSystrace = [mainBundle objectForInfoDictionaryKey:@"FLTTraceSystrace"];
+  XCTAssertNotNil(enableTraceSystrace);
+  XCTAssertEqual(enableTraceSystrace.boolValue, NO);
+  auto settings = FLTDefaultSettingsForBundle();
+  XCTAssertEqual(settings.trace_systrace, NO);
+}
+
 - (void)testEmptySettingsAreCorrect {
   XCTAssertFalse([FlutterDartProject allowsArbitraryLoads:[[NSDictionary alloc] init]]);
   XCTAssertEqualObjects(@"", [FlutterDartProject domainNetworkPolicy:[[NSDictionary alloc] init]]);

@@ -167,6 +167,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
     settings.enable_impeller = enableImpeller.boolValue;
   }
 
+  NSNumber* enableTraceSystrace = [mainBundle objectForInfoDictionaryKey:@"FLTTraceSystrace"];
+  // Change the default only if the option is present.
+  if (enableTraceSystrace != nil) {
+    settings.trace_systrace = enableTraceSystrace.boolValue;
+  }
+
   // Leak Dart VM settings, set whether leave or clean up the VM after the last shell shuts down.
   NSNumber* leakDartVM = [mainBundle objectForInfoDictionaryKey:@"FLTLeakDartVM"];
   // It will change the default leak_vm value in settings only if the key exists.
