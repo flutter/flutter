@@ -57,6 +57,7 @@ void main() {
       await binding.pump();
       expect(binding.window.frameData.frameNumber, 3);
     }, () {});
+    binding.postTest();
     binding.window.clearAllTestValues();
     expect(binding.window.frameData.frameNumber, 0);
   });
