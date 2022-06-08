@@ -682,7 +682,6 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       initialSize: widget.initialChildSize,
       onSizeChanged: _setExtent,
     );
-
     // Modify the existing scroll controller instead of replacing it so that
     // developers listening to the controller do not have to rebuild their listeners.
     _scrollController.extent = _extent;
@@ -701,7 +700,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
         for (int index = 0; index < _scrollController.positions.length; index++) {
           final _DraggableScrollableSheetScrollPosition position =
-          _scrollController.positions.elementAt(index) as _DraggableScrollableSheetScrollPosition;
+            _scrollController.positions.elementAt(index) as _DraggableScrollableSheetScrollPosition;
           position.goBallistic(0);
         }
       });
