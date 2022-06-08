@@ -766,8 +766,8 @@ class TextEditingValue {
     this.composing = TextRange.empty,
   }) : assert(text != null),
        // The constructor does not verified that `selection` and `composing` are
-       // valid ranges within `text`, and is unable to do so due to limitation 
-       // of const constructors. Some checks are performed by assertion 
+       // valid ranges within `text`, and is unable to do so due to limitation
+       // of const constructors. Some checks are performed by assertion
        // in other occasions. See `_textRangeIsValid`.
        assert(selection != null),
        assert(composing != null);
