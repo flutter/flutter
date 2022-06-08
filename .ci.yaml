@@ -2709,6 +2709,22 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac_arm64_ios module_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac", "arm64"]
+      task_name: module_test_ios
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2743,6 +2759,27 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly"]
+      task_name: plugin_lint_mac
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - packages/integration_test/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64_ios plugin_lint_mac
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "arm64ruby", "version": "version:311_3"}
+        ]
+      tags: >
+        ["devicelab", "ios", "mac", "arm64"]
       task_name: plugin_lint_mac
     scheduler: luci
     runIf:
