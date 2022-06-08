@@ -2097,7 +2097,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _floatingCursorResetController!.stop();
           _onFloatingCursorResetTick();
         }
-        // Stop cursor blinking and making it visable
+        // Stop cursor blinking and making it visable.
         _stopCursorTimer();
         _cursorBlinkOpacityController!.value = 1.0;
 
