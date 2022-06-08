@@ -159,7 +159,7 @@ def BuildEngineExecutableCommand(
       gtest_parallel = os.path.join(
           buildroot_dir, 'third_party', 'gtest-parallel', 'gtest-parallel'
       )
-      test_command = ['python', gtest_parallel] + test_command
+      test_command = ['python3', gtest_parallel] + test_command
 
   return test_command
 
@@ -181,13 +181,15 @@ def RunEngineExecutable(
     return
 
   unstripped_exe = os.path.join(build_dir, 'exe.unstripped', executable_name)
+  env = os.environ.copy()
   # We cannot run the unstripped binaries directly when coverage is enabled.
   if IsLinux() and os.path.exists(unstripped_exe) and not coverage:
     # Some tests depend on the EGL/GLES libraries placed in the build directory.
-    env = os.environ.copy()
     env['LD_LIBRARY_PATH'] = os.path.join(build_dir, 'lib.unstripped')
+  elif IsMac():
+    env['DYLD_LIBRARY_PATH'] = build_dir
   else:
-    env = None
+    env['PATH'] = build_dir + ":" + env['PATH']
 
   print('Running %s in %s' % (executable_name, cwd))
 
@@ -199,8 +201,6 @@ def RunEngineExecutable(
       gtest=gtest,
   )
 
-  if not env:
-    env = os.environ.copy()
   env['FLUTTER_BUILD_DIRECTORY'] = build_dir
   for key, value in extra_env.items():
     env[key] = value
@@ -1029,7 +1029,7 @@ def main():
   variants_to_skip = ['host_release', 'host_profile']
   if ('engine' in types or
       'font-subset' in types) and args.variant not in variants_to_skip:
-    RunCmd(['python', 'test.py'], cwd=font_subset_dir)
+    RunCmd(['python3', 'test.py'], cwd=font_subset_dir)
 
 
 if __name__ == '__main__':

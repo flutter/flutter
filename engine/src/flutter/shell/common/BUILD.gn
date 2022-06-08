@@ -302,6 +302,11 @@ if (enable_unittests) {
     } else {
       # TODO(63837): This test is hard-coded to use a TestGLSurface so it cannot run on fuchsia.
       sources += [ "shell_io_manager_unittests.cc" ]
+
+      # Swiftshader only supports x86/64. Only needed on non-Fuchsia platforms.
+      if (shell_enable_vulkan && (target_cpu == "x86" || target_cpu == "x64")) {
+        deps += [ "//third_party/swiftshader_flutter:swiftshader_vulkan" ]
+      }
     }
   }
 }
