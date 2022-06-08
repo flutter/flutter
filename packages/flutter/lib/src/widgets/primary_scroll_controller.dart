@@ -109,12 +109,14 @@ class PrimaryScrollController extends InheritedWidget {
   /// inherit the PrimaryScrollController.
   static bool shouldInherit(BuildContext context, Axis scrollDirection) {
     final PrimaryScrollController? result = context.findAncestorWidgetOfExactType<PrimaryScrollController>();
-    if (result == null)
+    if (result == null) {
       return false;
+    }
 
     final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
-    if (result.automaticallyInheritForPlatforms.contains(platform))
+    if (result.automaticallyInheritForPlatforms.contains(platform)) {
       return result.scrollDirection == scrollDirection;
+    }
     return false;
   }
 
