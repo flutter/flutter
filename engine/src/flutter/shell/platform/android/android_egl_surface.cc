@@ -60,6 +60,17 @@ void LogLastEGLError() {
   FML_LOG(ERROR) << "Unknown EGL Error";
 }
 
+namespace {
+
+static bool HasExtension(const char* extensions, const char* name) {
+  const char* r = strstr(extensions, name);
+  auto len = strlen(name);
+  // check that the extension name is terminated by space or null terminator
+  return r != nullptr && (r[len] == ' ' || r[len] == 0);
+}
+
+}  // namespace
+
 class AndroidEGLSurfaceDamage {
  public:
   void init(EGLDisplay display, EGLContext context) {
@@ -170,13 +181,6 @@ class AndroidEGLSurfaceDamage {
 
   bool partial_redraw_supported_;
 
-  bool HasExtension(const char* extensions, const char* name) {
-    const char* r = strstr(extensions, name);
-    auto len = strlen(name);
-    // check that the extension name is terminated by space or null terminator
-    return r != nullptr && (r[len] == ' ' || r[len] == 0);
-  }
-
   std::list<SkIRect> damage_history_;
 };
 
@@ -188,6 +192,14 @@ AndroidEGLSurface::AndroidEGLSurface(EGLSurface surface,
       context_(context),
       damage_(std::make_unique<AndroidEGLSurfaceDamage>()) {
   damage_->init(display_, context);
+
+  const char* extensions = eglQueryString(display, EGL_EXTENSIONS);
+
+  if (HasExtension(extensions, "EGL_ANDROID_presentation_time")) {
+    presentation_time_proc_ =
+        reinterpret_cast<PFNEGLPRESENTATIONTIMEANDROIDPROC>(
+            eglGetProcAddress("eglPresentationTimeANDROID"));
+  }
 }
 
 AndroidEGLSurface::~AndroidEGLSurface() {
@@ -238,6 +250,16 @@ AndroidEGLSurfaceMakeCurrentStatus AndroidEGLSurface::MakeCurrent() const {
 void AndroidEGLSurface::SetDamageRegion(
     const std::optional<SkIRect>& buffer_damage) {
   damage_->SetDamageRegion(display_, surface_, buffer_damage);
+}
+
+bool AndroidEGLSurface::SetPresentationTime(
+    const fml::TimePoint& presentation_time) {
+  if (presentation_time_proc_) {
+    const auto time_ns = presentation_time.ToEpochDelta().ToNanoseconds();
+    return presentation_time_proc_(display_, surface_, time_ns);
+  } else {
+    return false;
+  }
 }
 
 bool AndroidEGLSurface::SwapBuffers(
