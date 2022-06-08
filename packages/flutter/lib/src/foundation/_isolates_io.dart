@@ -10,6 +10,10 @@ import 'package:meta/meta.dart';
 import 'constants.dart';
 import 'isolates.dart' as isolates;
 
+export 'dart:async' show FutureOr;
+
+export 'isolates.dart' show ComputeCallback;
+
 /// The dart:io implementation of [isolate.compute].
 Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String? debugLabel }) async {
   debugLabel ??= kReleaseMode ? 'compute' : callback.toString();
