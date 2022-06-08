@@ -48,6 +48,8 @@
 	<false/>
 	<key>FLTEnableImpeller</key>
 	<false/>
+	<key>FLTTraceSystrace</key>
+	<false/>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
