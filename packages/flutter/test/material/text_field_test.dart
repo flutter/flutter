@@ -11344,7 +11344,7 @@ void main() {
     expect(controller.selection.extentOffset, 26);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgets('can shift + tap + drag to select with a keyboard, reversed (Apple platforms)', (WidgetTester tester) async {
+  testWidgets('can shift + tap + drag to select with a keyboard, reversed (MacOS)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -11438,9 +11438,205 @@ void main() {
     await gesture.up();
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 14);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
-  testWidgets('can shift + tap + drag to select with a keyboard, reversed (non-Apple platforms)', (WidgetTester tester) async {
+  testWidgets('can shift + tap + drag to select with a keyboard, reversed (iOS)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home:  Material(
+          child: Center(
+            child: TextField(controller: controller),
+          ),
+        ),
+      ),
+    );
+
+    // Make a selection from right to left.
+    await tester.tapAt(textOffsetToPosition(tester, 23));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 23);
+    await tester.pump(kDoubleTapTimeout);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    final TestGesture gesture =
+    await tester.startGesture(
+      textOffsetToPosition(tester, 8),
+      pointer: 7,
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 8);
+
+    // Expand the selection a bit.
+    await gesture.down(textOffsetToPosition(tester, 8));
+    await gesture.moveTo(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 5);
+
+    // Move back to the original selection.
+    await gesture.moveTo(textOffsetToPosition(tester, 8));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 8);
+
+    // Collapse the selection.
+    await gesture.moveTo(textOffsetToPosition(tester, 23));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 23);
+
+    // Invert the selection. The base jumps to the original extent.
+    await gesture.moveTo(textOffsetToPosition(tester, 24));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 24);
+
+    // Continuing to move in the inverted direction expands the selection.
+    await gesture.moveTo(textOffsetToPosition(tester, 27));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 27);
+
+    // Move back to the original base.
+    await gesture.moveTo(textOffsetToPosition(tester, 23));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 23);
+
+    // Continue to move past the original base, which will cause the selection
+    // to invert back to the original orientation.
+    await gesture.moveTo(textOffsetToPosition(tester, 22));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 22);
+
+    // Continuing to select in this direction selects just like it did
+    // originally.
+    await gesture.moveTo(textOffsetToPosition(tester, 16));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 16);
+
+    // Releasing the shift key has no effect; the selection continues as the
+    // mouse continues to move.
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 16);
+    await gesture.moveTo(textOffsetToPosition(tester, 14));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 14);
+
+    await gesture.up();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 14);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets('can shift + tap + drag to select with a keyboard, reversed (Android, Fuchsia)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home:  Material(
+          child: Center(
+            child: TextField(controller: controller),
+          ),
+        ),
+      ),
+    );
+
+    // Make a selection from right to left.
+    await tester.tapAt(textOffsetToPosition(tester, 23));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 23);
+    await tester.pump(kDoubleTapTimeout);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    final TestGesture gesture =
+    await tester.startGesture(
+      textOffsetToPosition(tester, 8),
+      pointer: 7,
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 8);
+
+    // Expand the selection a bit.
+    await gesture.down(textOffsetToPosition(tester, 8));
+    await gesture.moveTo(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 5);
+
+    // Move back to the original selection.
+    await gesture.moveTo(textOffsetToPosition(tester, 8));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 8);
+
+    // Collapse the selection.
+    await gesture.moveTo(textOffsetToPosition(tester, 23));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 23);
+
+    // Invert the selection. The selection is not restored like it would be on
+    // iOS and Mac.
+    await gesture.moveTo(textOffsetToPosition(tester, 24));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 24);
+
+    // Continuing to move in the inverted direction expands the selection.
+    await gesture.moveTo(textOffsetToPosition(tester, 27));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 27);
+
+    // Move back to the original base.
+    await gesture.moveTo(textOffsetToPosition(tester, 23));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 23);
+
+    // Continue to move past the original base.
+    await gesture.moveTo(textOffsetToPosition(tester, 22));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 22);
+
+    // Continuing to select in this direction selects just like it did
+    // originally.
+    await gesture.moveTo(textOffsetToPosition(tester, 16));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 16);
+
+    // Releasing the shift key has no effect; the selection continues as the
+    // mouse continues to move.
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 16);
+    await gesture.moveTo(textOffsetToPosition(tester, 14));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 14);
+
+    await gesture.up();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 14);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
+
+  testWidgets('can shift + tap + drag to select with a keyboard, reversed (Linux, Windows)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -11534,7 +11730,7 @@ void main() {
     await gesture.up();
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 14);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux,  TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }));
 
   // Regression test for https://github.com/flutter/flutter/issues/101587.
   testWidgets('Right clicking menu behavior', (WidgetTester tester) async {
