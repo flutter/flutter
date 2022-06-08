@@ -157,7 +157,7 @@ class _ElevationOpacity {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Generated version v0_99
 
 // Surface tint opacities based on elevations according to the
 // Material Design 3 specification:

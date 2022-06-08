@@ -1967,6 +1967,72 @@ targets:
       task_name: new_gallery__transition_perf
     scheduler: luci
 
+  - name: Linux_android flutter_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: flutter_gallery__transition_perf
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__transition_perf_e2e
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: flutter_gallery__transition_perf_e2e
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__transition_perf_hybrid
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: flutter_gallery__transition_perf_hybrid
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery__transition_perf_with_semantics
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: flutter_gallery__transition_perf_with_semantics
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery_sksl_warmup__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: flutter_gallery_sksl_warmup__transition_perf
+    scheduler: luci
+
+  - name: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: flutter_gallery_sksl_warmup__transition_perf_e2e
+    scheduler: luci
+
   - name: Linux_samsung_s10 new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2233,7 +2299,6 @@ targets:
       task_name: gradient_dynamic_perf__e2e_summary
 
   - name: Linux_android gradient_consistent_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
