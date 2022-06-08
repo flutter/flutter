@@ -173,6 +173,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
     settings.trace_systrace = enableTraceSystrace.boolValue;
   }
 
+  NSNumber* enableDartProfiling = [mainBundle objectForInfoDictionaryKey:@"FLTEnableDartProfiling"];
+  // Change the default only if the option is present.
+  if (enableDartProfiling != nil) {
+    settings.enable_dart_profiling = enableDartProfiling.boolValue;
+  }
+
   // Leak Dart VM settings, set whether leave or clean up the VM after the last shell shuts down.
   NSNumber* leakDartVM = [mainBundle objectForInfoDictionaryKey:@"FLTLeakDartVM"];
   // It will change the default leak_vm value in settings only if the key exists.

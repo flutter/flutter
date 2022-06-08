@@ -80,6 +80,15 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(settings.trace_systrace, NO);
 }
 
+- (void)testEnableDartProflingSettingIsCorrectlyParsed {
+  NSBundle* mainBundle = [NSBundle mainBundle];
+  NSNumber* enableTraceSystrace = [mainBundle objectForInfoDictionaryKey:@"FLTEnableDartProfiling"];
+  XCTAssertNotNil(enableTraceSystrace);
+  XCTAssertEqual(enableTraceSystrace.boolValue, NO);
+  auto settings = FLTDefaultSettingsForBundle();
+  XCTAssertEqual(settings.trace_systrace, NO);
+}
+
 - (void)testEmptySettingsAreCorrect {
   XCTAssertFalse([FlutterDartProject allowsArbitraryLoads:[[NSDictionary alloc] init]]);
   XCTAssertEqualObjects(@"", [FlutterDartProject domainNetworkPolicy:[[NSDictionary alloc] init]]);
