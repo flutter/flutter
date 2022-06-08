@@ -156,6 +156,9 @@ void AndroidSurfaceGLSkia::GLContextSetDamageRegion(
 bool AndroidSurfaceGLSkia::GLContextPresent(const GLPresentInfo& present_info) {
   FML_DCHECK(IsValid());
   FML_DCHECK(onscreen_surface_);
+  if (present_info.presentation_time) {
+    onscreen_surface_->SetPresentationTime(*present_info.presentation_time);
+  }
   return onscreen_surface_->SwapBuffers(present_info.damage);
 }
 

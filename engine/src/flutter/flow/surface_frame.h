@@ -11,6 +11,7 @@
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/display_list/display_list_canvas_recorder.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/time/time_point.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -72,6 +73,10 @@ class SurfaceFrame {
     //
     // Corresponds to EGL_KHR_partial_update
     std::optional<SkIRect> buffer_damage;
+
+    // Time at which this frame is scheduled to be presented. This is a hint
+    // that can be passed to the platform to drop queued frames.
+    std::optional<fml::TimePoint> presentation_time;
   };
 
   bool Submit();

@@ -266,7 +266,11 @@ bool GPUSurfaceGLSkia::PresentSurface(const SurfaceFrame& frame,
     onscreen_surface_->getCanvas()->flush();
   }
 
-  GLPresentInfo present_info = {fbo_id_, frame.submit_info().frame_damage};
+  GLPresentInfo present_info = {
+      .fbo_id = fbo_id_,
+      .damage = frame.submit_info().frame_damage,
+      .presentation_time = frame.submit_info().presentation_time,
+  };
   if (!delegate_->GLContextPresent(present_info)) {
     return false;
   }
