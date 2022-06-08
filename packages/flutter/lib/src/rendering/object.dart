@@ -1579,34 +1579,56 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     late bool result;
     assert(() {
       if (_debugDisposed) {
-        result = false;
-        return true;
+        throw FlutterError('Mutations not allowed: $this has already been disposed.');
       }
-      if (owner != null && !owner!.debugDoingLayout) {
+
+      final PipelineOwner? owner = this.owner;
+      // Detached nodes are allowed to mutate and the "can perform mutations`
+      // check will be performed when they re-attach. This assert is
+      // only useful during layout.
+      if (owner == null || !owner.debugDoingLayout) {
         result = true;
         return true;
       }
-      RenderObject node = this;
-      while (true) {
-        if (node._doingThisLayoutWithCallback) {
-          result = true;
-          break;
-        }
-        if (owner != null && owner!._debugAllowMutationsToDirtySubtrees && node._needsLayout) {
-          result = true;
-          break;
-        }
-        if (node._debugMutationsLocked) {
-          result = false;
-          break;
-        }
-        if (node.parent is! RenderObject) {
-          result = true;
-          break;
-        }
-        node = node.parent! as RenderObject;
+
+      if (owner._debugAllowMutationsToDirtySubtrees && _needsLayout) {
+        result = true;
+        return true;
       }
-      return true;
+
+      RenderObject? activeLayoutRoot = this;
+      while (activeLayoutRoot != null && !activeLayoutRoot._debugMutationsLocked) {
+        final AbstractNode? p = activeLayoutRoot.parent;
+        activeLayoutRoot = p is RenderObject ? p : null;
+      }
+
+      // Mutations are not permitted if the PipelineOwner is currently working
+      // on a render subtree that does not include this node. Otherwise,
+      // it's allowed to mutate the subtree within a layout callback.
+      if (activeLayoutRoot != null && activeLayoutRoot._doingThisLayoutWithCallback) {
+        result = true;
+        return true;
+      }
+
+      assert(activeLayoutRoot == null || activeLayoutRoot._debugMutationsLocked);
+      result = false;
+      if (activeLayoutRoot == null) {
+        throw FlutterError(
+          'Mutations on out-of-band RenderObjects are not allowed:\n'
+          '$this is mutated from ${RenderObject.debugActiveLayout}, while none of its ancestors is actively doing layout.'
+        );
+      }
+      if (activeLayoutRoot == this) {
+        throw FlutterError(
+          '$this is mutated while actively doing layout.'
+        );
+      }
+      throw FlutterError(
+        'Mutations on $this from ${RenderObject.debugActiveLayout} are not allowed:\n'
+        'their common ancestor $activeLayoutRoot is actively performing layout.\n'
+        'Mutating the layout of $this may cause some RenderObjects in its subtree to be laid out more than once.\n'
+        'Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'
+      );
     }());
     return result;
   }
