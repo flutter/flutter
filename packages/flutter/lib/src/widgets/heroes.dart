@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -137,7 +138,10 @@ enum HeroFlightDirection {
 /// is, by default, used to do the transition: when going from route A to route
 /// B, route B's hero's widget is placed over route A's hero's widget. If a
 /// [flightShuttleBuilder] is supplied, its output widget is shown during the
-/// flight transition instead.
+/// flight transition instead. If overriding [flightShuttleBuilder] leads to
+/// gaps or jumps arising in the animation, try interpolating between
+/// [MediaQueryData] padding values of the different contexts in the shuttle
+/// builder.
 ///
 /// By default, both route A and route B's heroes are hidden while the
 /// transitioning widget is animating in-flight above the 2 routes.
@@ -910,8 +914,8 @@ class HeroController extends NavigatorObserver {
     final NavigatorState? navigator = this.navigator;
     final OverlayState? overlay = navigator?.overlay;
     // If the navigator or the overlay was removed before this end-of-frame
-    // callback was called, then don't actually start a transition, and we don'
-    // t have to worry about any Hero widget we might have hidden in a previous
+    // callback was called, then don't actually start a transition, and we don't
+    // have to worry about any Hero widget we might have hidden in a previous
     // flight, or ongoing flights.
     if (navigator == null || overlay == null) {
       return;
@@ -998,7 +1002,32 @@ class HeroController extends NavigatorObserver {
     BuildContext toHeroContext,
   ) {
     final Hero toHero = toHeroContext.widget as Hero;
-    return toHero.child;
+    if (MediaQuery.maybeOf(toHeroContext) == null && MediaQuery.maybeOf(fromHeroContext) == null) {
+      return toHero.child;
+    }
+    final MediaQueryData chosenMediaQueryData = MediaQuery.maybeOf(toHeroContext) ?? MediaQuery.of(fromHeroContext);
+
+    final EdgeInsets fromHeroPadding = MediaQuery.maybeOf(fromHeroContext)?.padding?? EdgeInsets.zero;
+    final EdgeInsets toHeroPadding = MediaQuery.maybeOf(toHeroContext)?.padding?? EdgeInsets.zero;
+
+
+    return AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+              data: chosenMediaQueryData.copyWith(
+                padding: (flightDirection == HeroFlightDirection.push)
+                  ? Tween<EdgeInsets>(
+                      begin: fromHeroPadding,
+                      end: toHeroPadding,
+                    ).evaluate(animation)
+                  : Tween<EdgeInsets>(
+                      begin: toHeroPadding,
+                      end: fromHeroPadding,
+                    ).evaluate(animation),
+              ),
+              child: toHero.child);
+        });
   }
 }
 
