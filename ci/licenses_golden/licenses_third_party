@@ -1,4 +1,4 @@
-Signature: 11b568dda316906c42684b9f87a94126
+Signature: 1c8fef02ef3d6abf350c61f4513d1f71
 
 UNUSED LICENSES:
 
@@ -9984,8 +9984,8 @@ FILE: ../../../third_party/dart/benchmarks/AsyncLiveVars/dart/AsyncLiveVars.dart
 FILE: ../../../third_party/dart/benchmarks/AsyncLiveVars/dart2/AsyncLiveVars.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateBaseOverhead/dart/IsolateBaseOverhead.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateBaseOverhead/dart2/IsolateBaseOverhead.dart
-FILE: ../../../third_party/dart/benchmarks/IsolateSendExit/dart/IsolateSendExitLatency.dart
-FILE: ../../../third_party/dart/benchmarks/IsolateSendExit/dart2/IsolateSendExitLatency.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateSendExitLatency/dart/IsolateSendExitLatency.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateSendExitLatency/dart2/IsolateSendExitLatency.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart/Iterators.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart/data.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart2/Iterators.dart
@@ -10025,6 +10025,8 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/hash_factories.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/identical_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/internal_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_helper.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_util_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_util_wasm_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/list.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/math_patch.dart
@@ -10442,8 +10444,8 @@ FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyJson350KB/dart2/laten
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart/latency.dart
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart2/EventLoopLatencyRegexp.dart
 FILE: ../../../third_party/dart/benchmarks/EventLoopLatencyRegexp/dart2/latency.dart
-FILE: ../../../third_party/dart/benchmarks/IsolateSendExit/dart/latency.dart
-FILE: ../../../third_party/dart/benchmarks/IsolateSendExit/dart2/latency.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateSendExitLatency/dart/latency.dart
+FILE: ../../../third_party/dart/benchmarks/IsolateSendExitLatency/dart2/latency.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart2/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/MD5/dart/md5.dart
