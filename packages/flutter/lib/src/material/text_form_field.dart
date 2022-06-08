@@ -18,8 +18,8 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// A [Form] ancestor is not required. The [Form] simply makes it easier to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
-/// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
-/// save or reset the form field.
+/// pass a [GlobalKey<FormFieldState>] to the constructor and use
+/// [GlobalKey.currentState] to save or reset the form field.
 ///
 /// When a [controller] is specified, its [TextEditingController.text]
 /// defines the [initialValue]. If this [FormField] is part of a scrolling
@@ -34,8 +34,8 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// {@macro flutter.material.textfield.wantKeepAlive}
 ///
 /// Remember to call [TextEditingController.dispose] of the [TextEditingController]
-/// when it is no longer needed. This will ensure we discard any resources used
-/// by the object.
+/// when it is no longer needed. This will ensure any resources used by the object
+/// are discarded.
 ///
 /// By default, `decoration` will apply the [ThemeData.inputDecorationTheme] for
 /// the current context to the [InputDecoration], see
