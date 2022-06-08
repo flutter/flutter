@@ -77,6 +77,7 @@ enum ScriptCategory {
 /// See also:
 ///
 ///  * <https://material.io/design/typography/>
+///  * <https://m3.material.io/styles/typography>
 @immutable
 class Typography with Diagnosticable {
   /// Creates a typography instance.
@@ -157,6 +158,9 @@ class Typography with Diagnosticable {
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2021], [dense2021], and [tall2021].
+  ///
+  /// See also:
+  ///  * <https://m3.material.io/styles/typography>
   factory Typography.material2021({
     TargetPlatform? platform = TargetPlatform.android,
     TextTheme? black,

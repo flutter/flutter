@@ -133,7 +133,6 @@ targets:
       validation_name: Analyze
 
   - name: Linux android views
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/99001
     recipe: flutter/android_views
     properties:
       dependencies: >-
@@ -1948,6 +1947,7 @@ targets:
     bringup: true
 
   - name: Linux_android new_gallery__crane_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/105611
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1970,7 +1970,6 @@ targets:
   - name: Linux_android flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1981,7 +1980,6 @@ targets:
   - name: Linux_android flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1992,7 +1990,6 @@ targets:
   - name: Linux_android flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2003,7 +2000,6 @@ targets:
   - name: Linux_android flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2014,7 +2010,6 @@ targets:
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2025,7 +2020,6 @@ targets:
   - name: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3478,7 +3472,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios new_gallery_ios__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/96401
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

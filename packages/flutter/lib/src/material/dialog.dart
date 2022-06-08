@@ -169,10 +169,10 @@ class Dialog extends StatelessWidget {
 
 /// A Material Design alert dialog.
 ///
-/// An alert dialog informs the user about situations that require
-/// acknowledgement. An alert dialog has an optional title and an optional list
-/// of actions. The title is displayed above the content and the actions are
-/// displayed below the content.
+/// An alert dialog (also known as a basic dialog) informs the user about
+/// situations that require acknowledgement. An alert dialog has an optional
+/// title and an optional list of actions. The title is displayed above the
+/// content and the actions are displayed below the content.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
 ///
@@ -251,6 +251,7 @@ class Dialog extends StatelessWidget {
 ///  * [CupertinoAlertDialog], an iOS-styled alert dialog.
 ///  * [showDialog], which actually displays the dialog and returns its result.
 ///  * <https://material.io/design/components/dialogs.html#alert-dialog>
+///  * <https://m3.material.io/components/dialogs>
 class AlertDialog extends StatelessWidget {
   /// Creates an alert dialog.
   ///
@@ -1060,6 +1061,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/dialogs.html>
+///  * <https://m3.material.io/components/dialogs>
 Future<T?> showDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
