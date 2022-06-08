@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' show Codec, FrameInfo, ImmutableBuffer;
 
 import 'package:flutter/foundation.dart';
