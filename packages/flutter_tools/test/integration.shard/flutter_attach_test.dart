@@ -20,7 +20,6 @@ Future<int> getFreePort() async {
 }
 
 void main() {
-  late FlutterRunTestDriver flutterRun, flutterAttach;
   final BasicProject project = BasicProject();
   late Directory tempDir;
 
@@ -34,6 +33,7 @@ void main() {
   });
 
   group('DDS in flutter run', () {
+    late FlutterRunTestDriver flutterRun, flutterAttach;
     setUp(() {
       flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
       flutterAttach = FlutterRunTestDriver(
@@ -122,6 +122,7 @@ void main() {
   });
 
   group('DDS in flutter attach', () {
+    late FlutterRunTestDriver flutterRun, flutterAttach;
     setUp(() {
       flutterRun = FlutterRunTestDriver(
         tempDir,
@@ -131,7 +132,6 @@ void main() {
       flutterAttach = FlutterRunTestDriver(
         tempDir,
         logPrefix: 'ATTACH  ',
-        spawnDdsInstance: true,
       );
     });
 
@@ -146,7 +146,7 @@ void main() {
       await flutterRun.run(withDebugger: true);
       await flutterAttach.attach(
         flutterRun.vmServicePort!,
-        additionalCommandArgs: [
+        additionalCommandArgs: <String>[
           '--dds-port=$ddsPort',
         ],
       );
