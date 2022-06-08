@@ -725,6 +725,7 @@ void main() {
   testWidgets('Switch.adaptive', (WidgetTester tester) async {
     bool value = false;
     const Color inactiveTrackColor = Colors.pink;
+    const Color inactiveThumbColor = Colors.green;
 
     Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
@@ -736,6 +737,7 @@ void main() {
                 child: Switch.adaptive(
                   value: value,
                   inactiveTrackColor: inactiveTrackColor,
+                  inactiveThumbColor: inactiveThumbColor,
                   onChanged: (bool newValue) {
                     setState(() {
                       value = newValue;
@@ -756,6 +758,7 @@ void main() {
 
       final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
       expect(adaptiveSwitch.trackColor, inactiveTrackColor, reason: 'on ${platform.name}');
+      expect(adaptiveSwitch.thumbColor, inactiveThumbColor, reason: 'on ${platform.name}');
 
       expect(value, isFalse, reason: 'on ${platform.name}');
       await tester.tap(find.byType(Switch));

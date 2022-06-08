@@ -437,11 +437,12 @@ class Switch extends StatelessWidget {
         height: size.height,
         alignment: Alignment.center,
         child: CupertinoSwitch(
-            dragStartBehavior: dragStartBehavior,
-            value: value,
-            onChanged: onChanged,
-            activeColor: activeColor,
-            trackColor: inactiveTrackColor,
+          dragStartBehavior: dragStartBehavior,
+          value: value,
+          onChanged: onChanged,
+          activeColor: activeColor,
+          trackColor: inactiveTrackColor,
+          thumbColor: inactiveThumbColor,
         ),
       ),
     );
