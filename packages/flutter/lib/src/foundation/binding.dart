@@ -14,7 +14,6 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'diagnostics.dart';
 import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
