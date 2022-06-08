@@ -10,6 +10,7 @@
 
 namespace impeller {
 
+class TextureGLES;
 class SamplerLibraryGLES;
 class ProcTableGLES;
 
@@ -18,7 +19,8 @@ class SamplerGLES final : public Sampler,
  public:
   ~SamplerGLES();
 
-  bool ConfigureBoundTexture(const ProcTableGLES& gl) const;
+  bool ConfigureBoundTexture(const TextureGLES& texture,
+                             const ProcTableGLES& gl) const;
 
  private:
   friend class SamplerLibraryGLES;
