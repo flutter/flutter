@@ -5,9 +5,13 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_EGL_SURFACE_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_EGL_SURFACE_H_
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <KHR/khrplatform.h>
 #include <optional>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/shell/platform/android/android_environment_gl.h"
 #include "third_party/skia/include/core/SkRect.h"
 
@@ -78,6 +82,12 @@ class AndroidEGLSurface {
   void SetDamageRegion(const std::optional<SkIRect>& buffer_damage);
 
   //----------------------------------------------------------------------------
+  /// @brief      Sets the presentation time for the current surface. This
+  //              corresponds to calling eglPresentationTimeAndroid when
+  //              available.
+  bool SetPresentationTime(const fml::TimePoint& presentation_time);
+
+  //----------------------------------------------------------------------------
   /// @brief      This only applies to on-screen surfaces such as those created
   ///             by `AndroidContextGL::CreateOnscreenSurface`.
   ///
@@ -98,6 +108,7 @@ class AndroidEGLSurface {
   const EGLDisplay display_;
   const EGLContext context_;
   std::unique_ptr<AndroidEGLSurfaceDamage> damage_;
+  PFNEGLPRESENTATIONTIMEANDROIDPROC presentation_time_proc_;
 };
 
 }  // namespace flutter
