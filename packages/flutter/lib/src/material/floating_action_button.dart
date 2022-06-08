@@ -89,6 +89,7 @@ enum _FloatingActionButtonType {
 ///  * [Scaffold], in which floating action buttons typically live.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons-floating-action-button.html>
+///  * <https://m3.material.io/components/floating-action-button>
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
@@ -235,6 +236,9 @@ class FloatingActionButton extends StatelessWidget {
   /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
   /// (if specified) must be non-negative.
+  ///
+  /// See also:
+  ///  * <https://m3.material.io/components/extended-fab>
   const FloatingActionButton.extended({
     super.key,
     this.tooltip,
