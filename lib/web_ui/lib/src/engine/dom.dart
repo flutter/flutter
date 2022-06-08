@@ -66,9 +66,9 @@ class DomDocument {}
 extension DomDocumentExtension on DomDocument {
   external DomElement? get documentElement;
   external DomElement? querySelector(String selectors);
-  List<DomElement> querySelectorAll(String selectors) =>
-      js_util.callMethod<List<Object?>>(
-          this, 'querySelectorAll', <Object>[selectors]).cast<DomElement>();
+  Iterable<DomElement> querySelectorAll(String selectors) =>
+      _DomElementListWrapper.create(js_util.callMethod<_DomElementList>(
+          this, 'querySelectorAll', <Object>[selectors]));
   DomElement createElement(String name, [Object? options]) =>
       js_util.callMethod(this, 'createElement',
           <Object>[name, if (options != null) options]) as DomElement;
@@ -172,8 +172,8 @@ class DomElement extends DomNode {}
 DomElement createDomElement(String tag) => domDocument.createElement(tag);
 
 extension DomElementExtension on DomElement {
-  List<DomElement> get children =>
-      js_util.getProperty<List<Object?>>(this, 'children').cast<DomElement>();
+  Iterable<DomElement> get children => _DomElementListWrapper.create(
+      js_util.getProperty<_DomElementList>(this, 'children'));
   external int get clientHeight;
   external int get clientWidth;
   external String get id;
@@ -188,9 +188,9 @@ extension DomElementExtension on DomElement {
   external DomRect getBoundingClientRect();
   external void prepend(DomNode node);
   external DomElement? querySelector(String selectors);
-  List<DomElement> querySelectorAll(String selectors) =>
-      js_util.callMethod<List<Object?>>(
-          this, 'querySelectorAll', <Object>[selectors]).cast<DomElement>();
+  Iterable<DomElement> querySelectorAll(String selectors) =>
+      _DomElementListWrapper.create(js_util.callMethod<_DomElementList>(
+          this, 'querySelectorAll', <Object>[selectors]));
   external void remove();
   external void setAttribute(String name, Object value);
   void appendText(String text) => append(createDomText(text));
@@ -207,16 +207,14 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   set clip(String value) => setProperty('clip', value);
   set clipPath(String value) => setProperty('clip-path', value);
   set transform(String value) => setProperty('transform', value);
-  set transformOrigin(String value) =>
-      setProperty('transform-origin', value);
+  set transformOrigin(String value) => setProperty('transform-origin', value);
   set opacity(String value) => setProperty('opacity', value);
   set color(String value) => setProperty('color', value);
   set top(String value) => setProperty('top', value);
   set left(String value) => setProperty('left', value);
   set right(String value) => setProperty('right', value);
   set bottom(String value) => setProperty('bottom', value);
-  set backgroundColor(String value) =>
-      setProperty('background-color', value);
+  set backgroundColor(String value) => setProperty('background-color', value);
   set pointerEvents(String value) => setProperty('pointer-events', value);
   set filter(String value) => setProperty('filter', value);
   set zIndex(String value) => setProperty('z-index', value);
@@ -251,8 +249,7 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   set borderRadius(String value) => setProperty('border-radius', value);
   set perspective(String value) => setProperty('perspective', value);
   set padding(String value) => setProperty('padding', value);
-  set backgroundImage(String value) =>
-      setProperty('background-image', value);
+  set backgroundImage(String value) => setProperty('background-image', value);
   set border(String value) => setProperty('border', value);
   set mixBlendMode(String value) => setProperty('mix-blend-mode', value);
   set backgroundSize(String value) => setProperty('background-size', value);
@@ -655,11 +652,11 @@ extension DomHTMLTextAreaElementExtension on DomHTMLTextAreaElement {
 class DomClipboard extends DomEventTarget {}
 
 extension DomClipboardExtension on DomClipboard {
-  Future<String> readText() =>
-      js_util.promiseToFuture<String>(js_util.callMethod(this, 'readText', <Object>[]));
+  Future<String> readText() => js_util.promiseToFuture<String>(
+      js_util.callMethod(this, 'readText', <Object>[]));
 
-  Future<dynamic> writeText(String data) =>
-      js_util.promiseToFuture(js_util.callMethod(this, 'readText', <Object>[data]));
+  Future<dynamic> writeText(String data) => js_util
+      .promiseToFuture(js_util.callMethod(this, 'readText', <Object>[data]));
 }
 
 extension DomResponseExtension on DomResponse {
@@ -692,6 +689,57 @@ extension DomKeyboardEventExtension on DomKeyboardEvent {
   external bool? get repeat;
   external bool get shiftKey;
   external bool getModifierState(String keyArg);
+}
+
+/// [_DomElementList] is the shared interface for APIs that return either
+/// `NodeList` or `HTMLCollection`. Do *not* add any API to this class that
+/// isn't support by both JS objects. Furthermore, this is an internal class and
+/// should only be returned as a wrapped object to Dart.
+@JS()
+@staticInterop
+class _DomElementList {}
+
+extension DomElementListExtension on _DomElementList {
+  external int get length;
+  DomElement item(int index) =>
+      js_util.callMethod<DomElement>(this, 'item', <Object>[index]);
+}
+
+class _DomElementListIterator extends Iterator<DomElement> {
+  final _DomElementList elementList;
+  int index = -1;
+
+  _DomElementListIterator(this.elementList);
+
+  @override
+  bool moveNext() {
+    index++;
+    if (index > elementList.length) {
+      throw 'Iterator out of bounds';
+    }
+    return index < elementList.length;
+  }
+
+  @override
+  DomElement get current => elementList.item(index);
+}
+
+class _DomElementListWrapper extends Iterable<DomElement> {
+  final _DomElementList elementList;
+
+  _DomElementListWrapper._(this.elementList);
+
+  /// This is a work around for a `TypeError` which can be triggered by calling
+  /// `toList` on the `Iterable`.
+  static Iterable<DomElement> create(_DomElementList elementList) =>
+      _DomElementListWrapper._(elementList).cast<DomElement>();
+
+  @override
+  Iterator<DomElement> get iterator => _DomElementListIterator(elementList);
+
+  /// Override the length to avoid iterating through the whole collection.
+  @override
+  int get length => elementList.length;
 }
 
 Object? domGetConstructor(String constructorName) =>
