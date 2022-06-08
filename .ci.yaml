@@ -1992,7 +1992,6 @@ targets:
   - name: Linux_android flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
