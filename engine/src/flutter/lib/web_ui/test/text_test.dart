@@ -225,7 +225,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 800.0));
     expect(paragraph.plainText, 'abcdef');
     final List<Element> spans =
-        paragraph.toDomElement().querySelectorAll('flt-span').cast<Element>();
+        paragraph.toDomElement().querySelectorAll('flt-span').cast<Element>().toList();
     expect(spans[0].style.fontFamily, 'Ahem, $fallback, sans-serif');
     // The nested span here should not set it's family to default sans-serif.
     expect(spans[1].style.fontFamily, 'Ahem, $fallback, sans-serif');

@@ -248,7 +248,7 @@ void testMain() {
 
       final DomElement contentAfterReuse = builder2.build().webOnlyRootElement!;
       final List<DomCanvasElement> list =
-          contentAfterReuse.querySelectorAll('canvas').cast<DomCanvasElement>();
+          contentAfterReuse.querySelectorAll('canvas').cast<DomCanvasElement>().toList();
       expect(list[0].style.zIndex, '-1');
       expect(list[1].style.zIndex, '');
     });
@@ -268,7 +268,7 @@ void testMain() {
     final DomElement content = builder.build().webOnlyRootElement!;
     domDocument.body!.append(content);
     List<DomHTMLImageElement> list =
-        content.querySelectorAll('img').cast<DomHTMLImageElement>();
+        content.querySelectorAll('img').cast<DomHTMLImageElement>().toList();
     for (final DomHTMLImageElement image in list) {
       image.alt = 'marked';
     }
@@ -284,7 +284,8 @@ void testMain() {
     builder2.pop();
 
     final DomElement contentAfterReuse = builder2.build().webOnlyRootElement!;
-    list = contentAfterReuse.querySelectorAll('img').cast<DomHTMLImageElement>();
+    list =
+        contentAfterReuse.querySelectorAll('img').cast<DomHTMLImageElement>().toList();
     for (final DomHTMLImageElement image in list) {
       expect(image.alt, 'marked');
     }
@@ -515,7 +516,8 @@ void testMain() {
         renderedLayers[char] = pushChild(builder, char, oldLayer: renderedLayers[char]);
       }
       final SurfaceScene scene = builder.build();
-      final List<DomElement> pTags = scene.webOnlyRootElement!.querySelectorAll('flt-paragraph');
+      final List<DomElement> pTags =
+          scene.webOnlyRootElement!.querySelectorAll('flt-paragraph').toList();
       expect(pTags, hasLength(string.length));
       expect(
         scene.webOnlyRootElement!.querySelectorAll('flt-paragraph').map((DomElement p) => p.innerText).join(''),

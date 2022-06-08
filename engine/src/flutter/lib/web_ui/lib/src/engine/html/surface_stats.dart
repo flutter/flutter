@@ -291,7 +291,7 @@ void debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
   // A microtask will fire after the DOM is flushed, letting us probe into
   // actual <canvas> tags.
   scheduleMicrotask(() {
-    final List<DomElement> canvasElements = domDocument.querySelectorAll('canvas');
+    final Iterable<DomElement> canvasElements = domDocument.querySelectorAll('canvas');
     final StringBuffer canvasInfo = StringBuffer();
     final int pixelCount = canvasElements
         .cast<DomCanvasElement>()
