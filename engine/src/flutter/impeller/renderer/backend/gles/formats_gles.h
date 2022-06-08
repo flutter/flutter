@@ -163,4 +163,16 @@ constexpr std::optional<GLenum> ToVertexAttribType(ShaderType type) {
   FML_UNREACHABLE();
 }
 
+constexpr std::optional<GLenum> ToTextureTarget(TextureType type) {
+  switch (type) {
+    case TextureType::kTexture2D:
+      return GL_TEXTURE_2D;
+    case TextureType::kTexture2DMultisample:
+      return std::nullopt;
+    case TextureType::kTextureCube:
+      return GL_TEXTURE_CUBE_MAP;
+  }
+  FML_UNREACHABLE();
+}
+
 }  // namespace impeller

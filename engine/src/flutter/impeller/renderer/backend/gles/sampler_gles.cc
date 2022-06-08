@@ -4,7 +4,9 @@
 
 #include "impeller/renderer/backend/gles/sampler_gles.h"
 
+#include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "impeller/renderer/backend/gles/texture_gles.h"
 
 namespace impeller {
 
@@ -38,19 +40,26 @@ static GLint ToAddressMode(SamplerAddressMode mode) {
   FML_UNREACHABLE();
 }
 
-bool SamplerGLES::ConfigureBoundTexture(const ProcTableGLES& gl) const {
+bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
+                                        const ProcTableGLES& gl) const {
   if (!IsValid()) {
     return false;
   }
 
+  auto target = ToTextureTarget(texture.GetTextureDescriptor().type);
+
+  if (!target.has_value()) {
+    return false;
+  }
+
   const auto& desc = GetDescriptor();
-  gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+  gl.TexParameteri(target.value(), GL_TEXTURE_MIN_FILTER,
                    ToParam(desc.min_filter));
-  gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+  gl.TexParameteri(target.value(), GL_TEXTURE_MAG_FILTER,
                    ToParam(desc.mag_filter));
-  gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+  gl.TexParameteri(target.value(), GL_TEXTURE_WRAP_S,
                    ToAddressMode(desc.width_address_mode));
-  gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+  gl.TexParameteri(target.value(), GL_TEXTURE_WRAP_T,
                    ToAddressMode(desc.height_address_mode));
   return true;
 }
