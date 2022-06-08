@@ -311,6 +311,12 @@ class TestWindow implements ui.SingletonFlutterWindow {
     platformDispatcher.onTextScaleFactorChanged = callback;
   }
 
+    @override
+    bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
+    set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
+      platformDispatcher.nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
+    }
+
   @override
   bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
   /// Hides the real [brieflyShowPassword] and reports the given
@@ -720,6 +726,14 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   @override
   set onTextScaleFactorChanged(ui.VoidCallback? callback) {
     _platformDispatcher.onTextScaleFactorChanged = callback;
+  }
+
+  @override
+  bool get nativeSpellCheckServiceDefined => _nativeSpellCheckServiceDefinedTestValue ?? _platformDispatcher.nativeSpellCheckServiceDefined;
+  bool? _nativeSpellCheckServiceDefinedTestValue;
+  @override 
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) {
+    _nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
   }
 
   @override

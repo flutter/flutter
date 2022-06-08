@@ -100,10 +100,49 @@ abstract class SpellCheckService {
 ////////////////////////////////////////////////////////////////////////////////
 
 class DefaultSpellCheckService implements SpellCheckService {
+  List<SuggestionSpan>? reusableSpellCheckResults;
+  String? reusableText;
+
   late MethodChannel spellCheckChannel;
 
   DefaultSpellCheckService() {
     spellCheckChannel = SystemChannels.spellCheck;
+  }
+
+
+  /// Merges two lists of spell check results to account for Gboard's automatic
+  /// deletion of results in the composing region.
+  List<SuggestionSpan> mergeResults(
+      List<SuggestionSpan> oldResults, List<SuggestionSpan> newResults) {
+    List<SuggestionSpan> mergedResults = <SuggestionSpan>[];
+
+    int old_span_pointer = 0;
+    int new_span_pointer = 0;
+
+    while (old_span_pointer < oldResults.length &&
+        new_span_pointer < newResults.length) {
+      SuggestionSpan oldSpan = oldResults[old_span_pointer];
+      SuggestionSpan newSpan = newResults[new_span_pointer];
+
+      if (oldSpan.range.start == newSpan.range.start) {
+        mergedResults.add(oldSpan);
+        old_span_pointer += 1;
+        new_span_pointer += 1;
+      } else {
+        if (oldSpan.range.start < newSpan.range.start) {
+          mergedResults.add(oldSpan);
+          old_span_pointer += 1;
+        } else {
+          mergedResults.add(newSpan);
+          new_span_pointer += 1;
+        }
+      }
+    }
+
+    mergedResults.addAll(oldResults.sublist(old_span_pointer));
+    mergedResults.addAll(newResults.sublist(new_span_pointer));
+
+    return mergedResults;
   }
 
   @override
@@ -126,7 +165,6 @@ class DefaultSpellCheckService implements SpellCheckService {
 
     List<String> results = rawResults.cast<String>();
 
-    String resultsText = results.removeAt(0); // this will be removed when text is no longer sent from engine
     List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
 
     results.forEach((String result) {
@@ -134,6 +172,19 @@ class DefaultSpellCheckService implements SpellCheckService {
       suggestionSpans.add(SuggestionSpan(TextRange(start: int.parse(resultParsed[0]),
           end: int.parse(resultParsed[1])), resultParsed[2].split("\n")));
     });
+
+    /// Correct results if Gboard is currently trying to ignore the composing region.
+    if (reusableText != null &&
+        reusableText == text &&
+        reusableSpellCheckResults != null &&
+        suggestionSpans != null &&
+        !listEquals(reusableSpellCheckResults, suggestionSpans)) {
+        suggestionSpans =
+          mergeResults(reusableSpellCheckResults!, suggestionSpans);
+    }
+
+    reusableSpellCheckResults = suggestionSpans;
+    reusableText = text; 
 
     return suggestionSpans;
   }

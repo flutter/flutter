@@ -174,6 +174,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 
     bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing; // this is poorly named -- this is if composing range is out of range for current text
 
+    //TODO: I think the configuration will never will be null, so just need to check if disabled and if there are any results.
     if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null) {
         return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingWithinCurrentTextRange, style, spellCheckConfiguration.spellCheckResults!);
 

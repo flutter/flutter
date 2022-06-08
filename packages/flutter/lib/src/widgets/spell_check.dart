@@ -56,7 +56,7 @@ mixin SpellCheckSuggestionsHandler {
     TextStyle? style,
     SpellCheckResults spellCheckResults
   );
-  
+
   /// NOTE: NOT INCLUDED IN PR 1.1:
   Widget buildSpellCheckSuggestionsToolbar(
       TextSelectionDelegate delegate,
@@ -74,9 +74,6 @@ mixin SpellCheckSuggestionsHandler {
 class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   int scssSpans_consumed_index = 0;
   int text_consumed_index = 0;
-
-  List<SuggestionSpan>? reusableSpellCheckResults;
-  String? reusableText;
 
   final TargetPlatform platform;
 
@@ -165,41 +162,6 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     return correctedSpellCheckResults;
   }
 
-  /// Merges two lists of spell check results to account for Gboard's automatic
-  /// deletion of results in the composing region.
-  List<SuggestionSpan> mergeResults(
-      List<SuggestionSpan> oldResults, List<SuggestionSpan> newResults) {
-    List<SuggestionSpan> mergedResults = <SuggestionSpan>[];
-
-    int old_span_pointer = 0;
-    int new_span_pointer = 0;
-
-    while (old_span_pointer < oldResults.length &&
-        new_span_pointer < newResults.length) {
-      SuggestionSpan oldSpan = oldResults[old_span_pointer];
-      SuggestionSpan newSpan = newResults[new_span_pointer];
-
-      if (oldSpan.range.start == newSpan.range.start) {
-        mergedResults.add(oldSpan);
-        old_span_pointer += 1;
-        new_span_pointer += 1;
-      } else {
-        if (oldSpan.range.start < newSpan.range.start) {
-          mergedResults.add(oldSpan);
-          old_span_pointer += 1;
-        } else {
-          mergedResults.add(newSpan);
-          new_span_pointer += 1;
-        }
-      }
-    }
-
-    mergedResults.addAll(oldResults.sublist(old_span_pointer));
-    mergedResults.addAll(newResults.sublist(new_span_pointer));
-
-    return mergedResults;
-  }
-
   @override
   TextSpan buildTextSpanWithSpellCheckSuggestions(
       TextEditingValue value,
@@ -219,19 +181,9 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     if (spellCheckResultsText != value.text) {
       correctedSpellCheckResults = correctSpellCheckResults(
           value.text, spellCheckResultsText, rawSpellCheckResults);
-    } else if (reusableText != null &&
-        reusableText == spellCheckResultsText &&
-        reusableSpellCheckResults != null &&
-        rawSpellCheckResults != null &&
-        !listEquals(reusableSpellCheckResults, rawSpellCheckResults)) {
-        correctedSpellCheckResults =
-          mergeResults(reusableSpellCheckResults!, rawSpellCheckResults);
     } else {
       correctedSpellCheckResults = rawSpellCheckResults;
     }
-
-    reusableSpellCheckResults = correctedSpellCheckResults;
-    reusableText = value.text;
 
     switch (platform) {
       case TargetPlatform.android:
@@ -371,7 +323,7 @@ class _SpellCheckSuggestionsToolbar extends StatefulWidget {
     required this.globalEditableRegion,
     required this.selectionMidpoint,
     required this.textLineHeight,
-    required this.suggestionSpans, // This will need to actually use the corrected spell check results instead of the ones stored in the configuration. This makes me think that this correction should occur way before now. Well, it's not actually the correction. It's the merging because of the Gboard issue.
+    required this.suggestionSpans,
   }) : super(key: key);
 
   final TargetPlatform platform;
@@ -400,7 +352,7 @@ class _SpellCheckSuggestionsToolbarState
 
       if (suggestionSpans[mid_index].range.start <= curr_index &&
           suggestionSpans[mid_index].range.end + 1 >= curr_index) {
-        return suggestionSpans[mid_index];
+            return suggestionSpans[mid_index];
       }
 
       if (suggestionSpans[mid_index].range.start <= curr_index) {
