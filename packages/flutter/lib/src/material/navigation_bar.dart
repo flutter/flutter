@@ -48,6 +48,7 @@ import 'tooltip.dart';
 ///  * [NavigationDestination]
 ///  * [BottomNavigationBar]
 ///  * <https://api.flutter.dev/flutter/material/NavigationDestination-class.html>
+///  * <https://m3.material.io/components/navigation-bar>
 class NavigationBar extends StatelessWidget {
   /// Creates a Material 3 Navigation Bar component.
   ///
