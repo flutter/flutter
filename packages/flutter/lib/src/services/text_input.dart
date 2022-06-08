@@ -752,7 +752,8 @@ class RawFloatingCursorPoint {
 class TextEditingValue {
   /// Creates information for editing a run of text.
   ///
-  /// The selection and composing range must be within the text.
+  /// The selection and composing range must be within the text. This is not
+  /// checked during construction, and must be guaranteed by the caller.
   ///
   /// The [text], [selection], and [composing] arguments must not be null but
   /// each have default values.
@@ -764,6 +765,10 @@ class TextEditingValue {
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
   }) : assert(text != null),
+       // The constructor does not verified that `selection` and `composing` are
+       // valid ranges within `text`, and is unable to do so due to limitation 
+       // of const constructors. Some checks are performed by assertion 
+       // in other occasions. See `_textRangeIsValid`.
        assert(selection != null),
        assert(composing != null);
 
@@ -780,8 +785,8 @@ class TextEditingValue {
       start: encoded['composingBase'] as int? ?? -1,
       end: encoded['composingExtent'] as int? ?? -1,
     );
-    assert(_verifyRange(selection, text));
-    assert(_verifyRange(composing, text));
+    assert(_textRangeIsValid(selection, text));
+    assert(_textRangeIsValid(composing, text));
     return TextEditingValue(
       text: text,
       selection: selection,
@@ -898,8 +903,8 @@ class TextEditingValue {
       start: adjustIndex(composing.start),
       end: adjustIndex(composing.end),
     );
-    assert(_verifyRange(adjustedSelection, newText));
-    assert(_verifyRange(adjustedComposing, newText));
+    assert(_textRangeIsValid(adjustedSelection, newText));
+    assert(_textRangeIsValid(adjustedComposing, newText));
     return TextEditingValue(
       text: newText,
       selection: adjustedSelection,
@@ -909,8 +914,8 @@ class TextEditingValue {
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
-    assert(_verifyRange(selection, text));
-    assert(_verifyRange(composing, text));
+    assert(_textRangeIsValid(selection, text));
+    assert(_textRangeIsValid(composing, text));
     return <String, dynamic>{
       'text': text,
       'selectionBase': selection.baseOffset,
@@ -945,9 +950,12 @@ class TextEditingValue {
 
   // Verify that the given range is within the text.
   //
-  // This can't be perform during constructors, so perform this wherever else
-  // possible.
-  static bool _verifyRange(TextRange range, String text) {
+  // The verification can't be perform during the constructor of
+  // [TextEditingValue], which are `const` and are allowed to retrieve
+  // properties of [TextRange]s. [TextEditingValue] should perform this
+  // wherever it is building other values (such as toJson) or is built in a
+  // non-const way (such as fromJson).
+  static bool _textRangeIsValid(TextRange range, String text) {
     if (range.start == -1 && range.end == -1) {
       return true;
     }
@@ -1561,7 +1569,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
-    _channel.setMethodCallHandler(_loudlyhandleTextInputInvocation);
+    _channel.setMethodCallHandler(_loudlyHandleTextInputInvocation);
   }
 
   /// Set the [MethodChannel] used to communicate with the system's text input
@@ -1573,7 +1581,7 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel = newChannel..setMethodCallHandler(_instance._loudlyhandleTextInputInvocation);
+      _instance._channel = newChannel..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
       return true;
     }());
   }
@@ -1630,9 +1638,9 @@ class TextInput {
     return connection;
   }
 
-  /// This method actually notifies the embedding of the client. It is utilized
-  /// by [attach] and by [_handleTextInputInvocation] for the
-  /// `TextInputClient.requestExistingInputState` method.
+  // This method actually notifies the embedding of the client. It is utilized
+  // by [attach] and by [_handleTextInputInvocation] for the
+  // `TextInputClient.requestExistingInputState` method.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(connection != null);
     assert(connection._client != null);
@@ -1686,7 +1694,7 @@ class TextInput {
   /// Returns true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
 
-  Future<dynamic> _loudlyhandleTextInputInvocation(MethodCall call) async {
+  Future<dynamic> _loudlyHandleTextInputInvocation(MethodCall call) async {
     try {
       return await _handleTextInputInvocation(call);
     } catch (exception, stack) {
