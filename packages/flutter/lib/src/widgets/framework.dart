@@ -6457,7 +6457,7 @@ class DebugCreator {
   /// Create a [DebugCreator] instance with input [Element].
   DebugCreator(Element element): _elementRef = WeakReference<Element>(element);
 
-  final  WeakReference<Element> _elementRef;
+  final WeakReference<Element> _elementRef;
 
   /// The creator of the [RenderObject].
   Element? get element => _elementRef.target;
