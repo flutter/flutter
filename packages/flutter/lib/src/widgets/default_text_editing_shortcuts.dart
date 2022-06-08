@@ -271,6 +271,10 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.enter): const DoNothingAndStopPropagationTextIntent(),
@@ -513,22 +517,25 @@ final Map<String, Intent> _macosSelectorToIntent = <String, Intent>{
   'moveToBeginningOfParagraph:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
   'moveToEndOfParagraph:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
 
-  'moveWordLeftAndModifySelection:': const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
-  'moveWordRightAndModifySelection:': const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
-  'moveParagraphBackwardAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-  'moveParagraphForwardAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+  'moveWordLeftAndModifySelection:': const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
+  'moveWordRightAndModifySelection:': const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
+  'moveParagraphBackwardAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
+  'moveParagraphForwardAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
 
   'moveToLeftEndOfLine:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-  'moveToEndEndOfLine:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+  'moveToRightEndOfLine:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
   'moveToBeginningOfDocument:': const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
   'moveToEndOfDocument:': const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
 
-  'moveToLeftEndOfLineAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-  'moveToRightEndOfLineAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
-  'moveToBeginningOfDocumentAndModifySelection:': const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-  'moveToEndOfDocumentAndModifySelection:': const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+  'moveToLeftEndOfLineAndModifySelection:': const ExpandSelectionToLineBreakIntent(forward: false),
+  'moveToRightEndOfLineAndModifySelection:': const ExpandSelectionToLineBreakIntent(forward: true),
+  'moveToBeginningOfDocumentAndModifySelection:': const ExpandSelectionToDocumentBoundaryIntent(forward: false),
+  'moveToEndOfDocumentAndModifySelection:': const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
   'transpose:': const TransposeCharactersIntent(),
+
+  'scrollToBeginningOfDocument:': const ScrollToDocumentBoundaryIntent(forward: false),
+  'scrollToEndOfDocument:': const ScrollToDocumentBoundaryIntent(forward: true),
 
   // TODO(knopp): Page Up/Down intents are missing
   'scrollPageUp:': const ScrollToDocumentBoundaryIntent(forward: false),
