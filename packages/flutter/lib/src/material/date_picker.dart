@@ -14,6 +14,7 @@ import 'back_button.dart';
 import 'calendar_date_picker.dart';
 import 'color_scheme.dart';
 import 'date.dart';
+import 'date_picker_theme.dart';
 import 'debug.dart';
 import 'dialog.dart';
 import 'dialog_theme.dart';
@@ -40,6 +41,9 @@ const Size _inputRangeLandscapeDialogSize = Size(496, 164.0);
 const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
+
+const BorderRadius _kDefaultBorderRadius = BorderRadius.all(Radius.circular(4.0));
+const ShapeBorder _kDefaultShape = RoundedRectangleBorder(borderRadius: _kDefaultBorderRadius);
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -454,6 +458,8 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final DatePickerThemeData datePickerThemeData = DatePickerTheme.of(context);
+
     final ColorScheme colorScheme = theme.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.of(context).orientation;
@@ -499,6 +505,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         onDateChanged: _handleDateChanged,
         selectableDayPredicate: widget.selectableDayPredicate,
         initialCalendarMode: widget.initialCalendarMode,
+        selectedDayDecoration: datePickerThemeData.selectedDayDecoration,
+        disabledDayDecoration: datePickerThemeData.disabledDayDecoration,
+        todayDecoration: datePickerThemeData.todayDecoration,
       );
     }
 
@@ -543,7 +552,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         picker = calendarDatePicker();
         entryModeButton = IconButton(
           icon: const Icon(Icons.edit),
-          color: onPrimarySurface,
+          color: datePickerThemeData.entryModeIconColor ?? onPrimarySurface,
           tooltip: localizations.inputDateModeButtonLabel,
           onPressed: _handleEntryModeToggle,
         );
@@ -558,7 +567,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         picker = inputDatePicker();
         entryModeButton = IconButton(
           icon: const Icon(Icons.calendar_today),
-          color: onPrimarySurface,
+          color: datePickerThemeData.entryModeIconColor ?? onPrimarySurface,
           tooltip: localizations.calendarModeButtonLabel,
           onPressed: _handleEntryModeToggle,
         );
@@ -579,8 +588,12 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       entryModeButton: entryModeButton,
     );
 
+    final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
+
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     return Dialog(
+      shape: datePickerThemeData.shape ?? dialogTheme.shape ?? _kDefaultShape,
+      backgroundColor: datePickerThemeData.backgroundColor ?? theme.colorScheme.surface,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       clipBehavior: Clip.antiAlias,
       child: AnimatedContainer(
@@ -752,7 +765,7 @@ class _DatePickerHeader extends StatelessWidget {
     final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
     final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
 
-    final TextStyle? helpStyle = textTheme.overline?.copyWith(
+    final TextStyle? helpStyle = DatePickerTheme.of(context).helpTextStyle ?? textTheme.overline?.copyWith(
       color: onPrimarySurfaceColor,
     );
 

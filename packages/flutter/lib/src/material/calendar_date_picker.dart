@@ -93,6 +93,9 @@ class CalendarDatePicker extends StatefulWidget {
     this.onDisplayedMonthChanged,
     this.initialCalendarMode = DatePickerMode.day,
     this.selectableDayPredicate,
+    this.selectedDayDecoration,
+    this.disabledDayDecoration,
+    this.todayDecoration,
   }) : assert(initialDate != null),
        assert(firstDate != null),
        assert(lastDate != null),
@@ -143,6 +146,15 @@ class CalendarDatePicker extends StatefulWidget {
 
   /// Function to provide full control over which dates in the calendar can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  /// The decoration of selected day; only applied when it is neither selected nor disabled.
+  final Decoration? selectedDayDecoration;
+
+  /// The decoration of disabled day.
+  final Decoration? disabledDayDecoration;
+
+  /// The decoration of today.
+  final Decoration? todayDecoration;
 
   @override
   State<CalendarDatePicker> createState() => _CalendarDatePickerState();
@@ -272,6 +284,9 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           onChanged: _handleDayChanged,
           onDisplayedMonthChanged: _handleMonthChanged,
           selectableDayPredicate: widget.selectableDayPredicate,
+          selectedDayDecoration: widget.selectedDayDecoration,
+          disabledDayDecoration: widget.disabledDayDecoration,
+          todayDecoration: widget.todayDecoration,
         );
       case DatePickerMode.year:
         return Padding(
@@ -440,6 +455,9 @@ class _MonthPicker extends StatefulWidget {
     required this.onChanged,
     required this.onDisplayedMonthChanged,
     this.selectableDayPredicate,
+    this.selectedDayDecoration,
+    this.disabledDayDecoration,
+    this.todayDecoration,
   }) : assert(selectedDate != null),
        assert(currentDate != null),
        assert(onChanged != null),
@@ -480,6 +498,15 @@ class _MonthPicker extends StatefulWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  /// The decoration of selected day; only applied when it is neither selected nor disabled.
+  final Decoration? selectedDayDecoration;
+
+  /// The decoration of disabled day.
+  final Decoration? disabledDayDecoration;
+
+  /// The decoration of today.
+  final Decoration? todayDecoration;
 
   @override
   _MonthPickerState createState() => _MonthPickerState();
@@ -734,6 +761,9 @@ class _MonthPickerState extends State<_MonthPicker> {
       lastDate: widget.lastDate,
       displayedMonth: month,
       selectableDayPredicate: widget.selectableDayPredicate,
+      selectedDayDecoration: widget.selectedDayDecoration,
+      disabledDayDecoration: widget.disabledDayDecoration,
+      todayDecoration: widget.todayDecoration,
     );
   }
 
@@ -827,6 +857,9 @@ class _DayPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.selectableDayPredicate,
+    this.selectedDayDecoration,
+    this.disabledDayDecoration,
+    this.todayDecoration,
   }) : assert(currentDate != null),
        assert(displayedMonth != null),
        assert(firstDate != null),
@@ -863,6 +896,15 @@ class _DayPicker extends StatefulWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  /// The decoration of selected day; only applied when it is neither selected nor disabled.
+  final Decoration? selectedDayDecoration;
+
+  /// The decoration of disabled day.
+  final Decoration? disabledDayDecoration;
+
+  /// The decoration of today.
+  final Decoration? todayDecoration;
 
   @override
   _DayPickerState createState() => _DayPickerState();
@@ -970,23 +1012,24 @@ class _DayPickerState extends State<_DayPicker> {
         final bool isSelectedDay = DateUtils.isSameDay(widget.selectedDate, dayToBuild);
         final bool isToday = DateUtils.isSameDay(widget.currentDate, dayToBuild);
 
-        BoxDecoration? decoration;
+        Decoration? decoration;
         Color dayColor = enabledDayColor;
         if (isSelectedDay) {
           // The selected day gets a circle background highlight, and a
           // contrasting text color.
           dayColor = selectedDayColor;
-          decoration = BoxDecoration(
+          decoration = widget.selectedDayDecoration ?? BoxDecoration(
             color: selectedDayBackground,
             shape: BoxShape.circle,
           );
         } else if (isDisabled) {
+          decoration = widget.disabledDayDecoration;
           dayColor = disabledDayColor;
         } else if (isToday) {
           // The current day gets a different text color and a circle stroke
           // border.
           dayColor = todayColor;
-          decoration = BoxDecoration(
+          decoration = widget.todayDecoration ?? BoxDecoration(
             border: Border.all(color: todayColor),
             shape: BoxShape.circle,
           );

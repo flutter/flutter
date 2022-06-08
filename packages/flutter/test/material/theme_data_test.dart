@@ -697,6 +697,7 @@ void main() {
       tabBarTheme: const TabBarTheme(labelColor: Colors.black),
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
+      datePickerTheme: const DatePickerThemeData(backgroundColor: Colors.black),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
@@ -809,6 +810,7 @@ void main() {
       tabBarTheme: const TabBarTheme(labelColor: Colors.white),
       textButtonTheme: const TextButtonThemeData(),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
+      datePickerTheme: const DatePickerThemeData(backgroundColor: Colors.white),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
       tooltipTheme: const TooltipThemeData(height: 100),
@@ -907,6 +909,7 @@ void main() {
       tabBarTheme: otherTheme.tabBarTheme,
       textButtonTheme: otherTheme.textButtonTheme,
       textSelectionTheme: otherTheme.textSelectionTheme,
+      datePickerTheme: otherTheme.datePickerTheme,
       timePickerTheme: otherTheme.timePickerTheme,
       toggleButtonsTheme: otherTheme.toggleButtonsTheme,
       tooltipTheme: otherTheme.tooltipTheme,
@@ -994,6 +997,7 @@ void main() {
     expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
     expect(themeDataCopy.navigationBarTheme, equals(otherTheme.navigationBarTheme));
     expect(themeDataCopy.navigationRailTheme, equals(otherTheme.navigationRailTheme));
+    expect(themeDataCopy.datePickerTheme, equals(otherTheme.datePickerTheme));
     expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
     expect(themeDataCopy.popupMenuTheme, equals(otherTheme.popupMenuTheme));
     expect(themeDataCopy.progressIndicatorTheme, equals(otherTheme.progressIndicatorTheme));
@@ -1138,6 +1142,7 @@ void main() {
       'tabBarTheme',
       'textButtonTheme',
       'textSelectionTheme',
+      'datePickerTheme',
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
