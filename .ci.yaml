@@ -2045,7 +2045,6 @@ targets:
 
   - name: Linux_android new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
