@@ -428,6 +428,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       enableDds: enableDds,
+      ddsPort: ddsPort,
       devToolsServerAddress: devToolsServerAddress,
     );
 
