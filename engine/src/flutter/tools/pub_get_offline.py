@@ -14,23 +14,28 @@ import os
 import subprocess
 import sys
 
+SRC_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+ENGINE_DIR = os.path.join(SRC_ROOT, 'flutter')
+
 ALL_PACKAGES = [
-    os.path.join("src", "flutter", "ci"),
-    os.path.join("src", "flutter", "flutter_frontend_server"),
-    os.path.join("src", "flutter", "shell", "vmservice"),
-    os.path.join("src", "flutter", "testing", "benchmark"),
-    os.path.join("src", "flutter", "testing", "dart"),
-    os.path.join("src", "flutter", "testing", "litetest"),
-    os.path.join("src", "flutter", "testing", "android_background_image"),
-    os.path.join("src", "flutter", "testing", "scenario_app"),
-    os.path.join("src", "flutter", "testing", "smoke_test_failure"),
-    os.path.join("src", "flutter", "testing", "symbols"),
-    os.path.join("src", "flutter", "tools", "api_check"),
-    os.path.join("src", "flutter", "tools", "android_lint"),
-    os.path.join("src", "flutter", "tools", "clang_tidy"),
-    os.path.join("src", "flutter", "tools", "const_finder"),
-    os.path.join("src", "flutter", "tools", "githooks"),
-    os.path.join("src", "flutter", "tools", "licenses"),
+    os.path.join(ENGINE_DIR, "ci"),
+    os.path.join(ENGINE_DIR, "flutter_frontend_server"),
+    os.path.join(ENGINE_DIR, "shell", "vmservice"),
+    os.path.join(ENGINE_DIR, "testing", "benchmark"),
+    os.path.join(ENGINE_DIR, "testing", "dart"),
+    os.path.join(ENGINE_DIR, "testing", "litetest"),
+    os.path.join(ENGINE_DIR, "testing", "android_background_image"),
+    os.path.join(ENGINE_DIR, "testing", "scenario_app"),
+    os.path.join(ENGINE_DIR, "testing", "smoke_test_failure"),
+    os.path.join(ENGINE_DIR, "testing", "symbols"),
+    os.path.join(ENGINE_DIR, "tools", "api_check"),
+    os.path.join(ENGINE_DIR, "tools", "android_lint"),
+    os.path.join(ENGINE_DIR, "tools", "clang_tidy"),
+    os.path.join(ENGINE_DIR, "tools", "const_finder"),
+    os.path.join(ENGINE_DIR, "tools", "githooks"),
+    os.path.join(ENGINE_DIR, "tools", "licenses"),
 ]
 
 
@@ -71,15 +76,13 @@ def CheckPackage(package):
 
 
 def Main():
-  leading = os.path.join(
-      "src", "third_party", "dart", "tools", "sdks", "dart-sdk", "bin"
+  dart_sdk_bin = os.path.join(
+      SRC_ROOT, "third_party", "dart", "tools", "sdks", "dart-sdk", "bin"
   )
   dart = "dart"
   if os.name == "nt":
     dart = "dart.exe"
-  pubcmd = [
-      os.path.abspath(os.path.join(leading, dart)), "pub", "get", "--offline"
-  ]
+  pubcmd = [os.path.join(dart_sdk_bin, dart), "pub", "get", "--offline"]
 
   pub_count = 0
   for package in ALL_PACKAGES:
