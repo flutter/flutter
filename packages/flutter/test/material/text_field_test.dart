@@ -1964,7 +1964,7 @@ void main() {
     await tester.pumpAndSettle(kDoubleTapTimeout);
     expect(controller.selection, const TextSelection.collapsed(offset: 8));
 
-    final TestGesture touchGesture = await tester.startGesture(ePos, kind: PointerDeviceKind.touch);
+    final TestGesture touchGesture = await tester.startGesture(ePos);
     await touchGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
 
