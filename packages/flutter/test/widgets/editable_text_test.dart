@@ -5870,17 +5870,39 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    expect(
-      selection,
-      equals(
-        const TextSelection(
-          baseOffset: 3,
-          extentOffset: 0,
-          affinity: TextAffinity.upstream,
-        ),
-      ),
-      reason: 'on $platform',
-    );
+    switch (defaultTargetPlatform) {
+      // Extend selection.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 3,
+              extentOffset: 0,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+      // On macOS/iOS expand selection.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 72,
+              extentOffset: 0,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
 
     // Move to start again.
     await sendKeys(

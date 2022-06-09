@@ -328,8 +328,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const ExpandSelectionToLineBreakIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const ExpandSelectionToLineBreakIntent(forward: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
     const SingleActivator(LogicalKeyboardKey.keyT, control: true): const TransposeCharactersIntent(),
 
