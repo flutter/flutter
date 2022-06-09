@@ -520,14 +520,16 @@ class CircularProgressIndicator extends ProgressIndicator {
   @override
   Color? get backgroundColor => super.backgroundColor;
 
+  /// {@template flutter.material.CircularProgressIndicator.strokeWidth}
   /// The width of the line used to draw the circle.
+  /// {@endtemplate}
   final double strokeWidth;
 
   @override
-  State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
+  State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState<CircularProgressIndicator>();
 }
 
-class _CircularProgressIndicatorState extends State<CircularProgressIndicator> with SingleTickerProviderStateMixin {
+class _CircularProgressIndicatorState<T extends CircularProgressIndicator> extends State<T> with SingleTickerProviderStateMixin {
   static const int _pathCount = _kIndeterminateCircularDuration ~/ 1333;
   static const int _rotationCount = _kIndeterminateCircularDuration ~/ 2222;
 
@@ -559,7 +561,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   @override
-  void didUpdateWidget(CircularProgressIndicator oldWidget) {
+  void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
@@ -727,7 +729,35 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     super.strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
     super.semanticsLabel,
     super.semanticsValue,
+  }) : progress = null;
+
+  /// Creates a non-animated refresh progress indicator that draw
+  /// a circle based on the value of [progress].
+  ///
+  /// When provided, the value of [progress] must be between 0.0
+  /// and 1.0 (full circle) inclusive. Defaults to 1.0.
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
+  const RefreshProgressIndicator.partiallyRevealed({
+    super.key,
+    super.value,
+    super.backgroundColor,
+    super.color,
+    super.valueColor,
+    super.strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
+    super.semanticsLabel,
+    super.semanticsValue,
+    this.progress,
   });
+
+  /// Determines the percentage of circle radius that will be shown.
+  ///
+  /// Typical usage would display full circle, however, this allows for more fine-grained control such as
+  /// during pull-to-refresh when the drag-down action incise the circle radius as
+  /// the user continues to drag down.
+  ///
+  /// Defaults to 1.0. Must be between 0.0 and 1.0 inclusive.
+  @protected
+  final double? progress;
 
   /// Default stroke width.
   static const double defaultStrokeWidth = 2.5;
@@ -747,7 +777,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   State<CircularProgressIndicator> createState() => _RefreshProgressIndicatorState();
 }
 
-class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
+class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState<RefreshProgressIndicator> {
   static const double _indicatorSize = 41.0;
 
   /// Interval for arrow head to fully grow.
@@ -849,7 +879,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
                 child: CustomPaint(
                   painter: _RefreshProgressIndicatorPainter(
                     valueColor: valueColor,
-                    value: null, // Draw the indeterminate progress indicator.
+                    value: widget.progress, // Draw the indeterminate progress indicator.
                     headValue: headValue,
                     tailValue: tailValue,
                     offsetValue: offsetValue,
