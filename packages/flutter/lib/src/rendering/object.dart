@@ -1617,14 +1617,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         return true;
       }
 
+      final RenderObject debugActiveLayout = RenderObject.debugActiveLayout!;
+      final String culpritMethodName = debugActiveLayout.debugDoingThisLayout ? 'performLayout' : 'performResize';
+      final String culpritFullMethodName = '${debugActiveLayout.runtimeType}.$culpritMethodName';
       assert(activeLayoutRoot == null || activeLayoutRoot._debugMutationsLocked);
       result = false;
       if (activeLayoutRoot == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Mutations on out-of-band RenderObject during layout.'),
+          ErrorSummary('A $runtimeType was mutated in $culpritFullMethodName.'),
           ErrorDescription(
-            'A RenderObject must not be marked as neeing layout, '
-            'when none of its ancestors is actively performing layout',
+            'The RenderObject was marked as needing layout '
+            'when none of its ancestors is actively performing layout.',
           ),
           DiagnosticsProperty<RenderObject>(
             'The RenderObject being mutated was',
@@ -1638,30 +1641,29 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           ),
         ]);
       }
+
       if (activeLayoutRoot == this) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A $runtimeType was mutated during layout.'),
-          ErrorDescription(
-            'A $runtimeType must not redirty itself in its ${debugDoingThisLayout ? 'performLayout' : 'performResize'} method.'
-          ),
+          ErrorSummary('A $runtimeType was mutated in its own $culpritMethodName implementation.'),
+          ErrorDescription('A RenderObject must not re-dirty itself while still being laid out.'),
           DiagnosticsProperty<RenderObject>(
             'The RenderObject being mutated was',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
           ),
-          ErrorHint('Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'),
+          ErrorHint('Consider using the LayoutBuilder widget to dynamically change a subtree during layout.'),
         ]);
       }
 
+      final ErrorSummary summary = ErrorSummary('A $runtimeType was mutated in $culpritFullMethodName.');
       final bool isMutatedByAncestor = activeLayoutRoot == debugActiveLayout;
       final String description = isMutatedByAncestor
-        ? 'A RenderObject must not mutate its descendant in its '
-          '${RenderObject.debugActiveLayout!.debugDoingThisLayout ? 'performLayout' : 'performResize'} method.'
-        : 'A RenderObject must not mutate another RenderObject from a different render subtree, '
-          'in its ${RenderObject.debugActiveLayout!.debugDoingThisLayout ? 'performLayout' : 'performResize'} method.';
+        ? 'A RenderObject must not mutate its descendants in its $culpritMethodName method.'
+        : 'A RenderObject must not mutate another RenderObject from a different render subtree '
+          'in its $culpritMethodName method.';
 
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('A $runtimeType was mutated during layout.'),
+        summary,
         ErrorDescription(description),
         DiagnosticsProperty<RenderObject>(
           'The RenderObject being mutated was',
@@ -1670,7 +1672,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         ),
         DiagnosticsProperty<RenderObject>(
           'The ${isMutatedByAncestor ? 'ancestor ' : ''}RenderObject that was mutating the said $runtimeType was',
-          this,
+          debugActiveLayout,
           style: DiagnosticsTreeStyle.errorProperty,
         ),
         if (!isMutatedByAncestor) DiagnosticsProperty<RenderObject>(

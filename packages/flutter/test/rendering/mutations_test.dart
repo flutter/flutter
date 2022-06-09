@@ -30,7 +30,10 @@ class RenderLayoutTestBox extends RenderProxyBox {
   bool get sizedByParent => true;
 
   @override
-  void performLayout() => onPerformLayout?.call();
+  void performLayout() {
+    child?.layout(constraints, parentUsesSize: true);
+    onPerformLayout?.call();
+  }
 }
 
 void main() {
@@ -77,18 +80,6 @@ void main() {
   });
 
   group('Throws when invalid mutations are attempted: ', () {
-    FlutterError catchError(VoidCallback callback) {
-      Object? error;
-      try {
-        callback();
-      } catch (e) {
-        error = e;
-      }
-
-      expect(error, isFlutterError);
-      return error! as FlutterError;
-    }
-
     FlutterError catchLayoutError(RenderBox box) {
       Object? error;
       layout(box, onErrors: () {
@@ -112,7 +103,7 @@ void main() {
       expect(error, isFlutterError);
       expect(
         (error! as FlutterError).message,
-        contains('has already been disposed.'),
+        contains('A disposed RenderObject was mutated.'),
       );
     });
 
@@ -123,10 +114,10 @@ void main() {
 
       expect(
         catchLayoutError(block).message,
-        contains(
-          'A render object must not mark itself dirty while actively doing layout.\n'
-          'If you wish to change the layout of a subtree during layout, consider using the LayoutBuilder widget.'
-        ),
+        allOf(
+          contains('A RenderLayoutTestBox was mutated in its own performLayout implementation.\n'),
+          contains('A RenderObject must not re-dirty itself while still being laid out.\n'),
+        )
       );
     });
 
@@ -138,9 +129,58 @@ void main() {
 
       expect(
         catchLayoutError(block).message,
-        equalsIgnoringHashCodes(
-          'Mutating RenderLayoutTestBox#00000 from RenderLayoutTestBox#00000 is not allowed:\n'
-          'Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'
+        allOf(
+          contains('A RenderLayoutTestBox was mutated in RenderLayoutTestBox.performLayout.\n'),
+          contains('A RenderObject must not mutate another RenderObject from a different render subtree in its performLayout method.\n'),
+          contains('The RenderObject that was mutating the said RenderLayoutTestBox was:\n'),
+          contains('Their common ancestor was:'),
+        ),
+      );
+    });
+
+    test('marking a descendant dirty in performLayout', () {
+      late RenderBox child1;
+      final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+      block.add(child1 = RenderLayoutTestBox(() {}));
+      block.add(RenderLayoutTestBox(child1.markNeedsLayout));
+
+      expect(
+        catchLayoutError(block).message,
+        allOf(
+          contains('A RenderLayoutTestBox was mutated in RenderFlex.performLayout.\n'),
+          contains('A RenderObject must not mutate its descendants in its performLayout method.\n'),
+          contains('The ancestor RenderObject that was mutating the said RenderLayoutTestBox was:\n'),
+          isNot(contains('Their common ancestor was:')),
+        ),
+      );
+    });
+
+    test('marking an out-of-band mutation in performLayout', () {
+      late RenderProxyBox child1, child11, child2;
+      final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+      block.add(child1 = RenderLayoutTestBox(() {}));
+      block.add(child2 = RenderLayoutTestBox(() {}));
+      child1.child = child11 = RenderLayoutTestBox(() {});
+      layout(block);
+
+      expect(block.debugNeedsLayout, false);
+      expect(child1.debugNeedsLayout, false);
+      expect(child2.debugNeedsLayout, false);
+
+      // Add a new child to a relayout boundary.
+      child2.child = RenderLayoutTestBox(() {}, onPerformLayout: child11.markNeedsLayout);
+
+      FlutterError? error;
+      pumpFrame(onErrors: () {
+        error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!.exception as FlutterError;
+      });
+
+      expect(
+        error?.message,
+        allOf(
+          contains('A RenderLayoutTestBox was mutated in RenderLayoutTestBox.performLayout.'),
+          contains('The RenderObject was marked as needing layout when none of its ancestors is actively performing layout.'),
+          isNot(contains('Their common ancestor was:')),
         ),
       );
     });
