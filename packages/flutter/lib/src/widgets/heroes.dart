@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
+import 'implicit_animations.dart';
 import 'media_query.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -137,10 +138,18 @@ enum HeroFlightDirection {
 /// is, by default, used to do the transition: when going from route A to route
 /// B, route B's hero's widget is placed over route A's hero's widget. If a
 /// [flightShuttleBuilder] is supplied, its output widget is shown during the
-/// flight transition instead. If overriding [flightShuttleBuilder] leads to
-/// gaps or jumps arising in the animation, try interpolating between
-/// [MediaQueryData] padding values of the different contexts in the shuttle
-/// builder.
+/// flight transition instead.
+///
+/// The flightShuttleBulder tree uses [InheritedWidget]s from the route the Hero
+/// animation starts from. If the widget tree in [flightShuttleBuilder] changes
+/// its geometry/appearance based on [InheritedWidget]s that are above the Hero
+/// widget tree, for example if both routes provide [MediaQuery] but with
+/// different paddings, you may see jumps/gaps. If you experience this problem,
+/// wrap the current flightShuttleBulder in an [InheritedWidget] (and
+/// potentially interpolate the value provided by the inherited widget using the
+/// animation parameter). The default [flightShuttleBuilder] is wrapped in a
+/// [MediaQuery] widget if only one navigator has padding or both navigator's
+/// [MediaQuery]'s provide different paddings.
 ///
 /// By default, both route A and route B's heroes are hidden while the
 /// transitioning widget is animating in-flight above the 2 routes.
@@ -210,6 +219,18 @@ class Hero extends StatefulWidget {
   final Widget child;
 
   /// Optional override to supply a widget that's shown during the hero's flight.
+  ///
+  /// If overriding note the flightShuttleBulder tree uses [InheritedWidget]s 
+  /// from the route the Hero animation starts from. If the widget tree in 
+  /// [flightShuttleBuilder] changes its geometry/appearance based on 
+  /// [InheritedWidget]s that are above the Hero widget tree, for example if both
+  /// routes provide [MediaQuery] but with different paddings, you may see 
+  /// jumps/gaps. If you experience this problem, wrap the current 
+  /// flightShuttleBulder in an [InheritedWidget] (and potentially interpolate
+  /// the value provided by the inherited widget using the animation parameter).
+  /// The default [flightShuttleBuilder] is wrapped in a [MediaQuery] widget if
+  /// only one navigator has padding or both navigator's [MediaQuery]'s provide
+  /// different paddings.
   ///
   /// This in-flight widget can depend on the route transition's animation as
   /// well as the incoming and outgoing routes' [Hero] descendants' widgets and
@@ -1001,32 +1022,35 @@ class HeroController extends NavigatorObserver {
     BuildContext toHeroContext,
   ) {
     final Hero toHero = toHeroContext.widget as Hero;
-    if (MediaQuery.maybeOf(toHeroContext) == null && MediaQuery.maybeOf(fromHeroContext) == null) {
+
+    final MediaQueryData? toMediaQueryData = MediaQuery.maybeOf(toHeroContext);
+    final MediaQueryData? fromMediaQueryData = MediaQuery.maybeOf(fromHeroContext);
+
+    if (toMediaQueryData == null || fromMediaQueryData == null) {
       return toHero.child;
     }
-    final MediaQueryData chosenMediaQueryData = MediaQuery.maybeOf(toHeroContext) ?? MediaQuery.of(fromHeroContext);
 
-    final EdgeInsets fromHeroPadding = MediaQuery.maybeOf(fromHeroContext)?.padding?? EdgeInsets.zero;
-    final EdgeInsets toHeroPadding = MediaQuery.maybeOf(toHeroContext)?.padding?? EdgeInsets.zero;
-
+    final EdgeInsets fromHeroPadding = fromMediaQueryData.padding;
+    final EdgeInsets toHeroPadding = toMediaQueryData.padding;
 
     return AnimatedBuilder(
-        animation: animation,
-        builder: (BuildContext context, Widget? child) {
-          return MediaQuery(
-              data: chosenMediaQueryData.copyWith(
-                padding: (flightDirection == HeroFlightDirection.push)
-                  ? Tween<EdgeInsets>(
-                      begin: fromHeroPadding,
-                      end: toHeroPadding,
-                    ).evaluate(animation)
-                  : Tween<EdgeInsets>(
-                      begin: toHeroPadding,
-                      end: fromHeroPadding,
-                    ).evaluate(animation),
-              ),
-              child: toHero.child);
-        });
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: toMediaQueryData.copyWith(
+            padding: (flightDirection == HeroFlightDirection.push)
+              ? EdgeInsetsTween(
+                  begin: fromHeroPadding,
+                  end: toHeroPadding,
+                ).evaluate(animation)
+              : EdgeInsetsTween(
+                  begin: toHeroPadding,
+                  end: fromHeroPadding,
+                ).evaluate(animation),
+          ),
+          child: toHero.child);
+      },
+    );
   }
 }
 
