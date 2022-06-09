@@ -1901,6 +1901,85 @@ void main() {
     expect(controller.selection.baseOffset, testValue.length);
   });
 
+  testWidgets('Selection updates on tap down (Desktop platforms)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(controller: controller),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    final Offset gPos = textOffsetToPosition(tester, 8);
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 5));
+
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    await gesture.down(gPos);
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 8));
+  },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.macOS, TargetPlatform.windows })
+  );
+
+  testWidgets('Selection updates on tap up (Mobile platforms)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(controller: controller),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    final Offset gPos = textOffsetToPosition(tester, 8);
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    await gesture.down(gPos);
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 5));
+
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(controller.selection, const TextSelection.collapsed(offset: 8));
+
+    final TestGesture touchGesture = await tester.startGesture(ePos, kind: PointerDeviceKind.touch);
+    await touchGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    await touchGesture.down(gPos);
+    await tester.pumpAndSettle();
+    // On iOS a tap to select, selects the word edge instead of the exact tap position.
+    expect(controller.selection, TextSelection.collapsed(offset: isTargetPlatformApple ? 4 : 5));
+
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection.collapsed(offset: 8));
+  },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.iOS })
+  );
+
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
