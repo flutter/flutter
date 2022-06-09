@@ -265,18 +265,15 @@ class DateTimeRange {
 /// Encapsulates a possible start and end [DateTime] that represent a range of dates.
 ///
 /// The range may include the [start] and [end] dates. The [start] and [end] dates
-/// may be equal to indicate a date range of a single day. The [start] date must
-/// not be after the [end] date.
+/// may be equal to indicate a date range of a single day.
+/// The [DateTimeRangeValue] is valid if [start] is not after [end]
 @immutable
 class DateTimeRangeValue {
   /// Creates a date range for the given start and end [DateTime].
   DateTimeRangeValue({
     DateTime? start,
     DateTime? end,
-  }) : assert((start != null && end != null) ||
-            (start != null && end == null) ||
-            (start != null && end != null && !start.isAfter(end))),
-        start = start != null ? DateUtils.dateOnly(start) : null,
+  })  : start = start != null ? DateUtils.dateOnly(start) : null,
         end = end != null ? DateUtils.dateOnly(end) : null;
 
   /// Creates an empty date range where start and end are null.
