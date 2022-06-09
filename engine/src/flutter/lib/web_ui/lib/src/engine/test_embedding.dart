@@ -6,7 +6,6 @@
 //                https://github.com/flutter/flutter/issues/100394
 
 import 'dart:async';
-import 'dart:html' as html;
 
 import 'package:ui/ui.dart' as ui;
 
@@ -149,15 +148,16 @@ class TestUrlStrategy extends UrlStrategy {
     });
   }
 
-  final List<html.EventListener> listeners = <html.EventListener>[];
+  final List<DomEventListener> listeners = <DomEventListener>[];
 
   @override
-  ui.VoidCallback addPopStateListener(html.EventListener fn) {
-    listeners.add(fn);
+  ui.VoidCallback addPopStateListener(DomEventListener fn) {
+    final DomEventListener wrappedFn = allowInterop(fn);
+    listeners.add(wrappedFn);
     return () {
       // Schedule a micro task here to avoid removing the listener during
       // iteration in [_firePopStateEvent].
-      scheduleMicrotask(() => listeners.remove(fn));
+      scheduleMicrotask(() => listeners.remove(wrappedFn));
     };
   }
 
@@ -172,7 +172,7 @@ class TestUrlStrategy extends UrlStrategy {
   /// like a real browser.
   void _firePopStateEvent() {
     assert(withinAppHistory);
-    final html.PopStateEvent event = html.PopStateEvent(
+    final DomPopStateEvent event = createDomPopStateEvent(
       'popstate',
       <String, dynamic>{'state': currentEntry.state},
     );

@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 
 import 'package:js/js.dart' as js;
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
+import '../safe_browser_api.dart';
 import 'js_url_strategy.dart';
 
 /// Represents and reads route state from the browser's URL.
@@ -21,7 +22,7 @@ abstract class UrlStrategy {
 
   /// Adds a listener to the `popstate` event and returns a function that, when
   /// invoked, removes the listener.
-  ui.VoidCallback addPopStateListener(html.EventListener fn);
+  ui.VoidCallback addPopStateListener(DomEventListener fn);
 
   /// Returns the active path in the browser.
   String getPath();
@@ -82,9 +83,10 @@ class HashUrlStrategy extends UrlStrategy {
   final PlatformLocation _platformLocation;
 
   @override
-  ui.VoidCallback addPopStateListener(html.EventListener fn) {
-    _platformLocation.addPopStateListener(fn);
-    return () => _platformLocation.removePopStateListener(fn);
+  ui.VoidCallback addPopStateListener(DomEventListener fn) {
+    final DomEventListener wrappedFn = allowInterop(fn);
+    _platformLocation.addPopStateListener(wrappedFn);
+    return () => _platformLocation.removePopStateListener(wrappedFn);
   }
 
   @override
@@ -156,7 +158,7 @@ class CustomUrlStrategy extends UrlStrategy {
   final JsUrlStrategy delegate;
 
   @override
-  ui.VoidCallback addPopStateListener(html.EventListener fn) =>
+  ui.VoidCallback addPopStateListener(DomEventListener fn) =>
       delegate.addPopStateListener(js.allowInterop(fn));
 
   @override
@@ -194,13 +196,13 @@ abstract class PlatformLocation {
   /// Registers an event listener for the `popstate` event.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void addPopStateListener(html.EventListener fn);
+  void addPopStateListener(DomEventListener fn);
 
   /// Unregisters the given listener (added by [addPopStateListener]) from the
   /// `popstate` event.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void removePopStateListener(html.EventListener fn);
+  void removePopStateListener(DomEventListener fn);
 
   /// The `pathname` part of the URL in the browser address bar.
   ///
@@ -256,17 +258,17 @@ class BrowserPlatformLocation extends PlatformLocation {
   /// Default constructor for [BrowserPlatformLocation].
   const BrowserPlatformLocation();
 
-  html.Location get _location => html.window.location;
-  html.History get _history => html.window.history;
+  DomLocation get _location => domWindow.location;
+  DomHistory get _history => domWindow.history;
 
   @override
-  void addPopStateListener(html.EventListener fn) {
-    html.window.addEventListener('popstate', fn);
+  void addPopStateListener(DomEventListener fn) {
+    domWindow.addEventListener('popstate', fn);
   }
 
   @override
-  void removePopStateListener(html.EventListener fn) {
-    html.window.removeEventListener('popstate', fn);
+  void removePopStateListener(DomEventListener fn) {
+    domWindow.removeEventListener('popstate', fn);
   }
 
   @override
@@ -276,7 +278,7 @@ class BrowserPlatformLocation extends PlatformLocation {
   String get search => _location.search!;
 
   @override
-  String get hash => _location.hash;
+  String get hash => _location.locationHash;
 
   @override
   Object? get state => _history.state;
@@ -297,5 +299,5 @@ class BrowserPlatformLocation extends PlatformLocation {
   }
 
   @override
-  String? getBaseHref() => html.document.baseUri;
+  String? getBaseHref() => domDocument.baseUri;
 }

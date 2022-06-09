@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../services/message_codec.dart';
 import '../services/message_codecs.dart';
@@ -52,9 +51,7 @@ abstract class BrowserHistory {
   bool _isDisposed = false;
 
   void _setupStrategy(UrlStrategy strategy) {
-    _unsubscribe = strategy.addPopStateListener(
-      onPopState as html.EventListener,
-    );
+    _unsubscribe = strategy.addPopStateListener(onPopState as DomEventListener);
   }
 
   /// Release any resources held by this [BrowserHistory] instance.
@@ -103,7 +100,7 @@ abstract class BrowserHistory {
   ///
   /// Subclasses should send appropriate system messages to update the flutter
   /// applications accordingly.
-  void onPopState(covariant html.PopStateEvent event);
+  void onPopState(covariant DomPopStateEvent event);
 
   /// Restore any modifications to the html browser history during the lifetime
   /// of this class.
@@ -186,7 +183,7 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
   }
 
   @override
-  void onPopState(covariant html.PopStateEvent event) {
+  void onPopState(covariant DomPopStateEvent event) {
     assert(urlStrategy != null);
     // May be a result of direct url access while the flutter application is
     // already running.
@@ -263,7 +260,7 @@ class SingleEntryBrowserHistory extends BrowserHistory {
     _setupStrategy(strategy);
 
     final String path = currentPath;
-    if (!_isFlutterEntry(html.window.history.state)) {
+    if (!_isFlutterEntry(domWindow.history.state)) {
       // An entry may not have come from Flutter, for example, when the user
       // refreshes the page. They land directly on the "flutter" entry, so
       // there's no need to set up the "origin" and "flutter" entries, we can
@@ -314,7 +311,7 @@ class SingleEntryBrowserHistory extends BrowserHistory {
 
   String? _userProvidedRouteName;
   @override
-  void onPopState(covariant html.PopStateEvent event) {
+  void onPopState(covariant DomPopStateEvent event) {
     if (_isOriginEntry(event.state)) {
       _setupFlutterEntry(urlStrategy!);
 

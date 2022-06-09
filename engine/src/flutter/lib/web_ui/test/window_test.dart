@@ -47,7 +47,7 @@ void testMain() {
     final JsUrlStrategy jsUrlStrategy = JsUrlStrategy(
         getPath: allowInterop(() => '/initial'),
         getState: allowInterop(() => state),
-        addPopStateListener: allowInterop((html.EventListener listener) => () {}),
+        addPopStateListener: allowInterop((DomEventListener listener) => () {}),
         prepareExternalUrl: allowInterop((String value) => ''),
         pushState: allowInterop((Object? newState, String title, String url) {
           expect(newState is Map, true);
