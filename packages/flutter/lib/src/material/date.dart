@@ -271,11 +271,13 @@ class DateTimeRange {
 class DateTimeRangeValue {
   /// Creates a date range for the given start and end [DateTime].
   DateTimeRangeValue({
-    required this.start,
-    required this.end,
+    DateTime? start,
+    DateTime? end,
   }) : assert((start != null && end != null) ||
             (start != null && end == null) ||
-            (start != null && end != null && !start.isAfter(end)));
+            (start != null && end != null && !start.isAfter(end))),
+        start = start != null ? DateUtils.dateOnly(start) : null,
+        end = end != null ? DateUtils.dateOnly(end) : null;
 
   /// Creates an empty date range where start and end are null.
   const DateTimeRangeValue.empty()
@@ -307,8 +309,8 @@ class DateTimeRangeValue {
     DateTime? end,
   }) {
     return DateTimeRangeValue(
-      start: start ?? this.start,
-      end: end ?? this.end,
+      start: start != null ? DateUtils.dateOnly(start) : this.start,
+      end: end != null ? DateUtils.dateOnly(end) : this.end,
     );
   }
 
