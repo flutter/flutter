@@ -1579,7 +1579,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     late bool result;
     assert(() {
       if (_debugDisposed) {
-        throw FlutterError('Mutations not allowed: $this has already been disposed.');
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A disposed RenderObject was mutated.'),
+          DiagnosticsProperty<RenderObject>(
+            'The disposed RenderObject was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
       }
 
       final PipelineOwner? owner = this.owner;
@@ -1613,22 +1620,69 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(activeLayoutRoot == null || activeLayoutRoot._debugMutationsLocked);
       result = false;
       if (activeLayoutRoot == null) {
-        throw FlutterError(
-          'Mutations on out-of-band RenderObjects are not allowed:\n'
-          '$this is mutated from ${RenderObject.debugActiveLayout}, while none of its ancestors is actively doing layout.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Mutations on out-of-band RenderObject during layout.'),
+          ErrorDescription(
+            'A RenderObject must not be marked as neeing layout, '
+            'when none of its ancestors is actively performing layout',
+          ),
+          DiagnosticsProperty<RenderObject>(
+            'The RenderObject being mutated was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+          DiagnosticsProperty<RenderObject>(
+            'The RenderObject that was mutating the said $runtimeType was',
+            debugActiveLayout,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
       }
       if (activeLayoutRoot == this) {
-        throw FlutterError(
-          '$this is mutated while actively doing layout.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A $runtimeType was mutated during layout.'),
+          ErrorDescription(
+            'A $runtimeType must not redirty itself in its ${debugDoingThisLayout ? 'performLayout' : 'performResize'} method.'
+          ),
+          DiagnosticsProperty<RenderObject>(
+            'The RenderObject being mutated was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+          ErrorHint('Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'),
+        ]);
       }
-      throw FlutterError(
-        'Mutations on $this from ${RenderObject.debugActiveLayout} are not allowed:\n'
-        'their common ancestor $activeLayoutRoot is actively performing layout.\n'
-        'Mutating the layout of $this may cause some RenderObjects in its subtree to be laid out more than once.\n'
-        'Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'
-      );
+
+      final bool isMutatedByAncestor = activeLayoutRoot == debugActiveLayout;
+      final String description = isMutatedByAncestor
+        ? 'A RenderObject must not mutate its descendant in its '
+          '${RenderObject.debugActiveLayout!.debugDoingThisLayout ? 'performLayout' : 'performResize'} method.'
+        : 'A RenderObject must not mutate another RenderObject from a different render subtree, '
+          'in its ${RenderObject.debugActiveLayout!.debugDoingThisLayout ? 'performLayout' : 'performResize'} method.';
+
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('A $runtimeType was mutated during layout.'),
+        ErrorDescription(description),
+        DiagnosticsProperty<RenderObject>(
+          'The RenderObject being mutated was',
+          this,
+          style: DiagnosticsTreeStyle.errorProperty,
+        ),
+        DiagnosticsProperty<RenderObject>(
+          'The ${isMutatedByAncestor ? 'ancestor ' : ''}RenderObject that was mutating the said $runtimeType was',
+          this,
+          style: DiagnosticsTreeStyle.errorProperty,
+        ),
+        if (!isMutatedByAncestor) DiagnosticsProperty<RenderObject>(
+          'Their common ancestor was',
+          activeLayoutRoot,
+          style: DiagnosticsTreeStyle.errorProperty,
+        ),
+        ErrorHint(
+          'Mutating the layout of another RenderObject may cause some RenderObjects in its subtree to be laid out more than once. '
+          'Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'
+        ),
+      ]);
     }());
     return result;
   }

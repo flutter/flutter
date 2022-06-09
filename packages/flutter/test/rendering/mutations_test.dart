@@ -8,9 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 class RenderLayoutTestBox extends RenderProxyBox {
-  RenderLayoutTestBox(this.onLayout);
+  RenderLayoutTestBox(this.onLayout, {
+    this.onPerformLayout,
+  });
 
   final VoidCallback onLayout;
+  final VoidCallback? onPerformLayout;
 
   @override
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
@@ -27,7 +30,7 @@ class RenderLayoutTestBox extends RenderProxyBox {
   bool get sizedByParent => true;
 
   @override
-  void performLayout() { }
+  void performLayout() => onPerformLayout?.call();
 }
 
 void main() {
@@ -71,5 +74,75 @@ void main() {
     pumpFrame();
     expect(movedChild1, isFalse);
     expect(movedChild2, isFalse);
+  });
+
+  group('Throws when invalid mutations are attempted: ', () {
+    FlutterError catchError(VoidCallback callback) {
+      Object? error;
+      try {
+        callback();
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error, isFlutterError);
+      return error! as FlutterError;
+    }
+
+    FlutterError catchLayoutError(RenderBox box) {
+      Object? error;
+      layout(box, onErrors: () {
+        error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!.exception;
+      });
+      expect(error, isFlutterError);
+      return error! as FlutterError;
+    }
+
+    test('on disposed render objects', () {
+      final RenderBox box = RenderLayoutTestBox(() {});
+      box.dispose();
+
+      Object? error;
+      try {
+        box.markNeedsLayout();
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error, isFlutterError);
+      expect(
+        (error! as FlutterError).message,
+        contains('has already been disposed.'),
+      );
+    });
+
+    test('marking itself dirty in performLayout', () {
+      late RenderBox child1;
+      final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+      block.add(child1 = RenderLayoutTestBox(() {}, onPerformLayout: () { child1.markNeedsLayout(); }));
+
+      expect(
+        catchLayoutError(block).message,
+        contains(
+          'A render object must not mark itself dirty while actively doing layout.\n'
+          'If you wish to change the layout of a subtree during layout, consider using the LayoutBuilder widget.'
+        ),
+      );
+    });
+
+    test('marking a sibling dirty in performLayout', () {
+      late RenderBox child1;
+      final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+      block.add(child1 = RenderLayoutTestBox(() {}));
+      block.add(RenderLayoutTestBox(() {}, onPerformLayout: () { child1.markNeedsLayout(); }));
+
+      expect(
+        catchLayoutError(block).message,
+        equalsIgnoringHashCodes(
+          'Mutating RenderLayoutTestBox#00000 from RenderLayoutTestBox#00000 is not allowed:\n'
+          'Consider using the LayoutBuilder widget to dynamically mutate a subtree during layout.'
+        ),
+      );
+    });
   });
 }
