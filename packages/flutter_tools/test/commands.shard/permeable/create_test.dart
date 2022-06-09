@@ -2874,8 +2874,10 @@ testUsingContext('create an FFI plugin, then run ffigen', () async {
 
     await generatedBindings.delete();
 
+    final String flutter =
+        const LocalPlatform().isWindows ? 'flutter.exe' : 'flutter';
     final ProcessResult pubGetResult = await Process.run(
-      'flutter',
+      flutter,
       <String>[
         'pub',
         'get',
@@ -2888,7 +2890,7 @@ testUsingContext('create an FFI plugin, then run ffigen', () async {
     expect(pubGetResult.exitCode, 0);
 
     final ProcessResult ffigenResult = await Process.run(
-      'flutter',
+      flutter,
       <String>[
         'pub',
         'run',
