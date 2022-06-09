@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
 
+export 'package:flutter/foundation.dart' show DiagnosticsNode, VoidCallback;
+
 /// Signature for the callback passed to the [Ticker] class's constructor.
 ///
 /// The argument is the time that the object had spent enabled so far
