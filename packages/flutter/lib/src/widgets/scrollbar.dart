@@ -849,9 +849,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// This sample shows an app with two scrollables in the same route. Since by
 /// default, there is one [PrimaryScrollController] per route, and they both have a
 /// scroll direction of [Axis.vertical], they would both try to attach to that
-/// controller. The [Scrollbar] cannot support multiple positions attached to
-/// the same controller, so one [ListView], and its [Scrollbar] have been
-/// provided a unique [ScrollController].
+/// controller on mobile platforms. The [Scrollbar] cannot support multiple
+/// positions attached to the same controller, so one [ListView], and its
+/// [Scrollbar] have been provided a unique [ScrollController]. Desktop
+/// platforms do not automatically attach to the PrimaryScrollController,
+/// requiring [ScrollView.primary] to be true instead in order to use the
+/// PrimaryScrollController.
 ///
 /// Alternatively, a new PrimaryScrollController could be created above one of
 /// the [ListView]s.
@@ -1507,14 +1510,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           ErrorHint(
             'The Scrollbar attempted to use the $controllerForError. This '
             'ScrollController should be associated with the ScrollView that '
-            'the Scrollbar is being applied to. '
+            'the Scrollbar is being applied to.'
             '${tryPrimary
-              ? 'A ScrollView with an Axis.vertical '
-                'ScrollDirection will automatically use the '
+              ? 'A ScrollView with an Axis.vertical ScrollDirection on mobile '
+                'platforms will automatically use the '
                 'PrimaryScrollController if the user has not provided a '
-                'ScrollController, but a ScrollDirection of Axis.horizontal will '
-                'not. To use the PrimaryScrollController explicitly, set ScrollView.primary '
-                'to true for the Scrollable widget.'
+                'ScrollController. To use the PrimaryScrollController '
+                'explicitly, set ScrollView.primary to true for the Scrollable '
+                'widget.'
               : 'When providing your own ScrollController, ensure both the '
                 'Scrollbar and the Scrollable widget use the same one.'
             }',
@@ -1539,16 +1542,17 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             'The Scrollbar requires a single ScrollPosition in order to be painted.',
           ),
           ErrorHint(
-            'When $when, the associated Scrollable '
-            'widgets must have unique ScrollControllers. '
+            'When $when, the associated ScrollController must only have one '
+            'ScrollPosition attached.'
             '${tryPrimary
-              ? 'The PrimaryScrollController is used by default for '
-                'ScrollViews with an Axis.vertical ScrollDirection, '
-                'unless the ScrollView has been provided its own '
-                'ScrollController. More than one Scrollable may have tried '
-                'to use the PrimaryScrollController of the current context.'
-              : 'The provided ScrollController must be unique to a '
-                'Scrollable widget.'
+              ? 'If a ScrollController has not been provided, the '
+                'PrimaryScrollController is used by default on mobile platforms '
+                'for ScrollViews with an Axis.vertical scroll direction. More '
+                'than one ScrollView may have tried to use the '
+                'PrimaryScrollController of the current context. '
+                'ScrollView.primary can override this behavior.'
+              : 'The provided ScrollController must be unique to one '
+                'ScrollView widget.'
             }',
           ),
         ]);

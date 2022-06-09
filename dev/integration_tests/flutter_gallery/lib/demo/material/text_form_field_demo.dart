@@ -182,6 +182,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           onWillPop: _warnUserAboutInvalidData,
           child: Scrollbar(
             child: SingleChildScrollView(
+              primary: true,
               dragStartBehavior: DragStartBehavior.down,
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
