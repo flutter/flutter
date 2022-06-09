@@ -10978,11 +10978,11 @@ void main() {
     await tester.pump(kDoubleTapTimeout);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     final TestGesture gesture =
-    await tester.startGesture(
-      textOffsetToPosition(tester, 23),
-      pointer: 7,
-      kind: PointerDeviceKind.mouse,
-    );
+        await tester.startGesture(
+          textOffsetToPosition(tester, 23),
+          pointer: 7,
+          kind: PointerDeviceKind.mouse,
+        );
     if (isTargetPlatformMobile) {
       await gesture.up();
     }
@@ -11186,11 +11186,11 @@ void main() {
     await tester.pump(kDoubleTapTimeout);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     final TestGesture gesture =
-    await tester.startGesture(
-      textOffsetToPosition(tester, 8),
-      pointer: 7,
-      kind: PointerDeviceKind.mouse,
-    );
+        await tester.startGesture(
+          textOffsetToPosition(tester, 8),
+          pointer: 7,
+          kind: PointerDeviceKind.mouse,
+        );
     if (isTargetPlatformMobile) {
       await gesture.up();
     }
@@ -11290,11 +11290,11 @@ void main() {
     await tester.pump(kDoubleTapTimeout);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     final TestGesture gesture =
-    await tester.startGesture(
-      textOffsetToPosition(tester, 8),
-      pointer: 7,
-      kind: PointerDeviceKind.mouse,
-    );
+        await tester.startGesture(
+          textOffsetToPosition(tester, 8),
+          pointer: 7,
+          kind: PointerDeviceKind.mouse,
+        );
     if (isTargetPlatformMobile) {
       await gesture.up();
     }
