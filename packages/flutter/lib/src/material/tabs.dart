@@ -327,6 +327,7 @@ class _IndicatorPainter extends CustomPainter {
     required this.tabKeys,
     required _IndicatorPainter? old,
     required this.indicatorPadding,
+    required this.context,
   }) : assert(controller != null),
        assert(indicator != null),
        super(repaint: controller.animation) {
@@ -340,6 +341,7 @@ class _IndicatorPainter extends CustomPainter {
   final TabBarIndicatorSize? indicatorSize;
   final EdgeInsetsGeometry indicatorPadding;
   final List<GlobalKey> tabKeys;
+  final BuildContext context;
 
   // _currentTabOffsets and _currentTextDirection are set each time TabBar
   // layout is completed. These values can be null when TabBar contains no
@@ -352,6 +354,7 @@ class _IndicatorPainter extends CustomPainter {
   bool _needsPaint = false;
   void markNeedsPaint() {
     _needsPaint = true;
+    context.findRenderObject()?.markNeedsPaint();
   }
 
   void dispose() {
@@ -1004,6 +1007,7 @@ class _TabBarState extends State<TabBar> {
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
+      context: context
     );
   }
 
