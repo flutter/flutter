@@ -33,8 +33,6 @@ dependency_overrides:
     path: ../../../third_party/dart/pkg/async_helper
   async:
     path: ../../../third_party/dart/third_party/pkg/async
-  charcode:
-    path: ../../../third_party/dart/third_party/pkg/charcode
   collection:
     path: ../../../third_party/dart/third_party/pkg/collection
   convert:
