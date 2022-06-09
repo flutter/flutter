@@ -369,4 +369,3 @@ class TestTextInput {
     await _keyHandler?.handleKeyUpEvent(key);
   }
 }
-
