@@ -306,6 +306,74 @@ void main() {
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
   });
+
+  testWidgets('CircleAvatar respects setting backgroundImageFit', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: CircleAvatar(
+          backgroundImage: MemoryImage(Uint8List.fromList(kTransparentImage)),
+          backgroundImageFit: BoxFit.contain,
+          radius: 50.0,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.fit, equals(BoxFit.contain));
+  });
+
+  testWidgets('CircleAvatar respects setting backgroundImageAlignment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: CircleAvatar(
+          backgroundImage: MemoryImage(Uint8List.fromList(kTransparentImage)),
+          backgroundImageAlignment: Alignment.topLeft,
+          radius: 50.0,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.alignment, equals(Alignment.topLeft));
+  });
+
+  testWidgets('CircleAvatar respects setting foregroundImageFit', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: CircleAvatar(
+          foregroundImage: MemoryImage(Uint8List.fromList(kTransparentImage)),
+          foregroundImageFit: BoxFit.contain,
+          radius: 50.0,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.fit, equals(BoxFit.contain));
+  });
+
+  testWidgets('CircleAvatar respects setting foregroundImageAlignment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: CircleAvatar(
+          foregroundImage: MemoryImage(Uint8List.fromList(kTransparentImage)),
+          foregroundImageAlignment: Alignment.topLeft,
+          radius: 50.0,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.alignment, equals(Alignment.topLeft));
+  });
 }
 
 Widget wrap({ required Widget child }) {

@@ -64,7 +64,11 @@ class CircleAvatar extends StatelessWidget {
     this.child,
     this.backgroundColor,
     this.backgroundImage,
+    this.backgroundImageFit = BoxFit.cover,
+    this.backgroundImageAlignment = Alignment.center,
     this.foregroundImage,
+    this.foregroundImageFit = BoxFit.cover,
+    this.foregroundImageAlignment = Alignment.center,
     this.onBackgroundImageError,
     this.onForegroundImageError,
     this.foregroundColor,
@@ -106,10 +110,22 @@ class CircleAvatar extends StatelessWidget {
   /// If the [CircleAvatar] is to have the user's initials, use [child] instead.
   final ImageProvider? backgroundImage;
 
+  /// How to inscribe [backgroundImage] into the space allocated during layout, defaults to [BoxFit.cover].
+  final BoxFit backgroundImageFit;
+
+  /// How to align [backgroundImage] within its bounds.
+  final AlignmentGeometry backgroundImageAlignment;
+
   /// The foreground image of the circle.
   ///
   /// Typically used as profile image. For fallback use [backgroundImage].
   final ImageProvider? foregroundImage;
+
+  /// How to inscribe [foregroundImage] into the space allocated during layout, defaults to [BoxFit.cover].
+  final BoxFit foregroundImageFit;
+
+  /// How to align [foregroundImage] within its bounds.
+  final AlignmentGeometry foregroundImageAlignment;
 
   /// An optional error callback for errors emitted when loading
   /// [backgroundImage].
@@ -229,7 +245,8 @@ class CircleAvatar extends StatelessWidget {
           ? DecorationImage(
               image: backgroundImage!,
               onError: onBackgroundImageError,
-              fit: BoxFit.cover,
+              fit: backgroundImageFit,
+              alignment: backgroundImageAlignment,
             )
           : null,
         shape: BoxShape.circle,
@@ -239,7 +256,8 @@ class CircleAvatar extends StatelessWidget {
               image: DecorationImage(
                 image: foregroundImage!,
                 onError: onForegroundImageError,
-                fit: BoxFit.cover,
+                fit: foregroundImageFit,
+                alignment: foregroundImageAlignment,
               ),
               shape: BoxShape.circle,
             )
