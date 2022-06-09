@@ -10,6 +10,10 @@ import 'diagnostics.dart';
 import 'print.dart';
 import 'stack_frame.dart';
 
+export 'basic_types.dart' show IterableFilter;
+export 'diagnostics.dart' show DiagnosticLevel, DiagnosticsNode, DiagnosticPropertiesBuilder, DiagnosticsTreeStyle;
+export 'stack_frame.dart' show StackFrame;
+
 // Examples can assume:
 // late String runtimeType;
 // late bool draconisAlive;
