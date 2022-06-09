@@ -2892,8 +2892,14 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   /// return false and display an appropriate error message under one of the
   /// text fields.
   bool validate() {
-    final String? startError = _validateDate(_controller.start);
+    String? startError = _validateDate(_controller.start);
     final String? endError = _validateDate(_controller.end);
+    if (startError == null && endError == null) {
+      if (!_controller.isValid) {
+        startError = widget.errorInvalidRangeText ??
+            MaterialLocalizations.of(context).invalidDateRangeLabel;
+      }
+    }
     setState(() {
       _startErrorText = startError;
       _endErrorText = endError;
