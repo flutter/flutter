@@ -136,20 +136,13 @@ enum HeroFlightDirection {
 /// To make the animations look good, it's critical that the widget tree for the
 /// hero in both locations be essentially identical. The widget of the *target*
 /// is, by default, used to do the transition: when going from route A to route
-/// B, route B's hero's widget is placed over route A's hero's widget. If a
-/// [flightShuttleBuilder] is supplied, its output widget is shown during the
-/// flight transition instead.
-///
-/// The flightShuttleBulder tree uses [InheritedWidget]s from the route the Hero
-/// animation starts from. If the widget tree in [flightShuttleBuilder] changes
-/// its geometry/appearance based on [InheritedWidget]s that are above the Hero
-/// widget tree, for example if both routes provide [MediaQuery] but with
-/// different paddings, you may see jumps/gaps. If you experience this problem,
-/// wrap the current flightShuttleBulder in an [InheritedWidget] (and
-/// potentially interpolate the value provided by the inherited widget using the
-/// animation parameter). The default [flightShuttleBuilder] is wrapped in a
-/// [MediaQuery] widget if only one navigator has padding or both navigator's
-/// [MediaQuery]'s provide different paddings.
+/// B, route B's hero's widget is placed over route A's hero's widget. However,
+/// if the hero uses information from InheritedWidgets, and the inherited data
+/// are different between the starting tree and the target tree, there will be
+/// an ugly jumping animation unless that data is properly interpolated. By
+/// default, Hero interpolates MediaQuery's paddings. If your hero uses custom
+/// InheritedWidgets and displays jumping animation, try to provide custom
+/// in-flight transition using flightShuttleBuilder.
 ///
 /// By default, both route A and route B's heroes are hidden while the
 /// transitioning widget is animating in-flight above the 2 routes.
@@ -219,18 +212,6 @@ class Hero extends StatefulWidget {
   final Widget child;
 
   /// Optional override to supply a widget that's shown during the hero's flight.
-  ///
-  /// If overriding note the flightShuttleBulder tree uses [InheritedWidget]s 
-  /// from the route the Hero animation starts from. If the widget tree in 
-  /// [flightShuttleBuilder] changes its geometry/appearance based on 
-  /// [InheritedWidget]s that are above the Hero widget tree, for example if both
-  /// routes provide [MediaQuery] but with different paddings, you may see 
-  /// jumps/gaps. If you experience this problem, wrap the current 
-  /// flightShuttleBulder in an [InheritedWidget] (and potentially interpolate
-  /// the value provided by the inherited widget using the animation parameter).
-  /// The default [flightShuttleBuilder] is wrapped in a [MediaQuery] widget if
-  /// only one navigator has padding or both navigator's [MediaQuery]'s provide
-  /// different paddings.
   ///
   /// This in-flight widget can depend on the route transition's animation as
   /// well as the incoming and outgoing routes' [Hero] descendants' widgets and
