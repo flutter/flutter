@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-export 'dart:async' show FutureOr;
-
 /// A [Future] whose [then] implementation calls the callback immediately.
 ///
 /// This is similar to [Future.value], except that the value is available in

@@ -4,8 +4,6 @@
 
 import 'isolates.dart' as isolates;
 
-export 'dart:async' show FutureOr;
-
 export 'isolates.dart' show ComputeCallback;
 
 /// The dart:html implementation of [isolate.compute].

@@ -7,8 +7,6 @@ import 'dart:async';
 import '_isolates_io.dart'
   if (dart.library.html) '_isolates_web.dart' as isolates;
 
-export 'dart:async' show FutureOr;
-
 /// Signature for the callback passed to [compute].
 ///
 /// {@macro flutter.foundation.compute.types}
