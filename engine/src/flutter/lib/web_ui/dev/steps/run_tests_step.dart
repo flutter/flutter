@@ -78,6 +78,8 @@ class RunTestsStep implements PipelineStep {
       overridePathToCanvasKit: overridePathToCanvasKit,
     );
 
+    await _browserEnvironment.cleanup();
+
     if (io.exitCode != 0) {
       throw ToolExit('Some tests failed');
     }

@@ -9,13 +9,17 @@ import 'package:test_api/src/backend/runtime.dart';
 
 import 'browser.dart';
 import 'browser_lock.dart';
+import 'browser_process.dart';
 import 'common.dart';
 import 'edge_installation.dart';
 
 /// Provides an environment for the desktop Microsoft Edge (Chromium-based).
 class EdgeEnvironment implements BrowserEnvironment {
   @override
-  Browser launchBrowserInstance(Uri url, {bool debug = false}) {
+  final String name = 'Edge';
+
+  @override
+  Future<Browser> launchBrowserInstance(Uri url, {bool debug = false}) async {
     return Edge(url);
   }
 
@@ -28,7 +32,7 @@ class EdgeEnvironment implements BrowserEnvironment {
   }
 
   @override
-  ScreenshotManager? getScreenshotManager() => null;
+  Future<void> cleanup() async {}
 
   @override
   String get packageTestConfigurationYamlFile => 'dart_test_edge.yaml';
@@ -42,13 +46,12 @@ class EdgeEnvironment implements BrowserEnvironment {
 ///
 /// Any errors starting or running the process are reported through [onExit].
 class Edge extends Browser {
-  @override
-  final String name = 'Edge';
+  final BrowserProcess _process;
 
   /// Starts a new instance of Safari open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Edge(Uri url) {
-    return Edge._(() async {
+    return Edge._(BrowserProcess(() async {
       final BrowserInstallation installation = await getEdgeInstallation(
         browserLock.edgeLock.launcherVersion,
         infoLog: DevNull(),
@@ -67,8 +70,14 @@ class Edge extends Browser {
       );
 
       return process;
-    });
+    }));
   }
 
-  Edge._(Future<Process> Function() startBrowser) : super(startBrowser);
+  Edge._(this._process);
+
+  @override
+  Future<void> get onExit => _process.onExit;
+
+  @override
+  Future<void> close()  => _process.close();
 }

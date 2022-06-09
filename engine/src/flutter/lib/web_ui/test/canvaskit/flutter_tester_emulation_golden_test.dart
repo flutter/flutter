@@ -114,5 +114,5 @@ void testMain() {
     });
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/60040
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/71520
-  }, skip: isIosSafari || isFirefox);
+  }, skip: isSafari || isFirefox);
 }
