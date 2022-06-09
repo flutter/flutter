@@ -93,7 +93,7 @@ void testMain() {
       );
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
-    }, skip: isIosSafari || isFirefox);
+    }, skip: isSafari || isFirefox);
 
     test('will put the Noto Emoji font before other fallback fonts in the list',
         () async {
@@ -203,7 +203,7 @@ void testMain() {
       );
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
-    }, skip: isIosSafari || isFirefox);
+    }, skip: isSafari || isFirefox);
 
     test('will gracefully fail if we cannot parse the Google Fonts CSS',
         () async {
@@ -357,7 +357,7 @@ void testMain() {
       }
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  }, skip: isSafari);
 }
 
 class TestDownloader extends NotoDownloader {

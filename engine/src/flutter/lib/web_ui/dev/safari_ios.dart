@@ -9,19 +9,37 @@ import 'dart:math' as math;
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 import 'package:test_api/src/backend/runtime.dart';
+import 'package:uuid/uuid.dart';
 
 import 'browser.dart';
 import 'browser_lock.dart';
+import 'browser_process.dart';
 import 'environment.dart';
 import 'safari_installation.dart';
 import 'utils.dart';
 
+/// Info about the screen layout for the current version of iOS Safari.
+///
+/// This is used to properly take screenshots of the browser.
+class SafariScreenInfo {
+  final int heightOfHeader;
+  final int heightOfFooter;
+  final double scaleFactor;
+
+  SafariScreenInfo(this.heightOfHeader, this.heightOfFooter, this.scaleFactor);
+}
+
 /// Provides an environment for the mobile variant of Safari running in an iOS
 /// simulator.
 class SafariIosEnvironment implements BrowserEnvironment {
+  late final SafariScreenInfo _screenInfo;
+
   @override
-  Browser launchBrowserInstance(Uri url, {bool debug = false}) {
-    return SafariIos(url);
+  final String name = 'Safari iOS';
+
+  @override
+  Future<Browser> launchBrowserInstance(Uri url, {bool debug = false}) async {
+    return SafariIos(url, _screenInfo);
   }
 
   @override
@@ -29,13 +47,24 @@ class SafariIosEnvironment implements BrowserEnvironment {
 
   @override
   Future<void> prepare() async {
+    final SafariIosLock lock = browserLock.safariIosLock;
+    _screenInfo = SafariScreenInfo(
+        lock.heightOfHeader, lock.heightOfFooter, lock.scaleFactor);
+
+    /// Create the directory to use for taking screenshots, if it does not
+    /// exists.
+    if (!environment.webUiSimulatorScreenshotsDirectory.existsSync()) {
+      environment.webUiSimulatorScreenshotsDirectory.createSync();
+    }
+    // Temporary directories are deleted in the clenaup phase of after `felt`
+    // runs the tests.
+    temporaryDirectories.add(environment.webUiSimulatorScreenshotsDirectory);
+
     await initIosSimulator();
   }
 
   @override
-  ScreenshotManager? getScreenshotManager() {
-    return SafariIosScreenshotManager();
-  }
+  Future<void> cleanup() async {}
 
   @override
   String get packageTestConfigurationYamlFile => 'dart_test_safari.yaml';
@@ -49,13 +78,13 @@ class SafariIosEnvironment implements BrowserEnvironment {
 ///
 /// Any errors starting or running the process are reported through [onExit].
 class SafariIos extends Browser {
-  @override
-  final String name = 'Safari iOS';
+  final BrowserProcess _process;
+  final SafariScreenInfo _screenInfo;
 
   /// Starts a new instance of Safari open to the given [url], which may be a
   /// [Uri].
-  factory SafariIos(Uri url) {
-    return SafariIos._(() async {
+  factory SafariIos(Uri url, SafariScreenInfo screenInfo) {
+    return SafariIos._(BrowserProcess(() async {
       // iOS-Safari
       // Uses `xcrun simctl`. It is a command line utility to control the
       // Simulator. For more details on interacting with the simulator:
@@ -68,57 +97,21 @@ class SafariIos extends Browser {
       ]);
 
       return process;
-    });
+    }), screenInfo);
   }
 
-  SafariIos._(Future<io.Process> Function() startBrowser) : super(startBrowser);
-}
+  SafariIos._(this._process, this._screenInfo);
 
-/// [ScreenshotManager] implementation for Safari.
-///
-/// This manager will only be created/used for macOS.
-class SafariIosScreenshotManager extends ScreenshotManager {
   @override
-  String get filenameSuffix => '.iOS_Safari';
+  Future<void> get onExit => _process.onExit;
 
-  SafariIosScreenshotManager() {
-    final SafariIosLock lock = browserLock.safariIosLock;
-    _heightOfHeader = lock.heightOfHeader;
-    _heightOfFooter = lock.heightOfFooter;
-    _scaleFactor = lock.scaleFactor;
+  @override
+  Future<void> close() => _process.close();
 
-    /// Create the directory to use for taking screenshots, if it does not
-    /// exists.
-    if (!environment.webUiSimulatorScreenshotsDirectory.existsSync()) {
-      environment.webUiSimulatorScreenshotsDirectory.createSync();
-    }
-    // Temporary directories are deleted in the clenaup phase of after `felt`
-    // runs the tests.
-    temporaryDirectories.add(environment.webUiSimulatorScreenshotsDirectory);
-  }
+  @override
+  bool get supportsScreenshots => true;
 
-  /// This scale factor is used to enlarge/shrink the screenshot region
-  /// sent from the tests.
-  /// For more details see [_scaleScreenshotRegion(region)].
-  late final double _scaleFactor;
-
-  /// Height of the part to crop from the top of the image.
-  ///
-  /// `xcrun simctl` command takes the screenshot of the entire simulator. We
-  /// are cropping top bit from screenshot, otherwise due to the clock on top of
-  /// the screen, the screenshot will differ between each run.
-  /// Note that this gap can change per phone and per iOS version. For more
-  /// details refer to `browser_lock.yaml` file.
-  late final int _heightOfHeader;
-
-  /// Height of the part to crop from the bottom of the image.
-  ///
-  /// This area is the footer navigation bar of the phone, it is not the area
-  /// used by tests (which is inside the browser).
-  late final int _heightOfFooter;
-
-  /// Used as a suffix for the temporary file names used for screenshots.
-  int _fileNameCounter = 0;
+  @override
 
   /// Capture a screenshot of entire simulator.
   ///
@@ -155,20 +148,21 @@ class SafariIosScreenshotManager extends ScreenshotManager {
   ///
   /// Uses simulator tool `xcrun simctl`'s 'screenshot' command.
   @override
-  Future<Image> capture(math.Rectangle<num>? region) async {
-    final String filename = 'screenshot$_fileNameCounter.png';
-    _fileNameCounter++;
+  Future<Image> captureScreenshot(math.Rectangle<num>? region) async {
+    final String screenshotTag = const Uuid().v4();
+
+    final String filename = 'screenshot$screenshotTag.png';
 
     await iosSimulator.takeScreenshot(
-      filename, environment.webUiSimulatorScreenshotsDirectory,
+      filename,
+      environment.webUiSimulatorScreenshotsDirectory,
     );
 
     final io.File file = io.File(path.join(
         environment.webUiSimulatorScreenshotsDirectory.path, filename));
     List<int> imageBytes;
     if (!file.existsSync()) {
-      throw Exception('Failed to read the screenshot '
-          'screenshot$_fileNameCounter.png.');
+      throw Exception('Failed to read the screenshot $filename.');
     }
     imageBytes = await file.readAsBytes();
     file.deleteSync();
@@ -180,9 +174,11 @@ class SafariIosScreenshotManager extends ScreenshotManager {
     final Image content = copyCrop(
       screenshot,
       0,
-      _heightOfHeader,
+      _screenInfo.heightOfHeader,
       screenshot.width,
-      screenshot.height - _heightOfFooter - _heightOfHeader,
+      screenshot.height -
+          _screenInfo.heightOfFooter -
+          _screenInfo.heightOfHeader,
     );
 
     if (region == null) {
@@ -204,10 +200,10 @@ class SafariIosScreenshotManager extends ScreenshotManager {
   /// This uniform/isotropic scaling is done using [_scaleFactor].
   math.Rectangle<num> _scaleScreenshotRegion(math.Rectangle<num> region) {
     return math.Rectangle<num>(
-      region.left * _scaleFactor,
-      region.top * _scaleFactor,
-      region.width * _scaleFactor,
-      region.height * _scaleFactor,
+      region.left * _screenInfo.scaleFactor,
+      region.top * _screenInfo.scaleFactor,
+      region.width * _screenInfo.scaleFactor,
+      region.height * _screenInfo.scaleFactor,
     );
   }
 }

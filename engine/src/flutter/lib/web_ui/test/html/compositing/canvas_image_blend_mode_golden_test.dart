@@ -92,8 +92,7 @@ Future<void> testMain() async {
       await canvasScreenshot(rc, 'canvas_image_blend_group$blendGroup',
           maxDiffRatePercent: 8.0, region: screenRect);
     },
-        skip: browserEngine == BrowserEngine.webkit &&
-            operatingSystem == OperatingSystem.iOs);
+        skip: isSafari);
   }
 
   // Regression test for https://github.com/flutter/flutter/issues/56971
