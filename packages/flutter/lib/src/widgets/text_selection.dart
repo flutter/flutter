@@ -1507,6 +1507,8 @@ class TextSelectionGestureDetectorBuilder {
           // of the word.
             renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
             break;
+          case null:
+            break;
         }
         break;
       case TargetPlatform.linux:
