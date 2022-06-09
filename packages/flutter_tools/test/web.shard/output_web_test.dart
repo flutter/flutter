@@ -90,6 +90,5 @@ void main() {
     await start();
     await flutter.stop();
     expect(containsDartUriWarning, isFalse);
-    // TODO(elliette): Enable for DWDS >13.1.0, https://github.com/flutter/flutter/issues/101639
-  }, skip: true); // [intended] enable for DWDS >13.1.0
+  });
 }
