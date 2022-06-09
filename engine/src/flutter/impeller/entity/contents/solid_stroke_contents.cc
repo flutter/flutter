@@ -182,10 +182,8 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation();
-
-  VS::StrokeInfo stroke_info;
-  stroke_info.color = color_.Premultiply();
-  stroke_info.size = stroke_size_;
+  frame_info.color = color_.Premultiply();
+  frame_info.size = stroke_size_;
 
   Command cmd;
   cmd.primitive_type = PrimitiveType::kTriangleStrip;
@@ -205,8 +203,6 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
                                              cap_proc_, join_proc_,
                                              miter_limit_, smoothing));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
-  VS::BindStrokeInfo(cmd,
-                     pass.GetTransientsBuffer().EmplaceUniform(stroke_info));
 
   pass.AddCommand(cmd);
 
