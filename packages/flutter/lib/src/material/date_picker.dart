@@ -694,7 +694,6 @@ class _RestorableAutovalidateMode extends RestorableValue<AutovalidateMode> {
 /// [helpText], [orientation], [icon], [onIconPressed] are required and must be
 /// non-null.
 class _DatePickerHeader extends StatelessWidget {
-
   /// Creates a header for use in a date picker dialog.
   const _DatePickerHeader({
     required this.helpText,
@@ -1060,7 +1059,8 @@ String _formatRangeStartDate(MaterialLocalizations localizations, DateTime? star
 /// is in the same year as the `startDate` and the `currentDate` then it will
 /// just use the short month day format (i.e. 'Jan 21'), otherwise it will
 /// include the year (i.e. 'Jan 21, 2020').
-String _formatRangeEndDate(MaterialLocalizations localizations, DateTime? startDate, DateTime? endDate, DateTime currentDate) {
+String _formatRangeEndDate(
+    MaterialLocalizations localizations, DateTime? startDate, DateTime? endDate, DateTime currentDate) {
   return endDate == null
       ? localizations.dateRangeEndLabel
       : (startDate != null && startDate.year == endDate.year && startDate.year == currentDate.year)
@@ -1604,8 +1604,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          Text(' – ', style: startDateStyle,
-                          ),
+                          Text(' – ', style: startDateStyle),
                           Flexible(
                             child: Text(
                               endDateText,
@@ -1954,7 +1953,6 @@ class _FocusedDate extends InheritedWidget {
   }
 }
 
-
 class _DayHeaders extends StatelessWidget {
   const _DayHeaders();
 
@@ -2247,7 +2245,8 @@ class _MonthItemState extends State<_MonthItem> {
             policy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
             break;
         }
-        Scrollable.ensureVisible(primaryFocus!.context!,
+        Scrollable.ensureVisible(
+          primaryFocus!.context!,
           duration: _monthScrollDuration,
           alignmentPolicy: policy,
         );
@@ -2780,11 +2779,9 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   void _syncTextControllers() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
-    final String startInputText =
-        _controller.start != null ? localizations.formatCompactDate(_controller.start!) : '';
+    final String startInputText = _controller.start != null ? localizations.formatCompactDate(_controller.start!) : '';
     _startController.text = startInputText;
-    final String endInputText =
-        _controller.end != null ? localizations.formatCompactDate(_controller.end!) : '';
+    final String endInputText = _controller.end != null ? localizations.formatCompactDate(_controller.end!) : '';
     _endController.text = endInputText;
   }
 
