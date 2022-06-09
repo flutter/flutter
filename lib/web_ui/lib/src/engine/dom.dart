@@ -26,8 +26,10 @@ extension DomWindowExtension on DomWindow {
   external DomConsole get console;
   external num get devicePixelRatio;
   external DomDocument get document;
+  external DomHistory get history;
   external int? get innerHeight;
   external int? get innerWidth;
+  external DomLocation get location;
   external DomNavigator get navigator;
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
@@ -61,7 +63,7 @@ extension DomNavigatorExtension on DomNavigator {
 
 @JS()
 @staticInterop
-class DomDocument {}
+class DomDocument extends DomNode {}
 
 extension DomDocumentExtension on DomDocument {
   external DomElement? get documentElement;
@@ -142,6 +144,7 @@ extension DomProgressEventExtension on DomProgressEvent {
 class DomNode extends DomEventTarget {}
 
 extension DomNodeExtension on DomNode {
+  external String? get baseUri;
   external DomNode? get firstChild;
   external String get innerText;
   external DomNode? get lastChild;
@@ -691,6 +694,67 @@ extension DomKeyboardEventExtension on DomKeyboardEvent {
   external bool getModifierState(String keyArg);
 }
 
+@JS()
+@staticInterop
+class DomHistory {}
+
+extension DomHistoryExtension on DomHistory {
+  dynamic get state => js_util.dartify(js_util.getProperty(this, 'state'));
+  external void go([int? delta]);
+  void pushState(dynamic data, String title, String? url) =>
+      js_util.callMethod(this, 'pushState', <Object?>[
+        if (data is Map || data is Iterable) js_util.jsify(data) else data,
+        title,
+        url
+      ]);
+  void replaceState(dynamic data, String title, String? url) =>
+      js_util.callMethod(this, 'replaceState', <Object?>[
+        if (data is Map || data is Iterable) js_util.jsify(data) else data,
+        title,
+        url
+      ]);
+}
+
+@JS()
+@staticInterop
+class DomLocation {}
+
+extension DomLocationExtension on DomLocation {
+  external String? get pathname;
+  external String? get search;
+  // We have to change the name here because 'hash' is inherited from [Object].
+  String get locationHash => js_util.getProperty(this, 'hash');
+}
+
+@JS()
+@staticInterop
+class DomPopStateEvent extends DomEvent {}
+
+DomPopStateEvent createDomPopStateEvent(
+        String type, Map<Object?, Object?>? eventInitDict) =>
+    domCallConstructorString('PopStateEvent', <Object>[
+      type,
+      if (eventInitDict != null) js_util.jsify(eventInitDict)
+    ])! as DomPopStateEvent;
+
+extension DomPopStateEventExtension on DomPopStateEvent {
+  dynamic get state => js_util.dartify(js_util.getProperty(this, 'state'));
+}
+
+Object? domGetConstructor(String constructorName) =>
+    js_util.getProperty(domWindow, constructorName);
+
+Object? domCallConstructorString(String constructorName, List<Object?> args) {
+  final Object? constructor = domGetConstructor(constructorName);
+  if (constructor == null) {
+    return null;
+  }
+  return js_util.callConstructor(constructor, args);
+}
+
+bool domInstanceOfString(Object? element, String objectType) =>
+    js_util.instanceof(element, domGetConstructor(objectType)!);
+
 /// [_DomElementList] is the shared interface for APIs that return either
 /// `NodeList` or `HTMLCollection`. Do *not* add any API to this class that
 /// isn't support by both JS objects. Furthermore, this is an internal class and
@@ -741,17 +805,3 @@ class _DomElementListWrapper extends Iterable<DomElement> {
   @override
   int get length => elementList.length;
 }
-
-Object? domGetConstructor(String constructorName) =>
-    js_util.getProperty(domWindow, constructorName);
-
-Object? domCallConstructorString(String constructorName, List<Object?> args) {
-  final Object? constructor = domGetConstructor(constructorName);
-  if (constructor == null) {
-    return null;
-  }
-  return js_util.callConstructor(constructor, args);
-}
-
-bool domInstanceOfString(Object? element, String objectType) =>
-    js_util.instanceof(element, domGetConstructor(objectType)!);
