@@ -323,7 +323,7 @@ CustomDevicesCommand createCustomDevicesCommand({
       hostPlatform: platform.isLinux ? HostPlatform.linux_x64
         : platform.isWindows ? HostPlatform.windows_x64
         : platform.isMacOS ? HostPlatform.darwin_x64
-        : throw FallThroughError()
+        : throw UnsupportedError('Unsupported operating system')
     ),
     terminal: terminal != null
       ? terminal(platform)
