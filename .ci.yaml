@@ -2706,7 +2706,6 @@ targets:
   - name: Mac_arm64_ios module_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2765,7 +2764,6 @@ targets:
   - name: Mac_arm64_ios plugin_lint_mac
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
