@@ -406,6 +406,7 @@ abstract class ScrollView extends StatelessWidget {
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
+      clipBehavior: clipBehavior,
     );
     final Widget scrollableResult = primary && scrollController != null
         ? PrimaryScrollController.none(child: scrollable)
