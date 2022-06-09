@@ -4,12 +4,9 @@
 
 uniform FrameInfo {
   mat4 mvp;
-} frame_info;
-
-uniform StrokeInfo {
   vec4 color;
   float size;
-} stroke_info;
+} frame_info;
 
 in vec2 vertex_position;
 in vec2 vertex_normal;
@@ -20,8 +17,8 @@ out float v_pen_down;
 
 void main() {
   // Push one vertex by the half stroke size along the normal vector.
-  vec2 offset = vertex_normal * vec2(stroke_info.size * 0.5);
+  vec2 offset = vertex_normal * vec2(frame_info.size * 0.5);
   gl_Position = frame_info.mvp * vec4(vertex_position + offset, 0.0, 1.0);
-  stroke_color = stroke_info.color;
+  stroke_color = frame_info.color;
   v_pen_down = pen_down;
 }
