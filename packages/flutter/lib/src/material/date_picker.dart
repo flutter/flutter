@@ -1127,7 +1127,8 @@ class _RestorableDateRangeController
 
   @override
   DateRangeController createDefaultValue() =>
-      DateRangeController(const DateTimeRangeValue.empty());
+      DateRangeController(
+      DateTimeRangeValue(start: initialStart, end: initialEnd));
 
   @override
   DateRangeController fromPrimitives(Object? data) {
