@@ -142,7 +142,7 @@ class TestTextInput {
         break;
       case 'TextInput.show':
         _isVisible = true;
-        if (defaultTargetPlatform == TargetPlatform.macOS) {
+        if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
           _keyHandler ??= MacTestTextInputKeyHandler(_client ?? -1);
         }
         break;
