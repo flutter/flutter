@@ -17,33 +17,23 @@ class FlutterAttachRequestArguments
     this.customTool,
     this.customToolReplacesArgs,
     this.vmServiceUri,
-    Object? restart,
-    String? name,
-    String? cwd,
-    List<String>? additionalProjectPaths,
-    bool? debugSdkLibraries,
-    bool? debugExternalPackageLibraries,
-    bool? evaluateGettersInDebugViews,
-    bool? evaluateToStringInDebugViews,
-    bool? sendLogsToClient,
-  }) : super(
-          name: name,
-          cwd: cwd,
-          restart: restart,
-          additionalProjectPaths: additionalProjectPaths,
-          debugSdkLibraries: debugSdkLibraries,
-          debugExternalPackageLibraries: debugExternalPackageLibraries,
-          evaluateGettersInDebugViews: evaluateGettersInDebugViews,
-          evaluateToStringInDebugViews: evaluateToStringInDebugViews,
-          sendLogsToClient: sendLogsToClient,
-        );
+    super.restart,
+    super.name,
+    super.cwd,
+    super.additionalProjectPaths,
+    super.debugSdkLibraries,
+    super.debugExternalPackageLibraries,
+    super.evaluateGettersInDebugViews,
+    super.evaluateToStringInDebugViews,
+    super.sendLogsToClient,
+  });
 
-  FlutterAttachRequestArguments.fromMap(Map<String, Object?> obj)
+  FlutterAttachRequestArguments.fromMap(super.obj)
       : toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
         customTool = obj['customTool'] as String?,
         customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
         vmServiceUri = obj['vmServiceUri'] as String?,
-        super.fromMap(obj);
+        super.fromMap();
 
   static FlutterAttachRequestArguments fromJson(Map<String, Object?> obj) =>
       FlutterAttachRequestArguments.fromMap(obj);
@@ -98,35 +88,25 @@ class FlutterLaunchRequestArguments
     this.toolArgs,
     this.customTool,
     this.customToolReplacesArgs,
-    Object? restart,
-    String? name,
-    String? cwd,
-    List<String>? additionalProjectPaths,
-    bool? debugSdkLibraries,
-    bool? debugExternalPackageLibraries,
-    bool? evaluateGettersInDebugViews,
-    bool? evaluateToStringInDebugViews,
-    bool? sendLogsToClient,
-  }) : super(
-          restart: restart,
-          name: name,
-          cwd: cwd,
-          additionalProjectPaths: additionalProjectPaths,
-          debugSdkLibraries: debugSdkLibraries,
-          debugExternalPackageLibraries: debugExternalPackageLibraries,
-          evaluateGettersInDebugViews: evaluateGettersInDebugViews,
-          evaluateToStringInDebugViews: evaluateToStringInDebugViews,
-          sendLogsToClient: sendLogsToClient,
-        );
+    super.restart,
+    super.name,
+    super.cwd,
+    super.additionalProjectPaths,
+    super.debugSdkLibraries,
+    super.debugExternalPackageLibraries,
+    super.evaluateGettersInDebugViews,
+    super.evaluateToStringInDebugViews,
+    super.sendLogsToClient,
+  });
 
-  FlutterLaunchRequestArguments.fromMap(Map<String, Object?> obj)
+  FlutterLaunchRequestArguments.fromMap(super.obj)
       : noDebug = obj['noDebug'] as bool?,
         program = obj['program'] as String?,
         args = (obj['args'] as List<Object?>?)?.cast<String>(),
         toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
         customTool = obj['customTool'] as String?,
         customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
-        super.fromMap(obj);
+        super.fromMap();
 
   /// If noDebug is true the launch request should launch the program without enabling debugging.
   @override

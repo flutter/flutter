@@ -48,21 +48,6 @@ final vm_service.Isolate isolate = vm_service.Isolate(
   extensionRPCs: <String>['ext.flutter.connectedVmServiceUri'],
 );
 
-final vm_service.VM fakeVM = vm_service.VM(
-  isolates: <vm_service.IsolateRef>[isolate],
-  pid: 1,
-  hostCPU: '',
-  isolateGroups: <vm_service.IsolateGroupRef>[],
-  targetCPU: '',
-  startTime: 0,
-  name: 'dart',
-  architectureBits: 64,
-  operatingSystem: '',
-  version: '',
-  systemIsolateGroups: <vm_service.IsolateGroupRef>[],
-  systemIsolates: <vm_service.IsolateRef>[],
-);
-
 final FakeVmServiceRequest listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
@@ -70,7 +55,7 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
       FlutterView(
         id: 'a',
         uiIsolate: isolate,
-      ).toJson()
+      ).toJson(),
     ],
   },
 );

@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/dart/analysis.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_process_manager.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String _kFlutterRoot = '/data/flutter';

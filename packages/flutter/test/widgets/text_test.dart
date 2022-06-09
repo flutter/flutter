@@ -412,6 +412,75 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/100395.
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 200);
+    const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
+    const String offScreenText = 'off screen';
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      SingleChildScrollView(
+        controller: controller,
+        child: Text.rich(
+          TextSpan(
+            children: <TextSpan>[
+              const TextSpan(text: onScreenText),
+              TextSpan(
+                text: offScreenText,
+                recognizer: TapGestureRecognizer()..onTap = () { },
+              ),
+            ],
+            style: textStyle,
+          ),
+          textDirection: TextDirection.ltr,
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+          actions: <SemanticsAction>[SemanticsAction.scrollUp],
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: onScreenText,
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  label: offScreenText,
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  flags: <SemanticsFlag>[SemanticsFlag.isLink, SemanticsFlag.isHidden],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
+
+    // Test show on screen.
+    expect(controller.offset, 0.0);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(4, SemanticsAction.showOnScreen);
+    await tester.pumpAndSettle();
+    expect(controller.offset != 0.0, isTrue);
+
+    semantics.dispose();
+  });
+
   testWidgets('recognizers split semantic node when TextSpan overflows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
@@ -979,13 +1048,16 @@ void main() {
         );
 
       expect(find.byType(RichText), paints..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawParagraph)
+        if (method != #drawParagraph) {
           return false;
+        }
         final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-        if (paragraph.longestLine > paragraph.width)
+        if (paragraph.longestLine > paragraph.width) {
           throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
-        if (paragraph.width >= 400)
+        }
+        if (paragraph.width >= 400) {
           throw 'paragraph.width (${paragraph.width}) >= 400';
+        }
         return true;
       }));
     },

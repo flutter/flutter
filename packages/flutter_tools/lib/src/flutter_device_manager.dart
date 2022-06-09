@@ -9,11 +9,8 @@ import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
 import 'base/file_system.dart';
-import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/terminal.dart';
-import 'base/user_messages.dart' hide userMessages;
 import 'custom_devices/custom_device.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
@@ -32,14 +29,14 @@ import 'macos/xcdevice.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
-import 'windows/uwptool.dart';
+
 import 'windows/windows_device.dart';
 import 'windows/windows_workflow.dart';
 
 /// A provider for all of the device discovery instances.
 class FlutterDeviceManager extends DeviceManager {
   FlutterDeviceManager({
-    required Logger logger,
+    required super.logger,
     required Platform platform,
     required ProcessManager processManager,
     required FileSystem fileSystem,
@@ -54,12 +51,11 @@ class FlutterDeviceManager extends DeviceManager {
     required Artifacts artifacts,
     required MacOSWorkflow macOSWorkflow,
     required FuchsiaSdk fuchsiaSdk,
-    required UserMessages userMessages,
+    required super.userMessages,
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
-    required Terminal terminal,
+    required super.terminal,
     required CustomDevicesConfig customDevicesConfig,
-    required UwpTool uwptool,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -123,8 +119,6 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       fileSystem: fileSystem,
       windowsWorkflow: windowsWorkflow,
-      featureFlags: featureFlags,
-      uwptool: uwptool,
     ),
     WebDevices(
       featureFlags: featureFlags,
@@ -139,11 +133,7 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       config: customDevicesConfig
     ),
-  ], super(
-      logger: logger,
-      terminal: terminal,
-      userMessages: userMessages,
-    );
+  ];
 
   @override
   final List<DeviceDiscovery> deviceDiscoverers;

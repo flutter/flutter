@@ -77,5 +77,19 @@ void main() {
     await start();
     await sendEvent(<String, Object>{'type': 'DevtoolsEvent'});
     await warning;
-  });
+  }, skip: true); // Skipping for 'https://github.com/dart-lang/webdev/issues/1562'
+
+  testWithoutContext(
+      'flutter run output skips DartUri warning messages from dwds', () async {
+    bool containsDartUriWarning = false;
+    flutter.stderr.listen((String msg) {
+      if (msg.contains('DartUri')) {
+        containsDartUriWarning = true;
+      }
+    });
+    await start();
+    await flutter.stop();
+    expect(containsDartUriWarning, isFalse);
+    // TODO(elliette): Enable for DWDS >13.1.0, https://github.com/flutter/flutter/issues/101639
+  }, skip: true); // [intended] enable for DWDS >13.1.0
 }

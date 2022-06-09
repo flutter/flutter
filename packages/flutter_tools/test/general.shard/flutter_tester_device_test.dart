@@ -87,6 +87,7 @@ void main() {
         '--enable-dart-profiling',
         '--non-interactive',
         '--use-test-fonts',
+        '--disable-asset-fonts',
         '--packages=.dart_tool/package_config.json',
         'example.dill',
       ], environment: <String, String>{
@@ -131,8 +132,9 @@ void main() {
         '--enable-dart-profiling',
         '--non-interactive',
         '--use-test-fonts',
+        '--disable-asset-fonts',
         '--packages=.dart_tool/package_config.json',
-        'example.dill'
+        'example.dill',
       ], environment: <String, String>{
         'FLUTTER_TEST': expectedFlutterTestValue,
         'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
@@ -203,14 +205,15 @@ void main() {
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
+            '--disable-asset-fonts',
             '--packages=.dart_tool/package_config.json',
             '--foo',
             '--bar',
-            'example.dill'
+            'example.dill',
           ],
           stdout: 'success',
           stderr: 'failure',
-        )
+        ),
       ]);
       device = createDevice(dartEntrypointArgs: <String>['--foo', '--bar']);
     });
@@ -244,12 +247,13 @@ void main() {
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
+            '--disable-asset-fonts',
             '--packages=.dart_tool/package_config.json',
-            'example.dill'
+            'example.dill',
           ],
           stdout: 'The Dart VM service is listening on http://localhost:1234',
           stderr: 'failure',
-        )
+        ),
       ]);
       device = createDevice(enableObservatory: true);
     });
@@ -286,7 +290,6 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-        packagesPath: '.dart_tool/package_config.json',
       ),
       hostVmServicePort: 1234,
       dartEntrypointArgs: dartEntrypointArgs,
@@ -294,7 +297,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     enableObservatory: enableObservatory,
     machine: false,
     host: InternetAddress.loopbackIPv6,
-    buildTestAssets: false,
+    testAssetDirectory: null,
     flutterProject: null,
     icudtlPath: null,
     compileExpression: null,

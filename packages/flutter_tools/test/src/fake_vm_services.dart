@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
@@ -53,7 +52,7 @@ class FakeVmServiceHost {
           'error': <String, Object?>{
             'code': fakeRequest.errorCode,
             'message': 'error',
-          }
+          },
         }));
       }
       _applyStreamListen();

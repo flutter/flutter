@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:meta/meta.dart';
 
 import 'constants.dart';
@@ -296,12 +294,13 @@ class StackFrame {
   final bool isConstructor;
 
   @override
-  int get hashCode => hashValues(number, package, line, column, className, method, source);
+  int get hashCode => Object.hash(number, package, line, column, className, method, source);
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is StackFrame
         && other.number == number
         && other.package == package

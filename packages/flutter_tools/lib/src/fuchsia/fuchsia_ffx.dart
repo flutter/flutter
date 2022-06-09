@@ -58,7 +58,7 @@ class FuchsiaFfx {
       'target',
       'list',
       '--format',
-      's'
+      's',
     ];
     final RunResult result = await _processUtils.run(command);
     if (result.exitCode != 0) {

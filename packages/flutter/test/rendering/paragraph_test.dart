@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, Paragraph;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -20,10 +20,10 @@ const String _kText = "I polished up that handle so carefullee\nThat now I am th
 // containing an empty box.
 class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
   RenderParagraphWithEmptySelectionBoxList(
-    InlineSpan text, {
-    required TextDirection textDirection,
+    super.text, {
+    required super.textDirection,
     required this.emptyListSelection,
-  }) : super(text, textDirection: textDirection);
+  });
 
   TextSelection emptyListSelection;
 
@@ -50,10 +50,10 @@ class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
 // can return an empty list for a WidgetSpan with empty dimensions.
 class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
   RenderParagraphWithEmptyBoxListForWidgetSpan(
-    InlineSpan text, {
-    required List<RenderBox> children,
-    required TextDirection textDirection,
-  }) : super(text, children: children, textDirection: textDirection);
+    super.text, {
+    required List<RenderBox> super.children,
+    required super.textDirection,
+  });
 
   @override
   List<ui.TextBox> getBoxesForSelection(
@@ -815,4 +815,134 @@ void main() {
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  group('Selection', () {
+    void selectionParagraph(RenderParagraph paragraph, TextPosition start, TextPosition end) {
+      for (final Selectable selectable in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
+        selectable.dispatchSelectionEvent(
+          SelectionEdgeUpdateEvent.forStart(
+            globalPosition: paragraph.getOffsetForCaret(start, Rect.zero),
+          ),
+        );
+        selectable.dispatchSelectionEvent(
+          SelectionEdgeUpdateEvent.forEnd(
+            globalPosition: paragraph.getOffsetForCaret(end, Rect.zero),
+          ),
+        );
+      }
+    }
+
+    test('subscribe to SelectionRegistrar', () {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: '1234567'),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+      );
+      expect(registrar.selectables.length, 1);
+
+      paragraph.text = const TextSpan(text: '');
+      expect(registrar.selectables.length, 0);
+    });
+
+    test('paints selection highlight', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      const Color selectionColor = Color(0xAF6694e8);
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: '1234567'),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        selectionColor: selectionColor,
+      );
+      layout(paragraph);
+      final MockPaintingContext paintingContext = MockPaintingContext();
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawedRect, isNull);
+      expect(paintingContext.canvas.drawedRectPaint, isNull);
+      selectionParagraph(paragraph, const TextPosition(offset: 1), const TextPosition(offset: 5));
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawedRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
+      expect(paintingContext.canvas.drawedRectPaint!.style, PaintingStyle.fill);
+      expect(paintingContext.canvas.drawedRectPaint!.color, selectionColor);
+
+      selectionParagraph(paragraph, const TextPosition(offset: 2), const TextPosition(offset: 4));
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawedRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
+      expect(paintingContext.canvas.drawedRectPaint!.style, PaintingStyle.fill);
+      expect(paintingContext.canvas.drawedRectPaint!.color, selectionColor);
+    });
+
+    test('getPositionForOffset works', () async {
+      final RenderParagraph paragraph = RenderParagraph(const TextSpan(text: '1234567'), textDirection: TextDirection.ltr);
+      layout(paragraph);
+      expect(paragraph.getPositionForOffset(const Offset(42.0, 14.0)), const TextPosition(offset: 3));
+    });
+
+    test('can handle select all when contains widget span', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'widget'), textDirection: TextDirection.ltr),
+      ];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+          children: <InlineSpan>[
+            TextSpan(text: 'before the span'),
+            WidgetSpan(child: Text('widget')),
+            TextSpan(text: 'after the span'),
+          ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+      // The widget span will register to the selection container without going
+      // through the render paragraph.
+      expect(registrar.selectables.length, 2);
+      final Selectable segment1 = registrar.selectables[0];
+      segment1.dispatchSelectionEvent(const SelectAllSelectionEvent());
+      final SelectionGeometry geometry1 = segment1.value;
+      expect(geometry1.hasContent, true);
+      expect(geometry1.status, SelectionStatus.uncollapsed);
+
+      final Selectable segment2 = registrar.selectables[1];
+      segment2.dispatchSelectionEvent(const SelectAllSelectionEvent());
+      final SelectionGeometry geometry2 = segment2.value;
+      expect(geometry2.hasContent, true);
+      expect(geometry2.status, SelectionStatus.uncollapsed);
+    });
+  });
+}
+
+class MockCanvas extends Fake implements Canvas {
+  Rect? drawedRect;
+  Paint? drawedRectPaint;
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    drawedRect = rect;
+    drawedRectPaint = paint;
+  }
+
+  @override
+  void drawParagraph(ui.Paragraph paragraph, Offset offset) { }
+}
+
+class MockPaintingContext extends Fake implements PaintingContext {
+  @override
+  final MockCanvas canvas = MockCanvas();
+}
+
+class TestSelectionRegistrar extends SelectionRegistrar {
+  final List<Selectable> selectables = <Selectable>[];
+  @override
+  void add(Selectable selectable) {
+    selectables.add(selectable);
+  }
+
+  @override
+  void remove(Selectable selectable) {
+    expect(selectables.remove(selectable), isTrue);
+  }
+
 }

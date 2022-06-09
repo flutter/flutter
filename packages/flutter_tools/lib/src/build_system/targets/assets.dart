@@ -14,6 +14,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'shader_compiler.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
@@ -24,7 +25,9 @@ import 'icon_tree_shaker.dart';
 /// included in the final bundle, but not the AssetManifest.json file.
 ///
 /// Returns a [Depfile] containing all assets used in the build.
-Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
+Future<Depfile> copyAssets(
+  Environment environment,
+  Directory outputDirectory, {
   Map<String, DevFSContent>? additionalContent,
   required TargetPlatform targetPlatform,
   BuildMode? buildMode,
@@ -72,6 +75,12 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
   );
+  final ShaderCompiler shaderCompiler = ShaderCompiler(
+    processManager: environment.processManager,
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+    artifacts: environment.artifacts,
+  );
 
   final Map<String, DevFSContent> assetEntries = <String, DevFSContent>{
     ...assetBundle.entries,
@@ -100,6 +109,9 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
             input: content.file as File,
             outputPath: file.path,
             relativePath: entry.key,
+          ) && !await shaderCompiler.compileShader(
+            input: content.file as File,
+            outputPath: file.path,
           )) {
             await (content.file as File).copy(file.path);
           }
@@ -258,6 +270,7 @@ class CopyAssets extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
     ...IconTreeShaker.inputs,
+    ...ShaderCompiler.inputs,
   ];
 
   @override
@@ -265,7 +278,7 @@ class CopyAssets extends Target {
 
   @override
   List<String> get depfiles => const <String>[
-    'flutter_assets.d'
+    'flutter_assets.d',
   ];
 
   @override

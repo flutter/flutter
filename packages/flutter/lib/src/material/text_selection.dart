@@ -35,7 +35,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _TextSelectionControlsToolbar(
@@ -45,8 +45,8 @@ class MaterialTextSelectionControls extends TextSelectionControls {
       endpoints: endpoints,
       delegate: delegate,
       clipboardStatus: clipboardStatus,
-      handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
     );
@@ -130,7 +130,6 @@ class _TextSelectionToolbarItemData {
 // The highest level toolbar widget, built directly by buildToolbar.
 class _TextSelectionControlsToolbar extends StatefulWidget {
   const _TextSelectionControlsToolbar({
-    Key? key,
     required this.clipboardStatus,
     required this.delegate,
     required this.endpoints,
@@ -141,9 +140,9 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
     required this.handleSelectAll,
     required this.selectionMidpoint,
     required this.textLineHeight,
-  }) : super(key: key);
+  });
 
-  final ClipboardStatusNotifier clipboardStatus;
+  final ClipboardStatusNotifier? clipboardStatus;
   final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
@@ -168,28 +167,22 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
   @override
   void initState() {
     super.initState();
-    widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-    widget.clipboardStatus.update();
+    widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
   }
 
   @override
   void didUpdateWidget(_TextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-      widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-      oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+      widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
+      oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
     }
-    widget.clipboardStatus.update();
   }
 
   @override
   void dispose() {
     super.dispose();
-    // When used in an Overlay, it can happen that this is disposed after its
-    // creator has already disposed _clipboardStatus.
-    if (!widget.clipboardStatus.disposed) {
-      widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-    }
+    widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
   }
 
   @override
@@ -202,7 +195,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     // If the paste button is desired, don't render anything until the state of
     // the clipboard is known, since it's used to determine if paste is shown.
     if (widget.handlePaste != null
-        && widget.clipboardStatus.value == ClipboardStatus.unknown) {
+        && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox.shrink();
     }
 
@@ -212,9 +205,12 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     final TextSelectionPoint endTextSelectionPoint = widget.endpoints.length > 1
       ? widget.endpoints[1]
       : widget.endpoints[0];
+    final double topAmountInEditableRegion = startTextSelectionPoint.point.dy - widget.textLineHeight;
+    final double anchorTop = math.max(topAmountInEditableRegion, 0) + widget.globalEditableRegion.top - _kToolbarContentDistance;
+
     final Offset anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
-      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance,
+      anchorTop,
     );
     final Offset anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
@@ -238,7 +234,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
           onPressed: widget.handleCopy!,
         ),
       if (widget.handlePaste != null
-          && widget.clipboardStatus.value == ClipboardStatus.pasteable)
+          && widget.clipboardStatus?.value == ClipboardStatus.pasteable)
         _TextSelectionToolbarItemData(
           label: localizations.pasteButtonLabel,
           onPressed: widget.handlePaste!,

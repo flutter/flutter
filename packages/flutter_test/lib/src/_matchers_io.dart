@@ -91,8 +91,9 @@ class MatchesGoldenFile extends AsyncMatcher {
         throw AssertionError('Future<Image> completed to null');
       }
       final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null)
+      if (bytes == null) {
         return 'could not encode screenshot.';
+      }
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
         return null;

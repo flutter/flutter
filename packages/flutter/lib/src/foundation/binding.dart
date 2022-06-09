@@ -370,7 +370,7 @@ abstract class BindingBase {
   /// before the point in the application code that wants to initialize the binding, or
   /// to verify that the binding is the one that is expected.
   ///
-  /// For example, if an application uses [Zone]s to report uncaught execptions, it may
+  /// For example, if an application uses [Zone]s to report uncaught exceptions, it may
   /// need to ensure that `ensureInitialized()` has not yet been invoked on any binding
   /// at the point where it configures the zone and initializes the binding.
   ///
@@ -509,12 +509,12 @@ abstract class BindingBase {
             }
             _postExtensionStateChangedEvent(
               brightnessOverrideExtensionName,
-              (debugBrightnessOverride ?? window.platformBrightness).toString(),
+              (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
             );
             await reassembleApplication();
           }
           return <String, dynamic>{
-            'value': (debugBrightnessOverride ?? window.platformBrightness).toString(),
+            'value': (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
           };
         },
       );
@@ -827,8 +827,9 @@ abstract class BindingBase {
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
-        if (debugInstrumentationEnabled)
+        if (debugInstrumentationEnabled) {
           debugPrint('service extension method received: $method($parameters)');
+        }
         return true;
       }());
 

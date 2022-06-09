@@ -148,5 +148,30 @@ void main() {
     });
   });
 
+  test('Stack in Flex can layout with no children', () {
+    // Render an empty Stack in a Flex
+    final RenderFlex flex = RenderFlex(
+      textDirection: TextDirection.ltr,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <RenderBox>[
+        RenderStack(
+          textDirection: TextDirection.ltr,
+          children: <RenderBox>[],
+        ),
+      ]
+    );
+
+    bool stackFlutterErrorThrown = false;
+    layout(
+      flex,
+      constraints: BoxConstraints.tight(const Size(100.0, 100.0)),
+      onErrors: () {
+        stackFlutterErrorThrown = true;
+      }
+    );
+
+    expect(stackFlutterErrorThrown, false);
+  });
+
   // More tests in ../widgets/stack_test.dart
 }

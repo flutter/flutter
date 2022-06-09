@@ -69,8 +69,9 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
       foundMatching = true;
     }
   }
-  if (foundMatching)
+  if (foundMatching) {
     return result;
+  }
   return null;
 }
 
@@ -414,8 +415,9 @@ Future<void> benchmarkWidgets(
   bool semanticsEnabled = false,
 }) {
   assert(() {
-    if (mayRunWithAsserts)
+    if (mayRunWithAsserts) {
       return true;
+    }
     debugPrint(kDebugWarning);
     return true;
   }());
@@ -498,9 +500,10 @@ Future<void> expectLater(
 /// For convenience, instances of this class (such as the one provided by
 /// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
-  WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
-    if (binding is LiveTestWidgetsFlutterBinding)
-      binding.deviceEventDispatcher = this;
+  WidgetTester._(super.binding) {
+    if (binding is LiveTestWidgetsFlutterBinding) {
+      (binding as LiveTestWidgetsFlutterBinding).deviceEventDispatcher = this;
+    }
   }
 
   /// The description string of the test currently being run.
@@ -663,8 +666,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final DateTime endTime = binding.clock.fromNowBy(timeout);
       int count = 0;
       do {
-        if (binding.clock.now().isAfter(endTime))
+        if (binding.clock.now().isAfter(endTime)) {
           throw FlutterError('pumpAndSettle timed out');
+        }
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
@@ -837,8 +841,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       int totalNumber = 0;
       printToConsole('Some possible finders for the widgets at ${event.position}:');
       for (final Element element in candidates) {
-        if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
+        if (totalNumber > 13) {
           break;
+        }
         totalNumber += 1; // optimistically assume we'll be able to describe it
 
         final Widget widget = element.widget;
@@ -912,8 +917,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
         totalNumber -= 1; // if we got here, we didn't actually find something to say about it
       }
-      if (totalNumber == 0)
+      if (totalNumber == 0) {
         printToConsole('  <could not come up with any unique finders>');
+      }
     }
   }
 
@@ -977,7 +983,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
               'should be disposed by calling dispose() on the AnimationController itself. '
               'Otherwise, the ticker will leak.'
             ),
-            ticker.describeForError('The offending ticker was')
+            ticker.describeForError('The offending ticker was'),
           ]);
         }
       }
@@ -1002,7 +1008,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           'If your test uses SemanticsTester, it is '
           'sufficient to call dispose() on SemanticsTester. Otherwise, the '
           'existing handle will leak into another test and alter its behavior.'
-        )
+        ),
       ]);
     }
     _lastRecordedSemanticsHandles = null;
@@ -1106,7 +1112,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 
 class _TestTicker extends Ticker {
-  _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
+  _TestTicker(super.onTick, this._onDispose);
 
   final _TickerDisposeCallback _onDispose;
 

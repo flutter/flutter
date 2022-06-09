@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -12,8 +11,8 @@ import 'basic_types.dart';
 /// Base class for [Alignment] that allows for text-direction aware
 /// resolution.
 ///
-/// A property or argument of this type accepts classes created either with [new
-/// Alignment] and its variants, or [new AlignmentDirectional].
+/// A property or argument of this type accepts classes created either with [
+/// Alignment] and its variants, or [AlignmentDirectional.new].
 ///
 /// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.
@@ -89,16 +88,21 @@ abstract class AlignmentGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static AlignmentGeometry? lerp(AlignmentGeometry? a, AlignmentGeometry? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b! * t;
-    if (b == null)
+    }
+    if (b == null) {
       return a * (1.0 - t);
-    if (a is Alignment && b is Alignment)
+    }
+    if (a is Alignment && b is Alignment) {
       return Alignment.lerp(a, b, t);
-    if (a is AlignmentDirectional && b is AlignmentDirectional)
+    }
+    if (a is AlignmentDirectional && b is AlignmentDirectional) {
       return AlignmentDirectional.lerp(a, b, t);
+    }
     return _MixedAlignment(
       ui.lerpDouble(a._x, b._x, t)!,
       ui.lerpDouble(a._start, b._start, t)!,
@@ -119,10 +123,12 @@ abstract class AlignmentGeometry {
 
   @override
   String toString() {
-    if (_start == 0.0)
+    if (_start == 0.0) {
       return Alignment._stringify(_x, _y);
-    if (_x == 0.0)
+    }
+    if (_x == 0.0) {
       return AlignmentDirectional._stringify(_start, _y);
+    }
     return '${Alignment._stringify(_x, _y)} + ${AlignmentDirectional._stringify(_start, 0.0)}';
   }
 
@@ -135,7 +141,7 @@ abstract class AlignmentGeometry {
   }
 
   @override
-  int get hashCode => hashValues(_x, _start, _y);
+  int get hashCode => Object.hash(_x, _start, _y);
 }
 
 /// A point within a rectangle.
@@ -241,8 +247,9 @@ class Alignment extends AlignmentGeometry {
 
   @override
   AlignmentGeometry add(AlignmentGeometry other) {
-    if (other is Alignment)
+    if (other is Alignment) {
       return this + other;
+    }
     return super.add(other);
   }
 
@@ -334,12 +341,15 @@ class Alignment extends AlignmentGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static Alignment? lerp(Alignment? a, Alignment? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return Alignment(ui.lerpDouble(0.0, b!.x, t)!, ui.lerpDouble(0.0, b.y, t)!);
-    if (b == null)
+    }
+    if (b == null) {
       return Alignment(ui.lerpDouble(a.x, 0.0, t)!, ui.lerpDouble(a.y, 0.0, t)!);
+    }
     return Alignment(ui.lerpDouble(a.x, b.x, t)!, ui.lerpDouble(a.y, b.y, t)!);
   }
 
@@ -347,24 +357,33 @@ class Alignment extends AlignmentGeometry {
   Alignment resolve(TextDirection? direction) => this;
 
   static String _stringify(double x, double y) {
-    if (x == -1.0 && y == -1.0)
+    if (x == -1.0 && y == -1.0) {
       return 'Alignment.topLeft';
-    if (x == 0.0 && y == -1.0)
+    }
+    if (x == 0.0 && y == -1.0) {
       return 'Alignment.topCenter';
-    if (x == 1.0 && y == -1.0)
+    }
+    if (x == 1.0 && y == -1.0) {
       return 'Alignment.topRight';
-    if (x == -1.0 && y == 0.0)
+    }
+    if (x == -1.0 && y == 0.0) {
       return 'Alignment.centerLeft';
-    if (x == 0.0 && y == 0.0)
+    }
+    if (x == 0.0 && y == 0.0) {
       return 'Alignment.center';
-    if (x == 1.0 && y == 0.0)
+    }
+    if (x == 1.0 && y == 0.0) {
       return 'Alignment.centerRight';
-    if (x == -1.0 && y == 1.0)
+    }
+    if (x == -1.0 && y == 1.0) {
       return 'Alignment.bottomLeft';
-    if (x == 0.0 && y == 1.0)
+    }
+    if (x == 0.0 && y == 1.0) {
       return 'Alignment.bottomCenter';
-    if (x == 1.0 && y == 1.0)
+    }
+    if (x == 1.0 && y == 1.0) {
       return 'Alignment.bottomRight';
+    }
     return 'Alignment(${x.toStringAsFixed(1)}, '
                      '${y.toStringAsFixed(1)})';
   }
@@ -463,8 +482,9 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   @override
   AlignmentGeometry add(AlignmentGeometry other) {
-    if (other is AlignmentDirectional)
+    if (other is AlignmentDirectional) {
       return this + other;
+    }
     return super.add(other);
   }
 
@@ -515,12 +535,15 @@ class AlignmentDirectional extends AlignmentGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static AlignmentDirectional? lerp(AlignmentDirectional? a, AlignmentDirectional? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return AlignmentDirectional(ui.lerpDouble(0.0, b!.start, t)!, ui.lerpDouble(0.0, b.y, t)!);
-    if (b == null)
+    }
+    if (b == null) {
       return AlignmentDirectional(ui.lerpDouble(a.start, 0.0, t)!, ui.lerpDouble(a.y, 0.0, t)!);
+    }
     return AlignmentDirectional(ui.lerpDouble(a.start, b.start, t)!, ui.lerpDouble(a.y, b.y, t)!);
   }
 
@@ -536,24 +559,33 @@ class AlignmentDirectional extends AlignmentGeometry {
   }
 
   static String _stringify(double start, double y) {
-    if (start == -1.0 && y == -1.0)
+    if (start == -1.0 && y == -1.0) {
       return 'AlignmentDirectional.topStart';
-    if (start == 0.0 && y == -1.0)
+    }
+    if (start == 0.0 && y == -1.0) {
       return 'AlignmentDirectional.topCenter';
-    if (start == 1.0 && y == -1.0)
+    }
+    if (start == 1.0 && y == -1.0) {
       return 'AlignmentDirectional.topEnd';
-    if (start == -1.0 && y == 0.0)
+    }
+    if (start == -1.0 && y == 0.0) {
       return 'AlignmentDirectional.centerStart';
-    if (start == 0.0 && y == 0.0)
+    }
+    if (start == 0.0 && y == 0.0) {
       return 'AlignmentDirectional.center';
-    if (start == 1.0 && y == 0.0)
+    }
+    if (start == 1.0 && y == 0.0) {
       return 'AlignmentDirectional.centerEnd';
-    if (start == -1.0 && y == 1.0)
+    }
+    if (start == -1.0 && y == 1.0) {
       return 'AlignmentDirectional.bottomStart';
-    if (start == 0.0 && y == 1.0)
+    }
+    if (start == 0.0 && y == 1.0) {
       return 'AlignmentDirectional.bottomCenter';
-    if (start == 1.0 && y == 1.0)
+    }
+    if (start == 1.0 && y == 1.0) {
       return 'AlignmentDirectional.bottomEnd';
+    }
     return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
                                 '${y.toStringAsFixed(1)})';
   }

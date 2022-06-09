@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -36,27 +35,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
-import '../../src/fake_vm_services.dart';
 import '../../src/test_flutter_command_runner.dart';
-
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
-  breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
-  isolateFlags: <vm_service.IsolateFlag>[],
-  libraries: <vm_service.LibraryRef>[],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-);
 
 void main() {
   tearDown(() {
@@ -498,6 +477,7 @@ class FakeHotRunner extends Fake implements HotRunner {
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    bool needsFullRestart = true,
   }) {
     return onAttach(connectionInfoCompleter, appStartedCompleter, allowExistingDdsInstance, enableDevTools);
   }
@@ -631,7 +611,11 @@ class StreamLogger extends Logger {
   }
 
   @override
-  Status startSpinner({ VoidCallback onFinish }) {
+  Status startSpinner({
+    VoidCallback onFinish,
+    Duration timeout,
+    SlowWarningCallback slowWarningCallback,
+  }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
       onFinish: onFinish,
@@ -684,108 +668,6 @@ Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logge
   );
 }
 
-VMServiceConnector getFakeVmServiceFactory({
-  @required Completer<void> vmServiceDoneCompleter,
-}) {
-  assert(vmServiceDoneCompleter != null);
-
-  return (
-    Uri httpUri, {
-    ReloadSources reloadSources,
-    Restart restart,
-    CompileExpression compileExpression,
-    GetSkSLMethod getSkSLMethod,
-    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-    CompressionOptions compression,
-    Device device,
-    Logger logger,
-  }) async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        FakeVmServiceRequest(
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[
-              <String, Object>{
-                'id': '1',
-                'isolate': fakeUnpausedIsolate.toJson()
-              },
-            ],
-          },
-        ),
-        FakeVmServiceRequest(
-          method: 'getVM',
-          args: null,
-          jsonResponse: vm_service.VM.parse(<String, Object>{})
-            .toJson(),
-        ),
-        FakeVmServiceRequest(
-          method: '_createDevFS',
-          args: <String, Object>{
-            'fsName': globals.fs.currentDirectory.absolute.path,
-          },
-          jsonResponse: <String, Object>{
-            'uri': globals.fs.currentDirectory.absolute.path,
-          },
-        ),
-        FakeVmServiceRequest(
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[
-              <String, Object>{
-                'id': '1',
-                'isolate': fakeUnpausedIsolate.toJson()
-              },
-            ],
-          },
-        ),
-      ],
-    );
-    return fakeVmServiceHost.vmService;
-  };
-}
-
-class TestHotRunnerFactory extends HotRunnerFactory {
-  HotRunner _runner;
-
-  @override
-  HotRunner build(
-    List<FlutterDevice> devices, {
-    String target,
-    DebuggingOptions debuggingOptions,
-    bool benchmarkMode = false,
-    File applicationBinary,
-    bool hostIsIde = false,
-    String projectRootPath,
-    String packagesFilePath,
-    String dillOutputPath,
-    bool stayResident = true,
-    bool ipv6 = false,
-    FlutterProject flutterProject,
-  }) {
-    _runner ??= HotRunner(
-      devices,
-      target: target,
-      debuggingOptions: debuggingOptions,
-      benchmarkMode: benchmarkMode,
-      applicationBinary: applicationBinary,
-      hostIsIde: hostIsIde,
-      projectRootPath: projectRootPath,
-      dillOutputPath: dillOutputPath,
-      stayResident: stayResident,
-      ipv6: ipv6,
-    );
-    return _runner;
-  }
-
-  Future<void> exitApp() async {
-    assert(_runner != null);
-    await _runner.exit();
-  }
-}
-
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   @override
   Future<void> get done => noopCompleter.future;
@@ -798,6 +680,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int hostPort,
     bool ipv6,
     bool disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {}
 
   @override

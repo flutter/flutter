@@ -161,6 +161,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   final TestWindow _window;
 
   @override
+  TestPlatformDispatcher get platformDispatcher => _window.platformDispatcher;
+
+  @override
   TestRestorationManager get restorationManager {
     _restorationManager ??= createRestorationManager();
     return _restorationManager!;
@@ -176,8 +179,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _restorationManager = null;
     resetGestureBinding();
     testTextInput.reset();
-    if (registerTestTextInput)
+    if (registerTestTextInput) {
       _testTextInput.register();
+    }
   }
 
   @override
@@ -303,8 +307,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This is called automatically by [testWidgets].
   static TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
-    if (_instance != null)
+    if (_instance != null) {
       return _instance!;
+    }
     return binding.ensureInitialized(environment);
   }
 
@@ -432,8 +437,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
-      if (_surfaceSize == size)
+      if (_surfaceSize == size) {
         return;
+      }
       _surfaceSize = size;
       handleMetricsChanged();
     });
@@ -660,8 +666,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         reportTestException(_pendingExceptionDetails!, testDescription);
         _pendingExceptionDetails = null;
       }
-      if (!completer.isCompleted)
+      if (!completer.isCompleted) {
         completer.complete();
+      }
     };
   }
 
@@ -711,10 +718,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // information to stack traces, in this case the Trace and Chain classes
       // can be present. Because these StackTrace implementations do not follow
       // the format the framework expects, we covert them to a vm trace here.
-      if (stack is stack_trace.Trace)
+      if (stack is stack_trace.Trace) {
         return stack.vmTrace;
-      if (stack is stack_trace.Chain)
+      }
+      if (stack is stack_trace.Chain) {
         return stack.toTrace().vmTrace;
+      }
       return stack;
     };
     final Completer<void> testCompleter = Completer<void>();
@@ -786,13 +795,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
         },
         informationCollector: () sync* {
-          if (stackLinesToOmit > 0)
+          if (stackLinesToOmit > 0) {
             yield* omittedFrames;
+          }
           if (showAppDumpInErrors) {
             yield DiagnosticsProperty<DiagnosticsNode>('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# ', style: DiagnosticsTreeStyle.flat);
           }
-          if (description.isNotEmpty)
+          if (description.isNotEmpty) {
             yield DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.errorProperty);
+          }
         },
       ));
       assert(_parentZone != null);
@@ -836,8 +847,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // alone so that we don't cause more spurious errors.
       runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
-      if (registerTestTextInput)
+      if (registerTestTextInput) {
         _testTextInput.unregister();
+      }
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
@@ -949,10 +961,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     HardwareKeyboard.instance.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     keyEventManager.clearState();
-    assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
-        'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
-        'test has not removed the mouse pointer which it added. Call removePointer on the '
-        'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
   }
@@ -996,8 +1004,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// will select the correct test binding implementation
   /// automatically.
   static AutomatedTestWidgetsFlutterBinding ensureInitialized() {
-    if (AutomatedTestWidgetsFlutterBinding._instance == null)
+    if (AutomatedTestWidgetsFlutterBinding._instance == null) {
       AutomatedTestWidgetsFlutterBinding();
+    }
     return AutomatedTestWidgetsFlutterBinding.instance;
   }
 
@@ -1034,8 +1043,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return TestAsyncUtils.guard<void>(() {
       assert(inTest);
       assert(_clock != null);
-      if (duration != null)
+      if (duration != null) {
         _currentFakeAsync!.elapse(duration);
+      }
       _phase = newPhase;
       if (hasScheduledFrame) {
         addTime(const Duration(milliseconds: 500));
@@ -1058,8 +1068,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     assert(additionalTime != null);
     assert(() {
-      if (_pendingAsyncTasks == null)
+      if (_pendingAsyncTasks == null) {
         return true;
+      }
       fail(
         'Reentrant call to runAsync() denied.\n'
         'runAsync() was called, then before its future completed, it '
@@ -1112,8 +1123,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void ensureFrameCallbacksRegistered() {
     // Leave PlatformDispatcher alone, do nothing.
-    assert(window.onDrawFrame == null);
-    assert(window.onBeginFrame == null);
+    assert(platformDispatcher.onDrawFrame == null);
+    assert(platformDispatcher.onBeginFrame == null);
   }
 
   @override
@@ -1452,8 +1463,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// will select the correct test binding implementation
   /// automatically.
   static LiveTestWidgetsFlutterBinding ensureInitialized() {
-    if (LiveTestWidgetsFlutterBinding._instance == null)
+    if (LiveTestWidgetsFlutterBinding._instance == null) {
       LiveTestWidgetsFlutterBinding();
+    }
     return LiveTestWidgetsFlutterBinding.instance;
   }
 
@@ -1500,15 +1512,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void scheduleFrame() {
-    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
-      return; // In benchmark mode, don't actually schedule any engine frames.
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+      // In benchmark mode, don't actually schedule any engine frames.
+      return;
+    }
     super.scheduleFrame();
   }
 
   @override
   void scheduleForcedFrame() {
-    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
-      return; // In benchmark mode, don't actually schedule any engine frames.
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+      // In benchmark mode, don't actually schedule any engine frames.
+      return;
+    }
     super.scheduleForcedFrame();
   }
 
@@ -1539,8 +1555,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void handleDrawFrame() {
     assert(_doDrawThisFrame != null);
-    if (_doDrawThisFrame!)
+    if (_doDrawThisFrame!) {
       super.handleDrawFrame();
+    }
     _doDrawThisFrame = null;
     _viewNeedsPaint = false;
     _expectingFrameToReassemble = false;
@@ -1550,7 +1567,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame = null;
       _expectingFrame = false;
     } else if (framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
-      window.scheduleFrame();
+      platformDispatcher.scheduleFrame();
     }
   }
 
@@ -1596,8 +1613,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         final _LiveTestPointerRecord? record = _liveTestRenderView._pointers[event.pointer];
         if (record != null) {
           record.position = event.position;
-          if (!event.down)
+          if (!event.down) {
             record.decay = _kPointerDecay;
+          }
           _handleViewNeedsPaint();
         } else if (event.down) {
           _liveTestRenderView._pointers[event.pointer] = _LiveTestPointerRecord(
@@ -1631,8 +1649,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       case TestBindingEventSource.device:
         assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
         assert(deviceEventDispatcher != null);
-        if (hitTestResult != null)
+        if (hitTestResult != null) {
           deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
+        }
         break;
     }
   }
@@ -1668,8 +1687,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
-      if (!_runningAsyncTasks)
+      if (!_runningAsyncTasks) {
         return true;
+      }
       fail(
         'Reentrant call to runAsync() denied.\n'
         'runAsync() was called, then before its future completed, it '
@@ -1776,7 +1796,7 @@ class TestViewConfiguration extends ViewConfiguration {
   TestViewConfiguration._(Size size, ui.FlutterView window)
     : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
       _hitTestMatrix = _getMatrix(size, 1.0, window),
-      super(size: size);
+      super(size: size, devicePixelRatio: window.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
@@ -1838,10 +1858,10 @@ class _LiveTestPointerRecord {
 
 class _LiveTestRenderView extends RenderView {
   _LiveTestRenderView({
-    required ViewConfiguration configuration,
+    required super.configuration,
     required this.onNeedPaint,
-    required ui.FlutterView window,
-  }) : super(configuration: configuration, window: window);
+    required super.window,
+  });
 
   @override
   TestViewConfiguration get configuration => super.configuration as TestViewConfiguration;
@@ -1891,8 +1911,9 @@ class _LiveTestRenderView extends RenderView {
         final _LiveTestPointerRecord record = _pointers[pointer]!;
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position), paint);
-        if (record.decay < 0)
+        if (record.decay < 0) {
           dirty = true;
+        }
         record.decay += 1;
       }
       _pointers
@@ -1900,8 +1921,9 @@ class _LiveTestRenderView extends RenderView {
         .where((int pointer) => _pointers[pointer]!.decay == 0)
         .toList()
         .forEach(_pointers.remove);
-      if (dirty && onNeedPaint != null)
+      if (dirty && onNeedPaint != null) {
         scheduleMicrotask(onNeedPaint);
+      }
     }
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }

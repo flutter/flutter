@@ -137,7 +137,7 @@ class _DummyHitTestTarget implements HitTestTarget {
 
 class MyHitTestResult extends HitTestResult {
   MyHitTestResult();
-  MyHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+  MyHitTestResult.wrap(super.result) : super.wrap();
 
   void publicPushTransform(Matrix4 transform) => pushTransform(transform);
   void publicPushOffset(Offset offset) => pushOffset(offset);

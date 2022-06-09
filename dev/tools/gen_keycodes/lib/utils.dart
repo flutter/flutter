@@ -184,6 +184,10 @@ Map<String, List<String?>> parseMapOfListOfNullableString(String jsonString) {
   });
 }
 
+Map<String, bool> parseMapOfBool(String jsonString) {
+  return (json.decode(jsonString) as Map<String, dynamic>).cast<String, bool>();
+}
+
 /// Reverse the map of { fromValue -> list of toValue } to { toValue -> fromValue } and return.
 Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, void Function(String fromValue, String newToValue) onDuplicate) {
   final Map<String, String> result = <String, String>{};

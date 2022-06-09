@@ -47,9 +47,6 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
-  /// Whether the windows UWP embedding is enabled.
-  bool get isWindowsUwpEnabled => false;
-
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -62,7 +59,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
-  windowsUwpEmbedding,
   singleWidgetReload,
   flutterAndroidFeature,
   flutterIOSFeature,
@@ -91,35 +87,39 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'beta-quality support for desktop on macOS',
+  name: 'support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
-  extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
 );
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'beta-quality support for desktop on Linux',
+  name: 'support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
-  extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
 );
 
@@ -208,15 +208,6 @@ const Feature singleWidgetReload = Feature(
     enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
-    available: true,
-  ),
-);
-
-/// The feature for enabling the Windows UWP embedding.
-const Feature windowsUwpEmbedding = Feature(
-  name: 'Flutter for Windows UWP',
-  configSetting: 'enable-windows-uwp-desktop',
-  master: FeatureChannelSetting(
     available: true,
   ),
 );

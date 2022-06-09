@@ -14,11 +14,10 @@ import 'utils.dart';
 /// data structure given to it.
 class WebCodeGenerator extends PlatformCodeGenerator {
   WebCodeGenerator(
-    PhysicalKeyData keyData,
-    LogicalKeyData logicalData,
+    super.keyData,
+    super.logicalData,
     String logicalLocationMap,
-  ) : _logicalLocationMap = parseMapOfListOfNullableString(logicalLocationMap),
-      super(keyData, logicalData);
+  ) : _logicalLocationMap = parseMapOfListOfNullableString(logicalLocationMap);
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {

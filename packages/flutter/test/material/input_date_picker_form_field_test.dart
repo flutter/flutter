@@ -12,7 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
 
-  Widget _inputDatePickerField({
+  Widget inputDatePickerField({
     Key? key,
     DateTime? initialDate,
     DateTime? firstDate,
@@ -52,15 +52,15 @@ void main() {
     );
   }
 
-  TextField _textField(WidgetTester tester) {
+  TextField textField(WidgetTester tester) {
     return tester.widget<TextField>(find.byType(TextField));
   }
 
-  TextEditingController _textFieldController(WidgetTester tester) {
-    return _textField(tester).controller!;
+  TextEditingController textFieldController(WidgetTester tester) {
+    return textField(tester).controller!;
   }
 
-  double _textOpacity(WidgetTester tester, String textValue) {
+  double textOpacity(WidgetTester tester, String textValue) {
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
       find.ancestor(
         of: find.text(textValue),
@@ -76,12 +76,12 @@ void main() {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       final DateTime initialDate = DateTime(2016, DateTime.february, 21);
       DateTime? inputDate;
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         initialDate: initialDate,
         onDateSaved: (DateTime date) => inputDate = date,
         formKey: formKey,
       ));
-      expect(_textFieldController(tester).value.text, equals('02/21/2016'));
+      expect(textFieldController(tester).value.text, equals('02/21/2016'));
       formKey.currentState!.save();
       expect(inputDate, equals(initialDate));
     });
@@ -89,27 +89,27 @@ void main() {
     testWidgets('Changing initial date is reflected in text value', (WidgetTester tester) async {
       final DateTime initialDate = DateTime(2016, DateTime.february, 21);
       final DateTime updatedInitialDate = DateTime(2016, DateTime.february, 23);
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         initialDate: initialDate,
       ));
-      expect(_textFieldController(tester).value.text, equals('02/21/2016'));
+      expect(textFieldController(tester).value.text, equals('02/21/2016'));
 
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         initialDate: updatedInitialDate,
       ));
       await tester.pumpAndSettle();
-      expect(_textFieldController(tester).value.text, equals('02/23/2016'));
+      expect(textFieldController(tester).value.text, equals('02/23/2016'));
     });
 
     testWidgets('Valid date entry', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         onDateSaved: (DateTime date) => inputDate = date,
         formKey: formKey,
       ));
 
-      _textFieldController(tester).text = '02/21/2016';
+      textFieldController(tester).text = '02/21/2016';
       formKey.currentState!.save();
       expect(inputDate, equals(DateTime(2016, DateTime.february, 21)));
     });
@@ -117,7 +117,7 @@ void main() {
     testWidgets('Invalid text entry shows errorFormat text', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         onDateSaved: (DateTime date) => inputDate = date,
         formKey: formKey,
       ));
@@ -130,7 +130,7 @@ void main() {
       expect(find.text('Invalid format.'), findsOneWidget);
 
       // Change to a custom errorFormat text
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         onDateSaved: (DateTime date) => inputDate = date,
         errorFormatText: 'That is not a date.',
         formKey: formKey,
@@ -144,7 +144,7 @@ void main() {
     testWidgets('Valid text entry, but date outside first or last date shows bounds shows errorInvalid text', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         firstDate: DateTime(1966, DateTime.february, 21),
         lastDate: DateTime(2040, DateTime.february, 23),
         onDateSaved: (DateTime date) => inputDate = date,
@@ -165,7 +165,7 @@ void main() {
       expect(inputDate, isNull);
       expect(find.text('Out of range.'), findsOneWidget);
 
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         onDateSaved: (DateTime date) => inputDate = date,
         errorInvalidText: 'Not in given range.',
         formKey: formKey,
@@ -179,7 +179,7 @@ void main() {
     testWidgets('selectableDatePredicate will be used to show errorInvalid if date is not selectable', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         initialDate: DateTime(2016, DateTime.january, 16),
         onDateSaved: (DateTime date) => inputDate = date,
         selectableDayPredicate: (DateTime date) => date.day.isEven,
@@ -203,34 +203,34 @@ void main() {
     });
 
     testWidgets('Empty field shows hint text when focused', (WidgetTester tester) async {
-      await tester.pumpWidget(_inputDatePickerField());
+      await tester.pumpWidget(inputDatePickerField());
       // Focus on it
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
       // Hint text should be invisible
-      expect(_textOpacity(tester, 'mm/dd/yyyy'), equals(0.0));
-      _textFieldController(tester).clear();
+      expect(textOpacity(tester, 'mm/dd/yyyy'), equals(0.0));
+      textFieldController(tester).clear();
       await tester.pumpAndSettle();
       // Hint text should be visible
-      expect(_textOpacity(tester, 'mm/dd/yyyy'), equals(1.0));
+      expect(textOpacity(tester, 'mm/dd/yyyy'), equals(1.0));
 
       // Change to a different hint text
-      await tester.pumpWidget(_inputDatePickerField(fieldHintText: 'Enter some date'));
+      await tester.pumpWidget(inputDatePickerField(fieldHintText: 'Enter some date'));
       await tester.pumpAndSettle();
       expect(find.text('mm/dd/yyyy'), findsNothing);
-      expect(_textOpacity(tester, 'Enter some date'), equals(1.0));
+      expect(textOpacity(tester, 'Enter some date'), equals(1.0));
       await tester.enterText(find.byType(TextField), 'foobar');
       await tester.pumpAndSettle();
-      expect(_textOpacity(tester, 'Enter some date'), equals(0.0));
+      expect(textOpacity(tester, 'Enter some date'), equals(0.0));
     });
 
     testWidgets('Label text', (WidgetTester tester) async {
-      await tester.pumpWidget(_inputDatePickerField());
+      await tester.pumpWidget(inputDatePickerField());
       // Default label
       expect(find.text('Enter Date'), findsOneWidget);
 
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         fieldLabelText: 'Give me a date!',
       ));
       expect(find.text('Enter Date'), findsNothing);
@@ -247,7 +247,7 @@ void main() {
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
       addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
 
-      await tester.pumpWidget(_inputDatePickerField(autofocus: true));
+      await tester.pumpWidget(inputDatePickerField(autofocus: true));
       await tester.pumpAndSettle();
 
       expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
@@ -268,7 +268,7 @@ void main() {
 
     testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
       const InputBorder border = InputBorder.none;
-      await tester.pumpWidget(_inputDatePickerField(
+      await tester.pumpWidget(inputDatePickerField(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
           inputDecorationTheme: const InputDecorationTheme(
             border: border,

@@ -27,6 +27,7 @@ import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../proxied_devices/file_transfer.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -68,7 +69,7 @@ class DaemonCommand extends FlutterCommand {
     if (argResults['listen-on-tcp-port'] != null) {
       int port;
       try {
-        port = int.parse(stringArg('listen-on-tcp-port'));
+        port = int.parse(stringArgDeprecated('listen-on-tcp-port'));
       } on FormatException catch (error) {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
@@ -156,12 +157,12 @@ class Daemon {
     this.logToStdout = false,
   }) {
     // Set up domains.
-    _registerDomain(daemonDomain = DaemonDomain(this));
-    _registerDomain(appDomain = AppDomain(this));
-    _registerDomain(deviceDomain = DeviceDomain(this));
-    _registerDomain(emulatorDomain = EmulatorDomain(this));
-    _registerDomain(devToolsDomain = DevToolsDomain(this));
-    _registerDomain(proxyDomain = ProxyDomain(this));
+    registerDomain(daemonDomain = DaemonDomain(this));
+    registerDomain(appDomain = AppDomain(this));
+    registerDomain(deviceDomain = DeviceDomain(this));
+    registerDomain(emulatorDomain = EmulatorDomain(this));
+    registerDomain(devToolsDomain = DevToolsDomain(this));
+    registerDomain(proxyDomain = ProxyDomain(this));
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -191,7 +192,8 @@ class Daemon {
   final Completer<int> _onExitCompleter = Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
 
-  void _registerDomain(Domain domain) {
+  @visibleForTesting
+  void registerDomain(Domain domain) {
     _domainMap[domain.name] = domain;
   }
 
@@ -495,6 +497,7 @@ class AppDomain extends Domain {
     String packagesFilePath,
     String dillOutputPath,
     bool ipv6 = false,
+    bool multidexEnabled = false,
     String isolateFilter,
     bool machine = true,
   }) async {
@@ -543,6 +546,7 @@ class AppDomain extends Domain {
         projectRootPath: projectRootPath,
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
+        multidexEnabled: multidexEnabled,
         hostIsIde: true,
         machine: machine,
       );
@@ -553,6 +557,7 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         ipv6: ipv6,
+        multidexEnabled: multidexEnabled,
         machine: machine,
       );
     }
@@ -1098,7 +1103,7 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
       'flutterExit': device.supportsFlutterExit,
       'hardwareRendering': await device.supportsHardwareRendering,
       'startPaused': device.supportsStartPaused,
-    }
+    },
   };
 }
 
@@ -1320,6 +1325,8 @@ class EmulatorDomain extends Domain {
 class ProxyDomain extends Domain {
   ProxyDomain(Daemon daemon) : super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
+    registerHandler('calculateFileHashes', calculateFileHashes);
+    registerHandlerWithBinary('updateFile', updateFile);
     registerHandler('connect', connect);
     registerHandler('disconnect', disconnect);
     registerHandlerWithBinary('write', write);
@@ -1334,6 +1341,29 @@ class ProxyDomain extends Domain {
     final File file = tempDirectory.childFile(path);
     await file.parent.create(recursive: true);
     await file.openWrite().addStream(binary);
+  }
+
+  /// Calculate rolling hashes for a file in the local temporary directory.
+  Future<Map<String, dynamic>> calculateFileHashes(Map<String, dynamic> args) async {
+    final String path = _getStringArg(args, 'path', required: true);
+    final File file = tempDirectory.childFile(path);
+    if (!await file.exists()) {
+      return null;
+    }
+    final BlockHashes result = await FileTransfer().calculateBlockHashesOfFile(file);
+    return result.toJson();
+  }
+
+  Future<bool> updateFile(Map<String, dynamic> args, Stream<List<int>> binary) async {
+    final String path = _getStringArg(args, 'path', required: true);
+    final File file = tempDirectory.childFile(path);
+    if (!await file.exists()) {
+      return null;
+    }
+    final List<Map<String, dynamic>> deltaJson = (args['delta'] as List<dynamic>).cast<Map<String, dynamic>>();
+    final List<FileDeltaBlock> delta = FileDeltaBlock.fromJsonList(deltaJson);
+    final bool result = await FileTransfer().rebuildFile(file, delta, binary);
+    return result;
   }
 
   /// Opens a connection to a local port, and returns the connection id.
@@ -1404,12 +1434,13 @@ class ProxyDomain extends Domain {
     for (final Socket connection in _forwardedConnections.values) {
       connection.destroy();
     }
-    await _tempDirectory?.delete(recursive: true);
+    // We deliberately not clean up the tempDirectory here. The application package files that
+    // are transferred into this directory through ProxiedDevices are left in the directory
+    // to be reused on any subsequent runs.
   }
 
-
   Directory _tempDirectory;
-  Directory get tempDirectory => _tempDirectory ??= globals.fs.systemTempDirectory.createTempSync('flutter_tool_daemon.');
+  Directory get tempDirectory => _tempDirectory ??= globals.fs.systemTempDirectory.childDirectory('flutter_tool_daemon')..createSync();
 }
 
 /// A [Logger] which sends log messages to a listening daemon client.

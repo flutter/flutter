@@ -51,9 +51,6 @@ export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, Fake
 BufferLogger get testLogger => context.get<Logger>() as BufferLogger;
 
 FakeDeviceManager get testDeviceManager => context.get<DeviceManager>() as FakeDeviceManager;
-FakeDoctor get testDoctor => context.get<Doctor>() as FakeDoctor;
-
-typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
 void testUsingContext(
@@ -294,10 +291,10 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 12.3';
+  String get versionText => 'Xcode 13';
 
   @override
-  Version get version => Version(12, 3, null);
+  Version get version => Version(13, null, null);
 
   @override
   Future<Map<String, String>> getBuildSettings(

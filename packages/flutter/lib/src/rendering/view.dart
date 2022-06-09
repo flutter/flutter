@@ -40,15 +40,16 @@ class ViewConfiguration {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ViewConfiguration
         && other.size == size
         && other.devicePixelRatio == devicePixelRatio;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio);
+  int get hashCode => Object.hash(size, devicePixelRatio);
 
   @override
   String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
@@ -82,16 +83,21 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The constraints used for the root layout.
   ViewConfiguration get configuration => _configuration;
   ViewConfiguration _configuration;
+
   /// The configuration is initially set by the `configuration` argument
   /// passed to the constructor.
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     assert(value != null);
-    if (configuration == value)
+    if (configuration == value) {
       return;
+    }
+    final ViewConfiguration oldConfiguration = _configuration;
     _configuration = value;
-    replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
+    if (oldConfiguration.toMatrix() != _configuration.toMatrix()) {
+      replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
+    }
     assert(_rootTransform != null);
     markNeedsLayout();
   }
@@ -161,13 +167,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     _size = configuration.size;
     assert(_size.isFinite);
 
-    if (child != null)
+    if (child != null) {
       child!.layout(BoxConstraints.tight(_size));
-  }
-
-  @override
-  void rotate({ int? oldAngle, int? newAngle, Duration? time }) {
-    assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
+    }
   }
 
   /// Determines the set of render objects located at the given position.
@@ -181,8 +183,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
   bool hitTest(HitTestResult result, { required Offset position }) {
-    if (child != null)
+    if (child != null) {
       child!.hitTest(BoxHitTestResult.wrap(result), position: position);
+    }
     result.add(HitTestEntry(this));
     return true;
   }
@@ -205,8 +208,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
+    if (child != null) {
       context.paintChild(child!, offset);
+    }
   }
 
   @override
@@ -221,18 +225,20 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
     if (!kReleaseMode) {
-      Timeline.startSync('COMPOSITING', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Timeline.startSync('COMPOSITING');
     }
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
       final ui.Scene scene = layer!.buildScene(builder);
-      if (automaticSystemUiAdjustment)
+      if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
+      }
       _window.render(scene);
       scene.dispose();
       assert(() {
-        if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled)
+        if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
           debugCurrentRepaintColor = debugCurrentRepaintColor.withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
+        }
         return true;
       }());
     } finally {
@@ -265,49 +271,30 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     //    |                        |
     //    ++++++++++++++++++++++++++ <- bounds.bottom
     final Rect bounds = paintBounds;
-
-    // Only Android / iOS / Fuchsia have a customizable status bar.
-    SystemUiOverlayStyle? upperOverlayStyle;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        // Center of the status bar
-        final Offset top = Offset(
-          // Horizontal center of the screen
-          bounds.center.dx,
-          // The vertical center of the system status bar. The system status bar
-          // height is kept as top window padding.
-          _window.padding.top / 2.0,
-        );
-        upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
-        break;
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        break;
-    }
-
-    // Only Android has a customizable system navigation bar.
+    // Center of the status bar
+    final Offset top = Offset(
+      // Horizontal center of the screen
+      bounds.center.dx,
+      // The vertical center of the system status bar. The system status bar
+      // height is kept as top window padding.
+      _window.padding.top / 2.0,
+    );
+    // Center of the navigation bar
+    final Offset bottom = Offset(
+      // Horizontal center of the screen
+      bounds.center.dx,
+      // Vertical center of the system navigation bar. The system navigation bar
+      // height is kept as bottom window padding. The "1" needs to be subtracted
+      // from the bottom because available pixels are in (0..bottom) range.
+      // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
+      // bottom drawn pixel is at 1919 position.
+      bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
+    );
+    final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
+    // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle? lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        // If there is no bottom view padding, then there is no navigation bar
-        // and the hit test can be skipped.
-        if (_window.viewPadding.bottom == 0.0) {
-          break;
-        }
-        // Center of the navigation bar
-        final Offset bottom = Offset(
-          // Horizontal center of the screen
-          bounds.center.dx,
-          // Vertical center of the system navigation bar. The system navigation bar
-          // height is kept as bottom window padding. The "1" needs to be subtracted
-          // from the bottom because available pixels are in (0..bottom) range.
-          // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
-          // bottom drawn pixel is at 1919 position.
-          bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
-        );
         lowerOverlayStyle = layer!.find<SystemUiOverlayStyle>(bottom);
         break;
       case TargetPlatform.fuchsia:
@@ -354,7 +341,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.platformDispatcher.semanticsEnabled)
+    if (_window.platformDispatcher.semanticsEnabled) {
       properties.add(DiagnosticsNode.message('semantics enabled'));
+    }
   }
 }

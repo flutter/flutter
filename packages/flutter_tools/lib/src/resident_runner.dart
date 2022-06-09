@@ -126,6 +126,7 @@ class FlutterDevice {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
         ),
+        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(globals.artifacts
@@ -168,6 +169,7 @@ class FlutterDevice {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
         ),
+        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
         processManager: globals.processManager,
@@ -222,6 +224,7 @@ class FlutterDevice {
     int hostVmServicePort,
     int ddsPort,
     bool disableServiceAuthCodes = false,
+    bool cacheStartupProfile = false,
     bool enableDds = true,
     @required bool allowExistingDdsInstance,
     bool ipv6 = false,
@@ -267,6 +270,7 @@ class FlutterDevice {
             ipv6: ipv6,
             disableServiceAuthCodes: disableServiceAuthCodes,
             logger: globals.logger,
+            cacheStartupProfile: cacheStartupProfile,
           );
         } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||
@@ -665,6 +669,41 @@ abstract class ResidentHandlers {
           isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
+      }
+    }
+    return true;
+  }
+
+  /// Dump frame rasterization metrics for the last rendered frame.
+  ///
+  /// The last frames gets re-painted while recording additional tracing info
+  /// pertaining to the various draw calls issued by the frame. The timings
+  /// recorded here are not indicative of production performance. The intended
+  /// use case is to look at the various layers in proportion to see what
+  /// contributes the most towards raster performance.
+  Future<bool> debugFrameJankMetrics() async {
+    if (!supportsServiceProtocol) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
+        final Map<String, Object> rasterData =
+          await device.vmService.renderFrameWithRasterStats(
+            viewId: view.id,
+            uiIsolateId: view.uiIsolate.id,
+          );
+        if (rasterData != null) {
+          final File tempFile = globals.fsUtils.getUniqueFile(
+            globals.fs.currentDirectory,
+            'flutter_jank_metrics',
+            'json',
+          );
+          tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
+          logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
+        } else {
+          logger.printWarning('Unable to get jank metrics.');
+        }
       }
     }
     return true;
@@ -1139,11 +1178,16 @@ abstract class ResidentRunner extends ResidentHandlers {
     String route,
   });
 
+  /// Connect to a flutter application.
+  ///
+  /// [needsFullRestart] defaults to `true`, and controls if the frontend server should
+  /// compile a full dill. This should be set to `false` if this is called in [ResidentRunner.run], since that method already perfoms an initial compilation.
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    bool needsFullRestart = true,
   });
 
   @override
@@ -1296,7 +1340,8 @@ abstract class ResidentRunner extends ResidentHandlers {
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6,
-        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes
+        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
+        cacheStartupProfile: debuggingOptions.cacheStartupProfile,
       );
       await device.vmService.getFlutterViews();
 
@@ -1434,6 +1479,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       if (isRunningDebug) {
         commandHelp.g.print();
       }
+      commandHelp.j.print();
     }
   }
 
@@ -1445,13 +1491,16 @@ abstract class ResidentRunner extends ResidentHandlers {
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message, { this.fatal = false, this.updateFSReport });
+  OperationResult(this.code, this.message, { this.fatal = false, this.updateFSReport, this.extraTimings = const <OperationResultExtraTiming>[] });
 
   /// The result of the operation; a non-zero code indicates a failure.
   final int code;
 
   /// A user facing message about the results of the operation.
   final String message;
+
+  /// User facing extra timing information about the operation.
+  final List<OperationResultExtraTiming> extraTimings;
 
   /// Whether this error should cause the runner to exit.
   final bool fatal;
@@ -1461,6 +1510,16 @@ class OperationResult {
   bool get isOk => code == 0;
 
   static final OperationResult ok = OperationResult(0, '');
+}
+
+class OperationResultExtraTiming {
+  const OperationResultExtraTiming(this.description, this.timeInMs);
+
+  /// A user facing short description of this timing.
+  final String description;
+
+  /// The time this operation took in milliseconds.
+  final int timeInMs;
 }
 
 Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
@@ -1482,7 +1541,6 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
     case TargetPlatform.linux_x64:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_uwp_x64:
     case TargetPlatform.windows_x64:
       return null;
   }
@@ -1600,6 +1658,9 @@ class TerminalHandler {
         return residentRunner.debugToggleWidgetInspector();
       case 'I':
         return residentRunner.debugToggleInvertOversizedImages();
+      case 'j':
+      case 'J':
+        return residentRunner.debugFrameJankMetrics();
       case 'L':
         return residentRunner.debugDumpLayerTree();
       case 'o':

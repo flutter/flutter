@@ -275,6 +275,7 @@ class TimelineSummary {
       'total_ui_gc_time': gcSummarizer.totalGCTimeMillis,
       '30hz_frame_percentage': refreshRateSummary.percentageOf30HzFrames,
       '60hz_frame_percentage': refreshRateSummary.percentageOf60HzFrames,
+      '80hz_frame_percentage': refreshRateSummary.percentageOf80HzFrames,
       '90hz_frame_percentage': refreshRateSummary.percentageOf90HzFrames,
       '120hz_frame_percentage': refreshRateSummary.percentageOf120HzFrames,
       'illegal_refresh_rate_frame_count': refreshRateSummary.framesWithIllegalRefreshRate.length,
@@ -409,23 +410,26 @@ class TimelineSummary {
   }
 
   double _averageInMillis(Iterable<Duration> durations) {
-    if (durations.isEmpty)
+    if (durations.isEmpty) {
       throw ArgumentError('durations is empty!');
+    }
     final double total = durations.fold<double>(0.0, (double t, Duration duration) => t + duration.inMicroseconds.toDouble() / 1000.0);
     return total / durations.length;
   }
 
   double _percentileInMillis(Iterable<Duration> durations, double percentile) {
-    if (durations.isEmpty)
+    if (durations.isEmpty) {
       throw ArgumentError('durations is empty!');
+    }
     assert(percentile >= 0.0 && percentile <= 100.0);
     final List<double> doubles = durations.map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).toList();
     return findPercentile(doubles, percentile);
   }
 
   double _maxInMillis(Iterable<Duration> durations) {
-    if (durations.isEmpty)
+    if (durations.isEmpty) {
       throw ArgumentError('durations is empty!');
+    }
     return durations
         .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
         .reduce(math.max);

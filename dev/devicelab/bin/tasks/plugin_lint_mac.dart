@@ -248,7 +248,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
           // TODO(jmagman): Make Objective-C applications handle Swift libraries https://github.com/flutter/flutter/issues/16049
           canFail: true
@@ -272,7 +272,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -305,7 +305,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -326,7 +326,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -390,7 +390,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });

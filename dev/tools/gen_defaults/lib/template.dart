@@ -5,7 +5,10 @@
 import 'dart:io';
 
 abstract class TokenTemplate {
-  const TokenTemplate(this.fileName, this.tokens);
+  const TokenTemplate(this.fileName, this.tokens, {
+    this.colorSchemePrefix = 'Theme.of(context).colorScheme.',
+    this.textThemePrefix = 'Theme.of(context).textTheme.'
+  });
 
   static const String beginGeneratedComment = '''
 
@@ -27,6 +30,8 @@ abstract class TokenTemplate {
 
   final String fileName;
   final Map<String, dynamic> tokens;
+  final String colorSchemePrefix;
+  final String textThemePrefix;
 
   /// Replace or append the contents of the file with the text from [generate].
   ///
@@ -54,19 +59,55 @@ abstract class TokenTemplate {
   /// bottom of the file.
   String generate();
 
-  /// Generate a [ColorScheme] color name for the given component token.
+  /// Generate a [ColorScheme] color name for the given token.
   ///
-  /// If there is an opacity specified for the given component, it will
-  /// apply that opacity to the component's color.
-  String color(String componentToken) {
-    final String tokenColor = '$componentToken.color';
-    final String tokenOpacity = '$componentToken.opacity';
-    String value = '${tokens[tokenColor]!}';
-    if (tokens.containsKey(tokenOpacity)) {
-      final String opacity = tokens[tokens[tokenOpacity]!]!.toString();
-      value += '.withOpacity($opacity)';
+  /// If there is a value for the given token, this will return
+  /// the value prepended with [colorSchemePrefix].
+  ///
+  /// Otherwise it will return 'null'.
+  ///
+  /// See also:
+  ///   * [componentColor], that provides support for an optional opacity.
+  String color(String colorToken) {
+    return tokens.containsKey(colorToken)
+      ? '$colorSchemePrefix${tokens[colorToken]}'
+      : 'null';
+  }
+
+  /// Generate a [ColorScheme] color name for the given component's color
+  /// with opacity if available.
+  ///
+  /// If there is a value for the given component's color, this will return
+  /// the value prepended with [colorSchemePrefix]. If there is also
+  /// an opacity specified for the component, then the returned value
+  /// will include this opacity calculation.
+  ///
+  /// If there is no value for the component's color, 'null' will be returned.
+  ///
+  /// See also:
+  ///   * [color], that provides support for looking up a raw color token.
+  String componentColor(String componentToken) {
+    final String colorToken = '$componentToken.color';
+    if (!tokens.containsKey(colorToken))
+      return 'null';
+    String value = color(colorToken);
+    final String opacityToken = '$componentToken.opacity';
+    if (tokens.containsKey(opacityToken)) {
+      value += '.withOpacity(${opacity(opacityToken)})';
     }
     return value;
+  }
+
+  /// Generate the opacity value for the given token.
+  String? opacity(String token) {
+    final dynamic value = tokens[token];
+    if (value == null) {
+      return null;
+    }
+    if (value is double) {
+      return value.toString();
+    }
+    return tokens[value].toString();
   }
 
   /// Generate an elevation value for the given component token.
@@ -96,8 +137,18 @@ abstract class TokenTemplate {
     return '';
   }
 
+  /// Generate a [BorderSide] for the given component.
+  String border(String componentToken) {
+    if (!tokens.containsKey('$componentToken.color')) {
+      return 'null';
+    }
+    final String borderColor = componentColor(componentToken);
+    final double width = (tokens['$componentToken.width'] ?? 1.0) as double;
+    return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
+  }
+
   /// Generate a [TextTheme] text style name for the given component token.
   String textStyle(String componentToken) {
-    return tokens['$componentToken.text-style']!.toString();
+    return '$textThemePrefix${tokens["$componentToken.text-style"]}';
   }
 }

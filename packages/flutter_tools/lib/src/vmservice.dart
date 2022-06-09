@@ -23,6 +23,7 @@ const String kRunInViewMethod = '_flutter.runInView';
 const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
 const String kScreenshotMethod = '_flutter.screenshot';
+const String kRenderFrameWithRasterStatsMethod = '_flutter.renderFrameWithRasterStats';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -197,7 +198,7 @@ Future<vm_service.VmService> setUpVmService(
       return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
-        }
+        },
       };
     });
     registrationRequests.add(vmService.registerService('reloadSources', 'Flutter Tools'));
@@ -210,7 +211,7 @@ Future<vm_service.VmService> setUpVmService(
       return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
-        }
+        },
       };
     });
     registrationRequests.add(vmService.registerService('hotRestart', 'Flutter Tools'));
@@ -225,7 +226,7 @@ Future<vm_service.VmService> setUpVmService(
       'result': <String, Object>{
         'type': 'Success',
         ...versionJson,
-      }
+      },
     };
   });
   registrationRequests.add(vmService.registerService('flutterVersion', 'Flutter Tools'));
@@ -257,7 +258,7 @@ Future<vm_service.VmService> setUpVmService(
         'result': <String, Object>{
           'type': 'Success',
           ...result.toJson(),
-        }
+        },
       };
     });
     registrationRequests.add(vmService.registerService('flutterMemoryInfo', 'Flutter Tools'));
@@ -269,7 +270,7 @@ Future<vm_service.VmService> setUpVmService(
         'result': <String, Object>{
           'type': 'Success',
           'filename': filename,
-        }
+        },
       };
     });
     registrationRequests.add(vmService.registerService('flutterGetSkSL', 'Flutter Tools'));
@@ -536,6 +537,26 @@ class FlutterVmService {
       },
     );
     await onRunnable;
+  }
+
+  /// Renders the last frame with additional raster tracing enabled.
+  ///
+  /// When a frame is rendered using this method it will incur additional cost
+  /// for rasterization which is not reflective of how long the frame takes in
+  /// production. This is primarily intended to be used to identify the layers
+  /// that result in the most raster perf degradation.
+  Future<Map<String, Object>?> renderFrameWithRasterStats({
+    required String? viewId,
+    required String? uiIsolateId,
+  }) async {
+    final vm_service.Response? response = await callMethodWrapper(
+      kRenderFrameWithRasterStatsMethod,
+      isolateId: uiIsolateId,
+      args: <String, String?>{
+        'viewId': viewId,
+      },
+    );
+    return response?.json as Map<String, Object>?;
   }
 
   Future<String> flutterDebugDumpApp({
@@ -826,7 +847,7 @@ class FlutterVmService {
       final List<FlutterView> views = <FlutterView>[
         if (rawViews != null)
           for (final Map<String, Object?> rawView in rawViews.whereType<Map<String, Object?>>())
-            FlutterView.parse(rawView)
+            FlutterView.parse(rawView),
       ];
       if (views.isNotEmpty || returnEarly) {
         return views;
@@ -866,7 +887,7 @@ class FlutterVmService {
       final List<vm_service.IsolateRef> refs = await _getIsolateRefs();
       for (final vm_service.IsolateRef ref in refs) {
         final vm_service.Isolate? isolate = await getIsolateOrNull(ref.id!);
-        if (isolate != null && isolate.extensionRPCs?.contains(extensionName) == true) {
+        if (isolate != null && (isolate.extensionRPCs?.contains(extensionName) ?? false)) {
           return ref;
         }
       }

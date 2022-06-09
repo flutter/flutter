@@ -195,6 +195,56 @@ void main() {
     logs.clear();
   }, variant: KeySimulatorTransitModeVariant.all());
 
+  // Regression test for https://github.com/flutter/flutter/issues/99196 .
+  //
+  // In rawKeyData mode, if a key down event is dispatched but immediately
+  // synthesized to be released, the old logic would trigger a Null check
+  // _CastError on _hardwareKeyboard.lookUpLayout(key). The original scenario
+  // that this is triggered on Android is unknown. Here we make up a scenario
+  // where a ShiftLeft key down is dispatched but the modifier bit is not set.
+  testWidgets('Correctly convert down events that are synthesized released', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final List<KeyEvent> events = <KeyEvent>[];
+
+    await tester.pumpWidget(
+      KeyboardListener(
+        autofocus: true,
+        focusNode: focusNode,
+        child: Container(),
+        onKeyEvent: (KeyEvent event) {
+          events.add(event);
+        },
+      ),
+    );
+
+    // Dispatch an arbitrary event to bypass the pressedKeys check.
+    await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: 'web');
+
+    // Dispatch an
+    final Map<String, dynamic> data2 = KeyEventSimulator.getKeyData(
+      LogicalKeyboardKey.shiftLeft,
+      platform: 'web',
+    )..['metaState'] = 0;
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.keyEvent.name,
+      SystemChannels.keyEvent.codec.encodeMessage(data2),
+      (ByteData? data) {},
+    );
+
+    expect(events, hasLength(3));
+    expect(events[1], isA<KeyDownEvent>());
+    expect(events[1].logicalKey, LogicalKeyboardKey.shiftLeft);
+    expect(events[1].synthesized, false);
+    expect(events[2], isA<KeyUpEvent>());
+    expect(events[2].logicalKey, LogicalKeyboardKey.shiftLeft);
+    expect(events[2].synthesized, true);
+    expect(ServicesBinding.instance.keyboard.physicalKeysPressed, equals(<PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.keyA,
+    }));
+  }, variant: const KeySimulatorTransitModeVariant(<KeyDataTransitMode>{
+    KeyDataTransitMode.rawKeyData,
+  }));
+
   testWidgets('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<int> logs = <int>[];
@@ -282,7 +332,7 @@ void main() {
   // In that case, the key data should not be converted to any [KeyEvent]s,
   // but is only used so that *a* key data comes before the raw key message
   // and makes [KeyEventManager] infer [KeyDataTransitMode.keyDataThenRawKeyData].
-  testWidgets('Empty keyData yields no event but triggers inferrence', (WidgetTester tester) async {
+  testWidgets('Empty keyData yields no event but triggers inference', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     final List<RawKeyEvent> rawEvents = <RawKeyEvent>[];
     tester.binding.keyboard.addHandler((KeyEvent event) {

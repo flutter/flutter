@@ -41,7 +41,7 @@ class RawKeyboardListener extends StatefulWidget {
   ///
   /// The [autofocus] argument must not be null.
   const RawKeyboardListener({
-    Key? key,
+    super.key,
     required this.focusNode,
     this.autofocus = false,
     this.includeSemantics = true,
@@ -50,8 +50,7 @@ class RawKeyboardListener extends StatefulWidget {
   }) : assert(focusNode != null),
        assert(autofocus != null),
        assert(includeSemantics != null),
-       assert(child != null),
-       super(key: key);
+       assert(child != null);
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
@@ -104,24 +103,27 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   void _handleFocusChanged() {
-    if (widget.focusNode.hasFocus)
+    if (widget.focusNode.hasFocus) {
       _attachKeyboardIfDetached();
-    else
+    } else {
       _detachKeyboardIfAttached();
+    }
   }
 
   bool _listening = false;
 
   void _attachKeyboardIfDetached() {
-    if (_listening)
+    if (_listening) {
       return;
+    }
     RawKeyboard.instance.addListener(_handleRawKeyEvent);
     _listening = true;
   }
 
   void _detachKeyboardIfAttached() {
-    if (!_listening)
+    if (!_listening) {
       return;
+    }
     RawKeyboard.instance.removeListener(_handleRawKeyEvent);
     _listening = false;
   }

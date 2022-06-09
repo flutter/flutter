@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -895,7 +894,7 @@ class RestorationBucket {
       return;
     }
     _childrenToAdd[child.restorationId]?.remove(child);
-    if (_childrenToAdd[child.restorationId]?.isEmpty == true) {
+    if (_childrenToAdd[child.restorationId]?.isEmpty ?? false) {
       _childrenToAdd.remove(child.restorationId);
     }
   }

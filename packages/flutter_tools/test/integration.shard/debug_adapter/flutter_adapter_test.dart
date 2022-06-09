@@ -115,6 +115,40 @@ void main() {
       expect(output, contains('Exited (1)'));
     });
 
+    /// Helper that tests exception output in either debug or noDebug mode.
+    Future<void> testExceptionOutput({required bool noDebug}) async {
+        final BasicProjectThatThrows project = BasicProjectThatThrows();
+        await project.setUpIn(tempDir);
+
+        final List<OutputEventBody> outputEvents =
+            await dap.client.collectAllOutput(launch: () {
+          // Terminate the app after we see the exception because otherwise
+          // it will keep running and `collectAllOutput` won't end.
+          dap.client.output
+              .firstWhere((String output) => output.contains(endOfErrorOutputMarker))
+              .then((_) => dap.client.terminate());
+          return dap.client.launch(
+            noDebug: noDebug,
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          );
+        });
+
+        final String output = _uniqueOutputLines(outputEvents);
+        final List<String> outputLines = output.split('\n');
+        expect( outputLines, containsAllInOrder(<String>[
+            '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════',
+            'The following _Exception was thrown building App(dirty):',
+            'Exception: c',
+            'The relevant error-causing widget was:',
+        ]));
+        expect(output, contains('App:${Uri.file(project.dir.path)}/lib/main.dart:24:12'));
+    }
+
+    testWithoutContext('correctly outputs exceptions in debug mode', () => testExceptionOutput(noDebug: false));
+
+    testWithoutContext('correctly outputs exceptions in noDebug mode', () => testExceptionOutput(noDebug: true));
+
     testWithoutContext('can hot reload', () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
@@ -346,13 +380,35 @@ void main() {
         stoppedFuture,
         dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
       ], eagerError: true);
-      final int threadId = (await stoppedFuture).threadId!;
+    });
 
-      // Remove the breakpoint and resume.
-      await dap.client.clearBreakpoints(breakpointFilePath);
-      await dap.client.continue_(threadId);
+    testWithoutContext('resumes and removes breakpoints on detach', () async {
+      final Uri vmServiceUri = await testProcess.vmServiceUri;
 
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.start(
+          launch: () => dap.client.attach(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            vmServiceUri: vmServiceUri.toString(),
+          ),
+        ),
+      ], eagerError: true);
+
+      // Set a breakpoint and expect to hit it.
+      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere((StoppedEventBody e) => e.reason == 'breakpoint');
+      await Future.wait(<Future<void>>[
+        stoppedFuture,
+        dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
+      ], eagerError: true);
+
+      // Detach.
       await dap.client.terminate();
+
+      // Ensure we get additional output (confirming the process resumed).
+      await testProcess.output.first;
     });
   });
 }

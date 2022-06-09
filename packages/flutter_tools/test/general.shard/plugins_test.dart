@@ -245,7 +245,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
     }
@@ -275,7 +275,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
       return pluginUsingJavaAndNewEmbeddingDir;
@@ -305,7 +305,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          'plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          'plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
     }
@@ -333,7 +333,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          '$pluginName:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          '$pluginName:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
     }
@@ -366,7 +366,7 @@ flutter:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          'plugin4:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}',
+          'plugin4:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri}',
           mode: FileMode.append,
         );
     }
@@ -397,7 +397,7 @@ dependencies:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
+          '$name:${pluginDirectory.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
       return pluginDirectory;
@@ -435,7 +435,7 @@ dependencies:
       flutterProject.directory
         .childFile('.packages')
         .writeAsStringSync(
-          '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
+          '$name:${pluginDirectory.childDirectory('lib').uri}\n',
           mode: FileMode.append,
         );
       return pluginDirectory;
@@ -476,7 +476,7 @@ dependencies:
           'plugin_d',
           'plugin_a',
           '/local_plugins/plugin_c',
-          '/local_plugins/plugin_b'
+          '/local_plugins/plugin_b',
         ]);
 
         iosProject.testExists = true;
@@ -530,7 +530,7 @@ dependencies:
             'native_build': true,
             'dependencies': <String>[
               'plugin-b',
-              'plugin-c'
+              'plugin-c',
             ],
           },
           <String, dynamic> {
@@ -538,7 +538,7 @@ dependencies:
             'path': '${pluginB.path}/',
             'native_build': true,
             'dependencies': <String>[
-              'plugin-c'
+              'plugin-c',
             ],
           },
           <String, dynamic> {
@@ -560,18 +560,18 @@ dependencies:
             'name': 'plugin-a',
             'dependencies': <String>[
               'plugin-b',
-              'plugin-c'
-            ]
+              'plugin-c',
+            ],
           },
           <String, dynamic> {
             'name': 'plugin-b',
             'dependencies': <String>[
-              'plugin-c'
-            ]
+              'plugin-c',
+            ],
           },
           <String, dynamic> {
             'name': 'plugin-c',
-            'dependencies': <String>[]
+            'dependencies': <String>[],
           },
         ];
 
@@ -592,7 +592,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => flutterVersion
+        FlutterVersion: () => flutterVersion,
       });
 
       testUsingContext(
@@ -637,7 +637,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => flutterVersion
+        FlutterVersion: () => flutterVersion,
       });
 
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () async {
@@ -654,7 +654,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => flutterVersion
+        FlutterVersion: () => flutterVersion,
       });
 
       testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () async {
@@ -677,7 +677,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => flutterVersion
+        FlutterVersion: () => flutterVersion,
       });
     });
 
@@ -1076,14 +1076,15 @@ dependencies:
         flutterProject.directory
           .childFile('.packages')
           .writeAsStringSync('''
-web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toString()}
+web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri}
 ''');
 
-        await injectPlugins(flutterProject, webPlatform: true);
+        final Directory destination = flutterProject.directory.childDirectory('lib');
+        await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
 
         final File registrant = flutterProject.directory
             .childDirectory('lib')
-            .childFile('generated_plugin_registrant.dart');
+            .childFile('web_plugin_registrant.dart');
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
@@ -1291,7 +1292,7 @@ flutter:
           'plugin_d',
           'plugin_a',
           '/local_plugins/plugin_c',
-          '/local_plugins/plugin_b'
+          '/local_plugins/plugin_b',
         ]);
 
         await injectPlugins(flutterProject, linuxPlatform: true);
@@ -1376,7 +1377,7 @@ flutter:
           'plugin_d',
           'plugin_a',
           '/local_plugins/plugin_c',
-          '/local_plugins/plugin_b'
+          '/local_plugins/plugin_b',
         ]);
 
         await injectPlugins(flutterProject, windowsPlatform: true);
@@ -1557,7 +1558,7 @@ flutter:
         tryToDelete(tempDir);
       });
 
-      void _createPubspecFile(String yamlString) {
+      void createPubspecFile(String yamlString) {
         projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
       }
 
@@ -1581,23 +1582,23 @@ flutter:
           pluginClass: SomePlugin
           package: AndroidPackage
   ''';
-        _createPubspecFile(pluginYaml);
+        createPubspecFile(pluginYaml);
         validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'ios', 'macos', 'windows', 'linux', 'android', 'web'
+          'ios', 'macos', 'windows', 'linux', 'android', 'web',
         ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
       });
 
       testUsingContext('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
         expect(map['ios'], <String, String> {
-          'pluginClass' : 'PluginClass'
+          'pluginClass' : 'PluginClass',
         });
         expect(map['android'], <String, String> {
           'pluginClass' : 'PluginClass',
           'package': 'some.android.package',
         });
         expect(map['linux'], <String, String> {
-          'pluginClass' : 'PluginClass'
+          'pluginClass' : 'PluginClass',
         });
       });
 
@@ -1682,9 +1683,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   WindowsProject windows;
-
-  @override
-  WindowsUwpProject windowsUwp;
 }
 
 class FakeMacOSProject extends Fake implements MacOSProject {

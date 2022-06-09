@@ -12,6 +12,45 @@ import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'states.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('GridView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return GridView.builder(
+              itemCount: itemCount,
+              itemBuilder: (BuildContext _, int index) => Container(
+                key: Key('$index'),
+                height: 2000.0,
+              ),
+              findChildIndexCallback: (Key key) {
+                finderCalled = true;
+                return null;
+              },
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+              ),
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   testWidgets('Empty GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -63,8 +102,9 @@ void main() {
     await tester.drag(find.text('Arkansas'), const Offset(0.0, -200.0));
     await tester.pump();
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i) {
       expect(find.text(kStates[i]), findsNothing);
+    }
 
     for (int i = 4; i < 12; ++i) {
       await tester.tap(find.text(kStates[i]));

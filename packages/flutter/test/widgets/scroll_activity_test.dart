@@ -130,7 +130,7 @@ void main() {
 }
 
 class PageView62209 extends StatefulWidget {
-  const PageView62209({Key? key}) : super(key: key);
+  const PageView62209({super.key});
 
   @override
   State<PageView62209> createState() => _PageView62209State();
@@ -179,7 +179,7 @@ class _PageView62209State extends State<PageView62209> {
 }
 
 class Carousel62209Page extends StatelessWidget {
-  const Carousel62209Page({required this.number, Key? key}) : super(key: key);
+  const Carousel62209Page({required this.number, super.key});
 
   final int number;
 
@@ -190,7 +190,7 @@ class Carousel62209Page extends StatelessWidget {
 }
 
 class Carousel62209 extends StatefulWidget {
-  const Carousel62209({Key? key, required this.pages}) : super(key: key);
+  const Carousel62209({super.key, required this.pages});
 
   final List<Carousel62209Page> pages;
 

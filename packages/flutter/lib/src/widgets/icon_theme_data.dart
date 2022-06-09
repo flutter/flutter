@@ -15,7 +15,7 @@ import 'framework.dart' show BuildContext;
 /// widget subtree.
 ///
 /// To obtain the current icon theme, use [IconTheme.of]. To convert an icon
-/// theme to a version with all the fields filled in, use [new
+/// theme to a version with all the fields filled in, use [
 /// IconThemeData.fallback].
 @immutable
 class IconThemeData with Diagnosticable {
@@ -49,8 +49,9 @@ class IconThemeData with Diagnosticable {
   /// replaced by the non-null parameters of the given icon theme. If the given
   /// icon theme is null, simply returns this icon theme.
   IconThemeData merge(IconThemeData? other) {
-    if (other == null)
+    if (other == null) {
       return this;
+    }
     return copyWith(
       color: other.color,
       opacity: other.opacity,
@@ -84,7 +85,7 @@ class IconThemeData with Diagnosticable {
   final Color? color;
 
   /// An opacity to apply to both explicit and default icon colors.
-  double? get opacity => _opacity?.clamp(0.0, 1.0);
+  double? get opacity => _opacity == null ? null : clampDouble(_opacity!, 0.0, 1.0);
   final double? _opacity;
 
   /// The default size for icons.
@@ -108,8 +109,9 @@ class IconThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is IconThemeData
         && other.color == color
         && other.opacity == opacity
@@ -118,7 +120,12 @@ class IconThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => hashValues(color, opacity, size, hashList(shadows));
+  int get hashCode => Object.hash(
+    color,
+    opacity,
+    size,
+    shadows == null ? null : Object.hashAll(shadows!),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

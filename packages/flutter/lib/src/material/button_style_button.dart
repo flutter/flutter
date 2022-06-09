@@ -30,7 +30,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const ButtonStyleButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.onLongPress,
     required this.onHover,
@@ -41,8 +41,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     required this.child,
   }) : assert(autofocus != null),
-       assert(clipBehavior != null),
-       super(key: key);
+       assert(clipBehavior != null);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -149,10 +148,10 @@ abstract class ButtonStyleButton extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }
 
-  /// Returns null if [value] is null, otherwise `MaterialStateProperty.all<T>(value)`.
+  /// Returns null if [value] is null, otherwise `MaterialStatePropertyAll<T>(value)`.
   ///
   /// A convenience method for subclasses.
-  static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStateProperty.all<T>(value);
+  static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
 
   /// Returns an interpolated value based on the [textScaleFactor] parameter:
   ///
@@ -247,6 +246,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
     Color? resolvedBackgroundColor = resolve<Color?>((ButtonStyle? style) => style?.backgroundColor);
     final Color? resolvedForegroundColor = resolve<Color?>((ButtonStyle? style) => style?.foregroundColor);
     final Color? resolvedShadowColor = resolve<Color?>((ButtonStyle? style) => style?.shadowColor);
+    final Color? resolvedSurfaceTintColor = resolve<Color?>((ButtonStyle? style) => style?.surfaceTintColor);
     final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
     final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
@@ -302,7 +302,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry padding = resolvedPadding!
       .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
-      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
     // If an opaque button's background is becoming translucent while its
     // elevation is changing, change the elevation first. Material implicitly
@@ -343,6 +343,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
         shape: resolvedShape!.copyWith(side: resolvedSide),
         color: resolvedBackgroundColor,
         shadowColor: resolvedShadowColor,
+        surfaceTintColor: resolvedSurfaceTintColor,
         type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: resolvedAnimationDuration,
         clipBehavior: widget.clipBehavior,
@@ -366,7 +367,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
           splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,
           highlightColor: Colors.transparent,
-          customBorder: resolvedShape,
+          customBorder: resolvedShape.copyWith(side: resolvedSide),
           child: IconTheme.merge(
             data: IconThemeData(color: resolvedForegroundColor),
             child: Padding(
@@ -422,17 +423,16 @@ class _MouseCursor extends MaterialStateMouseCursor {
   String get debugDescription => 'ButtonStyleButton_MouseCursor';
 }
 
-/// A widget to pad the area around a [MaterialButton]'s inner [Material].
+/// A widget to pad the area around a [ButtonStyleButton]'s inner [Material].
 ///
 /// Redirect taps that occur in the padded area around the child to the center
 /// of the child. This increases the size of the button and the button's
 /// "tap target", but not its material or its ink splashes.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.minSize,
-  }) : super(key: key, child: child);
+  });
 
   final Size minSize;
 
@@ -453,37 +453,42 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value)
+    if (_minSize == value) {
       return;
+    }
     _minSize = value;
     markNeedsLayout();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
   }
 

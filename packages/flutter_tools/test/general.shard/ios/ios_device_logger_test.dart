@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -23,11 +22,11 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fake_vm_services.dart';
 
 void main() {
-  FakeProcessManager processManager;
-  Artifacts artifacts;
-  Cache fakeCache;
-  BufferLogger logger;
-  String ideviceSyslogPath;
+  late FakeProcessManager processManager;
+  late Artifacts artifacts;
+  late Cache fakeCache;
+  late BufferLogger logger;
+  late String ideviceSyslogPath;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -230,7 +229,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       iosDeployDebugger.debuggerAttached = true;
 
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
-        'Message from debugger'
+        'Message from debugger',
       ]);
       iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;
@@ -308,6 +307,45 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
       logReader.dispose();
       expect(iosDeployDebugger.detached, true);
+    });
+
+    testWithoutContext('Does not throw if debuggerStream set after logReader closed', () async {
+      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        '2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.',
+        '2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching from logging category.',
+        'stderr from dart',
+        '',
+      ]);
+
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        useSyslog: false,
+      );
+      Object? exception;
+      StackTrace? trace;
+      await asyncGuard(
+          () async {
+            await logReader.linesController.close();
+            final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+            iosDeployDebugger.logLines = debuggingLogs;
+            logReader.debuggerStream = iosDeployDebugger;
+            await logReader.logLines.drain<void>();
+          },
+          onError: (Object err, StackTrace stackTrace) {
+            exception = err;
+            trace = stackTrace;
+          }
+      );
+      expect(
+        exception,
+        isNull,
+        reason: trace.toString(),
+      );
     });
   });
 }

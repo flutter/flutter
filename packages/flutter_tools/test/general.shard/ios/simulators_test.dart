@@ -29,7 +29,7 @@ import '../../src/fakes.dart';
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{
-    'HOME': '/'
+    'HOME': '/',
   },
 );
 
@@ -604,7 +604,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           'Multi line message again',
           '  and it goes...',
           '  and goes...',
-          'Single line message, not the part of the above'
+          'Single line message, not the part of the above',
         ]);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
@@ -670,7 +670,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, <String>[
           'Single line message', 'Multi line message\n  continues...\n  continues...',
-          'Single line message, not the part of the above'
+          'Single line message, not the part of the above',
         ]);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
@@ -989,6 +989,35 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
       expect(simControl.requests.single.launchArgs, contains('--enable-software-rendering'));
+    }, overrides: <Type, Generator>{
+      PlistParser: () => testPlistParser,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Xcode: () => xcode,
+    });
+
+    testUsingContext('startApp using route', () async {
+      final IOSSimulator device = IOSSimulator(
+        'x',
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+      );
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+
+      final Directory mockDir = globals.fs.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(
+        projectBundleId: 'correct',
+        bundleName: 'name',
+        uncompressedBundle: mockDir,
+        applicationPackage: mockDir,
+      );
+
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
+      final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions, route: '/animation');
+
+      expect(simControl.requests.single.launchArgs, contains('--route=/animation'));
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,

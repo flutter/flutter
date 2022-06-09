@@ -64,7 +64,6 @@ import 'run_hot.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 import 'web/workflow.dart';
-import 'windows/uwptool.dart';
 import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
@@ -181,7 +180,6 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         logger: globals.logger,
         flutterProjectFactory: globals.projectFactory,
-        client: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => FlutterDeviceManager(
@@ -208,11 +206,6 @@ Future<T> runInContext<T>(
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
         customDevicesConfig: globals.customDevicesConfig,
-        uwptool: UwpTool(
-          artifacts: globals.artifacts,
-          logger: globals.logger,
-          processManager: globals.processManager,
-        ),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,

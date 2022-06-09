@@ -23,13 +23,12 @@ import 'gradle.dart';
 /// An application package created from an already built Android APK.
 class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackage {
   AndroidApk({
-    required String id,
+    required super.id,
     required this.applicationPackage,
     required this.versionCode,
     required this.launchActivity,
   }) : assert(applicationPackage != null),
-       assert(launchActivity != null),
-       super(id: id);
+       assert(launchActivity != null);
 
   /// Creates a new AndroidApk from an existing APK.
   ///
@@ -149,7 +148,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       }
       logger.printError('AndroidManifest.xml is not a valid XML document.');
       logger.printError('Please check $manifestLocation for errors.');
-      throwToolExit('XML Parser error message: ${exception.toString()}');
+      throwToolExit('XML Parser error message: $exception');
     }
 
     final Iterable<XmlElement> manifests = document.findElements('manifest');
@@ -232,7 +231,7 @@ class _Element extends _Entry {
 
   _Attribute? firstAttribute(String name) {
     for (final _Attribute child in children.whereType<_Attribute>()) {
-      if (child.key?.startsWith(name) == true) {
+      if (child.key?.startsWith(name) ?? false) {
         return child;
       }
     }
@@ -241,7 +240,7 @@ class _Element extends _Entry {
 
   _Element? firstElement(String name) {
     for (final _Element child in children.whereType<_Element>()) {
-      if (child.name?.startsWith(name) == true) {
+      if (child.name?.startsWith(name) ?? false) {
         return child;
       }
     }
@@ -249,7 +248,7 @@ class _Element extends _Entry {
   }
 
   Iterable<_Element> allElements(String name) {
-    return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) == true);
+    return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) ?? false);
   }
 }
 
@@ -332,7 +331,7 @@ class ApkManifestData {
       final _Attribute? enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters = activity.allElements('intent-filter');
       final bool isEnabledByDefault = enabled == null;
-      final bool isExplicitlyEnabled = enabled != null && enabled.value?.contains('0xffffffff') == true;
+      final bool isExplicitlyEnabled = enabled != null && (enabled.value?.contains('0xffffffff') ?? false);
       if (!(isEnabledByDefault || isExplicitlyEnabled)) {
         continue;
       }

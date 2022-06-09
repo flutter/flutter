@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../common.dart';
 import 'cocoon.dart';
 import 'devices.dart';
 import 'task_result.dart';
@@ -190,7 +189,7 @@ Future<TaskResult> runTask(
       .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!uri.isCompleted) {
-      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('(Observatory|Dart VM Service) listening on '));
+      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('(Observatory|The Dart VM service is) listening on '));
       if (serviceUri != null)
         uri.complete(serviceUri);
     }

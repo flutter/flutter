@@ -44,12 +44,11 @@ class ChipTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   const ChipTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -65,7 +64,7 @@ class ChipTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Spaceship extends StatelessWidget {
-  ///   const Spaceship({Key? key}) : super(key: key);
+  ///   const Spaceship({super.key});
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -99,7 +98,7 @@ class ChipTheme extends InheritedTheme {
   bool updateShouldNotify(ChipTheme oldWidget) => data != oldWidget.data;
 }
 
-/// Holds the color, shape, and text styles for a material design chip theme.
+/// Holds the color, shape, and text styles for a Material Design chip theme.
 ///
 /// Use this class to configure a [ChipTheme] widget, or to set the
 /// [ThemeData.chipTheme] for a [Theme] widget.
@@ -124,7 +123,7 @@ class ChipTheme extends InheritedTheme {
 ///
 /// ```dart
 /// class CarColor extends StatefulWidget {
-///   const CarColor({Key? key}) : super(key: key);
+///   const CarColor({super.key});
 ///
 ///   @override
 ///   State createState() => _CarColorState();
@@ -460,8 +459,9 @@ class ChipThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ChipThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
@@ -485,44 +485,46 @@ class ChipThemeData with Diagnosticable {
 
   // Special case because BorderSide.lerp() doesn't support null arguments.
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
-    if (b == null)
+    }
+    if (b == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
+    }
     return BorderSide.lerp(a, b, t);
   }
 
   // TODO(perclasson): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
   static OutlinedBorder? _lerpShapes(OutlinedBorder? a, OutlinedBorder? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ShapeBorder.lerp(a, b, t) as OutlinedBorder?;
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      deleteIconColor,
-      disabledColor,
-      selectedColor,
-      secondarySelectedColor,
-      shadowColor,
-      selectedShadowColor,
-      checkmarkColor,
-      labelPadding,
-      padding,
-      side,
-      shape,
-      labelStyle,
-      secondaryLabelStyle,
-      brightness,
-      elevation,
-      pressElevation,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    deleteIconColor,
+    disabledColor,
+    selectedColor,
+    secondarySelectedColor,
+    shadowColor,
+    selectedShadowColor,
+    checkmarkColor,
+    labelPadding,
+    padding,
+    side,
+    shape,
+    labelStyle,
+    secondaryLabelStyle,
+    brightness,
+    elevation,
+    pressElevation,
+  );
 
   @override
   bool operator ==(Object other) {

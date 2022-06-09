@@ -526,8 +526,8 @@ void main() {
                 position: location,
                 buttons: kSecondaryMouseButton,
                 pointer: 1,
-              )
-            ])
+              ),
+            ]),
         ],
         PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
           PointerUpEvent(
@@ -535,8 +535,8 @@ void main() {
             position: location,
             buttons: kSecondaryMouseButton,
             pointer: 1,
-          )
-        ])
+          ),
+        ]),
       ];
       final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
       expect(timeDiffs.length, records.length);
@@ -780,31 +780,6 @@ class FakeMatcher extends AsyncMatcher {
 
   @override
   Description describe(Description description) => description.add('--fake--');
-}
-
-class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest({Key? key}) : super(key: key);
-
-  @override
-  _SingleTickerTestState createState() => _SingleTickerTestState();
-}
-
-class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 100),
-    )  ;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
 }
 
 class _AlwaysAnimating extends StatefulWidget {

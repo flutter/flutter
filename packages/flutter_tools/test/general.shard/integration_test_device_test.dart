@@ -17,22 +17,9 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_devices.dart';
 import '../src/fake_vm_services.dart';
-
-final Map<String, Object> vm = <String, dynamic>{
-  'isolates': <dynamic>[
-    <String, dynamic>{
-      'type': '@Isolate',
-      'fixedId': true,
-      'id': 'isolates/242098474',
-      'name': 'main.dart:main()',
-      'number': 242098474,
-    },
-  ],
-};
 
 final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',

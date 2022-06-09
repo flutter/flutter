@@ -10,8 +10,7 @@ import 'dart:ui' show
   Size,
   Rect,
   TextAlign,
-  TextDirection,
-  hashValues;
+  TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
@@ -125,7 +124,7 @@ class TextInputType {
   ///
   /// Requests a default keyboard with ready access to the number keys.
   /// Additional options, such as decimal point and/or positive/negative
-  /// signs, can be requested using [new TextInputType.numberWithOptions].
+  /// signs, can be requested using [TextInputType.numberWithOptions].
   static const TextInputType number = TextInputType.numberWithOptions();
 
   /// Optimize for telephone numbers.
@@ -217,7 +216,7 @@ class TextInputType {
   }
 
   @override
-  int get hashCode => hashValues(index, signed, decimal);
+  int get hashCode => Object.hash(index, signed, decimal);
 }
 
 /// An action the user has requested the text input control to perform.
@@ -462,6 +461,7 @@ class TextInputConfiguration {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
+    this.enableInteractiveSelection = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
@@ -572,6 +572,15 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final bool enableSuggestions;
 
+  /// Whether a user can change its selection.
+  ///
+  /// This flag only affects iOS VoiceOver. On Android Talkback, the selection
+  /// change is sent through semantics actions and is directly disabled from
+  /// the widget side.
+  ///
+  /// Defaults to true. Cannot be null.
+  final bool enableInteractiveSelection;
+
   /// What text to display in the text input control's action button.
   final String? actionLabel;
 
@@ -619,6 +628,7 @@ class TextInputConfiguration {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     bool? enableSuggestions,
+    bool? enableInteractiveSelection,
     String? actionLabel,
     TextInputAction? inputAction,
     Brightness? keyboardAppearance,
@@ -635,6 +645,7 @@ class TextInputConfiguration {
       smartDashesType: smartDashesType ?? this.smartDashesType,
       smartQuotesType: smartQuotesType ?? this.smartQuotesType,
       enableSuggestions: enableSuggestions ?? this.enableSuggestions,
+      enableInteractiveSelection: enableInteractiveSelection ?? this.enableInteractiveSelection,
       inputAction: inputAction ?? this.inputAction,
       textCapitalization: textCapitalization ?? this.textCapitalization,
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
@@ -680,6 +691,7 @@ class TextInputConfiguration {
       'smartDashesType': smartDashesType.index.toString(),
       'smartQuotesType': smartQuotesType.index.toString(),
       'enableSuggestions': enableSuggestions,
+      'enableInteractiveSelection': enableInteractiveSelection,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
@@ -869,7 +881,7 @@ class TextEditingValue {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= replacementRange.start && originalIndex < replacementRange.end ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start;
+      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start; // ignore_clamp_double_lint
       return originalIndex + replacedLength - removedLength;
     }
 
@@ -904,8 +916,9 @@ class TextEditingValue {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is TextEditingValue
         && other.text == text
         && other.selection == selection
@@ -913,7 +926,7 @@ class TextEditingValue {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     text.hashCode,
     selection.hashCode,
     composing.hashCode,
@@ -965,17 +978,6 @@ enum SelectionChangedCause {
 mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
-
-  /// Indicates that the user has requested the delegate to replace its current
-  /// text editing state with [value].
-  ///
-  /// The new [value] is treated as user input and thus may subject to input
-  /// formatting.
-  @Deprecated(
-    'Use the userUpdateTextEditingValue instead. '
-    'This feature was deprecated after v1.26.0-17.2.pre.',
-  )
-  set textEditingValue(TextEditingValue value) {}
 
   /// Indicates that the user has requested the delegate to replace its current
   /// text editing state with [value].
@@ -1164,17 +1166,19 @@ class SelectionRect {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (runtimeType != other.runtimeType)
+    }
+    if (runtimeType != other.runtimeType) {
       return false;
+    }
     return other is SelectionRect
         && other.position == position
         && other.bounds   == bounds;
   }
 
   @override
-  int get hashCode => hashValues(position, bounds);
+  int get hashCode => Object.hash(position, bounds);
 
   @override
   String toString() => 'SelectionRect($position, $bounds)';
@@ -1196,16 +1200,23 @@ abstract class DeltaTextInputClient extends TextInputClient {
   /// to the client's editing state. A change is any mutation to the raw text
   /// value, or any updates to the selection and/or composing region.
   ///
-  /// Here is an example of what implementation of this method could look like:
   /// {@tool snippet}
+  /// This example shows what an implementation of this method could look like.
+  ///
+  /// ```dart
+  /// TextEditingValue? _localValue;
   /// @override
   /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-  ///   TextEditingValue newValue = _previousValue;
+  ///   if (_localValue == null) {
+  ///     return;
+  ///   }
+  ///   TextEditingValue newValue = _localValue!;
   ///   for (final TextEditingDelta delta in textEditingDeltas) {
   ///     newValue = delta.apply(newValue);
   ///   }
   ///   _localValue = newValue;
   /// }
+  /// ```
   /// {@end-tool}
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
@@ -1322,8 +1333,9 @@ class TextInputConnection {
   /// platform.
   void setComposingRect(Rect rect) {
     assert(rect != null);
-    if (rect == _cachedRect)
+    if (rect == _cachedRect) {
       return;
+    }
     _cachedRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setComposingTextRect(
@@ -1340,8 +1352,9 @@ class TextInputConnection {
   /// the accent selection menu.
   void setCaretRect(Rect rect) {
     assert(rect != null);
-    if (rect == _cachedCaretRect)
+    if (rect == _cachedCaretRect) {
       return;
+    }
     _cachedCaretRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setCaretRect(
@@ -1567,6 +1580,12 @@ class TextInput {
     TextInputAction.emergencyCall,
   ];
 
+  /// Ensure that a [TextInput] instance has been set up so that the platform
+  /// can handle messages on the text input method channel.
+  static void ensureInitialized() {
+    _instance; // ignore: unnecessary_statements
+  }
+
   /// Begin interacting with the text input control.
   ///
   /// Calling this function helps multiple clients coordinate about which one is
@@ -1648,8 +1667,9 @@ class TextInput {
       final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
       return _scribbleClients.keys.where((String elementIdentifier) {
         final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
-        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false))
+        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
           return false;
+        }
         final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
         return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
       }).map((String elementIdentifier) {
@@ -1663,8 +1683,9 @@ class TextInput {
       _scribbleInProgress = false;
       return;
     }
-    if (_currentConnection == null)
+    if (_currentConnection == null) {
       return;
+    }
 
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
@@ -1709,12 +1730,14 @@ class TextInput {
         // In debug builds we allow "-1" as a magical client ID that ignores
         // this verification step so that tests can always get through, even
         // when they are not mocking the engine side of text input.
-        if (client == -1)
+        if (client == -1) {
           debugAllowAnyway = true;
+        }
         return true;
       }());
-      if (!debugAllowAnyway)
+      if (!debugAllowAnyway) {
         return;
+      }
     }
 
     switch (method) {
@@ -1727,7 +1750,7 @@ class TextInput {
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
-        for (final dynamic encodedDelta in encoded['deltas']) {
+        for (final dynamic encodedDelta in encoded['deltas'] as List<dynamic>) {
           final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
           deltas.add(delta);
         }
@@ -1773,8 +1796,9 @@ class TextInput {
   bool _hidePending = false;
 
   void _scheduleHide() {
-    if (_hidePending)
+    if (_hidePending) {
       return;
+    }
     _hidePending = true;
 
     // Schedule a deferred task that hides the text input. If someone else
@@ -1782,8 +1806,9 @@ class TextInput {
     // nothing.
     scheduleMicrotask(() {
       _hidePending = false;
-      if (_currentConnection == null)
+      if (_currentConnection == null) {
         _channel.invokeMethod<void>('TextInput.hide');
+      }
     });
   }
 

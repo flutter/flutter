@@ -23,9 +23,11 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -46,13 +48,13 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
   group('run', () {
     FakeDeviceManager mockDeviceManager;
     FileSystem fileSystem;
-
-    setUpAll(() {
-      Cache.disableLocking();
-    });
 
     setUp(() {
       mockDeviceManager = FakeDeviceManager();
@@ -368,6 +370,42 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
+      testUsingContext('forwards --uninstall-only to DebuggingOptions', () async {
+        final RunCommand command = RunCommand();
+        final FakeDevice mockDevice = FakeDevice(
+          sdkNameAndVersion: 'iOS 13',
+        )..startAppSuccess = false;
+
+        mockDeviceManager
+          ..devices = <Device>[
+            mockDevice,
+          ]
+          ..targetDevices = <Device>[
+            mockDevice,
+          ];
+
+        // Causes swift to be detected in the analytics.
+        fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
+
+        await expectToolExitLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          '--uninstall-first',
+        ]), isNull);
+
+        final DebuggingOptions options = await command.createDebuggingOptions(false);
+        expect(options.uninstallFirst, isTrue);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => artifacts,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        DeviceManager: () => mockDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => usage,
+      });
+
+
       testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
@@ -394,6 +432,7 @@ void main() {
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'false',
+            'cd56': 'false',
           })
         )));
       }, overrides: <Type, Generator>{
@@ -403,6 +442,67 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => usage,
+      });
+
+      group('--machine', () {
+        testUsingContext('enables multidex by default', () async {
+          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+          final FakeDevice device = FakeDevice();
+          mockDeviceManager
+          ..devices = <Device>[device]
+          ..targetDevices = <Device>[device];
+
+          await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--machine',
+              '-d',
+              device.id,
+            ]),
+            throwsToolExit(),
+          );
+          expect(command.appDomain.multidexEnabled, isTrue);
+        }, overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => mockDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Usage: () => usage,
+          Stdio: () => FakeStdio(),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+        });
+
+        testUsingContext('can disable multidex with --no-multidex', () async {
+          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+          final FakeDevice device = FakeDevice();
+          mockDeviceManager
+          ..devices = <Device>[device]
+          ..targetDevices = <Device>[device];
+
+          await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--no-multidex',
+              '--machine',
+              '-d',
+              device.id,
+            ]),
+            throwsToolExit(),
+          );
+          expect(command.appDomain.multidexEnabled, isFalse);
+        }, overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => mockDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Usage: () => usage,
+          Stdio: () => FakeStdio(),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+        });
       });
     });
 
@@ -558,6 +658,35 @@ void main() {
     });
   });
 
+  group('terminal', () {
+    FakeAnsiTerminal fakeTerminal;
+
+    setUp(() {
+      fakeTerminal = FakeAnsiTerminal();
+    });
+
+    testUsingContext('Flutter run sets terminal singleCharMode to false on exit', () async {
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      await createTestCommandRunner(command).run(<String>[
+        'run',
+        '--no-pub',
+      ]);
+      // The sync completer where we initially set `terminal.singleCharMode` to
+      // `true` does not execute in unit tests, so explicitly check the
+      // `setSingleCharModeHistory` that the finally block ran, setting this
+      // back to `false`.
+      expect(fakeTerminal.setSingleCharModeHistory, contains(false));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => fakeTerminal,
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
   testUsingContext('Flutter run catches service has disappear errors and throws a tool exit', () async {
     final FakeResidentRunner residentRunner = FakeResidentRunner();
     residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
@@ -622,6 +751,44 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('flags propagate to debugging options', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+      '--start-paused',
+      '--disable-service-auth-codes',
+      '--use-test-fonts',
+      '--trace-skia',
+      '--trace-systrace',
+      '--verbose-system-logs',
+      '--null-assertions',
+      '--native-null-assertions',
+      '--enable-impeller',
+      '--trace-systrace',
+      '--enable-software-rendering',
+      '--skia-deterministic-rendering',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.startPaused, true);
+    expect(options.disableServiceAuthCodes, true);
+    expect(options.useTestFonts, true);
+    expect(options.traceSkia, true);
+    expect(options.traceSystrace, true);
+    expect(options.verboseSystemLogs, true);
+    expect(options.nullAssertions, true);
+    expect(options.nativeNullAssertions, true);
+    expect(options.traceSystrace, true);
+    expect(options.enableImpeller, true);
+    expect(options.enableSoftwareRendering, true);
+    expect(options.skiaDeterministicRendering, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('fails when "--web-launch-url" is not supported', () async {
     final RunCommand command = RunCommand();
     await expectLater(
@@ -671,20 +838,19 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   }
 
   @override
+  List<DeviceDiscovery> get deviceDiscoverers {
+    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    devices.forEach(discoverer.addDevice);
+    return <DeviceDiscovery>[discoverer];
+  }
+
+  @override
   Future<List<Device>> getAllConnectedDevices() async => devices;
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   String get adbPath => 'adb';
-}
-
-class TestRunCommand extends RunCommand {
-  @override
-  // ignore: must_call_super
-  Future<void> validateCommand() async {
-    devices = await globals.deviceManager.getDevices();
-  }
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -721,6 +887,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool supportsHotReload = false;
+
+  @override
+  bool get supportsHotRestart => true;
 
   @override
   bool get supportsFastStart => false;
@@ -840,4 +1009,59 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
     }
     return 0;
   }
+}
+
+class DaemonCapturingRunCommand extends RunCommand {
+  /*late*/ Daemon daemon;
+  /*late*/ CapturingAppDomain appDomain;
+
+  @override
+  Daemon createMachineDaemon() {
+    daemon = super.createMachineDaemon();
+    appDomain = daemon.appDomain = CapturingAppDomain(daemon);
+    daemon.registerDomain(appDomain);
+    return daemon;
+  }
+}
+
+class CapturingAppDomain extends AppDomain {
+  CapturingAppDomain(Daemon daemon) : super(daemon);
+
+  bool /*?*/ multidexEnabled;
+
+  @override
+  Future<AppInstance> startApp(
+    Device device,
+    String projectDirectory,
+    String target,
+    String route,
+    DebuggingOptions options,
+    bool enableHotReload, {
+    File applicationBinary,
+    @required bool trackWidgetCreation,
+    String projectRootPath,
+    String packagesFilePath,
+    String dillOutputPath,
+    bool ipv6 = false,
+    bool multidexEnabled = false,
+    String isolateFilter,
+    bool machine = true,
+  }) async {
+    this.multidexEnabled = multidexEnabled;
+    throwToolExit('');
+  }
+}
+
+class FakeAnsiTerminal extends Fake implements AnsiTerminal {
+  @override
+  bool usesTerminalUi = false;
+
+  /// A list of all the calls to the [singleCharMode] setter.
+  List<bool> setSingleCharModeHistory = <bool>[];
+
+  @override
+  set singleCharMode(bool value) => setSingleCharModeHistory.add(value);
+
+  @override
+  bool get singleCharMode => setSingleCharModeHistory.last;
 }

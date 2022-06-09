@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -31,7 +33,7 @@ const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 /// (see https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart)
 const int _kPubExitCodeUnavailable = 69;
 
-typedef MessageFilter = String Function(String message);
+typedef MessageFilter = String? Function(String message);
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
 /// environment variable and allows understanding the type of requests made to
@@ -311,7 +313,7 @@ class _DefaultPub implements Pub {
 
     String lastPubMessage = 'no message';
     bool versionSolvingFailed = false;
-    String filterWrapper(String line) {
+    String? filterWrapper(String line) {
       lastPubMessage = line;
       if (line.contains('version solving failed')) {
         versionSolvingFailed = true;

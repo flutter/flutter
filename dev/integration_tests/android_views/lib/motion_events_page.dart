@@ -44,7 +44,7 @@ class FutureDataHandler {
 FutureDataHandler driverDataHandler = FutureDataHandler();
 
 class MotionEventsBody extends StatefulWidget {
-  const MotionEventsBody({Key? key}) : super(key: key);
+  const MotionEventsBody({super.key});
 
   @override
   State createState() => MotionEventsBodyState();
@@ -171,7 +171,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   }
 
   Future<void> saveRecordedEvents(ByteData data, BuildContext context) async {
-    if (await channel.invokeMethod<bool>('getStoragePermission') == true) {
+    if (await channel.invokeMethod<bool>('getStoragePermission') ?? false) {
       showMessage(
           context, 'External storage permissions are required to save events');
       return;
@@ -189,7 +189,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       if (!mounted) {
         return;
       }
-      showMessage(context, 'Failed saving ${e.toString()}');
+      showMessage(context, 'Failed saving $e');
     }
   }
 
@@ -259,7 +259,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 }
 
 class TouchEventDiff extends StatelessWidget {
-  const TouchEventDiff(this.originalEvent, this.synthesizedEvent, {Key? key}) : super(key: key);
+  const TouchEventDiff(this.originalEvent, this.synthesizedEvent, {super.key});
 
   final Map<String, dynamic> originalEvent;
   final Map<String, dynamic> synthesizedEvent;
@@ -309,6 +309,6 @@ class TouchEventDiff extends StatelessWidget {
     for (int i = 0; i < coords.length; i++) {
       buffer.write('p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ');
     }
-    print(buffer.toString());
+    print(buffer);
   }
 }

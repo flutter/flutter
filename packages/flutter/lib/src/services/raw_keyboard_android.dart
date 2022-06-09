@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
@@ -300,10 +298,12 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataAndroid
         && other.flags == flags
         && other.codePoint == codePoint
@@ -314,7 +314,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     flags,
     codePoint,
     plainCodePoint,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
@@ -170,10 +168,12 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataFuchsia
         && other.hidUsage == hidUsage
         && other.codePoint == codePoint
@@ -181,7 +181,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     hidUsage,
     codePoint,
     modifiers,

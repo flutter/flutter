@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
@@ -100,8 +98,9 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     // Look to see if the keyCode is a key based on location. Typically they are
     // numpad keys (versus main area keys) and left/right modifiers.
     final LogicalKeyboardKey? maybeLocationKey = kWebLocationMap[key]?[location];
-    if (maybeLocationKey != null)
+    if (maybeLocationKey != null) {
       return maybeLocationKey;
+    }
 
     // Look to see if the [code] is one we know about and have a mapping for.
     final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];
@@ -110,8 +109,9 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     }
 
     final bool isPrintable = key.length == 1;
-    if (isPrintable)
+    if (isPrintable) {
       return LogicalKeyboardKey(key.toLowerCase().codeUnitAt(0));
+    }
 
     // This is a non-printable key that we don't know about, so we mint a new
     // key from `code`. Don't mint with `key`, because the `key` will always be
@@ -168,10 +168,12 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataWeb
         && other.code == code
         && other.key == key
@@ -181,7 +183,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     code,
     key,
     location,

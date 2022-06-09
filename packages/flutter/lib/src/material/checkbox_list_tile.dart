@@ -6,10 +6,12 @@ import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
+// bool? _throwShotAway = false;
 // void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
@@ -120,7 +122,7 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// The value of [tristate] must not be null.
   const CheckboxListTile({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -149,8 +151,7 @@ class CheckboxListTile extends StatelessWidget {
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
        assert(controlAffinity != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// Whether this checkbox is checked.
   final bool? value;
@@ -163,6 +164,8 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// If null, the checkbox will be displayed as disabled.
   ///
+  /// {@tool snippet}
+  ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
@@ -170,14 +173,15 @@ class CheckboxListTile extends StatelessWidget {
   /// ```dart
   /// CheckboxListTile(
   ///   value: _throwShotAway,
-  ///   onChanged: (bool newValue) {
+  ///   onChanged: (bool? newValue) {
   ///     setState(() {
   ///       _throwShotAway = newValue;
   ///     });
   ///   },
-  ///   title: Text('Throw away your shot'),
+  ///   title: const Text('Throw away your shot'),
   /// )
   /// ```
+  /// {@end-tool}
   final ValueChanged<bool?>? onChanged;
 
   /// The color to use when this checkbox is checked.

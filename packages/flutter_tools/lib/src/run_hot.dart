@@ -11,7 +11,6 @@ import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -229,6 +228,7 @@ class HotRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
+    bool needsFullRestart = true,
   }) async {
     _didAttach = true;
     try {
@@ -277,7 +277,7 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
-    final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
+    final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: needsFullRestart);
     _addBenchmarkData(
       'hotReloadInitialDevFSSyncMilliseconds',
       initialUpdateDevFSsTimer.elapsed.inMilliseconds,
@@ -437,6 +437,7 @@ class HotRunner extends ResidentRunner {
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
       enableDevTools: enableDevTools,
+      needsFullRestart: false,
     );
   }
 
@@ -614,7 +615,7 @@ class HotRunner extends ResidentRunner {
               device.vmService.service.setIsolatePauseMode(isolate.id,
                 exceptionPauseMode: vm_service.ExceptionPauseMode.kNone),
               for (final vm_service.Breakpoint breakpoint in isolate.breakpoints)
-                device.vmService.service.removeBreakpoint(isolate.id, breakpoint.id)
+                device.vmService.service.removeBreakpoint(isolate.id, breakpoint.id),
             ];
             await Future.wait(breakpointAndExceptionRemoval);
             await device.vmService.service.resume(view.uiIsolate.id);
@@ -727,7 +728,14 @@ class HotRunner extends ResidentRunner {
     if (result.isOk) {
       final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
       if (!silent) {
-        globals.printStatus('${result.message} in $elapsed.');
+        if (result.extraTimings.isNotEmpty) {
+          final String extraTimingsString = result.extraTimings
+            .map((OperationResultExtraTiming e) => '${e.description}: ${e.timeInMs} ms')
+            .join(', ');
+          globals.printStatus('${result.message} in $elapsed ($extraTimingsString).');
+        } else {
+          globals.printStatus('${result.message} in $elapsed.');
+        }
       }
     }
     return result;
@@ -899,6 +907,10 @@ class HotRunner extends ResidentRunner {
     if (!updatedDevFS.success) {
       return OperationResult(1, 'DevFS synchronization failed');
     }
+
+    final List<OperationResultExtraTiming> extraTimings = <OperationResultExtraTiming>[];
+    extraTimings.add(OperationResultExtraTiming('compile', updatedDevFS.compileDuration.inMilliseconds));
+
     String reloadMessage = 'Reloaded 0 libraries';
     final Stopwatch reloadVMTimer = _stopwatchFactory.createStopwatch('reloadSources:vm')..start();
     final Map<String, Object> firstReloadDetails = <String, Object>{};
@@ -921,6 +933,7 @@ class HotRunner extends ResidentRunner {
       _addBenchmarkData('hotReloadVMReloadMilliseconds', 0);
     }
     reloadVMTimer.stop();
+    extraTimings.add(OperationResultExtraTiming('reload', reloadVMTimer.elapsedMilliseconds));
 
     await evictDirtyAssets();
 
@@ -940,6 +953,7 @@ class HotRunner extends ResidentRunner {
     // Record time it took for Flutter to reassemble the application.
     reassembleTimer.stop();
     _addBenchmarkData('hotReloadFlutterReassembleMilliseconds', reassembleTimer.elapsed.inMilliseconds);
+    extraTimings.add(OperationResultExtraTiming('reassemble', reassembleTimer.elapsedMilliseconds));
 
     reloadTimer.stop();
     final Duration reloadDuration = reloadTimer.elapsed;
@@ -986,6 +1000,7 @@ class HotRunner extends ResidentRunner {
     return OperationResult(
       reassembleResult.failedReassemble ? 1 : OperationResult.ok.code,
       reloadMessage,
+      extraTimings: extraTimings
     );
   }
 
@@ -1186,7 +1201,7 @@ Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
         isolateRef.id,
         pause: pause,
         rootLibUri: deviceEntryUri,
-      )
+      ),
   ];
 }
 

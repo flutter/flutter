@@ -100,6 +100,8 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'debug',
+        kBuildName: '2.0.0',
+        kBuildNumber: '22',
       },
       inputs: <String, String>{
         kBundleSkSLPath: 'bundle.sksl',
@@ -121,8 +123,8 @@ void main() {
         'platform': 'ios',
         'data': <String, Object>{
           'A': 'B',
-        }
-      }
+        },
+      },
     ));
 
     await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
@@ -133,6 +135,9 @@ void main() {
     expect(output.childFile('kernel_blob.bin'), exists);
     expect(output.childFile('AssetManifest.json'), exists);
     expect(output.childFile('version.json'), exists);
+    final String versionFile = output.childFile('version.json').readAsStringSync();
+    expect(versionFile, contains('"version":"2.0.0"'));
+    expect(versionFile, contains('"build_number":"22"'));
     // SkSL
     expect(output.childFile('io.flutter.shaders.json'), exists);
     expect(output.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
