@@ -37,22 +37,31 @@ const int _kPubExitCodeUnavailable = 69;
 typedef MessageFilter = String? Function(String message);
 
 /// targetPath is the directory in which the content of the extraPath will be moved in
-void joinCaches(FileSystem fileSystem, String targetPath, String extraPath) {
+void joinCaches({
+  required FileSystem fileSystem,
+  required String targetPath,
+  required String extraPath,
+}) {
   final Directory targetDirectory = fileSystem.directory(targetPath);
   final Directory extraDirectory = fileSystem.directory(extraPath);
 
   for (final FileSystemEntity entity in extraDirectory.listSync()) {
-    final File file = fileSystem.file(entity.path);
-    if (file.existsSync()) {
-      targetDirectory.childFile(entity.basename).writeAsBytesSync(file.readAsBytesSync());
+    final String newPath = fileSystem.path.join(targetDirectory.path, entity.basename);
+    if (entity is File) {
+      final File file = fileSystem.file(entity.path);
+      file.renameSync(newPath);
     }
-    else if(fileSystem.directory(entity.path).existsSync()) {
-      final Directory newDirectory = targetDirectory.childDirectory(entity.basename);
-      newDirectory.createSync();
-      joinCaches(fileSystem, newDirectory.path, fileSystem.directory(entity.path).path);
+    else if (entity is Directory) {
+      final Directory currentDirectory = fileSystem.directory(entity.path);
+      try {
+        currentDirectory.renameSync(newPath);
+      }
+      on FileSystemException { // directory already exists
+        joinCaches(fileSystem: fileSystem, targetPath: newPath, extraPath: currentDirectory.path);
+      }
     }
   }
-  extraDirectory.delete(recursive: true);
+  extraDirectory.deleteSync();
 }
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
@@ -520,12 +529,21 @@ class _DefaultPub implements Pub {
     }
 
     final String cachePath = _fileSystem.path.join(Cache.flutterRoot!, '.pub-cache');
-    if (_fileSystem.directory(cachePath).existsSync()) {
-      joinCaches(_fileSystem, '${_platform.environment['Home']}/.pub_cache', cachePath);
-      //_logger.printTrace('Using $cachePath for the pub cache.');
-      //return cachePath;
+    final String homeDirectory;
+    if (_platform.isWindows) {
+      homeDirectory = _platform.environment['APPDATA'] ?? '';
+    }
+    else {
+      homeDirectory = _platform.environment['Home'] ?? '';
     }
 
+    if (_fileSystem.directory(cachePath).existsSync()) {
+      joinCaches(
+          fileSystem: _fileSystem,
+          targetPath: _fileSystem.path.join(homeDirectory, '.pub-cache'),
+          extraPath: cachePath
+      );
+    }
     // Use pub's default location by returning null.
     return null;
   }

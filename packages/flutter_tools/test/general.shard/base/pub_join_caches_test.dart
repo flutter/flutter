@@ -16,11 +16,17 @@ void main() {
     final Directory extra = fileSystem.currentDirectory.childDirectory('extra');
     target.createSync();
     target.childFile('first.file').createSync();
+    target.childDirectory('dir').createSync();
+
     extra.createSync();
     extra.childFile('second.file').writeAsBytesSync(<int>[0]);
     extra.childDirectory('dir').createSync();
     extra.childDirectory('dir').childFile('third.file').writeAsBytesSync(<int>[0]);
-    joinCaches(fileSystem, target.path, extra.path);
+    joinCaches(
+        fileSystem: fileSystem,
+        targetPath: target.path,
+        extraPath: extra.path
+    );
 
     expect(target.childFile('second.file').existsSync(), true);
     expect(target.childDirectory('dir').childFile('third.file').existsSync(), true);
