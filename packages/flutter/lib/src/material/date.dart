@@ -260,7 +260,7 @@ class DateTimeRange {
 
   @override
   String toString() => '$start - $end';
-}
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 
 /// Encapsulates a possible start and end [DateTime] that represent a range of dates.
 ///
@@ -273,7 +273,10 @@ class DateTimeRangeValue {
   DateTimeRangeValue({
     DateTime? start,
     DateTime? end,
-  })  : start = start != null ? DateUtils.dateOnly(start) : null,
+  })  : assert((start == null && end == null) ||
+            (start != null && end == null) ||
+            (start != null && !end!.isBefore(start))),
+        start = start != null ? DateUtils.dateOnly(start) : null,
         end = end != null ? DateUtils.dateOnly(end) : null;
 
   /// Creates an empty date range where start and end are null.

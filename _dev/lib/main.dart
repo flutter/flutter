@@ -40,8 +40,14 @@ class MyWidget extends StatelessWidget {
         onPressed: () => showDateRangePicker(
             context: context,
             initialEntryMode: DatePickerEntryMode.input,
-            firstDate: DateTime.now().subtract(const Duration(days: 2)),
-            lastDate: DateTime.now().add(const Duration(days: 2))),
+          firstDate: DateTime(2015),
+          lastDate: DateTime(2016, DateTime.december, 31),
+          currentDate: null,
+          initialDateRange: DateTimeRange(
+            start: DateTime(2016, DateTime.january, 15),
+            end: DateTime(2016, DateTime.january, 25),
+          ),
+        ),
       ),
     );
   }
