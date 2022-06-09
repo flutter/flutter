@@ -2852,6 +2852,63 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
+testUsingContext('create an FFI plugin, then run ffigen', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      projectDir.path,
+    ]);
+    expect(projectDir.childFile('ffigen.yaml'), exists);
+    final File generatedBindings = projectDir
+        .childDirectory('lib')
+        .childFile('${projectDir.basename}_bindings_generated.dart');
+    expect(generatedBindings, exists);
+
+    final String generatedBindingsFromTemplate =
+        await generatedBindings.readAsString();
+
+    await generatedBindings.delete();
+
+    final ProcessResult pubGetResult = await Process.run(
+      'flutter',
+      <String>[
+        'pub',
+        'get',
+      ],
+      workingDirectory: projectDir.path,
+    );
+    printOnFailure('Results of running ffigen:');
+    printOnFailure(pubGetResult.stdout.toString());
+    printOnFailure(pubGetResult.stderr.toString());
+    expect(pubGetResult.exitCode, 0);
+
+    final ProcessResult ffigenResult = await Process.run(
+      'flutter',
+      <String>[
+        'pub',
+        'run',
+        'ffigen',
+        '--config',
+        'ffigen.yaml',
+      ],
+      workingDirectory: projectDir.path,
+    );
+    printOnFailure('Results of running ffigen:');
+    printOnFailure(ffigenResult.stdout.toString());
+    printOnFailure(ffigenResult.stderr.toString());
+    expect(ffigenResult.exitCode, 0);
+
+    final String generatedBindingsFromFfigen =
+        await generatedBindings.readAsString();
+
+    expect(generatedBindingsFromFfigen, generatedBindingsFromTemplate);
+  });
+
   testUsingContext('FFI plugins error android language', () async {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
