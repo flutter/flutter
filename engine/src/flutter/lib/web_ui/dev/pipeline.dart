@@ -201,6 +201,12 @@ class PipelineWatcher {
     io.stdin.echoMode = false;
     io.stdin.lineMode = false;
 
+    // Reset these settings when the felt command is done.
+    cleanupCallbacks.add(() async {
+      io.stdin.echoMode = true;
+      io.stdin.lineMode = true;
+    });
+
     await io.stdin.firstWhere((List<int> event) {
       const int qKeyCode = 113;
       final bool qEntered = event.isNotEmpty && event.first == qKeyCode;
