@@ -15,7 +15,6 @@ import io.flutter.embedding.engine.systemchannels.SpellCheckChannel;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -36,7 +35,6 @@ public class SpellCheckPlugin
   private SpellCheckerSession mSpellCheckerSession;
 
   @VisibleForTesting MethodChannel.Result pendingResult;
-  @VisibleForTesting String pendingResultText;
 
   // The maximum number of suggestions that the Android spell check service is allowed to provide
   // per word. Same number that is used by default for Android's TextViews.
@@ -80,7 +78,6 @@ public class SpellCheckPlugin
     }
 
     pendingResult = result;
-    pendingResultText = text;
 
     performSpellCheck(locale, text);
   }
@@ -115,7 +112,7 @@ public class SpellCheckPlugin
   @Override
   public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results) {
     if (results.length == 0) {
-      pendingResult.success(new ArrayList<>(Arrays.asList(pendingResultText, "")));
+      pendingResult.success(new ArrayList<String>());
       pendingResult = null;
       return;
     }
@@ -146,7 +143,6 @@ public class SpellCheckPlugin
           spellCheckerSuggestionSpan.substring(0, spellCheckerSuggestionSpan.length() - 1));
     }
 
-    spellCheckerSuggestionSpans.add(0, pendingResultText);
     pendingResult.success(spellCheckerSuggestionSpans);
     pendingResult = null;
   }

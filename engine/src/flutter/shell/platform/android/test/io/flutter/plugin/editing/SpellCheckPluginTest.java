@@ -182,11 +182,10 @@ public class SpellCheckPluginTest {
         spy(new SpellCheckPlugin(fakeTextServicesManager, fakeSpellCheckChannel));
     MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     spellCheckPlugin.pendingResult = mockResult;
-    spellCheckPlugin.pendingResultText = "Hello, world!";
 
     spellCheckPlugin.onGetSentenceSuggestions(new SentenceSuggestionsInfo[] {});
 
-    verify(mockResult).success(new ArrayList<String>(Arrays.asList("Hello, world!", "")));
+    verify(mockResult).success(new ArrayList<String>());
   }
 
   @Test
@@ -197,7 +196,6 @@ public class SpellCheckPluginTest {
         spy(new SpellCheckPlugin(fakeTextServicesManager, fakeSpellCheckChannel));
     MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     spellCheckPlugin.pendingResult = mockResult;
-    spellCheckPlugin.pendingResultText = "Hello, wrold!";
 
     spellCheckPlugin.onGetSentenceSuggestions(
         new SentenceSuggestionsInfo[] {
@@ -211,7 +209,6 @@ public class SpellCheckPluginTest {
               new int[] {5})
         });
 
-    verify(mockResult)
-        .success(new ArrayList<String>(Arrays.asList("Hello, wrold!", "7.11.world\nword\nold")));
+    verify(mockResult).success(new ArrayList<String>(Arrays.asList("7.11.world\nword\nold")));
   }
 }
