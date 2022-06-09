@@ -2777,20 +2777,17 @@ class _InputDateRangePicker extends StatefulWidget {
 class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   late String _startInputText;
   late String _endInputText;
-  DateTime? _startDate;
-  DateTime? _endDate;
   late TextEditingController _startController;
   late TextEditingController _endController;
   String? _startErrorText;
   String? _endErrorText;
   bool _autoSelected = false;
+  DateRangeController get _controller => widget.controller;
 
   @override
   void initState() {
     super.initState();
-    _startDate = widget.initialStartDate;
     _startController = TextEditingController();
-    _endDate = widget.initialEndDate;
     _endController = TextEditingController();
   }
 
@@ -2806,15 +2803,15 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     super.didChangeDependencies();
     final MaterialLocalizations localizations =
         MaterialLocalizations.of(context);
-    if (_startDate != null) {
-      _startInputText = localizations.formatCompactDate(_startDate!);
+    if (_controller.start != null) {
+      _startInputText = localizations.formatCompactDate(_controller.start!);
       final bool selectText = widget.autofocus && !_autoSelected;
       _updateController(_startController, _startInputText, selectText);
       _autoSelected = selectText;
     }
 
-    if (_endDate != null) {
-      _endInputText = localizations.formatCompactDate(_endDate!);
+    if (_controller.end != null) {
+      _endInputText = localizations.formatCompactDate(_controller.end!);
       _updateController(_endController, _endInputText, false);
     }
   }
@@ -2826,14 +2823,8 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   /// return false and display an appropriate error message under one of the
   /// text fields.
   bool validate() {
-    String? startError = _validateDate(_startDate);
-    final String? endError = _validateDate(_endDate);
-    if (startError == null && endError == null) {
-      if (_startDate!.isAfter(_endDate!)) {
-        startError = widget.errorInvalidRangeText ??
-            MaterialLocalizations.of(context).invalidDateRangeLabel;
-      }
-    }
+    final String? startError = _validateDate(_controller.start);
+    final String? endError = _validateDate(_controller.end);
     setState(() {
       _startErrorText = startError;
       _endErrorText = endError;
@@ -2875,8 +2866,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   void _handleStartChanged(String text) {
     setState(() {
       _startInputText = text;
-      _startDate = _parseDate(text);
-      widget.onStartDateChanged?.call(_startDate);
+      _controller.start = _parseDate(text);
     });
     if (widget.autovalidate) {
       validate();
@@ -2886,8 +2876,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   void _handleEndChanged(String text) {
     setState(() {
       _endInputText = text;
-      _endDate = _parseDate(text);
-      widget.onEndDateChanged?.call(_endDate);
+      _controller.end = _parseDate(text);
     });
     if (widget.autovalidate) {
       validate();
