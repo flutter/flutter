@@ -29,7 +29,39 @@ void main() {
     );
 
     expect(target.childFile('second.file').existsSync(), true);
-    expect(target.childDirectory('dir').childFile('third.file').existsSync(), true);
-    expect(extra.existsSync(), false);
+    expect(target.childDirectory('dir').childFile('third.file').existsSync(), false);
+    expect(extra.childDirectory('dir').childFile('third.file').existsSync(), true);
+  });
+
+  testWithoutContext('needs to join cache', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem();
+    FakePub fakePub = FakePub(fileSystem);
+    final Directory local = fileSystem.currentDirectory.childDirectory('local');
+    final Directory global = fileSystem.currentDirectory.childDirectory('global');
+
+    for (final Directory directory in <Directory>[local, global]) {
+      directory.createSync();
+      Directory pubCache = directory.childDirectory('.pub-cache');
+      pubCache.createSync();
+      pubCache.childDirectory('hosted').createSync();
+      pubCache.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
+    }
+    final bool pass = needsToJoinCache(
+        fileSystem: fileSystem,
+        localCachePath: local.path,
+        globalCachePath: global.path
+    );
+    expect(pass, true);
+
+    local.childDirectory('.pub-cache').childDirectory('hosted').deleteSync(recursive: true);
+    expect(
+      needsToJoinCache(
+          fileSystem: fileSystem,
+          localCachePath: local.path,
+          globalCachePath: global.path
+      ),
+      false
+    );
+
   });
 }

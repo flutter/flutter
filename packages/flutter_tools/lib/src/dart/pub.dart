@@ -48,19 +48,43 @@ void joinCaches({
     final String newPath = fileSystem.path.join(targetDirectory.path, entity.basename);
     if (entity is File) {
       final File file = fileSystem.file(entity.path);
-      file.renameSync(newPath);
+      file.copySync(newPath);
+      file.deleteSync(recursive: true);
     }
     else if (entity is Directory) {
       final Directory currentDirectory = fileSystem.directory(entity.path);
-      try {
-        currentDirectory.renameSync(newPath);
-      }
-      on FileSystemException { // directory already exists
-        joinCaches(fileSystem: fileSystem, targetPath: newPath, extraPath: currentDirectory.path);
+      if (!currentDirectory.existsSync()) {
+        final Directory newDirectory = targetDirectory.childDirectory(entity.basename);
+        newDirectory.createSync();
+        joinCaches(
+            fileSystem: fileSystem,
+            targetPath: newDirectory.path,
+            extraPath: currentDirectory.path
+        );
       }
     }
   }
-  extraDirectory.deleteSync();
+}
+
+/// Valid pubCache should look like this ./localCachePath/.pub-cache/hosted/pub.dartlang.org
+/// In order to join both cache both local and global should should be present in the users environment
+bool needsToJoinCache({
+  required FileSystem fileSystem,
+  required String localCachePath,
+  required String globalCachePath
+}) {
+  final Directory globalDirectory = fileSystem.directory(fileSystem.path.join(globalCachePath, '.pub-cache'));
+  final Directory localDirectory = fileSystem.directory(fileSystem.path.join(localCachePath, '.pub-cache'));
+
+  if (globalDirectory.existsSync() && localDirectory.existsSync()) {
+    final Directory hostedGlobal = globalDirectory.childDirectory('hosted');
+    final Directory hostedLocal = localDirectory.childDirectory('hosted');
+    if (hostedGlobal.existsSync() && hostedLocal.existsSync()) {
+      return hostedGlobal.childDirectory('pub.dartlang.org').existsSync()
+          && hostedLocal.childDirectory('pub.dartlang.org').existsSync();
+    }
+  }
+  return false;
 }
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
@@ -522,12 +546,16 @@ class _DefaultPub implements Pub {
     return values.join(':');
   }
 
-  String? _getRootPubCacheIfAvailable() {
+  /// There is 3 ways to get the cache path
+  /// 1) Provide the _kPubCacheEnvironmentKey.
+  /// 2) localPath (flutterRoot) but not globalPath ($HOME) .pubCache in which case we use the available (and vice versa).
+  /// 3) If both local and global are available joinCaches is called and local deleted
+  String? _getLocalPubCacheIfAvailable() {
     if (_platform.environment.containsKey(_kPubCacheEnvironmentKey)) {
       return _platform.environment[_kPubCacheEnvironmentKey];
     }
 
-    final String cachePath = _fileSystem.path.join(Cache.flutterRoot!, '.pub-cache');
+    final String localCachePath = _fileSystem.path.join(Cache.flutterRoot!, '.pub-cache');
     final String homeDirectory;
     if (_platform.isWindows) {
       homeDirectory = _platform.environment['APPDATA'] ?? '';
@@ -536,12 +564,20 @@ class _DefaultPub implements Pub {
       homeDirectory = _platform.environment['Home'] ?? '';
     }
 
-    if (_fileSystem.directory(cachePath).existsSync()) {
+   final Directory globalDirectory = _fileSystem.directory(_fileSystem.path.join(homeDirectory, '.pub-cache'));
+
+    if (needsToJoinCache(
+        fileSystem: _fileSystem,
+        localCachePath: localCachePath,
+        globalCachePath: globalDirectory.path
+    )) {
+      final Directory localDirectory = _fileSystem.directory(localCachePath);
       joinCaches(
           fileSystem: _fileSystem,
-          targetPath: _fileSystem.path.join(homeDirectory, '.pub-cache'),
-          extraPath: cachePath
+          targetPath: globalDirectory.path,
+          extraPath: localDirectory.path
       );
+      localDirectory.deleteSync(recursive: true);
     }
     // Use pub's default location by returning null.
     return null;
@@ -556,7 +592,7 @@ class _DefaultPub implements Pub {
       'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot!,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
     };
-    final String? pubCache = _getRootPubCacheIfAvailable();
+    final String? pubCache = _getLocalPubCacheIfAvailable();
     if (pubCache != null) {
       environment[_kPubCacheEnvironmentKey] = pubCache;
     }
