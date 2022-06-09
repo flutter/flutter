@@ -9,6 +9,9 @@ android {
         warningsAsErrors true
         checkTestSources true
         textOutput 'stdout'
+        htmlReport false
+        xmlReport true
+        xmlOutput file("${rootProject.buildDir}/reports/lint-results.xml")
         // UnpackedNativeCode can break stack unwinding - see b/193408481
         // NewerVersionAvailable and GradleDependency need to be taken care of
         // by a roller rather than as part of CI.
