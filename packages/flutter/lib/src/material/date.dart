@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
 import 'material_localizations.dart';
@@ -30,17 +32,17 @@ class DateUtils {
   /// Returns true if the two [DateTime] objects have the same day, month, and
   /// year, or are both null.
   static bool isSameDay(DateTime? dateA, DateTime? dateB) {
-    return
-      dateA?.year == dateB?.year &&
-      dateA?.month == dateB?.month &&
-      dateA?.day == dateB?.day;
+    return 
+        dateA?.year == dateB?.year &&
+        dateA?.month == dateB?.month &&
+        dateA?.day == dateB?.day;
   }
 
   /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.
   static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
-    return
-      dateA?.year == dateB?.year &&
+    return 
+      dateA?.year == dateB?.year && 
       dateA?.month == dateB?.month;
   }
 
@@ -215,8 +217,8 @@ class DateTimeRange {
     required this.start,
     required this.end,
   }) : assert(start != null),
-       assert(end != null),
-       assert(!start.isAfter(end));
+        assert(end != null),
+        assert(!start.isAfter(end));
 
   /// The start of the range of dates.
   final DateTime start;
@@ -234,8 +236,8 @@ class DateTimeRange {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DateTimeRange
-      && other.start == start
+    return other is DateTimeRange 
+      && other.start == start 
       && other.end == end;
   }
 
@@ -244,4 +246,80 @@ class DateTimeRange {
 
   @override
   String toString() => '$start - $end';
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+
+/// Encapsulates a possible start and end [DateTime] that represent a range of dates.
+///
+/// The range may include the [start] and [end] dates. The [start] and [end] dates
+/// may be equal to indicate a date range of a single day.
+/// The [DateTimeRangeValue] is valid if [start] is not after [end]
+@immutable
+class DateTimeRangeValue {
+  /// Creates a date range for the given start and end [DateTime].
+  DateTimeRangeValue({
+    DateTime? start,
+    DateTime? end,
+  })  : assert((start == null && end == null) ||
+            (start != null && end == null) ||
+            (start != null && !end!.isBefore(start))),
+        start = start != null ? DateUtils.dateOnly(start) : null,
+        end = end != null ? DateUtils.dateOnly(end) : null;
+
+  /// Creates an empty date range where start and end are null.
+  const DateTimeRangeValue.empty()
+      : start = null,
+        end = null;
+
+  /// The start of the range of dates.
+  final DateTime? start;
+
+  /// The end of the range of dates.
+  final DateTime? end;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is DateTimeRange && other.start == start && other.end == end;
+  }
+
+  @override
+  int get hashCode => Object.hash(start, end);
+
+  @override
+  String toString() => 'DateRangeValue($start - $end)';
+
+  DateTimeRangeValue copyWith({
+    DateTime? start,
+    DateTime? end,
+  }) {
+    return DateTimeRangeValue(
+      start: start != null ? DateUtils.dateOnly(start) : this.start,
+      end: end != null ? DateUtils.dateOnly(end) : this.end,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'start': start?.millisecondsSinceEpoch,
+      'end': end?.millisecondsSinceEpoch,
+    };
+  }
+
+  factory DateTimeRangeValue.fromMap(Map<String, dynamic> map) {
+    return DateTimeRangeValue(
+      start: map['start'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['start'] as int)
+          : null,
+      end: map['end'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['end'] as int)
+          : null,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory DateTimeRangeValue.fromJson(String source) =>
+      DateTimeRangeValue.fromMap(json.decode(source) as Map<String, dynamic>);
 }
