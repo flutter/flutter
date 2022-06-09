@@ -233,16 +233,19 @@ template("_impellerc") {
 
 template("impellerc") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
-  assert(defined(invoker.sl_file_extension),
-         "The extension of the SL file must be specified (metal, glsl, etc..).")
   assert(defined(invoker.shader_target_flag),
          "The flag to impellerc for target selection must be specified.")
+
+  flutter_spirv = invoker.shader_target_flag == "--flutter-spirv"
+  if (!flutter_spirv) {
+    assert(
+        defined(invoker.sl_file_extension),
+        "The extension of the SL file must be specified (metal, glsl, etc..).")
+  }
 
   # Optional: invoker.defines specifies a list of valueless macro definitions.
   # Optional: invoker.intermediates_subdir specifies the subdirectory in which
   #           to put intermediates.
-
-  sl_file_extension = invoker.sl_file_extension
 
   _impellerc(target_name) {
     sources = invoker.shaders
@@ -255,43 +258,53 @@ template("impellerc") {
 
     shader_target_flag = invoker.shader_target_flag
 
-    sl_intermediate = "$generated_dir/{{source_file_part}}.$sl_file_extension"
     spirv_intermediate = "$generated_dir/{{source_file_part}}.spirv"
-    reflection_json_intermediate = "$generated_dir/{{source_file_part}}.json"
-    reflection_header_intermediate = "$generated_dir/{{source_file_part}}.h"
-    reflection_cc_intermediate = "$generated_dir/{{source_file_part}}.cc"
-
-    outputs = [
-      sl_intermediate,
-      reflection_header_intermediate,
-      reflection_cc_intermediate,
-    ]
+    spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
 
     depfile_path = "$generated_dir/{{source_file_part}}.d"
-
-    sl_intermediate_path = rebase_path(sl_intermediate, root_build_dir)
-    spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
     depfile_intermediate_path = rebase_path(depfile_path, root_build_dir)
-
-    reflection_json_path =
-        rebase_path(reflection_json_intermediate, root_build_dir)
-    reflection_header_path =
-        rebase_path(reflection_header_intermediate, root_build_dir)
-    reflection_cc_path = rebase_path(reflection_cc_intermediate, root_build_dir)
-
     depfile = depfile_path
 
     args = [
       "--input={{source}}",
-      "--sl=$sl_intermediate_path",
-      "--spirv=$spirv_intermediate_path",
-      "--reflection-json=$reflection_json_path",
-      "--reflection-header=$reflection_header_path",
-      "--reflection-cc=$reflection_cc_path",
       "--include={{source_dir}}",
       "--depfile=$depfile_intermediate_path",
       "$shader_target_flag",
     ]
+
+    if (flutter_spirv) {
+      args += [ "--spirv=$spirv_intermediate_path" ]
+      outputs = [ spirv_intermediate ]
+    } else {
+      sl_intermediate =
+          "$generated_dir/{{source_file_part}}.${invoker.sl_file_extension}"
+      reflection_json_intermediate = "$generated_dir/{{source_file_part}}.json"
+      reflection_header_intermediate = "$generated_dir/{{source_file_part}}.h"
+      reflection_cc_intermediate = "$generated_dir/{{source_file_part}}.cc"
+
+      sl_intermediate_path = rebase_path(sl_intermediate, root_build_dir)
+      reflection_json_path =
+          rebase_path(reflection_json_intermediate, root_build_dir)
+      reflection_header_path =
+          rebase_path(reflection_header_intermediate, root_build_dir)
+      reflection_cc_path =
+          rebase_path(reflection_cc_intermediate, root_build_dir)
+
+      args += [
+        "--sl=$sl_intermediate_path",
+        "--spirv=$spirv_intermediate_path",
+        "--reflection-json=$reflection_json_path",
+        "--reflection-header=$reflection_header_path",
+        "--reflection-cc=$reflection_cc_path",
+      ]
+
+      outputs = [
+        sl_intermediate,
+        reflection_header_intermediate,
+        reflection_cc_intermediate,
+      ]
+    }
+
     if (defined(invoker.defines)) {
       foreach(def, invoker.defines) {
         args += [ "--define=$def" ]

@@ -44,8 +44,6 @@ if (enable_unittests) {
       "9_ceil.frag",
     ]
 
-    sl_file_extension = ".spirv"
-
     shader_target_flag = "--flutter-spirv"
   }
 }

@@ -16,8 +16,6 @@ if (enable_unittests) {
       "uniforms.frag",
     ]
 
-    sl_file_extension = ".spirv"
-
     shader_target_flag = "--flutter-spirv"
   }
 }

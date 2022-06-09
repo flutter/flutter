@@ -40,8 +40,6 @@ if (enable_unittests) {
       "33_OpTypeFunction.frag",
     ]
 
-    sl_file_extension = ".spirv"
-
     shader_target_flag = "--flutter-spirv"
   }
 }
