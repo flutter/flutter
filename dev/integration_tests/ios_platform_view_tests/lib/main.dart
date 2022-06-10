@@ -6,7 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
-  enableFlutterDriverExtension();
+  // enableFlutterDriverExtension() will disable keyboard,
+  // which is required for flutter_driver tests
+  // But breaks the XCUITests
+  if (const bool.fromEnvironment('ENABLE_DRIVER_EXTENSION', defaultValue: false)) {
+    enableFlutterDriverExtension();
+  }
   runApp(const MyApp());
 }
 
