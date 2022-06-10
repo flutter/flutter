@@ -1557,10 +1557,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name) {
-    if (!argParser.options.containsKey(name)) {
-      return <String>[];
-    }
-    return argResults![name] as List<String>;
+    return argResults![name]! as List<String>? ?? <String>[];
   }
 }
 
