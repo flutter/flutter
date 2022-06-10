@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 
 import 'package:test/bootstrap/browser.dart';
@@ -127,9 +126,9 @@ Future<void> testMain() async {
 }
 
 engine.HtmlImage createTestImage({int width = 200, int height = 150}) {
-  final html.CanvasElement canvas =
-      html.CanvasElement(width: width, height: height);
-  final html.CanvasRenderingContext2D ctx = canvas.context2D;
+  final engine.DomCanvasElement canvas =
+      engine.createDomCanvasElement(width: width, height: height);
+  final engine.DomCanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, width / 3, height);
   ctx.fill();
@@ -139,7 +138,7 @@ engine.HtmlImage createTestImage({int width = 200, int height = 150}) {
   ctx.fillStyle = '#2040E0';
   ctx.fillRect(2 * width / 3, 0, width / 3, height);
   ctx.fill();
-  final html.ImageElement imageElement = html.ImageElement();
+  final engine.DomHTMLImageElement imageElement = engine.createDomHTMLImageElement();
   imageElement.src = js_util.callMethod<String>(canvas, 'toDataURL', <dynamic>[]);
   return engine.HtmlImage(imageElement, width, height);
 }

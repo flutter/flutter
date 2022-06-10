@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -723,7 +722,7 @@ const String _base64Encoded20x20TestImage = 'iVBORw0KGgoAAAANSUhEUgAAABQAAAAUC'
 
 HtmlImage _createRealTestImage() {
   return HtmlImage(
-    html.ImageElement()
+    createDomHTMLImageElement()
       ..src = 'data:text/plain;base64,$_base64Encoded20x20TestImage',
     20,
     20,

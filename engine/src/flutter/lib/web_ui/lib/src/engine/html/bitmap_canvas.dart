@@ -640,12 +640,11 @@ class BitmapCanvas extends EngineCanvas {
       }
     }
     // Can't reuse, create new instance.
-    final html.ImageElement newImageElement = htmlImage.cloneImageElement();
+    final DomHTMLImageElement newImageElement = htmlImage.cloneImageElement();
     if (_elementCache != null) {
-      _elementCache!.cache(cacheKey, newImageElement as DomHTMLImageElement,
-          _onEvictElement);
+      _elementCache!.cache(cacheKey, newImageElement, _onEvictElement);
     }
-    return newImageElement as DomHTMLImageElement;
+    return newImageElement;
   }
 
   static void _onEvictElement(DomHTMLElement element) {

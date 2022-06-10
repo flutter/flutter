@@ -35,6 +35,8 @@ extension DomWindowExtension on DomWindow {
   external DomPerformance get performance;
   Future<Object?> fetch(String url) =>
       js_util.promiseToFuture(js_util.callMethod(this, 'fetch', <String>[url]));
+  // ignore: non_constant_identifier_names
+  external DomURL get URL;
 }
 
 @JS()
@@ -69,8 +71,8 @@ extension DomDocumentExtension on DomDocument {
   external DomElement? get documentElement;
   external DomElement? querySelector(String selectors);
   Iterable<DomElement> querySelectorAll(String selectors) =>
-      _DomElementListWrapper.create(js_util.callMethod<_DomElementList>(
-          this, 'querySelectorAll', <Object>[selectors]));
+      createDomListWrapper<DomElement>(js_util
+          .callMethod<_DomList>(this, 'querySelectorAll', <Object>[selectors]));
   DomElement createElement(String name, [Object? options]) =>
       js_util.callMethod(this, 'createElement',
           <Object>[name, if (options != null) options]) as DomElement;
@@ -175,8 +177,8 @@ class DomElement extends DomNode {}
 DomElement createDomElement(String tag) => domDocument.createElement(tag);
 
 extension DomElementExtension on DomElement {
-  Iterable<DomElement> get children => _DomElementListWrapper.create(
-      js_util.getProperty<_DomElementList>(this, 'children'));
+  Iterable<DomElement> get children => createDomListWrapper<DomElement>(
+      js_util.getProperty<_DomList>(this, 'children'));
   external int get clientHeight;
   external int get clientWidth;
   external String get id;
@@ -192,8 +194,8 @@ extension DomElementExtension on DomElement {
   external void prepend(DomNode node);
   external DomElement? querySelector(String selectors);
   Iterable<DomElement> querySelectorAll(String selectors) =>
-      _DomElementListWrapper.create(js_util.callMethod<_DomElementList>(
-          this, 'querySelectorAll', <Object>[selectors]));
+      createDomListWrapper<DomElement>(js_util
+          .callMethod<_DomList>(this, 'querySelectorAll', <Object>[selectors]));
   external void remove();
   external void setAttribute(String name, Object value);
   void appendText(String text) => append(createDomText(text));
@@ -359,15 +361,23 @@ class DomHTMLBodyElement extends DomHTMLElement {}
 
 @JS()
 @staticInterop
-class DomHTMLImageElement extends DomHTMLElement {}
+class DomHTMLImageElement extends DomHTMLElement
+    implements DomCanvasImageSource {}
 
 DomHTMLImageElement createDomHTMLImageElement() =>
     domDocument.createElement('img') as DomHTMLImageElement;
 
-extension DomHTMLImageElemenExtension on DomHTMLImageElement {
+extension DomHTMLImageElementExtension on DomHTMLImageElement {
   external String? get alt;
   external set alt(String? value);
-  external set src(String value);
+  external String? get src;
+  external set src(String? value);
+  external int get naturalWidth;
+  external int get naturalHeight;
+  external set width(int? value);
+  external set height(int? value);
+  Future<dynamic> decode() =>
+      js_util.promiseToFuture(js_util.callMethod(this, 'decode', <Object>[]));
 }
 
 @JS()
@@ -741,6 +751,66 @@ extension DomPopStateEventExtension on DomPopStateEvent {
   dynamic get state => js_util.dartify(js_util.getProperty(this, 'state'));
 }
 
+@JS()
+@staticInterop
+class DomURL {}
+
+extension DomURLExtension on DomURL {
+  external String createObjectURL(Object object);
+  external void revokeObjectURL(String url);
+}
+
+@JS()
+@staticInterop
+class DomBlob {}
+
+DomBlob createDomBlob(List<Object?> parts) =>
+    domCallConstructorString('Blob', <Object>[parts])! as DomBlob;
+
+typedef DomMutationCallback = void Function(
+    List<dynamic> mutation, DomMutationObserver observer);
+
+@JS()
+@staticInterop
+class DomMutationObserver {}
+
+DomMutationObserver createDomMutationObserver(DomMutationCallback callback) =>
+    domCallConstructorString('MutationObserver', <Object>[callback])!
+        as DomMutationObserver;
+
+extension DomMutationObserverExtension on DomMutationObserver {
+  external void disconnect();
+  void observe(DomNode target, {bool? childList}) {
+    final Map<String, bool> options = <String, bool>{
+      if (childList != null) 'childList': childList,
+    };
+    return js_util
+        .callMethod(this, 'observe', <Object>[target, js_util.jsify(options)]);
+  }
+}
+
+@JS()
+@staticInterop
+class DomMutationRecord {}
+
+extension DomMutationRecordExtension on DomMutationRecord {
+  Iterable<DomNode>? get addedNodes {
+    final _DomList? list = js_util.getProperty<_DomList?>(this, 'addedNodes');
+    if (list == null) {
+      return null;
+    }
+    return createDomListWrapper<DomNode>(list);
+  }
+
+  Iterable<DomNode>? get removedNodes {
+    final _DomList? list = js_util.getProperty<_DomList?>(this, 'removedNodes');
+    if (list == null) {
+      return null;
+    }
+    return createDomListWrapper<DomNode>(list);
+  }
+}
+
 Object? domGetConstructor(String constructorName) =>
     js_util.getProperty(domWindow, constructorName);
 
@@ -761,47 +831,47 @@ bool domInstanceOfString(Object? element, String objectType) =>
 /// should only be returned as a wrapped object to Dart.
 @JS()
 @staticInterop
-class _DomElementList {}
+class _DomList {}
 
-extension DomElementListExtension on _DomElementList {
+extension DomListExtension on _DomList {
   external int get length;
-  DomElement item(int index) =>
-      js_util.callMethod<DomElement>(this, 'item', <Object>[index]);
+  DomNode item(int index) =>
+      js_util.callMethod<DomNode>(this, 'item', <Object>[index]);
 }
 
-class _DomElementListIterator extends Iterator<DomElement> {
-  final _DomElementList elementList;
+class _DomListIterator<T> extends Iterator<T> {
+  final _DomList list;
   int index = -1;
 
-  _DomElementListIterator(this.elementList);
+  _DomListIterator(this.list);
 
   @override
   bool moveNext() {
     index++;
-    if (index > elementList.length) {
+    if (index > list.length) {
       throw 'Iterator out of bounds';
     }
-    return index < elementList.length;
+    return index < list.length;
   }
 
   @override
-  DomElement get current => elementList.item(index);
+  T get current => list.item(index) as T;
 }
 
-class _DomElementListWrapper extends Iterable<DomElement> {
-  final _DomElementList elementList;
+class _DomListWrapper<T> extends Iterable<T> {
+  final _DomList list;
 
-  _DomElementListWrapper._(this.elementList);
-
-  /// This is a work around for a `TypeError` which can be triggered by calling
-  /// `toList` on the `Iterable`.
-  static Iterable<DomElement> create(_DomElementList elementList) =>
-      _DomElementListWrapper._(elementList).cast<DomElement>();
+  _DomListWrapper._(this.list);
 
   @override
-  Iterator<DomElement> get iterator => _DomElementListIterator(elementList);
+  Iterator<T> get iterator => _DomListIterator<T>(list);
 
   /// Override the length to avoid iterating through the whole collection.
   @override
-  int get length => elementList.length;
+  int get length => list.length;
 }
+
+/// This is a work around for a `TypeError` which can be triggered by calling
+/// `toList` on the `Iterable`.
+Iterable<T> createDomListWrapper<T>(_DomList list) =>
+    _DomListWrapper<T>._(list).cast<T>();
