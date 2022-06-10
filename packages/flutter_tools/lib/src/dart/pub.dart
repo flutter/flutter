@@ -556,15 +556,27 @@ class _DefaultPub implements Pub {
     }
 
     final String localCachePath = _fileSystem.path.join(Cache.flutterRoot!, '.pub-cache');
-    final String homeDirectory;
+    final Directory globalDirectory;
     if (_platform.isWindows) {
-      homeDirectory = _platform.environment['APPDATA'] ?? '';
+      // %LOCALAPPDATA% is preferred as the cache location over %APPDATA%, because the latter is synchronised between
+      // devices when the user roams between them, whereas the former is not.
+      // The default cache dir used to be in %APPDATA%, so to avoid breaking old installs,
+      // we use the old dir in %APPDATA% if it exists. Else, we use the new default location
+      // in %LOCALAPPDATA%.
+      final String appData = _platform.environment['APPDATA'] ?? '';
+      final Directory appDataDir = _fileSystem.directory(_fileSystem.path.join(appData, 'Pub', 'Cache'));
+
+      if (appDataDir.existsSync()) {
+        globalDirectory = appDataDir;
+      } else {
+        final String localAppData = _platform.environment['LOCALAPPDATA'] ?? '';
+        globalDirectory = _fileSystem.directory(_fileSystem.path.join(localAppData, 'Pub', 'Cache'));
+      }
     }
     else {
-      homeDirectory = _platform.environment['Home'] ?? '';
+      final String homeDirectory = _platform.environment['HOME'] ?? '';
+      globalDirectory = _fileSystem.directory(_fileSystem.path.join(homeDirectory, '.pub-cache'));
     }
-
-   final Directory globalDirectory = _fileSystem.directory(_fileSystem.path.join(homeDirectory, '.pub-cache'));
 
     if (needsToJoinCache(
         fileSystem: _fileSystem,

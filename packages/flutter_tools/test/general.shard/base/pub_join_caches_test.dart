@@ -40,7 +40,7 @@ void main() {
 
     for (final Directory directory in <Directory>[local, global]) {
       directory.createSync();
-      Directory pubCache = directory.childDirectory('.pub-cache');
+      final Directory pubCache = directory.childDirectory('.pub-cache');
       pubCache.createSync();
       pubCache.childDirectory('hosted').createSync();
       pubCache.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
