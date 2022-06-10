@@ -459,13 +459,31 @@ class TextSelectionOverlay {
       return;
     }
 
-    final TextSelection newSelection = TextSelection(
-      baseOffset: _selection.baseOffset,
-      extentOffset: position.offset,
-    );
-
-    if (newSelection.baseOffset >= newSelection.extentOffset) {
-      return; // Don't allow order swapping.
+    final TextSelection newSelection;
+    switch (defaultTargetPlatform) {
+      // On Apple platforms, dragging the base handle makes it the extent.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        newSelection = TextSelection(
+          extentOffset: position.offset,
+          baseOffset: _selection.start,
+        );
+        if (position.offset <= _selection.start) {
+          return; // Don't allow order swapping.
+        }
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        newSelection = TextSelection(
+          baseOffset: _selection.baseOffset,
+          extentOffset: position.offset,
+        );
+        if (newSelection.baseOffset >= newSelection.extentOffset) {
+          return; // Don't allow order swapping.
+        }
+        break;
     }
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
@@ -489,13 +507,31 @@ class TextSelectionOverlay {
       return;
     }
 
-    final TextSelection newSelection = TextSelection(
-      baseOffset: position.offset,
-      extentOffset: _selection.extentOffset,
-    );
-
-    if (newSelection.baseOffset >= newSelection.extentOffset) {
-      return; // Don't allow order swapping.
+    final TextSelection newSelection;
+    switch (defaultTargetPlatform) {
+      // On Apple platforms, dragging the base handle makes it the extent.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        newSelection = TextSelection(
+          extentOffset: position.offset,
+          baseOffset: _selection.end,
+        );
+        if (newSelection.extentOffset >= _selection.end) {
+          return; // Don't allow order swapping.
+        }
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        newSelection = TextSelection(
+          baseOffset: position.offset,
+          extentOffset: _selection.extentOffset,
+        );
+        if (newSelection.baseOffset >= newSelection.extentOffset) {
+          return; // Don't allow order swapping.
+        }
+        break;
     }
 
     _handleSelectionHandleChanged(newSelection, isEnd: false);
@@ -1116,7 +1152,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
 }
 
 class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with SingleTickerProviderStateMixin {
-
   late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
