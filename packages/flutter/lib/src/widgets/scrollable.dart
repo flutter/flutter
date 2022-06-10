@@ -265,6 +265,9 @@ class Scrollable extends StatefulWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
+  ///
+  /// Rather than clipping [Scrollable], this is passed to decorators in
+  /// [ScrollableDetails].
   final Clip clipBehavior;
 
   /// The axis along which the scroll view scrolls.
