@@ -396,16 +396,26 @@ class TextSelectionOverlay {
 
     _contextMenuController?.dispose();
 
-    // If right clicking, use the right click position as the only anchor.
+    // If right clicking on desktop, use the right click position as the only
+    /// anchor.
     if (renderObject.lastSecondaryTapDownPosition != null) {
-      // TODO(justinmc): Should ContextMenuController be a singleton to enforce
-      // that there can be only one?
-      _contextMenuController = ContextMenuController(
-        context: context,
-        primaryAnchor: renderObject.lastSecondaryTapDownPosition!,
-        buildContextMenu: buildContextMenu,
-      );
-      return;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          // TODO(justinmc): Should ContextMenuController be a singleton to enforce
+          // that there can be only one?
+          _contextMenuController = ContextMenuController(
+            context: context,
+            primaryAnchor: renderObject.lastSecondaryTapDownPosition!,
+            buildContextMenu: buildContextMenu,
+          );
+          return;
+      }
     }
 
     // Otherwise, calculate the anchors as the upper and lower horizontal center
