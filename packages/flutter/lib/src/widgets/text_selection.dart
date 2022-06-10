@@ -1505,9 +1505,8 @@ class TextSelectionGestureDetectorBuilder {
           case PointerDeviceKind.unknown:
           // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
           // of the word.
-            renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-            break;
           case null:
+            renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
             break;
         }
         break;
@@ -1644,7 +1643,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onSingleTapCancel], which triggers
   ///    this callback.
   @protected
-  void onSingleTapCancel() { /* Subclass should override this method if needed. */ }
+  void onSingleTapCancel() {/* Subclass should override this method if needed. */}
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapStart].
   ///
