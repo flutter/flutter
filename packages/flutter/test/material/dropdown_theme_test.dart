@@ -28,12 +28,10 @@ DropdownThemeData _dropdownTheme() {
 }
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
+
 void onChanged<T>(T _) { }
 
-final Type dropdownButtonType = DropdownButton<String>(
-  onChanged: (_) { },
-  items: const <DropdownMenuItem<String>>[],
-).runtimeType;
+Set<MaterialState> enabled = <MaterialState>{ };
 
 Finder _iconRichText(Key iconKey) {
   return find.descendant(
@@ -47,27 +45,18 @@ Widget buildDropdown({
   Key? buttonKey,
   String? value = 'two',
   ValueChanged<String?>? onChanged,
-  VoidCallback? onTap,
   Widget? icon,
+  TextStyle? style,
   Color? iconDisabledColor,
   Color? iconEnabledColor,
-  double iconSize = 24.0,
-  bool isDense = false,
-  bool isExpanded = false,
-  Widget? hint,
-  Widget? disabledHint,
-  Widget? underline,
   List<String>? items = menuItems,
-  List<Widget> Function(BuildContext)? selectedItemBuilder,
-  double? itemHeight = kMinInteractiveDimension,
-  AlignmentDirectional alignment = AlignmentDirectional.centerStart,
-  TextDirection textDirection = TextDirection.ltr,
-  Size? mediaSize,
   FocusNode? focusNode,
   bool autofocus = false,
   Color? focusColor,
   Color? dropdownColor,
   double? menuMaxHeight,
+  BorderRadius? borderRadius,
+  InputDecoration? decoration,
 }) {
   final List<DropdownMenuItem<String>>? listItems = items?.map<DropdownMenuItem<String>>((String item) {
     return DropdownMenuItem<String>(
@@ -82,163 +71,39 @@ Widget buildDropdown({
       child: DropdownButtonFormField<String>(
         key: buttonKey,
         value: value,
-        hint: hint,
-        disabledHint: disabledHint,
         onChanged: onChanged,
-        onTap: onTap,
         icon: icon,
-        iconSize: iconSize,
+        style: style,
         iconDisabledColor: iconDisabledColor,
         iconEnabledColor: iconEnabledColor,
-        isDense: isDense,
-        isExpanded: isExpanded,
         // No underline attribute
         focusNode: focusNode,
         autofocus: autofocus,
         focusColor: focusColor,
         dropdownColor: dropdownColor,
         items: listItems,
-        selectedItemBuilder: selectedItemBuilder,
-        itemHeight: itemHeight,
-        alignment: alignment,
         menuMaxHeight: menuMaxHeight,
+        borderRadius: borderRadius,
+        decoration: decoration,
       ),
     );
   }
   return DropdownButton<String>(
     key: buttonKey,
     value: value,
-    hint: hint,
-    disabledHint: disabledHint,
     onChanged: onChanged,
-    onTap: onTap,
     icon: icon,
-    iconSize: iconSize,
+    style: style,
     iconDisabledColor: iconDisabledColor,
     iconEnabledColor: iconEnabledColor,
-    isDense: isDense,
-    isExpanded: isExpanded,
-    underline: underline,
     focusNode: focusNode,
     autofocus: autofocus,
     focusColor: focusColor,
     dropdownColor: dropdownColor,
     items: listItems,
-    selectedItemBuilder: selectedItemBuilder,
-    itemHeight: itemHeight,
-    alignment: alignment,
     menuMaxHeight: menuMaxHeight,
+    borderRadius: borderRadius,
   );
-}
-
-Widget buildFrame({
-  Key? buttonKey,
-  String? value = 'two',
-  ValueChanged<String?>? onChanged,
-  VoidCallback? onTap,
-  Widget? icon,
-  Color? iconDisabledColor,
-  Color? iconEnabledColor,
-  double iconSize = 24.0,
-  bool isDense = false,
-  bool isExpanded = false,
-  Widget? hint,
-  Widget? disabledHint,
-  Widget? underline,
-  List<String>? items = menuItems,
-  List<Widget> Function(BuildContext)? selectedItemBuilder,
-  double? itemHeight = kMinInteractiveDimension,
-  AlignmentDirectional alignment = AlignmentDirectional.centerStart,
-  TextDirection textDirection = TextDirection.ltr,
-  Size? mediaSize,
-  FocusNode? focusNode,
-  bool autofocus = false,
-  Color? focusColor,
-  Color? dropdownColor,
-  bool isFormField = false,
-  double? menuMaxHeight,
-  Alignment dropdownAlignment = Alignment.center,
-}) {
-  return TestApp(
-    textDirection: textDirection,
-    mediaSize: mediaSize,
-    child: Material(
-      child: Align(
-        alignment: dropdownAlignment,
-        child: RepaintBoundary(
-          child: buildDropdown(
-            isFormField: isFormField,
-            buttonKey: buttonKey,
-            value: value,
-            hint: hint,
-            disabledHint: disabledHint,
-            onChanged: onChanged,
-            onTap: onTap,
-            icon: icon,
-            iconSize: iconSize,
-            iconDisabledColor: iconDisabledColor,
-            iconEnabledColor: iconEnabledColor,
-            isDense: isDense,
-            isExpanded: isExpanded,
-            underline: underline,
-            focusNode: focusNode,
-            autofocus: autofocus,
-            focusColor: focusColor,
-            dropdownColor: dropdownColor,
-            items: items,
-            selectedItemBuilder: selectedItemBuilder,
-            itemHeight: itemHeight,
-            alignment: alignment,
-            menuMaxHeight: menuMaxHeight,
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-class TestApp extends StatefulWidget {
-  const TestApp({
-    super.key,
-    required this.textDirection,
-    required this.child,
-    this.mediaSize,
-  });
-
-  final TextDirection textDirection;
-  final Widget child;
-  final Size? mediaSize;
-
-  @override
-  State<TestApp> createState() => _TestAppState();
-}
-
-class _TestAppState extends State<TestApp> {
-  @override
-  Widget build(BuildContext context) {
-    return Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultWidgetsLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-      ],
-      child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(size: widget.mediaSize),
-        child: Directionality(
-          textDirection: widget.textDirection,
-          child: Navigator(
-            onGenerateRoute: (RouteSettings settings) {
-              assert(settings.name == '/');
-              return MaterialPageRoute<void>(
-                settings: settings,
-                builder: (BuildContext context) => widget.child,
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 void main() {
@@ -299,7 +164,7 @@ void main() {
     );
   });
 
-  testWidgets('Passing no DropdownThemeData uses defaults ', (WidgetTester tester) async {
+  testWidgets('Dropdown default properties', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final Key iconKey = UniqueKey();
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
@@ -312,7 +177,6 @@ void main() {
           child: buildDropdown(
             isFormField: false,
             icon: customIcon,
-            autofocus: true,
             focusNode: focusNode,
             onChanged: onChanged,
           ),
@@ -373,9 +237,6 @@ void main() {
         body: Center(
           child: buildDropdown(
             isFormField: true,
-            icon: customIcon,
-            autofocus: true,
-            focusNode: focusNode,
             onChanged: onChanged,
           ),
         ),
@@ -383,6 +244,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
+    // Test `decoration`.
     final InputDecoration inputDecoration = tester.widget<InputDecorator>(
       find.byType(InputDecorator)
     ).decoration;
@@ -394,8 +256,6 @@ void main() {
           child: buildDropdown(
             isFormField: false,
             icon: customIcon,
-            autofocus: true,
-            focusNode: focusNode,
             items: null,
             onChanged: onChanged,
           ),
@@ -409,7 +269,7 @@ void main() {
     expect(disabledIconRichText.text.style!.color, Colors.grey.shade400);
   });
 
-  testWidgets('Dropdown uses values from DropdownThemeData', (WidgetTester tester) async {
+  testWidgets('Dropdown can be customized using DropdownThemeData', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
     const String value = 'two';
@@ -422,7 +282,6 @@ void main() {
           child: buildDropdown(
             isFormField: false,
             icon: customIcon,
-            autofocus: true,
             focusNode: focusNode,
             onChanged: onChanged,
           ),
@@ -433,6 +292,7 @@ void main() {
     WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
+
     // Test `focusColor`.
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: const Color(0xff00ff00)));
@@ -485,8 +345,6 @@ void main() {
           child: buildDropdown(
             isFormField: true,
             icon: customIcon,
-            autofocus: true,
-            focusNode: focusNode,
             onChanged: onChanged,
           ),
         ),
@@ -506,8 +364,6 @@ void main() {
           child: buildDropdown(
             isFormField: false,
             icon: customIcon,
-            autofocus: true,
-            focusNode: focusNode,
             items: null,
             onChanged: onChanged,
           ),
@@ -521,7 +377,7 @@ void main() {
     expect(disabledIconRichText.text.style!.color, Colors.black26);
   });
 
-  testWidgets('Dropdown uses local theme over global theme', (WidgetTester tester) async {
+  testWidgets('Local DropdownTheme overrides global DropdownTheme', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
     const String value = 'two';
@@ -545,9 +401,6 @@ void main() {
               focusColor: const Color(0xffedef00),
               borderRadius: BorderRadius.circular(24.0),
               menuMaxHeight: 150.0,
-              inputDecorationTheme: const InputDecorationTheme(
-                floatingLabelAlignment: FloatingLabelAlignment.center,
-              ),
             ),
             child: buildDropdown(
               isFormField: false,
@@ -564,6 +417,7 @@ void main() {
     WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
+
     // Test `focusColor`.
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: const Color(0xffedef00)));
@@ -613,12 +467,14 @@ void main() {
       theme: ThemeData(dropdownTheme: _dropdownTheme()),
       home: Scaffold(
         body: Center(
-          child: buildDropdown(
-            isFormField: true,
-            icon: customIcon,
-            autofocus: true,
-            focusNode: focusNode,
-            onChanged: onChanged,
+          child: DropdownTheme(
+            data: const DropdownThemeData(
+              inputDecorationTheme: InputDecorationTheme()
+            ),
+            child: buildDropdown(
+              isFormField: true,
+              onChanged: onChanged,
+            ),
           ),
         ),
       ),
@@ -628,6 +484,119 @@ void main() {
     final InputDecoration inputDecoration = tester.widget<InputDecorator>(
       find.byType(InputDecorator)
     ).decoration;
-    expect(inputDecoration.floatingLabelAlignment, FloatingLabelAlignment.center);
+    expect(inputDecoration.floatingLabelAlignment, FloatingLabelAlignment.start);
+  });
+
+  testWidgets('Dropdown properties override DropdownThemeData properties', (WidgetTester tester) async {
+    final Key iconKey = UniqueKey();
+    final Icon customIcon = Icon(Icons.assessment, key: iconKey);
+    const String value = 'two';
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    const Color dropdownColor = Color(0xff00ffff);
+    const TextStyle textStyle = TextStyle(color: Color(0xff124356));
+    final MaterialStateProperty<Color> iconColor = MaterialStateProperty.all<Color>(
+      const Color(0xff212121),
+    );
+    const Color focusColor = Color(0xff8012ff);
+    final BorderRadius borderRadius = BorderRadius.circular(30.0);
+    const double menuMaxHeight = 160.0;
+    const InputDecoration inputDecoration = InputDecoration(
+      floatingLabelAlignment: FloatingLabelAlignment.start,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(dropdownTheme: _dropdownTheme()),
+      home: Scaffold(
+        body: Center(
+          child: buildDropdown(
+            isFormField: false,
+            autofocus: true,
+            icon: customIcon,
+            focusNode: focusNode,
+            dropdownColor: dropdownColor,
+            style: textStyle,
+            iconEnabledColor: iconColor.resolve(enabled),
+            focusColor: focusColor,
+            borderRadius: borderRadius,
+            menuMaxHeight: menuMaxHeight,
+            onChanged: onChanged,
+          ),
+        ),
+      ),
+    ));
+
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    // Test `focusColor`.
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+
+    // Test `style`.
+    Color textColor(String text) {
+      return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color!;
+    }
+    expect(textColor('two'), textStyle.color);
+
+    // Test `iconColor`.
+    final RichText enabledIconRichText = tester.widget<RichText>(_iconRichText(iconKey));
+    expect(enabledIconRichText.text.style!.color, iconColor.resolve(enabled));
+
+    await tester.tap(find.text(value));
+    await tester.pumpAndSettle();
+
+    // Test `menuMaxHeight` and `borderRadius`.
+    expect(
+      find.ancestor(
+        of: find.text(value).last,
+        matching: find.byType(CustomPaint),
+      ).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(rrect: const RRect.fromLTRBXY(
+          0.0,
+          0.0,
+          134.0,
+          menuMaxHeight,
+          30.0,
+          30.0,
+        )),
+    );
+
+    // Test `dropdownColor`.
+    expect(
+      find.ancestor(
+        of: find.text(value).last,
+        matching: find.byType(CustomPaint),
+      ).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: dropdownColor, hasMaskFilter: false),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(dropdownTheme: _dropdownTheme()),
+      home: Scaffold(
+        body: Center(
+          child: buildDropdown(
+            isFormField: true,
+            decoration: inputDecoration,
+            onChanged: onChanged,
+          ),
+        ),
+      ),
+    ));
+
+    final InputDecoration decoration = tester.widget<InputDecorator>(
+      find.byType(InputDecorator)
+    ).decoration;
+    expect(decoration.floatingLabelAlignment, inputDecoration.floatingLabelAlignment);
   });
 }
