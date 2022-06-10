@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+import 'dart:ui' show WindowPadding;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/image_test_utils.dart' show TestImageProvider;
-import '../rendering/view_chrome_style_test.dart';
 
 Future<ui.Image> createTestImage() {
   final ui.Paint paint = ui.Paint()
@@ -183,6 +183,25 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) => Text(widget.value);
 }
+
+class FakeWindowPadding implements WindowPadding {
+  const FakeWindowPadding({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+  });
+
+  @override
+  final double left;
+  @override
+  final double top;
+  @override
+  final double right;
+  @override
+  final double bottom;
+}
+
 
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
@@ -3074,9 +3093,8 @@ Future<void> main() async {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
-
   testWidgets('smooth transition between different incoming data', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
       const Key imageKey1 = Key('image1');
       const Key imageKey2 = Key('image2');
       final TestImageProvider imageProvider = TestImageProvider(testImage);
