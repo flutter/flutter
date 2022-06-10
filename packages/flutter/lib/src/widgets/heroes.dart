@@ -1003,7 +1003,7 @@ class HeroController extends NavigatorObserver {
     BuildContext toHeroContext,
   ) {
     final Hero toHero = toHeroContext.widget as Hero;
-    
+
     final MediaQueryData? toMediaQueryData = MediaQuery.maybeOf(toHeroContext);
     final MediaQueryData? fromMediaQueryData = MediaQuery.maybeOf(fromHeroContext);
 
