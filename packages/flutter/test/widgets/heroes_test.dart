@@ -3081,8 +3081,8 @@ Future<void> main() async {
       const Key imageKey2 = Key('image2');
       final TestImageProvider imageProvider = TestImageProvider(testImage);
       final TestWidgetsFlutterBinding testBinding = tester.binding;
-      
-      testBinding.window.paddingTestValue = const FakeWindowPadding(top:50);
+
+      testBinding.window.paddingTestValue = const FakeWindowPadding(top: 50);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -3090,33 +3090,32 @@ Future<void> main() async {
           home: Scaffold(
             appBar: AppBar(title: const Text('test')),
             body: Hero(
-            tag: 'imageHero',
-            child: GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              children: [
-                Image(image: imageProvider, key: imageKey1),
-              ],
+              tag: 'imageHero',
+              child: GridView.count(
+                crossAxisCount: 3,
+                shrinkWrap: true,
+                children: [
+                  Image(image: imageProvider, key: imageKey1),
+                ],
+              ),
             ),
-          ),
           ),
         ),
       );
 
       final MaterialPageRoute<void> route2 = MaterialPageRoute<void>(
         builder: (BuildContext context) {
-          return 
-          Scaffold(
+          return Scaffold(
             body: Hero(
-            tag: 'imageHero',
-            child: GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              children: [
-                Image(image: imageProvider, key: imageKey2),
-              ],
+              tag: 'imageHero',
+              child: GridView.count(
+                crossAxisCount: 3,
+                shrinkWrap: true,
+                children: [
+                  Image(image: imageProvider, key: imageKey2),
+                ],
+              ),
             ),
-          ),
           );
         },
       );
