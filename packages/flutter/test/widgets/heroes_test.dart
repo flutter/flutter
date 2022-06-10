@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/image_test_utils.dart' show TestImageProvider;
+import '../rendering/view_chrome_style_test.dart';
 
 Future<ui.Image> createTestImage() {
   final ui.Paint paint = ui.Paint()
@@ -3073,4 +3074,72 @@ Future<void> main() async {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('smooth transition between different incoming data', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+      const Key imageKey1 = Key('image1');
+      const Key imageKey2 = Key('image2');
+      final TestImageProvider imageProvider = TestImageProvider(testImage);
+      final TestWidgetsFlutterBinding testBinding = tester.binding;
+      
+      testBinding.window.paddingTestValue = const FakeWindowPadding(top:50);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            appBar: AppBar(title: const Text('test')),
+            body: Hero(
+            tag: 'imageHero',
+            child: GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              children: [
+                Image(image: imageProvider, key: imageKey1),
+              ],
+            ),
+          ),
+          ),
+        ),
+      );
+
+      final MaterialPageRoute<void> route2 = MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return 
+          Scaffold(
+            body: Hero(
+            tag: 'imageHero',
+            child: GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              children: [
+                Image(image: imageProvider, key: imageKey2),
+              ],
+            ),
+          ),
+          );
+        },
+      );
+
+      // Load images.
+      imageProvider.complete();
+      await tester.pump();
+
+      final double forwardRest = tester.getTopLeft(find.byType(Image)).dy;
+      navigatorKey.currentState!.push(route2);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+      await tester.pumpAndSettle();
+
+      navigatorKey.currentState!.pop(route2);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+
+      testBinding.window.clearAllTestValues();
+    },
+  );
 }
