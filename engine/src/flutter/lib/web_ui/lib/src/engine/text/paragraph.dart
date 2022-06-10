@@ -14,7 +14,7 @@ import 'layout_service.dart';
 import 'ruler.dart';
 
 class EngineLineMetrics implements ui.LineMetrics {
-  EngineLineMetrics({
+  const EngineLineMetrics({
     required this.hardBreak,
     required this.ascent,
     required this.descent,
@@ -24,70 +24,7 @@ class EngineLineMetrics implements ui.LineMetrics {
     required this.left,
     required this.baseline,
     required this.lineNumber,
-  })  : displayText = null,
-        ellipsis = null,
-        startIndex = -1,
-        endIndex = -1,
-        endIndexWithoutNewlines = -1,
-        widthWithTrailingSpaces = width,
-        boxes = <RangeBox>[],
-        spaceBoxCount = 0,
-        trailingSpaceBoxCount = 0;
-
-  EngineLineMetrics.rich(
-    this.lineNumber, {
-    required this.ellipsis,
-    required this.startIndex,
-    required this.endIndex,
-    required this.endIndexWithoutNewlines,
-    required this.hardBreak,
-    required this.width,
-    required this.widthWithTrailingSpaces,
-    required this.left,
-    required this.height,
-    required this.baseline,
-    required this.ascent,
-    required this.descent,
-    required this.boxes,
-    required this.spaceBoxCount,
-    required this.trailingSpaceBoxCount,
-  })  : displayText = null,
-        unscaledAscent = double.infinity;
-
-  /// The text to be rendered on the screen representing this line.
-  final String? displayText;
-
-  /// The string to be displayed as an overflow indicator.
-  ///
-  /// When the value is non-null, it means this line is overflowing and the
-  /// [ellipsis] needs to be displayed at the end of it.
-  final String? ellipsis;
-
-  /// The index (inclusive) in the text where this line begins.
-  final int startIndex;
-
-  /// The index (exclusive) in the text where this line ends.
-  ///
-  /// When the line contains an overflow, then [endIndex] goes until the end of
-  /// the text and doesn't stop at the overflow cutoff.
-  final int endIndex;
-
-  /// The index (exclusive) in the text where this line ends, ignoring newline
-  /// characters.
-  final int endIndexWithoutNewlines;
-
-  /// The list of boxes representing the entire line, possibly across multiple
-  /// spans.
-  final List<RangeBox> boxes;
-
-  /// The number of boxes that are space-only.
-  final int spaceBoxCount;
-
-  /// The number of trailing boxes that are space-only.
-  final int trailingSpaceBoxCount;
-
-  /// The number of space-only boxes excluding trailing spaces.
-  int get nonTrailingSpaceBoxCount => spaceBoxCount - trailingSpaceBoxCount;
+  });
 
   @override
   final bool hardBreak;
@@ -107,18 +44,6 @@ class EngineLineMetrics implements ui.LineMetrics {
   @override
   final double width;
 
-  /// The full width of the line including all trailing space but not new lines.
-  ///
-  /// The difference between [width] and [widthWithTrailingSpaces] is that
-  /// [widthWithTrailingSpaces] includes trailing spaces in the width
-  /// calculation while [width] doesn't.
-  ///
-  /// For alignment purposes for example, the [width] property is the right one
-  /// to use because trailing spaces shouldn't affect the centering of text.
-  /// But for placing cursors in text fields, we do care about trailing
-  /// spaces so [widthWithTrailingSpaces] is more suitable.
-  final double widthWithTrailingSpaces;
-
   @override
   final double left;
 
@@ -128,15 +53,8 @@ class EngineLineMetrics implements ui.LineMetrics {
   @override
   final int lineNumber;
 
-  bool overlapsWith(int startIndex, int endIndex) {
-    return startIndex < this.endIndex && this.startIndex < endIndex;
-  }
-
   @override
   int get hashCode => Object.hash(
-        displayText,
-        startIndex,
-        endIndex,
         hardBreak,
         ascent,
         descent,
@@ -157,9 +75,6 @@ class EngineLineMetrics implements ui.LineMetrics {
       return false;
     }
     return other is EngineLineMetrics &&
-        other.displayText == displayText &&
-        other.startIndex == startIndex &&
-        other.endIndex == endIndex &&
         other.hardBreak == hardBreak &&
         other.ascent == ascent &&
         other.descent == descent &&
@@ -186,6 +101,139 @@ class EngineLineMetrics implements ui.LineMetrics {
     } else {
       return super.toString();
     }
+  }
+}
+
+class ParagraphLine {
+  ParagraphLine({
+    required bool hardBreak,
+    required double ascent,
+    required double descent,
+    required double height,
+    required double width,
+    required double left,
+    required double baseline,
+    required int lineNumber,
+    required this.ellipsis,
+    required this.startIndex,
+    required this.endIndex,
+    required this.endIndexWithoutNewlines,
+    required this.widthWithTrailingSpaces,
+    required this.boxes,
+    required this.spaceBoxCount,
+    required this.trailingSpaceBoxCount,
+    this.displayText,
+  }) : lineMetrics = EngineLineMetrics(
+          hardBreak: hardBreak,
+          ascent: ascent,
+          descent: descent,
+          unscaledAscent: ascent,
+          height: height,
+          width: width,
+          left: left,
+          baseline: baseline,
+          lineNumber: lineNumber,
+        );
+
+  /// Metrics for this line of the paragraph.
+  final EngineLineMetrics lineMetrics;
+
+  /// The string to be displayed as an overflow indicator.
+  ///
+  /// When the value is non-null, it means this line is overflowing and the
+  /// [ellipsis] needs to be displayed at the end of it.
+  final String? ellipsis;
+
+  /// The index (inclusive) in the text where this line begins.
+  final int startIndex;
+
+  /// The index (exclusive) in the text where this line ends.
+  ///
+  /// When the line contains an overflow, then [endIndex] goes until the end of
+  /// the text and doesn't stop at the overflow cutoff.
+  final int endIndex;
+
+  /// The index (exclusive) in the text where this line ends, ignoring newline
+  /// characters.
+  final int endIndexWithoutNewlines;
+
+  /// The full width of the line including all trailing space but not new lines.
+  ///
+  /// The difference between [width] and [widthWithTrailingSpaces] is that
+  /// [widthWithTrailingSpaces] includes trailing spaces in the width
+  /// calculation while [width] doesn't.
+  ///
+  /// For alignment purposes for example, the [width] property is the right one
+  /// to use because trailing spaces shouldn't affect the centering of text.
+  /// But for placing cursors in text fields, we do care about trailing
+  /// spaces so [widthWithTrailingSpaces] is more suitable.
+  final double widthWithTrailingSpaces;
+
+  /// The list of boxes representing the entire line, possibly across multiple
+  /// spans.
+  final List<RangeBox> boxes;
+
+  /// The number of boxes that are space-only.
+  final int spaceBoxCount;
+
+  /// The number of trailing boxes that are space-only.
+  final int trailingSpaceBoxCount;
+
+  /// The text to be rendered on the screen representing this line.
+  final String? displayText;
+
+  /// The number of space-only boxes excluding trailing spaces.
+  int get nonTrailingSpaceBoxCount => spaceBoxCount - trailingSpaceBoxCount;
+
+  // Convenient getters for line metrics properties.
+
+  bool get hardBreak => lineMetrics.hardBreak;
+  double get ascent => lineMetrics.ascent;
+  double get descent => lineMetrics.descent;
+  double get unscaledAscent => lineMetrics.unscaledAscent;
+  double get height => lineMetrics.height;
+  double get width => lineMetrics.width;
+  double get left => lineMetrics.left;
+  double get baseline => lineMetrics.baseline;
+  int get lineNumber => lineMetrics.lineNumber;
+
+  bool overlapsWith(int startIndex, int endIndex) {
+    return startIndex < this.endIndex && this.startIndex < endIndex;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        lineMetrics,
+        ellipsis,
+        startIndex,
+        endIndex,
+        endIndexWithoutNewlines,
+        widthWithTrailingSpaces,
+        boxes,
+        spaceBoxCount,
+        trailingSpaceBoxCount,
+        displayText,
+      );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ParagraphLine &&
+        other.lineMetrics == lineMetrics &&
+        other.ellipsis == ellipsis &&
+        other.startIndex == startIndex &&
+        other.endIndex == endIndex &&
+        other.endIndexWithoutNewlines == endIndexWithoutNewlines &&
+        other.widthWithTrailingSpaces == widthWithTrailingSpaces &&
+        other.boxes == boxes &&
+        other.spaceBoxCount == spaceBoxCount &&
+        other.trailingSpaceBoxCount == trailingSpaceBoxCount &&
+        other.displayText == displayText;
   }
 }
 
@@ -224,7 +272,8 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
 
   // The effective style attributes should be consistent with paragraph_style.h.
   ui.TextAlign get effectiveTextAlign => textAlign ?? ui.TextAlign.start;
-  ui.TextDirection get effectiveTextDirection => textDirection ?? ui.TextDirection.ltr;
+  ui.TextDirection get effectiveTextDirection =>
+      textDirection ?? ui.TextDirection.ltr;
 
   double? get lineHeight {
     // TODO(mdebbar): Implement proper support for strut styles.
@@ -742,8 +791,7 @@ void applyTextStyleToElement({
           _textDecorationToCssString(style.decoration, style.decorationStyle);
       if (textDecoration != null) {
         if (browserEngine == BrowserEngine.webkit) {
-          setElementStyle(
-              element, '-webkit-text-decoration', textDecoration);
+          setElementStyle(element, '-webkit-text-decoration', textDecoration);
         } else {
           cssStyle.textDecoration = textDecoration;
         }
@@ -762,7 +810,8 @@ void applyTextStyleToElement({
 
   final List<ui.FontVariation>? fontVariations = style.fontVariations;
   if (fontVariations != null && fontVariations.isNotEmpty) {
-    cssStyle.setProperty('font-variation-settings', _fontVariationListToCss(fontVariations));
+    cssStyle.setProperty(
+        'font-variation-settings', _fontVariationListToCss(fontVariations));
   }
 }
 

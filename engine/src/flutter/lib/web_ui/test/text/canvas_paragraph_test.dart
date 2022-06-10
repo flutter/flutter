@@ -395,8 +395,8 @@ Future<void> testMain() async {
       // we want to make sure that the "B" box is also popped.
       paragraph.layout(constrain(60));
 
-      final EngineLineMetrics firstLine = paragraph.computeLineMetrics()[0];
-      final EngineLineMetrics secondLine = paragraph.computeLineMetrics()[1];
+      final ParagraphLine firstLine = paragraph.lines[0];
+      final ParagraphLine secondLine = paragraph.lines[1];
 
       // There should be no "B" in the first line's boxes.
       expect(firstLine.boxes, hasLength(2));
