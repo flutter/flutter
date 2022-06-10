@@ -160,7 +160,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     if (argResults!['debug-url'] == null) {
       return null;
     }
-    final Uri uri = Uri.tryParse(stringArgDeprecated('debug-url')!)!;
+    final Uri? uri = Uri.tryParse(stringArgDeprecated('debug-url')!);
     if (uri == null) {
       throwToolExit('Invalid `--debug-url`: ${stringArgDeprecated('debug-url')}');
     }
