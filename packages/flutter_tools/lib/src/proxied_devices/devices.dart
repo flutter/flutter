@@ -520,7 +520,10 @@ class ProxiedPortForwarder extends DevicePortForwarder {
       socket.listen((Uint8List data) {
         unawaited(connection.sendRequest('proxy.write', <String, Object>{
           'id': id,
-        }, data).catchError((Object error, StackTrace stackTrace) {
+        }, data)
+        // TODO(https://github.com/flutter/flutter/issues/105750): Fix this static issue.
+        // ignore: body_might_complete_normally_catch_error
+	.catchError((Object error, StackTrace stackTrace) {
           // Log the error, but proceed normally. Network failure should not
           // crash the tool. If this is critical, the place where the connection
           // is being used would crash.
@@ -537,7 +540,10 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         // Send a proxy disconnect event just in case.
         unawaited(connection.sendRequest('proxy.disconnect', <String, Object>{
           'id': id,
-        }).catchError((Object error, StackTrace stackTrace) {
+        })
+        // TODO(https://github.com/flutter/flutter/issues/105750): Fix this static issue.
+        // ignore: body_might_complete_normally_catch_error
+	.catchError((Object error, StackTrace stackTrace) {
           // Ignore the error here. There might be a race condition when the
           // remote end also disconnects. In any case, this request is just to
           // notify the remote end to disconnect and we should not crash when

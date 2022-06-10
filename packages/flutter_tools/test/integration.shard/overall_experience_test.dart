@@ -297,7 +297,10 @@ Future<ProcessTestResult> runFlutter(
     }
     process.stdin.write('q');
     return -1; // discarded
-  }).catchError((Object error) { /* ignore errors here, they will be reported on the next line */ }));
+  })
+  // TODO(https://github.com/flutter/flutter/issues/105750): Fix this static issue.
+  // ignore: body_might_complete_normally_catch_error
+  .catchError((Object error) { /* ignore errors here, they will be reported on the next line */ }));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
     debugPrint('${stamp()} (process terminated with exit code $exitCode)');
