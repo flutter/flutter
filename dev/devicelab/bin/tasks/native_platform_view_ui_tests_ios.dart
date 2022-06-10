@@ -39,7 +39,7 @@ Future<void> main() async {
     if (!await runXcodeTests(
       platformDirectory: path.join(projectDirectory, 'ios'),
       destination: 'id=${device.deviceId}',
-      testName: 'native_ui_platform_view_tests_ios',
+      testName: 'native_platform_view_ui_tests_ios',
     )) {
       return TaskResult.failure('Platform view XCUITests failed');
     }
