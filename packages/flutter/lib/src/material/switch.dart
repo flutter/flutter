@@ -93,6 +93,7 @@ class Switch extends StatelessWidget {
     this.inactiveThumbImage,
     this.onInactiveThumbImageError,
     this.thumbColor,
+    this.thumbImage,
     this.trackColor,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -137,6 +138,7 @@ class Switch extends StatelessWidget {
     this.onInactiveThumbImageError,
     this.materialTapTargetSize,
     this.thumbColor,
+    this.thumbImage,
     this.trackColor,
     this.dragStartBehavior = DragStartBehavior.start,
     this.mouseCursor,
@@ -280,6 +282,41 @@ class Switch extends StatelessWidget {
   /// | Selected | [ThemeData.toggleableActiveColor] | [ThemeData.toggleableActiveColor] |
   /// | Disabled | `Colors.grey.shade400`            | `Colors.grey.shade800`            |
   final MaterialStateProperty<Color?>? thumbColor;
+
+  /// {@template flutter.material.switch.thumbImage}
+  /// The image of this [Switch]'s thumb.
+  ///
+  /// Resolved in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [thumbImage] based on the current
+  /// [MaterialState] of the [Switch], providing a different [ImageProvider] when it is
+  /// [MaterialState.disabled].
+  ///
+  /// ```dart
+  /// Switch(
+  ///   value: true,
+  ///   onChanged: (_) => true,
+  ///   thumbColor: MaterialStateProperty.resolveWith<ImageProvider>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.disabled)) {
+  ///       return Colors.orange.withOpacity(.48);
+  ///     }
+  ///     return Colors.orange;
+  ///   }),
+  /// )
+  /// ```
+  /// {@end-tool}
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [activeThumbImage] is used in the selected
+  /// state and [inactiveThumbImage] in the default state. If that is also null,
+  /// then the value of [SwitchThemeData.thumbImage] is used. If that is also
+  /// null, then it defaults to null
+  final MaterialStateProperty<ImageProvider?>? thumbImage;
 
   /// {@template flutter.material.switch.trackColor}
   /// The color of this [Switch]'s track.
@@ -465,6 +502,7 @@ class Switch extends StatelessWidget {
       inactiveThumbImage: inactiveThumbImage,
       onInactiveThumbImageError: onInactiveThumbImageError,
       thumbColor: thumbColor,
+      thumbImage: thumbImage,
       trackColor: trackColor,
       materialTapTargetSize: materialTapTargetSize,
       dragStartBehavior: dragStartBehavior,
@@ -523,6 +561,7 @@ class _MaterialSwitch extends StatefulWidget {
     this.inactiveThumbImage,
     this.onInactiveThumbImageError,
     this.thumbColor,
+    this.thumbImage,
     this.trackColor,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -548,6 +587,7 @@ class _MaterialSwitch extends StatefulWidget {
   final ImageProvider? inactiveThumbImage;
   final ImageErrorListener? onInactiveThumbImageError;
   final MaterialStateProperty<Color?>? thumbColor;
+  final MaterialStateProperty<ImageProvider?>? thumbImage;
   final MaterialStateProperty<Color?>? trackColor;
   final MaterialTapTargetSize? materialTapTargetSize;
   final DragStartBehavior dragStartBehavior;
@@ -633,6 +673,18 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         return widget.activeTrackColor;
       }
       return widget.inactiveTrackColor;
+    });
+  }
+
+  MaterialStateProperty<ImageProvider?> get _widgetThumbImage {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return widget.inactiveThumbImage;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return widget.activeThumbImage;
+      }
+      return widget.inactiveThumbImage;
     });
   }
 
@@ -734,7 +786,12 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       ?? _widgetTrackColor.resolve(inactiveStates)
       ?? switchTheme.trackColor?.resolve(inactiveStates)
       ?? _defaultTrackColor.resolve(inactiveStates);
-
+    final ImageProvider? effectiveActiveThumbImage = widget.thumbImage?.resolve(activeStates)
+        ?? _widgetThumbImage.resolve(activeStates)
+        ?? switchTheme.thumbImage?.resolve(activeStates);
+    final ImageProvider? effectiveInactiveThumbImage = widget.thumbImage?.resolve(inactiveStates)
+        ?? _widgetThumbImage.resolve(inactiveStates)
+        ?? switchTheme.thumbImage?.resolve(inactiveStates);
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
@@ -791,9 +848,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..isHovered = states.contains(MaterialState.hovered)
             ..activeColor = effectiveActiveThumbColor
             ..inactiveColor = effectiveInactiveThumbColor
-            ..activeThumbImage = widget.activeThumbImage ?? switchTheme.activeThumbImage
+            ..activeThumbImage = effectiveActiveThumbImage
             ..onActiveThumbImageError = widget.onActiveThumbImageError
-            ..inactiveThumbImage = widget.inactiveThumbImage ?? switchTheme.inactiveThumbImage
+            ..inactiveThumbImage = effectiveInactiveThumbImage
             ..onInactiveThumbImageError = widget.onInactiveThumbImageError
             ..activeTrackColor = effectiveActiveTrackColor
             ..inactiveTrackColor = effectiveInactiveTrackColor

@@ -35,8 +35,7 @@ class SwitchThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.switchTheme].
   const SwitchThemeData({
     this.thumbColor,
-    this.activeThumbImage,
-    this.inactiveThumbImage,
+    this.thumbImage,
     this.trackColor,
     this.materialTapTargetSize,
     this.mouseCursor,
@@ -49,15 +48,10 @@ class SwitchThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Switch.thumbColor].
   final MaterialStateProperty<Color?>? thumbColor;
 
-  /// {@macro flutter.material.switch.activeThumbImage}
+  /// {@macro flutter.material.switch.thumbImage}
   ///
-  /// If specified, overrides the default value of [Switch.activeThumbImage].
-  final ImageProvider? activeThumbImage;
-
-  /// {@macro flutter.material.switch.inactiveThumbImage}
-  ///
-  /// If specified, overrides the default value of [Switch.inactiveThumbImage].
-  final ImageProvider? inactiveThumbImage;
+  /// If specified, overrides the default value of [Switch.thumbImage].
+  final MaterialStateProperty<ImageProvider?>? thumbImage;
 
   /// {@macro flutter.material.switch.trackColor}
   ///
@@ -89,8 +83,7 @@ class SwitchThemeData with Diagnosticable {
   /// new values.
   SwitchThemeData copyWith({
     MaterialStateProperty<Color?>? thumbColor,
-    ImageProvider? activeThumbImage,
-    ImageProvider? inactiveThumbImage,
+    MaterialStateProperty<ImageProvider?>? thumbImage,
     MaterialStateProperty<Color?>? trackColor,
     MaterialTapTargetSize? materialTapTargetSize,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
@@ -99,8 +92,7 @@ class SwitchThemeData with Diagnosticable {
   }) {
     return SwitchThemeData(
       thumbColor: thumbColor ?? this.thumbColor,
-      activeThumbImage: activeThumbImage ?? this.activeThumbImage,
-      inactiveThumbImage: inactiveThumbImage ?? this.inactiveThumbImage,
+      thumbImage: thumbImage,
       trackColor: trackColor ?? this.trackColor,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -115,8 +107,7 @@ class SwitchThemeData with Diagnosticable {
   static SwitchThemeData lerp(SwitchThemeData? a, SwitchThemeData? b, double t) {
     return SwitchThemeData(
       thumbColor: MaterialStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
-      activeThumbImage: t < 0.5 ? a?.activeThumbImage : b?.activeThumbImage,
-      inactiveThumbImage: t < 0.5 ? a?.inactiveThumbImage : b?.inactiveThumbImage,
+      thumbImage: t < 0.5 ? a?.thumbImage : b?.thumbImage,
       trackColor: MaterialStateProperty.lerp<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
@@ -128,8 +119,7 @@ class SwitchThemeData with Diagnosticable {
   @override
   int get hashCode => Object.hash(
     thumbColor,
-    activeThumbImage,
-    inactiveThumbImage,
+    thumbImage,
     trackColor,
     materialTapTargetSize,
     mouseCursor,
@@ -147,8 +137,7 @@ class SwitchThemeData with Diagnosticable {
     }
     return other is SwitchThemeData
       && other.thumbColor == thumbColor
-      && other.activeThumbImage == activeThumbImage
-      && other.inactiveThumbImage == inactiveThumbImage
+      && other.thumbImage == thumbImage
       && other.trackColor == trackColor
       && other.materialTapTargetSize == materialTapTargetSize
       && other.mouseCursor == mouseCursor
@@ -160,6 +149,7 @@ class SwitchThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<ImageProvider?>>('thumbImage', thumbImage, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));

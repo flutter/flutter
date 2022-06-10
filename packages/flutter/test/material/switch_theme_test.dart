@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../image_data.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
@@ -18,8 +20,7 @@ void main() {
   test('SwitchThemeData defaults', () {
     const SwitchThemeData themeData = SwitchThemeData();
     expect(themeData.thumbColor, null);
-    expect(themeData.activeThumbImage, null);
-    expect(themeData.inactiveThumbImage, null);
+    expect(themeData.thumbImage, null);
     expect(themeData.trackColor, null);
     expect(themeData.mouseCursor, null);
     expect(themeData.materialTapTargetSize, null);
@@ -28,8 +29,7 @@ void main() {
 
     const SwitchTheme theme = SwitchTheme(data: SwitchThemeData(), child: SizedBox());
     expect(theme.data.thumbColor, null);
-    expect(theme.data.activeThumbImage, null);
-    expect(theme.data.inactiveThumbImage, null);
+    expect(themeData.thumbImage, null);
     expect(theme.data.trackColor, null);
     expect(theme.data.mouseCursor, null);
     expect(theme.data.materialTapTargetSize, null);
@@ -50,13 +50,15 @@ void main() {
   });
 
   testWidgets('SwitchThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final Uint8List thumbImageBytes = Uint8List.fromList(kBlueRectPng);
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const SwitchThemeData(
-      thumbColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
-      trackColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
-      mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
+    SwitchThemeData(
+      thumbColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
+      thumbImage: MaterialStatePropertyAll<ImageProvider>(MemoryImage(thumbImageBytes)),
+      trackColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
+      mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
+      overlayColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
       splashRadius: 1.0,
     ).debugFillProperties(builder);
 
@@ -66,11 +68,12 @@ void main() {
       .toList();
 
     expect(description[0], 'thumbColor: MaterialStatePropertyAll(Color(0xfffffff0))');
-    expect(description[1], 'trackColor: MaterialStatePropertyAll(Color(0xfffffff1))');
-    expect(description[2], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[3], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
-    expect(description[4], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
-    expect(description[5], 'splashRadius: 1.0');
+    expect(description[1], 'thumbImage: MaterialStatePropertyAll(MemoryImage(Uint8List#${shortHash(thumbImageBytes)}, scale: 1.0))');
+    expect(description[2], 'trackColor: MaterialStatePropertyAll(Color(0xfffffff1))');
+    expect(description[3], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
+    expect(description[4], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
+    expect(description[5], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
+    expect(description[6], 'splashRadius: 1.0');
   });
 
   testWidgets('Switch is themeable', (WidgetTester tester) async {
@@ -78,6 +81,8 @@ void main() {
 
     const Color defaultThumbColor = Color(0xfffffff0);
     const Color selectedThumbColor = Color(0xfffffff1);
+    final ImageProvider defaultThumbImage = MemoryImage(Uint8List.fromList(kBlueRectPng));
+    final ImageProvider selectedThumbImage = MemoryImage(Uint8List.fromList(kTransparentImage));
     const Color defaultTrackColor = Color(0xfffffff2);
     const Color selectedTrackColor = Color(0xfffffff3);
     const MouseCursor mouseCursor = SystemMouseCursors.text;
@@ -95,6 +100,12 @@ void main() {
                 return selectedThumbColor;
               }
               return defaultThumbColor;
+            }),
+            thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return selectedThumbImage;
+              }
+              return defaultThumbImage;
             }),
             trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
@@ -141,6 +152,7 @@ void main() {
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+    // TODO(kirolous-nashaat): verify that defaultThumbImage is used.
 
     // Selected switch.
     await tester.pumpWidget(buildSwitch(selected: true));
@@ -154,6 +166,7 @@ void main() {
         ..circle()
         ..circle(color: selectedThumbColor),
     );
+    // TODO(kirolous-nashaat): verify that selectedThumbImage is used.
 
     // Switch with hover.
     await tester.pumpWidget(buildSwitch());
@@ -173,6 +186,8 @@ void main() {
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
     const Color themeSelectedThumbColor = Color(0xfffffff1);
+    final ImageProvider themeDefaultThumbImage = MemoryImage(Uint8List.fromList(kBlueRectPng));
+    final ImageProvider themeSelectedThumbImage = MemoryImage(Uint8List.fromList(kTransparentImage));
     const Color themeDefaultTrackColor = Color(0xfffffff2);
     const Color themeSelectedTrackColor = Color(0xfffffff3);
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
@@ -200,6 +215,12 @@ void main() {
                 return themeSelectedThumbColor;
               }
               return themeDefaultThumbColor;
+            }),
+            thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return themeSelectedThumbImage;
+              }
+              return themeDefaultThumbImage;
             }),
             trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
@@ -262,6 +283,7 @@ void main() {
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+    // TODO(kirolous-nashaat): verify that themeDefaultThumbImage is used.
 
     // Selected switch.
     await tester.pumpWidget(buildSwitch(selected: true));
@@ -275,6 +297,7 @@ void main() {
         ..circle()
         ..circle(color: selectedThumbColor),
     );
+    // TODO(kirolous-nashaat): verify that themeSelectedThumbImage is used.
 
     // Switch with hover.
     await tester.pumpWidget(buildSwitch());
@@ -294,11 +317,15 @@ void main() {
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
     const Color themeSelectedThumbColor = Color(0xfffffff1);
+    final ImageProvider themeDefaultThumbImage = MemoryImage(Uint8List.fromList(kBlueRectPng));
+    final ImageProvider themeSelectedThumbImage = MemoryImage(Uint8List.fromList(kTransparentImage));
     const Color themeDefaultTrackColor = Color(0xfffffff2);
     const Color themeSelectedTrackColor = Color(0xfffffff3);
 
     const Color defaultThumbColor = Color(0xffffff0f);
     const Color selectedThumbColor = Color(0xffffff1f);
+    final ImageProvider defaultThumbImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+    final ImageProvider selectedThumbImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
     const Color defaultTrackColor = Color(0xffffff2f);
     const Color selectedTrackColor = Color(0xffffff3f);
 
@@ -311,6 +338,12 @@ void main() {
                 return themeSelectedThumbColor;
               }
               return themeDefaultThumbColor;
+            }),
+            thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return themeSelectedThumbImage;
+              }
+              return themeDefaultThumbImage;
             }),
             trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
@@ -327,6 +360,8 @@ void main() {
             autofocus: autofocus,
             activeColor: selectedThumbColor,
             inactiveThumbColor: defaultThumbColor,
+            activeThumbImage: selectedThumbImage,
+            inactiveThumbImage: defaultThumbImage,
             activeTrackColor: selectedTrackColor,
             inactiveTrackColor: defaultTrackColor,
           ),
@@ -346,6 +381,7 @@ void main() {
         ..circle()
         ..circle(color: defaultThumbColor),
     );
+    // TODO(kirolous-nashaat): verify that defaultThumbImage is used.
 
     // Selected switch.
     await tester.pumpWidget(buildSwitch(selected: true));
@@ -359,6 +395,7 @@ void main() {
         ..circle()
         ..circle(color: selectedThumbColor),
     );
+    // TODO(kirolous-nashaat): verify that selectedThumbImage is used.
   });
 
   testWidgets('Switch theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
@@ -426,23 +463,28 @@ void main() {
 
   testWidgets('Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
     const Color globalThemeThumbColor = Color(0xfffffff1);
+    final ImageProvider globalThemeThumbImage = MemoryImage(Uint8List.fromList(kBlueRectPng));
     const Color globalThemeTrackColor = Color(0xfffffff2);
+
     const Color localThemeThumbColor = Color(0xffff0000);
+    final ImageProvider localThemeThumbImage = MemoryImage(Uint8List.fromList(kTransparentImage));
     const Color localThemeTrackColor = Color(0xffff0000);
 
     Widget buildSwitch({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
         theme: ThemeData(
-          switchTheme: const SwitchThemeData(
-            thumbColor: MaterialStatePropertyAll<Color>(globalThemeThumbColor),
-            trackColor: MaterialStatePropertyAll<Color>(globalThemeTrackColor),
+          switchTheme: SwitchThemeData(
+            thumbColor: const MaterialStatePropertyAll<Color>(globalThemeThumbColor),
+            thumbImage: MaterialStatePropertyAll<ImageProvider>(globalThemeThumbImage),
+            trackColor: const MaterialStatePropertyAll<Color>(globalThemeTrackColor),
           ),
         ),
         home: Scaffold(
           body: SwitchTheme(
-            data: const SwitchThemeData(
-              thumbColor: MaterialStatePropertyAll<Color>(localThemeThumbColor),
-              trackColor: MaterialStatePropertyAll<Color>(localThemeTrackColor),
+            data: SwitchThemeData(
+              thumbColor: const MaterialStatePropertyAll<Color>(localThemeThumbColor),
+              thumbImage: MaterialStatePropertyAll<ImageProvider>(localThemeThumbImage),
+              trackColor: const MaterialStatePropertyAll<Color>(localThemeTrackColor),
             ),
             child: Switch(
               value: selected,
@@ -465,6 +507,7 @@ void main() {
         ..circle()
         ..circle(color: localThemeThumbColor),
     );
+    // TODO(kirolous-nashaat): verify that localThemeThumbImage is used.
   });
 }
 
