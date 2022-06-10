@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
@@ -562,6 +563,33 @@ extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
   external void send();
 }
 
+Future<DomXMLHttpRequest> domHttpRequest(String url, {String? responseType}) {
+  final Completer<DomXMLHttpRequest> completer = Completer<DomXMLHttpRequest>();
+  final DomXMLHttpRequest xhr = createDomXMLHttpRequest();
+  const String method = 'GET';
+  xhr.open(method, url, /* async */ true);
+  if (responseType != null) {
+    xhr.responseType = responseType;
+  }
+
+  xhr.addEventListener('load', allowInterop((DomEvent e) {
+    final int status = xhr.status!;
+    final bool accepted = status >= 200 && status < 300;
+    final bool fileUri = status == 0;
+    final bool notModified = status == 304;
+    final bool unknownRedirect = status > 307 && status < 400;
+    if (accepted || fileUri || notModified || unknownRedirect) {
+      completer.complete(xhr);
+    } else {
+      completer.completeError(e);
+    }
+  }));
+
+  xhr.addEventListener('error', allowInterop(completer.completeError));
+  xhr.send();
+  return completer.future;
+}
+
 @JS()
 @staticInterop
 class DomResponse {}
@@ -820,6 +848,14 @@ Object? domCallConstructorString(String constructorName, List<Object?> args) {
     return null;
   }
   return js_util.callConstructor(constructor, args);
+}
+
+String? domGetConstructorName(Object o) {
+  final Object? constructor = js_util.getProperty(o, 'constructor');
+  if (constructor == null) {
+    return '';
+  }
+  return js_util.getProperty(constructor, 'name')?.toString();
 }
 
 bool domInstanceOfString(Object? element, String objectType) =>
