@@ -9,7 +9,7 @@ void main() {
   // enableFlutterDriverExtension() will disable keyboard,
   // which is required for flutter_driver tests
   // But breaks the XCUITests
-  if (const bool.fromEnvironment('ENABLE_DRIVER_EXTENSION', defaultValue: false)) {
+  if (const bool.fromEnvironment('ENABLE_DRIVER_EXTENSION')) {
     enableFlutterDriverExtension();
   }
   runApp(const MyApp());
@@ -130,7 +130,7 @@ class _FocusTestPageState extends State<FocusTestPage> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
-    _controller.text = "Flutter Text Field";
+    _controller.text = 'Flutter Text Field';
   }
 
   @override
