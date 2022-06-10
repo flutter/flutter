@@ -3112,7 +3112,7 @@ Future<void> main() async {
               child: GridView.count(
                 crossAxisCount: 3,
                 shrinkWrap: true,
-                children: [
+                children: <Widget>[
                   Image(image: imageProvider, key: imageKey1),
                 ],
               ),
@@ -3129,7 +3129,7 @@ Future<void> main() async {
               child: GridView.count(
                 crossAxisCount: 3,
                 shrinkWrap: true,
-                children: [
+                children: <Widget>[
                   Image(image: imageProvider, key: imageKey2),
                 ],
               ),
