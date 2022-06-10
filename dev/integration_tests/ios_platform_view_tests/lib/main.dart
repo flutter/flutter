@@ -130,7 +130,7 @@ class _FocusTestPageState extends State<FocusTestPage> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
-    _controller.text = "Flutter Text Input";
+    _controller.text = "Flutter Text Field";
   }
 
   @override

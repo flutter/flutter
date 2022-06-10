@@ -2,42 +2,51 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <XCTest/XCTest.h>
+
+@import XCTest;
+
+@interface XCUIElement(KeyboardFocus)
+@property (nonatomic, readonly) BOOL flt_hasKeyboardFocus;
+@end
+
+@implementation XCUIElement(KeyboardFocus)
+- (BOOL)flt_hasKeyboardFocus {
+  return [[self valueForKey:@"hasKeyboardFocus"] boolValue];
+}
+@end
 
 @interface PlatformViewUITests : XCTestCase
-
+@property (strong) XCUIApplication *app;
 @end
 
 @implementation PlatformViewUITests
 
 - (void)setUp {
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+  self.continueAfterFailure = NO;
 
-    // In UI tests it is usually best to stop immediately when a failure occurs.
-    self.continueAfterFailure = NO;
-
-    // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+  self.app = [[XCUIApplication alloc] init];
+  [self.app launch];
 }
+- (void)testPlatformViewFocus {
 
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-}
+  XCUIElement *entranceButton = self.app.buttons[@"platform view focus test"];
+  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:1]);
+  [entranceButton tap];
 
-- (void)testExample {
-    // UI tests must launch the application that they test.
-    XCUIApplication *app = [[XCUIApplication alloc] init];
-    [app launch];
+  XCUIElement *platformView = self.app.textFields[@"platform_view[0]"];
+  XCTAssertTrue([platformView waitForExistenceWithTimeout:1]);
+  XCUIElement *flutterTextField = self.app.textFields[@"Flutter Text Field"];
+  XCTAssertTrue([flutterTextField waitForExistenceWithTimeout:1]);
 
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
-}
+  [flutterTextField tap];
+  XCTAssertTrue([self.app.windows.element waitForExistenceWithTimeout:1]);
+  XCTAssertFalse(platformView.flt_hasKeyboardFocus);
+  XCTAssertTrue(flutterTextField.flt_hasKeyboardFocus);
 
-- (void)testLaunchPerformance {
-    if (@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *)) {
-        // This measures how long it takes to launch your application.
-        [self measureWithMetrics:@[[[XCTApplicationLaunchMetric alloc] init]] block:^{
-            [[[XCUIApplication alloc] init] launch];
-        }];
-    }
+  // Tapping on platformView should unfocus the previously focused flutterTextField
+  [platformView tap];
+  XCTAssertTrue(platformView.flt_hasKeyboardFocus);
+  XCTAssertFalse(flutterTextField.flt_hasKeyboardFocus);
 }
 
 @end
