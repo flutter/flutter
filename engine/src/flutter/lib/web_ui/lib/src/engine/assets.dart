@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'dom.dart';
@@ -58,26 +57,34 @@ class AssetManager {
     return Uri.encodeFull((_baseUrl ?? '') + '$assetsDir/$asset');
   }
 
-  /// Loads an asset using an [html.HttpRequest] and returns data as [ByteData].
+  /// Loads an asset using an [DomXMLHttpRequest] and returns data as [ByteData].
   Future<ByteData> load(String asset) async {
     final String url = getAssetUrl(asset);
     try {
-      final html.HttpRequest request =
-          await html.HttpRequest.request(url, responseType: 'arraybuffer');
+      final DomXMLHttpRequest request =
+          await domHttpRequest(url, responseType: 'arraybuffer');
 
       final ByteBuffer response = request.response as ByteBuffer;
       return response.asByteData();
-    } on html.ProgressEvent catch (e) {
-      final html.EventTarget? target = e.target;
-      if (target is html.HttpRequest) {
-        if (target.status == 404 && asset == 'AssetManifest.json') {
+    } catch (e) {
+      if (!domInstanceOfString(e, 'ProgressEvent')){
+        rethrow;
+      }
+      final DomProgressEvent p = e as DomProgressEvent;
+      final DomEventTarget? target = p.target;
+      if (domInstanceOfString(target,'XMLHttpRequest')) {
+        final DomXMLHttpRequest request = target! as DomXMLHttpRequest;
+        if (request.status == 404 && asset == 'AssetManifest.json') {
           printWarning('Asset manifest does not exist at `$url` – ignoring.');
           return Uint8List.fromList(utf8.encode('{}')).buffer.asByteData();
         }
-        throw AssetManagerException(url, target.status!);
+        throw AssetManagerException(url, request.status!);
       }
 
-      printWarning('Caught ProgressEvent with target: $target');
+      final String? constructorName = target == null ? 'null' :
+          domGetConstructorName(target);
+      printWarning('Caught ProgressEvent with unknown target: '
+          '$constructorName');
       rethrow;
     }
   }
