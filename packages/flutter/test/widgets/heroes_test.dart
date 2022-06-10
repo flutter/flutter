@@ -3155,8 +3155,6 @@ Future<void> main() async {
       expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
-
-      testBinding.window.clearAllTestValues();
     },
   );
 }

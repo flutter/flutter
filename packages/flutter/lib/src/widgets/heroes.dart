@@ -136,13 +136,16 @@ enum HeroFlightDirection {
 /// To make the animations look good, it's critical that the widget tree for the
 /// hero in both locations be essentially identical. The widget of the *target*
 /// is, by default, used to do the transition: when going from route A to route
-/// B, route B's hero's widget is placed over route A's hero's widget. However,
-/// if the hero uses information from InheritedWidgets, and the inherited data
-/// are different between the starting tree and the target tree, there will be
-/// an ugly jumping animation unless that data is properly interpolated. By
-/// default, Hero interpolates MediaQuery's paddings. If your hero uses custom
-/// InheritedWidgets and displays jumping animation, try to provide custom
-/// in-flight transition using flightShuttleBuilder.
+/// B, route B's hero's widget is placed over route A's hero's widget. Additionally,
+/// if the [Hero] subtree changes appearance based on an InheritedWidget in route A
+/// or route B (such as MediaQuery or Theme), and the inherited data are different
+/// between the starting tree and the target tree, there will be a discontinuity
+/// in the animation unless that data is properly interpolated. For example if
+/// both routes provide MediaQuery but with different paddings, you may see
+/// jumps/gaps. The default [flightShuttleBuilder] interpolates [MediaQuery]'s
+/// paddings. If your [Hero] widget uses custom [InheritedWidget]s and displays
+/// a discontinuity in the animation, try to provide custom in-flight transition
+/// using [flightShuttleBuilder].
 ///
 /// By default, both route A and route B's heroes are hidden while the
 /// transitioning widget is animating in-flight above the 2 routes.
