@@ -1293,7 +1293,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          buildContextMenu: widget.buildContextMenu ?? (BuildContext context, ContextMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
+          buildContextMenu: widget.buildContextMenu ?? (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
             return DefaultTextSelectionToolbar(
               primaryAnchor: primaryAnchor,
               secondaryAnchor: secondaryAnchor,

@@ -2505,7 +2505,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
       buildContextMenu: (
         BuildContext context,
-        ContextMenuController controller,
         Offset primaryAnchor,
         Offset? secondaryAnchor,
       ) {
@@ -2514,7 +2513,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
         return widget.buildContextMenu!(
           context,
-          controller,
           this,
           primaryAnchor,
           secondaryAnchor,

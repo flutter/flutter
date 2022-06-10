@@ -39,7 +39,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 ///  * [ContextMenuBuilder], which doesn't include the buttonDatas.
 typedef SelectableRegionContextMenuBuilder = Widget Function(
   BuildContext context,
-  ContextMenuController controller,
   List<ContextualMenuButtonData> buttonDatas,
   Offset primaryAnchor,
   Offset? secondaryAnchor,
@@ -235,8 +234,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
                                         || _selectionDelegate.value.endSelectionPoint != null;
 
   Orientation? _lastOrientation;
-
-  ContextMenuController? _contextMenuController;
 
   @override
   void initState() {
@@ -608,7 +605,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       return false;
     }
 
-    _contextMenuController?.dispose();
+    ContextMenuController.hide();
 
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
       return false;
@@ -628,12 +625,11 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     }
 
     // TODO(justinmc): Is there ever a reason to use a secondary anchor?
-    _contextMenuController = ContextMenuController(
+    ContextMenuController.show(
       context: context,
       primaryAnchor: location,
       buildContextMenu: (
         BuildContext context,
-        ContextMenuController controller,
         Offset primaryAnchor,
         Offset? secondaryAnchor,
       ) {
@@ -641,20 +637,19 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
             _selectable?.getSelectedContent()?.plainText;
         return widget.buildContextMenu!(
           context,
-          controller,
           <ContextualMenuButtonData>[
             if (selectedText != null && selectedText != '')
               ContextualMenuButtonData(
                 onPressed: () {
                   copySelection(SelectionChangedCause.toolbar);
-                  controller.dispose();
+                  ContextMenuController.hide();
                 },
                 type: DefaultContextualMenuButtonType.copy,
               ),
             ContextualMenuButtonData(
               onPressed: () {
                 selectAll(SelectionChangedCause.toolbar);
-                controller.dispose();
+                ContextMenuController.hide();
               },
               type: DefaultContextualMenuButtonType.selectAll,
             ),
@@ -810,8 +805,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       _selectionOverlay?.hideHandles();
     }
     // TODO(justinmc): What of the above is still needed?
-    _contextMenuController?.dispose();
-    _contextMenuController = null;
+    ContextMenuController.hide();
   }
 
   @override

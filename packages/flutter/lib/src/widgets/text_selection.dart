@@ -357,8 +357,6 @@ class TextSelectionOverlay {
     _effectiveToolbarVisibility.value = renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value;
   }
 
-  ContextMenuController? _contextMenuController;
-
   /// Whether selection handles are visible.
   ///
   /// Set to false if you want to hide the handles. Use this property to show or
@@ -394,7 +392,7 @@ class TextSelectionOverlay {
     _selectionOverlay.showToolbar();
     */
 
-    _contextMenuController?.dispose();
+    ContextMenuController.hide();
 
     // If right clicking on desktop, use the right click position as the only
     /// anchor.
@@ -409,7 +407,7 @@ class TextSelectionOverlay {
         case TargetPlatform.windows:
           // TODO(justinmc): Should ContextMenuController be a singleton to enforce
           // that there can be only one?
-          _contextMenuController = ContextMenuController(
+          ContextMenuController.show(
             context: context,
             primaryAnchor: renderObject.lastSecondaryTapDownPosition!,
             buildContextMenu: buildContextMenu,
@@ -456,7 +454,7 @@ class TextSelectionOverlay {
       editingRegion.top + endTextSelectionPoint.point.dy,
     );
 
-    _contextMenuController = ContextMenuController(
+    ContextMenuController.show(
       context: context,
       primaryAnchor: anchorAbove,
       secondaryAnchor: anchorBelow,
@@ -511,7 +509,7 @@ class TextSelectionOverlay {
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
 
   /// Whether the toolbar is currently visible.
-  bool get toolbarIsVisible => _contextMenuController != null;
+  bool get toolbarIsVisible => ContextMenuController.isShown;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
   //void hide() => _selectionOverlay.hide();
@@ -528,8 +526,7 @@ class TextSelectionOverlay {
     _contextualMenuController!.dispose();
     _contextualMenuController = null;
     */
-    _contextMenuController?.dispose();
-    _contextMenuController = null;
+    ContextMenuController.hide();
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}

@@ -35,7 +35,6 @@ typedef ContextualMenuBuilder = Widget Function(
 /// Builds a context menu.
 typedef ContextMenuBuilder = Widget Function(
   BuildContext,
-  ContextMenuController,
   Offset,
   Offset?,
 );
@@ -49,7 +48,6 @@ typedef ContextMenuBuilder = Widget Function(
 ///    menu builder, not just for the editable text selection toolbar.
 typedef EditableTextToolbarBuilder = Widget Function(
   BuildContext,
-  ContextMenuController,
   EditableTextState,
   Offset,
   Offset?,
@@ -59,36 +57,25 @@ typedef EditableTextToolbarBuilder = Widget Function(
 // that get passed a controller call dispose on it, then it's done for.
 /// Builds and manages a conext menu at the given location.
 class ContextMenuController {
-  // TODO(justinmc): Update method for efficiency of moving the menu?
-  /// Creates an instance of [ContextMenuController].
-  ContextMenuController({
-    // TODO(justinmc): Accept these or just BuildContext?
-    required ContextMenuBuilder buildContextMenu,
-    required BuildContext context,
-    required Offset primaryAnchor,
-    Offset? secondaryAnchor,
-    Widget? debugRequiredFor,
-  }) {
-    _insert(
-      context: context,
-      buildMenu: buildContextMenu,
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      debugRequiredFor: debugRequiredFor,
-    );
-  }
+  ContextMenuController._();
 
   // The OverlayEntry is static because only one contextual menu can be
   // displayed at one time.
   static OverlayEntry? _menuOverlayEntry;
 
-  void _insert({
-    required ContextMenuBuilder buildMenu,
+  // TODO(justinmc): Update method for efficiency of moving the menu?
+  /// Shows the given context menu at the location.
+  static void show({
+    // TODO(justinmc): Accept these or just BuildContext?
+    required ContextMenuBuilder buildContextMenu,
     required BuildContext context,
+    // TODO(justinmc): Instead of 2 anchors, take a Rect? Or that's not enough
+    // info because selection is not always a Rect?
     required Offset primaryAnchor,
     Offset? secondaryAnchor,
     Widget? debugRequiredFor,
   }) {
+    hide();
     final OverlayState? overlayState = Overlay.of(
       context,
       rootOverlay: true,
@@ -101,24 +88,17 @@ class ContextMenuController {
 
     _menuOverlayEntry = OverlayEntry(
       builder: (BuildContext context) {
-        return Stack(
-          children: <Widget>[
-            ModalBarrier(
-              onDismiss: dispose,
-            ),
-            capturedThemes.wrap(buildMenu(context, this, primaryAnchor, secondaryAnchor)),
-          ],
-        );
+        return capturedThemes.wrap(buildContextMenu(context, primaryAnchor, secondaryAnchor));
       },
     );
     overlayState!.insert(_menuOverlayEntry!);
   }
 
   /// True iff the menu is currently being displayed.
-  bool get isVisible => _menuOverlayEntry != null;
+  static bool get isShown => _menuOverlayEntry != null;
 
   /// Remove the menu.
-  void dispose() {
+  static void hide() {
     _menuOverlayEntry?.remove();
     _menuOverlayEntry = null;
   }
@@ -571,14 +551,12 @@ class ContextMenu extends StatefulWidget {
 class _ContextMenuState extends State<ContextMenu> {
   Offset? _longPressOffset;
 
-  ContextMenuController? _contextMenuController;
-
   void _onSecondaryTapUp(TapUpDetails details) {
     _show(details.globalPosition);
   }
 
   void _onTap() {
-    if (!(_contextMenuController?.isVisible ?? false)) {
+    if (!ContextMenuController.isShown) {
       return;
     }
     _hide();
@@ -595,7 +573,7 @@ class _ContextMenuState extends State<ContextMenu> {
   }
 
   void _show(Offset position) {
-    _contextMenuController = ContextMenuController(
+    ContextMenuController.show(
       context: context,
       primaryAnchor: position,
       buildContextMenu: widget.buildContextMenu,
@@ -603,7 +581,7 @@ class _ContextMenuState extends State<ContextMenu> {
   }
 
   void _hide() {
-    _contextMenuController?.dispose();
+    ContextMenuController.hide();
   }
 
   @override

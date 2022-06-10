@@ -714,7 +714,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,
-        buildContextMenu: widget.buildContextMenu ?? (BuildContext context, ContextMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
+        buildContextMenu: widget.buildContextMenu ?? (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
           return DefaultTextSelectionToolbar(
             primaryAnchor: primaryAnchor,
             secondaryAnchor: secondaryAnchor,
