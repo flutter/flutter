@@ -74,7 +74,7 @@ Future<int> run(
         // This catches all exceptions to send to crash logging, etc.
         firstError = error;
         firstStackTrace = stackTrace;
-        return _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
+        return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion);
       }
     }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
@@ -82,7 +82,7 @@ Future<int> run(
       // to send the original error that triggered the crash report.
       firstError ??= error;
       firstStackTrace ??= stackTrace;
-      await _handleToolError(firstError!, firstStackTrace, verbose, args, reportCrashes, getVersion);
+      await _handleToolError(firstError!, firstStackTrace, verbose, args, reportCrashes!, getVersion);
     });
   }, overrides: overrides);
 }
@@ -92,7 +92,7 @@ Future<int> _handleToolError(
   StackTrace? stackTrace,
   bool verbose,
   List<String> args,
-  bool? reportCrashes,
+  bool reportCrashes,
   String Function() getFlutterVersion,
 ) async {
   if (error is UsageException) {
@@ -120,7 +120,7 @@ Future<int> _handleToolError(
     // We've crashed; emit a log report.
     globals.stdio.stderrWrite('\n');
 
-    if (!reportCrashes!) {
+    if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
       globals.stdio.stderrWrite('$error\n');
       globals.stdio.stderrWrite('$stackTrace\n');

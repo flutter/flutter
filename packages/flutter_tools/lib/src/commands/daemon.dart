@@ -1001,9 +1001,9 @@ class DeviceDomain extends Domain {
       ),
       mainPath: _getStringArg(args, 'mainPath'),
       route: _getStringArg(args, 'route'),
-      platformArgs: castStringKeyedMap(args['platformArgs'])!,
-      prebuiltApplication: _getBoolArg(args, 'prebuiltApplication')!,
-      ipv6: _getBoolArg(args, 'ipv6')!,
+      platformArgs: castStringKeyedMap(args['platformArgs']) ?? const <String, Object>{},
+      prebuiltApplication: _getBoolArg(args, 'prebuiltApplication') ?? false,
+      ipv6: _getBoolArg(args, 'ipv6') ?? false,
       userIdentifier: _getStringArg(args, 'userIdentifier'),
     );
     return <String, dynamic>{
@@ -1080,10 +1080,10 @@ class DevToolsDomain extends Domain {
 
   Future<Map<String, dynamic>> serve([ Map<String, dynamic>? args ]) async {
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    final DevToolsServerAddress server = await _devtoolsLauncher!.serve();
+    final DevToolsServerAddress? server = await _devtoolsLauncher?.serve();
     return<String, dynamic>{
-      'host': server.host,
-      'port': server.port,
+      'host': server?.host,
+      'port': server?.port,
     };
   }
 
