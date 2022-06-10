@@ -281,7 +281,8 @@ Future<vm_service.VmService> setUpVmService(
     // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
-      // TODO(https://github.com/flutter/flutter/issues/105750): Fix this static issue.
+      // TODO(srawlins): Fix this static issue,
+      // https://github.com/flutter/flutter/issues/105750.
       // ignore: body_might_complete_normally_catch_error
       .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
     );

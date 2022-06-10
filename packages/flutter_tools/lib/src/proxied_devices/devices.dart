@@ -521,7 +521,8 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         unawaited(connection.sendRequest('proxy.write', <String, Object>{
           'id': id,
         }, data)
-        // TODO(https://github.com/flutter/flutter/issues/105750): Fix this static issue.
+        // TODO(srawlins): Fix this static issue,
+        // https://github.com/flutter/flutter/issues/105750.
         // ignore: body_might_complete_normally_catch_error
 	.catchError((Object error, StackTrace stackTrace) {
           // Log the error, but proceed normally. Network failure should not
@@ -541,7 +542,8 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         unawaited(connection.sendRequest('proxy.disconnect', <String, Object>{
           'id': id,
         })
-        // TODO(https://github.com/flutter/flutter/issues/105750): Fix this static issue.
+        // TODO(srawlins): Fix this static issue,
+        // https://github.com/flutter/flutter/issues/105750.
         // ignore: body_might_complete_normally_catch_error
 	.catchError((Object error, StackTrace stackTrace) {
           // Ignore the error here. There might be a race condition when the

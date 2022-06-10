@@ -141,7 +141,8 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     if (resultFuture != null) {
       _pendingMessages.add(resultFuture);
       resultFuture
-        // TODO(https://github.com/flutter/flutter/issues/105750): Fix this static issue.
+        // TODO(srawlins): Fix this static issue,
+        // https://github.com/flutter/flutter/issues/105750.
         // ignore: body_might_complete_normally_catch_error
         .catchError((Object error) { /* errors are the responsibility of the caller */ })
         .whenComplete(() => _pendingMessages.remove(resultFuture));
