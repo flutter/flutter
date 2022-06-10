@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/temp_directory_validator.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -142,6 +143,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         featureFlags: featureFlags,
         httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
+      //TempDirectoryValidator(
+      //  globals.fs
+      //),
     ];
     return _validators!;
   }
