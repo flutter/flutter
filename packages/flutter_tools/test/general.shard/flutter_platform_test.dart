@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,11 +17,11 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  FileSystem fileSystem;
+  FileSystem? fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fileSystem
+    fileSystem!
       .file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion":2,"packages":[]}');
@@ -80,7 +80,7 @@ void main() {
         ),
       ), throwsAssertionError);
 
-      FlutterPlatform capturedPlatform;
+      FlutterPlatform? capturedPlatform;
       final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
       final FlutterPlatform flutterPlatform = installHook(
         shellPath: 'abc',

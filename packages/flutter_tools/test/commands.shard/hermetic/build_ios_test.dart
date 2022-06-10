@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -28,21 +28,21 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   @override
   Future<Map<String, String>> getBuildSettings(
       String projectPath, {
-        XcodeProjectBuildContext buildContext,
+        XcodeProjectBuildContext? buildContext,
         Duration timeout = const Duration(minutes: 1),
       }) async {
     return <String, String>{
       'PRODUCT_BUNDLE_IDENTIFIER': productBundleIdentifier ?? 'io.flutter.someProject',
       'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
       'WRAPPER_NAME': 'Runner.app',
-      if (developmentTeam != null) 'DEVELOPMENT_TEAM': developmentTeam,
+      if (developmentTeam != null) 'DEVELOPMENT_TEAM': developmentTeam!,
     };
   }
 
   /// The value of 'PRODUCT_BUNDLE_IDENTIFIER'.
-  final String productBundleIdentifier;
+  final String? productBundleIdentifier;
 
-  final String developmentTeam;
+  final String? developmentTeam;
 }
 
 final Platform macosPlatform = FakePlatform(
@@ -59,8 +59,8 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-  TestUsage usage;
+  FileSystem? fileSystem;
+  TestUsage? usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -73,16 +73,16 @@ void main() {
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
   void createCoreMockProjectFiles() {
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem!.file('pubspec.yaml').createSync();
+    fileSystem!.file('.packages').createSync();
+    fileSystem!.file(fileSystem!.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
   // Sets up the minimal mock project files necessary for iOS builds to succeed.
   void createMinimalMockProjectFiles() {
-    fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
+    fileSystem!.directory(fileSystem!.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
+    fileSystem!.directory(fileSystem!.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
+    fileSystem!.file(fileSystem!.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
     createCoreMockProjectFiles();
   }
 
@@ -90,7 +90,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpRsyncCommand({void Function() onRun}) {
+  FakeCommand setUpRsyncCommand({void Function()? onRun}) {
     return FakeCommand(
       command: const <String>[
         'rsync',
@@ -104,7 +104,7 @@ void main() {
     );
   }
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function() onRun}) {
+  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -125,10 +125,10 @@ void main() {
   FakeCommand setUpFakeXcodeBuildHandler({
     bool verbose = false,
     bool simulator = false,
-    String deviceId,
+    String? deviceId,
     int exitCode = 0,
-    String stdout,
-    void Function() onRun,
+    String? stdout,
+    void Function()? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -207,9 +207,9 @@ void main() {
 
   testUsingContext('ios build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand();
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
+    fileSystem!.file('pubspec.yaml').createSync();
+    fileSystem!.file('.packages').createSync();
+    fileSystem!.file(fileSystem!.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
     final bool supported = BuildIOSCommand(verboseHelp: false).supported;
@@ -230,13 +230,13 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
     );
-    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+    expect(testLogger!.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(onRun: () {
-        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        fileSystem!.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
     ]),
@@ -251,13 +251,13 @@ void main() {
     await createTestCommandRunner(command).run(
         const <String>['build', 'ios', '--no-pub', '--device-id', '1234']
     );
-    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+    expect(testLogger!.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(deviceId: '1234', onRun: () {
-        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        fileSystem!.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
     ]),
@@ -277,7 +277,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(simulator: true, onRun: () {
-        fileSystem.directory('build/ios/Debug-iphonesimulator/Runner.app').createSync(recursive: true);
+        fileSystem!.directory('build/ios/Debug-iphonesimulator/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
     ]),
@@ -297,7 +297,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(verbose: true, onRun: () {
-        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        fileSystem!.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),
     ]),
@@ -313,9 +313,9 @@ void main() {
       const <String>['build', 'ios', '--no-pub', '--analyze-size']
     );
 
-    expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
-    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
-    expect(usage.events, contains(
+    expect(testLogger!.statusText, contains('A summary of your iOS bundle analysis can be found at'));
+    expect(testLogger!.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(usage!.events, contains(
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
   }, overrides: <Type, Generator>{
@@ -323,8 +323,8 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(onRun: () {
-        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
-        fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
+        fileSystem!.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        fileSystem!.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 [
@@ -335,16 +335,16 @@ void main() {
     "s": 2400
   }
 ]''');
-        fileSystem.file('build/flutter_size_01/trace.arm64.json')
+        fileSystem!.file('build/flutter_size_01/trace.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
-      setUpRsyncCommand(onRun: () => fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+      setUpRsyncCommand(onRun: () => fileSystem!.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
     ]),
     Platform: () => macosPlatform,
-    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem!, platform: macosPlatform),
     Usage: () => usage,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -359,13 +359,13 @@ void main() {
         throwsToolExit(),
       );
 
-      expect(testLogger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
+      expect(testLogger!.traceText, contains('xcresult parser: Unrecognized top level json format.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
         }),
         setUpXCResultCommand(),
         setUpRsyncCommand(),
@@ -384,14 +384,14 @@ void main() {
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(testLogger!.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(testLogger!.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
         setUpRsyncCommand(),
@@ -410,16 +410,16 @@ void main() {
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
-      expect(testLogger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-      expect(testLogger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+      expect(testLogger!.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(testLogger!.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(testLogger!.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
+      expect(testLogger!.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
         setUpRsyncCommand(),
@@ -438,7 +438,7 @@ void main() {
         throwsToolExit(),
       );
 
-      expect(testLogger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
+      expect(testLogger!.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -461,17 +461,17 @@ void main() {
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains('Some Provisioning profile issue.'));
-      expect(testLogger.errorText, contains('It appears that there was a problem signing your application prior to installation on the device.'));
-      expect(testLogger.errorText, contains('Verify that the Bundle Identifier in your project is your signing id in Xcode'));
-      expect(testLogger.errorText, contains('open ios/Runner.xcworkspace'));
-      expect(testLogger.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
+      expect(testLogger!.errorText, contains('Some Provisioning profile issue.'));
+      expect(testLogger!.errorText, contains('It appears that there was a problem signing your application prior to installation on the device.'));
+      expect(testLogger!.errorText, contains('Verify that the Bundle Identifier in your project is your signing id in Xcode'));
+      expect(testLogger!.errorText, contains('open ios/Runner.xcworkspace'));
+      expect(testLogger!.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
         setUpRsyncCommand(),
@@ -490,15 +490,15 @@ void main() {
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
-      expect(testLogger.errorText, isNot(contains('It appears that your application still contains the default signing identifier.')));
+      expect(testLogger!.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(testLogger!.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(testLogger!.errorText, isNot(contains('It appears that your application still contains the default signing identifier.')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
         setUpRsyncCommand(),
@@ -518,13 +518,13 @@ void main() {
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains('It appears that your application still contains the default signing identifier.'));
+      expect(testLogger!.errorText, contains('It appears that your application still contains the default signing identifier.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
         setUpRsyncCommand(),
@@ -545,8 +545,8 @@ void main() {
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains('Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor'));
-      expect(testLogger.errorText, contains(noProvisioningProfileInstruction));
+      expect(testLogger!.errorText, contains('Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor'));
+      expect(testLogger!.errorText, contains(noProvisioningProfileInstruction));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -554,7 +554,7 @@ void main() {
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
@@ -574,7 +574,7 @@ void main() {
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains(noProvisioningProfileInstruction));
+      expect(testLogger!.errorText, contains(noProvisioningProfileInstruction));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -585,7 +585,7 @@ void main() {
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
@@ -605,7 +605,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains(noDevelopmentTeamInstruction));
+      expect(testLogger!.errorText, contains(noDevelopmentTeamInstruction));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -613,7 +613,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
@@ -634,7 +634,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains(noProvisioningProfileInstruction));
+      expect(testLogger!.errorText, contains(noProvisioningProfileInstruction));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -645,7 +645,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
@@ -666,7 +666,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains(noDevelopmentTeamInstruction));
+      expect(testLogger!.errorText, contains(noDevelopmentTeamInstruction));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -674,7 +674,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
@@ -694,8 +694,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains(noProvisioningProfileInstruction));
-      expect(testLogger.errorText, isNot(contains(noDevelopmentTeamInstruction)));
+      expect(testLogger!.errorText, contains(noProvisioningProfileInstruction));
+      expect(testLogger!.errorText, isNot(contains(noDevelopmentTeamInstruction)));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -703,7 +703,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
@@ -723,8 +723,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains(noDevelopmentTeamInstruction));
-      expect(testLogger.errorText, isNot(contains('It appears that there was a problem signing your application prior to installation on the device.')));
+      expect(testLogger!.errorText, contains(noDevelopmentTeamInstruction));
+      expect(testLogger!.errorText, isNot(contains('It appears that there was a problem signing your application prior to installation on the device.')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -732,7 +732,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
@@ -754,7 +754,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         throwsToolExit(),
       );
 
-      expect(testLogger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
+      expect(testLogger!.traceText, contains('xcresult parser: Unrecognized top level json format.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -763,7 +763,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           simulator: true,
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
         setUpXCResultCommand(),
@@ -783,8 +783,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(testLogger!.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(testLogger!.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -793,7 +793,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           simulator: true,
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
@@ -813,10 +813,10 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         throwsToolExit(),
       );
 
-      expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
-      expect(testLogger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-      expect(testLogger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+      expect(testLogger!.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(testLogger!.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(testLogger!.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
+      expect(testLogger!.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -825,7 +825,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           simulator: true,
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
@@ -845,7 +845,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         throwsToolExit(),
       );
 
-      expect(testLogger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
+      expect(testLogger!.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

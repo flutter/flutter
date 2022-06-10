@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:meta/meta.dart';
 
@@ -18,10 +18,10 @@ import '../runner/flutter_command.dart';
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({
     bool verboseHelp = false,
-    @required Cache cache,
-    @required Platform platform,
-    @required Logger logger,
-    @required FeatureFlags featureFlags,
+    required Cache? cache,
+    required Platform platform,
+    required Logger logger,
+    required FeatureFlags featureFlags,
   }) : _cache = cache,
        _platform = platform,
        _logger = logger,
@@ -62,7 +62,7 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache the unsigned macOS binaries when available.', hide: !verboseHelp);
   }
 
-  final Cache _cache;
+  final Cache? _cache;
   final Logger _logger;
   final Platform _platform;
   final FeatureFlags _featureFlags;
@@ -106,9 +106,9 @@ class PrecacheCommand extends FlutterCommand {
   Set<String> _explicitArtifactSelections() {
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<String> selections = <String>{};
-    bool explicitlySelected(String name) => boolArgDeprecated(name) && argResults.wasParsed(name);
+    bool explicitlySelected(String name) => boolArgDeprecated(name) && argResults!.wasParsed(name);
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
-      final String umbrellaName = umbrellaForArtifact[artifact.name];
+      final String? umbrellaName = umbrellaForArtifact[artifact.name];
       if (explicitlySelected(artifact.name) ||
           (umbrellaName != null && explicitlySelected(umbrellaName))) {
         selections.add(artifact.name);
@@ -120,11 +120,11 @@ class PrecacheCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
-      if (!argResults.arguments.contains('--no-$umbrellaName')) {
+      if (!argResults!.arguments.contains('--no-$umbrellaName')) {
         return;
       }
       for (final String childArtifactName in childArtifactNames) {
-        if (argResults.arguments.contains('--$childArtifactName')) {
+        if (argResults!.arguments.contains('--$childArtifactName')) {
           throwToolExit('--$childArtifactName requires --$umbrellaName');
         }
       }
@@ -137,21 +137,21 @@ class PrecacheCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     // Re-lock the cache.
     if (_platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-      await _cache.lock();
+      await _cache!.lock();
     }
     if (boolArgDeprecated('force')) {
-      _cache.clearStampFiles();
+      _cache!.clearStampFiles();
     }
 
     final bool includeAllPlatforms = boolArgDeprecated('all-platforms');
     if (includeAllPlatforms) {
-      _cache.includeAllPlatforms = true;
+      _cache!.includeAllPlatforms = true;
     }
     if (boolArgDeprecated('use-unsigned-mac-binaries')) {
-      _cache.useUnsignedMacBinaries = true;
+      _cache!.useUnsignedMacBinaries = true;
     }
     final Set<String> explicitlyEnabled = _explicitArtifactSelections();
-    _cache.platformOverrideArtifacts = explicitlyEnabled;
+    _cache!.platformOverrideArtifacts = explicitlyEnabled;
 
     // If the user did not provide any artifact flags, then download
     // all artifacts that correspond to an enabled platform.
@@ -159,7 +159,7 @@ class PrecacheCommand extends FlutterCommand {
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
-      if (artifact.feature != null && !_featureFlags.isEnabled(artifact.feature)) {
+      if (artifact.feature != null && !_featureFlags.isEnabled(artifact.feature!)) {
         continue;
       }
 
@@ -168,8 +168,8 @@ class PrecacheCommand extends FlutterCommand {
         requiredArtifacts.add(artifact);
       }
     }
-    if (!await _cache.isUpToDate()) {
-      await _cache.updateAll(requiredArtifacts);
+    if (!await _cache!.isUpToDate()) {
+      await _cache!.updateAll(requiredArtifacts);
     } else {
       _logger.printStatus('Already up-to-date.');
     }

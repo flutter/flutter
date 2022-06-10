@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -22,13 +22,13 @@ import '../src/context.dart';
 
 void main() {
   group('Dart plugin registrant', () {
-    FileSystem fs;
-    FakeFlutterProject flutterProject;
-    FakeFlutterManifest flutterManifest;
+    FileSystem? fs;
+    late FakeFlutterProject flutterProject;
+    late FakeFlutterManifest flutterManifest;
 
     setUp(() async {
       fs = MemoryFileSystem.test();
-      final Directory directory = fs.currentDirectory.childDirectory('app');
+      final Directory directory = fs!.currentDirectory.childDirectory('app');
       flutterManifest = FakeFlutterManifest();
       flutterProject = FakeFlutterProject()
         ..manifest = flutterManifest
@@ -59,7 +59,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -75,7 +75,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -91,7 +91,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -110,7 +110,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -151,7 +151,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -196,7 +196,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -227,7 +227,7 @@ void main() {
             }),
             VersionConstraint.parse('>=2.10.0'),
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -257,7 +257,7 @@ void main() {
             }),
             VersionConstraint.parse('>=2.11.0'),
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -300,7 +300,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -316,7 +316,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -346,7 +346,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -362,7 +362,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -395,7 +395,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -411,7 +411,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -427,7 +427,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -460,7 +460,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -476,7 +476,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
           Plugin.fromYaml(
@@ -492,7 +492,7 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ]);
@@ -526,7 +526,7 @@ void main() {
               }),
               null,
               <String>[],
-              fileSystem: fs,
+              fileSystem: fs!,
               appDependencies: directDependencies,
             ),
             Plugin.fromYaml(
@@ -542,13 +542,13 @@ void main() {
               }),
               null,
               <String>[],
-              fileSystem: fs,
+              fileSystem: fs!,
               appDependencies: directDependencies,
             ),
           ]);
 
           expect(
-            testLogger.errorText,
+            testLogger!.errorText,
             'Plugin `url_launcher_linux_2` implements an interface for `linux`, which was already implemented by plugin `url_launcher_linux_1`.\n'
             'To fix this issue, remove either dependency from pubspec.yaml.'
             '\n\n'
@@ -579,7 +579,7 @@ void main() {
               }),
               null,
               <String>[],
-              fileSystem: fs,
+              fileSystem: fs!,
               appDependencies: directDependencies,
             ),
             Plugin.fromYaml(
@@ -595,13 +595,13 @@ void main() {
               }),
               null,
               <String>[],
-              fileSystem: fs,
+              fileSystem: fs!,
               appDependencies: directDependencies,
             ),
           ]);
 
           expect(
-            testLogger.errorText,
+            testLogger!.errorText,
             'Plugin `url_launcher_linux_2` implements an interface for `linux`, which was already implemented by plugin `url_launcher_linux_1`.\n'
             'To fix this issue, remove either dependency from pubspec.yaml.'
             '\n\n'
@@ -620,7 +620,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs,
+          fs!,
           <String, String>{
             'url_launcher_android': '''
   flutter:
@@ -794,7 +794,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs,
+          fs!,
           <String, String>{
             'url_launcher_macos': '''
   flutter:
@@ -838,7 +838,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs,
+          fs!,
           <String, String>{
             'url_launcher_macos': '''
   flutter:
@@ -892,13 +892,13 @@ void main() {
             }),
             null,
             <String>[],
-            fileSystem: fs,
+            fileSystem: fs!,
             appDependencies: directDependencies,
           ),
         ],
           throwOnPluginPubspecError: false,
         );
-        expect(testLogger.errorText, '');
+        expect(testLogger!.errorText, '');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -935,7 +935,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs,
+          fs!,
           <String, String>{
             'url_launcher_macos': '''
   flutter:
@@ -969,7 +969,7 @@ void main() {
         createFakeDartPlugins(
           flutterProject,
           flutterManifest,
-          fs,
+          fs!,
           <String, String>{});
 
         await generateMainDartWithPluginRegistrant(
@@ -1023,35 +1023,35 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  FlutterManifest manifest;
+  late FlutterManifest manifest;
 
   @override
-  Directory directory;
+  late Directory directory;
 
   @override
-  File flutterPluginsFile;
+  late File flutterPluginsFile;
 
   @override
-  File flutterPluginsDependenciesFile;
+  late File flutterPluginsDependenciesFile;
 
   @override
-  File dartPluginRegistrant;
+  late File dartPluginRegistrant;
 
   @override
-  IosProject ios;
+  late IosProject ios;
 
   @override
-  AndroidProject android;
+  late AndroidProject android;
 
   @override
-  WebProject web;
+  late WebProject web;
 
   @override
-  MacOSProject macos;
+  late MacOSProject macos;
 
   @override
-  LinuxProject linux;
+  late LinuxProject linux;
 
   @override
-  WindowsProject windows;
+  late WindowsProject windows;
 }

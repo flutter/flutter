@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -20,12 +20,12 @@ import '../../src/fakes.dart' show FakeFlutterVersion;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  FakeProcessManager processManager;
+  FileSystem? fileSystem;
+  BufferLogger? logger;
+  FakeProcessManager? processManager;
   UpgradeCommand command;
-  CommandRunner<void> runner;
-  FlutterVersion flutterVersion;
+  late CommandRunner<void> runner;
+  FlutterVersion? flutterVersion;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -53,7 +53,7 @@ void main() {
       reEntryCompleter.complete();
     }
 
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', 'HEAD'],
         stdout: startingTag,
@@ -115,7 +115,7 @@ void main() {
     ]);
     await runner.run(<String>['upgrade']);
     expect(processManager, hasNoRemainingExpectations);
-    expect(logger.statusText, contains("Transitioning from 'dev' to 'beta'..."));
+    expect(logger!.statusText, contains("Transitioning from 'dev' to 'beta'..."));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     FlutterVersion: () => flutterVersion,

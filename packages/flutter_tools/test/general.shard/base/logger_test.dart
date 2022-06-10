@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -232,7 +232,7 @@ void main() {
   });
 
   group('AppContext', () {
-    FakeStopwatch fakeStopWatch;
+    FakeStopwatch? fakeStopWatch;
 
     setUp(() {
       fakeStopWatch = FakeStopwatch();
@@ -365,10 +365,10 @@ void main() {
   });
 
   group('Spinners', () {
-    FakeStdio mockStdio;
-    FakeStopwatch mockStopwatch;
-    FakeStopwatchFactory stopwatchFactory;
-    int called;
+    late FakeStdio mockStdio;
+    FakeStopwatch? mockStopwatch;
+    late FakeStopwatchFactory stopwatchFactory;
+    int? called;
     final List<Platform> testPlatforms = <Platform>[
       FakePlatform(
         environment: <String, String>{},
@@ -409,7 +409,7 @@ void main() {
 
     void doWhileAsync(FakeAsync time, bool Function() doThis) {
       do {
-        mockStopwatch.elapsed += const Duration(milliseconds: 1);
+        mockStopwatch!.elapsed += const Duration(milliseconds: 1);
         time.elapse(const Duration(milliseconds: 1));
       } while (doThis());
     }
@@ -418,9 +418,9 @@ void main() {
       group('(${testPlatform.operatingSystem})', () {
         Platform platform;
         Platform ansiPlatform;
-        AnsiTerminal terminal;
-        AnsiTerminal coloredTerminal;
-        SpinnerStatus spinnerStatus;
+        late AnsiTerminal terminal;
+        late AnsiTerminal coloredTerminal;
+        late SpinnerStatus spinnerStatus;
 
         setUp(() {
           platform = FakePlatform();
@@ -451,7 +451,7 @@ void main() {
           FakeAsync().run((FakeAsync time) {
             final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
               stdio: mockStdio,
-              stopwatch: mockStopwatch,
+              stopwatch: mockStopwatch!,
               terminal: terminal,
             )..start();
             doWhileAsync(time, () => spinner.ticks < 10);
@@ -485,14 +485,14 @@ void main() {
           final bool done = FakeAsync().run<bool>((FakeAsync time) {
             final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
               stdio: mockStdio,
-              stopwatch: mockStopwatch,
+              stopwatch: mockStopwatch!,
               terminal: terminal,
               slowWarningCallback: () => warningMessage,
               timeout: const Duration(milliseconds: 100),
             )..start();
             // must be greater than the spinner timer duration
             const Duration timeLapse = Duration(milliseconds: 101);
-            mockStopwatch.elapsed += timeLapse;
+            mockStopwatch!.elapsed += timeLapse;
             time.elapse(timeLapse);
 
             List<String> lines = outputStdout();
@@ -530,7 +530,7 @@ void main() {
               ? r'^Hello {15} {4} {8}⣽$'
               : r'^Hello {15} {4} {8}\\$'),
           );
-          mockStopwatch.elapsed = const Duration(seconds: 4, milliseconds: 100);
+          mockStopwatch!.elapsed = const Duration(seconds: 4, milliseconds: 100);
           status.stop();
           expect(
             outputStdout().join('\n'),
@@ -545,7 +545,7 @@ void main() {
         testWithoutContext('Stdout startProgress on colored terminal pauses', () async {
           bool done = false;
           FakeAsync().run((FakeAsync time) {
-            mockStopwatch.elapsed = const Duration(seconds: 5);
+            mockStopwatch!.elapsed = const Duration(seconds: 5);
             final Logger logger = StdoutLogger(
               terminal: coloredTerminal,
               stdio: mockStdio,
@@ -586,7 +586,7 @@ void main() {
         testWithoutContext('Stdout startProgress on non-colored terminal pauses', () async {
           bool done = false;
           FakeAsync().run((FakeAsync time) {
-            mockStopwatch.elapsed = const Duration(seconds: 5);
+            mockStopwatch!.elapsed = const Duration(seconds: 5);
             final Logger logger = StdoutLogger(
               terminal: terminal,
               stdio: mockStdio,
@@ -617,7 +617,7 @@ void main() {
           bool done = false;
           FakeAsync().run((FakeAsync time) {
             spinnerStatus.start();
-            mockStopwatch.elapsed = const Duration(seconds: 1);
+            mockStopwatch!.elapsed = const Duration(seconds: 1);
             doWhileAsync(time, () => spinnerStatus.ticks < 10);
             List<String> lines = outputStdout();
 
@@ -653,7 +653,7 @@ void main() {
           bool done = false;
           FakeAsync().run((FakeAsync time) {
             spinnerStatus.start();
-            mockStopwatch.elapsed = const Duration(seconds: 1);
+            mockStopwatch!.elapsed = const Duration(seconds: 1);
             doWhileAsync(time, () => spinnerStatus.ticks < 10);
             List<String> lines = outputStdout();
 
@@ -680,7 +680,7 @@ void main() {
             expect(times, hasLength(1));
             final Match match = times.single;
 
-            expect(lines[0], endsWith(match.group(0)));
+            expect(lines[0], endsWith(match.group(0)!));
             expect(called, equals(1));
             expect(lines.length, equals(2));
             expect(lines[1], equals(''));
@@ -697,9 +697,9 @@ void main() {
   });
 
   group('Output format', () {
-    FakeStdio fakeStdio;
-    SummaryStatus summaryStatus;
-    int called;
+    late FakeStdio fakeStdio;
+    late SummaryStatus summaryStatus;
+    int? called;
 
     setUp(() {
       fakeStdio = FakeStdio();
@@ -1329,14 +1329,14 @@ Matcher _throwsInvocationFor(dynamic Function() fakeCall) =>
   throwsA(_matchesInvocation(_invocationFor(fakeCall)));
 
 class FakeStdout extends Fake implements Stdout {
-  FakeStdout({@required this.syncError, this.completeWithError = false});
+  FakeStdout({required this.syncError, this.completeWithError = false});
 
   final bool syncError;
   final bool completeWithError;
   final Completer<void> _completer = Completer<void>();
 
   @override
-  void write(Object object) {
+  void write(Object? object) {
     if (syncError) {
       throw Exception('Error!');
     }

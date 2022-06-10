@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -31,9 +31,9 @@ Future<int> run(
     bool muteCommandLogging = false,
     bool verbose = false,
     bool verboseHelp = false,
-    bool reportCrashes,
-    String flutterVersion,
-    Map<Type, Generator> overrides,
+    bool? reportCrashes,
+    String? flutterVersion,
+    Map<Type, Generator>? overrides,
   }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
@@ -55,8 +55,8 @@ Future<int> run(
     );
 
     String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
-    Object firstError;
-    StackTrace firstStackTrace;
+    Object? firstError;
+    StackTrace? firstStackTrace;
     return runZoned<Future<int>>(() async {
       try {
         await runner.run(args);
@@ -89,10 +89,10 @@ Future<int> run(
 
 Future<int> _handleToolError(
   dynamic error,
-  StackTrace stackTrace,
+  StackTrace? stackTrace,
   bool verbose,
   List<String> args,
-  bool reportCrashes,
+  bool? reportCrashes,
   String Function() getFlutterVersion,
 ) async {
   if (error is UsageException) {
@@ -102,7 +102,7 @@ Future<int> _handleToolError(
     return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null) {
-      globals.printError(error.message);
+      globals.printError(error.message!);
     }
     if (verbose) {
       globals.printError('\n$stackTrace\n');
@@ -120,7 +120,7 @@ Future<int> _handleToolError(
     // We've crashed; emit a log report.
     globals.stdio.stderrWrite('\n');
 
-    if (!reportCrashes) {
+    if (!reportCrashes!) {
       // Print the stack trace on the bots - don't write a crash report.
       globals.stdio.stderrWrite('$error\n');
       globals.stdio.stderrWrite('$stackTrace\n');
@@ -138,7 +138,7 @@ Future<int> _handleToolError(
       );
       await crashReportSender.sendReport(
         error: error,
-        stackTrace: stackTrace,
+        stackTrace: stackTrace!,
         getFlutterVersion: getFlutterVersion,
         command: args.join(' '),
       );
@@ -159,11 +159,11 @@ Future<int> _handleToolError(
       final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
         error: error,
-        stackTrace: stackTrace,
+        stackTrace: stackTrace!,
         doctorText: doctorText,
       );
       final File file = await _createLocalCrashReport(details);
-      await globals.crashReporter.informUser(details, file);
+      await globals.crashReporter!.informUser(details, file);
 
       return _exit(1);
     // This catch catches all exceptions to ensure the message below is printed.
@@ -241,7 +241,7 @@ Future<int> _exit(int code) async {
   }
 
   // Run shutdown hooks before flushing logs
-  await globals.shutdownHooks.runShutdownHooks();
+  await globals.shutdownHooks!.runShutdownHooks();
 
   final Completer<void> completer = Completer<void>();
 

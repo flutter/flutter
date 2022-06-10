@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -45,9 +45,9 @@ void main() {
     Cache.disableLocking();
   });
 
-  FileSystem fileSystem;
-  ProcessManager processManager;
-  TestUsage usage;
+  FileSystem? fileSystem;
+  ProcessManager? processManager;
+  TestUsage? usage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -57,21 +57,21 @@ void main() {
 
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem!.file('pubspec.yaml').createSync();
+    fileSystem!.file('.packages').createSync();
+    fileSystem!.file(fileSystem!.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
   // Creates the mock files necessary to run a build.
   void setUpMockProjectFilesForBuild() {
     setUpMockCoreProjectFiles();
-    fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt')).createSync(recursive: true);
+    fileSystem!.file(fileSystem!.path.join('linux', 'CMakeLists.txt')).createSync(recursive: true);
   }
 
   // Returns the command matching the build_linux call to cmake.
   FakeCommand cmakeCommand(String buildMode, {
     String target = 'x64',
-    void Function() onRun,
+    void Function()? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -89,9 +89,9 @@ void main() {
 
   // Returns the command matching the build_linux call to ninja.
   FakeCommand ninjaCommand(String buildMode, {
-    Map<String, String> environment,
+    Map<String, String>? environment,
     String target = 'x64',
-    void Function() onRun,
+    void Function()? onRun,
     String stdout = '',
   }) {
     return FakeCommand(
@@ -163,7 +163,7 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
     );
-    expect(fileSystem.file('linux/flutter/ephemeral/generated_config.cmake'), exists);
+    expect(fileSystem!.file('linux/flutter/ephemeral/generated_config.cmake'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -223,10 +223,10 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--debug', '--no-pub']
     );
-    expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
-    expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
-    expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
-    expect(testLogger.traceText, contains('STDOUT STUFF'));
+    expect(testLogger!.statusText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger!.warningText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger!.errorText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger!.traceText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -271,7 +271,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       const <String>['build', 'linux', '--no-pub']
     );
     // Just the warnings and errors should be surfaced.
-    expect(testLogger.errorText, r'''
+    expect(testLogger!.errorText, r'''
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:6:2: error: expected ';' after class
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
@@ -305,10 +305,10 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--debug', '-v', '--no-pub']
     );
-    expect(testLogger.statusText, contains('STDOUT STUFF'));
-    expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
-    expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
-    expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger!.statusText, contains('STDOUT STUFF'));
+    expect(testLogger!.traceText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger!.warningText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger!.errorText, isNot(contains('STDOUT STUFF')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -412,9 +412,9 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       cmakeCommand('release'),
       ninjaCommand('release'),
     ]);
-    fileSystem.file('lib/other.dart')
+    fileSystem!.file('lib/other.dart')
       .createSync(recursive: true);
-    fileSystem.file('foo/bar.sksl.json')
+    fileSystem!.file('foo/bar.sksl.json')
       .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
@@ -434,7 +434,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       ]
     );
 
-    final File cmakeConfig = fileSystem.currentDirectory
+    final File cmakeConfig = fileSystem!.currentDirectory
       .childDirectory('linux')
       .childDirectory('flutter')
       .childDirectory('ephemeral')
@@ -446,7 +446,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
 
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
-      'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
+      'file(TO_CMAKE_PATH "${fileSystem!.currentDirectory.path}" PROJECT_DIR)',
       '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
       '  "DART_OBFUSCATION=true"',
       '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
@@ -455,7 +455,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       '  "TRACK_WIDGET_CREATION=true"',
       '  "TREE_SHAKE_ICONS=true"',
       '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
-      '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
+      '  "PROJECT_DIR=${fileSystem!.currentDirectory.path}"',
       '  "FLUTTER_TARGET=lib/other.dart"',
       '  "BUNDLE_SKSL_PATH=foo/bar.sksl.json"',
     ]));
@@ -468,7 +468,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   });
 
   testUsingContext('linux can extract binary name from CMake file', () async {
-    fileSystem.file('linux/CMakeLists.txt')
+    fileSystem!.file('linux/CMakeLists.txt')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'''
 cmake_minimum_required(VERSION 3.10)
@@ -476,9 +476,9 @@ project(runner LANGUAGES CXX)
 
 set(BINARY_NAME "fizz_bar")
 ''');
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    fileSystem!.file('pubspec.yaml').createSync();
+    fileSystem!.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
 
     expect(getCmakeExecutableName(flutterProject.linux), 'fizz_bar');
   }, overrides: <Type, Generator>{
@@ -516,7 +516,7 @@ set(BINARY_NAME "fizz_bar")
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('release'),
       ninjaCommand('release', onRun: () {
-        fileSystem.file('build/flutter_size_01/snapshot.linux-x64.json')
+        fileSystem!.file('build/flutter_size_01/snapshot.linux-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 [
@@ -527,13 +527,13 @@ set(BINARY_NAME "fizz_bar")
     "s": 2400
   }
 ]''');
-        fileSystem.file('build/flutter_size_01/trace.linux-x64.json')
+        fileSystem!.file('build/flutter_size_01/trace.linux-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
     ]);
 
-    fileSystem.file('build/linux/x64/release/bundle/libapp.so')
+    fileSystem!.file('build/linux/x64/release/bundle/libapp.so')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(10000, 0));
 
@@ -541,9 +541,9 @@ set(BINARY_NAME "fizz_bar")
       const <String>['build', 'linux', '--no-pub', '--analyze-size']
     );
 
-    expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
-    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
-    expect(usage.events, contains(
+    expect(testLogger!.statusText, contains('A summary of your Linux bundle analysis can be found at'));
+    expect(testLogger!.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(usage!.events, contains(
       const TestUsageEvent('code-size-analysis', 'linux'),
     ));
   }, overrides: <Type, Generator>{
@@ -561,7 +561,7 @@ set(BINARY_NAME "fizz_bar")
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('release', target: 'arm64'),
       ninjaCommand('release', target: 'arm64', onRun: () {
-        fileSystem.file('build/flutter_size_01/snapshot.linux-arm64.json')
+        fileSystem!.file('build/flutter_size_01/snapshot.linux-arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 [
@@ -572,13 +572,13 @@ set(BINARY_NAME "fizz_bar")
     "s": 2400
   }
 ]''');
-        fileSystem.file('build/flutter_size_01/trace.linux-arm64.json')
+        fileSystem!.file('build/flutter_size_01/trace.linux-arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
     ]);
 
-    fileSystem.file('build/linux/arm64/release/bundle/libapp.so')
+    fileSystem!.file('build/linux/arm64/release/bundle/libapp.so')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(10000, 0));
 
@@ -587,8 +587,8 @@ set(BINARY_NAME "fizz_bar")
     );
 
     // check if libapp.so of "build/linux/arm64/release" directory can be referenced.
-    expect(testLogger.statusText,  contains('libapp.so (Dart AOT)'));
-    expect(usage.events, contains(
+    expect(testLogger!.statusText,  contains('libapp.so (Dart AOT)'));
+    expect(usage!.events, contains(
       const TestUsageEvent('code-size-analysis', 'linux'),
     ));
   }, overrides: <Type, Generator>{

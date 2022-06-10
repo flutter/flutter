@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -18,7 +18,7 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('shell_completion', () {
-    FakeStdio fakeStdio;
+    FakeStdio? fakeStdio;
 
     setUp(() {
       Cache.disableLocking();
@@ -28,8 +28,8 @@ void main() {
     testUsingContext('generates bash initialization script to stdout', () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       await createTestCommandRunner(command).run(<String>['bash-completion']);
-      expect(fakeStdio.writtenToStdout.length, equals(1));
-      expect(fakeStdio.writtenToStdout.first, contains('__flutter_completion'));
+      expect(fakeStdio!.writtenToStdout.length, equals(1));
+      expect(fakeStdio!.writtenToStdout.first, contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -39,8 +39,8 @@ void main() {
     testUsingContext('generates bash initialization script to stdout with arg', () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       await createTestCommandRunner(command).run(<String>['bash-completion', '-']);
-      expect(fakeStdio.writtenToStdout.length, equals(1));
-      expect(fakeStdio.writtenToStdout.first, contains('__flutter_completion'));
+      expect(fakeStdio!.writtenToStdout.length, equals(1));
+      expect(fakeStdio!.writtenToStdout.first, contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -19,8 +19,8 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  FakePub pub;
+  FileSystem? fileSystem;
+  FakePub? pub;
 
   setUp(() {
     Cache.disableLocking();
@@ -33,9 +33,9 @@ void main() {
   });
 
   testUsingContext('pub get usage values are resilient to missing package config files before running "pub get"', () async {
-    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
-    fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
-    fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
+    fileSystem!.currentDirectory.childFile('pubspec.yaml').createSync();
+    fileSystem!.currentDirectory.childFile('.flutter-plugins').createSync();
+    fileSystem!.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
 
     final PackagesGetCommand command = PackagesGetCommand('get', false);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -54,11 +54,11 @@ void main() {
   });
 
   testUsingContext('pub get usage values are resilient to poorly formatted package config before "pub get"', () async {
-    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
-    fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
-    fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
-    fileSystem.currentDirectory.childFile('.packages').writeAsBytesSync(<int>[0]);
-    fileSystem.currentDirectory.childFile('.dart_tool/package_config.json')
+    fileSystem!.currentDirectory.childFile('pubspec.yaml').createSync();
+    fileSystem!.currentDirectory.childFile('.flutter-plugins').createSync();
+    fileSystem!.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
+    fileSystem!.currentDirectory.childFile('.packages').writeAsBytesSync(<int>[0]);
+    fileSystem!.currentDirectory.childFile('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[0]);
 
@@ -79,8 +79,8 @@ void main() {
   });
 
   testUsingContext('pub get on target directory', () async {
-    fileSystem.currentDirectory.childDirectory('target').createSync();
-    final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
+    fileSystem!.currentDirectory.childDirectory('target').createSync();
+    final Directory targetDirectory = fileSystem!.currentDirectory.childDirectory('target');
     targetDirectory.childFile('pubspec.yaml').createSync();
 
     final PackagesGetCommand command = PackagesGetCommand('get', false);
@@ -97,8 +97,8 @@ void main() {
   });
 
   testUsingContext("pub get skips example directory if it doesn't contain a pubspec.yaml", () async {
-    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
-    fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
+    fileSystem!.currentDirectory.childFile('pubspec.yaml').createSync();
+    fileSystem!.currentDirectory.childDirectory('example').createSync(recursive: true);
 
     final PackagesGetCommand command = PackagesGetCommand('get', false);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -120,22 +120,22 @@ void main() {
 class FakePub extends Fake implements Pub {
   FakePub(this.fileSystem);
 
-  final FileSystem fileSystem;
+  final FileSystem? fileSystem;
 
   @override
   Future<void> get({
-    @required PubContext context,
-    String directory,
+    required PubContext context,
+    String? directory,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    fileSystem.directory(directory)
+    fileSystem!.directory(directory)
       .childDirectory('.dart_tool')
       .childFile('package_config.json')
       ..createSync(recursive: true)

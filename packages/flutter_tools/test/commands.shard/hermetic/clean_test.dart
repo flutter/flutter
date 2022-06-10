@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -22,8 +22,8 @@ import '../../src/context.dart';
 
 void main() {
   group('clean command', () {
-    Xcode xcode;
-    FakeXcodeProjectInterpreter xcodeProjectInterpreter;
+    Xcode? xcode;
+    FakeXcodeProjectInterpreter? xcodeProjectInterpreter;
 
     setUp(() {
       xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
@@ -34,22 +34,22 @@ void main() {
     });
 
     group('general', () {
-      MemoryFileSystem fs;
-      Directory buildDirectory;
+      MemoryFileSystem? fs;
+      Directory? buildDirectory;
 
       setUp(() {
         fs = MemoryFileSystem.test();
 
-        final Directory currentDirectory = fs.currentDirectory;
+        final Directory currentDirectory = fs!.currentDirectory;
         buildDirectory = currentDirectory.childDirectory('build');
-        buildDirectory.createSync(recursive: true);
+        buildDirectory!.createSync(recursive: true);
       });
 
       testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode for iOS and macOS', () async {
-        final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory);
+        final FlutterProject projectUnderTest = setupProjectUnderTest(fs!.currentDirectory);
         // Xcode is installed and version satisfactory.
-        xcodeProjectInterpreter.isInstalled = true;
-        xcodeProjectInterpreter.version = Version(1000, 0, 0);
+        xcodeProjectInterpreter!.isInstalled = true;
+        xcodeProjectInterpreter!.version = Version(1000, 0, 0);
         await CleanCommand().runCommand();
 
         expect(buildDirectory, isNot(exists));
@@ -72,7 +72,7 @@ void main() {
         expect(projectUnderTest.flutterPluginsDependenciesFile, isNot(exists));
         expect(projectUnderTest.packagesFile, isNot(exists));
 
-      expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+      expect(xcodeProjectInterpreter!.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
           CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
         ]);
@@ -84,14 +84,14 @@ void main() {
       });
 
       testUsingContext('$CleanCommand cleans Xcode verbosely for iOS and macOS', () async {
-        setupProjectUnderTest(fs.currentDirectory);
+        setupProjectUnderTest(fs!.currentDirectory);
         // Xcode is installed and version satisfactory.
-        xcodeProjectInterpreter.isInstalled = true;
-        xcodeProjectInterpreter.version = Version(1000, 0, 0);
+        xcodeProjectInterpreter!.isInstalled = true;
+        xcodeProjectInterpreter!.version = Version(1000, 0, 0);
 
         await CleanCommand(verbose: true).runCommand();
 
-        expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+        expect(xcodeProjectInterpreter!.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', true),
           CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', true),
         ]);
@@ -104,9 +104,9 @@ void main() {
     });
 
     group('Windows', () {
-      FakePlatform windowsPlatform;
-      MemoryFileSystem fileSystem;
-      FileExceptionHandler exceptionHandler;
+      FakePlatform? windowsPlatform;
+      MemoryFileSystem? fileSystem;
+      late FileExceptionHandler exceptionHandler;
 
       setUp(() {
         windowsPlatform = FakePlatform(operatingSystem: 'windows');
@@ -115,9 +115,9 @@ void main() {
       });
 
       testUsingContext('$CleanCommand prints a helpful error message on Windows', () async {
-        xcodeProjectInterpreter.isInstalled = false;
+        xcodeProjectInterpreter!.isInstalled = false;
 
-        final File file = fileSystem.file('file')..createSync();
+        final File file = fileSystem!.file('file')..createSync();
         exceptionHandler.addError(
           file,
           FileSystemOp.delete,
@@ -126,7 +126,7 @@ void main() {
 
         final CleanCommand command = CleanCommand();
         command.deleteFile(file);
-        expect(testLogger.errorText, contains('A program may still be using a file'));
+        expect(testLogger!.errorText, contains('A program may still be using a file'));
       }, overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
         Xcode: () => xcode,
@@ -141,12 +141,12 @@ void main() {
           ..createSync();
         handler.addError(throwingFile, FileSystemOp.delete, const FileSystemException('OS error: Access Denied'));
 
-        xcodeProjectInterpreter.isInstalled = false;
+        xcodeProjectInterpreter!.isInstalled = false;
 
         final CleanCommand command = CleanCommand();
         command.deleteFile(throwingFile);
 
-        expect(testLogger.errorText, contains('Failed to remove bad. A program may still be using a file in the directory or the directory itself'));
+        expect(testLogger!.errorText, contains('Failed to remove bad. A program may still be using a file in the directory or the directory itself'));
         expect(throwingFile, exists);
       }, overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
@@ -191,7 +191,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Version version = Version(0, 0, 0);
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
     return XcodeProjectInfo(null, null, <String>['Runner'], BufferLogger.test());
   }
 

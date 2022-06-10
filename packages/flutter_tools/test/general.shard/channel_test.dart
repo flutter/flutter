@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
@@ -24,7 +24,7 @@ import '../src/test_flutter_command_runner.dart';
 
 void main() {
   group('channel', () {
-    FakeProcessManager fakeProcessManager;
+    FakeProcessManager? fakeProcessManager;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -38,12 +38,12 @@ void main() {
       final ChannelCommand command = ChannelCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(args);
-      expect(testLogger.errorText, hasLength(0));
+      expect(testLogger!.errorText, hasLength(0));
       // The bots may return an empty list of channels (network hiccup?)
       // and when run locally the list of branches might be different
       // so we check for the header text rather than any specific channel name.
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace('Flutter channels:'),
       );
     }
@@ -60,7 +60,7 @@ void main() {
       final ChannelCommand command = ChannelCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      fakeProcessManager.addCommand(
+      fakeProcessManager!.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
           stdout: 'origin/beta\n'
@@ -70,19 +70,19 @@ void main() {
       );
 
       await runner.run(<String>['channel']);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-      expect(testLogger.errorText, hasLength(0));
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
+      expect(testLogger!.errorText, hasLength(0));
       // format the status text for a simpler assertion.
-      final Iterable<String> rows = testLogger.statusText
+      final Iterable<String> rows = testLogger!.statusText
         .split('\n')
         .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
       expect(rows, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
-      testLogger.clear();
+      testLogger!.clear();
 
       // Extra branches.
-      fakeProcessManager.addCommand(
+      fakeProcessManager!.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
           stdout: 'origin/beta\n'
@@ -94,20 +94,20 @@ void main() {
       );
 
       await runner.run(<String>['channel']);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
       expect(rows, containsAllInOrder(kOfficialChannels));
-      expect(testLogger.errorText, hasLength(0));
+      expect(testLogger!.errorText, hasLength(0));
       // format the status text for a simpler assertion.
-      final Iterable<String> rows2 = testLogger.statusText
+      final Iterable<String> rows2 = testLogger!.statusText
         .split('\n')
         .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
       expect(rows2, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
-      testLogger.clear();
+      testLogger!.clear();
 
       // Missing branches.
-      fakeProcessManager.addCommand(
+      fakeProcessManager!.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
           stdout: 'origin/beta\n'
@@ -118,13 +118,13 @@ void main() {
       );
 
       await runner.run(<String>['channel']);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-      expect(testLogger.errorText, hasLength(0));
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
+      expect(testLogger!.errorText, hasLength(0));
       // check if available official channels are in order of stability
       int prev = -1;
       int next = -1;
       for (final String branch in kOfficialChannels) {
-        next = testLogger.statusText.indexOf(branch);
+        next = testLogger!.statusText.indexOf(branch);
         if (next != -1) {
           expect(prev < next, isTrue);
           prev = next;
@@ -137,7 +137,7 @@ void main() {
     });
 
     testUsingContext('ignores lines with unexpected output', () async {
-      fakeProcessManager.addCommand(
+      fakeProcessManager!.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
           stdout: 'origin/beta\n'
@@ -152,11 +152,11 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
 
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-      expect(testLogger.errorText, hasLength(0));
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
+      expect(testLogger!.errorText, hasLength(0));
 
       // format the status text for a simpler assertion.
-      final Iterable<String> rows = testLogger.statusText
+      final Iterable<String> rows = testLogger!.statusText
         .split('\n')
         .map((String line) => line.trim())
         .where((String line) => line?.isNotEmpty == true)
@@ -169,7 +169,7 @@ void main() {
     });
 
     testUsingContext('removes duplicates', () async {
-      fakeProcessManager.addCommand(
+      fakeProcessManager!.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
           stdout: 'origin/beta\n'
@@ -183,11 +183,11 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
 
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-      expect(testLogger.errorText, hasLength(0));
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
+      expect(testLogger!.errorText, hasLength(0));
 
       // format the status text for a simpler assertion.
-      final Iterable<String> rows = testLogger.statusText
+      final Iterable<String> rows = testLogger!.statusText
         .split('\n')
         .map((String line) => line.trim())
         .where((String line) => line?.isNotEmpty == true)
@@ -200,7 +200,7 @@ void main() {
     });
 
     testUsingContext('can switch channels', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
+      fakeProcessManager!.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'fetch'],
         ),
@@ -216,14 +216,14 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
       );
-      expect(testLogger.errorText, hasLength(0));
+      expect(testLogger!.errorText, hasLength(0));
 
-      fakeProcessManager.addCommands(<FakeCommand>[
+      fakeProcessManager!.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'fetch'],
         ),
@@ -237,14 +237,14 @@ void main() {
 
       await runner.run(<String>['channel', 'stable']);
 
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => fakeProcessManager,
     });
 
     testUsingContext('switching channels prompts to run flutter upgrade', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
+      fakeProcessManager!.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'fetch'],
         ),
@@ -261,17 +261,17 @@ void main() {
       await runner.run(<String>['channel', 'beta']);
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace("Successfully switched to flutter channel 'beta'."),
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace(
           "To ensure that you're on the latest build "
           "from this channel, run 'flutter upgrade'"),
       );
-      expect(testLogger.errorText, hasLength(0));
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(testLogger!.errorText, hasLength(0));
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => fakeProcessManager,
@@ -280,7 +280,7 @@ void main() {
     // This verifies that bug https://github.com/flutter/flutter/issues/21134
     // doesn't return.
     testUsingContext('removes version stamp file when switching channels', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
+      fakeProcessManager!.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'fetch'],
         ),
@@ -310,10 +310,10 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
-      expect(testLogger.statusText, isNot(contains('A new version of Flutter')));
-      expect(testLogger.errorText, hasLength(0));
+      expect(testLogger!.statusText, isNot(contains('A new version of Flutter')));
+      expect(testLogger!.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => fakeProcessManager,

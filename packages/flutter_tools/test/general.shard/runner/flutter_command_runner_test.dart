@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -26,8 +26,8 @@ const String _kProjectRoot = '/project';
 
 void main() {
   group('FlutterCommandRunner', () {
-    MemoryFileSystem fileSystem;
-    Platform platform;
+    MemoryFileSystem? fileSystem;
+    Platform? platform;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -35,9 +35,9 @@ void main() {
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
-      fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
-      fileSystem.directory(_kProjectRoot).createSync(recursive: true);
-      fileSystem.currentDirectory = _kProjectRoot;
+      fileSystem!.directory(_kFlutterRoot).createSync(recursive: true);
+      fileSystem!.directory(_kProjectRoot).createSync(recursive: true);
+      fileSystem!.currentDirectory = _kProjectRoot;
 
       platform = FakePlatform(
         environment: <String, String>{
@@ -158,8 +158,8 @@ void main() {
 
     testUsingContext("Doesn't crash on invalid .packages file", () async {
       final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-      fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.file('.packages')
+      fileSystem!.file('pubspec.yaml').createSync();
+      fileSystem!.file('.packages')
         ..createSync()
         ..writeAsStringSync('Not a valid package');
 
@@ -173,21 +173,21 @@ void main() {
     });
 
     group('getRepoPackages', () {
-      String oldFlutterRoot;
+      String? oldFlutterRoot;
 
       setUp(() {
         oldFlutterRoot = Cache.flutterRoot;
         Cache.flutterRoot = _kFlutterRoot;
-        fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'examples'))
+        fileSystem!.directory(fileSystem!.path.join(_kFlutterRoot, 'examples'))
             .createSync(recursive: true);
-        fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'packages'))
+        fileSystem!.directory(fileSystem!.path.join(_kFlutterRoot, 'packages'))
             .createSync(recursive: true);
-        fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
+        fileSystem!.directory(fileSystem!.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
             .createSync(recursive: true);
 
-        fileSystem.file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'pubspec.yaml'))
+        fileSystem!.file(fileSystem!.path.join(_kFlutterRoot, 'dev', 'tools', 'pubspec.yaml'))
             .createSync();
-        fileSystem.file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
+        fileSystem!.file(fileSystem!.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
             .createSync();
       });
 
@@ -200,8 +200,8 @@ void main() {
         final List<String> packagePaths = runner.getRepoPackages()
           .map((Directory d) => d.path).toList();
         expect(packagePaths, <String>[
-          fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool')).path,
-          fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools')).path,
+          fileSystem!.directory(fileSystem!.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool')).path,
+          fileSystem!.directory(fileSystem!.path.join(_kFlutterRoot, 'dev', 'tools')).path,
         ]);
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -270,7 +270,7 @@ void main() {
 }
 
 class FakeFlutterCommand extends FlutterCommand {
-  OutputPreferences preferences;
+  late OutputPreferences preferences;
 
   @override
   Future<FlutterCommandResult> runCommand() {
@@ -288,16 +288,16 @@ class FakeFlutterCommand extends FlutterCommand {
 class FakeStdio extends Stdio {
   FakeStdio({this.hasFakeTerminal});
 
-  final bool hasFakeTerminal;
+  final bool? hasFakeTerminal;
 
   @override
-  bool get hasTerminal => hasFakeTerminal;
+  bool get hasTerminal => hasFakeTerminal!;
 
   @override
-  int get terminalColumns => hasFakeTerminal ? 80 : null;
+  int? get terminalColumns => hasFakeTerminal! ? 80 : null;
 
   @override
-  int get terminalLines => hasFakeTerminal ? 24 : null;
+  int? get terminalLines => hasFakeTerminal! ? 24 : null;
   @override
-  bool get supportsAnsiEscapes => hasFakeTerminal;
+  bool get supportsAnsiEscapes => hasFakeTerminal!;
 }

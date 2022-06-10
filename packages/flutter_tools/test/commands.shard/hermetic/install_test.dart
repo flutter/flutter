@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -27,10 +27,10 @@ void main() {
       Cache.disableLocking();
     });
 
-    FileSystem fileSystem;
+    FileSystem? fileSystem;
     setUp(() {
       fileSystem = MemoryFileSystem.test();
-      fileSystem.file('pubspec.yaml').createSync(recursive: true);
+      fileSystem!.file('pubspec.yaml').createSync(recursive: true);
     });
 
     testUsingContext('returns 0 when Android is connected and ready for an install', () async {
@@ -38,7 +38,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager!.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
@@ -52,7 +52,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager!.addDevice(device);
 
       expect(() async => createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
         throwsToolExit(message: '--device-user is only supported for Android'));
@@ -67,7 +67,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
       final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager!.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
@@ -81,7 +81,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager!.addDevice(device);
 
       expect(() async => createTestCommandRunner(command).run(<String>['install', '--use-application-binary', 'bogus']),
           throwsToolExit(message: 'Prebuilt binary bogus does not exist'));
@@ -96,8 +96,8 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
-      testDeviceManager.addDevice(device);
-      fileSystem.file('binary').createSync(recursive: true);
+      testDeviceManager!.addDevice(device);
+      fileSystem!.file('binary').createSync(recursive: true);
 
       await createTestCommandRunner(command).run(<String>['install', '--use-application-binary', 'binary']);
     }, overrides: <Type, Generator>{
@@ -114,7 +114,7 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   final ApplicationPackage app;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
     return app;
   }
 }
@@ -131,13 +131,13 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   @override
   Future<bool> isAppInstalled(
     IOSApp app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => false;
 
   @override
   Future<bool> installApp(
     IOSApp app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 }
 
@@ -151,12 +151,12 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   Future<bool> isAppInstalled(
     AndroidApk app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => false;
 
   @override
   Future<bool> installApp(
     AndroidApk app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 }

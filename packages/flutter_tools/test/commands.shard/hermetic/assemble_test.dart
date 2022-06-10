@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -33,7 +33,7 @@ void main() {
     ));
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
 
-    expect(testLogger.traceText, contains('build succeeded.'));
+    expect(testLogger!.traceText, contains('build succeeded.'));
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -48,7 +48,7 @@ void main() {
     ));
     await commandRunner.run(<String>['assemble', '-o Output', '-dFooBar=fizz=2', 'debug_macos_bundle_flutter_assets']);
 
-    expect(testLogger.traceText, contains('build succeeded.'));
+    expect(testLogger!.traceText, contains('build succeeded.'));
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -63,7 +63,7 @@ void main() {
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>['assemble', '-o Output', '-iFoo=Bar.txt', 'debug_macos_bundle_flutter_assets']);
 
-    expect(testLogger.traceText, contains('build succeeded.'));
+    expect(testLogger!.traceText, contains('build succeeded.'));
     expect(await command.requiredArtifacts, isEmpty);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -143,8 +143,8 @@ void main() {
 
     await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
       throwsToolExit());
-    expect(testLogger.errorText, isNot(contains('bar')));
-    expect(testLogger.errorText, isNot(contains(stackTrace.toString())));
+    expect(testLogger!.errorText, isNot(contains('bar')));
+    expect(testLogger!.errorText, isNot(contains(stackTrace.toString())));
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),

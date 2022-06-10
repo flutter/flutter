@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:convert';
@@ -59,12 +59,12 @@ const String samplesIndexJson = '''
 ]''';
 
 void main() {
-  Directory tempDir;
-  Directory projectDir;
-  FakeFlutterVersion fakeFlutterVersion;
-  LoggingProcessManager loggingProcessManager;
-  FakeProcessManager fakeProcessManager;
-  BufferLogger logger;
+  late Directory tempDir;
+  late Directory projectDir;
+  FakeFlutterVersion? fakeFlutterVersion;
+  LoggingProcessManager? loggingProcessManager;
+  FakeProcessManager? fakeProcessManager;
+  BufferLogger? logger;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -535,10 +535,10 @@ void main() {
     // Expect the dependency on flutter_web_plugins exists
     expect(pubspec.dependencies, contains('flutter_web_plugins'));
     // The platform is correctly registered
-    final YamlMap web = ((pubspec.flutter['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
+    final YamlMap web = ((pubspec.flutter!['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
     expect(web['pluginClass'], 'FlutterProjectWeb');
     expect(web['fileName'], 'flutter_project_web.dart');
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Pub: () => Pub(
@@ -754,7 +754,7 @@ void main() {
     // Import for the new embedding class.
     expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
 
-    expect(logger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+    expect(logger!.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
   }, overrides: <Type, Generator>{
     Logger: () => logger,
   });
@@ -854,7 +854,7 @@ void main() {
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Logger: () => logger,
@@ -889,7 +889,7 @@ void main() {
         ],
         pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Logger: () => logger,
@@ -916,7 +916,7 @@ void main() {
     expect(projectDir.childDirectory('linux'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Logger: () => logger,
@@ -948,7 +948,7 @@ void main() {
       'macos',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Logger: () => logger,
@@ -974,7 +974,7 @@ void main() {
     expect(projectDir.childDirectory('linux'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     Logger: () => logger,
@@ -1035,7 +1035,7 @@ void main() {
       'windows',
     ], pluginClass: 'FlutterProjectPluginCApi',
     unexpectedPlatforms: <String>['some_platform']);
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     Logger: () => logger,
@@ -1062,7 +1062,7 @@ void main() {
     expect(projectDir.childDirectory('linux'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Logger: () => logger,
@@ -1124,7 +1124,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -1221,7 +1221,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -1289,7 +1289,7 @@ void main() {
     const String certificates = '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
     1 valid identities found''';
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['which', 'security'],
       ),
@@ -1866,14 +1866,14 @@ void main() {
 
       // Run pub online first in order to populate the pub cache.
       await runner.run(<String>['create', '--pub', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
-      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
+      expect(loggingProcessManager!.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
+      expect(loggingProcessManager!.commands.first, isNot(contains('--offline')));
 
       // Run pub offline.
-      loggingProcessManager.clear();
+      loggingProcessManager!.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
-      expect(loggingProcessManager.commands.first, contains('--offline'));
+      expect(loggingProcessManager!.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
+      expect(loggingProcessManager!.commands.first, contains('--offline'));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
@@ -2114,7 +2114,7 @@ void main() {
       'ios',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
@@ -2136,7 +2136,7 @@ void main() {
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project');
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
@@ -2158,7 +2158,7 @@ void main() {
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project',
     webFileName: 'flutter_project_web.dart');
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
 
     await _getPackages(projectDir);
     await _analyzeProject(projectDir.path);
@@ -2182,7 +2182,7 @@ void main() {
       'some_platform',
     ], pluginClass: 'somePluginClass',
     unexpectedPlatforms: <String>['web']);
-    expect(logger.errorText, contains(_kNoPlatformsMessage));
+    expect(logger!.errorText, contains(_kNoPlatformsMessage));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
@@ -2469,11 +2469,11 @@ void main() {
     final String relativeExamplePath = globals.fs.path.normalize(globals.fs.path.join(relativePluginPath, 'example/lib/main.dart'));
 
     await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platform=android', projectDir.path]);
-    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+    expect(logger!.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
     await runner.run(<String>['create', '--no-pub', '--org=com.example', '--template=plugin', '--platform=ios', projectDir.path]);
-    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+    expect(logger!.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
-    expect(logger.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
+    expect(logger!.statusText, contains('Your example app code is in $relativeExamplePath.\n'));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
   });
@@ -2486,7 +2486,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform=android', projectDir.path]);
     final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
     final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
-    expect(logger.statusText, isNot(contains('You need to update $relativePluginPath/pubspec.yaml to support android.\n')));
+    expect(logger!.statusText, isNot(contains('You need to update $relativePluginPath/pubspec.yaml to support android.\n')));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
   });
@@ -2499,9 +2499,9 @@ void main() {
     final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
     final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform=ios', projectDir.path]);
-    expect(logger.statusText, isNot(contains('You need to update $relativePluginPath/pubspec.yaml to support ios.\n')));
+    expect(logger!.statusText, isNot(contains('You need to update $relativePluginPath/pubspec.yaml to support ios.\n')));
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform=android', projectDir.path]);
-    expect(logger.statusText, contains('You need to update $relativePluginPath/pubspec.yaml to support android.\n'));
+    expect(logger!.statusText, contains('You need to update $relativePluginPath/pubspec.yaml to support android.\n'));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
   });
@@ -2514,9 +2514,9 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
-    final Map<String, VersionConstraint> env = pubspec.environment;
-    expect(env['flutter'].allows(Version(2, 5, 0)), true);
-    expect(env['flutter'].allows(Version(2, 4, 9)), false);
+    final Map<String, VersionConstraint?> env = pubspec.environment!;
+    expect(env['flutter']!.allows(Version(2, 5, 0)), true);
+    expect(env['flutter']!.allows(Version(2, 4, 9)), false);
   });
 
   testUsingContext('default app uses flutter default versions', () async {
@@ -2699,9 +2699,9 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-    expect(logger.errorText, contains(_kNoPlatformsMessage));
-    expect(logger.statusText, contains('To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
-    expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
+    expect(logger!.errorText, contains(_kNoPlatformsMessage));
+    expect(logger!.statusText, contains('To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
+    expect(logger!.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
@@ -2716,7 +2716,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform=ios', projectDir.path]);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+    expect(logger!.errorText, isNot(contains(_kNoPlatformsMessage)));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
@@ -2731,7 +2731,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android,ios,web,windows,macos,linux', projectDir.path]);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-    expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
+    expect(logger!.statusText, contains(_kDisabledPlatformRequestedMessage));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
@@ -2746,7 +2746,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android,ios,windows', projectDir.path]);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-    expect(logger.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
+    expect(logger!.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
@@ -2761,7 +2761,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--platforms=android,ios,web,windows,macos,linux', projectDir.path]);
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
-    expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
+    expect(logger!.statusText, contains(_kDisabledPlatformRequestedMessage));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
@@ -2776,7 +2776,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform=windows', projectDir.path]);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-    expect(logger.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
+    expect(logger!.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
@@ -2915,7 +2915,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', '--platforms=android,ios,windows,macos,linux', projectDir.path]);
     await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
-    expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
+    expect(logger!.statusText, contains(_kDisabledPlatformRequestedMessage));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
@@ -3034,7 +3034,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir,
   );
@@ -3074,7 +3074,7 @@ Future<void> _getPackages(Directory workingDir) async {
   // While flutter test does get packages, it doesn't write version
   // files anymore.
   await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     <String>[
       flutterToolsSnapshotPath,
       'packages',
@@ -3084,7 +3084,7 @@ Future<void> _getPackages(Directory workingDir) async {
   );
 }
 
-Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
+Future<void> _runFlutterTest(Directory workingDir, { String? target }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -3103,7 +3103,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir.path,
   );
@@ -3121,8 +3121,8 @@ class LoggingProcessManager extends LocalProcessManager {
   @override
   Future<Process> start(
     List<Object> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
@@ -3143,14 +3143,14 @@ class LoggingProcessManager extends LocalProcessManager {
   }
 }
 
-String _getStringValueFromPlist({File plistFile, String key}) {
+String _getStringValueFromPlist({required File plistFile, String? key}) {
   final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<string>', '').replaceAll('</string>', '');
 }
 
-bool _getBooleanValueFromPlist({File plistFile, String key}) {
+bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
   final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);

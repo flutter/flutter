@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
@@ -29,7 +29,7 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   Cache.disableLocking();
 
-  Future<BuildAarCommand> runCommandIn(String target, { List<String> arguments }) async {
+  Future<BuildAarCommand> runCommandIn(String target, { List<String>? arguments }) async {
     final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
@@ -42,8 +42,8 @@ void main() {
   }
 
   group('Usage', () {
-    Directory tempDir;
-    TestUsage testUsage;
+    late Directory tempDir;
+    TestUsage? testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -95,7 +95,7 @@ void main() {
       await runCommandIn(projectPath,
           arguments: <String>['--target-platform=android-arm']);
 
-      expect(testUsage.events, contains(
+      expect(testUsage!.events, contains(
         const TestUsageEvent(
           'tool-command-result',
           'aar',
@@ -110,8 +110,8 @@ void main() {
   });
 
   group('flag parsing', () {
-    Directory tempDir;
-    FakeAndroidBuilder fakeAndroidBuilder;
+    late Directory tempDir;
+    FakeAndroidBuilder? fakeAndroidBuilder;
 
     setUp(() {
       fakeAndroidBuilder = FakeAndroidBuilder();
@@ -127,11 +127,11 @@ void main() {
         arguments: <String>['--no-pub']);
       await runCommandIn(projectPath);
 
-      expect(fakeAndroidBuilder.buildNumber, '1.0');
-      expect(fakeAndroidBuilder.androidBuildInfo.length, 3);
+      expect(fakeAndroidBuilder!.buildNumber, '1.0');
+      expect(fakeAndroidBuilder!.androidBuildInfo.length, 3);
 
       final List<BuildMode> buildModes = <BuildMode>[];
-      for (final AndroidBuildInfo androidBuildInfo in fakeAndroidBuilder.androidBuildInfo) {
+      for (final AndroidBuildInfo androidBuildInfo in fakeAndroidBuilder!.androidBuildInfo) {
         final BuildInfo buildInfo = androidBuildInfo.buildInfo;
         buildModes.add(buildInfo.mode);
         if (buildInfo.mode.isPrecompiled) {
@@ -174,9 +174,9 @@ void main() {
         ],
       );
 
-      expect(fakeAndroidBuilder.buildNumber, '200');
+      expect(fakeAndroidBuilder!.buildNumber, '200');
 
-      final AndroidBuildInfo androidBuildInfo = fakeAndroidBuilder.androidBuildInfo.single;
+      final AndroidBuildInfo androidBuildInfo = fakeAndroidBuilder!.androidBuildInfo.single;
       expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86]);
 
       final BuildInfo buildInfo = androidBuildInfo.buildInfo;
@@ -193,11 +193,11 @@ void main() {
   });
 
   group('Gradle', () {
-    Directory tempDir;
-    AndroidSdk mockAndroidSdk;
-    String gradlew;
-    FakeProcessManager processManager;
-    String flutterRoot;
+    late Directory tempDir;
+    AndroidSdk? mockAndroidSdk;
+    late String gradlew;
+    FakeProcessManager? processManager;
+    late String flutterRoot;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -237,7 +237,7 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=module']);
 
-      processManager.addCommand(FakeCommand(
+      processManager!.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-I=${globals.fs.path.join(flutterRoot, 'packages', 'flutter_tools', 'gradle','aar_init_script.gradle')}',
@@ -277,7 +277,7 @@ void main() {
 
 Future<BuildAarCommand> runBuildAarCommand(
   String target, {
-  List<String> arguments,
+  List<String>? arguments,
 }) async {
   final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
   final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -291,19 +291,19 @@ Future<BuildAarCommand> runBuildAarCommand(
 }
 
 class FakeAndroidBuilder extends Fake implements AndroidBuilder {
-  FlutterProject project;
-  Set<AndroidBuildInfo> androidBuildInfo;
-  String target;
-  String outputDirectoryPath;
-  String buildNumber;
+  FlutterProject? project;
+  late Set<AndroidBuildInfo> androidBuildInfo;
+  String? target;
+  String? outputDirectoryPath;
+  String? buildNumber;
 
   @override
   Future<void> buildAar({
-    @required FlutterProject project,
-    @required Set<AndroidBuildInfo> androidBuildInfo,
-    @required String target,
-    @required String outputDirectoryPath,
-    @required String buildNumber,
+    required FlutterProject project,
+    required Set<AndroidBuildInfo> androidBuildInfo,
+    required String target,
+    required String? outputDirectoryPath,
+    required String buildNumber,
   }) async {
     this.project = project;
     this.androidBuildInfo = androidBuildInfo;

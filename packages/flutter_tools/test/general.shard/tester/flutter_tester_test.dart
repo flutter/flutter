@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -22,7 +22,7 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
 void main() {
-  MemoryFileSystem fileSystem;
+  MemoryFileSystem? fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -30,10 +30,10 @@ void main() {
 
   testWithoutContext('FlutterTesterApp can be created from the current directory', () async {
     const String projectPath = '/home/my/projects/my_project';
-    await fileSystem.directory(projectPath).create(recursive: true);
-    fileSystem.currentDirectory = projectPath;
+    await fileSystem!.directory(projectPath).create(recursive: true);
+    fileSystem!.currentDirectory = projectPath;
 
-    final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+    final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem!);
 
     expect(app.name, 'my_project');
   });
@@ -73,12 +73,12 @@ void main() {
   });
 
   group('startApp', () {
-    FlutterTesterDevice device;
-    List<String> logLines;
-    String mainPath;
+    late FlutterTesterDevice device;
+    late List<String> logLines;
+    String? mainPath;
 
-    FakeProcessManager fakeProcessManager;
-    TestBuildSystem buildSystem;
+    FakeProcessManager? fakeProcessManager;
+    TestBuildSystem? buildSystem;
 
     final Map<Type, Generator> startOverrides = <Type, Generator>{
       Platform: () => FakePlatform(),
@@ -92,8 +92,8 @@ void main() {
       buildSystem = TestBuildSystem.all(BuildResult(success: true));
       fakeProcessManager = FakeProcessManager.empty();
       device = FlutterTesterDevice('flutter-tester',
-        fileSystem: fileSystem,
-        processManager: fakeProcessManager,
+        fileSystem: fileSystem!,
+        processManager: fakeProcessManager!,
         artifacts: Artifacts.test(),
         logger: BufferLogger.test(),
         flutterVersion: FakeFlutterVersion(),
@@ -138,10 +138,10 @@ void main() {
     });
 
     testUsingContext('performs a build and starts in debug mode', () async {
-      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem!);
       final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
       final Completer<void> completer = Completer<void>();
-      fakeProcessManager.addCommand(FakeCommand(
+      fakeProcessManager!.addCommand(FakeCommand(
         command: const <String>[
           'Artifact.flutterTester',
           '--run-forever',
@@ -167,14 +167,14 @@ Hello!
       expect(result.started, isTrue);
       expect(result.observatoryUri, observatoryUri);
       expect(logLines.last, 'Hello!');
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     }, overrides: startOverrides);
 
     testUsingContext('performs a build and starts in debug mode with track-widget-creation', () async {
-      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem!);
       final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
       final Completer<void> completer = Completer<void>();
-      fakeProcessManager.addCommand(FakeCommand(
+      fakeProcessManager!.addCommand(FakeCommand(
         command: const <String>[
           'Artifact.flutterTester',
           '--run-forever',
@@ -200,7 +200,7 @@ Hello!
       expect(result.started, isTrue);
       expect(result.observatoryUri, observatoryUri);
       expect(logLines.last, 'Hello!');
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     }, overrides: startOverrides);
   });
 }

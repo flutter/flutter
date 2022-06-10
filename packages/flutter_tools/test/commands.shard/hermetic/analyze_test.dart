@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
@@ -45,13 +45,13 @@ void main() {
   });
 
   group('analyze command', () {
-    FileSystem fileSystem;
+    FileSystem? fileSystem;
     Platform platform;
     BufferLogger logger;
-    FakeProcessManager processManager;
+    FakeProcessManager? processManager;
     Terminal terminal;
     AnalyzeCommand command;
-    CommandRunner<void> runner;
+    late CommandRunner<void> runner;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -65,10 +65,10 @@ void main() {
       terminal = Terminal.test();
       command = AnalyzeCommand(
         artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         logger: logger,
         platform: platform,
-        processManager: processManager,
+        processManager: processManager!,
         terminal: terminal,
       );
       runner = createTestCommandRunner(command);
@@ -77,13 +77,13 @@ void main() {
       const String homePath = '/home/user/flutter';
       Cache.flutterRoot = homePath;
       for (final String dir in <String>['dev', 'examples', 'packages']) {
-        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
+        fileSystem!.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
     });
 
     testUsingContext('SIGABRT throws Exception', () async {
       const String stderr = 'Something bad happened!';
-      processManager.addCommands(
+      processManager!.addCommands(
         <FakeCommand>[
           const FakeCommand(
             // artifact paths are from Artifacts.test() and stable
@@ -128,8 +128,8 @@ void main() {
     // Absolute paths
     expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
     expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
-    expect(inRepo(<String>[Cache.flutterRoot], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot, 'foo')], fileSystem), isTrue);
+    expect(inRepo(<String?>[Cache.flutterRoot], fileSystem), isTrue);
+    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot!, 'foo')], fileSystem), isTrue);
 
     // Relative paths
     fileSystem.currentDirectory = Cache.flutterRoot;
@@ -163,13 +163,13 @@ void main() {
   });
 }
 
-bool inRepo(List<String> fileList, FileSystem fileSystem) {
+bool inRepo(List<String?>? fileList, FileSystem fileSystem) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot));
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot!));
   final String prefix = root + fileSystem.path.separator;
-  for (String file in fileList) {
+  for (String file in fileList as Iterable<String>) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));
     if (file == root || file.startsWith(prefix)) {
       return true;

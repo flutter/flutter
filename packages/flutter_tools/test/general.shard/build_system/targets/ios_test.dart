@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -39,11 +39,11 @@ const List<String> _kSharedConfig = <String>[
 ];
 
 void main() {
-  Environment environment;
-  FileSystem fileSystem;
-  FakeProcessManager processManager;
-  Artifacts artifacts;
-  BufferLogger logger;
+  late Environment environment;
+  FileSystem? fileSystem;
+  FakeProcessManager? processManager;
+  late Artifacts artifacts;
+  late BufferLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -51,15 +51,15 @@ void main() {
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
     environment = Environment.test(
-      fileSystem.currentDirectory,
+      fileSystem!.currentDirectory,
       defines: <String, String>{
         kTargetPlatform: 'ios',
       },
       inputs: <String, String>{},
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       logger: logger,
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       engineVersion: '2',
     );
   });
@@ -73,7 +73,7 @@ void main() {
     environment.defines[kIosArchs] = 'x86_64';
     environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
     final String appFrameworkPath = environment.buildDir.childDirectory('App.framework').childFile('App').path;
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         'xcrun',
         'clang',
@@ -81,7 +81,7 @@ void main() {
         'c',
         '-arch',
         'x86_64',
-        fileSystem.path.absolute(fileSystem.path.join(
+        fileSystem!.path.absolute(fileSystem!.path.join(
             '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         '-dynamiclib',
         '-fembed-bitcode-marker',
@@ -112,7 +112,7 @@ void main() {
     ]);
 
     await const DebugUniversalFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager!.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -123,7 +123,7 @@ void main() {
     environment.defines[kIosArchs] = 'arm64';
     environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     final String appFrameworkPath = environment.buildDir.childDirectory('App.framework').childFile('App').path;
-    processManager.addCommands(<FakeCommand>[
+    processManager!.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         'xcrun',
         'clang',
@@ -132,7 +132,7 @@ void main() {
         // iphone only gets 64 bit arch based on kIosArchs
         '-arch',
         'arm64',
-        fileSystem.path.absolute(fileSystem.path.join(
+        fileSystem!.path.absolute(fileSystem!.path.join(
             '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         ..._kSharedConfig,
         '-o',
@@ -149,7 +149,7 @@ void main() {
     ]);
 
     await const DebugUniversalFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager!.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -162,15 +162,15 @@ void main() {
     environment.defines[kCodesignIdentity] = 'ABC123';
     // Precompiled dart data
 
-    fileSystem.file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+    fileSystem!.file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
       .createSync();
-    fileSystem.file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+    fileSystem!.file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
       .createSync();
     // Project info
-    fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem!.file('pubspec.yaml').writeAsStringSync('name: hello');
+    fileSystem!.file('.packages').writeAsStringSync('\n');
     // Plist file
-    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+    fileSystem!.file(fileSystem!.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
       .createSync(recursive: true);
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
@@ -180,7 +180,7 @@ void main() {
       .childFile('App')
       .createSync(recursive: true);
     // sksl bundle
-    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
+    fileSystem!.file('bundle.sksl').writeAsStringSync(json.encode(
       <String, Object>{
         'engineRevision': '2',
         'platform': 'ios',
@@ -192,7 +192,7 @@ void main() {
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-    processManager.addCommand(
+    processManager!.addCommand(
       FakeCommand(command: <String>[
         'codesign',
         '--force',
@@ -204,7 +204,7 @@ void main() {
     );
 
     await const DebugIosApplicationBundle().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager!.hasRemainingExpectations, isFalse);
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
@@ -223,10 +223,10 @@ void main() {
     environment.defines[kCodesignIdentity] = 'ABC123';
 
     // Project info
-    fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem!.file('pubspec.yaml').writeAsStringSync('name: hello');
+    fileSystem!.file('.packages').writeAsStringSync('\n');
     // Plist file
-    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+    fileSystem!.file(fileSystem!.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
       .createSync(recursive: true);
 
     // Real framework
@@ -238,7 +238,7 @@ void main() {
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-    processManager.addCommand(
+    processManager!.addCommand(
       FakeCommand(command: <String>[
         'codesign',
         '--force',
@@ -249,7 +249,7 @@ void main() {
     );
 
     await const ReleaseIosApplicationBundle().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager!.hasRemainingExpectations, isFalse);
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
@@ -275,7 +275,7 @@ void main() {
         kBuildMode: 'release',
         kIosArchs: 'x86_64',
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       logger: logger,
       fileSystem: fileSystem,
@@ -288,7 +288,7 @@ void main() {
         contains('release/profile builds are only supported for physical devices.'),
       )
     ));
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager!.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -302,7 +302,7 @@ void main() {
       defines: <String, String>{
         kTargetPlatform: 'ios',
       },
-      processManager: processManager,
+      processManager: processManager!,
       artifacts: artifacts,
       logger: logger,
       fileSystem: fileSystem,
@@ -315,7 +315,7 @@ void main() {
       'description',
       contains('required define SdkRoot but it was not provided'),
     )));
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager!.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -323,18 +323,18 @@ void main() {
   });
 
   group('copies Flutter.framework', () {
-    Directory outputDir;
-    File binary;
-    FakeCommand copyPhysicalFrameworkCommand;
-    FakeCommand lipoCommandNonFatResult;
-    FakeCommand lipoVerifyArm64Command;
-    FakeCommand bitcodeStripCommand;
-    FakeCommand adHocCodesignCommand;
+    Directory? outputDir;
+    late File binary;
+    FakeCommand? copyPhysicalFrameworkCommand;
+    FakeCommand? lipoCommandNonFatResult;
+    FakeCommand? lipoVerifyArm64Command;
+    FakeCommand? bitcodeStripCommand;
+    FakeCommand? adHocCodesignCommand;
 
     setUp(() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       outputDir = fileSystem.directory('output');
-      binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter');
+      binary = outputDir!.childDirectory('Flutter.framework').childFile('Flutter');
       copyPhysicalFrameworkCommand = FakeCommand(command: <String>[
         'rsync',
         '-av',
@@ -342,7 +342,7 @@ void main() {
         '--filter',
         '- .DS_Store/',
         'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
-        outputDir.path,
+        outputDir!.path,
       ]);
 
       lipoCommandNonFatResult = FakeCommand(command: <String>[
@@ -379,11 +379,11 @@ void main() {
 
     testWithoutContext('iphonesimulator', () async {
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'x86_64',
@@ -392,7 +392,7 @@ void main() {
         },
       );
 
-      processManager.addCommands(<FakeCommand>[
+      processManager!.addCommands(<FakeCommand?>[
         FakeCommand(command: <String>[
           'rsync',
           '-av',
@@ -400,7 +400,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
-          outputDir.path,
+          outputDir!.path,
           ],
           onRun: () => binary.createSync(recursive: true),
         ),
@@ -416,16 +416,16 @@ void main() {
       await const DebugUnpackIOS().build(environment);
 
       expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testWithoutContext('fails when frameworks missing', () async {
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64',
@@ -433,7 +433,7 @@ void main() {
           kBitcodeFlag: '',
         },
       );
-      processManager.addCommand(copyPhysicalFrameworkCommand);
+      processManager!.addCommand(copyPhysicalFrameworkCommand!);
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(isException.having(
@@ -447,11 +447,11 @@ void main() {
       binary.createSync(recursive: true);
 
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
@@ -460,7 +460,7 @@ void main() {
         },
       );
 
-      processManager.addCommands(<FakeCommand>[
+      processManager!.addCommands(<FakeCommand?>[
         copyPhysicalFrameworkCommand,
         FakeCommand(command: <String>[
           'lipo',
@@ -490,11 +490,11 @@ void main() {
       binary.createSync(recursive: true);
 
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
@@ -503,7 +503,7 @@ void main() {
         },
       );
 
-      processManager.addCommands(<FakeCommand>[
+      processManager!.addCommands(<FakeCommand?>[
         copyPhysicalFrameworkCommand,
         FakeCommand(command: <String>[
           'lipo',
@@ -544,11 +544,11 @@ void main() {
       binary.createSync(recursive: true);
 
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64',
@@ -557,7 +557,7 @@ void main() {
         },
       );
 
-      processManager.addCommands(<FakeCommand>[
+      processManager!.addCommands(<FakeCommand?>[
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
@@ -567,18 +567,18 @@ void main() {
 
       expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testWithoutContext('thins fat framework', () async {
       binary.createSync(recursive: true);
 
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
@@ -587,7 +587,7 @@ void main() {
         },
       );
 
-      processManager.addCommands(<FakeCommand>[
+      processManager!.addCommands(<FakeCommand?>[
         copyPhysicalFrameworkCommand,
         FakeCommand(command: <String>[
           'lipo',
@@ -615,18 +615,18 @@ void main() {
       ]);
 
       await const DebugUnpackIOS().build(environment);
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testWithoutContext('fails when bitcode strip fails', () async {
       binary.createSync(recursive: true);
 
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64',
@@ -635,7 +635,7 @@ void main() {
         },
       );
 
-      processManager.addCommands(<FakeCommand>[
+      processManager!.addCommands(<FakeCommand?>[
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
@@ -658,18 +658,18 @@ void main() {
         )),
       );
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testWithoutContext('strips framework', () async {
       binary.createSync(recursive: true);
 
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64',
@@ -678,7 +678,7 @@ void main() {
         },
       );
 
-      processManager.addCommands(<FakeCommand>[
+      processManager!.addCommands(<FakeCommand?>[
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
@@ -687,18 +687,18 @@ void main() {
       ]);
       await const DebugUnpackIOS().build(environment);
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testWithoutContext('fails when codesign fails', () async {
       binary.createSync(recursive: true);
 
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64',
@@ -708,7 +708,7 @@ void main() {
         },
       );
 
-      processManager.addCommands(<FakeCommand>[
+      processManager!.addCommands(<FakeCommand?>[
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
@@ -732,18 +732,18 @@ void main() {
         )),
       );
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testWithoutContext('codesigns framework', () async {
       binary.createSync(recursive: true);
 
       final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
+        fileSystem!.currentDirectory,
+        processManager: processManager!,
         artifacts: artifacts,
         logger: logger,
-        fileSystem: fileSystem,
+        fileSystem: fileSystem!,
         outputDir: outputDir,
         defines: <String, String>{
           kIosArchs: 'arm64',
@@ -753,7 +753,7 @@ void main() {
         },
       );
 
-      processManager.addCommands(<FakeCommand>[
+      processManager!.addCommands(<FakeCommand?>[
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
@@ -769,7 +769,7 @@ void main() {
       ]);
       await const DebugUnpackIOS().build(environment);
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
   });
 }

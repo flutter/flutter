@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -90,14 +90,14 @@ void main() {
   });
 
   // Only required for the test below that still depends on the context.
-  FileSystem fileSystem;
+  FileSystem? fileSystem;
   setUp(() {
     fileSystem = MemoryFileSystem.test();
   });
 
   testUsingContext('DebugBundleLinuxAssets copies artifacts to out directory', () async {
     final Environment testEnvironment = Environment.test(
-      fileSystem.currentDirectory,
+      fileSystem!.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'debug',
         kBuildName: '2.0.0',
@@ -108,7 +108,7 @@ void main() {
       },
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       logger: BufferLogger.test(),
       engineVersion: '2',
     );
@@ -117,7 +117,7 @@ void main() {
 
     // Create input files.
     testEnvironment.buildDir.childFile('app.dill').createSync();
-    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
+    fileSystem!.file('bundle.sksl').writeAsStringSync(json.encode(
       <String, Object>{
         'engineRevision': '2',
         'platform': 'ios',
@@ -156,13 +156,13 @@ void main() {
 
   testUsingContext('ProfileBundleLinuxAssets copies artifacts to out directory', () async {
     final Environment testEnvironment = Environment.test(
-      fileSystem.currentDirectory,
+      fileSystem!.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'profile',
       },
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       logger: BufferLogger.test(),
     );
 
@@ -195,13 +195,13 @@ void main() {
 
   testUsingContext('ReleaseBundleLinuxAssets copies artifacts to out directory', () async {
     final Environment testEnvironment = Environment.test(
-      fileSystem.currentDirectory,
+      fileSystem!.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'release',
       },
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       logger: BufferLogger.test(),
     );
 

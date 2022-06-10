@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -28,25 +28,25 @@ import '../src/context.dart';
 import '../src/test_build_system.dart';
 
 void main() {
-  FakeFlutterDevice mockFlutterDevice;
+  FakeFlutterDevice? mockFlutterDevice;
   FakeWebDevFS mockWebDevFS;
-  FileSystem fileSystem;
+  FileSystem? fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     mockWebDevFS = FakeWebDevFS();
     final FakeWebDevice mockWebDevice = FakeWebDevice();
     mockFlutterDevice = FakeFlutterDevice(mockWebDevice);
-    mockFlutterDevice._devFS = mockWebDevFS;
+    mockFlutterDevice!._devFS = mockWebDevFS;
 
-    fileSystem.file('.packages').writeAsStringSync('\n');
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
+    fileSystem!.file('.packages').writeAsStringSync('\n');
+    fileSystem!.file('pubspec.yaml').createSync();
+    fileSystem!.file(fileSystem!.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem!.file(fileSystem!.path.join('web', 'index.html')).createSync(recursive: true);
   });
 
   testUsingContext('Can successfully run and connect without vmservice', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -74,7 +74,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
   testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -97,7 +97,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
   testUsingContext('ResidentWebRunner calls appFailedToStart if error is thrown during startup', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -119,7 +119,7 @@ void main() {
   });
 
   testUsingContext('Can full restart after attaching', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -146,7 +146,7 @@ void main() {
   });
 
   testUsingContext('Fails on compilation errors in hot restart', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem!.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -197,7 +197,7 @@ class FakeWebDevice extends Fake implements Device {
   @override
   Future<bool> stopApp(
     covariant ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     return true;
   }
@@ -205,13 +205,13 @@ class FakeWebDevice extends Fake implements Device {
   @override
   Future<LaunchResult> startApp(
     covariant ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    String? mainPath,
+    String? route,
+    DebuggingOptions? debuggingOptions,
+    Map<String, dynamic>? platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     return LaunchResult.succeeded();
   }
@@ -224,14 +224,14 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   final FakeWebDevice device;
 
 
-  DevFS _devFS;
+  DevFS? _devFS;
 
   @override
-  DevFS get devFS => _devFS;
+  DevFS? get devFS => _devFS;
 
   @override
-  set devFS(DevFS value) { }
+  set devFS(DevFS? value) { }
 
   @override
-  FlutterVmService vmService;
+  FlutterVmService? vmService;
 }

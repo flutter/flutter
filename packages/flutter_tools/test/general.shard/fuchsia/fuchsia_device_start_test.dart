@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:convert';
@@ -35,15 +35,15 @@ import '../../src/fakes.dart';
 
 void main() {
   group('Fuchsia app start and stop: ', () {
-    MemoryFileSystem memoryFileSystem;
-    FakeOperatingSystemUtils osUtils;
-    FakeFuchsiaDeviceTools fuchsiaDeviceTools;
-    FakeFuchsiaSdk fuchsiaSdk;
-    Artifacts artifacts;
-    FakeProcessManager fakeSuccessfulProcessManager;
-    FakeProcessManager fakeFailedProcessManagerForHostAddress;
-    FakeProcessManager fakeSuccessfulProcessManagerWithSession;
-    File sshConfig;
+    MemoryFileSystem? memoryFileSystem;
+    FakeOperatingSystemUtils? osUtils;
+    FakeFuchsiaDeviceTools? fuchsiaDeviceTools;
+    FakeFuchsiaSdk? fuchsiaSdk;
+    Artifacts? artifacts;
+    FakeProcessManager? fakeSuccessfulProcessManager;
+    FakeProcessManager? fakeFailedProcessManagerForHostAddress;
+    FakeProcessManager? fakeSuccessfulProcessManagerWithSession;
+    File? sshConfig;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -53,23 +53,23 @@ void main() {
       sshConfig = MemoryFileSystem.test().file('ssh_config')..writeAsStringSync('\n');
       artifacts = Artifacts.test();
       for (final BuildMode mode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
-        memoryFileSystem.file(
-          artifacts.getArtifactPath(Artifact.fuchsiaKernelCompiler,
+        memoryFileSystem!.file(
+          artifacts!.getArtifactPath(Artifact.fuchsiaKernelCompiler,
               platform: TargetPlatform.fuchsia_arm64, mode: mode),
         ).createSync();
 
-        memoryFileSystem.file(
-          artifacts.getArtifactPath(Artifact.platformKernelDill,
+        memoryFileSystem!.file(
+          artifacts!.getArtifactPath(Artifact.platformKernelDill,
               platform: TargetPlatform.fuchsia_arm64, mode: mode),
         ).createSync();
 
-        memoryFileSystem.file(
-          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath,
+        memoryFileSystem!.file(
+          artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath,
               platform: TargetPlatform.fuchsia_arm64, mode: mode),
         ).createSync();
 
-        memoryFileSystem.file(
-          artifacts.getArtifactPath(Artifact.fuchsiaFlutterRunner,
+        memoryFileSystem!.file(
+          artifacts!.getArtifactPath(Artifact.fuchsiaFlutterRunner,
               platform: TargetPlatform.fuchsia_arm64, mode: mode),
         ).createSync();
       }
@@ -79,13 +79,13 @@ void main() {
           exitCode: 1,
         ),
         FakeCommand(
-          command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
+          command: <String>['ssh', '-F', sshConfig!.absolute.path, '123', r'echo $SSH_CONNECTION'],
           stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
         ),
       ]);
       fakeFailedProcessManagerForHostAddress = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
+          command: <String>['ssh', '-F', sshConfig!.absolute.path, '123', r'echo $SSH_CONNECTION'],
           stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
           exitCode: 1,
         ),
@@ -96,15 +96,15 @@ void main() {
           stdout: '/bin/session_control',
         ),
         FakeCommand(
-          command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
+          command: <String>['ssh', '-F', sshConfig!.absolute.path, '123', r'echo $SSH_CONNECTION'],
           stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
         ),
       ]);
     });
 
     Future<LaunchResult> setupAndStartApp({
-      @required bool prebuilt,
-      @required BuildMode mode,
+      required bool prebuilt,
+      required BuildMode mode,
     }) async {
       const String appName = 'app_name';
       final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
@@ -112,7 +112,7 @@ void main() {
       final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
 
-      FuchsiaApp app;
+      FuchsiaApp? app;
       if (prebuilt) {
         final File far = globals.fs.file('app_name-0.far')..createSync();
         app = FuchsiaApp.fromPrebuiltApp(far);
@@ -127,7 +127,7 @@ void main() {
 
       final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null, treeShakeIcons: false));
       return device.startApp(
-        app,
+        app!,
         prebuiltApplication: prebuilt,
         debuggingOptions: debuggingOptions,
       );
@@ -171,7 +171,7 @@ void main() {
       pubspecFile.writeAsStringSync('name: $appName');
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
-      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
+      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
       final DebuggingOptions debuggingOptions =
           DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
@@ -198,7 +198,7 @@ void main() {
       pubspecFile.writeAsStringSync('name: $appName');
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
-      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
+      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
       final DebuggingOptions debuggingOptions =
       DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
@@ -270,7 +270,7 @@ void main() {
               ],
             ),
             FakeCommand(
-              command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
+              command: <String>['ssh', '-F', sshConfig!.absolute.path, '123', r'echo $SSH_CONNECTION'],
               stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
             ),
           ]),
@@ -303,7 +303,7 @@ void main() {
           ],
         ),
         FakeCommand(
-          command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
+          command: <String>['ssh', '-F', sshConfig!.absolute.path, '123', r'echo $SSH_CONNECTION'],
           stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
         ),
       ]),
@@ -456,7 +456,7 @@ Process _createFakeProcess({
 }
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
-  FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
+  FuchsiaDeviceWithFakeDiscovery(String id, {required String name}) : super(id, name: name);
 
   @override
   FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {
@@ -525,7 +525,7 @@ class FakeFuchsiaTilesCtl implements FuchsiaTilesCtl {
   }
 
   @override
-  Future<Map<int, String>> list(FuchsiaDevice device) async {
+  Future<Map<int, String>?> list(FuchsiaDevice device) async {
     if (!_started) {
       return null;
     }
@@ -568,7 +568,7 @@ class FailingTilesCtl implements FuchsiaTilesCtl {
   }
 
   @override
-  Future<Map<int, String>> list(FuchsiaDevice device) async {
+  Future<Map<int, String>?> list(FuchsiaDevice device) async {
     return null;
   }
 
@@ -604,9 +604,9 @@ class FailingFuchsiaSessionControl implements FuchsiaSessionControl {
 
 class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
   FakeFuchsiaDeviceTools({
-    FuchsiaPkgctl pkgctl,
-    FuchsiaTilesCtl tiles,
-    FuchsiaSessionControl sessionControl,
+    FuchsiaPkgctl? pkgctl,
+    FuchsiaTilesCtl? tiles,
+    FuchsiaSessionControl? sessionControl,
   })  : pkgctl = pkgctl ?? FakeFuchsiaPkgctl(),
         tilesCtl = tiles ?? FakeFuchsiaTilesCtl(),
         sessionControl = sessionControl ?? FakeFuchsiaSessionControl();
@@ -622,7 +622,7 @@ class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
 }
 
 class FakeFuchsiaPM implements FuchsiaPM {
-  String _appName;
+  String? _appName;
 
   @override
   Future<bool> init(String buildPath, String appName) async {
@@ -722,8 +722,8 @@ class FailingPM implements FuchsiaPM {
 class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
   @override
   Future<void> build({
-    @required FuchsiaProject fuchsiaProject,
-    @required String target, // E.g., lib/main.dart
+    required FuchsiaProject fuchsiaProject,
+    required String target, // E.g., lib/main.dart
     BuildInfo buildInfo = BuildInfo.debug,
   }) async {
     final String outDir = getFuchsiaBuildDirectory();
@@ -735,7 +735,7 @@ class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
 
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration timeout}) async {
+  Future<List<String>> list({Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
@@ -747,9 +747,9 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
 
 class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
-    FuchsiaPM pm,
-    FuchsiaKernelCompiler compiler,
-    FuchsiaFfx ffx,
+    FuchsiaPM? pm,
+    FuchsiaKernelCompiler? compiler,
+    FuchsiaFfx? ffx,
   }) : fuchsiaPM = pm ?? FakeFuchsiaPM(),
        fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
        fuchsiaFfx = ffx ?? FakeFuchsiaFfx();

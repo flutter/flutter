@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:io' hide Directory, File;
 
@@ -34,14 +34,14 @@ const List<int> kTransparentImage = <int>[
 ];
 
 void main() {
-  Testbed testbed;
-  WebAssetServer webAssetServer;
-  ReleaseAssetServer releaseAssetServer;
-  Platform linux;
-  PackageConfig packages;
-  Platform windows;
-  FakeHttpServer httpServer;
-  BufferLogger logger;
+  late Testbed testbed;
+  late WebAssetServer webAssetServer;
+  late ReleaseAssetServer releaseAssetServer;
+  Platform? linux;
+  PackageConfig? packages;
+  Platform? windows;
+  FakeHttpServer? httpServer;
+  BufferLogger? logger;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -94,8 +94,8 @@ void main() {
     ];
 
     events.forEach(log);
-    expect(logger.warningText, contains(unresolvedUriMessage));
-    expect(logger.warningText, contains(otherMessage));
+    expect(logger!.warningText, contains(unresolvedUriMessage));
+    expect(logger!.warningText, contains(otherMessage));
   }));
 
   test('Handles against malformed manifest', () => testbed.run(() async {
@@ -176,10 +176,10 @@ void main() {
       }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
-    final String merged = await webAssetServer.metadataContents('main_module.ddc_merged_metadata');
+    final String? merged = await webAssetServer.metadataContents('main_module.ddc_merged_metadata');
     expect(merged, equals(metadataContents));
 
-    final String single = await webAssetServer.metadataContents('foo.js.metadata');
+    final String? single = await webAssetServer.metadataContents('foo.js.metadata');
     expect(single, equals(metadataContents));
   }, overrides: <Type, Generator>{
     Platform: () => linux,
@@ -373,7 +373,7 @@ void main() {
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
-    final String etag = response.headers[HttpHeaders.etagHeader];
+    final String etag = response.headers[HttpHeaders.etagHeader]!;
 
     final Response cachedResponse = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js'), headers: <String, String>{
@@ -615,14 +615,14 @@ void main() {
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/fooπ')));
-    final String etag = response.headers[HttpHeaders.etagHeader];
+    final String etag = response.headers[HttpHeaders.etagHeader]!;
 
     expect(etag.runes, everyElement(predicate((int char) => char < 255)));
   }));
 
   test('serves /packages/<package>/<path> files as if they were '
        'package:<package>/<path> uris', () => testbed.run(() async {
-    final Uri expectedUri = packages.resolve(
+    final Uri? expectedUri = packages!.resolve(
         Uri.parse('package:flutter_tools/foo.dart'));
     final File source = globals.fs.file(globals.fs.path.fromUri(expectedUri))
       ..createSync(recursive: true)
@@ -641,7 +641,7 @@ void main() {
   test('calling dispose closes the http server', () => testbed.run(() async {
     await webAssetServer.dispose();
 
-    expect(httpServer.closed, true);
+    expect(httpServer!.closed, true);
   }));
 
   test('Can start web server with specified assets', () => testbed.run(() async {
@@ -682,15 +682,15 @@ void main() {
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
-    final Uri uri = await webDevFS.create();
+    final Uri uri = await (webDevFS.create() as FutureOr<Uri>);
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
-    final String webPrecompiledSdk = globals.artifacts
+    final String webPrecompiledSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSdk).path;
-    final String webPrecompiledSdkSourcemaps = globals.artifacts
+    final String webPrecompiledSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path;
-    final String webPrecompiledCanvaskitSdk = globals.artifacts
+    final String webPrecompiledCanvaskitSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path;
-    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
+    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path;
     globals.fs.currentDirectory
       .childDirectory('lib')
@@ -793,20 +793,20 @@ void main() {
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
-    final Uri uri = await webDevFS.create();
+    final Uri uri = await (webDevFS.create() as FutureOr<Uri>);
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     globals.fs.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
-    final String webPrecompiledSdk = globals.artifacts
+    final String webPrecompiledSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
-    final String webPrecompiledSdkSourcemaps = globals.artifacts
+    final String webPrecompiledSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
-    final String webPrecompiledCanvaskitSdk = globals.artifacts
+    final String webPrecompiledCanvaskitSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
-    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
+    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
@@ -894,7 +894,7 @@ void main() {
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
-    final Uri uri = await webDevFS.create();
+    final Uri uri = await (webDevFS.create() as FutureOr<Uri>);
 
     expect(uri.host, 'localhost');
     await webDevFS.destroy();
@@ -1082,7 +1082,7 @@ void main() {
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
-    final Uri uri = await webDevFS.create();
+    final Uri uri = await (webDevFS.create() as FutureOr<Uri>);
 
     // served on localhost
     expect(uri.host, 'localhost');
@@ -1105,17 +1105,17 @@ class FakeHttpServer extends Fake implements HttpServer {
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
-  CompilerOutput output;
+  CompilerOutput? output;
 
   @override
   void addFileSystemRoot(String root) { }
 
   @override
-  Future<CompilerOutput> recompile(Uri mainUri, List<Uri> invalidatedFiles, {
-    String outputPath,
-    PackageConfig packageConfig,
-    String projectRootPath,
-    FileSystem fs,
+  Future<CompilerOutput?> recompile(Uri mainUri, List<Uri>? invalidatedFiles, {
+    String? outputPath,
+    PackageConfig? packageConfig,
+    String? projectRootPath,
+    FileSystem? fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
   }) async {

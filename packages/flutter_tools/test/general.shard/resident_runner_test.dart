@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -150,12 +150,12 @@ const FakeVmServiceRequest evict = FakeVmServiceRequest(
 final Uri testUri = Uri.parse('foo://bar');
 
 void main() {
-  Testbed testbed;
-  FakeFlutterDevice flutterDevice;
-  FakeDevFS devFS;
-  ResidentRunner residentRunner;
-  FakeDevice device;
-  FakeVmServiceHost fakeVmServiceHost;
+  late Testbed testbed;
+  FakeFlutterDevice? flutterDevice;
+  FakeDevFS? devFS;
+  late ResidentRunner residentRunner;
+  FakeDevice? device;
+  FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
     testbed = Testbed(setup: () {
@@ -165,7 +165,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
       residentRunner = HotRunner(
-        <FlutterDevice>[
+        <FlutterDevice?>[
           flutterDevice,
         ],
         stayResident: false,
@@ -190,7 +190,7 @@ void main() {
     ]);
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
-    final Future<int> result = residentRunner.attach(
+    final Future<int?> result = residentRunner.attach(
       appStartedCompleter: futureAppStart,
       connectionInfoCompleter: futureConnectionInfo,
       enableDevTools: true,
@@ -201,7 +201,7 @@ void main() {
     expect(futureConnectionInfo.isCompleted, true);
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(futureAppStart.isCompleted, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
@@ -214,7 +214,7 @@ void main() {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
       ..nextOutput = const CompilerOutput('foo', 0 ,<Uri>[]);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -222,11 +222,11 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
-    flutterDevice.generator = residentCompiler;
+    flutterDevice!.generator = residentCompiler;
 
     expect(await residentRunner.run(enableDevTools: true), 0);
     expect(residentCompiler.didSuppressErrors, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
@@ -237,7 +237,7 @@ void main() {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
       ..nextOutput = const CompilerOutput('foo', 1 ,<Uri>[]);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -245,7 +245,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
-    flutterDevice.generator = residentCompiler;
+    flutterDevice!.generator = residentCompiler;
 
     expect(await residentRunner.run(), 1);
     // Completing this future ensures that the daemon can exit correctly.
@@ -258,7 +258,7 @@ void main() {
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentRunner = ColdRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -266,7 +266,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
-    flutterDevice.runColdCode = 1;
+    flutterDevice!.runColdCode = 1;
 
     expect(await residentRunner.run(), 1);
     // Completing this future ensures that the daemon can exit correctly.
@@ -279,7 +279,7 @@ void main() {
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentRunner = ColdRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -287,7 +287,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
-    flutterDevice.runColdError = Exception('BAD STUFF');
+    flutterDevice!.runColdError = Exception('BAD STUFF');
 
 
     expect(await residentRunner.run(), 1);
@@ -305,7 +305,7 @@ void main() {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
       ..nextOutput = const CompilerOutput('foo', 0 ,<Uri>[]);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       applicationBinary: globals.fs.file('app.apk'),
@@ -314,11 +314,11 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
-    flutterDevice.generator = residentCompiler;
+    flutterDevice!.generator = residentCompiler;
 
     expect(await residentRunner.run(enableDevTools: true), 0);
     expect(residentCompiler.didSuppressErrors, false);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner can attach to device successfully with --fast-start', () => testbed.run(() async {
@@ -329,13 +329,13 @@ void main() {
       FakeVmServiceRequest(
         method: 'getIsolate',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
         jsonResponse: fakeUnpausedIsolate.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'getVM',
-        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+        jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
       ),
       listViews,
       const FakeVmServiceRequest(
@@ -361,7 +361,7 @@ void main() {
       ),
     ]);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -375,7 +375,7 @@ void main() {
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
-    final Future<int> result = residentRunner.attach(
+    final Future<int?> result = residentRunner.attach(
       appStartedCompleter: futureAppStart,
       connectionInfoCompleter: futureConnectionInfo,
       enableDevTools: true,
@@ -386,7 +386,7 @@ void main() {
     expect(futureConnectionInfo.isCompleted, true);
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(futureAppStart.isCompleted, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner can handle an RPC exception from hot reload', () => testbed.run(() async {
@@ -403,7 +403,7 @@ void main() {
       enableDevTools: true,
     ));
     await futureAppStart.future;
-    flutterDevice.reportError = vm_service.RPCError('something bad happened', 666, '');
+    flutterDevice!.reportError = vm_service.RPCError('something bad happened', 666, '');
 
     final OperationResult result = await residentRunner.restart();
     expect(result.fatal, true);
@@ -417,7 +417,7 @@ void main() {
         fastReassemble: false,
       )),
     ));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -434,13 +434,13 @@ void main() {
       connectionInfoCompleter: futureConnectionInfo,
     ));
     await futureAppStart.future;
-    flutterDevice._devFS = null;
+    flutterDevice!._devFS = null;
 
     final OperationResult result = await residentRunner.restart();
     expect(result.fatal, false);
     expect(result.code, 1);
     expect(result.message, contains('Device initialization has not completed.'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner can handle an reload-barred exception from hot reload', () => testbed.run(() async {
@@ -457,7 +457,7 @@ void main() {
       enableDevTools: true,
     ));
     await futureAppStart.future;
-    flutterDevice.reportError = vm_service.RPCError('something bad happened', kIsolateReloadBarred, '');
+    flutterDevice!.reportError = vm_service.RPCError('something bad happened', kIsolateReloadBarred, '');
 
     final OperationResult result = await residentRunner.restart();
     expect(result.fatal, true);
@@ -473,7 +473,7 @@ void main() {
         fastReassemble: false,
       )),
     ));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -485,7 +485,7 @@ void main() {
       listViews,
     ]);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -505,7 +505,7 @@ void main() {
       enableDevTools: true,
     ));
     await futureAppStart.future;
-    flutterDevice.reportError = vm_service.RPCError('something bad happened', 666, '');
+    flutterDevice!.reportError = vm_service.RPCError('something bad happened', 666, '');
 
     final OperationResult result = await residentRunner.restart();
     expect(result.fatal, true);
@@ -520,7 +520,7 @@ void main() {
         fastReassemble: false,
       )),
     ));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -540,12 +540,12 @@ void main() {
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
       ),
     ]);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -561,12 +561,12 @@ void main() {
       enableDevTools: true,
     ));
     await futureAppStart.future;
-    flutterDevice.report =  UpdateFSReport(success: true);
+    flutterDevice!.report =  UpdateFSReport(success: true);
 
     final OperationResult result = await residentRunner.restart();
 
     expect(result.code, 0);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner reports error with missing entrypoint file', () => testbed.run(() async {
@@ -580,7 +580,7 @@ void main() {
           'isolates': <Object>[
             fakeUnpausedIsolate.toJson(),
           ],
-        }).toJson(),
+        })!.toJson(),
       ),
       const FakeVmServiceRequest(
         method: 'reloadSources',
@@ -607,7 +607,7 @@ void main() {
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
       ),
     ]);
@@ -619,12 +619,12 @@ void main() {
       enableDevTools: true,
     ));
     await futureAppStart.future;
-    flutterDevice.report =  UpdateFSReport(success: true, invalidatedSourcesCount: 1);
+    flutterDevice!.report =  UpdateFSReport(success: true, invalidatedSourcesCount: 1);
 
     final OperationResult result = await residentRunner.restart();
 
     expect(globals.fs.file(globals.fs.path.join('lib', 'main.dart')), isNot(exists));
-    expect(testLogger.errorText, contains('The entrypoint file (i.e. the file with main())'));
+    expect(testLogger!.errorText, contains('The entrypoint file (i.e. the file with main())'));
     expect(result.fatal, false);
     expect(result.code, 0);
   }));
@@ -640,7 +640,7 @@ void main() {
           'isolates': <Object>[
             fakeUnpausedIsolate.toJson(),
           ],
-        }).toJson(),
+        })!.toJson(),
       ),
       const FakeVmServiceRequest(
         method: 'reloadSources',
@@ -671,7 +671,7 @@ void main() {
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
       ),
     ]);
@@ -683,14 +683,14 @@ void main() {
       enableDevTools: true,
     ));
     await futureAppStart.future;
-    flutterDevice.report =  UpdateFSReport(success: true, invalidatedSourcesCount: 1);
+    flutterDevice!.report =  UpdateFSReport(success: true, invalidatedSourcesCount: 1);
 
     final OperationResult result = await residentRunner.restart();
 
     expect(result.fatal, false);
     expect(result.message, contains('Reload rejected: Failed to hot reload')); // contains error message from reload report.
     expect(result.code, 1);
-    expect(devFS.lastCompiled, null);
+    expect(devFS!.lastCompiled, null);
   }));
 
   testUsingContext('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
@@ -704,7 +704,7 @@ void main() {
           'isolates': <Object>[
             fakeUnpausedIsolate.toJson(),
           ],
-        }).toJson(),
+        })!.toJson(),
       ),
       const FakeVmServiceRequest(
         method: 'reloadSources',
@@ -731,7 +731,7 @@ void main() {
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
       ),
     ]);
@@ -751,7 +751,7 @@ void main() {
     final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
     expect(event.category, 'hot');
     expect(event.parameter, 'reload');
-    expect(event.parameters.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
+    expect(event.parameters!.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -794,7 +794,7 @@ void main() {
       FakeVmServiceRequest(
         method: 'ext.flutter.fastReassemble',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
           'className': 'FOO',
         },
       ),
@@ -804,7 +804,7 @@ void main() {
       BuildInfo.debug,
       FakeResidentCompiler(),
       devFS,
-    )..vmService = fakeVmServiceHost.vmService;
+    )..vmService = fakeVmServiceHost!.vmService;
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -814,7 +814,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
-    devFS.nextUpdateReport = UpdateFSReport(
+    devFS!.nextUpdateReport = UpdateFSReport(
       success: true,
       fastReassembleClassName: 'FOO',
       invalidatedSourcesCount: 1,
@@ -837,7 +837,7 @@ void main() {
     final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
     expect(event.category, 'hot');
     expect(event.parameter, 'reload');
-    expect(event.parameters.fastReassemble, true);
+    expect(event.parameters!.fastReassemble, true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     Platform: () => FakePlatform(),
@@ -885,7 +885,7 @@ void main() {
       FakeVmServiceRequest(
         method: 'ext.flutter.fastReassemble',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
           'className': 'FOO',
         },
       ),
@@ -895,7 +895,7 @@ void main() {
       BuildInfo.debug,
       FakeResidentCompiler(),
       devFS,
-    )..vmService = fakeVmServiceHost.vmService;
+    )..vmService = fakeVmServiceHost!.vmService;
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -905,7 +905,7 @@ void main() {
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
-    devFS.nextUpdateReport = UpdateFSReport(
+    devFS!.nextUpdateReport = UpdateFSReport(
       success: true,
       fastReassembleClassName: 'FOO',
       invalidatedSourcesCount: 1,
@@ -924,7 +924,7 @@ void main() {
 
     // The actual test: Expect to have compile, reload and reassemble times.
     expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(RegExp(r'Reloaded 1 of 42 libraries in \d+ms '
             r'\(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.')));
   }, overrides: <Type, Generator>{
@@ -943,13 +943,13 @@ void main() {
       FakeVmServiceRequest(
         method: 'getIsolate',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
         jsonResponse: fakeUnpausedIsolate.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'getVM',
-        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+        jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
       ),
       listViews,
       const FakeVmServiceRequest(
@@ -989,8 +989,8 @@ void main() {
     final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
     expect(event.category, 'hot');
     expect(event.parameter, 'restart');
-    expect(event.parameters.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(event.parameters!.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -1003,13 +1003,13 @@ void main() {
       FakeVmServiceRequest(
         method: 'getIsolate',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
         jsonResponse: fakePausedIsolate.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'getVM',
-        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+        jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
       ),
       const FakeVmServiceRequest(
         method: 'setIsolatePauseMode',
@@ -1065,7 +1065,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
 
     expect(result.isOk, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner will alternative the name of the dill file uploaded for a hot restart', () => testbed.run(() async {
@@ -1076,13 +1076,13 @@ void main() {
       FakeVmServiceRequest(
         method: 'getIsolate',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
         jsonResponse: fakeUnpausedIsolate.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'getVM',
-        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+        jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
       ),
       listViews,
       const FakeVmServiceRequest(
@@ -1110,13 +1110,13 @@ void main() {
       FakeVmServiceRequest(
         method: 'getIsolate',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
         jsonResponse: fakeUnpausedIsolate.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'getVM',
-        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+        jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
       ),
       listViews,
       const FakeVmServiceRequest(
@@ -1144,13 +1144,13 @@ void main() {
       FakeVmServiceRequest(
         method: 'getIsolate',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': fakeUnpausedIsolate.id!,
         },
         jsonResponse: fakeUnpausedIsolate.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'getVM',
-        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+        jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
       ),
       listViews,
       const FakeVmServiceRequest(
@@ -1187,7 +1187,7 @@ void main() {
     await residentRunner.restart(fullRestart: true);
     await residentRunner.restart(fullRestart: true);
 
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner Can handle an RPC exception from hot restart', () => testbed.run(() async {
@@ -1203,7 +1203,7 @@ void main() {
       enableDevTools: true,
     ));
     await futureAppStart.future;
-    flutterDevice.reportError = vm_service.RPCError('something bad happened', 666, '');
+    flutterDevice!.reportError = vm_service.RPCError('something bad happened', 666, '');
 
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, true);
@@ -1218,7 +1218,7 @@ void main() {
         fastReassemble: false,
       )),
     ));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -1228,7 +1228,7 @@ void main() {
     expect(residentRunner.artifactDirectory.path, contains('flutter_tool.'));
 
     final ResidentRunner otherRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1283,8 +1283,8 @@ void main() {
 
     await residentRunner.runSourceGenerators();
 
-    expect(testLogger.errorText, isEmpty);
-    expect(testLogger.statusText, isEmpty);
+    expect(testLogger!.errorText, isEmpty);
+    expect(testLogger!.statusText, isEmpty);
   }));
 
   testUsingContext('generated main uses correct target', () => testbed.run(() async {
@@ -1344,7 +1344,7 @@ flutter:
 ''');
 
     residentRunner = HotRunner(
-        <FlutterDevice>[
+        <FlutterDevice?>[
           flutterDevice,
         ],
         stayResident: false,
@@ -1359,8 +1359,8 @@ flutter:
         .childFile('dart_plugin_registrant.dart');
 
     expect(generatedMain.existsSync(), isTrue);
-    expect(testLogger.errorText, isEmpty);
-    expect(testLogger.statusText, isEmpty);
+    expect(testLogger!.errorText, isEmpty);
+    expect(testLogger!.statusText, isEmpty);
   }));
 
   testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
@@ -1380,8 +1380,8 @@ flutter:
 
     await residentRunner.runSourceGenerators();
 
-    expect(testLogger.errorText, allOf(contains('Exception')));
-    expect(testLogger.statusText, isEmpty);
+    expect(testLogger!.errorText, allOf(contains('Exception')));
+    expect(testLogger!.statusText, isEmpty);
   }));
 
   testUsingContext('ResidentRunner printHelpDetails hot runner', () => testbed.run(() {
@@ -1398,7 +1398,7 @@ flutter:
     // does support SkSL
     expect(residentRunner.supportsWriteSkSL, true);
     // commands
-    expect(testLogger.statusText, equals(
+    expect(testLogger!.statusText, equals(
         <dynamic>[
           'Flutter run key commands.',
           commandHelp.r,
@@ -1446,7 +1446,7 @@ flutter:
     // does support SkSL
     expect(residentRunner.supportsWriteSkSL, true);
     // commands
-    expect(testLogger.statusText, equals(
+    expect(testLogger!.statusText, equals(
         <dynamic>[
           'Flutter run key commands.',
           commandHelp.r,
@@ -1466,7 +1466,7 @@ flutter:
   testUsingContext('ResidentRunner printHelpDetails cold runner', () => testbed.run(() {
     fakeVmServiceHost = null;
     residentRunner = ColdRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1485,7 +1485,7 @@ flutter:
     // does support SkSL
     expect(residentRunner.supportsWriteSkSL, false);
     // commands
-    expect(testLogger.statusText, equals(
+    expect(testLogger!.statusText, equals(
         <dynamic>[
           'Flutter run key commands.',
           commandHelp.v,
@@ -1501,7 +1501,7 @@ flutter:
   testUsingContext('ResidentRunner printHelp cold runner', () => testbed.run(() {
     fakeVmServiceHost = null;
     residentRunner = ColdRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1520,7 +1520,7 @@ flutter:
     // does support SkSL
     expect(residentRunner.supportsWriteSkSL, false);
     // commands
-    expect(testLogger.statusText, equals(
+    expect(testLogger!.statusText, equals(
         <dynamic>[
           'Flutter run key commands.',
           commandHelp.hWithoutDetails,
@@ -1546,8 +1546,8 @@ flutter:
     ]);
     await residentRunner.writeSkSL();
 
-    expect(testLogger.statusText, contains('No data was received'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(testLogger!.statusText, contains('No data was received'));
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner can write SkSL data to a unique file with engine revision, platform, and device name', () => testbed.run(() async {
@@ -1567,7 +1567,7 @@ flutter:
     ]);
     await residentRunner.writeSkSL();
 
-    expect(testLogger.statusText, contains('flutter_01.sksl.json'));
+    expect(testLogger!.statusText, contains('flutter_01.sksl.json'));
     expect(globals.fs.file('flutter_01.sksl.json'), exists);
     expect(json.decode(globals.fs.file('flutter_01.sksl.json').readAsStringSync()), <String, Object>{
       'platform': 'android',
@@ -1575,7 +1575,7 @@ flutter:
       'engineRevision': 'abcdefg',
       'data': <String, Object>{'A': 'B'},
     });
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystemUtils: () => FileSystemUtils(
       fileSystem: globals.fs,
@@ -1590,7 +1590,7 @@ flutter:
       listViews,
     ]);
     residentRunner = ColdRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1599,7 +1599,7 @@ flutter:
       devtoolsHandler: createNoOpHandler,
     );
 
-    final Future<int> result = residentRunner.attach();
+    final Future<int?> result = residentRunner.attach();
     expect(await result, 0);
   }));
 
@@ -1610,7 +1610,7 @@ flutter:
 
     await flutterDevice.exitApps();
 
-    expect(device.appStopped, true);
+    expect(device!.appStopped, true);
   }));
 
   testUsingContext('FlutterDevice will exit an un-paused isolate using stopApp', () => testbed.run(() async {
@@ -1618,13 +1618,13 @@ flutter:
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
     );
-    flutterDevice.vmService = fakeVmServiceHost.vmService;
+    flutterDevice.vmService = fakeVmServiceHost!.vmService;
 
     final Future<void> exitFuture = flutterDevice.exitApps();
 
     await expectLater(exitFuture, completes);
-    expect(device.appStopped, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(device!.appStopped, true);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
@@ -1634,7 +1634,7 @@ flutter:
     ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1645,7 +1645,7 @@ flutter:
 
     await residentRunner.run(enableDevTools: true);
 
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
     expect(await globals.fs.file('foo').readAsString(), testUri.toString());
   }));
 
@@ -1656,7 +1656,7 @@ flutter:
     ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1684,7 +1684,7 @@ flutter:
     ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1714,7 +1714,7 @@ flutter:
     ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1744,7 +1744,7 @@ flutter:
     ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1767,7 +1767,7 @@ flutter:
     ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1790,7 +1790,7 @@ flutter:
     ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1817,7 +1817,7 @@ flutter:
     ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1827,7 +1827,7 @@ flutter:
     );
 
     await residentRunner.run();
-    expect(device.disposed, true);
+    expect(device!.disposed, true);
   }));
 
   testUsingContext('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
@@ -1837,7 +1837,7 @@ flutter:
     ]);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1848,8 +1848,8 @@ flutter:
 
     await residentRunner.run(enableDevTools: true);
 
-    expect(testLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(testLogger!.errorText, contains('Failed to write vmservice-out-file at foo'));
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem.test()),
   }));
@@ -1860,7 +1860,7 @@ flutter:
     ], wsAddress: testUri);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = ColdRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -1872,7 +1872,7 @@ flutter:
     await residentRunner.run(enableDevTools: true);
 
     expect(await globals.fs.file('foo').readAsString(), testUri.toString());
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('FlutterDevice uses dartdevc configuration when targeting web', () async {
@@ -1893,11 +1893,11 @@ flutter:
     expect(residentCompiler.initializeFromDill,
       globals.fs.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'));
     expect(residentCompiler.librariesSpec,
-      globals.fs.file(globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
+      globals.fs.file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
-      '${globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
+      '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
     expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelDill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
@@ -1924,11 +1924,11 @@ flutter:
     expect(residentCompiler.initializeFromDill,
       globals.fs.path.join(getBuildDirectory(), '80b1a4cf4e7b90e1ab5f72022a0bc624.cache.dill'));
     expect(residentCompiler.librariesSpec,
-      globals.fs.file(globals.artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
+      globals.fs.file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
-      '${globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
+      '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
     expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformSoundKernelDill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
@@ -2035,7 +2035,7 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri, List<String> cachedUserTags}) {
+    ddsLauncherCallback = (Uri uri, {bool? enableAuthCodes, bool? ipv6, Uri? serviceUri, List<String>? cachedUserTags}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
@@ -2044,7 +2044,7 @@ flutter:
       throw FakeDartDevelopmentServiceException(message:
         'Existing VM service clients prevent DDS from taking control.',
       );
-    };
+    } as Future<dds.DartDevelopmentService> Function(Uri, {List<String> cachedUserTags, bool enableAuthCodes, bool ipv6, Uri? serviceUri});
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
       observatoryUris: Stream<Uri>.value(testUri),
@@ -2067,14 +2067,14 @@ flutter:
     }
   }, overrides: <Type, Generator>{
     VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-      Logger logger,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      Logger? logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
@@ -2083,7 +2083,7 @@ flutter:
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
     final Completer<void>done = Completer<void>();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri, List<String> cachedUserTags}) async {
+    ddsLauncherCallback = (Uri uri, {bool? enableAuthCodes, bool? ipv6, Uri? serviceUri, List<String>? cachedUserTags}) async {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
       expect(ipv6, isTrue);
@@ -2091,7 +2091,7 @@ flutter:
       expect(cachedUserTags, isEmpty);
       done.complete();
       return null;
-    };
+    } as Future<dds.DartDevelopmentService> Function(Uri, {List<String> cachedUserTags, bool enableAuthCodes, bool ipv6, Uri? serviceUri});
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
       observatoryUris: Stream<Uri>.value(testUri),
@@ -2100,14 +2100,14 @@ flutter:
     await done.future;
   }, overrides: <Type, Generator>{
     VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-      Logger logger,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      Logger? logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
@@ -2115,14 +2115,14 @@ flutter:
     // See https://github.com/flutter/flutter/issues/72385 for context.
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri, List<String> cachedUserTags}) {
+    ddsLauncherCallback = (Uri uri, {bool? enableAuthCodes, bool? ipv6, Uri? serviceUri, List<String>? cachedUserTags}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
       expect(cachedUserTags, isEmpty);
       throw FakeDartDevelopmentServiceException(message: 'No URI');
-    };
+    } as Future<dds.DartDevelopmentService> Function(Uri, {List<String> cachedUserTags, bool enableAuthCodes, bool ipv6, Uri? serviceUri});
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
       observatoryUris: Stream<Uri>.value(testUri),
@@ -2134,7 +2134,7 @@ flutter:
     }, (Object e, StackTrace st) {
       expect(e is StateError, true);
       expect((e as StateError).message, contains('No URI'));
-      expect(testLogger.errorText, contains(
+      expect(testLogger!.errorText, contains(
         'DDS has failed to start and there is not an existing DDS instance',
       ));
       done.complete();
@@ -2146,14 +2146,14 @@ flutter:
     }
   }, overrides: <Type, Generator>{
     VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-      Logger logger,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      Logger? logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
@@ -2167,7 +2167,7 @@ flutter:
 
   testUsingContext('cleanupAtFinish shuts down resident devtools handler', () => testbed.run(() async {
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -2187,7 +2187,7 @@ flutter:
       evict,
     ]);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -2196,19 +2196,19 @@ flutter:
       devtoolsHandler: createNoOpHandler,
     );
 
-    (flutterDevice.devFS as FakeDevFS).assetPathsToEvict = <String>{'asset'};
+    (flutterDevice!.devFS as FakeDevFS).assetPathsToEvict = <String>{'asset'};
 
-    expect(flutterDevice.devFS.hasSetAssetDirectory, false);
+    expect(flutterDevice!.devFS!.hasSetAssetDirectory, false);
     await (residentRunner as HotRunner).evictDirtyAssets();
-    expect(flutterDevice.devFS.hasSetAssetDirectory, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(flutterDevice!.devFS!.hasSetAssetDirectory, true);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('HotRunner does not sets asset directory when no assets to evict', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
     ]);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -2217,10 +2217,10 @@ flutter:
       devtoolsHandler: createNoOpHandler,
     );
 
-    expect(flutterDevice.devFS.hasSetAssetDirectory, false);
+    expect(flutterDevice!.devFS!.hasSetAssetDirectory, false);
     await (residentRunner as HotRunner).evictDirtyAssets();
-    expect(flutterDevice.devFS.hasSetAssetDirectory, false);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(flutterDevice!.devFS!.hasSetAssetDirectory, false);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 
   testUsingContext('HotRunner does not set asset directory if it has been set before', () => testbed.run(() async {
@@ -2229,7 +2229,7 @@ flutter:
       evict,
     ]);
     residentRunner = HotRunner(
-      <FlutterDevice>[
+      <FlutterDevice?>[
         flutterDevice,
       ],
       stayResident: false,
@@ -2238,12 +2238,12 @@ flutter:
       devtoolsHandler: createNoOpHandler,
     );
 
-    (flutterDevice.devFS as FakeDevFS).assetPathsToEvict = <String>{'asset'};
-    flutterDevice.devFS.hasSetAssetDirectory = true;
+    (flutterDevice!.devFS as FakeDevFS).assetPathsToEvict = <String>{'asset'};
+    flutterDevice!.devFS!.hasSetAssetDirectory = true;
 
     await (residentRunner as HotRunner).evictDirtyAssets();
-    expect(flutterDevice.devFS.hasSetAssetDirectory, true);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(flutterDevice!.devFS!.hasSetAssetDirectory, true);
+    expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
 }
 
@@ -2259,14 +2259,14 @@ class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceE
 }
 
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(Device device, { Stream<Uri> observatoryUris })
+  TestFlutterDevice(Device? device, { Stream<Uri>? observatoryUris })
     : super(device, buildInfo: BuildInfo.debug) {
     _observatoryUris = observatoryUris;
   }
 
   @override
-  Stream<Uri> get observatoryUris => _observatoryUris;
-  Stream<Uri> _observatoryUris;
+  Stream<Uri>? get observatoryUris => _observatoryUris;
+  Stream<Uri>? _observatoryUris;
 }
 
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
@@ -2282,36 +2282,36 @@ class ThrowingForwardingFileSystem extends ForwardingFileSystem {
 }
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
-  FakeVmServiceHost Function() vmServiceHost;
-  Uri testUri;
+  FakeVmServiceHost? Function()? vmServiceHost;
+  Uri? testUri;
   UpdateFSReport report = UpdateFSReport(
     success: true,
     invalidatedSourcesCount: 1,
   );
-  Exception reportError;
-  Exception runColdError;
+  Exception? reportError;
+  Exception? runColdError;
   int runHotCode = 0;
   int runColdCode = 0;
 
   @override
-  ResidentCompiler generator;
+  ResidentCompiler? generator;
 
   @override
-  Stream<Uri> get observatoryUris => Stream<Uri>.value(testUri);
+  Stream<Uri?> get observatoryUris => Stream<Uri?>.value(testUri);
 
   @override
-  FlutterVmService get vmService => vmServiceHost?.call()?.vmService;
+  FlutterVmService? get vmService => vmServiceHost?.call()?.vmService;
 
-  DevFS _devFS;
-
-  @override
-  DevFS get devFS => _devFS;
+  DevFS? _devFS;
 
   @override
-  set devFS(DevFS value) { }
+  DevFS? get devFS => _devFS;
 
   @override
-  Device device;
+  set devFS(DevFS? value) { }
+
+  @override
+  Device? device;
 
   @override
   Future<void> stopEchoingDeviceLog() async { }
@@ -2320,56 +2320,56 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<void> initLogReader() async { }
 
   @override
-  Future<Uri> setupDevFS(String fsName, Directory rootDirectory) async {
+  Future<Uri?> setupDevFS(String fsName, Directory rootDirectory) async {
     return testUri;
   }
 
   @override
-  Future<int> runHot({HotRunner hotRunner, String route}) async {
+  Future<int> runHot({HotRunner? hotRunner, String? route}) async {
     return runHotCode;
   }
 
   @override
-  Future<int> runCold({ColdRunner coldRunner, String route}) async {
+  Future<int> runCold({ColdRunner? coldRunner, String? route}) async {
     if (runColdError != null) {
-      throw runColdError;
+      throw runColdError!;
     }
     return runColdCode;
   }
 
   @override
   Future<void> connect({
-    ReloadSources reloadSources,
-    Restart restart,
-    CompileExpression compileExpression,
-    GetSkSLMethod getSkSLMethod,
-    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-    int hostVmServicePort,
-    int ddsPort,
+    ReloadSources? reloadSources,
+    Restart? restart,
+    CompileExpression? compileExpression,
+    GetSkSLMethod? getSkSLMethod,
+    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    int? hostVmServicePort,
+    int? ddsPort,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
     bool cacheStartupProfile = false,
-    @required bool allowExistingDdsInstance,
-    bool ipv6 = false,
+    required bool allowExistingDdsInstance,
+    bool? ipv6 = false,
   }) async { }
 
   @override
   Future<UpdateFSReport> updateDevFS({
-    Uri mainUri,
-    String target,
-    AssetBundle bundle,
-    DateTime firstBuildTime,
+    Uri? mainUri,
+    String? target,
+    AssetBundle? bundle,
+    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
-    String projectRootPath,
-    String pathToReload,
-    String dillOutputPath,
-    List<Uri> invalidatedFiles,
-    PackageConfig packageConfig,
+    String? projectRootPath,
+    String? pathToReload,
+    String? dillOutputPath,
+    List<Uri>? invalidatedFiles,
+    PackageConfig? packageConfig,
   }) async {
     if (reportError != null) {
-      throw reportError;
+      throw reportError!;
     }
     return report;
   }
@@ -2380,7 +2380,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
 class FakeDelegateFlutterDevice extends FlutterDevice {
   FakeDelegateFlutterDevice(
-    Device device,
+    Device? device,
     BuildInfo buildInfo,
     ResidentCompiler residentCompiler,
     this.fakeDevFS,
@@ -2388,42 +2388,42 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
 
   @override
   Future<void> connect({
-    ReloadSources reloadSources,
-    Restart restart,
+    ReloadSources? reloadSources,
+    Restart? restart,
     bool enableDds = true,
     bool cacheStartupProfile = false,
     bool disableServiceAuthCodes = false,
-    bool ipv6 = false,
-    CompileExpression compileExpression,
-    GetSkSLMethod getSkSLMethod,
-    int hostVmServicePort,
-    int ddsPort,
-    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    bool? ipv6 = false,
+    CompileExpression? compileExpression,
+    GetSkSLMethod? getSkSLMethod,
+    int? hostVmServicePort,
+    int? ddsPort,
+    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     bool allowExistingDdsInstance = false,
   }) async { }
 
 
-  final DevFS fakeDevFS;
+  final DevFS? fakeDevFS;
 
   @override
-  DevFS get devFS => fakeDevFS;
+  DevFS? get devFS => fakeDevFS;
 
   @override
-  set devFS(DevFS value) {}
+  set devFS(DevFS? value) {}
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
-  CompilerOutput nextOutput;
+  CompilerOutput? nextOutput;
   bool didSuppressErrors = false;
 
   @override
   Future<CompilerOutput> recompile(
     Uri mainUri,
-    List<Uri> invalidatedFiles, {
-    @required String outputPath,
-    @required PackageConfig packageConfig,
-    @required String projectRootPath,
-    @required FileSystem fs,
+    List<Uri>? invalidatedFiles, {
+    required String outputPath,
+    required PackageConfig packageConfig,
+    required String? projectRootPath,
+    required FileSystem fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
   }) async {
@@ -2441,10 +2441,10 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator {
   @override
   Future<InvalidationResult> findInvalidated({
-    @required DateTime lastCompiled,
-    @required List<Uri> urisToMonitor,
-    @required String packagesPath,
-    @required PackageConfig packageConfig,
+    required DateTime? lastCompiled,
+    required List<Uri> urisToMonitor,
+    required String packagesPath,
+    required PackageConfig packageConfig,
     bool asyncScanning = false,
   }) async {
     return InvalidationResult(
@@ -2504,7 +2504,7 @@ class FakeDevice extends Fake implements Device {
   String get name => 'FakeDevice';
 
   @override
-  DartDevelopmentService dds;
+  late DartDevelopmentService dds;
 
   @override
   Future<void> dispose() async {
@@ -2512,7 +2512,7 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
     appStopped = true;
     return true;
   }
@@ -2527,7 +2527,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage app,
+    covariant ApplicationPackage? app,
     bool includePastLogs = false,
   }) => NoOpDeviceLogReader(name);
 
@@ -2537,10 +2537,10 @@ class FakeDevice extends Fake implements Device {
 
 class FakeDevFS extends Fake implements DevFS {
   @override
-  DateTime lastCompiled = DateTime(2000);
+  DateTime? lastCompiled = DateTime(2000);
 
   @override
-  PackageConfig lastPackageConfig = PackageConfig.empty;
+  PackageConfig? lastPackageConfig = PackageConfig.empty;
 
   @override
   List<Uri> sources = <Uri>[];
@@ -2571,20 +2571,20 @@ class FakeDevFS extends Fake implements DevFS {
 
   @override
   Future<UpdateFSReport> update({
-    @required Uri mainUri,
-    @required ResidentCompiler generator,
-    @required bool trackWidgetCreation,
-    @required String pathToReload,
-    @required List<Uri> invalidatedFiles,
-    @required PackageConfig packageConfig,
-    @required String dillOutputPath,
-    DevFSWriter devFSWriter,
-    String target,
-    AssetBundle bundle,
-    DateTime firstBuildTime,
+    required Uri mainUri,
+    required ResidentCompiler generator,
+    required bool trackWidgetCreation,
+    required String pathToReload,
+    required List<Uri> invalidatedFiles,
+    required PackageConfig packageConfig,
+    required String dillOutputPath,
+    DevFSWriter? devFSWriter,
+    String? target,
+    AssetBundle? bundle,
+    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
-    String projectRootPath,
+    String? projectRootPath,
   }) async {
     return nextUpdateReport;
   }

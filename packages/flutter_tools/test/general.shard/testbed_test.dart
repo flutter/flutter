@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:io';
@@ -24,7 +24,7 @@ void main() {
     test('Can provide default interfaces', () async {
       final Testbed testbed = Testbed();
 
-      FileSystem localFileSystem;
+      FileSystem? localFileSystem;
       await testbed.run(() {
         localFileSystem = globals.fs;
       });
@@ -39,7 +39,7 @@ void main() {
         A: () => A(),
       });
 
-      A instance;
+      A? instance;
       await testbed.run(() {
         instance = context.get<A>();
       });
@@ -52,7 +52,7 @@ void main() {
         A: () => A(),
       });
 
-      A instance;
+      A? instance;
       await testbed.run(() {
         instance = context.get<A>();
       }, overrides: <Type, Generator>{

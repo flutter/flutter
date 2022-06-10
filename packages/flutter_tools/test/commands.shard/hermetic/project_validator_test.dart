@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -18,7 +18,7 @@ import '../../src/test_flutter_command_runner.dart';
 
 class ProjectValidatorDummy extends ProjectValidator {
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger logger, FileSystem fileSystem}) async{
+  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async{
     return <ProjectValidatorResult>[
       const ProjectValidatorResult(name: 'pass', value: 'value', status: StatusProjectValidator.success),
       const ProjectValidatorResult(name: 'fail', value: 'my error', status: StatusProjectValidator.error),
@@ -37,7 +37,7 @@ class ProjectValidatorDummy extends ProjectValidator {
 
 class ProjectValidatorSecondDummy extends ProjectValidator {
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger logger, FileSystem fileSystem}) async{
+  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async{
     return <ProjectValidatorResult>[
       const ProjectValidatorResult(name: 'second', value: 'pass', status: StatusProjectValidator.success),
       const ProjectValidatorResult(name: 'other fail', value: 'second fail', status: StatusProjectValidator.error),
@@ -55,7 +55,7 @@ class ProjectValidatorSecondDummy extends ProjectValidator {
 
 class ProjectValidatorCrash extends ProjectValidator {
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger logger, FileSystem fileSystem}) async{
+  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async{
     throw Exception('my exception');
   }
 
@@ -69,7 +69,7 @@ class ProjectValidatorCrash extends ProjectValidator {
 }
 
 void main() {
-  FileSystem fileSystem;
+  late FileSystem fileSystem;
 
   group('analyze project command', () {
 

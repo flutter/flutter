@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -14,9 +14,9 @@ import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 
 void main() {
-  Directory tempDir;
+  late Directory tempDir;
   final HotReloadProject project = HotReloadProject();
-  FlutterRunTestDriver flutter;
+  late FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('hot_reload_test.');

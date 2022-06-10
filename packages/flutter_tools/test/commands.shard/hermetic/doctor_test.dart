@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
@@ -42,9 +42,9 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FakeFlutterVersion flutterVersion;
-  BufferLogger logger;
-  FakeProcessManager fakeProcessManager;
+  FakeFlutterVersion? flutterVersion;
+  late BufferLogger logger;
+  FakeProcessManager? fakeProcessManager;
 
   setUp(() {
     flutterVersion = FakeFlutterVersion();
@@ -192,7 +192,7 @@ void main() {
   });
 
   group('doctor usage params', () {
-    TestUsage testUsage;
+    TestUsage? testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -202,8 +202,8 @@ void main() {
       final Doctor doctor = Doctor(logger: logger);
       await doctor.diagnose(verbose: false);
 
-      expect(testUsage.events.length, 3);
-      expect(testUsage.events, contains(
+      expect(testUsage!.events.length, 3);
+      expect(testUsage!.events, contains(
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
@@ -218,7 +218,7 @@ void main() {
     testUsingContext('contains installed and partial', () async {
       await FakePassingDoctor(logger).diagnose(verbose: false);
 
-      expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
+      expect(testUsage!.events, unorderedEquals(<TestUsageEvent>[
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
@@ -247,7 +247,7 @@ void main() {
     testUsingContext('contains installed, missing and partial', () async {
       await FakeDoctor(logger).diagnose(verbose: false);
 
-      expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
+      expect(testUsage!.events, unorderedEquals(<TestUsageEvent>[
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
@@ -281,7 +281,7 @@ void main() {
     testUsingContext('events for grouped validators are properly decomposed', () async {
       await FakeGroupedDoctor(logger).diagnose(verbose: false);
 
-      expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
+      expect(testUsage!.events, unorderedEquals(<TestUsageEvent>[
         const TestUsageEvent(
           'doctor-result',
           'PassingGroupedValidator',
@@ -310,7 +310,7 @@ void main() {
     testUsingContext('sending events can be skipped', () async {
       await FakePassingDoctor(logger).diagnose(verbose: false, sendEvent: false);
 
-      expect(testUsage.events, isEmpty);
+      expect(testUsage!.events, isEmpty);
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
@@ -489,8 +489,8 @@ void main() {
   });
 
   group('doctor diagnosis wrapper', () {
-    TestUsage testUsage;
-    BufferLogger logger;
+    TestUsage? testUsage;
+    late BufferLogger logger;
 
     setUp(() {
       testUsage = TestUsage();
@@ -519,7 +519,7 @@ void main() {
       expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
 
       // Only one event sent.
-      expect(testUsage.events, <TestUsageEvent>[
+      expect(testUsage!.events, <TestUsageEvent>[
         const TestUsageEvent(
           'doctor-result',
           'PiiValidator',
@@ -715,7 +715,7 @@ void main() {
 
     await commandRunner.run(<String>['doctor']);
 
-    expect(flutterVersion.didFetchTagsAndUpdate, true);
+    expect(flutterVersion!.didFetchTagsAndUpdate, true);
     Cache.enableLocking();
   }, overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.any(),
@@ -747,9 +747,9 @@ class NoOpDoctor implements Doctor {
     bool androidLicenses = false,
     bool verbose = true,
     bool showColor = true,
-    AndroidLicenseValidator androidLicenseValidator,
+    AndroidLicenseValidator? androidLicenseValidator,
     bool showPii = true,
-    List<ValidatorTask> startedValidatorTasks,
+    List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
   }) async => true;
 
@@ -878,7 +878,7 @@ class AsyncCrashingValidator extends DoctorValidator {
     final Future<ValidationResult> result = Future<ValidationResult>.delayed(delay)
       .then((_) {
         throw StateError('fatal error');
-      });
+      } as FutureOr<ValidationResult> Function(ValidationResult));
     _time.elapse(const Duration(seconds: 1));
     _time.flushMicrotasks();
     return result;
@@ -889,7 +889,7 @@ class AsyncCrashingValidator extends DoctorValidator {
 class FakeDoctor extends Doctor {
   FakeDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
 
   @override
   List<DoctorValidator> get validators {
@@ -907,7 +907,7 @@ class FakeDoctor extends Doctor {
 class FakePassingDoctor extends Doctor {
   FakePassingDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
   @override
   List<DoctorValidator> get validators {
     return _validators ??= <DoctorValidator>[
@@ -924,7 +924,7 @@ class FakePassingDoctor extends Doctor {
 class FakeSinglePassingDoctor extends Doctor {
   FakeSinglePassingDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
   @override
   List<DoctorValidator> get validators {
     return _validators ??= <DoctorValidator>[
@@ -937,7 +937,7 @@ class FakeSinglePassingDoctor extends Doctor {
 class FakeQuietDoctor extends Doctor {
   FakeQuietDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
   @override
   List<DoctorValidator> get validators {
     return _validators ??= <DoctorValidator>[
@@ -953,7 +953,7 @@ class FakeQuietDoctor extends Doctor {
 class FakePiiDoctor extends Doctor {
   FakePiiDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
   @override
   List<DoctorValidator> get validators {
     return _validators ??= <DoctorValidator>[
@@ -966,18 +966,18 @@ class FakePiiDoctor extends Doctor {
 class FakeCrashingDoctor extends Doctor {
   FakeCrashingDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
   @override
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator'));
-      _validators.add(PassingValidator('Another Passing Validator'));
-      _validators.add(CrashingValidator());
-      _validators.add(PassingValidator('Validators are fun'));
-      _validators.add(PassingValidator('Four score and seven validators ago'));
+      _validators!.add(PassingValidator('Passing Validator'));
+      _validators!.add(PassingValidator('Another Passing Validator'));
+      _validators!.add(CrashingValidator());
+      _validators!.add(PassingValidator('Validators are fun'));
+      _validators!.add(PassingValidator('Four score and seven validators ago'));
     }
-    return _validators;
+    return _validators!;
   }
 }
 
@@ -985,18 +985,18 @@ class FakeCrashingDoctor extends Doctor {
 class FakeAsyncStuckDoctor extends Doctor {
   FakeAsyncStuckDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
   @override
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator'));
-      _validators.add(PassingValidator('Another Passing Validator'));
-      _validators.add(StuckValidator());
-      _validators.add(PassingValidator('Validators are fun'));
-      _validators.add(PassingValidator('Four score and seven validators ago'));
+      _validators!.add(PassingValidator('Passing Validator'));
+      _validators!.add(PassingValidator('Another Passing Validator'));
+      _validators!.add(StuckValidator());
+      _validators!.add(PassingValidator('Validators are fun'));
+      _validators!.add(PassingValidator('Four score and seven validators ago'));
     }
-    return _validators;
+    return _validators!;
   }
 }
 
@@ -1006,18 +1006,18 @@ class FakeAsyncCrashingDoctor extends Doctor {
 
   final FakeAsync _time;
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
   @override
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator'));
-      _validators.add(PassingValidator('Another Passing Validator'));
-      _validators.add(AsyncCrashingValidator(_time));
-      _validators.add(PassingValidator('Validators are fun'));
-      _validators.add(PassingValidator('Four score and seven validators ago'));
+      _validators!.add(PassingValidator('Passing Validator'));
+      _validators!.add(PassingValidator('Another Passing Validator'));
+      _validators!.add(AsyncCrashingValidator(_time));
+      _validators!.add(PassingValidator('Validators are fun'));
+      _validators!.add(PassingValidator('Four score and seven validators ago'));
     }
-    return _validators;
+    return _validators!;
   }
 }
 
@@ -1089,7 +1089,7 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
 class FakeGroupedDoctor extends Doctor {
   FakeGroupedDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
   @override
   List<DoctorValidator> get validators {
     return _validators ??= <DoctorValidator>[
@@ -1108,7 +1108,7 @@ class FakeGroupedDoctor extends Doctor {
 class FakeGroupedDoctorWithStatus extends Doctor {
   FakeGroupedDoctorWithStatus(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
+  List<DoctorValidator>? _validators;
   @override
   List<DoctorValidator> get validators {
     return _validators ??= <DoctorValidator>[
@@ -1127,14 +1127,14 @@ class FakeSmallGroupDoctor extends Doctor {
     _validators = <DoctorValidator>[GroupedValidator(<DoctorValidator>[val1, val2])];
   }
 
-  List<DoctorValidator> _validators;
+  late List<DoctorValidator> _validators;
 
   @override
   List<DoctorValidator> get validators => _validators;
 }
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
-  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
+  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String? edition})
     : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition, fileSystem: globals.fs));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>

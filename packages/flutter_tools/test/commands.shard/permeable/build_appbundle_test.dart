@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
@@ -24,8 +24,8 @@ void main() {
   Cache.disableLocking();
 
   group('Usage', () {
-    Directory tempDir;
-    TestUsage testUsage;
+    late Directory tempDir;
+    TestUsage? testUsage;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -76,7 +76,7 @@ void main() {
 
       await runBuildAppBundleCommand(projectPath);
 
-      expect(testUsage.events, contains(
+      expect(testUsage!.events, contains(
         const TestUsageEvent('tool-command-result', 'appbundle', label: 'success'),
       ));
     },
@@ -87,10 +87,10 @@ void main() {
   });
 
   group('Gradle', () {
-    Directory tempDir;
-    FakeProcessManager processManager;
-    FakeAndroidSdk fakeAndroidSdk;
-    TestUsage testUsage;
+    late Directory tempDir;
+    FakeProcessManager? processManager;
+    FakeAndroidSdk? fakeAndroidSdk;
+    TestUsage? testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -142,18 +142,18 @@ void main() {
       }, throwsToolExit());
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace("Your app isn't using AndroidX"),
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
         ),
       );
 
-      expect(testUsage.events, contains(
+      expect(testUsage!.events, contains(
         const TestUsageEvent(
           'build',
           'gradle',
@@ -181,11 +181,11 @@ void main() {
       }, throwsToolExit());
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         isNot(containsIgnoringWhitespace("Your app isn't using AndroidX")),
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         isNot(
           containsIgnoringWhitespace(
             'To avoid potential build failures, you can quickly migrate your app by '
@@ -193,7 +193,7 @@ void main() {
         )
       );
 
-      expect(testUsage.events, contains(
+      expect(testUsage!.events, contains(
         const TestUsageEvent(
           'build',
           'gradle',
@@ -213,7 +213,7 @@ void main() {
 
 Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
-  List<String> arguments,
+  List<String>? arguments,
 }) async {
   final BuildAppBundleCommand command = BuildAppBundleCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);

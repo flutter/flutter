@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:convert';
 
@@ -24,7 +24,7 @@ void main() {
       Cache.disableLocking();
     });
 
-    Cache cache;
+    Cache? cache;
 
     setUp(() {
       cache = Cache.test(processManager: FakeProcessManager.any());
@@ -41,7 +41,7 @@ void main() {
     testUsingContext('no error when no connected devices', () async {
       final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
-      expect(testLogger.statusText, containsIgnoringWhitespace('No devices detected'));
+      expect(testLogger!.statusText, containsIgnoringWhitespace('No devices detected'));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
       DeviceManager: () => NoDevicesManager(),
@@ -52,7 +52,7 @@ void main() {
 
     testUsingContext("get devices' platform types", () async {
       final List<String> platformTypes = Device.devicesPlatformTypes(
-        await globals.deviceManager.getAllConnectedDevices(),
+        await globals.deviceManager!.getAllConnectedDevices(),
       );
       expect(platformTypes, <String>['android', 'web']);
     }, overrides: <Type, Generator>{
@@ -66,7 +66,7 @@ void main() {
       final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices', '--machine']);
       expect(
-        json.decode(testLogger.statusText),
+        json.decode(testLogger!.statusText),
         <Map<String,Object>>[
           <String, Object>{
             'name': 'ephemeral',
@@ -115,7 +115,7 @@ void main() {
       final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         '''
 2 connected devices:
 
@@ -140,7 +140,7 @@ class _FakeDeviceManager extends DeviceManager {
     Future<List<Device>>.value(fakeDevices.map((FakeDeviceJsonData d) => d.dev).toList());
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) =>
     getAllConnectedDevices();
 
   @override
@@ -157,7 +157,7 @@ class NoDevicesManager extends DeviceManager {
   Future<List<Device>> getAllConnectedDevices() async => <Device>[];
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) =>
     getAllConnectedDevices();
 
   @override

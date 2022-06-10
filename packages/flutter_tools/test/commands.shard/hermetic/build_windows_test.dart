@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -41,10 +41,10 @@ final Platform notWindowsPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
+  FileSystem? fileSystem;
 
-  ProcessManager processManager;
-  TestUsage usage;
+  ProcessManager? processManager;
+  TestUsage? usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -59,28 +59,28 @@ void main() {
 
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem!.file('pubspec.yaml').createSync();
+    fileSystem!.file('.packages').createSync();
+    fileSystem!.file(fileSystem!.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
   // Creates the mock files necessary to run a build.
   void setUpMockProjectFilesForBuild() {
-    fileSystem.file(buildFilePath).createSync(recursive: true);
+    fileSystem!.file(buildFilePath).createSync(recursive: true);
     setUpMockCoreProjectFiles();
   }
 
   // Returns the command matching the build_windows call to generate CMake
   // files.
   FakeCommand cmakeGenerationCommand({
-    void Function() onRun,
+    void Function()? onRun,
     String generator = _defaultGenerator,
   }) {
     return FakeCommand(
       command: <String>[
         _cmakePath,
         '-S',
-        fileSystem.path.dirname(buildFilePath),
+        fileSystem!.path.dirname(buildFilePath),
         '-B',
         r'build\windows',
         '-G',
@@ -93,7 +93,7 @@ void main() {
   // Returns the command matching the build_windows call to build.
   FakeCommand buildCommand(String buildMode, {
     bool verbose = false,
-    void Function() onRun,
+    void Function()? onRun,
     String stdout = '',
   }) {
     return FakeCommand(
@@ -197,8 +197,8 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
     );
-    expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
-    expect(testLogger.traceText, contains('STDOUT STUFF'));
+    expect(testLogger!.statusText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger!.traceText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -250,7 +250,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       const <String>['windows', '--no-pub']
     );
     // Just the warnings and errors should be surfaced.
-    expect(testLogger.errorText, r'''
+    expect(testLogger!.errorText, r'''
 C:\foo\windows\runner\main.cpp(18): error C2220: the following warning is treated as an error [C:\foo\build\windows\runner\test.vcxproj]
 C:\foo\windows\runner\main.cpp(18): warning C4706: assignment within conditional expression [C:\foo\build\windows\runner\test.vcxproj]
 main.obj : error LNK2019: unresolved external symbol "void __cdecl Bar(void)" (?Bar@@YAXXZ) referenced in function wWinMain [C:\foo\build\windows\runner\test.vcxproj]
@@ -281,8 +281,8 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     await createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub', '-v']
     );
-    expect(testLogger.statusText, contains('STDOUT STUFF'));
-    expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger!.statusText, contains('STDOUT STUFF'));
+    expect(testLogger!.traceText, isNot(contains('STDOUT STUFF')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -300,9 +300,9 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       cmakeGenerationCommand(),
       buildCommand('Release'),
     ]);
-    fileSystem.file(fileSystem.path.join('lib', 'other.dart'))
+    fileSystem!.file(fileSystem!.path.join('lib', 'other.dart'))
       .createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json'))
+    fileSystem!.file(fileSystem!.path.join('foo', 'bar.sksl.json'))
       .createSync(recursive: true);
 
     // Relevant portions of an incorrectly generated project, with some
@@ -388,7 +388,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
 </Project>
 ''';
-    final File assembleProject = fileSystem.currentDirectory
+    final File assembleProject = fileSystem!.currentDirectory
       .childDirectory('build')
       .childDirectory('windows')
       .childDirectory('flutter')
@@ -436,9 +436,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       cmakeGenerationCommand(),
       buildCommand('Release'),
     ]);
-    fileSystem.file(fileSystem.path.join('lib', 'other.dart'))
+    fileSystem!.file(fileSystem!.path.join('lib', 'other.dart'))
       .createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json'))
+    fileSystem!.file(fileSystem!.path.join('foo', 'bar.sksl.json'))
       .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
@@ -457,7 +457,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]
     );
 
-    final File cmakeConfig = fileSystem.currentDirectory
+    final File cmakeConfig = fileSystem!.currentDirectory
       .childDirectory('windows')
       .childDirectory('flutter')
       .childDirectory('ephemeral')
@@ -555,14 +555,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
-    fileSystem.file(r'build\windows\runner\Release\app.so')
+    fileSystem!.file(r'build\windows\runner\Release\app.so')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
       buildCommand('Release', onRun: () {
-        fileSystem.file(r'build\flutter_size_01\snapshot.windows-x64.json')
+        fileSystem!.file(r'build\flutter_size_01\snapshot.windows-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 [
@@ -573,7 +573,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     "s": 2400
   }
 ]''');
-        fileSystem.file(r'build\flutter_size_01\trace.windows-x64.json')
+        fileSystem!.file(r'build\flutter_size_01\trace.windows-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
@@ -583,9 +583,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       const <String>['windows', '--no-pub', '--analyze-size']
     );
 
-    expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
-    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
-    expect(usage.events, contains(
+    expect(testLogger!.statusText, contains('A summary of your Windows bundle analysis can be found at'));
+    expect(testLogger!.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(usage!.events, contains(
        const TestUsageEvent('code-size-analysis', 'windows'),
     ));
   }, overrides: <Type, Generator>{
@@ -593,7 +593,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => windowsPlatform,
-    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
+    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem!, platform: windowsPlatform),
     Usage: () => usage,
   });
 }
@@ -606,7 +606,7 @@ class FakeVisualStudio extends Fake implements VisualStudio {
   });
 
   @override
-  final String cmakePath;
+  final String? cmakePath;
 
   @override
   final String cmakeGenerator;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
@@ -26,8 +26,8 @@ void main() {
   Cache.disableLocking();
 
   group('Usage', () {
-    Directory tempDir;
-    TestUsage testUsage;
+    late Directory tempDir;
+    TestUsage? testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -93,7 +93,7 @@ void main() {
 
       await runBuildApkCommand(projectPath);
 
-      expect(testUsage.events, contains(
+      expect(testUsage!.events, contains(
         const TestUsageEvent(
           'tool-command-result',
           'apk',
@@ -108,11 +108,11 @@ void main() {
   });
 
   group('Gradle', () {
-    Directory tempDir;
-    FakeProcessManager processManager;
-    String gradlew;
-    AndroidSdk mockAndroidSdk;
-    TestUsage testUsage;
+    late Directory tempDir;
+    FakeProcessManager? processManager;
+    late String gradlew;
+    AndroidSdk? mockAndroidSdk;
+    TestUsage? testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -151,7 +151,7 @@ void main() {
 
     testUsingContext('shrinking is enabled by default on release mode', () async {
       final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
-      processManager.addCommand(FakeCommand(
+      processManager!.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
@@ -181,7 +181,7 @@ void main() {
 
     testUsingContext('--split-debug-info is enabled when an output directory is provided', () async {
       final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
-      processManager.addCommand(FakeCommand(
+      processManager!.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
@@ -212,7 +212,7 @@ void main() {
 
     testUsingContext('--extra-front-end-options are provided to gradle project', () async {
       final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
-      processManager.addCommand(FakeCommand(
+      processManager!.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
@@ -243,7 +243,7 @@ void main() {
 
     testUsingContext('shrinking is disabled when --no-shrink is passed', () async {
       final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
-      processManager.addCommand(FakeCommand(
+      processManager!.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
@@ -279,7 +279,7 @@ void main() {
       const String r8StdoutWarning =
         "Execution failed for task ':app:transformClassesAndResourcesWithR8ForStageInternal'.\n"
         '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
-      processManager.addCommand(FakeCommand(
+      processManager!.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
@@ -302,13 +302,13 @@ void main() {
         throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'),
       );
       expect(
-        testLogger.statusText, allOf(
+        testLogger!.statusText, allOf(
           containsIgnoringWhitespace('The shrinker may have failed to optimize the Java bytecode.'),
           containsIgnoringWhitespace('To disable the shrinker, pass the `--no-shrink` flag to this command.'),
           containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
         )
       );
-      expect(testUsage.events, contains(
+      expect(testUsage!.events, contains(
         const TestUsageEvent(
           'build',
           'gradle',
@@ -334,7 +334,7 @@ void main() {
         .childDirectory('android')
         .childFile('gradle.properties')
         .writeAsStringSync('android.useAndroidX=false');
-      processManager.addCommand(FakeCommand(
+      processManager!.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
@@ -352,7 +352,7 @@ void main() {
       await expectLater(() =>  runBuildApkCommand(projectPath), throwsToolExit());
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         allOf(
           containsIgnoringWhitespace("Your app isn't using AndroidX"),
           containsIgnoringWhitespace(
@@ -361,7 +361,7 @@ void main() {
           ),
         ),
       );
-      expect(testUsage.events, contains(
+      expect(testUsage!.events, contains(
         const TestUsageEvent(
           'build',
           'gradle',
@@ -381,7 +381,7 @@ void main() {
 
     testUsingContext('reports when the app is using AndroidX', () async {
       final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
-      processManager.addCommand(FakeCommand(
+      processManager!.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
@@ -399,7 +399,7 @@ void main() {
       await expectLater(() => runBuildApkCommand(projectPath), throwsToolExit());
 
       expect(
-        testLogger.statusText, allOf(
+        testLogger!.statusText, allOf(
           isNot(contains("[!] Your app isn't using AndroidX")),
           isNot(contains(
             'To avoid potential build failures, you can quickly migrate your app by '
@@ -407,7 +407,7 @@ void main() {
           ))
         ),
       );
-      expect(testUsage.events, contains(
+      expect(testUsage!.events, contains(
         const TestUsageEvent(
           'build',
           'gradle',
@@ -429,7 +429,7 @@ void main() {
 
 Future<BuildApkCommand> runBuildApkCommand(
   String target, {
-  List<String> arguments,
+  List<String>? arguments,
 }) async {
   final BuildApkCommand command = BuildApkCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);

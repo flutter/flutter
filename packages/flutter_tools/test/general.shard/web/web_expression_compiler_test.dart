@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
@@ -14,14 +14,14 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 
 void main() {
-  FileSystem fileSystem;
+  FileSystem? fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
   });
 
   testWithoutContext('WebExpressionCompiler handles successful expression compilation', () async {
-    fileSystem.file('compilerOutput').writeAsStringSync('a');
+    fileSystem!.file('compilerOutput').writeAsStringSync('a');
     final ResidentCompiler residentCompiler = FakeResidentCompiler(const CompilerOutput('compilerOutput', 0, <Uri>[]));
     final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler, fileSystem: fileSystem);
 
@@ -33,7 +33,7 @@ void main() {
   });
 
   testWithoutContext('WebExpressionCompiler handles compilation error', () async {
-    fileSystem.file('compilerOutput').writeAsStringSync('Error: a');
+    fileSystem!.file('compilerOutput').writeAsStringSync('Error: a');
     final ResidentCompiler residentCompiler = FakeResidentCompiler(const CompilerOutput('compilerOutput', 1, <Uri>[]));
     final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler, fileSystem: fileSystem);
 
@@ -66,10 +66,10 @@ void expectResult(ExpressionCompilationResult result, bool isError, String value
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   FakeResidentCompiler(this.output);
 
-  final CompilerOutput output;
+  final CompilerOutput? output;
 
   @override
-  Future<CompilerOutput> compileExpressionToJs(
+  Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
     int line,
     int column,

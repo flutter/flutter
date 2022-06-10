@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:convert';
 
@@ -26,7 +26,7 @@ void main() {
     // rolls into Flutter.
     return path?.replaceAll('/', globals.fs.path.separator);
   }
-  void writePubspecFile(String path, String name, { List<String> assets }) {
+  void writePubspecFile(String path, String name, { List<String>? assets }) {
     String assetsSection;
     if (assets == null) {
       assetsSection = '';
@@ -65,7 +65,7 @@ $assetsSection
   Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
-    String expectedAssetManifest, {
+    String? expectedAssetManifest, {
     bool expectExists = true,
   }) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
@@ -78,7 +78,7 @@ $assetsSection
           reason: 'Cannot find key on bundle: $entryKey');
         if (expectExists) {
           expect(
-            utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+            utf8.decode(await bundle.entries[entryKey]!.contentsAsBytes()),
             asset,
           );
         }
@@ -87,7 +87,7 @@ $assetsSection
 
     if (expectExists) {
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
     }
@@ -103,7 +103,7 @@ $assetsSection
     }
   }
 
-  FileSystem testFileSystem;
+  FileSystem? testFileSystem;
 
   setUp(() async {
     testFileSystem = MemoryFileSystem(
@@ -111,7 +111,7 @@ $assetsSection
         ? FileSystemStyle.windows
         : FileSystemStyle.posix,
     );
-    testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+    testFileSystem!.currentDirectory = testFileSystem!.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
   });
 
   group('AssetBundle assets from packages', () {
@@ -125,11 +125,11 @@ $assetsSection
       expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
       expect(
-        utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
         '[]',
       );
     }, overrides: <Type, Generator>{
@@ -150,11 +150,11 @@ $assetsSection
       expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
       expect(
-        utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
         '[]',
       );
     }, overrides: <Type, Generator>{

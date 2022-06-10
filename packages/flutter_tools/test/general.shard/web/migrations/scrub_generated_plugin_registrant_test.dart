@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -22,13 +22,13 @@ void main() {
 
   group('ScrubGeneratedPluginRegistrant', () {
     // The files this migration deals with
-    File gitignore;
-    File registrant;
+    late File gitignore;
+    late File registrant;
 
     // Environment overrides
-    FileSystem fileSystem;
-    ProcessManager processManager;
-    BuildSystem buildSystem;
+    FileSystem? fileSystem;
+    ProcessManager? processManager;
+    BuildSystem? buildSystem;
 
     setUp(() {
       // Prepare environment overrides
@@ -36,10 +36,10 @@ void main() {
       processManager = FakeProcessManager.any();
       buildSystem = TestBuildSystem.all(BuildResult(success: true));
       // Write some initial state into our testing filesystem
-      setupFileSystemForEndToEndTest(fileSystem);
+      setupFileSystemForEndToEndTest(fileSystem!);
       // Initialize fileSystem references
-      gitignore = fileSystem.file('.gitignore');
-      registrant = fileSystem.file(fileSystem.path.join('lib', 'generated_plugin_registrant.dart'));
+      gitignore = fileSystem!.file('.gitignore');
+      registrant = fileSystem!.file(fileSystem!.path.join('lib', 'generated_plugin_registrant.dart'));
     });
 
     testUsingContext('noop - nothing to do - build runs', () async {
@@ -49,7 +49,7 @@ void main() {
       await createTestCommandRunner(BuildCommand())
           .run(<String>['build', 'web', '--no-pub']);
 
-      final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
+      final Directory buildDir = fileSystem!.directory(fileSystem!.path.join('build', 'web'));
       expect(buildDir.existsSync(), true);
     }, overrides: <Type, Generator> {
       FileSystem: () => fileSystem,
@@ -58,7 +58,7 @@ void main() {
     });
 
     testUsingContext('noop - .gitignore does not reference generated_plugin_registrant.dart - untouched', () async {
-      writeGitignore(fileSystem, mentionsPluginRegistrant: false);
+      writeGitignore(fileSystem!, mentionsPluginRegistrant: false);
 
       final String contentsBeforeBuild = gitignore.readAsStringSync();
       expect(contentsBeforeBuild, isNot(contains('lib/generated_plugin_registrant.dart')));
@@ -74,7 +74,7 @@ void main() {
     });
 
     testUsingContext('.gitignore references generated_plugin_registrant - cleans it up', () async {
-      writeGitignore(fileSystem);
+      writeGitignore(fileSystem!);
 
       expect(gitignore.existsSync(), isTrue);
       expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
@@ -90,7 +90,7 @@ void main() {
     });
 
     testUsingContext('generated_plugin_registrant.dart exists - gets deleted', () async {
-      writeGeneratedPluginRegistrant(fileSystem);
+      writeGeneratedPluginRegistrant(fileSystem!);
 
       expect(registrant.existsSync(), isTrue);
 
@@ -105,8 +105,8 @@ void main() {
     });
 
     testUsingContext('scrubs generated_plugin_registrant file and cleans .gitignore', () async {
-      writeGitignore(fileSystem);
-      writeGeneratedPluginRegistrant(fileSystem);
+      writeGitignore(fileSystem!);
+      writeGeneratedPluginRegistrant(fileSystem!);
 
       expect(registrant.existsSync(), isTrue);
       expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));

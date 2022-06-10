@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -20,9 +20,9 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
 void main() {
-  MemoryFileSystem memoryFileSystem;
-  Directory outputDirectory;
-  FakePlatform fakePlatform;
+  MemoryFileSystem? memoryFileSystem;
+  late Directory outputDirectory;
+  FakePlatform? fakePlatform;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -38,7 +38,7 @@ void main() {
       },
     );
 
-    outputDirectory = memoryFileSystem.systemTempDirectory
+    outputDirectory = memoryFileSystem!.systemTempDirectory
         .createTempSync('flutter_build_framework_test_output.')
         .childDirectory('Debug')
       ..createSync();
@@ -47,10 +47,10 @@ void main() {
   group('build ios-framework', () {
     group('podspec', () {
       const String engineRevision = '0123456789abcdef';
-      Cache cache;
+      Cache? cache;
 
       setUp(() {
-        final Directory rootOverride = memoryFileSystem.directory('cache');
+        final Directory rootOverride = memoryFileSystem!.directory('cache');
         cache = Cache.test(
           rootOverride: rootOverride,
           platform: fakePlatform,
@@ -143,7 +143,7 @@ void main() {
         setUp(() {
           // cache.getLicenseFile() relies on the flutter root being set.
           Cache.flutterRoot ??= getFlutterRoot();
-          cache.getLicenseFile()
+          cache!.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
         });
@@ -180,7 +180,7 @@ void main() {
         });
 
         group('not on master channel', () {
-          FakeFlutterVersion fakeFlutterVersion;
+          FakeFlutterVersion? fakeFlutterVersion;
           setUp(() {
             const GitTagVersion gitTagVersion = GitTagVersion(
               x: 1,
@@ -276,10 +276,10 @@ void main() {
   group('build macos-framework', () {
     group('podspec', () {
       const String engineRevision = '0123456789abcdef';
-      Cache cache;
+      Cache? cache;
 
       setUp(() {
-        final Directory rootOverride = memoryFileSystem.directory('cache');
+        final Directory rootOverride = memoryFileSystem!.directory('cache');
         cache = Cache.test(
           rootOverride: rootOverride,
           platform: fakePlatform,
@@ -372,7 +372,7 @@ void main() {
         setUp(() {
           // cache.getLicenseFile() relies on the flutter root being set.
           Cache.flutterRoot ??= getFlutterRoot();
-          cache.getLicenseFile()
+          cache!.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
         });
@@ -409,7 +409,7 @@ void main() {
         });
 
         group('not on master channel', () {
-          FakeFlutterVersion fakeFlutterVersion;
+          FakeFlutterVersion? fakeFlutterVersion;
           setUp(() {
             const GitTagVersion gitTagVersion = GitTagVersion(
               x: 1,
@@ -503,8 +503,8 @@ void main() {
   });
 
   group('XCFrameworks', () {
-    MemoryFileSystem fileSystem;
-    FakeProcessManager fakeProcessManager;
+    late MemoryFileSystem fileSystem;
+    late FakeProcessManager fakeProcessManager;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();

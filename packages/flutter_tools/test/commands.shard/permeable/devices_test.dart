@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:convert';
 
@@ -20,8 +20,8 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FakeDeviceManager deviceManager;
-  BufferLogger logger;
+  FakeDeviceManager? deviceManager;
+  BufferLogger? logger;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -38,7 +38,7 @@ void main() {
     await runner.run(<String>['devices', '--machine']);
 
     expect(
-      json.decode(logger.statusText),
+      json.decode(logger!.statusText),
       isEmpty,
     );
   }, overrides: <Type, Generator>{
@@ -47,15 +47,15 @@ void main() {
   });
 
   testUsingContext('devices can display via the --machine flag', () async {
-    deviceManager.devices = <Device>[
-      WebServerDevice(logger: logger),
+    deviceManager!.devices = <Device>[
+      WebServerDevice(logger: logger!),
     ];
     final DevicesCommand command = DevicesCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['devices', '--machine']);
 
     expect(
-      json.decode(logger.statusText),
+      json.decode(logger!.statusText),
       contains(equals(
         <String, Object>{
           'name': 'Web Server',
@@ -87,10 +87,10 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   List<Device> devices = <Device>[];
 
   @override
-  String specifiedDeviceId;
+  String? specifiedDeviceId;
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) async {
+  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) async {
     return devices;
   }
 }

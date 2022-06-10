@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -426,10 +426,10 @@ void main() {
 }
 
 FlutterDriverService setUpDriverService({
-  Logger logger,
-  ProcessManager processManager,
-  FlutterVmService vmService,
-  DevtoolsLauncher devtoolsLauncher,
+  Logger? logger,
+  ProcessManager? processManager,
+  FlutterVmService? vmService,
+  DevtoolsLauncher? devtoolsLauncher,
 }) {
   logger ??= BufferLogger.test();
   return FlutterDriverService(
@@ -442,14 +442,14 @@ FlutterDriverService setUpDriverService({
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
     vmServiceConnector: (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      Object compression,
-      Device device,
-      @required Logger logger,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      Object? compression,
+      Device? device,
+      required Logger logger,
     }) async {
       assert(logger != null);
       if (httpUri.scheme != 'http') {
@@ -471,8 +471,8 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   @override
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
-    BuildInfo buildInfo,
-    File applicationBinary,
+    BuildInfo? buildInfo,
+    File? applicationBinary,
   }) async => applicationPackage;
 }
 
@@ -506,20 +506,20 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage app,
+    covariant ApplicationPackage? app,
     bool includePastLogs = false,
   }) async => NoOpDeviceLogReader('test');
 
   @override
   Future<LaunchResult> startApp(
     covariant ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    String? mainPath,
+    String? route,
+    DebuggingOptions? debuggingOptions,
+    Map<String, dynamic>? platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     if (failOnce) {
       failOnce = false;
@@ -529,13 +529,13 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
     didStopApp = true;
     return true;
   }
 
   @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+  Future<bool> uninstallApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
     didUninstallApp = true;
     return true;
   }
@@ -556,10 +556,10 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri observatoryUri, {
-    @required Logger logger,
-    int hostPort,
-    bool ipv6,
-    bool disableServiceAuthCodes,
+    required Logger logger,
+    int? hostPort,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
     bool cacheStartupProfile = false,
   }) async {
     started = true;
@@ -576,7 +576,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   final Completer<void> _processStarted = Completer<void>();
 
   @override
-  Future<void> launch(Uri vmServiceUri, {List<String> additionalArguments}) {
+  Future<void> launch(Uri vmServiceUri, {List<String>? additionalArguments}) {
     _processStarted.complete();
     return Completer<void>().future;
   }

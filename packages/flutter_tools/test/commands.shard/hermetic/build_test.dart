@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -28,12 +28,12 @@ void main() {
   });
   group('Fatal Logs', () {
     FakeBuildCommand command;
-    MemoryFileSystem fs;
+    MemoryFileSystem? fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
-      fs.file('/package/pubspec.yaml').createSync(recursive: true);
-      fs.currentDirectory = '/package';
+      fs!.file('/package/pubspec.yaml').createSync(recursive: true);
+      fs!.currentDirectory = '/package';
       Cache.disableLocking();
     });
 
@@ -55,7 +55,7 @@ void main() {
 
     testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
       command = FakeBuildCommand();
-      testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+      testLogger!.printWarning('Warning: Mild annoyance Will Robinson!');
       try {
         await createTestCommandRunner(command).run(<String>[
           'build',
@@ -71,7 +71,7 @@ void main() {
 
     testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
       command = FakeBuildCommand();
-      testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+      testLogger!.printWarning('Warning: Mild annoyance Will Robinson!');
       await expectLater(createTestCommandRunner(command).run(<String>[
         'build',
         'test',
@@ -84,7 +84,7 @@ void main() {
 
     testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
       command = FakeBuildCommand();
-      testLogger.printError('Error: Danger Will Robinson!');
+      testLogger!.printError('Error: Danger Will Robinson!');
       await expectLater(createTestCommandRunner(command).run(<String>[
         'build',
         'test',
@@ -134,7 +134,7 @@ class FakeBuildCommand extends BuildCommand {
 }
 
 class FakeBuildSubcommand extends BuildSubCommand {
-  FakeBuildSubcommand({@required bool verboseHelp}) : super(verboseHelp: verboseHelp);
+  FakeBuildSubcommand({required bool verboseHelp}) : super(verboseHelp: verboseHelp);
 
   @override
   String get description => '';

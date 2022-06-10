@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -18,16 +18,16 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  Platform platform;
-  Terminal terminal;
-  ProcessManager processManager;
-  Directory appDir;
+  FileSystem? fileSystem;
+  late BufferLogger logger;
+  Platform? platform;
+  late Terminal terminal;
+  ProcessManager? processManager;
+  late Directory appDir;
 
   setUp(() {
     fileSystem = globals.localFileSystem;
-    appDir = fileSystem.systemTempDirectory.createTempSync('apptestdir');
+    appDir = fileSystem!.systemTempDirectory.createTempSync('apptestdir');
     logger = BufferLogger.test();
     platform = FakePlatform();
     terminal = Terminal.test();
@@ -46,10 +46,10 @@ void main() {
     final MigrateCommand command = MigrateCommand(
       verbose: true,
       logger: logger,
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       terminal: terminal,
-      platform: platform,
-      processManager: processManager,
+      platform: platform!,
+      processManager: processManager!,
     );
     final Directory workingDir = appDir.childDirectory(kDefaultMigrateStagingDirectoryName);
     appDir.childFile('lib/main.dart').createSync(recursive: true);
@@ -85,7 +85,7 @@ flutter:
     );
     expect(logger.statusText, contains('Project is not a git repo. Please initialize a git repo and try again.'));
 
-    await processManager.run(<String>['git', 'init'], workingDirectory: appDir.path);
+    await processManager!.run(<String>['git', 'init'], workingDirectory: appDir.path);
 
     logger.clear();
     await createTestCommandRunner(command).run(
@@ -191,8 +191,8 @@ line3
     );
     expect(logger.statusText, contains('There are uncommitted changes in your project. Please git commit, abandon, or stash your changes before trying again.'));
 
-    await processManager.run(<String>['git', 'add', '.'], workingDirectory: appDir.path);
-    await processManager.run(<String>['git', 'commit', '-m', 'Initial commit'], workingDirectory: appDir.path);
+    await processManager!.run(<String>['git', 'add', '.'], workingDirectory: appDir.path);
+    await processManager!.run(<String>['git', 'commit', '-m', 'Initial commit'], workingDirectory: appDir.path);
 
     logger.clear();
     await createTestCommandRunner(command).run(

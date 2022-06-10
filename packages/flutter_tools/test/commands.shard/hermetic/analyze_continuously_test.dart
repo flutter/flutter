@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -31,13 +31,13 @@ void main() {
     Cache.flutterRoot = getFlutterRoot();
   });
 
-  AnalysisServer server;
-  Directory tempDir;
-  FileSystem fileSystem;
-  Platform platform;
-  ProcessManager processManager;
-  AnsiTerminal terminal;
-  Logger logger;
+  AnalysisServer? server;
+  late Directory tempDir;
+  late FileSystem fileSystem;
+  late Platform platform;
+  late ProcessManager processManager;
+  late AnsiTerminal terminal;
+  late Logger logger;
 
   setUp(() {
     fileSystem = globals.localFileSystem;
@@ -91,7 +91,7 @@ void main() {
       );
 
       server = AnalysisServer(
-        globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+        globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
@@ -101,10 +101,10 @@ void main() {
       );
 
       int errorCount = 0;
-      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-      server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
+      final Future<bool> onDone = server!.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+      server!.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
-      await server.start();
+      await server!.start();
       await onDone;
 
       expect(errorCount, 0);
@@ -129,7 +129,7 @@ void main() {
     );
 
       server = AnalysisServer(
-        globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+        globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
@@ -139,12 +139,12 @@ void main() {
       );
 
     int errorCount = 0;
-    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-    server.onErrors.listen((FileAnalysisErrors errors) {
+    final Future<bool> onDone = server!.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server!.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
 
-    await server.start();
+    await server!.start();
     await onDone;
 
     expect(errorCount, greaterThan(0));
@@ -154,7 +154,7 @@ void main() {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
     server = AnalysisServer(
-      globals.artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+      globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
       <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
@@ -164,11 +164,11 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-    server.onErrors.listen((FileAnalysisErrors errors) {
+    final Future<bool> onDone = server!.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server!.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
-    await server.start();
+    await server!.start();
     await onDone;
     expect(errorCount, 0);
   });

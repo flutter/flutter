@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/file.dart';
 
@@ -16,8 +16,8 @@ import 'test_utils.dart';
 
 void batch1() {
   final BasicProject project = BasicProject();
-  Directory tempDir;
-  FlutterRunTestDriver flutter;
+  late Directory tempDir;
+  late FlutterRunTestDriver flutter;
 
   Future<void> initProject() async {
     tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
@@ -95,8 +95,8 @@ void batch1() {
 
 void batch2() {
   final TestsProject project = TestsProject();
-  Directory tempDir;
-  FlutterTestTestDriver flutter;
+  late Directory tempDir;
+  late FlutterTestTestDriver flutter;
 
   Future<void> initProject() async {
     tempDir = createResolvedTempDirectorySync('test_expression_eval_test.');
@@ -165,14 +165,14 @@ Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) asyn
   final DateTime date = DateTime(2000);
   final ObjRef resp = await flutter.evaluateInFrame('new DateTime(2000)');
   expectInstanceOfClass(resp, 'DateTime');
-  final ObjRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
+  final ObjRef res = await flutter.evaluate(resp.id!, r'"$year-$month-$day"');
   expectValue(res, '${date.year}-${date.month}-${date.day}');
 }
 
 void expectInstanceOfClass(ObjRef result, String name) {
   expect(result,
     const TypeMatcher<InstanceRef>()
-      .having((InstanceRef instance) => instance.classRef.name, 'resp.classRef.name', name));
+      .having((InstanceRef instance) => instance.classRef!.name, 'resp.classRef.name', name));
 }
 
 void expectValueOfType(ObjRef result, String kind, String message) {

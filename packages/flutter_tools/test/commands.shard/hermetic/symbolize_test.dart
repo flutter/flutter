@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -24,8 +24,8 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  MemoryFileSystem fileSystem;
-  FakeStdio stdio;
+  late MemoryFileSystem fileSystem;
+  late FakeStdio stdio;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -140,9 +140,9 @@ void main() {
 class ThrowingDwarfSymbolizationService extends Fake implements DwarfSymbolizationService {
   @override
   Future<void> decode({
-    @required Stream<List<int>> input,
-    @required IOSink output,
-    @required Uint8List symbols,
+    required Stream<List<int>> input,
+    required IOSink output,
+    required Uint8List symbols,
   }) async {
     throwToolExit('test');
   }

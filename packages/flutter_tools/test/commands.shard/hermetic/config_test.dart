@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:convert';
 
@@ -23,10 +23,10 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FakeAndroidStudio fakeAndroidStudio;
-  FakeAndroidSdk fakeAndroidSdk;
-  FakeFlutterVersion fakeFlutterVersion;
-  TestUsage testUsage;
+  FakeAndroidStudio? fakeAndroidStudio;
+  FakeAndroidSdk? fakeAndroidSdk;
+  FakeFlutterVersion? fakeFlutterVersion;
+  TestUsage? testUsage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -40,9 +40,9 @@ void main() {
   });
 
   void verifyNoAnalytics() {
-    expect(testUsage.commands, isEmpty);
-    expect(testUsage.events, isEmpty);
-    expect(testUsage.timings, isEmpty);
+    expect(testUsage!.commands, isEmpty);
+    expect(testUsage!.events, isEmpty);
+    expect(testUsage!.timings, isEmpty);
   }
 
   group('config', () {
@@ -50,8 +50,8 @@ void main() {
       final ConfigCommand command = ConfigCommand();
       await command.handleMachine();
 
-      expect(testLogger.statusText, isNotEmpty);
-      final dynamic jsonObject = json.decode(testLogger.statusText);
+      expect(testLogger!.statusText, isNotEmpty);
+      final dynamic jsonObject = json.decode(testLogger!.statusText);
       expect(jsonObject, const TypeMatcher<Map<String, dynamic>>());
       if (jsonObject is Map<String, dynamic>) {
         expect(jsonObject.containsKey('android-studio-dir'), true);
@@ -160,7 +160,7 @@ void main() {
       ]);
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace('You may need to restart any open editors'),
       );
     }, overrides: <Type, Generator>{
@@ -168,7 +168,7 @@ void main() {
     });
 
     testUsingContext('displays which config settings are available on stable', () async {
-      fakeFlutterVersion.channel = 'stable';
+      fakeFlutterVersion!.channel = 'stable';
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
@@ -185,19 +185,19 @@ void main() {
       ]);
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace('enable-web: true'),
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace('enable-linux-desktop: true'),
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace('enable-windows-desktop: true'),
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace('enable-macos-desktop: true'),
       );
       verifyNoAnalytics();
@@ -212,24 +212,24 @@ void main() {
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-      expect(testUsage.enabled, true);
+      expect(testUsage!.enabled, true);
       await commandRunner.run(<String>[
         'config',
         '--no-analytics',
       ]);
 
-      expect(testUsage.enabled, false);
+      expect(testUsage!.enabled, false);
 
       // Verify that we flushed the analytics queue.
-      expect(testUsage.ensureAnalyticsSentCalls, 1);
+      expect(testUsage!.ensureAnalyticsSentCalls, 1);
 
       // Verify that we only send the analytics disable event, and no other
       // info.
-      expect(testUsage.events, equals(<TestUsageEvent>[
+      expect(testUsage!.events, equals(<TestUsageEvent>[
         const TestUsageEvent('analytics', 'enabled', label: 'false'),
       ]));
-      expect(testUsage.commands, isEmpty);
-      expect(testUsage.timings, isEmpty);
+      expect(testUsage!.commands, isEmpty);
+      expect(testUsage!.timings, isEmpty);
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
@@ -243,15 +243,15 @@ void main() {
         '--analytics',
       ]);
 
-      expect(testUsage.enabled, true);
+      expect(testUsage!.enabled, true);
 
       // Verify that we only send the analytics enable event, and no other
       // info.
-      expect(testUsage.events, equals(<TestUsageEvent>[
+      expect(testUsage!.events, equals(<TestUsageEvent>[
         const TestUsageEvent('analytics', 'enabled', label: 'true'),
       ]));
-      expect(testUsage.commands, isEmpty);
-      expect(testUsage.timings, isEmpty);
+      expect(testUsage!.commands, isEmpty);
+      expect(testUsage!.timings, isEmpty);
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
@@ -260,14 +260,14 @@ void main() {
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-      testUsage.suppressAnalytics = true;
+      testUsage!.suppressAnalytics = true;
 
       await commandRunner.run(<String>[
         'config',
       ]);
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         containsIgnoringWhitespace('Analytics reporting is currently disabled'),
       );
     }, overrides: <Type, Generator>{
@@ -288,7 +288,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
   @override
-  String channel;
+  late String channel;
 
   @override
   void ensureVersionFile() {}

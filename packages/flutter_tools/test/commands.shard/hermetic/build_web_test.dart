@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -23,7 +23,7 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
+  FileSystem? fileSystem;
   final Platform fakePlatform = FakePlatform(
     environment: <String, String>{
       'FLUTTER_ROOT': '/',
@@ -37,16 +37,16 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fileSystem.file('pubspec.yaml')
+    fileSystem!.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('name: foo\n');
-    fileSystem.file('.packages').createSync();
-    fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem!.file('.packages').createSync();
+    fileSystem!.file(fileSystem!.path.join('web', 'index.html')).createSync(recursive: true);
+    fileSystem!.file(fileSystem!.path.join('lib', 'main.dart')).createSync(recursive: true);
   });
 
   testUsingContext('Refuses to build for web when missing index.html', () async {
-    fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
+    fileSystem!.file(fileSystem!.path.join('web', 'index.html')).deleteSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(
@@ -89,10 +89,10 @@ void main() {
   testUsingContext('Builds a web bundle - end to end', () async {
     final BuildCommand buildCommand = BuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
-    setupFileSystemForEndToEndTest(fileSystem);
+    setupFileSystemForEndToEndTest(fileSystem!);
     await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=foo=a', '--dart2js-optimization=O3']);
 
-    final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
+    final Directory buildDir = fileSystem!.directory(fileSystem!.path.join('build', 'web'));
 
     expect(buildDir.existsSync(), true);
   }, overrides: <Type, Generator>{
@@ -139,7 +139,7 @@ void main() {
   testUsingContext('Defaults to web renderer auto mode when no option is specified', () async {
     final TestWebBuildCommand buildCommand = TestWebBuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
-    setupFileSystemForEndToEndTest(fileSystem);
+    setupFileSystemForEndToEndTest(fileSystem!);
     await runner.run(<String>['build', 'web', '--no-pub']);
     final BuildInfo buildInfo =
         await buildCommand.webCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
@@ -155,7 +155,7 @@ void main() {
   testUsingContext('Web build supports build-name and build-number', () async {
     final TestWebBuildCommand buildCommand = TestWebBuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
-    setupFileSystemForEndToEndTest(fileSystem);
+    setupFileSystemForEndToEndTest(fileSystem!);
 
     await runner.run(<String>[
       'build',
@@ -243,7 +243,7 @@ class TestWebBuildCommand extends FlutterCommand {
   final String description = 'Build a test executable app.';
 
   @override
-  Future<FlutterCommandResult> runCommand() async => null;
+  Future<FlutterCommandResult?> runCommand() async => null;
 
   @override
   bool get shouldRunPub => false;

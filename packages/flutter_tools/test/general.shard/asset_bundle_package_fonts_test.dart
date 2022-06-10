@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:convert';
 
@@ -26,7 +26,7 @@ void main() {
     // rolls into Flutter.
     return path?.replaceAll('/', globals.fs.path.separator);
   }
-  void writePubspecFile(String path, String name, { String fontsSection }) {
+  void writePubspecFile(String path, String name, { String? fontsSection }) {
     if (fontsSection == null) {
       fontsSection = '';
     } else {
@@ -68,7 +68,7 @@ $fontsSection
         final String entryKey = 'packages/$packageName/$packageFont';
         expect(bundle.entries.containsKey(entryKey), true);
         expect(
-          utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+          utf8.decode(await bundle.entries[entryKey]!.contentsAsBytes()),
           packageFont,
         );
       }
@@ -76,14 +76,14 @@ $fontsSection
       for (final String localFont in localFonts) {
         expect(bundle.entries.containsKey(localFont), true);
         expect(
-          utf8.decode(await bundle.entries[localFont].contentsAsBytes()),
+          utf8.decode(await bundle.entries[localFont]!.contentsAsBytes()),
           localFont,
         );
       }
     }
 
     expect(
-      json.decode(utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes())),
+      json.decode(utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes())),
       json.decode(expectedAssetManifest),
     );
   }
@@ -95,7 +95,7 @@ $fontsSection
   }
 
   group('AssetBundle fonts from packages', () {
-    FileSystem testFileSystem;
+    FileSystem? testFileSystem;
 
     setUp(() async {
       testFileSystem = MemoryFileSystem(
@@ -103,7 +103,7 @@ $fontsSection
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem!.currentDirectory = testFileSystem!.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
 
     testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
@@ -34,7 +34,7 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   Cache.disableLocking();
   group('packages get/upgrade', () {
-    Directory tempDir;
+    late Directory tempDir;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -44,7 +44,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<String> createProjectWithPlugin(String plugin, { List<String> arguments }) async {
+    Future<String> createProjectWithPlugin(String plugin, { List<String>? arguments }) async {
       final String projectPath = await createProject(tempDir, arguments: arguments);
       final File pubspec = globals.fs.file(globals.fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
@@ -60,7 +60,7 @@ void main() {
       return projectPath;
     }
 
-    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String> args }) async {
+    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String>? args }) async {
       final PackagesCommand command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
@@ -439,8 +439,8 @@ void main() {
   });
 
   group('packages test/pub', () {
-    FakeProcessManager processManager;
-    FakeStdio mockStdio;
+    FakeProcessManager? processManager;
+    FakeStdio? mockStdio;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -451,7 +451,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
-      processManager.addCommand(
+      processManager!.addCommand(
         const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
@@ -476,7 +476,7 @@ void main() {
     testUsingContext('test with bot', () async {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
-      processManager.addCommand(
+      processManager!.addCommand(
         const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', '--trace', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
@@ -502,7 +502,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       final IOSink stdin = IOSink(StreamController<List<int>>().sink);
-      processManager.addCommand(
+      processManager!.addCommand(
         FakeCommand(
           command: const <String>[
             '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', '--foo', 'bar',
@@ -532,7 +532,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       final IOSink stdin = IOSink(StreamController<List<int>>().sink);
-      processManager.addCommand(
+      processManager!.addCommand(
         FakeCommand(
           command: const <String>[
             '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'token', 'list',
@@ -560,7 +560,7 @@ void main() {
 
     testUsingContext('upgrade does not check for pubspec.yaml if -h/--help is passed', () async {
       Cache.flutterRoot = '';
-      processManager.addCommand(
+      processManager!.addCommand(
         FakeCommand(
           command: const <String>[
             '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'upgrade', '-h',

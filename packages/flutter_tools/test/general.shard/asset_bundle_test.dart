@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:convert';
 
@@ -21,7 +21,7 @@ import '../src/context.dart';
 
 void main() {
   group('AssetBundle.build', () {
-    FileSystem testFileSystem;
+    FileSystem? testFileSystem;
 
     setUp(() async {
       testFileSystem = MemoryFileSystem(
@@ -29,7 +29,7 @@ void main() {
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem!.currentDirectory = testFileSystem!.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
 
     testUsingContext('nonempty', () async {
@@ -51,7 +51,7 @@ void main() {
       expect(bundle.entries.length, 1);
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
     }, overrides: <Type, Generator>{
@@ -210,7 +210,7 @@ flutter:
       //  - assets/foo/bar.txt
       expect(bundle.entries.length, 4);
       expect(bundle.deferredComponentsEntries.length, 1);
-      expect(bundle.deferredComponentsEntries['component1'].length, 2);
+      expect(bundle.deferredComponentsEntries['component1']!.length, 2);
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -282,7 +282,7 @@ flutter:
       //  - assets/foo/bar.txt
       expect(bundle.entries.length, 4);
       expect(bundle.deferredComponentsEntries.length, 1);
-      expect(bundle.deferredComponentsEntries['component1'].length, 2);
+      expect(bundle.deferredComponentsEntries['component1']!.length, 2);
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
 
       // Simulate modifying the files by updating the filestat time manually.
@@ -295,7 +295,7 @@ flutter:
 
       expect(bundle.entries.length, 4);
       expect(bundle.deferredComponentsEntries.length, 1);
-      expect(bundle.deferredComponentsEntries['component1'].length, 3);
+      expect(bundle.deferredComponentsEntries['component1']!.length, 3);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -312,7 +312,7 @@ flutter:
 
     await writeBundle(directory, <String, DevFSContent>{}, loggerOverride: testLogger);
 
-    expect(testLogger.warningText, contains('Expected Error Text'));
+    expect(testLogger!.warningText, contains('Expected Error Text'));
   });
 
   testUsingContext('does not unnecessarily recreate asset manifest, font manifest, license', () async {
@@ -329,12 +329,12 @@ assets:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
 
-    final DevFSStringContent assetManifest = bundle.entries['AssetManifest.json']
-      as DevFSStringContent;
-    final DevFSStringContent fontManifest = bundle.entries['FontManifest.json']
-      as DevFSStringContent;
-    final DevFSStringContent license = bundle.entries['NOTICES']
-      as DevFSStringContent;
+    final DevFSStringContent? assetManifest = bundle.entries['AssetManifest.json']
+      as DevFSStringContent?;
+    final DevFSStringContent? fontManifest = bundle.entries['FontManifest.json']
+      as DevFSStringContent?;
+    final DevFSStringContent? license = bundle.entries['NOTICES']
+      as DevFSStringContent?;
 
     await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
 
@@ -390,29 +390,29 @@ flutter:
 
 
   group('Shaders: ', () {
-    MemoryFileSystem fileSystem;
-    Artifacts artifacts;
-    String impellerc;
-    Directory output;
-    String shaderPath;
-    String outputPath;
+    MemoryFileSystem? fileSystem;
+    Artifacts? artifacts;
+    String? impellerc;
+    late Directory output;
+    String? shaderPath;
+    String? outputPath;
 
     setUp(() {
       artifacts = Artifacts.test();
       fileSystem = MemoryFileSystem.test();
-      impellerc = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+      impellerc = artifacts!.getHostArtifact(HostArtifact.impellerc).path;
 
-      fileSystem.file(impellerc).createSync(recursive: true);
+      fileSystem!.file(impellerc).createSync(recursive: true);
 
-      output = fileSystem.directory('asset_output')..createSync(recursive: true);
-      shaderPath = fileSystem.path.join('assets', 'shader.frag');
-      outputPath = fileSystem.path.join(output.path, 'assets', 'shader.frag');
-      fileSystem.file(shaderPath).createSync(recursive: true);
+      output = fileSystem!.directory('asset_output')..createSync(recursive: true);
+      shaderPath = fileSystem!.path.join('assets', 'shader.frag');
+      outputPath = fileSystem!.path.join(output.path, 'assets', 'shader.frag');
+      fileSystem!.file(shaderPath).createSync(recursive: true);
     });
 
     testUsingContext('Including a shader triggers the shader compiler', () async {
-      fileSystem.file('.packages').createSync();
-      fileSystem.file('pubspec.yaml')
+      fileSystem!.file('.packages').createSync();
+      fileSystem!.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
   name: example
@@ -432,13 +432,13 @@ flutter:
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
-            impellerc,
+            impellerc!,
             '--flutter-spirv',
             '--spirv=$outputPath',
             '--input=/$shaderPath',
           ],
           onRun: () {
-            fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem!.file(outputPath).createSync(recursive: true);
           },
         ),
       ]),
@@ -549,7 +549,7 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 1);
-    expect(testLogger.errorText, contains('This asset was included from package foo'));
+    expect(testLogger!.errorText, contains('This asset was included from package foo'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -572,7 +572,7 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 1);
-    expect(testLogger.errorText, isNot(contains('This asset was included from')));
+    expect(testLogger!.errorText, isNot(contains('This asset was included from')));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -608,7 +608,7 @@ flutter:
     expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);
     expect((bundle.entries['FontManifest.json'] as DevFSStringContent).string, '[]');
     expect((bundle.entries['AssetManifest.json'] as DevFSStringContent).string, '{}');
-    expect(testLogger.errorText, contains(
+    expect(testLogger!.errorText, contains(
       'package:foo has `uses-material-design: true` set'
     ));
   }, overrides: <Type, Generator>{

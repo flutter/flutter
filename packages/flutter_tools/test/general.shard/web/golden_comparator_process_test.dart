@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:convert';
 
@@ -16,11 +16,11 @@ import '../../src/fakes.dart';
 
 void main() {
   group('Test that TestGoldenComparatorProcess', () {
-    File imageFile;
-    Uri goldenKey;
-    File imageFile2;
-    Uri goldenKey2;
-    FakeProcess Function(String) createFakeProcess;
+    late File imageFile;
+    Uri? goldenKey;
+    late File imageFile2;
+    Uri? goldenKey2;
+    late FakeProcess Function(String) createFakeProcess;
 
     setUpAll(() {
       imageFile = globals.fs.file('test_image_file');

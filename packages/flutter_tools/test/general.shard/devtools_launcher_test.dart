@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -17,7 +17,7 @@ import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
-  BufferLogger logger;
+  BufferLogger? logger;
 
   Cache.flutterRoot = '';
 
@@ -44,7 +44,7 @@ void main() {
       ]),
     );
 
-    final DevToolsServerAddress address = await launcher.serve();
+    final DevToolsServerAddress address = await (launcher.serve() as FutureOr<DevToolsServerAddress>);
     expect(address.host, '127.0.0.1');
     expect(address.port, 9100);
   });
@@ -68,12 +68,12 @@ void main() {
       ]),
     );
 
-    DevToolsServerAddress address = await launcher.serve();
+    DevToolsServerAddress address = await (launcher.serve() as FutureOr<DevToolsServerAddress>);
     expect(address.host, '127.0.0.1');
     expect(address.port, 9100);
 
     // Call `serve` again and verify that the already running server is returned.
-    address = await launcher.serve();
+    address = await (launcher.serve() as FutureOr<DevToolsServerAddress>);
     expect(address.host, '127.0.0.1');
     expect(address.port, 9100);
   });
@@ -124,7 +124,7 @@ void main() {
 
     await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
 
-    expect(logger.errorText, contains('Failed to launch DevTools: ProcessException'));
+    expect(logger!.errorText, contains('Failed to launch DevTools: ProcessException'));
   });
 
   testWithoutContext('DevtoolsLauncher handles failure of DevTools process on a bot', () async {

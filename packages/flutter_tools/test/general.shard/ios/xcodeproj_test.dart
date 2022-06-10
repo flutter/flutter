@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -56,29 +56,29 @@ void main() {
     stdout: 'hw.optional.arm64: 1',
   );
 
-  FakeProcessManager fakeProcessManager;
-  XcodeProjectInterpreter xcodeProjectInterpreter;
-  FakePlatform platform;
-  FileSystem fileSystem;
-  BufferLogger logger;
+  FakeProcessManager? fakeProcessManager;
+  late XcodeProjectInterpreter xcodeProjectInterpreter;
+  late FakePlatform platform;
+  FileSystem? fileSystem;
+  late BufferLogger logger;
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.empty();
     platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem.test();
-    fileSystem.file(xcodebuild).createSync(recursive: true);
+    fileSystem!.file(xcodebuild).createSync(recursive: true);
     logger = BufferLogger.test();
     xcodeProjectInterpreter = XcodeProjectInterpreter(
       logger: logger,
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       platform: platform,
-      processManager: fakeProcessManager,
+      processManager: fakeProcessManager!,
       usage: TestUsage(),
     );
   });
 
   testWithoutContext('xcodebuild versionText returns null when xcodebuild is not fully installed', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -95,7 +95,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild versionText returns null when xcodebuild is not installed', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -108,7 +108,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild versionText returns formatted version text', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -122,7 +122,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild versionText handles Xcode version string with unexpected format', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -136,7 +136,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild version parts can be parsed', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -150,7 +150,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild minor and patch version default to 0', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -164,7 +164,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild version parts is null when version has unexpected format', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -180,19 +180,19 @@ void main() {
     final Platform platform = FakePlatform(operatingSystem: 'notMacOS');
     xcodeProjectInterpreter = XcodeProjectInterpreter(
       logger: logger,
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       platform: platform,
-      processManager: fakeProcessManager,
+      processManager: fakeProcessManager!,
       usage: TestUsage(),
     );
-    fileSystem.file(xcodebuild).deleteSync();
+    fileSystem!.file(xcodebuild).deleteSync();
 
     expect(xcodeProjectInterpreter.isInstalled, isFalse);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('xcodebuild isInstalled is false when xcodebuild does not exist', () {
-    fileSystem.file(xcodebuild).deleteSync();
+    fileSystem!.file(xcodebuild).deleteSync();
 
     expect(xcodeProjectInterpreter.isInstalled, isFalse);
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -200,7 +200,7 @@ void main() {
 
   testWithoutContext(
       'xcodebuild isInstalled is false when Xcode is not fully installed', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -217,7 +217,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild isInstalled is false when version has unexpected format', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -231,7 +231,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild isInstalled is true when version has expected format', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -245,7 +245,7 @@ void main() {
   });
 
   testWithoutContext('xcrun runs natively on arm64', () {
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kARMCheckCommand,
     ]);
@@ -261,7 +261,7 @@ void main() {
   testUsingContext('xcodebuild build settings is empty when xcodebuild failed to get the build settings', () async {
     platform.environment = const <String, String>{};
 
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       kWhichSysctlCommand,
       const FakeCommand(
         command: <String>[
@@ -281,7 +281,7 @@ void main() {
           '-destination',
           'id=123',
           '-showBuildSettings',
-          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
+          'BUILD_DIR=${fileSystem!.path.absolute('build', 'ios')}',
         ],
         exitCode: 1,
       ),
@@ -299,7 +299,7 @@ void main() {
   testUsingContext('build settings passes in the simulator SDK', () async {
     platform.environment = const <String, String>{};
 
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -313,7 +313,7 @@ void main() {
           '-destination',
           'generic/platform=iOS Simulator',
           '-showBuildSettings',
-          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
+          'BUILD_DIR=${fileSystem!.path.absolute('build', 'ios')}',
         ],
         exitCode: 1,
       ),
@@ -335,7 +335,7 @@ void main() {
   testUsingContext('build settings accepts an empty scheme', () async {
     platform.environment = const <String, String>{};
 
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -347,7 +347,7 @@ void main() {
           '-destination',
           'generic/platform=iOS',
           '-showBuildSettings',
-          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
+          'BUILD_DIR=${fileSystem!.path.absolute('build', 'ios')}',
         ],
         exitCode: 1,
       ),
@@ -366,7 +366,7 @@ void main() {
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
       'FLUTTER_XCODE_ARCHS': 'arm64',
     };
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -374,13 +374,13 @@ void main() {
           'xcrun',
           'xcodebuild',
           '-project',
-          fileSystem.path.separator,
+          fileSystem!.path.separator,
           '-scheme',
           'Free',
           '-destination',
           'generic/platform=iOS',
           '-showBuildSettings',
-          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
+          'BUILD_DIR=${fileSystem!.path.absolute('build', 'ios')}',
           'CODE_SIGN_STYLE=Manual',
           'ARCHS=arm64',
         ],
@@ -401,7 +401,7 @@ void main() {
       'FLUTTER_XCODE_ARCHS': 'arm64',
     };
 
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -426,7 +426,7 @@ void main() {
 
   testWithoutContext('xcodebuild -list getInfo returns something when xcodebuild -list succeeds', () async {
     const String workingDirectory = '/';
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -436,9 +436,9 @@ void main() {
 
     final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter(
       logger: logger,
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       platform: platform,
-      processManager: fakeProcessManager,
+      processManager: fakeProcessManager!,
       usage: TestUsage(),
     );
 
@@ -450,7 +450,7 @@ void main() {
     const String workingDirectory = '/';
     const String stderr = 'Useful Xcode failure message about missing project.';
 
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -462,9 +462,9 @@ void main() {
 
     final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter(
       logger: logger,
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       platform: platform,
-      processManager: fakeProcessManager,
+      processManager: fakeProcessManager!,
       usage: TestUsage(),
     );
 
@@ -476,7 +476,7 @@ void main() {
     const String workingDirectory = '/';
     const String stderr = 'Useful Xcode failure message about corrupted project.';
 
-    fakeProcessManager.addCommands(const <FakeCommand>[
+    fakeProcessManager!.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
       FakeCommand(
@@ -488,9 +488,9 @@ void main() {
 
     final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter(
       logger: logger,
-      fileSystem: fileSystem,
+      fileSystem: fileSystem!,
       platform: platform,
-      processManager: fakeProcessManager,
+      processManager: fakeProcessManager!,
       usage: TestUsage(),
     );
 
@@ -658,7 +658,7 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid', treeShakeIcons: false), 'Paid'), null);
   });
  group('environmentVariablesAsXcodeBuildSettings', () {
-    FakePlatform platform;
+    late FakePlatform platform;
 
     setUp(() {
       platform = FakePlatform();
@@ -677,34 +677,34 @@ Information about project "Runner":
   });
 
   group('updateGeneratedXcodeProperties', () {
-    Artifacts localIosArtifacts;
-    FakePlatform macOS;
-    FileSystem fs;
+    Artifacts? localIosArtifacts;
+    FakePlatform? macOS;
+    FileSystem? fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
       localIosArtifacts = Artifacts.test(localEngine: 'out/ios_profile_arm64');
       macOS = FakePlatform(operatingSystem: 'macos');
-      fs.file(xcodebuild).createSync(recursive: true);
+      fs!.file(xcodebuild).createSync(recursive: true);
     });
 
     group('arm simulator', () {
-      FakeProcessManager fakeProcessManager;
-      XcodeProjectInterpreter xcodeProjectInterpreter;
+      FakeProcessManager? fakeProcessManager;
+      XcodeProjectInterpreter? xcodeProjectInterpreter;
 
       setUp(() {
         fakeProcessManager = FakeProcessManager.empty();
-        xcodeProjectInterpreter = XcodeProjectInterpreter.test(processManager: fakeProcessManager);
+        xcodeProjectInterpreter = XcodeProjectInterpreter.test(processManager: fakeProcessManager!);
       });
 
       testUsingContext('does not exclude arm64 simulator when supported by all plugins', () async {
         const BuildInfo buildInfo = BuildInfo.debug;
-        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
         final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
-        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
-        fakeProcessManager.addCommands(<FakeCommand>[
+        final String buildDirectory = fileSystem!.path.absolute('build', 'ios');
+        fakeProcessManager!.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
           FakeCommand(
@@ -742,7 +742,7 @@ Build settings for action build and target plugin2:
           buildInfo: buildInfo,
         );
 
-        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+        final File config = fs!.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
         expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7\n'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -756,12 +756,12 @@ Build settings for action build and target plugin2:
 
       testUsingContext('excludes arm64 simulator when build setting fetch fails', () async {
         const BuildInfo buildInfo = BuildInfo.debug;
-        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
         final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
-        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
-        fakeProcessManager.addCommands(<FakeCommand>[
+        final String buildDirectory = fileSystem!.path.absolute('build', 'ios');
+        fakeProcessManager!.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
           FakeCommand(
@@ -787,7 +787,7 @@ Build settings for action build and target plugin2:
           buildInfo: buildInfo,
         );
 
-        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+        final File config = fs!.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64\n'));
         expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7\n'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -801,12 +801,12 @@ Build settings for action build and target plugin2:
 
       testUsingContext('excludes arm64 simulator when unsupported by plugins', () async {
         const BuildInfo buildInfo = BuildInfo.debug;
-        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
         final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
-        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
-        fakeProcessManager.addCommands(<FakeCommand>[
+        final String buildDirectory = fileSystem!.path.absolute('build', 'ios');
+        fakeProcessManager!.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
           FakeCommand(
@@ -844,7 +844,7 @@ Build settings for action build and target plugin2:
           buildInfo: buildInfo,
         );
 
-        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+        final File config = fs!.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64\n'));
         expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7\n'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -869,7 +869,7 @@ Build settings for action build and target plugin2:
     testUsingOsxContext('exits when armv7 local engine is set', () async {
       localIosArtifacts = Artifacts.test(localEngine: 'out/ios_profile_arm');
       const BuildInfo buildInfo = BuildInfo.debug;
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
       await expectLater(() =>
         updateGeneratedXcodeProperties(
           project: project,
@@ -881,20 +881,20 @@ Build settings for action build and target plugin2:
 
     testUsingContext('sets ARCHS=arm64 when arm64 local host engine is set', () async {
       const BuildInfo buildInfo = BuildInfo.debug;
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
         useMacOSConfig: true,
       );
 
-      final File config = fs.file('path/to/project/macos/Flutter/ephemeral/Flutter-Generated.xcconfig');
+      final File config = fs!.file('path/to/project/macos/Flutter/ephemeral/Flutter-Generated.xcconfig');
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('ARCHS=arm64\n'), isTrue);
 
-      final File buildPhaseScript = fs.file('path/to/project/macos/Flutter/ephemeral/flutter_export_environment.sh');
+      final File buildPhaseScript = fs!.file('path/to/project/macos/Flutter/ephemeral/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
@@ -908,20 +908,20 @@ Build settings for action build and target plugin2:
 
     testUsingContext('sets ARCHS=x86_64 when x64 local host engine is set', () async {
       const BuildInfo buildInfo = BuildInfo.debug;
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
         useMacOSConfig: true,
       );
 
-      final File config = fs.file('path/to/project/macos/Flutter/ephemeral/Flutter-Generated.xcconfig');
+      final File config = fs!.file('path/to/project/macos/Flutter/ephemeral/Flutter-Generated.xcconfig');
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('ARCHS=x86_64\n'), isTrue);
 
-      final File buildPhaseScript = fs.file('path/to/project/macos/Flutter/ephemeral/flutter_export_environment.sh');
+      final File buildPhaseScript = fs!.file('path/to/project/macos/Flutter/ephemeral/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
@@ -935,35 +935,35 @@ Build settings for action build and target plugin2:
 
     testUsingOsxContext('does not exclude arm64 simulator when there are no plugins', () async {
       const BuildInfo buildInfo = BuildInfo.debug;
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
       );
 
-      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      final File config = fs!.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
       expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7\n'));
 
-      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      final File buildPhaseScript = fs!.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.readAsStringSync(), isNot(contains('EXCLUDED_ARCHS')));
     });
 
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
       const BuildInfo buildInfo = BuildInfo.debug;
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
       );
 
-      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      final File config = fs!.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('TRACK_WIDGET_CREATION=true'), isTrue);
 
-      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      final File buildPhaseScript = fs!.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
@@ -972,19 +972,19 @@ Build settings for action build and target plugin2:
 
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
       );
 
-      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      final File config = fs!.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('TRACK_WIDGET_CREATION=true'), isFalse);
 
-      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      final File buildPhaseScript = fs!.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
@@ -994,19 +994,19 @@ Build settings for action build and target plugin2:
     group('sim local engine', () {
       testUsingContext('sets ARCHS=x86_64 when x86 sim local engine is set', () async {
         const BuildInfo buildInfo = BuildInfo.debug;
-        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
         );
 
-        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+        final File config = fs!.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.existsSync(), isTrue);
 
         final String contents = config.readAsStringSync();
         expect(contents.contains('ARCHS=x86_64'), isTrue);
 
-        final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+        final File buildPhaseScript = fs!.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
         expect(buildPhaseScript.existsSync(), isTrue);
 
         final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
@@ -1020,19 +1020,19 @@ Build settings for action build and target plugin2:
 
       testUsingContext('sets ARCHS=arm64 when arm64 sim local engine is set', () async {
         const BuildInfo buildInfo = BuildInfo.debug;
-        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs!.directory('path/to/project'));
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
         );
 
-        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+        final File config = fs!.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.existsSync(), isTrue);
 
         final String contents = config.readAsStringSync();
         expect(contents.contains('ARCHS=arm64'), isTrue);
 
-        final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+        final File buildPhaseScript = fs!.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
         expect(buildPhaseScript.existsSync(), isTrue);
 
         final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
@@ -1045,7 +1045,7 @@ Build settings for action build and target plugin2:
       });
     });
 
-    String propertyFor(String key, File file) {
+    String? propertyFor(String key, File file) {
       final List<String> properties = file
           .readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
@@ -1055,21 +1055,21 @@ Build settings for action build and target plugin2:
     }
 
     Future<void> checkBuildVersion({
-      String manifestString,
-      BuildInfo buildInfo,
-      String expectedBuildName,
-      String expectedBuildNumber,
+      required String manifestString,
+      required BuildInfo buildInfo,
+      String? expectedBuildName,
+      String? expectedBuildNumber,
     }) async {
-      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
+      final File manifestFile = fs!.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifestString);
 
       await updateGeneratedXcodeProperties(
-        project: FlutterProject.fromDirectoryTest(fs.directory('path/to/project')),
+        project: FlutterProject.fromDirectoryTest(fs!.directory('path/to/project')),
         buildInfo: buildInfo,
       );
 
-      final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      final File localPropertiesFile = fs!.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(propertyFor('FLUTTER_BUILD_NAME', localPropertiesFile), expectedBuildName);
       expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), expectedBuildNumber);
       expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), isNotNull);

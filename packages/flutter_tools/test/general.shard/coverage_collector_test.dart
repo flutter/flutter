@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:vm_service/vm_service.dart';
@@ -24,9 +24,9 @@ void main() {
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
-          ).toJson(),
+          )!.toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'getScripts',
@@ -40,13 +40,13 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object> result = await (collect(
       null,
       <String>{'foo'},
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
-    );
+    ) as FutureOr<Map<String, Object>>);
 
     expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[]});
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -65,9 +65,9 @@ void main() {
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
-          ).toJson(),
+          )!.toJson(),
         ),
         FakeVmServiceRequest(
           method: 'getScripts',
@@ -112,13 +112,13 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object> result = await (collect(
       null,
       <String>{'foo'},
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
-    );
+    ) as FutureOr<Map<String, Object>>);
 
     expect(result, <String, Object>{
       'type': 'CodeCoverage',
@@ -152,9 +152,9 @@ void main() {
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
-          ).toJson(),
+          )!.toJson(),
         ),
         FakeVmServiceRequest(
           method: 'getScripts',
@@ -229,13 +229,13 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object> result = await (collect(
       null,
       null,
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
-    );
+    ) as FutureOr<Map<String, Object>>);
 
     expect(result, <String, Object>{
       'type': 'CodeCoverage',
@@ -280,9 +280,9 @@ void main() {
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
-          ).toJson(),
+          )!.toJson(),
         ),
         FakeVmServiceRequest(
           method: 'getSourceReport',
@@ -317,13 +317,13 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object> result = await (collect(
       null,
       <String>{'foo'},
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
-    );
+    ) as FutureOr<Map<String, Object>>);
 
     expect(result, <String, Object>{
       'type': 'CodeCoverage',
@@ -357,9 +357,9 @@ void main() {
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
                 'id': '1',
-              }),
+              })!,
             ]
-          ).toJson(),
+          )!.toJson(),
         ),
         FakeVmServiceRequest(
           method: 'getSourceReport',
@@ -393,13 +393,13 @@ void main() {
       ],
     );
 
-    final Map<String, Object> result = await collect(
+    final Map<String, Object> result = await (collect(
       null,
       null,
-      connector: (Uri uri) async {
+      connector: (Uri? uri) async {
         return fakeVmServiceHost.vmService;
       },
-    );
+    ) as FutureOr<Map<String, Object>>);
 
     expect(result, <String, Object>{
       'type': 'CodeCoverage',

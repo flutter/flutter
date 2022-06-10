@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -28,26 +28,26 @@ import 'test_config.dart';
 class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
   TestGoldenComparator(this.shellPath, this.compilerFactory, {
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required ProcessManager processManager,
-    @required this.webRenderer,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required ProcessManager? processManager,
+    required this.webRenderer,
   }) : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
        _logger = logger,
        _fileSystem = fileSystem,
        _processManager = processManager;
 
-  final String shellPath;
+  final String? shellPath;
   final Directory tempDir;
   final TestCompiler Function() compilerFactory;
   final Logger _logger;
   final FileSystem _fileSystem;
-  final ProcessManager _processManager;
+  final ProcessManager? _processManager;
   final WebRendererMode webRenderer;
 
-  TestCompiler _compiler;
-  TestGoldenComparatorProcess _previousComparator;
-  Uri _previousTestUri;
+  TestCompiler? _compiler;
+  TestGoldenComparatorProcess? _previousComparator;
+  Uri? _previousTestUri;
 
   Future<void> close() async {
     tempDir.deleteSync(recursive: true);
@@ -57,7 +57,7 @@ class TestGoldenComparator {
 
   /// Start golden comparator in a separate process. Start one file per test file
   /// to reduce the overhead of starting `flutter_tester`.
-  Future<TestGoldenComparatorProcess> _processForTestFile(Uri testUri) async {
+  Future<TestGoldenComparatorProcess?> _processForTestFile(Uri testUri) async {
     if (testUri == _previousTestUri) {
       return _previousComparator;
     }
@@ -78,9 +78,9 @@ class TestGoldenComparator {
 
     // Lazily create the compiler
     _compiler = _compiler ?? compilerFactory();
-    final String output = await _compiler.compile(listenerFile.uri);
+    final String output = await _compiler!.compile(listenerFile.uri);
     final List<String> command = <String>[
-      shellPath,
+      shellPath!,
       '--disable-observatory',
       '--non-interactive',
       '--packages=${_fileSystem.path.join('.dart_tool', 'package_config.json')}',
@@ -92,12 +92,12 @@ class TestGoldenComparator {
       'FLUTTER_TEST_BROWSER': 'chrome',
       'FLUTTER_WEB_RENDERER': webRenderer == WebRendererMode.html ? 'html' : 'canvaskit',
     };
-    return _processManager.start(command, environment: environment);
+    return _processManager!.start(command, environment: environment);
   }
 
-  Future<String> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool updateGoldens) async {
+  Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
     final File imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
-    final TestGoldenComparatorProcess process = await _processForTestFile(testUri);
+    final TestGoldenComparatorProcess process = await (_processForTestFile(testUri) as FutureOr<TestGoldenComparatorProcess>);
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
     final Map<String, dynamic> result = await process.getResponse();
@@ -105,7 +105,7 @@ class TestGoldenComparator {
     if (result == null) {
       return 'unknown error';
     } else {
-      return (result['success'] as bool) ? null : ((result['message'] as String) ?? 'does not match');
+      return (result['success'] as bool) ? null : ((result['message'] as String?) ?? 'does not match');
     }
   }
 }
@@ -114,7 +114,7 @@ class TestGoldenComparator {
 /// handles communication with the child process.
 class TestGoldenComparatorProcess {
   /// Creates a [TestGoldenComparatorProcess] backed by [process].
-  TestGoldenComparatorProcess(this.process, {@required Logger logger}) : _logger = logger {
+  TestGoldenComparatorProcess(this.process, {required Logger logger}) : _logger = logger {
     // Pipe stdout and stderr to printTrace and printError.
     // Also parse stdout as a stream of JSON objects.
     streamIterator = StreamIterator<Map<String, dynamic>>(
@@ -138,14 +138,14 @@ class TestGoldenComparatorProcess {
 
   final Logger _logger;
   final Process process;
-  StreamIterator<Map<String, dynamic>> streamIterator;
+  late StreamIterator<Map<String, dynamic>> streamIterator;
 
   Future<void> close() async {
     process.kill();
     await process.exitCode;
   }
 
-  void sendCommand(File imageFile, Uri goldenKey, bool updateGoldens) {
+  void sendCommand(File imageFile, Uri? goldenKey, bool? updateGoldens) {
     final Object command = jsonEncode(<String, dynamic>{
       'imageFile': imageFile.path,
       'key': goldenKey.toString(),
@@ -161,8 +161,8 @@ class TestGoldenComparatorProcess {
     return streamIterator.current;
   }
 
-  static String generateBootstrap(File testFile, Uri testUri, {@required Logger logger}) {
-    final File testConfigFile = findTestConfigFile(testFile, logger);
+  static String generateBootstrap(File testFile, Uri testUri, {required Logger logger}) {
+    final File? testConfigFile = findTestConfigFile(testFile, logger);
     // Generate comparator process for the file.
     return '''
 import 'dart:convert'; // flutter_ignore: dart_convert_import

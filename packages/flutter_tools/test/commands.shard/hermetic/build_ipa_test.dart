@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -28,7 +28,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   @override
   Future<Map<String, String>> getBuildSettings(
       String projectPath, {
-        XcodeProjectBuildContext buildContext,
+        XcodeProjectBuildContext? buildContext,
         Duration timeout = const Duration(minutes: 1),
       }) async {
     return <String, String>{
@@ -53,9 +53,9 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-  TestUsage usage;
-  FakeProcessManager fakeProcessManager;
+  FileSystem? fileSystem;
+  TestUsage? usage;
+  FakeProcessManager? fakeProcessManager;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -69,16 +69,16 @@ void main() {
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
   void createCoreMockProjectFiles() {
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem!.file('pubspec.yaml').createSync();
+    fileSystem!.file('.packages').createSync();
+    fileSystem!.file(fileSystem!.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
   // Sets up the minimal mock project files necessary for iOS builds to succeed.
   void createMinimalMockProjectFiles() {
-    fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
+    fileSystem!.directory(fileSystem!.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
+    fileSystem!.directory(fileSystem!.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
+    fileSystem!.file(fileSystem!.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
     createCoreMockProjectFiles();
   }
 
@@ -86,7 +86,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function() onRun}) {
+  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -104,7 +104,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, int exitCode = 0, void Function() onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, int exitCode = 0, void Function()? onRun }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -134,7 +134,7 @@ void main() {
 
   FakeCommand exportArchiveCommand({
     String exportOptionsPlist =  '/ExportOptions.plist',
-    File cachePlist,
+    File? cachePlist,
   }) {
     return FakeCommand(
       command: <String>[
@@ -154,7 +154,7 @@ void main() {
         // exportOptionsPlist will be cleaned up within the command.
         // Save it somewhere else so test expectations can be run on it.
         if (cachePlist != null) {
-          cachePlist.writeAsStringSync(fileSystem.file(_exportOptionsPlist).readAsStringSync());
+          cachePlist.writeAsStringSync(fileSystem!.file(_exportOptionsPlist).readAsStringSync());
         }
       }
     );
@@ -190,9 +190,9 @@ void main() {
 
   testUsingContext('ipa build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand();
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
+    fileSystem!.file('pubspec.yaml').createSync();
+    fileSystem!.file('.packages').createSync();
+    fileSystem!.file(fileSystem!.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
     final bool supported = BuildIOSArchiveCommand(verboseHelp: false).supported;
@@ -230,7 +230,7 @@ void main() {
   });
 
   testUsingContext('ipa build fails when export plist is not a file', () async {
-    final Directory bogus = fileSystem.directory('bogus')..createSync();
+    final Directory bogus = fileSystem!.directory('bogus')..createSync();
     final BuildCommand command = BuildCommand();
     createMinimalMockProjectFiles();
 
@@ -278,7 +278,7 @@ void main() {
 
   testUsingContext('ipa build reports when IPA fails', () async {
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
       const FakeCommand(
@@ -305,10 +305,10 @@ void main() {
       const <String>['build', 'ipa', '--no-pub']
     );
 
-    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(testLogger.statusText, contains('Building App Store IPA'));
-    expect(testLogger.errorText, contains('Encountered error while creating the IPA:'));
-    expect(testLogger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
+    expect(testLogger!.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(testLogger!.statusText, contains('Building App Store IPA'));
+    expect(testLogger!.errorText, contains('Encountered error while creating the IPA:'));
+    expect(testLogger!.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -318,9 +318,9 @@ void main() {
   });
 
   testUsingContext('ipa build invokes xcodebuild and archives for app store', () async {
-    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final File cachedExportOptionsPlist = fileSystem!.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
@@ -344,13 +344,13 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+    final String actualIpaPlistContents = fileSystem!.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
-    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(testLogger.statusText, contains('Building App Store IPA'));
-    expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
-    expect(testLogger.statusText, contains('To upload to the App Store'));
+    expect(testLogger!.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(testLogger!.statusText, contains('Building App Store IPA'));
+    expect(testLogger!.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(testLogger!.statusText, contains('To upload to the App Store'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -360,9 +360,9 @@ void main() {
   });
 
   testUsingContext('ipa build invokes xcodebuild and archives for ad-hoc distribution', () async {
-    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final File cachedExportOptionsPlist = fileSystem!.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
@@ -386,14 +386,14 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+    final String actualIpaPlistContents = fileSystem!.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
-    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(testLogger.statusText, contains('Building ad-hoc IPA'));
-    expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(testLogger!.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(testLogger!.statusText, contains('Building ad-hoc IPA'));
+    expect(testLogger!.statusText, contains('Built IPA to /build/ios/ipa'));
     // Don't instruct how to upload to the App Store.
-    expect(testLogger.statusText, isNot(contains('To upload')));
+    expect(testLogger!.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -403,9 +403,9 @@ void main() {
   });
 
   testUsingContext('ipa build invokes xcodebuild and archives for enterprise distribution', () async {
-    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final File cachedExportOptionsPlist = fileSystem!.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
@@ -429,14 +429,14 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+    final String actualIpaPlistContents = fileSystem!.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
-    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(testLogger.statusText, contains('Building enterprise IPA'));
-    expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(testLogger!.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(testLogger!.statusText, contains('Building enterprise IPA'));
+    expect(testLogger!.statusText, contains('Built IPA to /build/ios/ipa'));
     // Don't instruct how to upload to the App Store.
-    expect(testLogger.statusText, isNot(contains('To upload')));
+    expect(testLogger!.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -446,9 +446,9 @@ void main() {
   });
 
   testUsingContext('ipa build invokes xcodebuild and archives with bitcode on', () async {
-    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final File cachedExportOptionsPlist = fileSystem!.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
@@ -470,7 +470,7 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+    final String actualIpaPlistContents = fileSystem!.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -483,7 +483,7 @@ void main() {
 
   testUsingContext('ipa build invokes xcode build with verbosity', () async {
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(verbose: true),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -503,7 +503,7 @@ void main() {
 
   testUsingContext('ipa build --no-codesign skips codesigning and IPA creation', () async {
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       const FakeCommand(
         command: <String>[
@@ -536,7 +536,7 @@ void main() {
       const <String>['build', 'ipa', '--no-pub', '--no-codesign']
     );
     expect(fakeProcessManager, hasNoRemainingExpectations);
-    expect(testLogger.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
+    expect(testLogger!.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -566,13 +566,13 @@ void main() {
     final BuildCommand command = BuildCommand();
     createMinimalMockProjectFiles();
 
-    fileSystem.file('build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Frameworks/App.framework/App')
+    fileSystem!.file('build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Frameworks/App.framework/App')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(onRun: () {
-        fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
+        fileSystem!.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 [
@@ -583,7 +583,7 @@ void main() {
     "s": 2400
   }
 ]''');
-        fileSystem.file('build/flutter_size_01/trace.arm64.json')
+        fileSystem!.file('build/flutter_size_01/trace.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
@@ -594,9 +594,9 @@ void main() {
       const <String>['build', 'ipa', '--no-pub', '--analyze-size']
     );
 
-    expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
-    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
-    expect(usage.events, contains(
+    expect(testLogger!.statusText, contains('A summary of your iOS bundle analysis can be found at'));
+    expect(testLogger!.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(usage!.events, contains(
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -604,18 +604,18 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
-    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem!, platform: macosPlatform),
     Usage: () => usage,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build invokes xcode build export archive when passed plist', () async {
     final String outputPath =
-        fileSystem.path.absolute(fileSystem.path.join('build', 'ios', 'ipa'));
-    final File exportOptions = fileSystem.file('ExportOptions.plist')
+        fileSystem!.path.absolute(fileSystem!.path.join('build', 'ios', 'ipa'));
+    final File exportOptions = fileSystem!.file('ExportOptions.plist')
       ..createSync();
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
       exportArchiveCommand(),
@@ -632,7 +632,7 @@ void main() {
       ],
     );
 
-    expect(testLogger.statusText, contains('Built IPA to $outputPath.'));
+    expect(testLogger!.statusText, contains('Built IPA to $outputPath.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -644,10 +644,10 @@ void main() {
 
   testUsingContext('Trace error if xcresult is empty.', () async {
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-        fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+        fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(),
     ]);
@@ -658,7 +658,7 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
+    expect(testLogger!.traceText, contains('xcresult parser: Unrecognized top level json format.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -669,10 +669,10 @@ void main() {
 
   testUsingContext('Display xcresult issues on console if parsed.', () async {
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-        fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+        fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
     ]);
@@ -683,8 +683,8 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-    expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+    expect(testLogger!.errorText, contains("Use of undeclared identifier 'asdas'"));
+    expect(testLogger!.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -695,10 +695,10 @@ void main() {
 
   testUsingContext('Do not display xcresult issues that needs to be discarded.', () async {
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-        fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+        fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
     ]);
@@ -709,10 +709,10 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-    expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
-    expect(testLogger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-    expect(testLogger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+    expect(testLogger!.errorText, contains("Use of undeclared identifier 'asdas'"));
+    expect(testLogger!.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+    expect(testLogger!.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
+    expect(testLogger!.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -723,7 +723,7 @@ void main() {
 
   testUsingContext('Trace if xcresult bundle does not exist.', () async {
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1),
     ]);
@@ -734,7 +734,7 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
+    expect(testLogger!.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -746,10 +746,10 @@ void main() {
 
   testUsingContext('Extra error message for provision profile issue in xcresulb bundle.', () async {
     final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
+    fakeProcessManager!.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-        fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+        fileSystem!.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
     ]);
@@ -760,11 +760,11 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.errorText, contains('Some Provisioning profile issue.'));
-    expect(testLogger.errorText, contains('It appears that there was a problem signing your application prior to installation on the device.'));
-    expect(testLogger.errorText, contains('Verify that the Bundle Identifier in your project is your signing id in Xcode'));
-    expect(testLogger.errorText, contains('open ios/Runner.xcworkspace'));
-    expect(testLogger.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
+    expect(testLogger!.errorText, contains('Some Provisioning profile issue.'));
+    expect(testLogger!.errorText, contains('It appears that there was a problem signing your application prior to installation on the device.'));
+    expect(testLogger!.errorText, contains('Verify that the Bundle Identifier in your project is your signing id in Xcode'));
+    expect(testLogger!.errorText, contains('open ios/Runner.xcworkspace'));
+    expect(testLogger!.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

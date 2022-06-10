@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -44,16 +44,16 @@ const FakeCommand kListEmulatorsCommand = FakeCommand(
 );
 
 void main() {
-  FakeProcessManager fakeProcessManager;
-  FakeAndroidSdk sdk;
-  FileSystem fileSystem;
-  Xcode xcode;
+  FakeProcessManager? fakeProcessManager;
+  FakeAndroidSdk? sdk;
+  FileSystem? fileSystem;
+  Xcode? xcode;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     sdk = FakeAndroidSdk();
-    xcode = Xcode.test(processManager: fakeProcessManager, fileSystem: fileSystem);
+    xcode = Xcode.test(processManager: fakeProcessManager!, fileSystem: fileSystem);
 
     sdk
       ..avdManagerPath = 'avdmanager'
@@ -120,7 +120,7 @@ void main() {
     });
 
     testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
-      sdk.avdManagerPath = null;
+      sdk!.avdManagerPath = null;
       final EmulatorManager emulatorManager = EmulatorManager(
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -306,8 +306,8 @@ void main() {
 
   group('ios_emulators', () {
     testUsingContext('runs correct launch commands', () async {
-      fileSystem.directory('/fake/Xcode.app/Contents/Developer/Applications/Simulator.app').createSync(recursive: true);
-      fakeProcessManager.addCommands(
+      fileSystem!.directory('/fake/Xcode.app/Contents/Developer/Applications/Simulator.app').createSync(recursive: true);
+      fakeProcessManager!.addCommands(
         <FakeCommand>[
           const FakeCommand(
             command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -329,7 +329,7 @@ void main() {
 
       const Emulator emulator = IOSEmulator('ios');
       await emulator.launch();
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       Xcode: () => xcode,
@@ -373,16 +373,16 @@ class FakeEmulator extends Emulator {
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
-  String avdManagerPath;
+  String? avdManagerPath;
 
   @override
-  String emulatorPath;
+  String? emulatorPath;
 
   @override
-  String adbPath;
+  String? adbPath;
 
   @override
-  String getAvdManagerPath() => avdManagerPath;
+  String? getAvdManagerPath() => avdManagerPath;
 
   @override
   String getAvdPath() => 'avd';

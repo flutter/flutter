@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -57,9 +57,9 @@ final vm_service.Isolate fakeIsolate = vm_service.Isolate(
 
 void main() {
   group('fuchsia device', () {
-    MemoryFileSystem memoryFileSystem;
-    File sshConfig;
-    FakeProcessManager processManager;
+    late MemoryFileSystem memoryFileSystem;
+    File? sshConfig;
+    FakeProcessManager? processManager;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -207,7 +207,7 @@ void main() {
     });
 
     testUsingContext('targetPlatform arm64 works', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/ssh_config', '123', 'uname -m'],
         stdout: 'aarch64',
       ));
@@ -221,7 +221,7 @@ void main() {
     });
 
     testUsingContext('targetPlatform x64 works', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/ssh_config', '123', 'uname -m'],
         stdout: 'x86_64',
       ));
@@ -235,7 +235,7 @@ void main() {
     });
 
     testUsingContext('hostAddress parsing works', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/ssh_config', 'id', r'echo $SSH_CONNECTION'],
         stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
       ));
@@ -249,7 +249,7 @@ void main() {
     });
 
     testUsingContext('hostAddress parsing throws tool error on failure', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/ssh_config', 'id', r'echo $SSH_CONNECTION'],
         exitCode: 1,
       ));
@@ -263,7 +263,7 @@ void main() {
     });
 
     testUsingContext('hostAddress parsing throws tool error on empty response', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/ssh_config', 'id', r'echo $SSH_CONNECTION'],
       ));
 
@@ -277,8 +277,8 @@ void main() {
   });
 
   group('displays friendly error when', () {
-    File artifactFile;
-    FakeProcessManager processManager;
+    File? artifactFile;
+    FakeProcessManager? processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -286,7 +286,7 @@ void main() {
     });
 
     testUsingContext('No vmservices found', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
       ));
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'device');
@@ -311,9 +311,9 @@ void main() {
 [2018-11-09 01:30:12][52580][52983][log] INFO: example_app.cmx(flutter): Did thing this time
 
   ''';
-      FakeProcessManager processManager;
-      File ffx;
-      File sshConfig;
+      FakeProcessManager? processManager;
+      File? ffx;
+      File? sshConfig;
 
       setUp(() {
        processManager = FakeProcessManager.empty();
@@ -324,7 +324,7 @@ void main() {
 
       testUsingContext('can be parsed for an app', () async {
         final Completer<void> lock = Completer<void>();
-        processManager.addCommand(FakeCommand(
+        processManager!.addCommand(FakeCommand(
           command: const <String>['ssh', '-F', '/ssh_config', 'id', 'log_listener --clock Local'],
           stdout: exampleUtcLogs,
           completer: lock,
@@ -354,7 +354,7 @@ void main() {
 
       testUsingContext('cuts off prior logs', () async {
         final Completer<void> lock = Completer<void>();
-        processManager.addCommand(FakeCommand(
+        processManager!.addCommand(FakeCommand(
           command: const <String>['ssh', '-F', '/ssh_config', 'id', 'log_listener --clock Local'],
           stdout: exampleUtcLogs,
           completer: lock,
@@ -381,7 +381,7 @@ void main() {
 
       testUsingContext('can be parsed for all apps', () async {
         final Completer<void> lock = Completer<void>();
-        processManager.addCommand(FakeCommand(
+        processManager!.addCommand(FakeCommand(
           command: const <String>['ssh', '-F', '/ssh_config', 'id', 'log_listener --clock Local'],
           stdout: exampleUtcLogs,
           completer: lock,
@@ -413,7 +413,7 @@ void main() {
   });
 
   group('screenshot', () {
-    FakeProcessManager processManager;
+    FakeProcessManager? processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -449,7 +449,7 @@ void main() {
     });
 
     testUsingContext('takeScreenshot throws if screencap failed', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'ssh',
           '-F',
@@ -482,7 +482,7 @@ void main() {
 
     testUsingContext('takeScreenshot throws if scp failed', () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'ssh',
           '-F',
@@ -491,7 +491,7 @@ void main() {
           'screencap > /tmp/screenshot.ppm',
         ],
       ));
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'scp',
           '-F',
@@ -502,7 +502,7 @@ void main() {
         exitCode: 1,
         stderr: '<error-message>',
       ));
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'ssh',
           '-F',
@@ -532,7 +532,7 @@ void main() {
 
     testUsingContext("takeScreenshot prints error if can't delete file from device", () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'ssh',
           '-F',
@@ -541,7 +541,7 @@ void main() {
           'screencap > /tmp/screenshot.ppm',
         ],
       ));
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'scp',
           '-F',
@@ -550,7 +550,7 @@ void main() {
           'file.ppm',
         ],
       ));
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'ssh',
           '-F',
@@ -564,7 +564,7 @@ void main() {
 
       await device.takeScreenshot(globals.fs.file('file.ppm'));
       expect(
-        testLogger.errorText,
+        testLogger!.errorText,
         contains('Failed to delete screenshot.ppm from the device:\n<error-message>'),
       );
     }, overrides: <Type, Generator>{
@@ -579,7 +579,7 @@ void main() {
 
     testUsingContext('takeScreenshot returns', () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'ssh',
           '-F',
@@ -588,7 +588,7 @@ void main() {
           'screencap > /tmp/screenshot.ppm',
         ],
       ));
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'scp',
           '-F',
@@ -597,7 +597,7 @@ void main() {
           'file.ppm',
         ],
       ));
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'ssh',
           '-F',
@@ -620,8 +620,8 @@ void main() {
   });
 
   group('portForwarder', () {
-    FakeProcessManager processManager;
-    File sshConfig;
+    FakeProcessManager? processManager;
+    File? sshConfig;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -630,7 +630,7 @@ void main() {
 
     testUsingContext('`unforward` prints stdout and stderr if ssh command failed', () async {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/irrelevant', '-O', 'cancel', '-vvv', '-L', '0:127.0.0.1:1', 'id'],
         exitCode: 1,
         stdout: '<stdout>',
@@ -670,7 +670,7 @@ void main() {
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => fakeVmServiceHost.vmService,
-        (Device device, Uri uri, bool enableServiceAuthCodes) => null,
+        ((Device device, Uri uri, bool enableServiceAuthCodes) => null) as Future<void> Function(Device, Uri, bool),
         true, // only poll once.
       );
       return discoveryProtocol.uri;
@@ -708,7 +708,7 @@ void main() {
         // no ui isolate.
         FlutterView(id: '1', uiIsolate: fakeIsolate),
         // wrong name.
-        FlutterView(id: '2', uiIsolate: vm_service.Isolate.parse(<String, Object>{
+        FlutterView(id: '2', uiIsolate: vm_service.Isolate.parse(<String, Object?>{
            ...fakeIsolate.toJson(),
           'name': 'wrong name',
         })),
@@ -769,8 +769,8 @@ void main() {
   });
 
   group('sdkNameAndVersion: ', () {
-    File sshConfig;
-    FakeProcessManager processManager;
+    File? sshConfig;
+    FakeProcessManager? processManager;
 
     setUp(() {
       sshConfig = MemoryFileSystem.test().file('ssh_config')..writeAsStringSync('\n');
@@ -788,7 +788,7 @@ void main() {
     });
 
     testUsingContext('returns what we get from the device on success', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/ssh_config', '123', 'cat /pkgfs/packages/build-info/0/data/version'],
         stdout: 'version'
       ));
@@ -802,7 +802,7 @@ void main() {
     });
 
     testUsingContext('returns "Fuchsia" when device command fails', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/ssh_config', '123', 'cat /pkgfs/packages/build-info/0/data/version'],
         exitCode: 1,
       ));
@@ -816,7 +816,7 @@ void main() {
     });
 
     testUsingContext('returns "Fuchsia" when device gives an empty result', () async {
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>['ssh', '-F', '/ssh_config', '123', 'cat /pkgfs/packages/build-info/0/data/version'],
       ));
       final FuchsiaDevice device = FuchsiaDevice('123', name: 'device');
@@ -831,7 +831,7 @@ void main() {
 }
 
 class FuchsiaModulePackage extends ApplicationPackage {
-  FuchsiaModulePackage({@required this.name}) : super(id: name);
+  FuchsiaModulePackage({required this.name}) : super(id: name);
 
   @override
   final String name;
@@ -878,7 +878,7 @@ class FakePortForwarder extends Fake implements DevicePortForwarder {
 
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration timeout}) async {
+  Future<List<String>> list({Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
@@ -890,10 +890,10 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
 
 class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
-    FuchsiaPM pm,
-    FuchsiaKernelCompiler compiler,
-    FuchsiaFfx ffx,
-    String devices,
+    required FuchsiaPM pm,
+    required FuchsiaKernelCompiler compiler,
+    FuchsiaFfx? ffx,
+    String? devices,
   }) : fuchsiaPM = pm,
        fuchsiaKernelCompiler = compiler,
        fuchsiaFfx = ffx ?? FakeFuchsiaFfx(),
@@ -908,10 +908,10 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   @override
   final FuchsiaFfx fuchsiaFfx;
 
-  final String _devices;
+  final String? _devices;
 
   @override
-  Future<String> listDevices({Duration timeout}) async {
+  Future<String?> listDevices({Duration? timeout}) async {
     return _devices;
   }
 }
@@ -920,10 +920,10 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri observatoryUri, {
-    @required Logger logger,
-    int hostPort,
-    bool ipv6,
-    bool disableServiceAuthCodes,
+    required Logger logger,
+    int? hostPort,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
     bool cacheStartupProfile = false,
   }) async {}
 

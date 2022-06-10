@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
@@ -27,10 +27,10 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   group('gradle build', () {
-    BufferLogger logger;
-    TestUsage testUsage;
-    FileSystem fileSystem;
-    FakeProcessManager processManager;
+    late BufferLogger logger;
+    late TestUsage testUsage;
+    late FileSystem fileSystem;
+    FakeProcessManager? processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -43,14 +43,14 @@ void main() {
     testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
          'gradlew',
           '-q',
@@ -99,10 +99,10 @@ void main() {
                 return line.contains('Some gradle message');
               },
               handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool multidexEnabled
+                String? line,
+                FlutterProject? project,
+                bool? usesAndroidX,
+                bool? multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -131,14 +131,14 @@ void main() {
     testUsingContext('Verbose mode for APKs includes Gradle stacktrace and sets debug log level', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: BufferLogger.test(verbose: true),
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
          'gradlew',
           '--full-stacktrace',
@@ -194,7 +194,7 @@ void main() {
     testUsingContext('Can retry build on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
@@ -218,11 +218,11 @@ void main() {
         stderr: '\nSome gradle message\n',
       );
 
-      processManager.addCommand(fakeCmd);
+      processManager!.addCommand(fakeCmd);
 
       const int maxRetries = 2;
       for (int i = 0; i < maxRetries; i++) {
-        processManager.addCommand(fakeCmd);
+        processManager!.addCommand(fakeCmd);
       }
 
       fileSystem.directory('android')
@@ -263,10 +263,10 @@ void main() {
                 return false;
               },
               handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool multidexEnabled
+                String? line,
+                FlutterProject? project,
+                bool? usesAndroidX,
+                bool? multidexEnabled
               }) async {
                 return GradleBuildStatus.retry;
               },
@@ -295,14 +295,14 @@ void main() {
     testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -351,10 +351,10 @@ void main() {
                 return line.contains('Some gradle message');
               },
               handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool multidexEnabled
+                String? line,
+                FlutterProject? project,
+                bool? usesAndroidX,
+                bool? multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -383,14 +383,14 @@ void main() {
     testUsingContext('rethrows unrecognized ProcessException', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(FakeCommand(
+      processManager!.addCommand(FakeCommand(
         command: const <String>[
           'gradlew',
           '-q',
@@ -443,14 +443,14 @@ void main() {
     testUsingContext('logs success event after a successful retry', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -465,7 +465,7 @@ void main() {
         exitCode: 1,
         stderr: '\nnSome gradle message\n',
       ));
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -517,10 +517,10 @@ void main() {
               return line.contains('Some gradle message');
             },
             handler: ({
-              String line,
-              FlutterProject project,
-              bool usesAndroidX,
-                bool multidexEnabled
+              String? line,
+              FlutterProject? project,
+              bool? usesAndroidX,
+                bool? multidexEnabled
             }) async {
               return GradleBuildStatus.retry;
             },
@@ -542,7 +542,7 @@ void main() {
     testUsingContext('performs code size analysis and sends analytics', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
@@ -553,7 +553,7 @@ void main() {
           },
         ),
       );
-       processManager.addCommand(const FakeCommand(
+       processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -595,7 +595,7 @@ void main() {
         .childDirectory('flutter-apk')
         .childFile('app-release.apk')
         ..createSync(recursive: true)
-        ..writeAsBytesSync(ZipEncoder().encode(archive));
+        ..writeAsBytesSync(ZipEncoder().encode(archive)!);
 
       fileSystem.file('foo/snapshot.arm64-v8a.json')
         ..createSync(recursive: true)
@@ -639,14 +639,14 @@ void main() {
     testUsingContext('indicates that an APK has been built successfully', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -704,14 +704,14 @@ void main() {
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
            'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
@@ -766,14 +766,14 @@ void main() {
     testUsingContext('Verbose mode for AARs includes Gradle stacktrace and sets debug log level', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: BufferLogger.test(verbose: true),
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
@@ -821,14 +821,14 @@ void main() {
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
@@ -877,14 +877,14 @@ void main() {
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -951,14 +951,14 @@ void main() {
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm64'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -1025,14 +1025,14 @@ void main() {
     testUsingContext('build apk uses selected local engine with x86 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x86'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -1099,14 +1099,14 @@ void main() {
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x64'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
@@ -1174,14 +1174,14 @@ void main() {
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(
+      processManager!.addCommand(
         const FakeCommand(command: <String>[
           'gradlew',
           '-q',
@@ -1230,14 +1230,14 @@ void main() {
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
@@ -1314,14 +1314,14 @@ void main() {
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm64'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
@@ -1398,14 +1398,14 @@ void main() {
     testUsingContext('build aar uses selected local engine with x86 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x86'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
@@ -1482,14 +1482,14 @@ void main() {
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
-        processManager: processManager,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x64'),
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager!.addCommand(const FakeCommand(
         command: <String>[
          'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',

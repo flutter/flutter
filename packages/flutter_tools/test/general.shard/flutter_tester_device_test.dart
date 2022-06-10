@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -25,10 +25,10 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
 void main() {
-  FakePlatform platform;
-  FileSystem fileSystem;
-  FakeProcessManager processManager;
-  FlutterTesterTestDevice device;
+  late FakePlatform platform;
+  late FileSystem fileSystem;
+  FakeProcessManager? processManager;
+  late FlutterTesterTestDevice device;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -46,7 +46,7 @@ void main() {
     TestFlutterTesterDevice(
       platform: platform,
       fileSystem: fileSystem,
-      processManager: processManager,
+      processManager: processManager!,
       enableObservatory: enableObservatory,
       dartEntrypointArgs: dartEntrypointArgs,
     );
@@ -144,42 +144,42 @@ void main() {
     }
 
     testUsingContext('as true when not originally set', () async {
-      processManager.addCommand(flutterTestCommand('true'));
+      processManager!.addCommand(flutterTestCommand('true'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testUsingContext('as true when set to true', () async {
       platform.environment = <String, String>{'FLUTTER_TEST': 'true'};
-      processManager.addCommand(flutterTestCommand('true'));
+      processManager!.addCommand(flutterTestCommand('true'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testUsingContext('as false when set to false', () async {
       platform.environment = <String, String>{'FLUTTER_TEST': 'false'};
-      processManager.addCommand(flutterTestCommand('false'));
+      processManager!.addCommand(flutterTestCommand('false'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testUsingContext('unchanged when set', () async {
       platform.environment = <String, String>{'FLUTTER_TEST': 'neither true nor false'};
-      processManager.addCommand(flutterTestCommand('neither true nor false'));
+      processManager!.addCommand(flutterTestCommand('neither true nor false'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
 
     testUsingContext('as null when set to null', () async {
       platform.environment = <String, String>{'FLUTTER_TEST': null};
-      processManager.addCommand(flutterTestCommand(null));
+      processManager!.addCommand(flutterTestCommand(null));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager!.hasRemainingExpectations, isFalse);
     });
   });
 
@@ -273,11 +273,11 @@ void main() {
 /// Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   TestFlutterTesterDevice({
-    @required Platform platform,
-    @required FileSystem fileSystem,
-    @required ProcessManager processManager,
-    @required bool enableObservatory,
-    @required List<String> dartEntrypointArgs,
+    required Platform platform,
+    required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required bool enableObservatory,
+    required List<String> dartEntrypointArgs,
   }) : super(
     id: 999,
     shellPath: '/',
@@ -315,7 +315,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   }
 
   @override
-  Future<HttpServer> bind(InternetAddress host, int port) async => FakeHttpServer();
+  Future<HttpServer> bind(InternetAddress? host, int port) async => FakeHttpServer();
 
   @override
   Future<StreamChannel<String>> get remoteChannel async => StreamChannelController<String>().foreign;

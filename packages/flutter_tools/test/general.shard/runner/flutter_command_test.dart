@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:io' as io;
@@ -31,13 +31,13 @@ import 'utils.dart';
 
 void main() {
   group('Flutter Command', () {
-    FakeCache cache;
-    TestUsage usage;
-    FakeClock clock;
-    FakeProcessInfo processInfo;
-    MemoryFileSystem fileSystem;
-    FakeProcessManager processManager;
-    PreRunValidator preRunValidator;
+    FakeCache? cache;
+    TestUsage? usage;
+    FakeClock? clock;
+    FakeProcessInfo? processInfo;
+    MemoryFileSystem? fileSystem;
+    FakeProcessManager? processManager;
+    PreRunValidator? preRunValidator;
 
     setUpAll(() {
       Cache.flutterRoot = '/path/to/sdk/flutter';
@@ -49,10 +49,10 @@ void main() {
       usage = TestUsage();
       clock = FakeClock();
       processInfo = FakeProcessInfo();
-      processInfo.maxRss = 10;
+      processInfo!.maxRss = 10;
       fileSystem = MemoryFileSystem.test();
       processManager = FakeProcessManager.empty();
-      preRunValidator = PreRunValidator(fileSystem: fileSystem);
+      preRunValidator = PreRunValidator(fileSystem: fileSystem!);
     });
 
     tearDown(() {
@@ -69,7 +69,7 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
 
-      expect(cache.artifacts, isEmpty);
+      expect(cache!.artifacts, isEmpty);
       expect(flutterCommand.deprecated, isFalse);
       expect(flutterCommand.hidden, isFalse);
     },
@@ -84,7 +84,7 @@ void main() {
       await flutterCommand.run();
       // First call for universal, second for the rest
       expect(
-        cache.artifacts,
+        cache!.artifacts,
         <Set<DevelopmentArtifact>>[
           <DevelopmentArtifact>{DevelopmentArtifact.universal},
           <DevelopmentArtifact>{},
@@ -116,7 +116,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
       await runner.run(<String>['deprecated']);
 
-      expect(testLogger.warningText,
+      expect(testLogger!.warningText,
         contains('The "deprecated" command is deprecated and will be removed in '
             'a future version of Flutter.'));
       expect(flutterCommand.usage,
@@ -188,7 +188,7 @@ void main() {
 
     testUsingCommandContext('reports command that results in success', () async {
       // Crash if called a third time which is unexpected.
-      clock.times = <int>[1000, 2000];
+      clock!.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -197,7 +197,7 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(usage.events, <TestUsageEvent>[
+      expect(usage!.events, <TestUsageEvent>[
         const TestUsageEvent(
           'tool-command-result',
           'dummy',
@@ -214,7 +214,7 @@ void main() {
 
     testUsingCommandContext('reports command that results in warning', () async {
       // Crash if called a third time which is unexpected.
-      clock.times = <int>[1000, 2000];
+      clock!.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -223,7 +223,7 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(usage.events, <TestUsageEvent>[
+      expect(usage!.events, <TestUsageEvent>[
         const TestUsageEvent(
           'tool-command-result',
           'dummy',
@@ -240,18 +240,18 @@ void main() {
 
     testUsingCommandContext('reports command that results in error', () async {
       // Crash if called a third time which is unexpected.
-      clock.times = <int>[1000, 2000];
+      clock!.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-        }
+        } as Future<FlutterCommandResult> Function()?
       );
       await expectLater(
         () => flutterCommand.run(),
         throwsToolExit(),
       );
-      expect(usage.events, <TestUsageEvent>[
+      expect(usage!.events, <TestUsageEvent>[
         const TestUsageEvent(
           'tool-command-result',
           'dummy',
@@ -323,20 +323,20 @@ void main() {
     });
 
     group('signals tests', () {
-      FakeIoProcessSignal mockSignal;
-      ProcessSignal signalUnderTest;
-      StreamController<io.ProcessSignal> signalController;
+      FakeIoProcessSignal? mockSignal;
+      ProcessSignal? signalUnderTest;
+      late StreamController<io.ProcessSignal?> signalController;
 
       setUp(() {
         mockSignal = FakeIoProcessSignal();
-        signalUnderTest = ProcessSignal(mockSignal);
-        signalController = StreamController<io.ProcessSignal>();
-        mockSignal.stream = signalController.stream;
+        signalUnderTest = ProcessSignal(mockSignal!);
+        signalController = StreamController<io.ProcessSignal?>();
+        mockSignal!.stream = signalController.stream;
       });
 
       testUsingContext('reports command that is killed', () async {
         // Crash if called a third time which is unexpected.
-        clock.times = <int>[1000, 2000];
+        clock!.times = <int>[1000, 2000];
 
         final Completer<void> completer = Completer<void>();
         setExitFunctionForTests((int exitCode) {
@@ -350,14 +350,14 @@ void main() {
             final Completer<void> c = Completer<void>();
             await c.future;
             return null; // unreachable
-          }
+          } as Future<FlutterCommandResult> Function()?
         );
 
         unawaited(flutterCommand.run());
         signalController.add(mockSignal);
         await completer.future;
 
-        expect(usage.events, <TestUsageEvent>[
+        expect(usage!.events, <TestUsageEvent>[
           const TestUsageEvent(
             'tool-command-result',
             'dummy',
@@ -376,14 +376,14 @@ void main() {
         ProcessInfo: () => processInfo,
         Signals: () => FakeSignals(
           subForSigTerm: signalUnderTest,
-          exitSignals: <ProcessSignal>[signalUnderTest],
+          exitSignals: <ProcessSignal>[signalUnderTest!],
         ),
         SystemClock: () => clock,
         Usage: () => usage,
       });
 
       testUsingContext('command release lock on kill signal', () async {
-        clock.times = <int>[1000, 2000];
+        clock!.times = <int>[1000, 2000];
         final Completer<void> completer = Completer<void>();
         setExitFunctionForTests((int exitCode) {
           expect(exitCode, 0);
@@ -398,7 +398,7 @@ void main() {
           final Completer<void> c = Completer<void>();
           await c.future;
           return null; // unreachable
-        });
+        } as Future<FlutterCommandResult> Function()?);
 
         unawaited(flutterCommand.run());
         await checkLockCompleter.future;
@@ -413,7 +413,7 @@ void main() {
         ProcessInfo: () => processInfo,
         Signals: () => FakeSignals(
               subForSigTerm: signalUnderTest,
-              exitSignals: <ProcessSignal>[signalUnderTest],
+              exitSignals: <ProcessSignal>[signalUnderTest!],
             ),
         Usage: () => usage,
       });
@@ -421,12 +421,12 @@ void main() {
 
     testUsingCommandContext('report execution timing by default', () async {
       // Crash if called a third time which is unexpected.
-      clock.times = <int>[1000, 2000];
+      clock!.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
 
-      expect(usage.timings, contains(
+      expect(usage!.timings, contains(
         const TestTimingEvent(
           'flutter',
           'dummy',
@@ -437,18 +437,18 @@ void main() {
 
     testUsingCommandContext('no timing report without usagePath', () async {
       // Crash if called a third time which is unexpected.
-      clock.times = <int>[1000, 2000];
+      clock!.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand =
           DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
 
-      expect(usage.timings, isEmpty);
+      expect(usage!.timings, isEmpty);
     });
 
     testUsingCommandContext('report additional FlutterCommandResult data', () async {
       // Crash if called a third time which is unexpected.
-      clock.times = <int>[1000, 2000];
+      clock!.times = <int>[1000, 2000];
 
       final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
@@ -462,7 +462,7 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(usage.timings, contains(
+      expect(usage!.timings, contains(
         const TestTimingEvent(
           'flutter',
           'dummy',
@@ -473,19 +473,19 @@ void main() {
 
     testUsingCommandContext('report failed execution timing too', () async {
       // Crash if called a third time which is unexpected.
-      clock.times = <int>[1000, 2000];
+      clock!.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-        },
+        } as Future<FlutterCommandResult> Function()?,
       );
 
       await expectLater(
         () => flutterCommand.run(),
         throwsToolExit(),
       );
-      expect(usage.timings, contains(
+      expect(usage!.timings, contains(
         const TestTimingEvent(
           'flutter',
           'dummy',
@@ -524,7 +524,7 @@ void main() {
 
       await runner.run(<String>['test']);
 
-      expect(usage.events, containsAll(<TestUsageEvent>[
+      expect(usage!.events, containsAll(<TestUsageEvent>[
         const TestUsageEvent(
           NullSafetyAnalysisEvent.kNullSafetyCategory,
           'runtime-mode',
@@ -700,7 +700,7 @@ class FakeTargetCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  String cachedTargetFile;
+  String? cachedTargetFile;
 
   @override
   String get description => '';
@@ -758,10 +758,10 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
-  Stream<io.ProcessSignal> stream;
+  late Stream<io.ProcessSignal?> stream;
 
   @override
-  Stream<io.ProcessSignal> watch() => stream;
+  Stream<io.ProcessSignal?> watch() => stream;
 }
 
 class FakeCache extends Fake implements Cache {
@@ -779,16 +779,16 @@ class FakeCache extends Fake implements Cache {
 class FakeSignals implements Signals {
   FakeSignals({
     this.subForSigTerm,
-    List<ProcessSignal> exitSignals,
+    required List<ProcessSignal> exitSignals,
   }) : delegate = Signals.test(exitSignals: exitSignals);
 
-  final ProcessSignal subForSigTerm;
+  final ProcessSignal? subForSigTerm;
   final Signals delegate;
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
     if (signal == ProcessSignal.sigterm) {
-      return delegate.addHandler(subForSigTerm, handler);
+      return delegate.addHandler(subForSigTerm!, handler);
     }
     return delegate.addHandler(signal, handler);
   }
@@ -813,13 +813,13 @@ class FakeClock extends Fake implements SystemClock {
 class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
-    PubContext context,
-    String directory,
+    PubContext? context,
+    String? directory,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,

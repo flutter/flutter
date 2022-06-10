@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -65,7 +65,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      expect(testLogger!.errorText,
         contains(
           'Gradle threw an error while downloading artifacts from the network.'
         )
@@ -95,7 +95,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      expect(testLogger!.errorText,
         contains(
           'Gradle threw an error while downloading artifacts from the network.'
         )
@@ -116,7 +116,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      expect(testLogger!.errorText,
         contains(
           'Gradle threw an error while downloading artifacts from the network.'
         )
@@ -153,7 +153,7 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      expect(testLogger!.errorText,
         contains(
           'Gradle threw an error while downloading artifacts from the network.'
         )
@@ -182,7 +182,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      expect(testLogger!.errorText,
         contains(
           'Gradle threw an error while downloading artifacts from the network.'
         )
@@ -222,7 +222,7 @@ Exception in thread "main" java.net.SocketException: Connection reset
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      expect(testLogger!.errorText,
         contains(
           'Gradle threw an error while downloading artifacts from the network.'
         )
@@ -249,7 +249,7 @@ A problem occurred configuring root project 'android'.
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      expect(testLogger!.errorText,
         contains(
           'Gradle threw an error while downloading artifacts from the network.'
         )
@@ -280,7 +280,7 @@ A problem occurred configuring root project 'android'.
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      expect(testLogger!.errorText,
         contains(
           'Gradle threw an error while downloading artifacts from the network.'
         )
@@ -319,17 +319,17 @@ Execution failed for task ':app:mergeDexDebug'.
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
       expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.exit));
 
-      expect(testLogger.statusText,
+      expect(testLogger!.statusText,
         contains(
           'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
         )
       );
-      expect(testLogger.statusText,
+      expect(testLogger!.statusText,
         contains(
           'See https://docs.flutter.dev/deployment/android#enabling-multidex-support for more information.'
         )
       );
-      expect(testLogger.statusText,
+      expect(testLogger!.statusText,
         contains(
           'Your `android/app/src/main/AndroidManifest.xml` does not contain'
         )
@@ -383,12 +383,12 @@ Execution failed for task ':app:mergeDexDebug'.
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
       expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.statusText,
+      expect(testLogger!.statusText,
         contains(
           'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
         )
       );
-      expect(testLogger.statusText,
+      expect(testLogger!.statusText,
         contains(
           'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'
         )
@@ -444,17 +444,17 @@ Execution failed for task ':app:mergeDexDebug'.
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
       expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.exit));
 
-      expect(testLogger.statusText,
+      expect(testLogger!.statusText,
         contains(
           'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
         )
       );
-      expect(testLogger.statusText,
+      expect(testLogger!.statusText,
         contains(
           'Flutter tool can add multidex support. The following file will be added by flutter:'
         )
       );
-      expect(testLogger.statusText,
+      expect(testLogger!.statusText,
         contains(
           'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'
         )
@@ -492,7 +492,7 @@ Execution failed for task ':app:mergeDexDebug'.
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
       expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: false), equals(GradleBuildStatus.exit));
 
-      expect(testLogger.statusText,
+      expect(testLogger!.statusText,
         contains(
           'Flutter multidex handling is disabled.'
         )
@@ -513,11 +513,11 @@ Command: /home/android/gradlew assembleRelease
       expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.exit));
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains('Gradle does not have execution permission.'),
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
@@ -543,11 +543,11 @@ Command: /home/android/gradlew assembleRelease
       expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.exit));
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains('Gradle does not have execution permission.'),
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
@@ -577,7 +577,7 @@ Command: /home/android/gradlew assembleRelease
       );
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
@@ -593,7 +593,7 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('flavor undefined', () {
-    FakeProcessManager fakeProcessManager;
+    FakeProcessManager? fakeProcessManager;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -627,7 +627,7 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('handler - with flavor', () async {
-      fakeProcessManager.addCommand(const FakeCommand(
+      fakeProcessManager!.addCommand(const FakeCommand(
         command: <String>[
       'gradlew',
         'app:tasks' ,
@@ -652,14 +652,14 @@ assembleFooTest
       );
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           'Gradle project does not define a task suitable '
           'for the requested build.'
         )
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
@@ -670,7 +670,7 @@ assembleFooTest
           '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -679,7 +679,7 @@ assembleFooTest
     });
 
     testUsingContext('handler - without flavor', () async {
-      fakeProcessManager.addCommand(const FakeCommand(
+      fakeProcessManager!.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           'app:tasks' ,
@@ -698,7 +698,7 @@ assembleProfile
       );
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
@@ -709,7 +709,7 @@ assembleProfile
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager!.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -735,7 +735,7 @@ assembleProfile
       );
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
@@ -780,7 +780,7 @@ assembleProfile
       );
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
@@ -822,7 +822,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       );
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
@@ -858,7 +858,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       );
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
@@ -898,7 +898,7 @@ A problem occurred evaluating project ':app'.
       );
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────┐\n'
@@ -955,7 +955,7 @@ Execution failed for task ':app:checkDebugAarMetadata'.
       );
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
@@ -996,7 +996,7 @@ A problem occurred evaluating project ':flutter'.
       await jvm11RequiredHandler.handler();
 
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
@@ -1071,7 +1071,7 @@ at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''
       final GradleBuildStatus status = await sslExceptionHandler.handler();
 
       expect(status, GradleBuildStatus.retry);
-      expect(testLogger.errorText,
+      expect(testLogger!.errorText,
         contains(
           'Gradle threw an error while downloading artifacts from the network.'
         )
@@ -1114,12 +1114,12 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       expect(result, equals(GradleBuildStatus.retry));
       expect(globals.fs.file('foo/.gradle/fizz.zip'), exists);
       expect(
-        testLogger.errorText,
+        testLogger!.errorText,
         contains(
           '[!] Your .gradle directory under the home directory might be corrupted.\n'
         )
       );
-       expect(testLogger.statusText, '');
+       expect(testLogger!.statusText, '');
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
       FileSystem: () => MemoryFileSystem.test(),
@@ -1136,13 +1136,13 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
 
       expect(
-        testLogger.errorText,
+        testLogger!.errorText,
         contains(
           '[!] Your .gradle directory under the home directory might be corrupted.\n'
         )
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains('Deleting foo/.gradle\n'),
       );
     }, overrides: <Type, Generator>{
@@ -1160,13 +1160,13 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       expect(result, equals(GradleBuildStatus.retry));
       expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
       expect(
-        testLogger.errorText,
+        testLogger!.errorText,
         contains(
           '[!] Your .gradle directory under the home directory might be corrupted.\n'
         )
       );
       expect(
-        testLogger.statusText,
+        testLogger!.statusText,
         contains('Deleting foo/.gradle\n'),
       );
     }, overrides: <Type, Generator>{
@@ -1185,12 +1185,12 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       expect(result, equals(GradleBuildStatus.retry));
       expect(globals.fs.file('foo/.gradle/fizz.zip'), exists);
       expect(
-        testLogger.errorText,
+        testLogger!.errorText,
         contains(
           '[!] Your .gradle directory under the home directory might be corrupted.\n'
         )
       );
-      expect(testLogger.statusText, '');
+      expect(testLogger!.statusText, '');
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
       FileSystem: () => MemoryFileSystem.test(),
@@ -1232,9 +1232,9 @@ class _TestPromptTerminal extends AnsiTerminal {
 
   @override
   Future<String> promptForCharInput(List<String> acceptedCharacters, {
-    Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    Logger? logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) {
     return Future<String>.value(promptResult);

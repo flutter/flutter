@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -217,7 +217,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   final bool doResolveToError;
 
   @override
-  ResidentRunner createWebRunner(FlutterDevice device, {String target, bool stayResident, FlutterProject flutterProject, bool ipv6, DebuggingOptions debuggingOptions, UrlTunneller urlTunneller, Logger logger, FileSystem fileSystem, SystemClock systemClock, Usage usage, bool machine = false}) {
+  ResidentRunner createWebRunner(FlutterDevice device, {String? target, bool? stayResident, FlutterProject? flutterProject, bool? ipv6, DebuggingOptions? debuggingOptions, UrlTunneller? urlTunneller, Logger? logger, FileSystem? fileSystem, SystemClock? systemClock, Usage? usage, bool machine = false}) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
@@ -232,9 +232,9 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
     instance = this;
   }
 
-  static FakeResidentRunner instance;
+  static late FakeResidentRunner instance;
 
-  final bool doResolveToError;
+  final bool? doResolveToError;
   final Completer<int> _exitCompleter = Completer<int>();
   final List<String> callLog = <String>[];
 
@@ -243,18 +243,18 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<void> appStartedCompleter,
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
     bool enableDevTools = false,
-    String route,
+    String? route,
   }) async {
     callLog.add('run');
 
-    if (doResolveToError) {
+    if (doResolveToError!) {
       return Future<int>.error('This is a test error');
     }
 
-    appStartedCompleter.complete();
+    appStartedCompleter!.complete();
     // Emulate stayResident by completing after exitApp is called.
     return _exitCompleter.future;
   }
