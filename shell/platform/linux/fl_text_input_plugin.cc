@@ -85,8 +85,8 @@ struct FlTextInputPluginPrivate {
 
   flutter::TextInputModel* text_model;
 
-  // The owning Flutter view.
-  FlView* view;
+  // The owning native window.
+  GdkWindow* window;
 
   // A 4x4 matrix that maps from `EditableText` local coordinates to the
   // coordinate system of `PipelineOwner.rootNode`.
@@ -260,8 +260,7 @@ static void im_preedit_start_cb(FlTextInputPlugin* self) {
   priv->text_model->BeginComposing();
 
   // Set the native window used for system input method windows.
-  GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(priv->view));
-  gtk_im_context_set_client_window(priv->im_context, window);
+  gtk_im_context_set_client_window(priv->im_context, priv->window);
 }
 
 // Signal handler for GtkIMContext::preedit-changed
@@ -420,8 +419,7 @@ static FlMethodResponse* show(FlTextInputPlugin* self) {
   }
 
   // Set the native window used for system input method windows.
-  GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(priv->view));
-  gtk_im_context_set_client_window(priv->im_context, window);
+  gtk_im_context_set_client_window(priv->im_context, priv->window);
 
   gtk_im_context_focus_in(priv->im_context);
 
@@ -601,7 +599,7 @@ static void fl_text_input_plugin_dispose(GObject* object) {
     delete priv->text_model;
     priv->text_model = nullptr;
   }
-  priv->view = nullptr;
+  priv->window = nullptr;
 
   G_OBJECT_CLASS(fl_text_input_plugin_parent_class)->dispose(object);
 }
@@ -728,7 +726,7 @@ static void fl_text_input_plugin_init(FlTextInputPlugin* self) {
 
 FlTextInputPlugin* fl_text_input_plugin_new(
     FlBinaryMessenger* messenger,
-    FlView* view,
+    GdkWindow* window,
     FlTextInputPluginImFilter im_filter) {
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
   g_return_val_if_fail(im_filter != nullptr, nullptr);
@@ -743,7 +741,7 @@ FlTextInputPlugin* fl_text_input_plugin_new(
       fl_method_channel_new(messenger, kChannelName, FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(priv->channel, method_call_cb, self,
                                             nullptr);
-  priv->view = view;
+  priv->window = window;
   priv->im_filter = im_filter;
 
   return self;

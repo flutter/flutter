@@ -103,8 +103,9 @@ static gboolean text_input_im_filter_by_gtk(GtkIMContext* im_context,
 // Initialize keyboard manager.
 static void init_keyboard(FlView* self) {
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
-  self->text_input_plugin =
-      fl_text_input_plugin_new(messenger, self, text_input_im_filter_by_gtk);
+  self->text_input_plugin = fl_text_input_plugin_new(
+      messenger, gtk_widget_get_window(GTK_WIDGET(self)),
+      text_input_im_filter_by_gtk);
   self->keyboard_manager =
       fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(self));
 }

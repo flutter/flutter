@@ -5,11 +5,10 @@
 #ifndef FLUTTER_SHELL_TEXT_INPUT_LINUX_FL_TEXT_INPUT_PLUGIN_H_
 #define FLUTTER_SHELL_TEXT_INPUT_LINUX_FL_TEXT_INPUT_PLUGIN_H_
 
-#include <gdk/gdk.h>
+#include <gtk/gtk.h>
 
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 /**
  * FlTextInputPluginImFilter:
@@ -51,7 +50,7 @@ struct _FlTextInputPluginClass {
 /**
  * fl_text_input_plugin_new:
  * @messenger: an #FlBinaryMessenger.
- * @view: the #FlView with which the text input plugin is associated.
+ * @window: the #GdkWindow with which the text input plugin is associated.
  * @im_filter: a function used to allow an input method to internally handle
  * key press and release events. Typically a wrap of
  * #gtk_im_context_filter_keypress. Must not be nullptr.
@@ -63,7 +62,7 @@ struct _FlTextInputPluginClass {
  */
 FlTextInputPlugin* fl_text_input_plugin_new(
     FlBinaryMessenger* messenger,
-    FlView* view,
+    GdkWindow* window,
     FlTextInputPluginImFilter im_filter);
 
 /**

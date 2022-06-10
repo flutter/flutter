@@ -2216,6 +2216,7 @@ FILE: ../../../flutter/shell/platform/linux/fl_task_runner.cc
 FILE: ../../../flutter/shell/platform/linux/fl_task_runner.h
 FILE: ../../../flutter/shell/platform/linux/fl_text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/linux/fl_text_input_plugin.h
+FILE: ../../../flutter/shell/platform/linux/fl_text_input_plugin_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_texture.cc
 FILE: ../../../flutter/shell/platform/linux/fl_texture_gl.cc
 FILE: ../../../flutter/shell/platform/linux/fl_texture_gl_private.h
