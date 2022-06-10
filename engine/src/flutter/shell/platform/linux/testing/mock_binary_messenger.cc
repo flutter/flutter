@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/testing/mock_binary_messenger.h"
+#include "flutter/shell/platform/linux/testing/mock_binary_messenger_response_handle.h"
 
 using namespace flutter::testing;
 
@@ -16,6 +17,30 @@ struct _FlMockBinaryMessenger {
   GObject parent_instance;
   MockBinaryMessenger* mock;
 };
+
+bool MockBinaryMessenger::HasMessageHandler(const gchar* channel) const {
+  return message_handlers.at(channel) != nullptr;
+}
+
+void MockBinaryMessenger::SetMessageHandler(
+    const gchar* channel,
+    FlBinaryMessengerMessageHandler handler,
+    gpointer user_data) {
+  message_handlers[channel] = handler;
+  user_datas[channel] = user_data;
+}
+
+void MockBinaryMessenger::ReceiveMessage(FlBinaryMessenger* messenger,
+                                         const gchar* channel,
+                                         GBytes* message) {
+  FlBinaryMessengerMessageHandler handler = message_handlers[channel];
+  if (response_handles[channel] == nullptr) {
+    response_handles[channel] = FL_BINARY_MESSENGER_RESPONSE_HANDLE(
+        fl_mock_binary_messenger_response_handle_new());
+  }
+  handler(messenger, channel, message, response_handles[channel],
+          user_datas[channel]);
+}
 
 static void fl_mock_binary_messenger_iface_init(
     FlBinaryMessengerInterface* iface);
@@ -38,6 +63,7 @@ static void fl_mock_binary_messenger_set_message_handler_on_channel(
     GDestroyNotify destroy_notify) {
   g_return_if_fail(FL_IS_MOCK_BINARY_MESSENGER(messenger));
   FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(messenger);
+  self->mock->SetMessageHandler(channel, handler, user_data);
   self->mock->fl_binary_messenger_set_message_handler_on_channel(
       messenger, channel, handler, user_data, destroy_notify);
 }
