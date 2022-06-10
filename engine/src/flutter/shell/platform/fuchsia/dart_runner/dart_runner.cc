@@ -41,7 +41,6 @@ namespace {
 
 const char* kDartVMArgs[] = {
     // clang-format off
-    "--lazy_async_stacks",
 
     "--systrace_timeline",
     "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM",

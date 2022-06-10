@@ -46,7 +46,6 @@ template("create_aot_snapshot") {
     }
 
     args = [
-      "--lazy_async_stacks",
       "--deterministic",
       "--snapshot_kind=vm-aot-assembly",
       "--assembly=" + rebase_path(snapshot_assembly),

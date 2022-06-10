@@ -120,7 +120,7 @@ template("flutter_snapshot") {
     deps = [ ":$kernel_target" ]
     outputs = []
 
-    args = [ "--lazy_async_stacks" ]
+    args = []
 
     if (is_debug && flutter_runtime_mode != "profile" &&
         flutter_runtime_mode != "release" &&
