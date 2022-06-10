@@ -339,6 +339,7 @@ Future<void> _runGeneralToolTests() async {
     _toolsPath,
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
+    unsoundNullSafety: true,
     // Detect unit test time regressions (poor time delay handling, etc).
     // This overrides the 15 minute default for tools tests.
     // See the README.md and dart_test.yaml files in the flutter_tools package.
@@ -1624,6 +1625,7 @@ Future<void> _dartRunTest(String workingDirectory, {
   bool includeLocalEngineEnv = false,
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
+  bool unsoundNullSafety = false,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1646,6 +1648,7 @@ Future<void> _dartRunTest(String workingDirectory, {
   final List<String> args = <String>[
     'run',
     'test',
+    if (unsoundNullSafety) '--no-sound-null-safety',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     if (useFlutterTestFormatter)
       '-rjson'
