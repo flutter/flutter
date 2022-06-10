@@ -42,7 +42,6 @@ Finder _iconRichText(Key iconKey) {
 
 Widget buildDropdown({
   required bool isFormField,
-  Key? buttonKey,
   String? value = 'two',
   ValueChanged<String?>? onChanged,
   Widget? icon,
@@ -69,7 +68,6 @@ Widget buildDropdown({
   if (isFormField) {
     return Form(
       child: DropdownButtonFormField<String>(
-        key: buttonKey,
         value: value,
         onChanged: onChanged,
         icon: icon,
@@ -89,7 +87,6 @@ Widget buildDropdown({
     );
   }
   return DropdownButton<String>(
-    key: buttonKey,
     value: value,
     onChanged: onChanged,
     icon: icon,
@@ -187,6 +184,7 @@ void main() {
     WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
+
     // Test `focusColor`.
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: const Color(0x1f000000)));
@@ -405,7 +403,6 @@ void main() {
             child: buildDropdown(
               isFormField: false,
               icon: customIcon,
-              autofocus: true,
               focusNode: focusNode,
               onChanged: onChanged,
             ),
@@ -510,7 +507,6 @@ void main() {
         body: Center(
           child: buildDropdown(
             isFormField: false,
-            autofocus: true,
             icon: customIcon,
             focusNode: focusNode,
             dropdownColor: dropdownColor,
