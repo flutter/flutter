@@ -301,11 +301,11 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbColor: MaterialStateProperty.resolveWith<ImageProvider>((Set<MaterialState> states) {
+  ///   thumbImage: MaterialStateProperty.resolveWith<ImageProvider>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
-  ///       return Colors.orange.withOpacity(.48);
+  ///       return MemoryImage(Uint8List.fromList(bytes));
   ///     }
-  ///     return Colors.orange;
+  ///     return MemoryImage(Uint8List.fromList(otherBytes));
   ///   }),
   /// )
   /// ```
