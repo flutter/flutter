@@ -317,14 +317,16 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return editableTextState.textEditingValue.text.isNotEmpty
-            && editableTextState.textEditingValue.selection.isCollapsed;
-      case TargetPlatform.iOS:
       case TargetPlatform.macOS:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return true;
+        return editableTextState.textEditingValue.text.isNotEmpty
+           && !(editableTextState.textEditingValue.selection.start == 0
+               && editableTextState.textEditingValue.selection.end == editableTextState.textEditingValue.text.length);
+      case TargetPlatform.iOS:
+        return editableTextState.textEditingValue.text.isNotEmpty
+            && editableTextState.textEditingValue.selection.isCollapsed;
     }
   }
 
