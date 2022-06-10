@@ -29,14 +29,6 @@ const Duration _kIndicatorSnapDuration = Duration(milliseconds: 150);
 // has completed.
 const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
 
-/// The signature for a function that's called when the user has dragged a
-/// [RefreshIndicator] far enough to demonstrate that they want the app to
-/// refresh. The returned [Future] must complete when the refresh operation is
-/// finished.
-///
-/// Used by [RefreshIndicator.onRefresh].
-typedef RefreshCallback = Future<void> Function();
-
 // The state machine moves through these modes only when the scrollable
 // identified by scrollableKey has been scrolled to its min or max limit.
 enum _RefreshIndicatorMode {
@@ -592,5 +584,172 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         ),
       ],
     );
+  }
+}
+
+/// A sliver widget implementing pull-to-refresh content control.
+///
+/// Unlike [RefreshIndicator] the [SliverRefreshControl]
+/// beings part of the scrollable and actively occupies scrollable space.
+///
+/// When inserted as the first sliver in a scroll view or behind other slivers
+/// that still lets the scrollable overscroll in front of this sliver (such as
+/// the [SliverAppBar], this widget will:
+///
+///  * Let the user draw inside the overscrolled area via the passed in [builder].
+///  * Trigger the provided [onRefresh] function when overscrolled far enough to
+///    pass [refreshTriggerPullDistance].
+///  * Continue to hold [refreshIndicatorExtent] amount of space for the [builder]
+///    to keep drawing inside of as the [Future] returned by [onRefresh] processes.
+///  * Scroll away once the [onRefresh] [Future] completes.
+///
+/// The [builder] function will be informed of the current [RefreshIndicatorMode]
+/// when invoking it, except in the [RefreshIndicatorMode.inactive] state when
+/// no space is available and nothing needs to be built. The [builder] function
+/// will otherwise be continuously invoked as the amount of space available
+/// changes from overscroll, as the sliver scrolls away after the [onRefresh]
+/// task is done, etc.
+///
+/// Only one refresh can be triggered until the previous refresh has completed
+/// and the indicator sliver has retracted at least 90% of the way back.
+///
+/// Can only be used in downward-scrolling vertical lists that overscrolls. In
+/// other words, refreshes can't be triggered with [Scrollable]s using
+/// [ClampingScrollPhysics] which is the default on Android. To allow overscroll
+/// on Android, use an overscrolling physics such as [BouncingScrollPhysics].
+/// This can be done via:
+///
+///  * Providing a [BouncingScrollPhysics] (possibly in combination with a
+///    [AlwaysScrollableScrollPhysics]) while constructing the scrollable.
+///  * By inserting a [ScrollConfiguration] with [BouncingScrollPhysics] above
+///    the scrollable.
+///  * By using [CupertinoApp], which always uses a [ScrollConfiguration]
+///    with [BouncingScrollPhysics] regardless of platform.
+///
+/// In a typical application, this sliver should be inserted between the app bar
+/// sliver such as [SliverAppBar] and your main scrollable
+/// content's sliver like: [CustomScrollView].
+///
+/// {@tool dartpad}
+/// When the user scrolls past [refreshTriggerPullDistance],
+/// this sample shows material pull to refresh indicator for 1 second and
+/// adds a new item to the top of the list view.
+///
+/// ** See code in examples/api/lib/material/refresh_indicator/sliver_refresh_control.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [CustomScrollView], a typical sliver holding scroll view this control
+///    should go into.
+///  * [RefreshIndicator], a Material Design version of the pull-to-refresh
+///    paradigm. This widget works differently than [SliverRefreshControl]
+///    because instead of being part of the scrollable and actively occupies
+///    scrollable space. it goose overlay on top of the scrollable.
+///
+class SliverRefreshControl extends BaseSliverRefreshControl {
+  /// Create a new refresh control for inserting into a list of slivers.
+  ///
+  /// The [refreshTriggerPullDistance] and [refreshIndicatorExtent] arguments
+  /// must not be null and must be >= 0.
+  ///
+  /// The [builder] argument may be null, in which case no indicator UI will be
+  /// shown but the [onRefresh] will still be invoked. By default, [builder]
+  /// shows a [CupertinoActivityIndicator].
+  ///
+  /// The [onRefresh] argument will be called when pulled far enough to trigger
+  /// a refresh.
+  const SliverRefreshControl({
+    super.key,
+    super.refreshTriggerPullDistance,
+    super.refreshIndicatorExtent,
+    super.builder,
+    super.onRefresh,
+    this.backgroundColor,
+    this.color,
+    this.semanticsLabel,
+    this.semanticsValue,
+    this.radius = _progressIndicatorRadius,
+    this.strokeWidth = _defaultStrokeWidth,
+  });
+
+  /// The progress indicator's background color.
+  final Color? backgroundColor;
+
+  ///{@macro flutter.progress_indicator.ProgressIndicator.color}
+  final Color? color;
+
+  ///{@macro flutter.progress_indicator.ProgressIndicator.semanticsLabel}
+  final String? semanticsLabel;
+
+  ///{@macro flutter.progress_indicator.ProgressIndicator.semanticsValue}
+  final String? semanticsValue;
+
+  ///{@macro flutter.material.CircularProgressIndicator.strokeWidth}
+  ///
+  /// Defaults to 2.5px. Must be positive and cannot be null.
+  final double strokeWidth;
+
+  /// Determinate the radius of the [RefreshProgressIndicator].
+  ///
+  /// Defaults to 50px. Must be positive and cannot be null.
+  final double radius;
+
+  static const double _defaultStrokeWidth = 2.5;
+  static const double _progressIndicatorRadius = 25.0;
+
+  Widget _indicator([double? progress]) {
+    return SizedBox(
+      width: radius * 2,
+      height: radius * 2,
+      child: FittedBox(
+        child: RefreshProgressIndicator.partiallyRevealed(
+          backgroundColor: backgroundColor,
+          color: color,
+          semanticsLabel: semanticsLabel,
+          semanticsValue: semanticsValue,
+          strokeWidth: strokeWidth,
+          progress: progress,
+        ),
+      ),
+    );
+  }
+
+  /// Builds a refresh indicator that reflects the standard material pull-to-refresh.
+  ///
+  /// Specifically, this entails presenting a [RefreshProgressIndicator] that
+  /// changes depending on the current refreshState. As the user initially drags
+  /// down, the indicator will gradually reveal part or the circle until the refresh
+  /// becomes armed. At this point, the indicator will begin rotating.
+  /// Once the refresh has completed, the indicator shrinks away as the
+  /// space allocation animates back to closed.
+  @override
+  Widget buildRefreshIndicator(
+    BuildContext context,
+    RefreshIndicatorMode refreshState,
+    double pulledExtent,
+    double refreshTriggerPullDistance,
+    double refreshIndicatorExtent,
+  ) {
+    final double percentageComplete = clampDouble(pulledExtent / refreshTriggerPullDistance, 0.0, 1.0);
+
+    return _buildIndicatorForRefreshState(refreshState, percentageComplete);
+  }
+
+  Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState, double percentageComplete) {
+    switch (refreshState) {
+      case RefreshIndicatorMode.drag:
+        return _indicator(percentageComplete);
+      case RefreshIndicatorMode.armed:
+      case RefreshIndicatorMode.refresh:
+      // Once armed or performing the refresh, show the animated progress indicator.
+        return _indicator();
+      case RefreshIndicatorMode.done:
+      // When the user lets go, the standard transition is to shrink the indicator.
+        return _indicator();
+      case RefreshIndicatorMode.inactive:
+      // Anything else doesn't show anything.
+        return Container();
+    }
   }
 }
