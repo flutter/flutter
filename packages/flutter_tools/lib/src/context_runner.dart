@@ -186,7 +186,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         processManager: globals.processManager,
         platform: globals.platform,
-        androidSdk: globals.androidSdk!,
+        androidSdk: globals.androidSdk,
         iosSimulatorUtils: globals.iosSimulatorUtils!,
         featureFlags: featureFlags,
         fileSystem: globals.fs,

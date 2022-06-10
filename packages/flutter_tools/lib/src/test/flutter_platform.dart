@@ -405,7 +405,7 @@ class FlutterPlatform extends PlatformPlugin {
         id: ourTestCount,
         debuggingOptions: debuggingOptions,
         device: integrationTestDevice!,
-        userIdentifier: integrationTestUserIdentifier!,
+        userIdentifier: integrationTestUserIdentifier,
       );
     }
     return FlutterTesterTestDevice(
