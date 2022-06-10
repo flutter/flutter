@@ -494,7 +494,7 @@ class AppDomain extends Domain {
     String? projectRootPath,
     String? packagesFilePath,
     String? dillOutputPath,
-    bool? ipv6 = false,
+    bool ipv6 = false,
     bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
@@ -748,6 +748,7 @@ class AppDomain extends Domain {
     }
 
     if (result.containsKey('error')) {
+      // ignore: only_throw_errors
       throw result['error']! as Object;
     }
 

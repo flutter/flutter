@@ -454,7 +454,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 class HotRunnerFactory {
   HotRunner? build(
     List<FlutterDevice> devices, {
-    String? target,
+    required String target,
     required DebuggingOptions debuggingOptions,
     bool benchmarkMode = false,
     File? applicationBinary,

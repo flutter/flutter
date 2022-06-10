@@ -524,7 +524,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: stringArgDeprecated('project-root'),
         dillOutputPath: stringArgDeprecated('output-dill'),
         stayResident: stayResident,
-        ipv6: ipv6,
+        ipv6: ipv6 ?? false,
         multidexEnabled: boolArgDeprecated('multidex'),
       );
     } else if (webMode) {
@@ -551,7 +551,7 @@ class RunCommand extends RunCommandBase {
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
-      ipv6: ipv6,
+      ipv6: ipv6 ?? false,
       stayResident: stayResident,
       multidexEnabled: boolArgDeprecated('multidex'),
     );
@@ -597,7 +597,7 @@ class RunCommand extends RunCommandBase {
           projectRootPath: stringArgDeprecated('project-root'),
           packagesFilePath: globalResults!['packages'] as String?,
           dillOutputPath: stringArgDeprecated('output-dill'),
-          ipv6: ipv6,
+          ipv6: ipv6 ?? false,
           multidexEnabled: boolArgDeprecated('multidex'),
         );
       } on Exception catch (error) {
@@ -697,7 +697,7 @@ class RunCommand extends RunCommandBase {
       }
     ));
     try {
-      final int result = await runner.run(
+      final int? result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
         enableDevTools: stayResident && boolArgDeprecated(FlutterCommand.kEnableDevTools),
         route: route,

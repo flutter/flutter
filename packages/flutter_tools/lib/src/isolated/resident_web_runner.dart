@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -48,16 +45,16 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String target,
-    @required bool stayResident,
-    @required FlutterProject flutterProject,
-    @required bool ipv6,
-    @required DebuggingOptions debuggingOptions,
-    @required UrlTunneller urlTunneller,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required SystemClock systemClock,
-    @required Usage usage,
+    String? target,
+    required bool stayResident,
+    required FlutterProject flutterProject,
+    required bool? ipv6,
+    required DebuggingOptions debuggingOptions,
+    required UrlTunneller? urlTunneller,
+    required Logger? logger,
+    required FileSystem fileSystem,
+    required SystemClock systemClock,
+    required Usage usage,
     bool machine = false,
   }) {
     return ResidentWebRunner(
@@ -83,18 +80,18 @@ const String kExitMessage = 'Failed to establish connection with the application
 
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
-    FlutterDevice device, {
-    String target,
+    FlutterDevice? device, {
+    String? target,
     bool stayResident = true,
     bool machine = false,
-    @required this.flutterProject,
-    @required bool ipv6,
-    @required DebuggingOptions debuggingOptions,
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required SystemClock systemClock,
-    @required Usage usage,
-    @required UrlTunneller urlTunneller,
+    required this.flutterProject,
+    required bool? ipv6,
+    required DebuggingOptions debuggingOptions,
+    required FileSystem? fileSystem,
+    required Logger? logger,
+    required SystemClock systemClock,
+    required Usage usage,
+    UrlTunneller? urlTunneller,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
@@ -102,8 +99,8 @@ class ResidentWebRunner extends ResidentRunner {
        _usage = usage,
        _urlTunneller = urlTunneller,
        super(
-          <FlutterDevice>[device],
-          target: target ?? fileSystem.path.join('lib', 'main.dart'),
+          <FlutterDevice?>[device],
+          target: target ?? fileSystem!.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
@@ -111,25 +108,25 @@ class ResidentWebRunner extends ResidentRunner {
           devtoolsHandler: devtoolsHandler,
         );
 
-  final FileSystem _fileSystem;
-  final Logger _logger;
+  final FileSystem? _fileSystem;
+  final Logger? _logger;
   final SystemClock _systemClock;
   final Usage _usage;
-  final UrlTunneller _urlTunneller;
+  final UrlTunneller? _urlTunneller;
 
   @override
-  Logger get logger => _logger;
+  Logger? get logger => _logger;
 
   @override
-  FileSystem get fileSystem => _fileSystem;
+  FileSystem? get fileSystem => _fileSystem;
 
-  FlutterDevice get device => flutterDevices.first;
+  FlutterDevice? get device => flutterDevices.first;
   final FlutterProject flutterProject;
-  DateTime firstBuildTime;
+  DateTime? firstBuildTime;
 
   // Used with the new compiler to generate a bootstrap file containing plugins
   // and platform initialization.
-  Directory _generatedEntrypointDirectory;
+  Directory? _generatedEntrypointDirectory;
 
   // Only the debug builds of the web support the service protocol.
   @override
@@ -139,7 +136,7 @@ class ResidentWebRunner extends ResidentRunner {
   bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
 
   /// WebServer device is debuggable when running with --start-paused.
-  bool get deviceIsDebuggable => device.device is! WebServerDevice || debuggingOptions.startPaused;
+  bool get deviceIsDebuggable => device!.device is! WebServerDevice || debuggingOptions.startPaused;
 
   @override
   bool get supportsWriteSkSL => false;
@@ -150,24 +147,24 @@ class ResidentWebRunner extends ResidentRunner {
 
   bool get _enableDwds => debuggingEnabled;
 
-  ConnectionResult _connectionResult;
-  StreamSubscription<vmservice.Event> _stdOutSub;
-  StreamSubscription<vmservice.Event> _stdErrSub;
-  StreamSubscription<vmservice.Event> _extensionEventSub;
+  ConnectionResult? _connectionResult;
+  StreamSubscription<vmservice.Event>? _stdOutSub;
+  StreamSubscription<vmservice.Event>? _stdErrSub;
+  StreamSubscription<vmservice.Event>? _extensionEventSub;
   bool _exited = false;
-  WipConnection _wipConnection;
-  ChromiumLauncher _chromiumLauncher;
+  WipConnection? _wipConnection;
+  ChromiumLauncher? _chromiumLauncher;
 
   FlutterVmService get _vmService {
     if (_instance != null) {
-      return _instance;
+      return _instance!;
     }
-    final vmservice.VmService service =_connectionResult?.vmService;
-    final Uri websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
+    final vmservice.VmService? service =_connectionResult?.vmService;
+    final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
     final Uri httpUri = _httpUriFromWebsocketUri(websocketUri);
-    return _instance ??= FlutterVmService(service, wsAddress: websocketUri, httpAddress: httpUri);
+    return _instance ??= FlutterVmService(service!, wsAddress: websocketUri, httpAddress: httpUri);
   }
-  FlutterVmService _instance;
+  FlutterVmService? _instance;
 
   @override
   Future<void> cleanupAfterSignal() async {
@@ -183,17 +180,17 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
-    await residentDevtoolsHandler.shutdown();
+    await residentDevtoolsHandler!.shutdown();
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
     await _extensionEventSub?.cancel();
-    await device.device.stopApp(null);
+    await device!.device!.stopApp(null);
     try {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
     } on FileSystemException {
       // Best effort to clean up temp dirs.
-      _logger.printTrace(
-        'Failed to clean up temp directory: ${_generatedEntrypointDirectory.path}',
+      _logger!.printTrace(
+        'Failed to clean up temp directory: ${_generatedEntrypointDirectory!.path}',
       );
     }
     _exited = true;
@@ -212,59 +209,58 @@ class ResidentWebRunner extends ResidentRunner {
     const String fire = '🔥';
     const String rawMessage =
         '  To hot restart changes while running, press "r" or "R".';
-    final String message = _logger.terminal.color(
-      fire + _logger.terminal.bolden(rawMessage),
+    final String message = _logger!.terminal.color(
+      fire + _logger!.terminal.bolden(rawMessage),
       TerminalColor.red,
     );
-    _logger.printStatus(message);
+    _logger!.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
-    _logger.printStatus('For a more detailed help message, press "h". $quitMessage');
-    _logger.printStatus('');
+    _logger!.printStatus('For a more detailed help message, press "h". $quitMessage');
+    _logger!.printStatus('');
     printDebuggerList();
   }
 
   @override
   Future<void> stopEchoingDeviceLog() async {
     // Do nothing for ResidentWebRunner
-    await device.stopEchoingDeviceLog();
+    await device!.stopEchoingDeviceLog();
   }
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<void> appStartedCompleter,
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
     bool enableDevTools = false, // ignored, we don't yet support devtools for web
-    String route,
+    String? route,
   }) async {
     firstBuildTime = DateTime.now();
-    final ApplicationPackage package = await ApplicationPackageFactory.instance.getPackageForPlatform(
+    final ApplicationPackage? package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
       TargetPlatform.web_javascript,
       buildInfo: debuggingOptions.buildInfo,
-      applicationBinary: null,
     );
     if (package == null) {
-      _logger.printStatus('This application is not configured to build on the web.');
-      _logger.printStatus('To add web support to a project, run `flutter create .`.');
+      _logger!.printStatus('This application is not configured to build on the web.');
+      _logger!.printStatus('To add web support to a project, run `flutter create .`.');
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
-    _logger.printStatus(
-      'Launching ${getDisplayPath(target, _fileSystem)} '
-      'on ${device.device.name} in $modeName mode...',
+    _logger!.printStatus(
+      'Launching ${getDisplayPath(target, _fileSystem!)} '
+      'on ${device!.device!.name} in $modeName mode...',
     );
-    if (device.device is ChromiumDevice) {
-      _chromiumLauncher = (device.device as ChromiumDevice).chromeLauncher;
+    if (device!.device is ChromiumDevice) {
+      _chromiumLauncher = (device!.device! as ChromiumDevice).chromeLauncher;
     }
 
     try {
       return await asyncGuard(() async {
-        final ExpressionCompiler expressionCompiler =
+        final ExpressionCompiler? expressionCompiler =
           debuggingOptions.webEnableExpressionEvaluation
-              ? WebExpressionCompiler(device.generator, fileSystem: _fileSystem)
+              ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
               : null;
-        device.devFS = WebDevFS(
+        device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
           port: debuggingOptions.port != null
-            ? int.tryParse(debuggingOptions.port)
+            ? int.tryParse(debuggingOptions.port!)
             : null,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
@@ -274,22 +270,22 @@ class ResidentWebRunner extends ResidentRunner {
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
           enableDds: debuggingOptions.enableDds,
-          entrypoint: _fileSystem.file(target).uri,
+          entrypoint: _fileSystem!.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
-        final Uri url = await device.devFS.create();
+        final Uri url = await device!.devFS!.create();
         if (debuggingOptions.buildInfo.isDebug) {
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
           if (!report.success) {
-            _logger.printError('Failed to compile application.');
+            _logger!.printError('Failed to compile application.');
             appFailedToStart();
             return 1;
           }
-          device.generator.accept();
+          device!.generator!.accept();
           cacheInitialDillCompilation();
         } else {
           await buildWeb(
@@ -304,8 +300,8 @@ class ResidentWebRunner extends ResidentRunner {
             null,
           );
         }
-        await device.device.startApp(
-          package,
+        await device!.device!.startApp(
+          package!,
           mainPath: target,
           debuggingOptions: debuggingOptions,
           platformArgs: <String, Object>{
@@ -320,19 +316,19 @@ class ResidentWebRunner extends ResidentRunner {
       });
     } on WebSocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger!.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on ChromeDebugException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger!.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on AppConnectionException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger!.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on SocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger!.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on Exception {
       appFailedToStart();
@@ -343,12 +339,12 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   Future<OperationResult> restart({
     bool fullRestart = false,
-    bool pause = false,
-    String reason,
+    bool? pause = false,
+    String? reason,
     bool benchmarkMode = false,
   }) async {
     final DateTime start = _systemClock.now();
-    final Status status = _logger.startProgress(
+    final Status status = _logger!.startProgress(
       'Performing hot restart...',
       progressId: 'hot.restart',
     );
@@ -358,10 +354,10 @@ class ResidentWebRunner extends ResidentRunner {
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS();
       if (report.success) {
-        device.generator.accept();
+        device!.generator!.accept();
       } else {
         status.stop();
-        await device.generator.reject();
+        await device!.generator!.reject();
         return OperationResult(1, 'Failed to recompile application.');
       }
     } else {
@@ -384,7 +380,7 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       if (!deviceIsDebuggable) {
-        _logger.printStatus('Recompile complete. Page requires refresh.');
+        _logger!.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
         await _vmService.service.callMethod('hotRestart');
       } else {
@@ -402,8 +398,8 @@ class ResidentWebRunner extends ResidentRunner {
 
     final Duration elapsed = _systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
-    _logger.printStatus('Restarted application in $elapsedMS.');
-    unawaited(residentDevtoolsHandler.hotRestart(flutterDevices));
+    _logger!.printStatus('Restarted application in $elapsedMS.');
+    unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
@@ -411,7 +407,7 @@ class ResidentWebRunner extends ResidentRunner {
       HotEvent(
         'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
-        sdkName: await device.device.sdkNameAndVersion,
+        sdkName: await device!.device!.sdkNameAndVersion,
         emulator: false,
         fullRestart: true,
         reason: reason,
@@ -425,34 +421,34 @@ class ResidentWebRunner extends ResidentRunner {
   // Flutter web projects need to include a generated main entrypoint to call the
   // appropriate bootstrap method and inject plugins.
   // Keep this in sync with build_system/targets/web.dart.
-  Future<Uri> _generateEntrypoint(Uri mainUri, PackageConfig packageConfig) async {
-    File result = _generatedEntrypointDirectory?.childFile('web_entrypoint.dart');
+  Future<Uri> _generateEntrypoint(Uri mainUri, PackageConfig? packageConfig) async {
+    File? result = _generatedEntrypointDirectory?.childFile('web_entrypoint.dart');
     if (_generatedEntrypointDirectory == null) {
-      _generatedEntrypointDirectory ??= _fileSystem.systemTempDirectory.createTempSync('flutter_tools.')
+      _generatedEntrypointDirectory ??= _fileSystem!.systemTempDirectory.createTempSync('flutter_tools.')
         ..createSync();
-      result = _generatedEntrypointDirectory.childFile('web_entrypoint.dart');
+      result = _generatedEntrypointDirectory!.childFile('web_entrypoint.dart');
 
       // Generates the generated_plugin_registrar
-      await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: _generatedEntrypointDirectory);
+      await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: _generatedEntrypointDirectory!);
       // The below works because `injectBuildTimePluginFiles` is configured to write
       // the web_plugin_registrant.dart file alongside the generated main.dart
-      const String/*?*/ generatedImport = 'web_plugin_registrant.dart';
+      const String generatedImport = 'web_plugin_registrant.dart';
 
-      Uri importedEntrypoint = packageConfig.toPackageUri(mainUri);
+      Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
-        final String parent = _fileSystem.file(mainUri).parent.path;
-        flutterDevices.first.generator.addFileSystemRoot(parent);
-        flutterDevices.first.generator.addFileSystemRoot(_fileSystem.directory('test').absolute.path);
+        final String parent = _fileSystem!.file(mainUri).parent.path;
+        flutterDevices.first!.generator!.addFileSystemRoot(parent);
+        flutterDevices.first!.generator!.addFileSystemRoot(_fileSystem!.directory('test').absolute.path);
         importedEntrypoint = Uri(
           scheme: 'org-dartlang-app',
           path: '/${mainUri.pathSegments.last}',
         );
       }
       final LanguageVersion languageVersion = determineLanguageVersion(
-        _fileSystem.file(mainUri),
+        _fileSystem!.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
-        Cache.flutterRoot,
+        Cache.flutterRoot!,
       );
 
       final String entrypoint = main_dart.generateMainDartFile(importedEntrypoint.toString(),
@@ -462,14 +458,14 @@ class ResidentWebRunner extends ResidentRunner {
 
       result.writeAsStringSync(entrypoint);
     }
-    return result.absolute.uri;
+    return result!.absolute.uri;
   }
 
   Future<UpdateFSReport> _updateDevFS({bool fullRestart = false}) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
-      _logger.printTrace('Updating assets');
+      _logger!.printTrace('Updating assets');
       final int result = await assetBundle.build(
         packagesPath: debuggingOptions.buildInfo.packagesPath,
         targetPlatform: TargetPlatform.web_javascript,
@@ -479,67 +475,66 @@ class ResidentWebRunner extends ResidentRunner {
       }
     }
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
-      lastCompiled: device.devFS.lastCompiled,
-      urisToMonitor: device.devFS.sources,
+      lastCompiled: device!.devFS!.lastCompiled,
+      urisToMonitor: device!.devFS!.sources,
       packagesPath: packagesFilePath,
-      packageConfig: device.devFS.lastPackageConfig
+      packageConfig: device!.devFS!.lastPackageConfig
         ?? debuggingOptions.buildInfo.packageConfig,
     );
-    final Status devFSStatus = _logger.startProgress(
-      'Waiting for connection from debug service on ${device.device.name}...',
+    final Status devFSStatus = _logger!.startProgress(
+      'Waiting for connection from debug service on ${device!.device!.name}...',
     );
-    final UpdateFSReport report = await device.devFS.update(
+    final UpdateFSReport report = await device!.devFS!.update(
       mainUri: await _generateEntrypoint(
-        _fileSystem.file(mainPath).absolute.uri,
+        _fileSystem!.file(mainPath).absolute.uri,
         invalidationResult.packageConfig,
       ),
       target: target,
       bundle: assetBundle,
       firstBuildTime: firstBuildTime,
       bundleFirstUpload: isFirstUpload,
-      generator: device.generator,
+      generator: device!.generator!,
       fullRestart: fullRestart,
       dillOutputPath: dillOutputPath,
       projectRootPath: projectRootPath,
       pathToReload: getReloadPath(fullRestart: fullRestart, swap: false),
-      invalidatedFiles: invalidationResult.uris,
-      packageConfig: invalidationResult.packageConfig,
+      invalidatedFiles: invalidationResult.uris!,
+      packageConfig: invalidationResult.packageConfig!,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
-      devFSWriter: null,
     );
     devFSStatus.stop();
-    _logger.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    _logger!.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
     return report;
   }
 
   @override
   Future<int> attach({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<void> appStartedCompleter,
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
     bool allowExistingDdsInstance = false,
     bool enableDevTools = false, // ignored, we don't yet support devtools for web
     bool needsFullRestart = true,
   }) async {
     if (_chromiumLauncher != null) {
-      final Chromium chrome = await _chromiumLauncher.connectedInstance;
-      final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+      final Chromium chrome = await _chromiumLauncher!.connectedInstance;
+      final ChromeTab chromeTab = await (chrome.chromeConnection.getTab((ChromeTab chromeTab) {
         return !chromeTab.url.startsWith('chrome-extension');
-      });
+      }) as FutureOr<ChromeTab>);
       if (chromeTab == null) {
         throwToolExit('Failed to connect to Chrome instance.');
       }
       _wipConnection = await chromeTab.connect();
     }
-    Uri websocketUri;
+    Uri? websocketUri;
     if (supportsServiceProtocol) {
-      final WebDevFS webDevFS = device.devFS as WebDevFS;
-      final bool useDebugExtension = device.device is WebServerDevice && debuggingOptions.startPaused;
+      final WebDevFS webDevFS = device!.devFS! as WebDevFS;
+      final bool useDebugExtension = device!.device is WebServerDevice && debuggingOptions.startPaused;
       _connectionResult = await webDevFS.connect(useDebugExtension);
-      unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
+      unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
       void onLogEvent(vmservice.Event event)  {
         final String message = processVmServiceMessage(event);
-        _logger.printStatus(message);
+        _logger!.printStatus(message);
       }
 
       _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
@@ -564,41 +559,41 @@ class ResidentWebRunner extends ResidentRunner {
       }
       await setUpVmService(
         (String isolateId, {
-          bool force,
-          bool pause,
+          bool? force,
+          bool? pause,
         }) async {
           await restart(pause: pause);
         },
         null,
         null,
-        device.device,
+        device!.device,
         null,
         printStructuredErrorLog,
         _vmService.service,
       );
 
 
-      websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
-      device.vmService = _vmService;
+      websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
+      device!.vmService = _vmService;
 
       // Run main immediately if the app is not started paused or if there
       // is no debugger attached. Otherwise, runMain when a resume event
       // is received.
       if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
-        _connectionResult.appConnection.runMain();
+        _connectionResult!.appConnection!.runMain();
       } else {
-        StreamSubscription<void> resumeSub;
+        late StreamSubscription<void> resumeSub;
         resumeSub = _vmService.service.onDebugEvent
             .listen((vmservice.Event event) {
           if (event.type == vmservice.EventKind.kResume) {
-            _connectionResult.appConnection.runMain();
+            _connectionResult!.appConnection!.runMain();
             resumeSub.cancel();
           }
         });
       }
       if (enableDevTools) {
         // The method below is guaranteed never to return a failing future.
-        unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
           devToolsServerAddress: debuggingOptions.devToolsServerAddress,
           flutterDevices: flutterDevices,
         ));
@@ -606,20 +601,20 @@ class ResidentWebRunner extends ResidentRunner {
     }
     if (websocketUri != null) {
       if (debuggingOptions.vmserviceOutFile != null) {
-        _fileSystem.file(debuggingOptions.vmserviceOutFile)
+        _fileSystem!.file(debuggingOptions.vmserviceOutFile)
           ..createSync(recursive: true)
           ..writeAsStringSync(websocketUri.toString());
       }
-      _logger.printStatus('Debug service listening on $websocketUri');
-      _logger.printStatus('');
+      _logger!.printStatus('Debug service listening on $websocketUri');
+      _logger!.printStatus('');
       if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-        _logger.printStatus('💪 Running with sound null safety 💪', emphasis: true);
+        _logger!.printStatus('💪 Running with sound null safety 💪', emphasis: true);
       } else {
-        _logger.printStatus(
+        _logger!.printStatus(
           'Running with unsound null safety',
           emphasis: true,
         );
-        _logger.printStatus(
+        _logger!.printStatus(
           'For more information see https://dart.dev/null-safety/unsound-null-safety',
         );
       }
@@ -638,7 +633,7 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<void> exitApp() async {
-    await device.exitApps();
+    await device!.exitApps();
     appFinished();
   }
 }

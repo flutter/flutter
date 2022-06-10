@@ -220,11 +220,11 @@ class DriveCommand extends RunCommandBase {
 
     final bool web = device is WebServerDevice || device is ChromiumDevice;
     _flutterDriverFactory ??= FlutterDriverFactory(
-      applicationPackageFactory: ApplicationPackageFactory.instance,
-      logger: _logger,
+      applicationPackageFactory: ApplicationPackageFactory.instance!,
+      logger: _logger!,
       processUtils: globals.processUtils,
       dartSdkPath: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
-      devtoolsLauncher: DevtoolsLauncher.instance,
+      devtoolsLauncher: DevtoolsLauncher.instance!,
     );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file('.packages'),
@@ -245,7 +245,7 @@ class DriveCommand extends RunCommandBase {
           buildInfo,
           device,
           debuggingOptions,
-          ipv6,
+          ipv6 ?? false,
           applicationBinary: applicationBinary,
           route: route,
           userIdentifier: userIdentifier,
@@ -268,7 +268,7 @@ class DriveCommand extends RunCommandBase {
           uri,
           device,
           debuggingOptions,
-          ipv6,
+          ipv6 ?? false,
         );
       }
 

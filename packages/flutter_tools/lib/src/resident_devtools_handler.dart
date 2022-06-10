@@ -124,7 +124,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   void _launchDevToolsForDevices(List<FlutterDevice?> flutterDevices) {
     assert(activeDevToolsServer != null);
     for (final FlutterDevice? device in flutterDevices) {
-      final String devToolsUrl = activeDevToolsServer!.uri.replace(
+      final String devToolsUrl = activeDevToolsServer!.uri!.replace(
         queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
       ).toString();
       _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
