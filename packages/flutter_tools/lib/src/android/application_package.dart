@@ -97,7 +97,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk?> fromAndroidProject(
     AndroidProject androidProject, {
-    required AndroidSdk androidSdk,
+    required AndroidSdk? androidSdk,
     required ProcessManager processManager,
     required UserMessages userMessages,
     required ProcessUtils processUtils,
@@ -113,7 +113,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
         // the application Id, so we need to look at what was actually built.
         return AndroidApk.fromApk(
           apkFile,
-          androidSdk: androidSdk,
+          androidSdk: androidSdk!,
           processManager: processManager,
           logger: logger,
           userMessages: userMessages,
