@@ -756,7 +756,6 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// the user continues to drag down.
   ///
   /// Defaults to 1.0. Must be between 0.0 and 1.0 inclusive.
-  @protected
   final double? progress;
 
   /// Default stroke width.
