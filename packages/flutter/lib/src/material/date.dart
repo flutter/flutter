@@ -245,3 +245,57 @@ class DateTimeRange {
   @override
   String toString() => '$start - $end';
 }
+
+/// Encapsulates a possible start and end [DateTime] that represent a range of dates.
+///
+/// The range may include the [start] and [end] dates. The [start] and [end] dates
+/// may be equal to indicate a date range of a single day.
+/// The [DateTimeRangeValue] is valid if [start] is not after [end]
+@immutable
+class DateTimeRangeValue {
+  /// Creates a date range for the given start and end [DateTime].
+  DateTimeRangeValue({
+    DateTime? start,
+    DateTime? end,
+  })  : assert((start == null && end == null) ||
+            (start != null && end == null) ||
+            (start != null && !end!.isBefore(start))),
+        start = start != null ? DateUtils.dateOnly(start) : null,
+        end = end != null ? DateUtils.dateOnly(end) : null;
+
+  /// Creates an empty date range where start and end are null.
+  const DateTimeRangeValue.empty()
+      : start = null,
+        end = null;
+
+  /// The start of the range of dates.
+  final DateTime? start;
+
+  /// The end of the range of dates.
+  final DateTime? end;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is DateTimeRange && other.start == start && other.end == end;
+  }
+
+  @override
+  int get hashCode => Object.hash(start, end);
+
+  @override
+  String toString() => 'DateRangeValue($start - $end)';
+
+  /// Copies the DateTimeRangeValue with new start or/and end.
+  DateTimeRangeValue copyWith({
+    DateTime? start,
+    DateTime? end,
+  }) {
+    return DateTimeRangeValue(
+      start: start != null ? DateUtils.dateOnly(start) : this.start,
+      end: end != null ? DateUtils.dateOnly(end) : this.end,
+    );
+  }
+}
