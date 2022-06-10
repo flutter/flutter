@@ -35,7 +35,6 @@ void main() {
 
   testWithoutContext('needs to join cache', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem();
-    FakePub fakePub = FakePub(fileSystem);
     final Directory local = fileSystem.currentDirectory.childDirectory('local');
     final Directory global = fileSystem.currentDirectory.childDirectory('global');
 
