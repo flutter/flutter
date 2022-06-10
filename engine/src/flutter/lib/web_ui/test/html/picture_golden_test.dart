@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -29,7 +27,7 @@ void testMain() {
       final ui.Picture picture = recorder.endRecording();
       final HtmlImage image = await picture.toImage(200, 100) as HtmlImage;
       expect(image, isNotNull);
-      html.document.body!
+      domDocument.body!
         ..style.margin = '0'
         ..append(image.imgElement);
       try {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:ui/src/engine.dart';
 
 /// 50x50 pixel flutter logo image that contains alpha ramps and colors
@@ -117,7 +115,7 @@ const String _flutterLogoBase64 =
 
 HtmlImage createFlutterLogoTestImage() {
   return HtmlImage(
-    html.ImageElement()
+    createDomHTMLImageElement()
       ..src = 'data:text/plain;base64,$_flutterLogoBase64',
     50,
     50,

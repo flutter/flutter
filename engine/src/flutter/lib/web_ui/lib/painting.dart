@@ -479,7 +479,7 @@ Future<Codec> instantiateImageCodec(
   if (engine.useCanvasKit) {
     return engine.skiaInstantiateImageCodec(list, targetWidth, targetHeight);
   } else {
-    final html.Blob blob = html.Blob(<dynamic>[list.buffer]);
+    final engine.DomBlob blob = engine.createDomBlob(<dynamic>[list.buffer]);
     return engine.HtmlBlobCodec(blob);
   }
 }
@@ -493,7 +493,7 @@ Future<Codec> instantiateImageCodecFromBuffer(
   if (engine.useCanvasKit) {
     return engine.skiaInstantiateImageCodec(buffer._list!, targetWidth, targetHeight);
   } else {
-    final html.Blob blob = html.Blob(<dynamic>[buffer._list!.buffer]);
+    final engine.DomBlob blob = engine.createDomBlob(<dynamic>[buffer._list!.buffer]);
     return engine.HtmlBlobCodec(blob);
   }
 }

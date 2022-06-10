@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 
@@ -726,16 +725,16 @@ const String base64ImageData = 'data:image/png;base64,iVBORw0KGgoAAAANSUh'
 
 HtmlImage createNineSliceImage() {
   return HtmlImage(
-    html.ImageElement()..src = base64ImageData,
+    createDomHTMLImageElement()..src = base64ImageData,
     60,
     60,
   );
 }
 
 HtmlImage createTestImage({int width = 100, int height = 50}) {
-  final html.CanvasElement canvas =
-      html.CanvasElement(width: width, height: height);
-  final html.CanvasRenderingContext2D ctx = canvas.context2D;
+  final DomCanvasElement canvas =
+      createDomCanvasElement(width: width, height: height);
+  final DomCanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, 33, 50);
   ctx.fill();
@@ -745,7 +744,7 @@ HtmlImage createTestImage({int width = 100, int height = 50}) {
   ctx.fillStyle = '#2040E0';
   ctx.fillRect(66, 0, 33, 50);
   ctx.fill();
-  final html.ImageElement imageElement = html.ImageElement();
+  final DomHTMLImageElement imageElement = createDomHTMLImageElement();
   imageElement.src = js_util.callMethod<String>(canvas, 'toDataURL', <dynamic>[]);
   return HtmlImage(imageElement, width, height);
 }

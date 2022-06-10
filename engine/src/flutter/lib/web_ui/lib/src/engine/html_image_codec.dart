@@ -3,18 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
+import 'dom.dart';
 import 'safe_browser_api.dart';
 import 'util.dart';
 
 Object? get _jsImageDecodeFunction => getJsProperty<Object?>(
   getJsProperty<Object>(
-    getJsProperty<Object>(html.window, 'Image'),
+    getJsProperty<Object>(domWindow, 'Image'),
     'prototype',
   ),
   'decode',
@@ -44,7 +44,7 @@ class HtmlCodec implements ui.Codec {
     // builders to create UI.
       chunkCallback?.call(0, 100);
     if (_supportsDecode) {
-      final html.ImageElement imgElement = html.ImageElement();
+      final DomHTMLImageElement imgElement = createDomHTMLImageElement();
       imgElement.src = src;
       setJsProperty<String>(imgElement, 'decoding', 'async');
 
@@ -82,24 +82,27 @@ class HtmlCodec implements ui.Codec {
   }
 
   void _decodeUsingOnLoad(Completer<ui.FrameInfo> completer) {
-    StreamSubscription<html.Event>? loadSubscription;
-    late StreamSubscription<html.Event> errorSubscription;
-    final html.ImageElement imgElement = html.ImageElement();
+    final DomHTMLImageElement imgElement = createDomHTMLImageElement();
     // If the browser doesn't support asynchronous decoding of an image,
     // then use the `onload` event to decide when it's ready to paint to the
     // DOM. Unfortunately, this will cause the image to be decoded synchronously
     // on the main thread, and may cause dropped framed.
-    errorSubscription = imgElement.onError.listen((html.Event event) {
-      loadSubscription?.cancel();
-      errorSubscription.cancel();
+    late DomEventListener errorListener;
+    DomEventListener? loadListener;
+    errorListener = allowInterop((DomEvent event) {
+      if (loadListener != null) {
+        imgElement.removeEventListener('load', loadListener);
+      }
+      imgElement.removeEventListener('error', errorListener);
       completer.completeError(event);
     });
-    loadSubscription = imgElement.onLoad.listen((html.Event event) {
+    imgElement.addEventListener('error', errorListener);
+    loadListener = allowInterop((DomEvent event) {
       if (chunkCallback != null) {
         chunkCallback!(100, 100);
       }
-      loadSubscription!.cancel();
-      errorSubscription.cancel();
+      imgElement.removeEventListener('load', loadListener!);
+      imgElement.removeEventListener('error', errorListener);
       final HtmlImage image = HtmlImage(
         imgElement,
         imgElement.naturalWidth,
@@ -107,6 +110,7 @@ class HtmlCodec implements ui.Codec {
       );
       completer.complete(SingleFrameInfo(image));
     });
+    imgElement.addEventListener('load', loadListener);
     imgElement.src = src;
   }
 
@@ -115,13 +119,13 @@ class HtmlCodec implements ui.Codec {
 }
 
 class HtmlBlobCodec extends HtmlCodec {
-  final html.Blob blob;
+  final DomBlob blob;
 
-  HtmlBlobCodec(this.blob) : super(html.Url.createObjectUrlFromBlob(blob));
+  HtmlBlobCodec(this.blob) : super(domWindow.URL.createObjectURL(blob));
 
   @override
   void dispose() {
-    html.Url.revokeObjectUrl(src);
+    domWindow.URL.revokeObjectURL(src);
   }
 }
 
@@ -136,7 +140,7 @@ class SingleFrameInfo implements ui.FrameInfo {
 }
 
 class HtmlImage implements ui.Image {
-  final html.ImageElement imgElement;
+  final DomHTMLImageElement imgElement;
   bool _requiresClone = false;
   HtmlImage(this.imgElement, this.width, this.height);
 
@@ -181,12 +185,12 @@ class HtmlImage implements ui.Image {
       // The format rawRgba always returns straight rather than premul currently.
       case ui.ImageByteFormat.rawRgba:
       case ui.ImageByteFormat.rawStraightRgba:
-        final html.CanvasElement canvas = html.CanvasElement()
+        final DomCanvasElement canvas = createDomCanvasElement()
           ..width = width
           ..height = height;
-        final html.CanvasRenderingContext2D ctx = canvas.context2D;
+        final DomCanvasRenderingContext2D ctx = canvas.context2D;
         ctx.drawImage(imgElement, 0, 0);
-        final html.ImageData imageData = ctx.getImageData(0, 0, width, height);
+        final DomImageData imageData = ctx.getImageData(0, 0, width, height);
         return Future<ByteData?>.value(imageData.data.buffer.asByteData());
       default:
         if (imgElement.src?.startsWith('data:') == true) {
@@ -200,9 +204,9 @@ class HtmlImage implements ui.Image {
 
   // Returns absolutely positioned actual image element on first call and
   // clones on subsequent calls.
-  html.ImageElement cloneImageElement() {
+  DomHTMLImageElement cloneImageElement() {
     if (_requiresClone) {
-      return imgElement.clone(true) as html.ImageElement;
+      return imgElement.cloneNode(true) as DomHTMLImageElement;
     } else {
       _requiresClone = true;
       imgElement.style.position = 'absolute';

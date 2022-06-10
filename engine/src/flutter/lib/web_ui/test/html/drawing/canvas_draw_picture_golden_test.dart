@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -144,7 +142,7 @@ const String _base64Encoded20x20TestImage =
 
 HtmlImage _createRealTestImage() {
   return HtmlImage(
-    html.ImageElement()
+    createDomHTMLImageElement()
       ..src = 'data:text/plain;base64,$_base64Encoded20x20TestImage',
     20,
     20,

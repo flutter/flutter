@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -156,14 +155,14 @@ Future<void> testMain() async {
     // if any pixels are left semi-transparent, which might be caused by
     // converting to and from pre-multiplied values. See
     // https://github.com/flutter/flutter/issues/92958 .
-    final CanvasElement canvas = CanvasElement()
+    final DomCanvasElement canvas = createDomCanvasElement()
       ..width = 2
       ..height = 2;
-    final CanvasRenderingContext2D ctx = canvas.context2D;
+    final DomCanvasRenderingContext2D ctx = canvas.context2D;
     ctx.drawImage((blueBackground as HtmlImage).imgElement, 0, 0);
     ctx.drawImage((sourceImage as HtmlImage).imgElement, 0, 0);
 
-    final ImageData imageData = ctx.getImageData(0, 0, 2, 2);
+    final DomImageData imageData = ctx.getImageData(0, 0, 2, 2);
     final List<int> actualPixels = imageData.data;
 
     final Uint8List benchmarkPixels = _pixelsToBytes(

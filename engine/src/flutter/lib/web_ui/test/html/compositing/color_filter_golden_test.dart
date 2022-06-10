@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 
 import 'package:test/bootstrap/browser.dart';
@@ -192,5 +191,5 @@ HtmlImage createTestImage({int width = 200, int height = 150}) {
   ctx.fill();
   final DomHTMLImageElement imageElement = createDomHTMLImageElement();
   imageElement.src = js_util.callMethod<String>(canvas, 'toDataURL', <dynamic>[]);
-  return HtmlImage(imageElement as html.ImageElement, width, height);
+  return HtmlImage(imageElement, width, height);
 }
