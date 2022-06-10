@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
