@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for SliverRefreshControl
+// Flutter code sample for SliverRefreshIndicator
 
 import 'package:flutter/material.dart';
 
@@ -49,7 +49,7 @@ class _SliverRefreshControlExampleState extends State<SliverRefreshControlExampl
           const SliverAppBar(
             title: Text('Scroll down'),
           ),
-          SliverRefreshControl(
+          SliverRefreshIndicator(
             onRefresh: () async {
               await Future<void>.delayed(
                 const Duration(milliseconds: 1000),

@@ -589,7 +589,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
 /// A sliver widget implementing pull-to-refresh content control.
 ///
-/// Unlike [RefreshIndicator] the [SliverRefreshControl]
+/// Unlike [RefreshIndicator] the [SliverRefreshIndicator]
 /// beings part of the scrollable and actively occupies scrollable space.
 ///
 /// When inserted as the first sliver in a scroll view or behind other slivers
@@ -647,7 +647,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 ///    because instead of being part of the scrollable and actively occupies
 ///    scrollable space. it goose overlay on top of the scrollable.
 ///
-class SliverRefreshControl extends BaseSliverRefreshControl {
+class SliverRefreshIndicator extends BaseSliverRefreshControl {
   /// Create a new refresh control for inserting into a list of slivers.
   ///
   /// The [refreshTriggerPullDistance] and [refreshIndicatorExtent] arguments
@@ -659,7 +659,7 @@ class SliverRefreshControl extends BaseSliverRefreshControl {
   ///
   /// The [onRefresh] argument will be called when pulled far enough to trigger
   /// a refresh.
-  const SliverRefreshControl({
+  const SliverRefreshIndicator({
     super.key,
     super.refreshTriggerPullDistance,
     super.refreshIndicatorExtent,
