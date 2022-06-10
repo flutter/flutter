@@ -50,7 +50,7 @@ class IntegrationTestTestDevice implements TestDevice {
     }
 
     final LaunchResult launchResult = await device.startApp(
-      _applicationPackage!,
+      _applicationPackage,
       mainPath: entrypointPath,
       platformArgs: <String, dynamic>{},
       debuggingOptions: debuggingOptions,

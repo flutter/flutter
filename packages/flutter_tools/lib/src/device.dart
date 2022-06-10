@@ -593,7 +593,7 @@ abstract class Device {
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
+    covariant ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,

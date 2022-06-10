@@ -1277,13 +1277,13 @@ Future<ReassembleResult> _defaultReassembleHelper(
 
   globals.printTrace('Reassembling application');
 
-  final Future<void> reassembleFuture = Future.wait<void>(reassembleFutures);
+  final Future<void> reassembleFuture = Future.wait<void>(reassembleFutures).then((void _) => null);
   await reassembleFuture.timeout(
     const Duration(seconds: 2),
     onTimeout: () async {
       if (pausedIsolatesFound > 0) {
         shouldReportReloadTime = false;
-        return; // probably no point waiting, they're probably deadlocked and we've already warned.
+        return ; // probably no point waiting, they're probably deadlocked and we've already warned.
       }
       // Check if any isolate is newly paused.
       globals.printTrace('This is taking a long time; will now check for paused isolates.');
@@ -1313,6 +1313,7 @@ Future<ReassembleResult> _defaultReassembleHelper(
       if (onSlow != null) {
         onSlow('${_describePausedIsolates(postReloadPausedIsolatesFound, serviceEventKind!)}.');
       }
+      return;
     },
   );
   return ReassembleResult(reassembleViews, failedReassemble, shouldReportReloadTime);

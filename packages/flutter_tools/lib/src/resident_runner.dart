@@ -76,7 +76,7 @@ class FlutterDevice {
     Device device, {
     required String? target,
     required BuildInfo buildInfo,
-    required Platform? platform,
+    required Platform platform,
     TargetModel targetModel = TargetModel.flutter,
     List<String>? experimentalFlags,
     ResidentCompiler? generator,
@@ -138,7 +138,7 @@ class FlutterDevice {
         processManager: globals.processManager,
         logger: globals.logger,
         fileSystem: globals.fs,
-        platform: platform!,
+        platform: platform,
       );
     } else {
       // The flutter-widget-cache feature only applies to run mode.
@@ -172,7 +172,7 @@ class FlutterDevice {
         artifacts: globals.artifacts!,
         processManager: globals.processManager,
         logger: globals.logger,
-        platform: platform!,
+        platform: platform,
         fileSystem: globals.fs,
       );
     }
@@ -294,7 +294,7 @@ class FlutterDevice {
         service = await Future.any<dynamic>(
           <Future<dynamic>>[
             connectToVmService(
-              enableDds ? device!.dds.uri! : observatoryUri!,
+              enableDds ? (device!.dds.uri ?? observatoryUri!): observatoryUri!,
               reloadSources: reloadSources,
               restart: restart,
               compileExpression: compileExpression,
@@ -427,7 +427,7 @@ class FlutterDevice {
 
     // Start the application.
     final Future<LaunchResult> futureResult = device!.startApp(
-      package!,
+      package,
       mainPath: hotRunner.mainPath,
       debuggingOptions: hotRunner.debuggingOptions,
       platformArgs: platformArgs,
@@ -502,7 +502,7 @@ class FlutterDevice {
     await startEchoingDeviceLog();
 
     final LaunchResult result = await device!.startApp(
-      package!,
+      package,
       mainPath: coldRunner.mainPath,
       debuggingOptions: coldRunner.debuggingOptions,
       platformArgs: platformArgs,
@@ -1274,7 +1274,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   Future<void> shutdownDartDevelopmentService() async {
     await Future.wait<void>(
       flutterDevices.map<Future<void>>(
-        (FlutterDevice? device) => device!.device?.dds.shutdown() ?? Future<void>.value()
+        (FlutterDevice? device) => device?.device?.dds.shutdown() ?? Future<void>.value()
       )
     );
   }
@@ -1570,7 +1570,7 @@ class TerminalHandler {
 
   final ResidentHandlers residentRunner;
   bool _processingUserRequest = false;
-  late StreamSubscription<void> subscription;
+  StreamSubscription<void>? subscription;
   File? _actualPidFile;
 
   @visibleForTesting
@@ -1625,7 +1625,7 @@ class TerminalHandler {
       _signals.removeHandler(entry.key, entry.value);
     }
     _signalTokens.clear();
-    subscription.cancel();
+    subscription?.cancel();
   }
 
   /// Returns [true] if the input has been handled by this function.
@@ -1771,7 +1771,7 @@ class TerminalHandler {
 
   Future<void> _cleanUp(io.ProcessSignal? signal) async {
     _terminal.singleCharMode = false;
-    await subscription.cancel();
+    await subscription?.cancel();
     await residentRunner.cleanupAfterSignal();
   }
 }

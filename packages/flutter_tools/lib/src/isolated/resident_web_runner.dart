@@ -301,7 +301,7 @@ class ResidentWebRunner extends ResidentRunner {
           );
         }
         await device!.device!.startApp(
-          package!,
+          package,
           mainPath: target,
           debuggingOptions: debuggingOptions,
           platformArgs: <String, Object>{
