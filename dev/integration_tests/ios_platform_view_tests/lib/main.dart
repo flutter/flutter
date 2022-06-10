@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// A page with a button in the center.
+/// A page with several buttons in the center.
 ///
 /// On press the button, a page with platform view should be pushed into the scene.
 class MyHomePage extends StatefulWidget {
@@ -56,8 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute<PlatformViewPage>(
-                  builder: (BuildContext context) => const PlatformViewPage()),
+              MaterialPageRoute<MergeThreadTestPage>(
+                  builder: (BuildContext context) => const MergeThreadTestPage()),
             );
           },
         ),
@@ -67,14 +67,25 @@ class _MyHomePageState extends State<MyHomePage> {
           child: const Text('Tap to unmerge threads'),
           onPressed: () {},
         ),
+        TextButton(
+          key: const ValueKey<String>('platform_view_focus_test'),
+          child: const Text('platform view focus test'),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute<FocusTestPage>(
+                  builder: (BuildContext context) => const FocusTestPage()),
+            );
+          },
+        ),
       ]),
     );
   }
 }
 
-/// A page contains the platform view to be tested.
-class PlatformViewPage extends StatelessWidget {
-  const PlatformViewPage({super.key});
+/// A page to test thread merge for platform view.
+class MergeThreadTestPage extends StatelessWidget {
+  const MergeThreadTestPage({super.key});
 
   static Key button = const ValueKey<String>('plus_button');
 
@@ -82,7 +93,7 @@ class PlatformViewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Platform View'),
+        title: const Text('Platform View Thread Merge Tests'),
       ),
       body: Column(
         children: <Widget>[
@@ -96,6 +107,47 @@ class PlatformViewPage extends StatelessWidget {
             key: button,
             child: const Text('button'),
             onPressed: (){},
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A page to test platform view focus.
+class FocusTestPage extends StatefulWidget {
+  const FocusTestPage({super.key});
+
+  @override
+  State<FocusTestPage> createState() => _FocusTestPageState();
+}
+
+class _FocusTestPageState extends State<FocusTestPage> {
+
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    _controller.text = "Flutter Text Input";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Platform View Focus Tests'),
+      ),
+      body: Column(
+        children: <Widget>[
+          const SizedBox(
+            width: 300,
+            height: 50,
+            child: UiKitView(viewType: 'platform_text_field'),
+          ),
+          TextField(
+            controller: _controller,
           ),
         ],
       ),
