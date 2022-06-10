@@ -488,7 +488,7 @@ ComponentV2::ComponentV2(
     std::cout << message << std::endl;
   };
 
-  settings_.dart_flags = {"--lazy_async_stacks"};
+  settings_.dart_flags = {};
 
   // Don't collect CPU samples from Dart VM C++ code.
   settings_.dart_flags.push_back("--no_profile_vm");

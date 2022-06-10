@@ -66,7 +66,6 @@ template("core_snapshot") {
     tool = gen_snapshot_to_use
 
     args = [
-      "--lazy_async_stacks",
       "--enable_mirrors=false",
       "--deterministic",
       "--snapshot_kind=core-jit",

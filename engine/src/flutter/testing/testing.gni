@@ -179,7 +179,6 @@ template("dart_snapshot_aot") {
     outputs = [ elf_object ]
 
     args = [
-      "--lazy_async_stacks",
       "--deterministic",
       "--snapshot_kind=app-aot-elf",
       "--loading_unit_manifest=" + rebase_path(loading_unit_manifest),
