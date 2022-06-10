@@ -192,7 +192,7 @@ class SelectableRegion extends StatefulWidget {
   /// toolbar for mobile devices.
   const SelectableRegion({
     super.key,
-    required this.buildContextMenu,
+    this.buildContextMenu,
     required this.focusNode,
     required this.selectionControls,
     required this.child,
@@ -207,7 +207,7 @@ class SelectableRegion extends StatefulWidget {
   final Widget child;
 
   /// {@macro flutter.widgets.EditableText.buildContextMenu}
-  final SelectableRegionContextMenuBuilder buildContextMenu;
+  final SelectableRegionContextMenuBuilder? buildContextMenu;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
@@ -604,6 +604,10 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   ///
   /// Returns true if the toolbar is shown, false if the toolbar can't be shown.
   bool _showToolbar({Offset? location}) {
+    if (widget.buildContextMenu == null) {
+      return false;
+    }
+
     _contextMenuController?.dispose();
 
     if (!_hasSelectionOverlayGeometry && _selectionOverlay == null) {
@@ -635,7 +639,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       ) {
         final String? selectedText =
             _selectable?.getSelectedContent()?.plainText;
-        return widget.buildContextMenu(
+        return widget.buildContextMenu!(
           context,
           controller,
           <ContextualMenuButtonData>[
