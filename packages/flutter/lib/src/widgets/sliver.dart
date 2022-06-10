@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
 import 'package:flutter/services.dart' show HapticFeedback;
-import 'package:flutter/widgets.dart' show LayoutBuilder;
+import 'package:flutter/widgets.dart' show Container, LayoutBuilder;
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -2221,7 +2221,7 @@ abstract class BaseSliverRefreshControl extends StatefulWidget {
   /// Retrieve the current state of the BaseSliverRefreshControl. The same as the
   /// state that gets passed into the [builder] function. Used for testing.
   @visibleForTesting
-  static RefreshIndicatorMode state(BuildContext context) {
+  RefreshIndicatorMode state(BuildContext context) {
     final _BaseSliverRefreshControlState state = context.findAncestorStateOfType<_BaseSliverRefreshControlState>()!;
     return state.refreshState;
   }
@@ -2360,22 +2360,26 @@ class _BaseSliverRefreshControlState extends State<BaseSliverRefreshControl> {
           latestIndicatorBoxExtent = constraints.maxHeight;
           refreshState = transitionNextState();
           // Build the overridden indicators.
-          if (widget.builder == null) {
-            return widget.buildRefreshIndicator(
+          if (latestIndicatorBoxExtent > 0) {
+            if (widget.builder == null) {
+              return widget.buildRefreshIndicator(
+                context,
+                refreshState,
+                latestIndicatorBoxExtent,
+                widget.refreshTriggerPullDistance,
+                widget.refreshIndicatorExtent,
+              );
+            }
+            return widget.builder!(
               context,
               refreshState,
               latestIndicatorBoxExtent,
               widget.refreshTriggerPullDistance,
               widget.refreshIndicatorExtent,
             );
+          } else {
+            return Container();
           }
-          return widget.builder!(
-            context,
-            refreshState,
-            latestIndicatorBoxExtent,
-            widget.refreshTriggerPullDistance,
-            widget.refreshIndicatorExtent,
-          );
         },
       ),
     );
