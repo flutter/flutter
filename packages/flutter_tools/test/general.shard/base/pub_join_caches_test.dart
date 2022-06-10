@@ -24,8 +24,8 @@ void main() {
     extra.childDirectory('dir').childFile('third.file').writeAsBytesSync(<int>[0]);
     joinCaches(
         fileSystem: fileSystem,
-        targetPath: target.path,
-        extraPath: extra.path
+        globalCachePath: target.path,
+        localCachePath: extra.path
     );
 
     expect(target.childFile('second.file').existsSync(), true);
@@ -40,10 +40,8 @@ void main() {
 
     for (final Directory directory in <Directory>[local, global]) {
       directory.createSync();
-      final Directory pubCache = directory.childDirectory('.pub-cache');
-      pubCache.createSync();
-      pubCache.childDirectory('hosted').createSync();
-      pubCache.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
+      directory.childDirectory('hosted').createSync();
+      directory.childDirectory('hosted').childDirectory('pub.dartlang.org').createSync();
     }
     final bool pass = needsToJoinCache(
         fileSystem: fileSystem,
@@ -52,7 +50,7 @@ void main() {
     );
     expect(pass, true);
 
-    local.childDirectory('.pub-cache').childDirectory('hosted').deleteSync(recursive: true);
+    local.childDirectory('hosted').deleteSync(recursive: true);
     expect(
       needsToJoinCache(
           fileSystem: fileSystem,

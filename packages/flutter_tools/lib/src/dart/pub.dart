@@ -38,53 +38,46 @@ typedef MessageFilter = String? Function(String message);
 /// targetPath is the directory in which the content of the extraPath will be moved in
 void joinCaches({
   required FileSystem fileSystem,
-  required String targetPath,
-  required String extraPath,
+  required String globalCachePath,
+  required String localCachePath,
 }) {
-  final Directory targetDirectory = fileSystem.directory(targetPath);
-  final Directory extraDirectory = fileSystem.directory(extraPath);
+  final Directory globalDirectory = fileSystem.directory(globalCachePath);
+  final Directory localDirectory = fileSystem.directory(localCachePath);
 
-  for (final FileSystemEntity entity in extraDirectory.listSync()) {
-    final String newPath = fileSystem.path.join(targetDirectory.path, entity.basename);
+  for (final FileSystemEntity entity in localDirectory.listSync()) {
+    final String newPath = fileSystem.path.join(globalDirectory.path, entity.basename);
     if (entity is File) {
       final File file = fileSystem.file(entity.path);
       file.copySync(newPath);
-      file.deleteSync(recursive: true);
-    }
-    else if (entity is Directory) {
+    } else if (entity is Directory) {
       final Directory currentDirectory = fileSystem.directory(entity.path);
       if (!currentDirectory.existsSync()) {
-        final Directory newDirectory = targetDirectory.childDirectory(entity.basename);
+        final Directory newDirectory = globalDirectory.childDirectory(entity.basename);
         newDirectory.createSync();
         joinCaches(
             fileSystem: fileSystem,
-            targetPath: newDirectory.path,
-            extraPath: currentDirectory.path
+            globalCachePath: newDirectory.path,
+            localCachePath: currentDirectory.path,
         );
       }
     }
   }
 }
 
+/// When local cache (flutter_root/.pub-cache) and global cache (HOME/.pub-cache) are present a
+/// merge needs to be done leaving only the global
+///
 /// Valid pubCache should look like this ./localCachePath/.pub-cache/hosted/pub.dartlang.org
-/// In order to join both cache both local and global should should be present in the users environment
 bool needsToJoinCache({
   required FileSystem fileSystem,
   required String localCachePath,
   required String globalCachePath
 }) {
-  final Directory globalDirectory = fileSystem.directory(fileSystem.path.join(globalCachePath, '.pub-cache'));
-  final Directory localDirectory = fileSystem.directory(fileSystem.path.join(localCachePath, '.pub-cache'));
+  final Directory globalDirectory = fileSystem.directory(globalCachePath);
+  final Directory localDirectory = fileSystem.directory(localCachePath);
 
-  if (globalDirectory.existsSync() && localDirectory.existsSync()) {
-    final Directory hostedGlobal = globalDirectory.childDirectory('hosted');
-    final Directory hostedLocal = localDirectory.childDirectory('hosted');
-    if (hostedGlobal.existsSync() && hostedLocal.existsSync()) {
-      return hostedGlobal.childDirectory('pub.dartlang.org').existsSync()
-          && hostedLocal.childDirectory('pub.dartlang.org').existsSync();
-    }
-  }
-  return false;
+  return globalDirectory.childDirectory('hosted').childDirectory('pub.dartlang.org').existsSync() &&
+      localDirectory.childDirectory('hosted').childDirectory('pub.dartlang.org').existsSync();
 }
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
@@ -546,7 +539,8 @@ class _DefaultPub implements Pub {
     return values.join(':');
   }
 
-  /// There is 3 ways to get the cache path
+  /// There is 3 ways to get the pub cache location
+  ///
   /// 1) Provide the _kPubCacheEnvironmentKey.
   /// 2) localPath (flutterRoot) but not globalPath ($HOME) .pubCache in which case we use the available (and vice versa).
   /// 3) If both local and global are available joinCaches is called and local deleted
@@ -581,15 +575,21 @@ class _DefaultPub implements Pub {
     if (needsToJoinCache(
         fileSystem: _fileSystem,
         localCachePath: localCachePath,
-        globalCachePath: globalDirectory.path
+        globalCachePath: globalDirectory.path,
     )) {
-      final Directory localDirectory = _fileSystem.directory(localCachePath);
+      final Directory localDirectoryPub = _fileSystem.directory(
+          _fileSystem.path.join(localCachePath, 'hosted', 'pub.dartlang.org')
+      );
+      final Directory globalDirectoryPub = _fileSystem.directory(
+          _fileSystem.path.join(globalDirectory.path, 'hosted', 'pub.dartlang.org')
+      );
+      
       joinCaches(
           fileSystem: _fileSystem,
-          targetPath: globalDirectory.path,
-          extraPath: localDirectory.path
+          globalCachePath: globalDirectoryPub.path,
+          localCachePath: localDirectoryPub.path,
       );
-      localDirectory.deleteSync(recursive: true);
+      _fileSystem.directory(localCachePath).deleteSync(recursive: true);
     }
     // Use pub's default location by returning null.
     return null;
