@@ -31,8 +31,7 @@ La herramienta Flutter ocasionalmente puede descargar recursos de los servidores
 https://policies.google.com/terms
 
 Por ejemplo, cuando se instala desde GitHub (a diferencia de un archivo preempaquetado), la herramienta Flutter descargará el SDK de Dart de los servidores de Google
-inmediatamente cuando se ejecuta por primera vez, ya que se utiliza para ejecutar la propia herramienta `flutter`.
-Esto también ocurrirá cuando se actualice Flutter (por ejemplo, al ejecutar el comando `flutter upgrade`).
+inmediatamente cuando se ejecuta por primera vez, ya que se utiliza para ejecutar la propia herramienta `flutter`. Esto también ocurrirá cuando se actualice Flutter (por ejemplo, al ejecutar el comando `flutter upgrade`).
 
 ## Acerca de Flutter
 
@@ -63,12 +62,11 @@ Flutter ofrece recarga en caliente con estado, lo que le permite realizar cambio
 ### Modelo abierto y extensible
 
 Flutter funciona con cualquier herramienta de desarrollo (o con ninguna), y también incluye complementos de edición para [Visual Studio Code] e [IntelliJ / Android Studio].
-Flutter proporciona [tens of thousands of packages][Flutter packages] para acelerar su desarrollo, independientemente de su plataforma de destino. Y acceder a otro código nativo es fácil, con soporte tanto para [FFI] como para [platform-specific APIs][platform
-channels].
+Flutter proporciona [decenas de miles de paquetes][Flutter packages] para acelerar su desarrollo, independientemente de su plataforma de destino. Y acceder a otro código nativo es fácil, con soporte tanto para [FFI] como para [API específicas de la plataforma][canales de la plataforma].
 
 Flutter es un proyecto totalmente de código abierto y agradecemos las contribuciones.
 Puede encontrar información sobre cómo empezar en nuestra
-[contributor guide](CONTRIBUTING.md).
+[guía del colaborador](CONTRIBUTING.md).
 
 
 [flutter.dev]: https://flutter.dev
@@ -91,5 +89,5 @@ Puede encontrar información sobre cómo empezar en nuestra
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
 [Flutter packages]: https://pub.dev/flutter
 [FFI]: https://flutter.dev/docs/development/platform-integration/c-interop
-[platform channels]: https://flutter.dev/docs/development/platform-integration/platform-channels
+[canales de la plataforma]: https://flutter.dev/docs/development/platform-integration/platform-channels
 [interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel
