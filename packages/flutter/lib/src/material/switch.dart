@@ -220,6 +220,8 @@ class Switch extends StatelessWidget {
 
   /// An image to use on the thumb of this switch when the switch is on.
   ///
+  /// Defaults to the image described in the Material design specification.
+  ///
   /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider? activeThumbImage;
 
@@ -228,6 +230,8 @@ class Switch extends StatelessWidget {
   final ImageErrorListener? onActiveThumbImageError;
 
   /// An image to use on the thumb of this switch when the switch is off.
+  ///
+  /// Defaults to the image described in the Material design specification.
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider? inactiveThumbImage;
@@ -787,9 +791,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..isHovered = states.contains(MaterialState.hovered)
             ..activeColor = effectiveActiveThumbColor
             ..inactiveColor = effectiveInactiveThumbColor
-            ..activeThumbImage = widget.activeThumbImage
+            ..activeThumbImage = widget.activeThumbImage ?? switchTheme.activeThumbImage
             ..onActiveThumbImageError = widget.onActiveThumbImageError
-            ..inactiveThumbImage = widget.inactiveThumbImage
+            ..inactiveThumbImage = widget.inactiveThumbImage ?? switchTheme.inactiveThumbImage
             ..onInactiveThumbImageError = widget.onInactiveThumbImageError
             ..activeTrackColor = effectiveActiveTrackColor
             ..inactiveTrackColor = effectiveInactiveTrackColor

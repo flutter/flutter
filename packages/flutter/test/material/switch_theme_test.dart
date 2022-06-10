@@ -18,6 +18,8 @@ void main() {
   test('SwitchThemeData defaults', () {
     const SwitchThemeData themeData = SwitchThemeData();
     expect(themeData.thumbColor, null);
+    expect(themeData.activeThumbImage, null);
+    expect(themeData.inactiveThumbImage, null);
     expect(themeData.trackColor, null);
     expect(themeData.mouseCursor, null);
     expect(themeData.materialTapTargetSize, null);
@@ -26,6 +28,8 @@ void main() {
 
     const SwitchTheme theme = SwitchTheme(data: SwitchThemeData(), child: SizedBox());
     expect(theme.data.thumbColor, null);
+    expect(theme.data.activeThumbImage, null);
+    expect(theme.data.inactiveThumbImage, null);
     expect(theme.data.trackColor, null);
     expect(theme.data.mouseCursor, null);
     expect(theme.data.materialTapTargetSize, null);

@@ -35,6 +35,8 @@ class SwitchThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.switchTheme].
   const SwitchThemeData({
     this.thumbColor,
+    this.activeThumbImage,
+    this.inactiveThumbImage,
     this.trackColor,
     this.materialTapTargetSize,
     this.mouseCursor,
@@ -46,6 +48,16 @@ class SwitchThemeData with Diagnosticable {
   ///
   /// If specified, overrides the default value of [Switch.thumbColor].
   final MaterialStateProperty<Color?>? thumbColor;
+
+  /// {@macro flutter.material.switch.activeThumbImage}
+  ///
+  /// If specified, overrides the default value of [Switch.activeThumbImage].
+  final ImageProvider? activeThumbImage;
+
+  /// {@macro flutter.material.switch.inactiveThumbImage}
+  ///
+  /// If specified, overrides the default value of [Switch.inactiveThumbImage].
+  final ImageProvider? inactiveThumbImage;
 
   /// {@macro flutter.material.switch.trackColor}
   ///
@@ -77,6 +89,8 @@ class SwitchThemeData with Diagnosticable {
   /// new values.
   SwitchThemeData copyWith({
     MaterialStateProperty<Color?>? thumbColor,
+    ImageProvider? activeThumbImage,
+    ImageProvider? inactiveThumbImage,
     MaterialStateProperty<Color?>? trackColor,
     MaterialTapTargetSize? materialTapTargetSize,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
@@ -85,6 +99,8 @@ class SwitchThemeData with Diagnosticable {
   }) {
     return SwitchThemeData(
       thumbColor: thumbColor ?? this.thumbColor,
+      activeThumbImage: activeThumbImage ?? this.activeThumbImage,
+      inactiveThumbImage: inactiveThumbImage ?? this.inactiveThumbImage,
       trackColor: trackColor ?? this.trackColor,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -99,6 +115,8 @@ class SwitchThemeData with Diagnosticable {
   static SwitchThemeData lerp(SwitchThemeData? a, SwitchThemeData? b, double t) {
     return SwitchThemeData(
       thumbColor: MaterialStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
+      activeThumbImage: t < 0.5 ? a?.activeThumbImage : b?.activeThumbImage,
+      inactiveThumbImage: t < 0.5 ? a?.inactiveThumbImage : b?.inactiveThumbImage,
       trackColor: MaterialStateProperty.lerp<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
@@ -110,6 +128,8 @@ class SwitchThemeData with Diagnosticable {
   @override
   int get hashCode => Object.hash(
     thumbColor,
+    activeThumbImage,
+    inactiveThumbImage,
     trackColor,
     materialTapTargetSize,
     mouseCursor,
@@ -127,6 +147,8 @@ class SwitchThemeData with Diagnosticable {
     }
     return other is SwitchThemeData
       && other.thumbColor == thumbColor
+      && other.activeThumbImage == activeThumbImage
+      && other.inactiveThumbImage == inactiveThumbImage
       && other.trackColor == trackColor
       && other.materialTapTargetSize == materialTapTargetSize
       && other.mouseCursor == mouseCursor
