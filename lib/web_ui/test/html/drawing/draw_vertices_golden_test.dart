@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
@@ -416,9 +415,9 @@ Future<void> testMain() async {
 }
 
 Future<HtmlImage> createTestImage({int width = 50, int height = 40}) {
-  final html.CanvasElement canvas =
-      html.CanvasElement(width: width, height: height);
-  final html.CanvasRenderingContext2D ctx = canvas.context2D;
+  final DomCanvasElement canvas =
+      createDomCanvasElement(width: width, height: height);
+  final DomCanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, width / 3, height);
   ctx.fill();
@@ -428,11 +427,11 @@ Future<HtmlImage> createTestImage({int width = 50, int height = 40}) {
   ctx.fillStyle = '#2040E0';
   ctx.fillRect(2 * width / 3, 0, width / 3, height);
   ctx.fill();
-  final html.ImageElement imageElement = html.ImageElement();
+  final DomHTMLImageElement imageElement = createDomHTMLImageElement();
   final Completer<HtmlImage> completer = Completer<HtmlImage>();
-  imageElement.onLoad.listen((html.Event event) {
+  imageElement.addEventListener('load', allowInterop((DomEvent event) {
     completer.complete(HtmlImage(imageElement, width, height));
-  });
+  }));
   imageElement.src = js_util.callMethod<String>(canvas, 'toDataURL', <dynamic>[]);
   return completer.future;
 }
