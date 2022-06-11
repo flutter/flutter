@@ -1935,16 +1935,16 @@ typedef RefreshControlIndicatorBuilder = Widget Function(
     double pulledExtent,
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
-    );
+  );
 
 class _SliverRefresh extends SingleChildRenderObjectWidget {
   const _SliverRefresh({
     this.refreshIndicatorLayoutExtent = 0.0,
     this.hasLayoutExtent = false,
     super.child,
-  })  : assert(refreshIndicatorLayoutExtent != null),
-        assert(refreshIndicatorLayoutExtent >= 0.0),
-        assert(hasLayoutExtent != null);
+  }) : assert(refreshIndicatorLayoutExtent != null),
+       assert(refreshIndicatorLayoutExtent >= 0.0),
+       assert(hasLayoutExtent != null);
 
   // The amount of space the indicator should occupy in the sliver in a
   // resting state when in the refreshing mode.
@@ -1964,8 +1964,7 @@ class _SliverRefresh extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, covariant _RenderSliverRefresh renderObject) {
+  void updateRenderObject(BuildContext context, covariant _RenderSliverRefresh renderObject) {
     renderObject
       ..refreshIndicatorLayoutExtent = refreshIndicatorLayoutExtent
       ..hasLayoutExtent = hasLayoutExtent;
@@ -1978,17 +1977,16 @@ class _SliverRefresh extends SingleChildRenderObjectWidget {
 //
 // The [layoutExtentOffsetCompensation] field keeps internal accounting to
 // prevent scroll position jumps as the [layoutExtent] is set and unset.
-class _RenderSliverRefresh extends RenderSliver
-    with RenderObjectWithChildMixin<RenderBox> {
+class _RenderSliverRefresh extends RenderSliver with RenderObjectWithChildMixin<RenderBox> {
   _RenderSliverRefresh({
     required double refreshIndicatorExtent,
     required bool hasLayoutExtent,
     RenderBox? child,
-  })  : assert(refreshIndicatorExtent != null),
-        assert(refreshIndicatorExtent >= 0.0),
-        assert(hasLayoutExtent != null),
-        _refreshIndicatorExtent = refreshIndicatorExtent,
-        _hasLayoutExtent = hasLayoutExtent {
+  }) : assert(refreshIndicatorExtent != null),
+       assert(refreshIndicatorExtent >= 0.0),
+       assert(hasLayoutExtent != null),
+       _refreshIndicatorExtent = refreshIndicatorExtent,
+       _hasLayoutExtent = hasLayoutExtent {
     this.child = child;
   }
 
@@ -1996,7 +1994,6 @@ class _RenderSliverRefresh extends RenderSliver
   // resting state when in the refreshing mode.
   double get refreshIndicatorLayoutExtent => _refreshIndicatorExtent;
   double _refreshIndicatorExtent;
-
   set refreshIndicatorLayoutExtent(double value) {
     assert(value != null);
     assert(value >= 0.0);
@@ -2012,7 +2009,6 @@ class _RenderSliverRefresh extends RenderSliver
   // [SliverGeometry.layoutExtent] space or not.
   bool get hasLayoutExtent => _hasLayoutExtent;
   bool _hasLayoutExtent;
-
   set hasLayoutExtent(bool value) {
     assert(value != null);
     if (value == _hasLayoutExtent) {
@@ -2036,8 +2032,7 @@ class _RenderSliverRefresh extends RenderSliver
     assert(constraints.growthDirection == GrowthDirection.forward);
 
     // The new layout extent this sliver should now have.
-    final double layoutExtent =
-        (_hasLayoutExtent ? 1.0 : 0.0) * _refreshIndicatorExtent;
+    final double layoutExtent = (_hasLayoutExtent ? 1.0 : 0.0) * _refreshIndicatorExtent;
     // If the new layoutExtent instructive changed, the SliverGeometry's
     // layoutExtent will take that value (on the next performLayout run). Shift
     // the scroll offset first so it doesn't make the scroll position suddenly jump.
@@ -2054,8 +2049,7 @@ class _RenderSliverRefresh extends RenderSliver
     }
 
     final bool active = constraints.overlap < 0.0 || layoutExtent > 0.0;
-    final double overscrolledExtent =
-    constraints.overlap < 0.0 ? constraints.overlap.abs() : 0.0;
+    final double overscrolledExtent = constraints.overlap < 0.0 ? constraints.overlap.abs() : 0.0;
     // Layout the child giving it the space of the currently dragged overscroll
     // which may or may not include a sliver layout extent space that it will
     // keep after the user lets go during the refresh process.
@@ -2094,8 +2088,7 @@ class _RenderSliverRefresh extends RenderSliver
 
   @override
   void paint(PaintingContext paintContext, Offset offset) {
-    if (constraints.overlap < 0.0 ||
-        constraints.scrollOffset + child!.size.height > 0) {
+    if (constraints.overlap < 0.0 || constraints.scrollOffset + child!.size.height > 0) {
       paintContext.paintChild(child!, offset);
     }
   }
@@ -2147,15 +2140,15 @@ abstract class BaseSliverRefreshControl extends StatefulWidget {
     this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
     this.builder,
     this.onRefresh,
-  })  : assert(refreshTriggerPullDistance != null),
-        assert(refreshTriggerPullDistance > 0.0),
-        assert(refreshIndicatorExtent != null),
-        assert(refreshIndicatorExtent >= 0.0),
-        assert(
-        refreshTriggerPullDistance >= refreshIndicatorExtent,
-        'The refresh indicator cannot take more space in its final state '
-            'than the amount initially created by overscrolling.',
-        );
+  }) : assert(refreshTriggerPullDistance != null),
+       assert(refreshTriggerPullDistance > 0.0),
+       assert(refreshIndicatorExtent != null),
+       assert(refreshIndicatorExtent >= 0.0),
+       assert(
+         refreshTriggerPullDistance >= refreshIndicatorExtent,
+         'The refresh indicator cannot take more space in its final state '
+         'than the amount initially created by overscrolling.',
+       );
 
   /// The amount of overscroll the scrollable must be dragged to trigger a reload.
   ///
@@ -2284,8 +2277,7 @@ class _BaseSliverRefreshControlState extends State<BaseSliverRefreshControl> {
       case RefreshIndicatorMode.drag:
         if (latestIndicatorBoxExtent == 0) {
           return RefreshIndicatorMode.inactive;
-        } else if (latestIndicatorBoxExtent <
-            widget.refreshTriggerPullDistance) {
+        } else if (latestIndicatorBoxExtent < widget.refreshTriggerPullDistance) {
           return RefreshIndicatorMode.drag;
         } else {
           if (widget.onRefresh != null) {
@@ -2293,8 +2285,7 @@ class _BaseSliverRefreshControlState extends State<BaseSliverRefreshControl> {
             // Call onRefresh after this frame finished since the function is
             // user supplied and we're always here in the middle of the sliver's
             // performLayout.
-            SchedulerBinding.instance
-                .addPostFrameCallback((Duration timestamp) {
+            SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
               refreshTask = widget.onRefresh!()
                 ..whenComplete(() {
                   if (mounted) {
@@ -2336,9 +2327,7 @@ class _BaseSliverRefreshControlState extends State<BaseSliverRefreshControl> {
       // to 0.0 since the last bit of the animation can take some time and
       // can feel sluggish if not going all the way back to 0.0 prevented
       // a subsequent pull-to-refresh from starting.
-        if (latestIndicatorBoxExtent >
-            widget.refreshTriggerPullDistance *
-                inactiveResetOverscrollFraction) {
+        if (latestIndicatorBoxExtent > widget.refreshTriggerPullDistance * inactiveResetOverscrollFraction) {
           return RefreshIndicatorMode.done;
         } else {
           nextState = RefreshIndicatorMode.inactive;

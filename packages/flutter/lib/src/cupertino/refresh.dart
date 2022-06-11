@@ -127,8 +127,7 @@ class CupertinoSliverRefreshControl extends BaseSliverRefreshControl {
     );
   }
 
-  Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState,
-      double radius, double percentageComplete) {
+  Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState, double radius, double percentageComplete) {
     switch (refreshState) {
       case RefreshIndicatorMode.drag:
         // While we're dragging, we draw individual ticks of the spinner while simultaneously
