@@ -1948,9 +1948,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         );
       }
     }
-    if (widget.selectionEnabled && pasteEnabled
-        && TextSelectionToolbarButtonDatasBuilder.canPaste(this)) {
-      clipboardStatus?.update();
+    if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null
+        && TextSelectionToolbarButtonDatasBuilder.canPaste(this, clipboardStatus!.value)) {
+      clipboardStatus!.update();
     }
   }
 
@@ -3192,7 +3192,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && pasteEnabled
         && _hasFocus
-        && TextSelectionToolbarButtonDatasBuilder.canPaste(this)
+        && TextSelectionToolbarButtonDatasBuilder.canPaste(
+          this,
+          clipboardStatus?.value ?? ClipboardStatus.pasteable,
+        )
         && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
       ? () => pasteText(SelectionChangedCause.toolbar)
       : null;

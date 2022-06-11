@@ -303,8 +303,10 @@ class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
   }
 
   /// Returns true if the given [EditableTextState] supports paste.
-  static bool canPaste(EditableTextState editableTextState) {
-    return !editableTextState.widget.readOnly;
+  static bool canPaste(EditableTextState editableTextState, ClipboardStatus clipboardStatus) {
+    print('justin canpaste? $clipboardStatus');
+    return !editableTextState.widget.readOnly
+        && clipboardStatus == ClipboardStatus.pasteable;
   }
 
   /// Returns true if the given [EditableTextState] supports select all.
@@ -338,8 +340,6 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
   bool get _cutEnabled => TextSelectionToolbarButtonDatasBuilder.canCut(widget.editableTextState);
 
   bool get _copyEnabled => TextSelectionToolbarButtonDatasBuilder.canCopy(widget.editableTextState);
-
-  bool get _pasteEnabled => TextSelectionToolbarButtonDatasBuilder.canPaste(widget.editableTextState);
 
   bool get _selectAllEnabled => TextSelectionToolbarButtonDatasBuilder.canSelectAll(widget.editableTextState);
 
@@ -378,13 +378,17 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
     return _ClipboardStatusBuilder(
       clipboardStatusNotifier: widget.editableTextState.clipboardStatus,
       builder: (BuildContext context, ClipboardStatus clipboardStatus) {
+        final bool pasteEnabled = TextSelectionToolbarButtonDatasBuilder.canPaste(
+          widget.editableTextState,
+          clipboardStatus,
+        );
         // If there are no buttons to be shown, don't render anything.
-        if (!_cutEnabled && !_copyEnabled && !_pasteEnabled && !_selectAllEnabled) {
+        if (!_cutEnabled && !_copyEnabled && !pasteEnabled && !_selectAllEnabled) {
           return const SizedBox.shrink();
         }
         // If the paste button is enabled, don't render anything until the state of
         // the clipboard is known, since it's used to determine if paste is shown.
-        if (_pasteEnabled && clipboardStatus == ClipboardStatus.unknown) {
+        if (pasteEnabled && clipboardStatus == ClipboardStatus.unknown) {
           return const SizedBox.shrink();
         }
 
@@ -402,7 +406,7 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
               onPressed: _handleCopy,
               type: DefaultContextualMenuButtonType.copy,
             ),
-          if (_pasteEnabled
+          if (pasteEnabled
               && clipboardStatus == ClipboardStatus.pasteable)
             ContextualMenuButtonData(
               onPressed: _handlePaste,

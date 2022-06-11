@@ -11317,6 +11317,7 @@ void main() {
     final Offset midBlah2 = textOffsetToPosition(tester, 8);
 
     // Right click the second word.
+    print('justin do the right click');
     final TestGesture gesture = await tester.startGesture(
       midBlah2,
       kind: PointerDeviceKind.mouse,
@@ -11326,6 +11327,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
+    print('justin check if paste is there.  It should be.');
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
