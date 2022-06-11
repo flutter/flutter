@@ -417,7 +417,7 @@ class FlutterDevice {
       globals.printError(message);
       return 1;
     }
-    devFSWriter = device!.createDevFSWriter(package!, userIdentifier!);
+    devFSWriter = device!.createDevFSWriter(package, userIdentifier);
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{
       'multidex': hotRunner.multidexEnabled,
@@ -466,7 +466,7 @@ class FlutterDevice {
       buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
     );
-    devFSWriter = device!.createDevFSWriter(package!, userIdentifier!);
+    devFSWriter = device!.createDevFSWriter(package, userIdentifier);
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
