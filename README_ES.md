@@ -14,8 +14,7 @@
 
 Flutter es el SDK de Google para crear interfaces de usuario atractivas y rápidas para dispositivos móviles, web y de escritorio a partir de una única base de código. Flutter funciona con código existente, lo utilizan desarrolladores y organizaciones de todo el mundo, es gratuito y de código abierto.
 
-## Documentación 
-#### [Inglés](README.md)
+## Documentación [Inglés](README.md)
 
 * [Instalar Flutter](https://flutter.dev/get-started/)
 * [Flutter documentación](https://flutter.dev/docs)
