@@ -112,7 +112,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addFlag('trace-systrace',
         negatable: false,
         help: 'Enable tracing to the system tracer. This is only useful on '
-              'platforms where such a tracer is available (Android and Fuchsia).',
+              'platforms where such a tracer is available (Android, iOS, '
+              'macOS and Fuchsia).',
       )
       ..addFlag('trace-skia',
         negatable: false,
@@ -715,6 +716,10 @@ class RunCommand extends RunCommandBase {
         throwToolExit('Lost connection to device.');
       }
       rethrow;
+    } finally {
+      // However we exited from the runner, ensure the terminal has line mode
+      // and echo mode enabled before we return the user to the shell.
+      globals.terminal.singleCharMode = false;
     }
     return FlutterCommandResult(
       ExitStatus.success,

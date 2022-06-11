@@ -295,7 +295,7 @@ typedef ChildIndexGetter = int? Function(Key key);
 /// {@end-tool}
 ///
 /// In certain cases, only a subset of child widgets should be annotated
-/// with a semantic index. For example, in [new ListView.separated()] the
+/// with a semantic index. For example, in [ListView.separated()] the
 /// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
@@ -375,6 +375,11 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Should return null if asked to build a widget with a greater index than
   /// exists.
   ///
+  /// May result in an infinite loop or run out of memory if [childCount] is null
+  /// and the [builder] always provides a zero-size widget (such as `Container()`
+  /// or `SizedBox.shrink()`). If possible, provide children with non-zero size,
+  /// return null from [builder], or set a [childCount].
+  ///
   /// The delegate wraps the children returned by this builder in
   /// [RepaintBoundary] widgets.
   final NullableIndexedWidgetBuilder builder;
@@ -383,6 +388,11 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   ///
   /// If null, the number of children is determined by the least index for which
   /// [builder] returns null.
+  ///
+  /// May result in an infinite loop or run out of memory if [childCount] is null
+  /// and the [builder] always provides a zero-size widget (such as `Container()`
+  /// or `SizedBox.shrink()`). If possible, provide children with non-zero size,
+  /// return null from [builder], or set a [childCount].
   final int? childCount;
 
   /// Whether to wrap each child in an [AutomaticKeepAlive].
@@ -541,7 +551,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// second delegate should offset its children by 10.
 ///
 /// In certain cases, only a subset of child widgets should be annotated
-/// with a semantic index. For example, in [new ListView.separated()] the
+/// with a semantic index. For example, in [ListView.separated()] the
 /// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
