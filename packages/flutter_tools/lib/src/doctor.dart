@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/temp_directory_validator.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -35,6 +34,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'reporting/reporting.dart';
+import 'temp_directory_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
