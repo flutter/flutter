@@ -661,6 +661,16 @@ bool PlatformView::HandleFlutterTextInputChannelPlatformMessage(
     current_text_input_client_ = 0;
     last_text_state_ = nullptr;
     DeactivateIme();
+  } else if (method->value == "TextInput.setCaretRect" ||
+             method->value == "TextInput.setEditableSizeAndTransform" ||
+             method->value == "TextInput.setMarkedTextRect" ||
+             method->value == "TextInput.setStyle") {
+    // We don't have these methods implemented and they get
+    // sent a lot during text input, so we create an empty case for them
+    // here to avoid "Unknown flutter/textinput method TextInput.*"
+    // log spam.
+    //
+    // TODO(fxb/101619): We should implement these.
   } else {
     FML_LOG(ERROR) << "Unknown " << message->channel() << " method "
                    << method->value.GetString();
