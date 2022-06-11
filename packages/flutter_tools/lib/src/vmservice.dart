@@ -269,7 +269,7 @@ Future<vm_service.VmService> setUpVmService(
       if (filename == null) {
         return <String, Object>{
           'result': <String, Object>{
-            'type': 'Failure',
+            'type': 'Success',
           },
         };
       }
