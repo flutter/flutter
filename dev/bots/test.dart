@@ -1625,7 +1625,6 @@ Future<void> _dartRunTest(String workingDirectory, {
   bool includeLocalEngineEnv = false,
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
-  bool unsoundNullSafety = false,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
