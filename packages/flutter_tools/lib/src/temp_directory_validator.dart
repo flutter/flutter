@@ -5,10 +5,7 @@
 import 'dart:async';
 
 import 'base/file_system.dart';
-import 'base/io.dart';
-import 'base/platform.dart';
 import 'doctor_validator.dart';
-import 'features.dart';
 
 class TempDirectoryValidator extends DoctorValidator {
   TempDirectoryValidator({
@@ -23,13 +20,12 @@ class TempDirectoryValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
+    if (!_fileSystem.systemTempDirectory.existsSync()) {
+      messages.add(const ValidationMessage('Temp directory missing'));
+      return ValidationResult(ValidationType.missing, messages);
+    }
 
-
-    return ValidationResult(
-      availabilityResults.length == _requiredHosts.length
-          ? ValidationType.notAvailable
-          : ValidationType.partial,
-      messages,
-    );
+    messages.add(const ValidationMessage('Valid temp directory'));
+    return ValidationResult(ValidationType.installed, messages);
   }
 }
