@@ -143,9 +143,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         featureFlags: featureFlags,
         httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
-      //TempDirectoryValidator(
-      //  globals.fs
-      //),
+      TempDirectoryValidator(
+        fileSystem: globals.fs
+      ),
     ];
     return _validators!;
   }

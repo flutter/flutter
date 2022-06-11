@@ -20,12 +20,15 @@ class TempDirectoryValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    if (!_fileSystem.systemTempDirectory.existsSync()) {
-      messages.add(const ValidationMessage('Temp directory missing'));
+    try {
+      final Directory tempDir = tempDirectory;
+      messages.add(ValidationMessage('Valid temporary directory at: ${tempDir.path}'));
+      return ValidationResult(ValidationType.installed, messages);
+    } on FileSystemException catch (e){
+      messages.add(ValidationMessage.hint('Try creating the directory: ${e.path}'));
       return ValidationResult(ValidationType.missing, messages);
     }
-
-    messages.add(const ValidationMessage('Valid temp directory'));
-    return ValidationResult(ValidationType.installed, messages);
   }
+
+  Directory get tempDirectory => _fileSystem.systemTempDirectory;
 }
