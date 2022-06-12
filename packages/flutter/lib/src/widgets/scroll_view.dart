@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -1232,31 +1230,14 @@ class ListView extends BoxScrollView {
        assert(itemCount != null && itemCount >= 0),
        itemExtent = null,
        prototypeItem = null,
-       childrenDelegate = SliverChildBuilderDelegate(
-         (BuildContext context, int index) {
-           final int itemIndex = index ~/ 2;
-           final Widget widget;
-           if (index.isEven) {
-             widget = itemBuilder(context, itemIndex);
-           } else {
-             widget = separatorBuilder(context, itemIndex);
-             assert(() {
-               if (widget == null) {
-                 throw FlutterError('separatorBuilder cannot return null.');
-               }
-               return true;
-             }());
-           }
-           return widget;
-         },
+       childrenDelegate = SeparatedSliverChildBuilderDelegate(
          findChildIndexCallback: findChildIndexCallback,
-         childCount: _computeActualChildCount(itemCount),
+         itemCount: itemCount,
+         itemBuilder: itemBuilder,
+         separatorBuilder: separatorBuilder,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-         semanticIndexCallback: (Widget _, int index) {
-           return index.isEven ? index ~/ 2 : null;
-         },
        ),
        super(
          semanticChildCount: itemCount,
@@ -1439,11 +1420,6 @@ class ListView extends BoxScrollView {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
-  }
-
-  // Helper method to compute the actual child count for the separated constructor.
-  static int _computeActualChildCount(int itemCount) {
-    return math.max(0, itemCount * 2 - 1);
   }
 }
 
