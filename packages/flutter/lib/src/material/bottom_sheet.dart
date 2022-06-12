@@ -36,7 +36,7 @@ typedef BottomSheetDragEndHandler = void Function(
 });
 
 /// A callback that builds the flexible constraints for a modal bottom sheet.
-/// 
+///
 /// This callback provides the incoming layout constraints
 /// so that a modal bottom sheet can provide its child with a flexible constraint.
 typedef BottomSheetConstraintBuilder = BoxConstraints Function(
@@ -670,12 +670,12 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
-/// 
-/// The [constraints] parameter can be used to provide a fixed constraint to the 
+///
+/// The [constraints] parameter can be used to provide a fixed constraint to the
 /// bottom sheet. If the constraint for the bottom sheet should be a flexible constraint
 /// consider using the [constraintsBuilder] instead.
-/// 
-/// If both `constraints` and `constraintsBuilder` are specified, 
+///
+/// If both `constraints` and `constraintsBuilder` are specified,
 /// the result of calling `constraintsBuilder` is used.
 ///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior]
