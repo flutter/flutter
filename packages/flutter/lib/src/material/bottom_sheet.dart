@@ -674,6 +674,9 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// The [constraints] parameter can be used to provide a fixed constraint to the 
 /// bottom sheet. If the constraint for the bottom sheet should be a flexible constraint
 /// consider using the [constraintsBuilder] instead.
+/// 
+/// If both `constraints` and `constraintsBuilder` are specified, 
+/// the result of calling `constraintsBuilder` is used.
 ///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior]
 /// and [transitionAnimationController] parameters can be passed in to customize
