@@ -586,13 +586,13 @@ class SeparatedSliverChildBuilderDelegate extends SliverChildBuilderDelegate {
   }): super(
     (BuildContext context, int index) {
       final int itemIndex = index ~/ 2;
-      
+
       if (index.isEven) {
         return itemBuilder(context, itemIndex);
       }
 
       final Widget widget = separatorBuilder(context, itemIndex);
-        
+
       assert(() {
         if (widget == null) {
           throw FlutterError('separatorBuilder cannot return null.');
