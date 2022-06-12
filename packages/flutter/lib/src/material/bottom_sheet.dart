@@ -35,6 +35,14 @@ typedef BottomSheetDragEndHandler = void Function(
   required bool isClosing,
 });
 
+/// A callback that builds the flexible constraints for a modal bottom sheet.
+/// 
+/// This callback provides the incoming layout constraints
+/// so that a modal bottom sheet can provide its child with a flexible constraint.
+typedef BottomSheetConstraintBuilder = BoxConstraints Function(
+  BoxConstraints constraints,
+);
+
 /// A Material Design bottom sheet.
 ///
 /// There are two kinds of bottom sheets in Material Design:
@@ -461,6 +469,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.shape,
     this.clipBehavior,
     this.constraints,
+    this.constraintsBuilder,
     this.modalBarrierColor,
     this.isDismissible = true,
     this.enableDrag = true,
@@ -480,6 +489,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final ShapeBorder? shape;
   final Clip? clipBehavior;
   final BoxConstraints? constraints;
+  final BottomSheetConstraintBuilder? constraintsBuilder;
   final Color? modalBarrierColor;
   final bool isDismissible;
   final bool enableDrag;
@@ -524,24 +534,49 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       removeTop: true,
       child: DisplayFeatureSubScreen(
         anchorPoint: anchorPoint,
-        child: Builder(
-          builder: (BuildContext context) {
-            final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-            return _ModalBottomSheet<T>(
-              route: this,
-              backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
-              elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
-              shape: shape,
-              clipBehavior: clipBehavior,
-              constraints: constraints,
-              isScrollControlled: isScrollControlled,
-              enableDrag: enableDrag,
-            );
-          },
-        ),
+        child: _wrapInBuilder(),
       ),
     );
+
     return capturedThemes.wrap(bottomSheet);
+  }
+
+  Widget _wrapInBuilder(){
+    if(constraintsBuilder != null){
+      return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints layoutConstraints){
+          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+
+          return _ModalBottomSheet<T>(
+            route: this,
+            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
+            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+            shape: shape,
+            clipBehavior: clipBehavior,
+            constraints: constraintsBuilder!(layoutConstraints),
+            isScrollControlled: isScrollControlled,
+            enableDrag: enableDrag,
+          );
+        },
+      );
+    }
+
+    return Builder(
+      builder: (BuildContext context){
+        final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+
+        return _ModalBottomSheet<T>(
+          route: this,
+          backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
+          elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+          shape: shape,
+          clipBehavior: clipBehavior,
+          constraints: constraints,
+          isScrollControlled: isScrollControlled,
+          enableDrag: enableDrag,
+        );
+      },
+    );
   }
 }
 
@@ -635,12 +670,15 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
+/// 
+/// The [constraints] parameter can be used to provide a fixed constraint to the 
+/// bottom sheet. If the constraint for the bottom sheet should be a flexible constraint
+/// consider using the [constraintsBuilder] instead.
 ///
-/// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
-/// [constraints] and [transitionAnimationController]
-/// parameters can be passed in to customize the appearance and behavior of
-/// modal bottom sheets (see the documentation for these on [BottomSheet]
-/// for more details).
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior]
+/// and [transitionAnimationController] parameters can be passed in to customize
+/// the appearance and behavior of modal bottom sheets
+/// (see the documentation for these on [BottomSheet] for more details).
 ///
 /// The [transitionAnimationController] controls the bottom sheet's entrance and
 /// exit animations. It's up to the owner of the controller to call
@@ -683,6 +721,7 @@ Future<T?> showModalBottomSheet<T>({
   ShapeBorder? shape,
   Clip? clipBehavior,
   BoxConstraints? constraints,
+  BottomSheetConstraintBuilder? constraintsBuilder,
   Color? barrierColor,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
@@ -712,6 +751,7 @@ Future<T?> showModalBottomSheet<T>({
     shape: shape,
     clipBehavior: clipBehavior,
     constraints: constraints,
+    constraintsBuilder: constraintsBuilder,
     isDismissible: isDismissible,
     modalBarrierColor: barrierColor,
     enableDrag: enableDrag,
