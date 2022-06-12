@@ -266,17 +266,19 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): const UndoTextIntent(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyZ, shift: true, meta: true): const RedoTextIntent(SelectionChangedCause.keyboard),
 
-    // These keys should go to the IME when a field is focused, not to other
+    // On desktop these keys should go to the IME when a field is focused, not to other
     // Shortcuts.
-    const SingleActivator(LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.enter): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.tab): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.tab, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    if (!kIsWeb) ...<ShortcutActivator, Intent>{
+      const SingleActivator(LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.enter): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.tab): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.tab, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    },
   };
 
   // There is no complete documentation of iOS shortcuts.
