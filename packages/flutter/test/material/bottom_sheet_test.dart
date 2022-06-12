@@ -1649,6 +1649,161 @@ void main() {
       );
     });
 
+    testWidgets(
+      'passing no constraintsBuilder falls back to using constraints for showModalBottomSheet',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return Center(
+                    child: ElevatedButton(
+                      child: const Text('Press me'),
+                      onPressed: () {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          builder: (BuildContext context) => const Text('BottomSheet'),
+                          constraints: const BoxConstraints(maxWidth: 100),
+                        );
+                      },
+                    ),
+                  );
+                }
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('BottomSheet'), findsNothing);
+        await tester.tap(find.text('Press me'));
+        await tester.pumpAndSettle();
+        expect(find.text('BottomSheet'), findsOneWidget);
+
+        expect(
+          tester.getRect(find.text('BottomSheet')),
+          const Rect.fromLTRB(350, 572, 450, 600),
+        );
+    });
+
+    testWidgets(
+      'passing only constraintsBuilder uses builder constraints for showModalBottomSheet',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return Center(
+                    child: ElevatedButton(
+                      child: const Text('Press me'),
+                      onPressed: () {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          builder: (BuildContext context) => const Text('BottomSheet'),
+                          constraintsBuilder: (BoxConstraints constraints) {
+                            return BoxConstraints(
+                              maxWidth: constraints.maxWidth / 2,
+                            );
+                          }
+                        );
+                      },
+                    ),
+                  );
+                }
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('BottomSheet'), findsNothing);
+        await tester.tap(find.text('Press me'));
+        await tester.pumpAndSettle();
+        expect(find.text('BottomSheet'), findsOneWidget);
+
+        expect(
+          tester.getRect(find.text('BottomSheet')),
+          const Rect.fromLTRB(323, 586, 477, 600),
+        );
+    });
+
+    testWidgets(
+      'passing both constraintsBuilder and constraints uses builder constraints for showModalBottomSheet',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return Center(
+                    child: ElevatedButton(
+                      child: const Text('Press me'),
+                      onPressed: () {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          builder: (BuildContext context) => const Text('BottomSheet'),
+                          constraints: const BoxConstraints(maxWidth: 100),
+                          constraintsBuilder: (BoxConstraints constraints) {
+                            return BoxConstraints(
+                              maxWidth: constraints.maxWidth / 2,
+                            );
+                          }
+                        );
+                      },
+                    ),
+                  );
+                }
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('BottomSheet'), findsNothing);
+        await tester.tap(find.text('Press me'));
+        await tester.pumpAndSettle();
+        expect(find.text('BottomSheet'), findsOneWidget);
+
+        expect(
+          tester.getRect(find.text('BottomSheet')),
+          const Rect.fromLTRB(323, 586, 477, 600),
+        );
+    });
+
+    testWidgets(
+      'passing neither constraintsBuilder or constraints uses no constraints for showModalBottomSheet',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return Center(
+                    child: ElevatedButton(
+                      child: const Text('Press me'),
+                      onPressed: () {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          builder: (BuildContext context) => const Text('BottomSheet'),
+                        );
+                      },
+                    ),
+                  );
+                }
+              ),
+            ),
+          ),
+        );
+
+        expect(find.text('BottomSheet'), findsNothing);
+        await tester.tap(find.text('Press me'));
+        await tester.pumpAndSettle();
+        expect(find.text('BottomSheet'), findsOneWidget);
+
+        expect(
+          tester.getRect(find.text('BottomSheet')),
+          const Rect.fromLTRB(0, 586, 800, 600),
+        );
+    });
   });
 }
 
