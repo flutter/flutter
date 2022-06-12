@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
@@ -271,24 +272,14 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.enter): const DoNothingAndStopPropagationTextIntent(),
-    // The following key combinations have no effect on text editing on this
-    // platform:
-    //   * End
-    //   * Home
-    //   * Control + shift? + end
-    //   * Control + shift? + home
-    //   * Control + shift? + Z
+    const SingleActivator(LogicalKeyboardKey.tab): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.tab, shift: true): const DoNothingAndStopPropagationTextIntent(),
   };
 
-  // There is no complete documentation of iOS shortcuts. Use mac shortcuts for
-  // now.
+  // There is no complete documentation of iOS shortcuts.
   static final Map<ShortcutActivator, Intent> _iOSShortcuts = <ShortcutActivator, Intent>{
     for (final bool pressShift in const <bool>[true, false])
       ...<SingleActivator, Intent>{
@@ -491,7 +482,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   }
 }
 
-final Map<String, Intent> _macosSelectorToIntent = <String, Intent>{
+final Map<String, Intent> _macOSSelectorToIntent = <String, Intent>{
   'deleteBackward:': const DeleteCharacterIntent(forward: false),
   'deleteWordBackward:': const DeleteToNextWordBoundaryIntent(forward: false),
   'deleteToBeginningOfLine:': const DeleteToLineBreakIntent(forward: false),
@@ -537,7 +528,7 @@ final Map<String, Intent> _macosSelectorToIntent = <String, Intent>{
   'scrollToBeginningOfDocument:': const ScrollToDocumentBoundaryIntent(forward: false),
   'scrollToEndOfDocument:': const ScrollToDocumentBoundaryIntent(forward: true),
 
-  // TODO(knopp): Page Up/Down intents are missing
+  // TODO(knopp): Page Up/Down intents are missing (https://github.com/flutter/flutter/pull/105497)
   'scrollPageUp:': const ScrollToDocumentBoundaryIntent(forward: false),
   'scrollPageDown:': const ScrollToDocumentBoundaryIntent(forward: true),
   'pageUpAndModifySelection': const ExpandSelectionToDocumentBoundaryIntent(forward: false),
@@ -545,10 +536,13 @@ final Map<String, Intent> _macosSelectorToIntent = <String, Intent>{
 
   // Escape when there's no IME selection
   'cancelOperation:': const DismissIntent(),
+  // Tab when there's no IME selection
+  'insertTab:': const NextFocusIntent(),
+  'insertBacktab:': const PreviousFocusIntent(),
 };
 
 /// Returns editing intent for selector from NSStandardKeyBindingResponding
 /// if the selector is recognized.
 Intent? intentForMacOSSelector(String selectorName) {
-  return _macosSelectorToIntent[selectorName];
+  return _macOSSelectorToIntent[selectorName];
 }
