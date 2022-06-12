@@ -333,6 +333,87 @@ void main() {
     expect(find.byKey(const Key('key0')), findsOneWidget);
     expect(find.byKey(const Key('key1')), findsOneWidget);
   });
+
+  testWidgets(
+    'SliverList with SeparatedSliverChildBuilderDelegate builds children correctly',
+    (WidgetTester tester) async {
+    const int itemCount = 2;
+
+    final List<String> callbackTracker = <String>[];
+
+    await tester.pumpWidget(
+      _buildSeparatedSliverList(
+        itemBuilder: (BuildContext context, int index){
+          callbackTracker.add('item $index');
+
+          return Text('item $index');
+        },
+        itemCount: itemCount,
+        separatorBuilder: (BuildContext context, int index) {
+          callbackTracker.add('divider $index');
+
+          return const Divider();
+        },
+      ),
+    );
+
+    expect(callbackTracker, equals(<String>['item 0', 'divider 0', 'item 1']));
+
+    callbackTracker.clear();
+  });
+
+  testWidgets(
+    'SliverList with SeparatedSliverChildBuilderDelegate and one child builds only the child',
+    (WidgetTester tester) async {
+      const int itemCount = 1;
+
+      final List<String> callbackTracker = <String>[];
+
+      await tester.pumpWidget(
+        _buildSeparatedSliverList(
+          itemBuilder: (BuildContext context, int index){
+            callbackTracker.add('item $index');
+
+            return Text('item $index');
+          },
+          itemCount: itemCount,
+          separatorBuilder: (BuildContext context, int index) {
+            callbackTracker.add('divider $index');
+
+            return const Divider();
+          },
+        ),
+      );     
+
+      expect(callbackTracker, equals(<String>['item 0']));
+    }
+  );
+
+  testWidgets(
+    'SliverList with SeparatedSliverChildBuilderDelegate and no children builds no children or separators',
+    (WidgetTester tester) async {
+      const int itemCount = 0;
+
+      final List<String> callbackTracker = <String>[];
+
+      await tester.pumpWidget(
+        _buildSeparatedSliverList(
+          itemBuilder: (BuildContext context, int index){
+            callbackTracker.add('item $index');
+
+            return Text('item $index');
+          },
+          itemCount: itemCount,
+          separatorBuilder: (BuildContext context, int index) {
+            callbackTracker.add('divider $index');
+
+            return const Divider();
+          },
+        ),
+      );
+  
+      expect(callbackTracker.isEmpty, true);
+  });
 }
 
 Widget _buildSliverListRenderWidgetChild(List<String> items) {
@@ -396,6 +477,30 @@ Widget _buildSliverList({
             ),
           ],
         ),
+      ),
+    ),
+  );
+}
+
+Widget _buildSeparatedSliverList({
+  required int itemCount,
+  required IndexedWidgetBuilder itemBuilder,
+  required IndexedWidgetBuilder separatorBuilder,
+}){
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: SizedBox(
+    height: 300,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverList(
+            delegate: SeparatedSliverChildBuilderDelegate(
+              itemBuilder: itemBuilder,
+              itemCount: itemCount,
+              separatorBuilder: separatorBuilder,
+            ),
+          ),
+        ],
       ),
     ),
   );
