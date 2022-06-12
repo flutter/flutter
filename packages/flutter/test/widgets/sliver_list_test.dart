@@ -383,7 +383,7 @@ void main() {
             return const Divider();
           },
         ),
-      );     
+      ); 
 
       expect(callbackTracker, equals(<String>['item 0']));
     }
@@ -411,7 +411,7 @@ void main() {
           },
         ),
       );
-  
+
       expect(callbackTracker.isEmpty, true);
   });
 }

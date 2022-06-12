@@ -515,19 +515,19 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 
 /// A delegate that supplies children for slivers using a builder callback,
 /// while also inserting separators between them.
-/// 
+///
 /// See also:
 ///
 ///  * [SliverChildBuilderDelegate], which is a delegate that uses a builder
 ///    callback to construct the children.
 ///  * [SliverList.separated], which is a [SliverList]
 ///    that uses this delegate to construct its children.
-/// 
+///
 /// {@tool snippet}
-/// 
+///
 /// This code sample shows how to use a `SliverList`
 /// that inserts separators between its children:
-/// 
+///
 /// ```dart
 /// CustomScrollView(
 ///   slivers: [
@@ -548,10 +548,10 @@ class SeparatedSliverChildBuilderDelegate extends SliverChildBuilderDelegate {
   /// Creates a delegate that supplies children for slivers using the given
   /// [itemBuilder] callback. The children are separated by separators,
   /// built using the given [separatorBuilder] callback.
-  /// 
+  ///
   /// The `itemBuilder` callback will be called with indices greater than
   /// or equal to zero and less than [itemCount].
-  /// 
+  ///
   /// Separators only appear between children built by the `itemBuilder`:
   /// The first separator appears after the first item
   /// and the last separator appears before the last item.
@@ -567,7 +567,7 @@ class SeparatedSliverChildBuilderDelegate extends SliverChildBuilderDelegate {
   /// providing a [findChildIndexCallback]. This allows the delegate to find the
   /// new index for a child that was previously located at a different index to
   /// attach the existing state to the [Widget] at its new location.
-  /// 
+  ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
