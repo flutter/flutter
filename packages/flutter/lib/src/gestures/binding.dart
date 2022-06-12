@@ -19,6 +19,16 @@ import 'pointer_router.dart';
 import 'pointer_signal_resolver.dart';
 import 'resampler.dart';
 
+export 'dart:ui' show Offset;
+
+export 'package:flutter/foundation.dart' show DiagnosticsNode, InformationCollector;
+
+export 'arena.dart' show GestureArenaManager;
+export 'events.dart' show PointerEvent;
+export 'hit_test.dart' show HitTestEntry, HitTestTarget, HitTestResult;
+export 'pointer_router.dart' show PointerRouter;
+export 'pointer_signal_resolver.dart' show PointerSignalResolver;
+
 typedef _HandleSampleTimeChangedCallback = void Function();
 
 /// Class that implements clock used for sampling.
