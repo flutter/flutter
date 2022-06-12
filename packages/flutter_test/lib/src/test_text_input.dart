@@ -135,6 +135,7 @@ class TestTextInput {
       case 'TextInput.clearClient':
         _client = null;
         _isVisible = false;
+        _keyHandler = null;
         onCleared?.call();
         break;
       case 'TextInput.setEditingState':
@@ -143,7 +144,7 @@ class TestTextInput {
       case 'TextInput.show':
         _isVisible = true;
         if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
-          _keyHandler ??= MacTestTextInputKeyHandler(_client ?? -1);
+          _keyHandler ??= MacOSTestTextInputKeyHandler(_client ?? -1);
         }
         break;
       case 'TextInput.hide':

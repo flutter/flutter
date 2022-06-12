@@ -17,9 +17,9 @@ abstract class TestTextInputKeyHandler {
 }
 
 /// MacOS specific key input handler
-class MacTestTextInputKeyHandler extends TestTextInputKeyHandler {
+class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
   /// Create a new macOS specific text input handler.
-  MacTestTextInputKeyHandler(this.client);
+  MacOSTestTextInputKeyHandler(this.client);
 
   /// ClientId of TextInput
   final int client;
@@ -34,7 +34,8 @@ class MacTestTextInputKeyHandler extends TestTextInputKeyHandler {
     );
   }
 
-  static final Map<SingleActivator, String> _activatorToSelector = <SingleActivator, String>{
+  // These combination must match NSStandardKeyBindingResponding
+  static final Map<SingleActivator, String> _macOSActivatorToSelector = <SingleActivator, String>{
     for (final bool pressShift in const <bool>[true, false]) ...<SingleActivator, String>{
       SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): 'deleteBackward:',
       SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: pressShift): 'deleteWordBackward:',
@@ -97,6 +98,12 @@ class MacTestTextInputKeyHandler extends TestTextInputKeyHandler {
     const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): 'pageUpAndModifySelection:',
     const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): 'pageDownAndModifySelection:',
     const SingleActivator(LogicalKeyboardKey.escape): 'cancelOperation:',
+    const SingleActivator(LogicalKeyboardKey.enter): 'insertNewline:',
+    const SingleActivator(LogicalKeyboardKey.enter, alt: true): 'insertNewlineIgnoringFieldEditor:',
+    const SingleActivator(LogicalKeyboardKey.enter, control: true): 'insertLineBreak:',
+    const SingleActivator(LogicalKeyboardKey.tab): 'insertTab:',
+    const SingleActivator(LogicalKeyboardKey.tab, alt: true): 'insertTabIgnoringFieldEditor:',
+    const SingleActivator(LogicalKeyboardKey.tab, shift: true): 'insertBacktab:',
   };
 
   @override
@@ -114,7 +121,7 @@ class MacTestTextInputKeyHandler extends TestTextInputKeyHandler {
         key == LogicalKeyboardKey.metaRight) {
       _meta = true;
     } else {
-      for (final MapEntry<SingleActivator, String> entry in _activatorToSelector.entries) {
+      for (final MapEntry<SingleActivator, String> entry in _macOSActivatorToSelector.entries) {
         final SingleActivator activator = entry.key;
         if (activator.triggers.first == key &&
             activator.shift == _shift &&
