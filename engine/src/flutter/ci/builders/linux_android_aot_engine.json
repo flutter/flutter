@@ -4,6 +4,7 @@
             "archives": [
                 {
                     "name": "android_profile",
+                    "type": "gcs",
                     "base_path": "out/android_profile/zip_archives/",
                     "include_paths": [
                         "out/android_profile/zip_archives/android-arm-profile/artifacts.zip",
@@ -43,6 +44,7 @@
             "archives": [
                 {
                     "name": "android_release",
+                    "type": "gcs",
                     "base_path": "out/android_release/zip_archives/",
                     "include_paths": [
                         "out/android_release/zip_archives/android-arm-release/artifacts.zip",
@@ -82,6 +84,7 @@
             "archives": [
                 {
                     "name": "android_release_arm64",
+                    "type": "gcs",
                     "base_path": "out/android_release_arm64/zip_archives/",
                     "include_paths": [
                         "out/android_release_arm64/zip_archives/android-arm64-release/artifacts.zip",
@@ -120,6 +123,7 @@
             "archives": [
                 {
                     "name": "android_profile_x64",
+                    "type": "gcs",
                     "base_path": "out/android_profile_x64/zip_archives/",
                     "include_paths": [
                         "out/android_profile_x64/zip_archives/android-x64-profile/artifacts.zip",
@@ -158,6 +162,7 @@
             "archives": [
                 {
                     "name": "android_release_x64",
+                    "type": "gcs",
                     "base_path": "out/android_release_x64/zip_archives/",
                     "include_paths": [
                         "out/android_release_x64/zip_archives/android-x64-release/artifacts.zip",
