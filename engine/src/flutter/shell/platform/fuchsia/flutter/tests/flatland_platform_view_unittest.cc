@@ -287,18 +287,11 @@ class MockParentViewportWatcher
     }
   }
 
-  void SetLayout(uint32_t logical_size_x,
-                 uint32_t logical_size_y,
-                 uint32_t pixel_scale_x = 1u,
-                 uint32_t pixel_scale_y = 1u) {
+  void SetLayout(uint32_t logical_size_x, uint32_t logical_size_y) {
     ::fuchsia::math::SizeU logical_size;
     logical_size.width = logical_size_x;
     logical_size.height = logical_size_y;
     layout_.set_logical_size(logical_size);
-    ::fuchsia::math::SizeU pixel_scale;
-    pixel_scale.width = pixel_scale_x;
-    pixel_scale.height = pixel_scale_y;
-    layout_.set_pixel_scale(pixel_scale);
 
     if (pending_callback_valid_) {
       pending_layout_callback_(std::move(layout_));
