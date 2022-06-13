@@ -36,6 +36,9 @@ class XcodeValidator extends DoctorValidator {
         if (xcodeVersionInfo.contains(',')) {
           xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
         }
+        if (_xcode.buildVersion != null) {
+          messages.add(ValidationMessage('Build ${_xcode.buildVersion}'));
+        }
       }
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;

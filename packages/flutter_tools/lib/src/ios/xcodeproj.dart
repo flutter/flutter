@@ -47,6 +47,7 @@ class XcodeProjectInterpreter {
     required FileSystem fileSystem,
     required Usage usage,
     Version? version,
+    String? build,
   }) : _platform = platform,
         _fileSystem = fileSystem,
         _logger = logger,
@@ -58,6 +59,7 @@ class XcodeProjectInterpreter {
           processManager: processManager,
         ),
         _version = version,
+        _build = build,
         _versionText = version?.toString(),
         _usage = usage;
 
@@ -70,6 +72,7 @@ class XcodeProjectInterpreter {
   factory XcodeProjectInterpreter.test({
     required ProcessManager processManager,
     Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
+    String? build = '13C100',
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -82,6 +85,7 @@ class XcodeProjectInterpreter {
       usage: TestUsage(),
       logger: BufferLogger.test(),
       version: version,
+      build: build,
     );
   }
 
@@ -93,6 +97,7 @@ class XcodeProjectInterpreter {
   final Usage _usage;
 
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
+  static final RegExp _buildRegex = RegExp(r'Build version ([a-zA-Z0-9]+)');
 
   void _updateVersion() {
     if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
@@ -108,16 +113,19 @@ class XcodeProjectInterpreter {
         }
         _versionText = result.stdout.trim().replaceAll('\n', ', ');
       }
-      final Match? match = _versionRegex.firstMatch(versionText!);
-      if (match == null) {
-        return;
+      final Match? matchVersion = _versionRegex.firstMatch(versionText!);
+      final Match? matchBuild = _buildRegex.firstMatch(versionText!);
+      if (matchVersion != null) {
+        final String version = matchVersion.group(1)!;
+        final List<String> components = version.split('.');
+        final int majorVersion = int.parse(components[0]);
+        final int minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
+        final int patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
+        _version = Version(majorVersion, minorVersion, patchVersion);
       }
-      final String version = match.group(1)!;
-      final List<String> components = version.split('.');
-      final int majorVersion = int.parse(components[0]);
-      final int minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
-      final int patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
-      _version = Version(majorVersion, minorVersion, patchVersion);
+      if (matchBuild != null) {
+        _build = matchBuild.group(1);
+      }
     } on ProcessException {
       // Ignored, leave values null.
     }
@@ -134,11 +142,19 @@ class XcodeProjectInterpreter {
   }
 
   Version? _version;
+  String? _build;
   Version? get version {
     if (_version == null) {
       _updateVersion();
     }
     return _version;
+  }
+
+  String? get build {
+    if (_build == null) {
+      _updateVersion();
+    }
+    return _build;
   }
 
   /// The `xcrun` Xcode command to run or locate development
