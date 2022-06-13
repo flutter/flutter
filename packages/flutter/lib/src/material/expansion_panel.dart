@@ -373,7 +373,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           onPressed: onTapIcon,
         ):InkWell(
         onTap:onTapIcon,
-        child:icon!!),
+        child:icon),
       );
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
