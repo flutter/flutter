@@ -282,7 +282,6 @@ class CupertinoTextField extends StatefulWidget {
     this.enabled,
     this.cursorWidth = 2.0,
     this.cursorHeight,
-    this.fixedCursorHeight = false,
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -440,7 +439,6 @@ class CupertinoTextField extends StatefulWidget {
     this.enabled,
     this.cursorWidth = 2.0,
     this.cursorHeight,
-    this.fixedCursorHeight = false,
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -736,9 +734,6 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.cursorHeight}
   final double? cursorHeight;
-
-  /// {@macro flutter.widgets.editableText.fixedCursorHeight}
-  final bool fixedCursorHeight;
 
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
@@ -1280,7 +1275,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             rendererIgnoresPointer: true,
             cursorWidth: widget.cursorWidth,
             cursorHeight: widget.cursorHeight,
-            fixedCursorHeight: widget.fixedCursorHeight,
             cursorRadius: widget.cursorRadius,
             cursorColor: cursorColor,
             cursorOpacityAnimates: true,

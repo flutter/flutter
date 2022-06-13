@@ -499,7 +499,6 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
     this.cursorHeight,
-    this.fixedCursorHeight = false,
     this.cursorRadius,
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
@@ -1110,12 +1109,6 @@ class EditableText extends StatefulWidget {
   /// If this property is null, [RenderEditable.preferredLineHeight] will be used.
   /// {@endtemplate}
   final double? cursorHeight;
-
-  /// {@template flutter.widgets.editableText.fixedCursorHeight}
-  ///
-  /// If cursor Height fix
-  /// {@endtemplate}
-  final bool fixedCursorHeight;
 
   /// {@template flutter.widgets.editableText.cursorRadius}
   /// How rounded the corners of the cursor should be.
@@ -3034,7 +3027,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                     rendererIgnoresPointer: widget.rendererIgnoresPointer,
                     cursorWidth: widget.cursorWidth,
                     cursorHeight: widget.cursorHeight,
-                    fixedCursorHeight: widget.fixedCursorHeight,
                     cursorRadius: widget.cursorRadius,
                     cursorOffset: widget.cursorOffset ?? Offset.zero,
                     selectionHeightStyle: widget.selectionHeightStyle,
@@ -3119,7 +3111,6 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
     this.cursorHeight,
-    this.fixedCursorHeight = false,
     this.cursorRadius,
     required this.cursorOffset,
     required this.paintCursorAboveText,
@@ -3180,7 +3171,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final double? cursorHeight;
-  final bool fixedCursorHeight;
   final Radius? cursorRadius;
   final Offset cursorOffset;
   final bool paintCursorAboveText;
@@ -3224,7 +3214,6 @@ class _Editable extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
       cursorHeight: cursorHeight,
-      fixedCursorHeight: fixedCursorHeight,
       cursorRadius: cursorRadius,
       cursorOffset: cursorOffset,
       paintCursorAboveText: paintCursorAboveText,
@@ -3269,7 +3258,6 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
       ..cursorHeight = cursorHeight
-      ..fixedCursorHeight = fixedCursorHeight
       ..cursorRadius = cursorRadius
       ..cursorOffset = cursorOffset
       ..selectionHeightStyle = selectionHeightStyle
