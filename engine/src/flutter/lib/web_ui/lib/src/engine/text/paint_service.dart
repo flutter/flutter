@@ -4,6 +4,7 @@
 
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import '../html/bitmap_canvas.dart';
 import '../html/painting.dart';
 import 'canvas_paragraph.dart';
