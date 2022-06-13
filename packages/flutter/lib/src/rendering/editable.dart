@@ -1082,8 +1082,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// {@endtemplate}
   bool get fixedCursorHeight => _fixedCursorHeight;
-  bool _fixedCursorHeight;
-
+  bool _fixedCursorHeight = false;
   set fixedCursorHeight(bool value) {
     if (_fixedCursorHeight == value) return;
     _fixedCursorHeight = value;
@@ -2960,10 +2959,8 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     caretRect = caretRect.shift(renderEditable._paintOffset);
 
     //If fixed cursorHeight, caretRect top bottom will fixed
-    if (renderEditable.fixedCursorHeight != null &&
-        renderEditable.fixedCursorHeight) {
-      caretRect = Rect.fromLTRB(caretRect.left, 0.0, caretRect.right,
-          renderEditable.cursorHeight + 2.0);
+    if (renderEditable.fixedCursorHeight != null && renderEditable.fixedCursorHeight) {
+      caretRect = Rect.fromLTRB(caretRect.left, 0.0, caretRect.right, renderEditable.cursorHeight + 2.0);
     }
 
     final Rect integralRect = caretRect.shift(renderEditable._snapToPhysicalPixel(caretRect.topLeft));
