@@ -7,6 +7,7 @@ import 'dart:io' as io;
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -14,6 +15,13 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+
+class LocalFileSystemFake extends LocalFileSystem {
+  LocalFileSystemFake.test({required super.signals}) : super.test();
+
+  @override
+  String get systemTempDirectoryPath => '/does_not_exists';
+}
 
 void main() {
   group('fsUtils', () {
@@ -173,6 +181,20 @@ void main() {
       await completer.future;
 
       expect(temp.existsSync(), isFalse);
+    });
+
+    testWithoutContext('throwToolExit when temp not found', () async {
+      final Signals signals = Signals.test();
+      final LocalFileSystemFake localFileSystem = LocalFileSystemFake.test(
+        signals: signals,
+      );
+
+      try {
+        localFileSystem.systemTempDirectory;
+        fail('expected tool exit');
+      } on ToolExit catch(e) {
+        expect(e.message, 'Temporary directory: /does_not_exists does not exists');
+      }
     });
   });
 }

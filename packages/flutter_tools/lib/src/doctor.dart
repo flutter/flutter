@@ -34,7 +34,6 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'reporting/reporting.dart';
-import 'temp_directory_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
@@ -142,9 +141,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         platform: globals.platform,
         featureFlags: featureFlags,
         httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
-      ),
-      TempDirectoryValidator(
-        fileSystem: globals.fs
       ),
     ];
     return _validators!;

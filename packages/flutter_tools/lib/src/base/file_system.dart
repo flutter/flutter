@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
+import 'common.dart';
 import 'io.dart';
 import 'platform.dart';
 import 'process.dart';
@@ -218,6 +219,9 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   @override
   Directory get systemTempDirectory {
     if (_systemTemp == null) {
+      if (!directory(systemTempDirectoryPath).existsSync()) {
+        throwToolExit('Temporary directory: $systemTempDirectoryPath does not exists');
+      }
       _systemTemp = super.systemTempDirectory.createTempSync('flutter_tools.')
         ..createSync(recursive: true);
       // Make sure that the temporary directory is cleaned up if the tool is
@@ -239,4 +243,8 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
     }
     return _systemTemp!;
   }
+
+  // This only exist because the memory file system does not support a systemTemp that does not exists #74042
+  @visibleForTesting
+  String get systemTempDirectoryPath => super.systemTempDirectory.path;
 }
