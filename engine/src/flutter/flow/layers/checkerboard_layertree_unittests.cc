@@ -59,6 +59,9 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerNotCheckBoard) {
            MockCanvas::DrawCall{
                1, MockCanvas::ClipRectData{layer_bounds, SkClipOp::kIntersect,
                                            MockCanvas::kSoft_ClipEdgeStyle}},
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+           MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkM44()}},
+#endif
            MockCanvas::DrawCall{
                1, MockCanvas::SaveLayerData{layer->paint_bounds(), clip_paint,
                                             nullptr, 2}},
@@ -150,6 +153,9 @@ TEST_F(CheckerBoardLayerTest, ClipPathSaveLayerNotCheckBoard) {
            MockCanvas::DrawCall{
                1, MockCanvas::ClipRectData{layer_bounds, SkClipOp::kIntersect,
                                            MockCanvas::kSoft_ClipEdgeStyle}},
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+           MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkM44()}},
+#endif
            MockCanvas::DrawCall{
                1,
                MockCanvas::SaveLayerData{child_bounds, clip_paint, nullptr, 2}},
@@ -232,6 +238,9 @@ TEST_F(CheckerBoardLayerTest, ClipRRectSaveLayerNotCheckBoard) {
            MockCanvas::DrawCall{
                1, MockCanvas::ClipRectData{layer_bounds, SkClipOp::kIntersect,
                                            MockCanvas::kSoft_ClipEdgeStyle}},
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+           MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkM44()}},
+#endif
            MockCanvas::DrawCall{
                1,
                MockCanvas::SaveLayerData{child_bounds, clip_paint, nullptr, 2}},
