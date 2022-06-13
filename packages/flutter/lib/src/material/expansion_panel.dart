@@ -77,7 +77,7 @@ class ExpansionPanel {
   /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
   ExpansionPanel({
     required this.headerBuilder,
-    required this.body,
+    required  this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
@@ -367,14 +367,13 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               : null
       Widget expandIconContainer = Container(
         margin: const EdgeInsetsDirectional.only(end: 8.0),
-        child: icon!=null?ExpandIcon(
+        child: icon==null?ExpandIcon(
           isExpanded: _isChildExpanded(index),
           padding: const EdgeInsets.all(16.0),
           onPressed: onTapIcon,
         ):InkWell(
         onTap:onTapIcon,
-        child:icon
-        ),
+        child:icon!!),
       );
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
