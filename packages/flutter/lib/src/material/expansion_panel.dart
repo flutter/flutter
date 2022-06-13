@@ -167,6 +167,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.animationDuration = kThemeAnimationDuration,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
+    this.icon = null,
+    this.showIcon = true
     this.elevation = 2,
   }) : assert(children != null),
        assert(animationDuration != null),
@@ -194,6 +196,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.initialOpenPanelValue,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
+    this.icon = null,
+    this.showIcon = true,
     this.elevation = 2,
   }) : assert(children != null),
        assert(animationDuration != null),
@@ -202,6 +206,11 @@ class ExpansionPanelList extends StatefulWidget {
   /// The children of the expansion panel list. They are laid out in a similar
   /// fashion to [ListBody].
   final List<ExpansionPanel> children;
+    
+  /// Icon for expanding the expandable panel
+  final Widget? icon;
+  /// Show icon for expanding the expandable panel
+  final bool showIcon;
 
   /// The callback that gets called whenever one of the expand/collapse buttons
   /// is pressed. The arguments passed to the callback are the index of the
@@ -352,15 +361,19 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         context,
         _isChildExpanded(index),
       );
-
+        
+      var onTapIcon = !child.canTapOnHeader
+              ? (bool isExpanded) => _handlePressed(isExpanded, index)
+              : null
       Widget expandIconContainer = Container(
         margin: const EdgeInsetsDirectional.only(end: 8.0),
-        child: ExpandIcon(
+        child: icon!=null?ExpandIcon(
           isExpanded: _isChildExpanded(index),
           padding: const EdgeInsets.all(16.0),
-          onPressed: !child.canTapOnHeader
-              ? (bool isExpanded) => _handlePressed(isExpanded, index)
-              : null,
+          onPressed: onTapIcon,
+        ):InkWell(
+        onTap:onTapIcon,
+        child:icon
         ),
       );
       if (!child.canTapOnHeader) {
@@ -384,6 +397,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               ),
             ),
           ),
+          if(showIcon)
           expandIconContainer,
         ],
       );
