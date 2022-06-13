@@ -155,7 +155,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
     const fml::TimeDelta offscreen_render_time =
         fml::TimePoint::Now() - start_time;
 
-    const SkIRect device_bounds =
+    const SkRect device_bounds =
         RasterCache::GetDeviceBounds(paint_bounds(), ctm);
     sk_sp<SkData> raster_data = offscreen_surface->GetRasterData(true);
     LayerSnapshotData snapshot_data(unique_id(), offscreen_render_time,
