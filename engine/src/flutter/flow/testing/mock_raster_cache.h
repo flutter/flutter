@@ -26,11 +26,13 @@ namespace testing {
  */
 class MockRasterCacheResult : public RasterCacheResult {
  public:
-  explicit MockRasterCacheResult(SkIRect device_rect);
+  explicit MockRasterCacheResult(SkRect device_rect);
 
   void draw(SkCanvas& canvas, const SkPaint* paint = nullptr) const override{};
 
-  SkISize image_dimensions() const override { return device_rect_.size(); };
+  SkISize image_dimensions() const override {
+    return SkSize::Make(device_rect_.width(), device_rect_.height()).toCeil();
+  };
 
   int64_t image_bytes() const override {
     return image_dimensions().area() *
@@ -38,7 +40,7 @@ class MockRasterCacheResult : public RasterCacheResult {
   }
 
  private:
-  SkIRect device_rect_;
+  SkRect device_rect_;
 };
 
 /**

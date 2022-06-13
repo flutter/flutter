@@ -26,7 +26,7 @@ class LayerSnapshotData {
   LayerSnapshotData(int64_t layer_unique_id,
                     const fml::TimeDelta& duration,
                     const sk_sp<SkData>& snapshot,
-                    const SkIRect& bounds);
+                    const SkRect& bounds);
 
   ~LayerSnapshotData() = default;
 
@@ -36,13 +36,13 @@ class LayerSnapshotData {
 
   sk_sp<SkData> GetSnapshot() const { return snapshot_; }
 
-  SkIRect GetBounds() const { return bounds_; }
+  SkRect GetBounds() const { return bounds_; }
 
  private:
   const int64_t layer_unique_id_;
   const fml::TimeDelta duration_;
   const sk_sp<SkData> snapshot_;
-  const SkIRect bounds_;
+  const SkRect bounds_;
 };
 
 /// Collects snapshots of layers during frame rasterization.
