@@ -695,7 +695,7 @@ bool? _ellipseFeatureDetected;
 
 /// Draws CanvasElement ellipse with fallback.
 void drawEllipse(
-    html.CanvasRenderingContext2D context,
+    DomCanvasRenderingContext2D context,
     double centerX,
     double centerY,
     double radiusX,

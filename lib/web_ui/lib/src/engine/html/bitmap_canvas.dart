@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -159,7 +158,7 @@ class BitmapCanvas extends EngineCanvas {
     _canvasPositionX = _bounds.left.floor() - kPaddingPixels;
     _canvasPositionY = _bounds.top.floor() - kPaddingPixels;
     _updateRootElementTransform();
-    _canvasPool.mount(rootElement as html.HtmlElement);
+    _canvasPool.mount(rootElement as DomHTMLElement);
     _setupInitialTransform();
   }
 
@@ -892,18 +891,18 @@ class BitmapCanvas extends EngineCanvas {
 
   void setCssFont(String cssFont) {
     if (cssFont != _cachedLastCssFont) {
-      final html.CanvasRenderingContext2D ctx = _canvasPool.context;
+      final DomCanvasRenderingContext2D ctx = _canvasPool.context;
       ctx.font = cssFont;
       _cachedLastCssFont = cssFont;
     }
   }
 
-  /// Measures the given [text] and returns a [html.TextMetrics] object that
+  /// Measures the given [text] and returns a [DomTextMetrics] object that
   /// contains information about the measurement.
   ///
   /// The text is measured using the font set by the most recent call to
   /// [setCssFont].
-  html.TextMetrics measureText(String text) {
+  DomTextMetrics measureText(String text) {
     return _canvasPool.context.measureText(text);
   }
 
@@ -912,7 +911,7 @@ class BitmapCanvas extends EngineCanvas {
   /// The text is drawn starting at coordinates ([x], [y]). It uses the current
   /// font set by the most recent call to [setCssFont].
   void drawText(String text, double x, double y, {ui.PaintingStyle? style, List<ui.Shadow>? shadows}) {
-    final html.CanvasRenderingContext2D ctx = _canvasPool.context;
+    final DomCanvasRenderingContext2D ctx = _canvasPool.context;
     if (shadows != null) {
       ctx.save();
       for (final ui.Shadow shadow in shadows) {
@@ -1013,8 +1012,7 @@ class BitmapCanvas extends EngineCanvas {
         'Linear/Radial/SweepGradient not supported yet');
     final Int32List? colors = vertices.colors;
     final ui.VertexMode mode = vertices.mode;
-    final DomCanvasRenderingContext2D ctx = _canvasPool.context as
-        DomCanvasRenderingContext2D;
+    final DomCanvasRenderingContext2D ctx = _canvasPool.context;
     if (colors == null &&
         paint.style != ui.PaintingStyle.fill &&
         paint.shader == null) {

@@ -130,7 +130,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Returns device pixel ratio returned by browser.
   static double get browserDevicePixelRatio {
-    final double? ratio = html.window.devicePixelRatio as double?;
+    final double? ratio = domWindow.devicePixelRatio as double?;
     // Guard against WebOS returning 0 and other browsers returning null.
     return (ratio == null || ratio == 0.0) ? 1.0 : ratio;
   }
@@ -429,7 +429,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             // TODO(ferhat): Find more appropriate defaults? Or noop when values are null?
             final String label = arguments['label'] as String? ?? '';
             final int primaryColor = arguments['primaryColor'] as int? ?? 0xFF000000;
-            html.document.title = label;
+            domDocument.title = label;
             setThemeColor(ui.Color(primaryColor));
             replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
@@ -455,7 +455,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       // Dispatched by the bindings to delay service worker initialization.
       case 'flutter/service_worker':
-        html.window.dispatchEvent(html.Event('flutter-first-frame'));
+        domWindow.dispatchEvent(createDomEvent('Event', 'flutter-first-frame'));
         return;
 
       case 'flutter/textinput':
@@ -736,7 +736,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   static List<ui.Locale> parseBrowserLanguages() {
     // TODO(yjbanov): find a solution for IE
-    final List<String>? languages = html.window.navigator.languages;
+    final List<String>? languages = domWindow.navigator.languages;
     if (languages == null || languages.isEmpty) {
       // To make it easier for the app code, let's not leave the locales list
       // empty. This way there's fewer corner cases for apps to handle.
@@ -799,26 +799,26 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// recalculate [textScaleFactor].
   ///
   /// Updates [textScaleFactor] with the new value.
-  html.MutationObserver? _fontSizeObserver;
+  DomMutationObserver? _fontSizeObserver;
 
   /// Set the callback function for updating [textScaleFactor] based on
   /// font-size changes in the browser's <html> element.
   void _addFontSizeObserver() {
     const String styleAttribute = 'style';
 
-    _fontSizeObserver = html.MutationObserver(
-        (List<dynamic> mutations, html.MutationObserver _) {
+    _fontSizeObserver = createDomMutationObserver(allowInterop(
+        (List<dynamic> mutations, DomMutationObserver _) {
       for (final dynamic mutation in mutations) {
-        final html.MutationRecord record = mutation as html.MutationRecord;
+        final DomMutationRecord record = mutation as DomMutationRecord;
         if (record.type == 'attributes' &&
             record.attributeName == styleAttribute) {
           final double newTextScaleFactor = findBrowserTextScaleFactor();
           _updateTextScaleFactor(newTextScaleFactor);
         }
       }
-    });
+    }));
     _fontSizeObserver!.observe(
-      html.document.documentElement!,
+      domDocument.documentElement!,
       attributes: true,
       attributeFilter: <String>[styleAttribute],
     );
@@ -887,13 +887,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   String? get systemFontFamily => configuration.systemFontFamily;
 
   /// Reference to css media query that indicates the user theme preference on the web.
-  final html.MediaQueryList _brightnessMediaQuery =
-      html.window.matchMedia('(prefers-color-scheme: dark)');
+  final DomMediaQueryList _brightnessMediaQuery =
+      domWindow.matchMedia('(prefers-color-scheme: dark)');
 
   /// A callback that is invoked whenever [_brightnessMediaQuery] changes value.
   ///
   /// Updates the [_platformBrightness] with the new user preference.
-  html.EventListener? _brightnessMediaQueryListener;
+  DomEventListener? _brightnessMediaQueryListener;
 
   /// Set the callback function for listening changes in [_brightnessMediaQuery] value.
   void _addBrightnessMediaQueryListener() {
@@ -901,12 +901,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         ? ui.Brightness.dark
         : ui.Brightness.light);
 
-    _brightnessMediaQueryListener = (html.Event event) {
-      final html.MediaQueryListEvent mqEvent =
-          event as html.MediaQueryListEvent;
+    _brightnessMediaQueryListener = allowInterop((DomEvent event) {
+      final DomMediaQueryListEvent mqEvent =
+          event as DomMediaQueryListEvent;
       _updatePlatformBrightness(
           mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-    };
+    });
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
     registerHotRestartListener(() {
       _removeBrightnessMediaQueryListener();
@@ -1184,6 +1184,7 @@ const double _defaultRootFontSize = 16.0;
 /// Finds the text scale factor of the browser by looking at the computed style
 /// of the browser's <html> element.
 double findBrowserTextScaleFactor() {
-  final num fontSize = parseFontSize(html.document.documentElement!) ?? _defaultRootFontSize;
+  final num fontSize = parseFontSize(domDocument.documentElement! as
+      html.Element) ?? _defaultRootFontSize;
   return fontSize / _defaultRootFontSize;
 }
