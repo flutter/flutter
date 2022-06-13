@@ -484,67 +484,66 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   }
 }
 
-final Map<String, Intent> _macOSSelectorToIntent = <String, Intent>{
-  'deleteBackward:': const DeleteCharacterIntent(forward: false),
-  'deleteWordBackward:': const DeleteToNextWordBoundaryIntent(forward: false),
-  'deleteToBeginningOfLine:': const DeleteToLineBreakIntent(forward: false),
-  'deleteForward:': const DeleteCharacterIntent(forward: true),
-  'deleteWordForward:': const DeleteToNextWordBoundaryIntent(forward: true),
-  'deleteToEndOfLine:': const DeleteToLineBreakIntent(forward: true),
-
-  'moveLeft:': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
-  'moveRight:': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
-  'moveForward:': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
-  'moveBackward:': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
-
-  'moveUp:': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
-  'moveDown:': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
-
-  'moveLeftAndModifySelection:': const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
-  'moveRightAndModifySelection:': const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
-  'moveUpAndModifySelection:': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
-  'moveDownAndModifySelection:': const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
-
-  'moveWordLeft:': const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
-  'moveWordRight:': const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
-  'moveToBeginningOfParagraph:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-  'moveToEndOfParagraph:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-
-  'moveWordLeftAndModifySelection:': const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
-  'moveWordRightAndModifySelection:': const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-  'moveParagraphBackwardAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
-  'moveParagraphForwardAndModifySelection:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
-
-  'moveToLeftEndOfLine:': const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-  'moveToRightEndOfLine:': const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-  'moveToBeginningOfDocument:': const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
-  'moveToEndOfDocument:': const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
-
-  'moveToLeftEndOfLineAndModifySelection:': const ExpandSelectionToLineBreakIntent(forward: false),
-  'moveToRightEndOfLineAndModifySelection:': const ExpandSelectionToLineBreakIntent(forward: true),
-  'moveToBeginningOfDocumentAndModifySelection:': const ExpandSelectionToDocumentBoundaryIntent(forward: false),
-  'moveToEndOfDocumentAndModifySelection:': const ExpandSelectionToDocumentBoundaryIntent(forward: true),
-
-  'transpose:': const TransposeCharactersIntent(),
-
-  'scrollToBeginningOfDocument:': const ScrollToDocumentBoundaryIntent(forward: false),
-  'scrollToEndOfDocument:': const ScrollToDocumentBoundaryIntent(forward: true),
-
-  // TODO(knopp): Page Up/Down intents are missing (https://github.com/flutter/flutter/pull/105497)
-  'scrollPageUp:': const ScrollToDocumentBoundaryIntent(forward: false),
-  'scrollPageDown:': const ScrollToDocumentBoundaryIntent(forward: true),
-  'pageUpAndModifySelection': const ExpandSelectionToDocumentBoundaryIntent(forward: false),
-  'pageDownAndModifySelection:': const ExpandSelectionToDocumentBoundaryIntent(forward: true),
-
-  // Escape when there's no IME selection
-  'cancelOperation:': const DismissIntent(),
-  // Tab when there's no IME selection
-  'insertTab:': const NextFocusIntent(),
-  'insertBacktab:': const PreviousFocusIntent(),
-};
-
 /// Returns editing intent for selector from NSStandardKeyBindingResponding
 /// if the selector is recognized.
 Intent? intentForMacOSSelector(String selectorName) {
-  return _macOSSelectorToIntent[selectorName];
+  const Map<String, Intent> selectorToIntent = <String, Intent>{
+    'deleteBackward:': DeleteCharacterIntent(forward: false),
+    'deleteWordBackward:': DeleteToNextWordBoundaryIntent(forward: false),
+    'deleteToBeginningOfLine:': DeleteToLineBreakIntent(forward: false),
+    'deleteForward:': DeleteCharacterIntent(forward: true),
+    'deleteWordForward:': DeleteToNextWordBoundaryIntent(forward: true),
+    'deleteToEndOfLine:': DeleteToLineBreakIntent(forward: true),
+
+    'moveLeft:': ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+    'moveRight:': ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    'moveForward:': ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    'moveBackward:': ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+
+    'moveUp:': ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    'moveDown:': ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+
+    'moveLeftAndModifySelection:': ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
+    'moveRightAndModifySelection:': ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
+    'moveUpAndModifySelection:': ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    'moveDownAndModifySelection:': ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+
+    'moveWordLeft:': ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
+    'moveWordRight:': ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
+    'moveToBeginningOfParagraph:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    'moveToEndOfParagraph:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+
+    'moveWordLeftAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
+    'moveWordRightAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
+    'moveParagraphBackwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
+    'moveParagraphForwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
+
+    'moveToLeftEndOfLine:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    'moveToRightEndOfLine:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    'moveToBeginningOfDocument:': ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    'moveToEndOfDocument:': ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+
+    'moveToLeftEndOfLineAndModifySelection:': ExpandSelectionToLineBreakIntent(forward: false),
+    'moveToRightEndOfLineAndModifySelection:': ExpandSelectionToLineBreakIntent(forward: true),
+    'moveToBeginningOfDocumentAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: false),
+    'moveToEndOfDocumentAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: true),
+
+    'transpose:': TransposeCharactersIntent(),
+
+    'scrollToBeginningOfDocument:': ScrollToDocumentBoundaryIntent(forward: false),
+    'scrollToEndOfDocument:': ScrollToDocumentBoundaryIntent(forward: true),
+
+    // TODO(knopp): Page Up/Down intents are missing (https://github.com/flutter/flutter/pull/105497)
+    'scrollPageUp:': ScrollToDocumentBoundaryIntent(forward: false),
+    'scrollPageDown:': ScrollToDocumentBoundaryIntent(forward: true),
+    'pageUpAndModifySelection': ExpandSelectionToDocumentBoundaryIntent(forward: false),
+    'pageDownAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: true),
+
+    // Escape when there's no IME selection
+    'cancelOperation:': DismissIntent(),
+    // Tab when there's no IME selection
+    'insertTab:': NextFocusIntent(),
+    'insertBacktab:': PreviousFocusIntent(),
+  };
+  return selectorToIntent[selectorName];
 }
