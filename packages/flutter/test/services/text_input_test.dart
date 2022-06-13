@@ -384,16 +384,19 @@ void main() {
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
-      expect(client.latestSelector, isNull);
+      expect(client.performedSelectors, isEmpty);
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          'selectorName',
+          <dynamic>[
+            'selector1',
+            'selector2',
+          ]
         ],
-        'method': 'TextInputClient.performSelector',
+        'method': 'TextInputClient.performSelectors',
       });
       await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
@@ -402,7 +405,7 @@ void main() {
       );
 
       expect(client.latestMethodCall, 'performSelector');
-      expect(client.latestSelector, 'selectorName');
+      expect(client.performedSelectors, <dynamic>['selector1', 'selector2']);
     });
 
     test('TextInputClient performPrivateCommand method is called', () async {
@@ -730,7 +733,7 @@ class FakeTextInputClient with TextInputClient {
   FakeTextInputClient(this.currentTextEditingValue);
 
   String latestMethodCall = '';
-  String? latestSelector;
+  final List<String> performedSelectors = <String>[];
 
   @override
   TextEditingValue currentTextEditingValue;
@@ -788,6 +791,6 @@ class FakeTextInputClient with TextInputClient {
   @override
   void performSelector(String selectorName) {
     latestMethodCall = 'performSelector';
-    latestSelector = selectorName;
+    performedSelectors.add(selectorName);
   }
 }

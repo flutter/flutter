@@ -24,86 +24,86 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
   /// ClientId of TextInput
   final int client;
 
-  Future<void> _sendSelector(String selector) async {
+  Future<void> _sendSelectors(List<String> selectors) async {
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
-        MethodCall('TextInputClient.performSelector', <dynamic>[client, selector]),
+        MethodCall('TextInputClient.performSelectors', <dynamic>[client, selectors]),
       ),
       (ByteData? data) {/* response from framework is discarded */},
     );
   }
 
   // These combinations must match NSStandardKeyBindingResponding.
-  static final Map<SingleActivator, String> _macOSActivatorToSelector = <SingleActivator, String>{
-    for (final bool pressShift in const <bool>[true, false]) ...<SingleActivator, String>{
-      SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): 'deleteBackward:',
-      SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: pressShift): 'deleteWordBackward:',
-      SingleActivator(LogicalKeyboardKey.backspace, meta: true, shift: pressShift): 'deleteToBeginningOfLine:',
-      SingleActivator(LogicalKeyboardKey.delete, shift: pressShift): 'deleteForward:',
-      SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: pressShift): 'deleteWordForward:',
-      SingleActivator(LogicalKeyboardKey.delete, meta: true, shift: pressShift): 'deleteToEndOfLine:',
+  static final Map<SingleActivator, List<String>> _macOSActivatorToSelectors = <SingleActivator, List<String>>{
+    for (final bool pressShift in const <bool>[true, false]) ...<SingleActivator, List<String>>{
+      SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): <String>['deleteBackward:'],
+      SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: pressShift): <String>['deleteWordBackward:'],
+      SingleActivator(LogicalKeyboardKey.backspace, meta: true, shift: pressShift): <String>['deleteToBeginningOfLine:'],
+      SingleActivator(LogicalKeyboardKey.delete, shift: pressShift): <String>['deleteForward:'],
+      SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: pressShift): <String>['deleteWordForward:'],
+      SingleActivator(LogicalKeyboardKey.delete, meta: true, shift: pressShift): <String>['deleteToEndOfLine:'],
     },
-    const SingleActivator(LogicalKeyboardKey.arrowLeft): 'moveLeft:',
-    const SingleActivator(LogicalKeyboardKey.arrowRight): 'moveRight:',
-    const SingleActivator(LogicalKeyboardKey.arrowUp): 'moveUp:',
-    const SingleActivator(LogicalKeyboardKey.arrowDown): 'moveDown:',
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): 'moveLeftAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): 'moveRightAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): 'moveUpAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): 'moveDownAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): 'moveWordLeft:',
-    const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): 'moveWordRight:',
-    const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): 'moveToBeginningOfParagraph:',
-    const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): 'moveToEndOfParagraph:',
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true, shift: true): 'moveWordLeftAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true, shift: true): 'moveWordRightAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true, shift: true): 'moveParagraphBackwardAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true, shift: true): 'moveParagraphForwardAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): 'moveToLeftEndOfLine:',
-    const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): 'moveToRightEndOfLine:',
-    const SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): 'moveToBeginningOfDocument:',
-    const SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): 'moveToEndOfDocument:',
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true, shift: true): 'moveToLeftEndOfLineAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true, shift: true): 'moveToRightEndOfLineAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowUp, meta: true, shift: true): 'moveToBeginningOfDocumentAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.arrowDown, meta: true, shift: true): 'moveToEndOfDocumentAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.keyA, control: true, shift: true): 'moveToBeginningOfParagraphAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.keyA, control: true): 'moveToBeginningOfParagraph:',
-    const SingleActivator(LogicalKeyboardKey.keyB, control: true, shift: true): 'moveBackwardAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.keyB, control: true): 'moveBackward:',
-    const SingleActivator(LogicalKeyboardKey.keyE, control: true, shift: true): 'moveToEndOfParagraphAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.keyE, control: true): 'moveToEndOfParagraph:',
-    const SingleActivator(LogicalKeyboardKey.keyF, control: true, shift: true): 'moveForwardAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.keyF, control: true): 'moveForward:',
-    const SingleActivator(LogicalKeyboardKey.keyK, control: true): 'deleteToEndOfParagraph',
-    const SingleActivator(LogicalKeyboardKey.keyL, control: true): 'centerSelectionInVisibleArea',
-    const SingleActivator(LogicalKeyboardKey.keyN, control: true): 'moveDown:',
-    const SingleActivator(LogicalKeyboardKey.keyN, control: true, shift: true): 'moveDownAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.keyO, control: true): 'insertNewlineIgnoringFieldEditor:',
-    const SingleActivator(LogicalKeyboardKey.keyP, control: true): 'moveUp:',
-    const SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true): 'moveUpAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.keyT, control: true): 'transpose:',
-    const SingleActivator(LogicalKeyboardKey.keyV, control: true): 'pageDown:',
-    const SingleActivator(LogicalKeyboardKey.keyV, control: true, shift: true): 'pageDownAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.keyY, control: true): 'yank:',
-    const SingleActivator(LogicalKeyboardKey.quoteSingle, control: true): 'insertSingleQuoteIgnoringSubstitution:',
-    const SingleActivator(LogicalKeyboardKey.quote, control: true): 'insertDoubleQuoteIgnoringSubstitution:',
-    const SingleActivator(LogicalKeyboardKey.home): 'scrollToBeginningOfDocument:',
-    const SingleActivator(LogicalKeyboardKey.end): 'scrollToEndOfDocument:',
-    const SingleActivator(LogicalKeyboardKey.home, shift: true): 'moveToBeginningOfDocumentAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.end, shift: true): 'moveToEndOfDocumentAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.pageUp): 'scrollPageUp:',
-    const SingleActivator(LogicalKeyboardKey.pageDown): 'scrollPageDown:',
-    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): 'pageUpAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): 'pageDownAndModifySelection:',
-    const SingleActivator(LogicalKeyboardKey.escape): 'cancelOperation:',
-    const SingleActivator(LogicalKeyboardKey.enter): 'insertNewline:',
-    const SingleActivator(LogicalKeyboardKey.enter, alt: true): 'insertNewlineIgnoringFieldEditor:',
-    const SingleActivator(LogicalKeyboardKey.enter, control: true): 'insertLineBreak:',
-    const SingleActivator(LogicalKeyboardKey.tab): 'insertTab:',
-    const SingleActivator(LogicalKeyboardKey.tab, alt: true): 'insertTabIgnoringFieldEditor:',
-    const SingleActivator(LogicalKeyboardKey.tab, shift: true): 'insertBacktab:',
+    const SingleActivator(LogicalKeyboardKey.arrowLeft): <String>['moveLeft:'],
+    const SingleActivator(LogicalKeyboardKey.arrowRight): <String>['moveRight:'],
+    const SingleActivator(LogicalKeyboardKey.arrowUp): <String>['moveUp:'],
+    const SingleActivator(LogicalKeyboardKey.arrowDown): <String>['moveDown:'],
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): <String>['moveLeftAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): <String>['moveRightAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): <String>['moveUpAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): <String>['moveDownAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): <String>['moveWordLeft:'],
+    const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): <String>['moveWordRight:'],
+    const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): <String>['moveToBeginningOfParagraph:'],
+    const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): <String>['moveToEndOfParagraph:'],
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true, shift: true): <String>['moveWordLeftAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true, shift: true): <String>['moveWordRightAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true, shift: true): <String>['moveParagraphBackwardAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true, shift: true): <String>['moveParagraphForwardAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): <String>['moveToLeftEndOfLine:'],
+    const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): <String>['moveToRightEndOfLine:'],
+    const SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): <String>['moveBackward:', 'moveToBeginningOfDocument:'],
+    const SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): <String>['moveForward:', 'moveToEndOfDocument:'],
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true, shift: true): <String>['moveToLeftEndOfLineAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true, shift: true): <String>['moveToRightEndOfLineAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowUp, meta: true, shift: true): <String>['moveToBeginningOfDocumentAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.arrowDown, meta: true, shift: true): <String>['moveToEndOfDocumentAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.keyA, control: true, shift: true): <String>['moveToBeginningOfParagraphAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.keyA, control: true): <String>['moveToBeginningOfParagraph:'],
+    const SingleActivator(LogicalKeyboardKey.keyB, control: true, shift: true): <String>['moveBackwardAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.keyB, control: true): <String>['moveBackward:'],
+    const SingleActivator(LogicalKeyboardKey.keyE, control: true, shift: true): <String>['moveToEndOfParagraphAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.keyE, control: true): <String>['moveToEndOfParagraph:'],
+    const SingleActivator(LogicalKeyboardKey.keyF, control: true, shift: true): <String>['moveForwardAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.keyF, control: true): <String>['moveForward:'],
+    const SingleActivator(LogicalKeyboardKey.keyK, control: true): <String>['deleteToEndOfParagraph'],
+    const SingleActivator(LogicalKeyboardKey.keyL, control: true): <String>['centerSelectionInVisibleArea'],
+    const SingleActivator(LogicalKeyboardKey.keyN, control: true): <String>['moveDown:'],
+    const SingleActivator(LogicalKeyboardKey.keyN, control: true, shift: true): <String>['moveDownAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.keyO, control: true): <String>['insertNewlineIgnoringFieldEditor:'],
+    const SingleActivator(LogicalKeyboardKey.keyP, control: true): <String>['moveUp:'],
+    const SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true): <String>['moveUpAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.keyT, control: true): <String>['transpose:'],
+    const SingleActivator(LogicalKeyboardKey.keyV, control: true): <String>['pageDown:'],
+    const SingleActivator(LogicalKeyboardKey.keyV, control: true, shift: true): <String>['pageDownAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.keyY, control: true): <String>['yank:'],
+    const SingleActivator(LogicalKeyboardKey.quoteSingle, control: true): <String>['insertSingleQuoteIgnoringSubstitution:'],
+    const SingleActivator(LogicalKeyboardKey.quote, control: true): <String>['insertDoubleQuoteIgnoringSubstitution:'],
+    const SingleActivator(LogicalKeyboardKey.home): <String>['scrollToBeginningOfDocument:'],
+    const SingleActivator(LogicalKeyboardKey.end): <String>['scrollToEndOfDocument:'],
+    const SingleActivator(LogicalKeyboardKey.home, shift: true): <String>['moveToBeginningOfDocumentAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.end, shift: true): <String>['moveToEndOfDocumentAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.pageUp): <String>['scrollPageUp:'],
+    const SingleActivator(LogicalKeyboardKey.pageDown): <String>['scrollPageDown:'],
+    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): <String>['pageUpAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): <String>['pageDownAndModifySelection:'],
+    const SingleActivator(LogicalKeyboardKey.escape): <String>['cancelOperation:'],
+    const SingleActivator(LogicalKeyboardKey.enter): <String>['insertNewline:'],
+    const SingleActivator(LogicalKeyboardKey.enter, alt: true): <String>['insertNewlineIgnoringFieldEditor:'],
+    const SingleActivator(LogicalKeyboardKey.enter, control: true): <String>['insertLineBreak:'],
+    const SingleActivator(LogicalKeyboardKey.tab): <String>['insertTab:'],
+    const SingleActivator(LogicalKeyboardKey.tab, alt: true): <String>['insertTabIgnoringFieldEditor:'],
+    const SingleActivator(LogicalKeyboardKey.tab, shift: true): <String>['insertBacktab:'],
   };
 
   @override
@@ -121,14 +121,13 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
         key == LogicalKeyboardKey.metaRight) {
       _meta = true;
     } else {
-      for (final MapEntry<SingleActivator, String> entry in _macOSActivatorToSelector.entries) {
+      for (final MapEntry<SingleActivator, List<String>> entry in _macOSActivatorToSelectors.entries) {
         final SingleActivator activator = entry.key;
         if (activator.triggers.first == key &&
             activator.shift == _shift &&
             activator.alt == _alt &&
             activator.meta == _meta) {
-          final String selector = entry.value;
-          await _sendSelector(selector);
+          await _sendSelectors(entry.value);
           return;
         }
       }

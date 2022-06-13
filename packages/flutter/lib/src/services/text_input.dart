@@ -1823,8 +1823,9 @@ class TextInput {
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
         break;
-      case 'TextInputClient.performSelector':
-        _currentConnection!._client.performSelector(args[1] as String);
+      case 'TextInputClient.performSelectors':
+        final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
+        selectors.forEach(_currentConnection!._client.performSelector);
         break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;

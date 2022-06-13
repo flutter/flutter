@@ -12567,7 +12567,7 @@ void main() {
     });
 
     testWidgets('macOS selectors work', (WidgetTester tester) async {
-      controller.text = 'test';
+      controller.text = 'test\nline2';
       controller.selection = TextSelection.collapsed(offset: controller.text.length);
 
       final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
@@ -12600,7 +12600,26 @@ void main() {
 
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3),
+        const TextSelection.collapsed(offset: 9),
+      );
+
+      key.currentState!.performSelector('moveToBeginningOfParagraph:');
+      await tester.pump();
+
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 5),
+      );
+
+      // These both need to be handled, first moves cursor to the end of previous
+      // paragraph, second moves to the beginning of paragraph.
+      key.currentState!.performSelector('moveBackward:');
+      key.currentState!.performSelector('moveToBeginningOfParagraph:');
+      await tester.pump();
+
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 0),
       );
     });
   });

@@ -4336,7 +4336,16 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     }
 
     final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
-    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
+
+    // textBoundary selection is only updated after rebuild; If the text value is same,
+    // use selection from state which is more recent. This is necessary on macOS
+    // where alt+up sends moveBackward: and `moveToBeginningOfParagraph:` selectors at
+    // the same time.
+    final TextSelection textBoundarySelection =
+        textBoundary.textEditingValue.text == state._value.text
+            ? state._value.selection
+            : textBoundary.textEditingValue.selection;
+
     if (!textBoundarySelection.isValid) {
       return null;
     }
