@@ -508,9 +508,10 @@ def to_gn_args(args):
       sys.exit(1)
     gn_args['enable_vulkan_validation_layers'] = True
 
-  # Enable pointer compression on 64-bit mobile targets.
-  if args.target_os in ['android', 'ios'
-                       ] and gn_args['target_cpu'] in ['x64', 'arm64']:
+  # Enable pointer compression on 64-bit mobile targets. iOS is excluded due to
+  # its inability to allocate address space without allocating memory.
+  if args.target_os in ['android'] and gn_args['target_cpu'] in ['x64', 'arm64'
+                                                                ]:
     gn_args['dart_use_compressed_pointers'] = True
 
   if args.fuchsia_target_api_level is not None:
