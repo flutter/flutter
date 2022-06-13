@@ -18,7 +18,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// A [Form] ancestor is not required. The [Form] simply makes it easier to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
-/// pass a [GlobalKey<FormFieldState>] to the constructor and use
+/// pass a `GlobalKey<FormFieldState>` (see [GlobalKey]) to the constructor and use
 /// [GlobalKey.currentState] to save or reset the form field.
 ///
 /// When a [controller] is specified, its [TextEditingController.text]
