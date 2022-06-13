@@ -469,6 +469,11 @@ TEST_F(ClipRectLayerTest, OpacityInheritanceSaveLayerPainting) {
       /* ClipRectLayer::Paint() */ {
         expected_builder.save();
         expected_builder.clipRect(clip_rect, SkClipOp::kIntersect, true);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+        /* ClipShapeLayer::Paint() Integer CTM */
+        expected_builder.transformReset();
+        expected_builder.transform(opacity_integer_transform);
+#endif
         expected_builder.setColor(opacity_alpha << 24);
         expected_builder.saveLayer(&children_bounds, true);
         /* child layer1 paint */ {

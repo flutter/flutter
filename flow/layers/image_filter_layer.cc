@@ -21,6 +21,11 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
     }
   }
 
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  context->SetTransform(
+      RasterCache::GetIntegralTransCTM(context->GetTransform()));
+#endif
+
   if (filter_) {
     auto filter = filter_->makeWithLocalMatrix(context->GetTransform());
     if (filter) {
@@ -62,13 +67,18 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
 
   set_paint_bounds(child_bounds);
 
+  SkMatrix child_matrix(matrix);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  child_matrix = RasterCache::GetIntegralTransCTM(child_matrix);
+#endif
+
   transformed_filter_ = nullptr;
   if (render_count_ >= kMinimumRendersBeforeCachingFilterLayer) {
     // We have rendered this same ImageFilterLayer object enough
     // times to consider its properties and children to be stable
     // from frame to frame so we try to cache the layer itself
     // for maximum performance.
-    TryToPrepareRasterCache(context, this, matrix,
+    TryToPrepareRasterCache(context, this, child_matrix,
                             RasterCacheLayerStrategy::kLayer);
   } else {
     // This ImageFilterLayer is not yet considered stable so we
@@ -83,7 +93,7 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
     // instances can do this operation on some transforms and some
     // (filters or transforms) cannot. We can only cache the children
     // and apply the filter on the fly if this operation succeeds.
-    transformed_filter_ = filter_->makeWithLocalMatrix(matrix);
+    transformed_filter_ = filter_->makeWithLocalMatrix(child_matrix);
     if (transformed_filter_) {
       // With a modified SkImageFilter we can now try to cache the
       // children to avoid their rendering costs if they remain
@@ -101,6 +111,11 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   AutoCachePaint cache_paint(context);
+
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  context.internal_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
+      context.leaf_nodes_canvas->getTotalMatrix()));
+#endif
 
   if (context.raster_cache) {
     if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
