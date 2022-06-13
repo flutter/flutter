@@ -844,22 +844,8 @@ import java.util.List;
         flutterEngine.getDartExecutor().notifyLowMemoryWarning();
         flutterEngine.getSystemChannel().sendMemoryPressureWarning();
       }
+      flutterEngine.getRenderer().onTrimMemory(level);
     }
-  }
-
-  /**
-   * Invoke this from {@link android.app.Activity#onLowMemory()}.
-   *
-   * <p>A {@code Fragment} host must have its containing {@code Activity} forward this call so that
-   * the {@code Fragment} can then invoke this method.
-   *
-   * <p>This method sends a "memory pressure warning" message to Flutter over the "system channel".
-   */
-  void onLowMemory() {
-    Log.v(TAG, "Forwarding onLowMemory() to FlutterEngine.");
-    ensureAlive();
-    flutterEngine.getDartExecutor().notifyLowMemoryWarning();
-    flutterEngine.getSystemChannel().sendMemoryPressureWarning();
   }
 
   /**
