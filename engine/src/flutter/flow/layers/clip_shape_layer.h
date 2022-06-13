@@ -31,6 +31,12 @@ class ClipShapeLayer : public ContainerLayer {
         context->MarkSubtreeDirty(context->GetOldLayerPaintRegion(old_layer));
       }
     }
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+    if (UsesSaveLayer()) {
+      context->SetTransform(
+          RasterCache::GetIntegralTransCTM(context->GetTransform()));
+    }
+#endif
     if (context->PushCullRect(clip_shape_bounds())) {
       DiffChildren(context, prev);
     }
@@ -61,7 +67,11 @@ class ClipShapeLayer : public ContainerLayer {
     if (UsesSaveLayer()) {
       context->subtree_can_inherit_opacity = true;
       if (render_count_ >= kMinimumRendersBeforeCachingLayer) {
-        TryToPrepareRasterCache(context, this, matrix,
+        SkMatrix child_matrix(matrix);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+        child_matrix = RasterCache::GetIntegralTransCTM(child_matrix);
+#endif
+        TryToPrepareRasterCache(context, this, child_matrix,
                                 RasterCacheLayerStrategy::kLayer);
       } else {
         render_count_++;
@@ -82,6 +92,11 @@ class ClipShapeLayer : public ContainerLayer {
       PaintChildren(context);
       return;
     }
+
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+    context.internal_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
+        context.leaf_nodes_canvas->getTotalMatrix()));
+#endif
 
     AutoCachePaint cache_paint(context);
     if (context.raster_cache &&
