@@ -530,10 +530,10 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 ///
 /// ```dart
 /// CustomScrollView(
-///   slivers: [
+///   slivers: <Widget>[
 ///     SliverList(
 ///       delegate: SeparatedSliverChildBuilderDelegate(
-///         (BuildContext context, int index){
+///         itemBuilder: (BuildContext context, int index){
 ///           return Text('item: $index');
 ///         },
 ///         itemCount: 10,
