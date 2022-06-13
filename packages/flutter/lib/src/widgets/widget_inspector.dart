@@ -1378,18 +1378,29 @@ mixin WidgetInspectorService {
     _isLocalCreationCache.clear();
   }
 
+  /// Add a list of directories that should be considered part of the local
+  /// project.
+  /// 
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project over widgets created from inside the framework.
   @protected
   void addPubRootDirectories(List<String> pubRootDirectories) {
     _pubRootDirectories ??= <String>[];
-    final pubSet = _pubRootDirectories!.toSet();
+    final Set<String> pubSet = _pubRootDirectories!.toSet();
     pubSet.addAll(pubRootDirectories
         .map<String>((String directory) => Uri.parse(directory).path));
     _pubRootDirectories = pubSet.toList();
-    // TODO: Mutex?
+    
+    // TODO: This feels like something that could benefit from a Mutex?
 
     _isLocalCreationCache.clear();
   }
 
+  /// Remove a list of directories that should no longer be considered part
+  /// of the local project.
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project over widgets created from inside the framework.
   @protected
   void removePubRootDirectories(List<String> pubRootDirectories) {
     if (_pubRootDirectories == null) {
@@ -1397,6 +1408,9 @@ mixin WidgetInspectorService {
     }
 
     _pubRootDirectories!.toSet().remove(pubRootDirectories);
+
+    // TODO: This feels like something that could benefit from a Mutex?
+    
     _isLocalCreationCache.clear();
   }
 
