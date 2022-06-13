@@ -4,10 +4,6 @@
 
 // @dart = 2.8
 
-// TODO(fujino): remove after fixing
-// https://github.com/flutter/flutter/issues/105924
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -149,12 +145,14 @@ void main() {
       MemoryFileSystem fs;
       Artifacts artifacts;
       TestUsage usage;
+      FakeAnsiTerminal fakeTerminal;
 
       setUpAll(() {
         Cache.disableLocking();
       });
 
       setUp(() {
+        fakeTerminal = FakeAnsiTerminal();
         artifacts = Artifacts.test();
         usage = TestUsage();
         fs = MemoryFileSystem.test();
@@ -433,6 +431,7 @@ void main() {
           })
         )));
       }, overrides: <Type, Generator>{
+        AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
         DeviceManager: () => mockDeviceManager,
