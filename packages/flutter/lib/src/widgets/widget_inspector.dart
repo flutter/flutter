@@ -1106,6 +1106,20 @@ mixin WidgetInspectorService {
         return null;
       },
     );
+    _registerServiceExtensionVarArgs(
+      name: 'addPubRootDirectories',
+      callback: (List<String> args) async {
+        addPubRootDirectories(args);
+        return null;
+      },
+    );
+    _registerServiceExtensionVarArgs(
+      name: 'removePubRootDirectories',
+      callback: (List<String> args) async {
+        removePubRootDirectories(args);
+        return null;
+      },
+    );
     _registerServiceExtensionWithArg(
       name: 'setSelectionById',
       callback: setSelectionById,
@@ -1361,6 +1375,28 @@ mixin WidgetInspectorService {
     _pubRootDirectories = pubRootDirectories
       .map<String>((String directory) => Uri.parse(directory).path)
       .toList();
+    _isLocalCreationCache.clear();
+  }
+
+  @protected
+  void addPubRootDirectories(List<String> pubRootDirectories) {
+    _pubRootDirectories ??= <String>[];
+    final pubSet = _pubRootDirectories!.toSet();
+    pubSet.addAll(pubRootDirectories
+        .map<String>((String directory) => Uri.parse(directory).path));
+    _pubRootDirectories = pubSet.toList();
+    // TODO: Mutex?
+
+    _isLocalCreationCache.clear();
+  }
+
+  @protected
+  void removePubRootDirectories(List<String> pubRootDirectories) {
+    if (_pubRootDirectories == null) {
+      return;
+    }
+
+    _pubRootDirectories!.toSet().remove(pubRootDirectories);
     _isLocalCreationCache.clear();
   }
 
