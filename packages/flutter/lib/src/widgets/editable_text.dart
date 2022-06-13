@@ -1182,7 +1182,7 @@ class EditableText extends StatefulWidget {
   ///
   /// If this property is null, [RenderEditable.preferredLineHeight] will be used.
   /// {@endtemplate}
-  final bool? fixedCursorHeight;
+  final bool fixedCursorHeight;
 
   /// {@template flutter.widgets.editableText.cursorRadius}
   /// How rounded the corners of the cursor should be.
