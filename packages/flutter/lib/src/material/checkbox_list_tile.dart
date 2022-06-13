@@ -299,7 +299,7 @@ class CheckboxListTile extends StatelessWidget {
   /// Whether the CheckboxListTile is interactive.
   ///
   /// If false, this list tile is styled with the disabled color from the
-  /// current [Theme] and the [onTap] callback is
+  /// current [Theme] and the [ListTile.onTap] callback is
   /// inoperative.
   final bool? enabled;
 
