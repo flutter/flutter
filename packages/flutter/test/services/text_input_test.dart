@@ -405,7 +405,7 @@ void main() {
       );
 
       expect(client.latestMethodCall, 'performSelector');
-      expect(client.performedSelectors, <dynamic>['selector1', 'selector2']);
+      expect(client.performedSelectors, <String>['selector1', 'selector2']);
     });
 
     test('TextInputClient performPrivateCommand method is called', () async {
