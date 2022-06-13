@@ -3169,16 +3169,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void performSelector(String selectorName) {
     final Intent? intent = intentForMacOSSelector(selectorName);
+
     if (intent != null) {
       final BuildContext? primaryContext = primaryFocus?.context;
       if (primaryContext != null) {
-        final Action<Intent>? action = Actions.maybeFind<Intent>(
-          primaryContext,
-          intent: intent,
-        );
-        if (action != null && action.isEnabled(intent)) {
-          Actions.of(primaryContext).invokeAction(action, intent, primaryContext);
-        }
+        Actions.invoke(primaryContext, intent);
       }
     }
   }
