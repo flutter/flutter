@@ -31,6 +31,13 @@ public interface TextureRegistry {
   @NonNull
   SurfaceTextureEntry registerSurfaceTexture(@NonNull SurfaceTexture surfaceTexture);
 
+  /**
+   * Callback invoked when memory is low.
+   *
+   * <p>Invoke this from {@link android.app.Activity#onTrimMemory(int)}.
+   */
+  default void onTrimMemory(int level) {}
+
   /** A registry entry for a managed SurfaceTexture. */
   interface SurfaceTextureEntry {
     /** @return The managed SurfaceTexture. */
@@ -45,6 +52,9 @@ public interface TextureRegistry {
 
     /** Set a listener that will be notified when the most recent image has been consumed. */
     default void setOnFrameConsumedListener(@Nullable OnFrameConsumedListener listener) {}
+
+    /** Set a listener that will be notified when a memory pressure warning was forward. */
+    default void setOnTrimMemoryListener(@Nullable OnTrimMemoryListener listener) {}
   }
 
   /** Listener invoked when the most recent image has been consumed. */
@@ -54,5 +64,11 @@ public interface TextureRegistry {
      * consumed.
      */
     void onFrameConsumed();
+  }
+
+  /** Listener invoked when a memory pressure warning was forward. */
+  interface OnTrimMemoryListener {
+    /** This method will be invoked when a memory pressure warning was forward. */
+    void onTrimMemory(int level);
   }
 }

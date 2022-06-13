@@ -981,19 +981,6 @@ public class FlutterFragment extends Fragment
   }
 
   /**
-   * Callback invoked when memory is low.
-   *
-   * <p>This implementation forwards a memory pressure warning to the running Flutter app.
-   */
-  @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    if (stillAttachedForEvent("onLowMemory")) {
-      delegate.onLowMemory();
-    }
-  }
-
-  /**
    * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
    * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
    * Flutter.
