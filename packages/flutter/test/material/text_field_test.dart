@@ -699,6 +699,7 @@ void main() {
     expect(textField.cursorWidth, 2.0);
     expect(textField.cursorHeight, null);
     expect(textField.cursorRadius, null);
+    expect(textField.fixedCursorHeight, false);
   });
 
   testWidgets('cursor has expected radius value', (WidgetTester tester) async {
@@ -9033,6 +9034,7 @@ void main() {
       enabled: false,
       cursorWidth: 1.0,
       cursorHeight: 1.0,
+      fixedCursorHeight: true,
       cursorRadius: Radius.zero,
       cursorColor: Color(0xff00ff00),
       keyboardAppearance: Brightness.dark,
@@ -9061,6 +9063,7 @@ void main() {
       'textDirection: ltr',
       'cursorWidth: 1.0',
       'cursorHeight: 1.0',
+      'fixedCursorHeight: true',
       'cursorRadius: Radius.circular(0.0)',
       'cursorColor: Color(0xff00ff00)',
       'keyboardAppearance: Brightness.dark',
