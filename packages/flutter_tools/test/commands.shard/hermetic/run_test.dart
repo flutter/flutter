@@ -4,6 +4,10 @@
 
 // @dart = 2.8
 
+// TODO(fujino): remove after fixing
+// https://github.com/flutter/flutter/issues/105924
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 
 import 'package:file/file.dart';
