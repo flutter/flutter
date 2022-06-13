@@ -255,6 +255,7 @@ class CupertinoTextField extends StatefulWidget {
     this.enabled,
     this.cursorWidth = 2.0,
     this.cursorHeight,
+    this.fixedCursorHeight = false,
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -415,6 +416,7 @@ class CupertinoTextField extends StatefulWidget {
     this.enabled,
     this.cursorWidth = 2.0,
     this.cursorHeight,
+    this.fixedCursorHeight = false,
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -708,6 +710,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorHeight}
   final double? cursorHeight;
 
+  /// {@macro flutter.widgets.editableText.fixedCursorHeight}
+  final bool fixedCursorHeight;
+
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
@@ -809,6 +814,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('fixedCursorHeight', fixedCursorHeight, defaultValue: false));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(createCupertinoColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
@@ -1267,6 +1273,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             rendererIgnoresPointer: true,
             cursorWidth: widget.cursorWidth,
             cursorHeight: widget.cursorHeight,
+            fixedCursorHeight: widget.fixedCursorHeight,
             cursorRadius: widget.cursorRadius,
             cursorColor: cursorColor,
             cursorOpacityAnimates: true,

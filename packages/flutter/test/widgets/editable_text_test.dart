@@ -258,6 +258,7 @@ void main() {
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
+    expect(editableText.fixedCursorHeight, false);
     expect(editableText.textHeightBehavior, isNull);
   });
 

@@ -532,6 +532,7 @@ class EditableText extends StatefulWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
     this.cursorHeight,
+    this.fixedCursorHeight = false,
     this.cursorRadius,
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
@@ -1175,6 +1176,13 @@ class EditableText extends StatefulWidget {
   /// If this property is null, [RenderEditable.preferredLineHeight] will be used.
   /// {@endtemplate}
   final double? cursorHeight;
+
+  /// {@template flutter.widgets.editableText.fixedCursorHeight}
+  /// How tall the cursor will be.
+  ///
+  /// If this property is null, [RenderEditable.preferredLineHeight] will be used.
+  /// {@endtemplate}
+  final bool? fixedCursorHeight;
 
   /// {@template flutter.widgets.editableText.cursorRadius}
   /// How rounded the corners of the cursor should be.
