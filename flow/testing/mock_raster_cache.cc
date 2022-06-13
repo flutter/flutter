@@ -9,7 +9,7 @@
 namespace flutter {
 namespace testing {
 
-MockRasterCacheResult::MockRasterCacheResult(SkIRect device_rect)
+MockRasterCacheResult::MockRasterCacheResult(SkRect device_rect)
     : RasterCacheResult(nullptr, SkRect::MakeEmpty(), "RasterCacheFlow::test"),
       device_rect_(device_rect) {}
 
@@ -20,7 +20,7 @@ std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizePicture(
     SkColorSpace* dst_color_space,
     bool checkerboard) const {
   SkRect logical_rect = picture->cullRect();
-  SkIRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
+  SkRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
 
   return std::make_unique<MockRasterCacheResult>(cache_rect);
 }
@@ -32,7 +32,7 @@ std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizeDisplayList(
     SkColorSpace* dst_color_space,
     bool checkerboard) const {
   SkRect logical_rect = display_list->bounds();
-  SkIRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
+  SkRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
 
   return std::make_unique<MockRasterCacheResult>(cache_rect);
 }
@@ -44,7 +44,7 @@ std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizeLayer(
     const SkMatrix& ctm,
     bool checkerboard) const {
   SkRect logical_rect = layer->paint_bounds();
-  SkIRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
+  SkRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
 
   return std::make_unique<MockRasterCacheResult>(cache_rect);
 }

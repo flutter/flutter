@@ -12,7 +12,7 @@ namespace flutter {
 LayerSnapshotData::LayerSnapshotData(int64_t layer_unique_id,
                                      const fml::TimeDelta& duration,
                                      const sk_sp<SkData>& snapshot,
-                                     const SkIRect& bounds)
+                                     const SkRect& bounds)
     : layer_unique_id_(layer_unique_id),
       duration_(duration),
       snapshot_(snapshot),
