@@ -724,6 +724,40 @@ TEST(GeometryTest, PointAbs) {
   ASSERT_POINT_NEAR(a_abs, expected);
 }
 
+TEST(GeometryTest, CanUseVector3AssignmentOperators) {
+  {
+    Vector3 p(1, 2, 4);
+    p += Vector3(1, 2, 4);
+    ASSERT_EQ(p.x, 2u);
+    ASSERT_EQ(p.y, 4u);
+    ASSERT_EQ(p.z, 8u);
+  }
+
+  {
+    Vector3 p(3, 6, 8);
+    p -= Vector3(1, 2, 3);
+    ASSERT_EQ(p.x, 2u);
+    ASSERT_EQ(p.y, 4u);
+    ASSERT_EQ(p.z, 5u);
+  }
+
+  {
+    Vector3 p(1, 2, 3);
+    p *= Vector3(2, 3, 4);
+    ASSERT_EQ(p.x, 2u);
+    ASSERT_EQ(p.y, 6u);
+    ASSERT_EQ(p.z, 12u);
+  }
+
+  {
+    Vector3 p(2, 6, 12);
+    p /= Vector3(2, 3, 4);
+    ASSERT_EQ(p.x, 1u);
+    ASSERT_EQ(p.y, 2u);
+    ASSERT_EQ(p.z, 3u);
+  }
+}
+
 TEST(GeometryTest, ColorPremultiply) {
   {
     Color a(1.0, 0.5, 0.2, 0.5);

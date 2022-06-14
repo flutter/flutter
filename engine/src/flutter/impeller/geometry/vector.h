@@ -68,6 +68,34 @@ struct Vector3 {
     return v.x != x || v.y != y || v.z != z;
   }
 
+  constexpr Vector3 operator+=(const Vector3& p) {
+    x += p.x;
+    y += p.y;
+    z += p.z;
+    return *this;
+  }
+
+  constexpr Vector3 operator-=(const Vector3& p) {
+    x -= p.x;
+    y -= p.y;
+    z -= p.z;
+    return *this;
+  }
+
+  constexpr Vector3 operator*=(const Vector3& p) {
+    x *= p.x;
+    y *= p.y;
+    z *= p.z;
+    return *this;
+  }
+
+  constexpr Vector3 operator/=(const Vector3& p) {
+    x /= p.x;
+    y /= p.y;
+    z /= p.z;
+    return *this;
+  }
+
   constexpr Vector3 operator-() const { return Vector3(-x, -y, -z); }
 
   constexpr Vector3 operator+(const Vector3& v) const {
