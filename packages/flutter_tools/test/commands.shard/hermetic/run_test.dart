@@ -4,12 +4,6 @@
 
 // @dart = 2.8
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -151,12 +145,14 @@ void main() {
       MemoryFileSystem fs;
       Artifacts artifacts;
       TestUsage usage;
+      FakeAnsiTerminal fakeTerminal;
 
       setUpAll(() {
         Cache.disableLocking();
       });
 
       setUp(() {
+        fakeTerminal = FakeAnsiTerminal();
         artifacts = Artifacts.test();
         usage = TestUsage();
         fs = MemoryFileSystem.test();
@@ -405,7 +401,6 @@ void main() {
         Usage: () => usage,
       });
 
-
       testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
@@ -431,16 +426,18 @@ void main() {
         expect(usage.commands, contains(
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
-            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'false',
+            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
             'cd56': 'false',
           })
         )));
       }, overrides: <Type, Generator>{
+        AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        Stdio: () => FakeStdio(),
         Usage: () => usage,
       });
 

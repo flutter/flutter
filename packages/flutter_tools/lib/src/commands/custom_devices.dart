@@ -780,7 +780,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         pingSuccessRegex: null
       );
     } else {
-      throw FallThroughError();
+      throw UnsupportedError('Unsupported operating system');
     }
 
     final bool apply = await askApplyConfig(
@@ -809,7 +809,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     if (boolArgDeprecated(_kSsh) == true) {
       return runInteractivelySsh();
     }
-    throw FallThroughError();
+    throw UnsupportedError('Unknown run mode');
   }
 }
 

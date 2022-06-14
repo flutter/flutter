@@ -28,6 +28,22 @@ void main() {
     mockOnPressedFunction = MockOnPressedFunction();
   });
 
+  testWidgets('test icon is findable by key', (WidgetTester tester) async {
+    const ValueKey<String> key = ValueKey<String>('icon-button');
+    await tester.pumpWidget(
+      wrap(
+        useMaterial3: true,
+        child: IconButton(
+          key: key,
+          onPressed: () {},
+          icon: const Icon(Icons.link),
+        ),
+      ),
+    );
+
+    expect(find.byKey(key), findsOneWidget);
+  });
+
   testWidgets('test default icon buttons are sized up to 48', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
