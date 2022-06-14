@@ -792,6 +792,8 @@ class RenderParagraph extends RenderBox
     final bool hasVisualOverflow = didOverflowWidth || didOverflowHeight;
     if (hasVisualOverflow) {
       switch (_overflow) {
+        case TextOverflow.throwException:
+          throw new Exception('Overflow: $didOverflowHeight $didOverflowWidth');
         case TextOverflow.visible:
           _needsClipping = false;
           _overflowShader = null;

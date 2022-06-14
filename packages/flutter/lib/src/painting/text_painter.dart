@@ -37,6 +37,9 @@ enum TextOverflow {
 
   /// Render overflowing text outside of its container.
   visible,
+
+  /// Throw an exception if text overflows.
+  throwException,
 }
 
 /// Holds the [Size] and baseline required to represent the dimensions of
