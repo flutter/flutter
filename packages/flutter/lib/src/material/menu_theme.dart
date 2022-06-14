@@ -14,16 +14,16 @@ import 'theme.dart';
 /// Defines the visual properties of [MenuBar], [MenuBarMenu] and
 /// [MenuBarButton] widgets.
 ///
-/// Descendant widgets obtain the current [MenuBarThemeData] object
-/// using `MenuBarTheme.of(context)`. Instances of
-/// [MenuBarThemeData] can be customized with
-/// [MenuBarThemeData.copyWith].
+/// Descendant widgets obtain the current [MenuThemeData] object
+/// using `MenuTheme.of(context)`. Instances of
+/// [MenuThemeData] can be customized with
+/// [MenuThemeData.copyWith].
 ///
-/// Typically, a [MenuBarThemeData] is specified as part of the
-/// overall [Theme] with [ThemeData.menuBarTheme]. Otherwise,
-/// [MenuBarTheme] can be used to configure its own widget subtree.
+/// Typically, a [MenuThemeData] is specified as part of the
+/// overall [Theme] with [ThemeData.menuTheme]. Otherwise,
+/// [MenuTheme] can be used to configure its own widget subtree.
 ///
-/// All [MenuBarThemeData] properties are `null` by default.
+/// All [MenuThemeData] properties are `null` by default.
 /// If any of these properties are null, the menu bar will provide its own
 /// defaults.
 ///
@@ -32,9 +32,9 @@ import 'theme.dart';
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 @immutable
-class MenuBarThemeData with Diagnosticable {
-  /// Creates the set of properties used to configure [MenuBarTheme].
-  const MenuBarThemeData({
+class MenuThemeData with Diagnosticable {
+  /// Creates the set of properties used to configure [MenuTheme].
+  const MenuThemeData({
     this.barHeight,
     this.barPadding,
     this.barBackgroundColor,
@@ -111,7 +111,7 @@ class MenuBarThemeData with Diagnosticable {
 
   /// Creates a copy of this object with the given fields replaced with the new
   /// values.
-  MenuBarThemeData copyWith({
+  MenuThemeData copyWith({
     double? barHeight,
     EdgeInsets? barPadding,
     MaterialStateProperty<Color?>? barBackgroundColor,
@@ -127,7 +127,7 @@ class MenuBarThemeData with Diagnosticable {
     EdgeInsets? itemPadding,
     MaterialStateProperty<OutlinedBorder?>? itemShape,
   }) {
-    return MenuBarThemeData(
+    return MenuThemeData(
       barHeight: barHeight ?? this.barHeight,
       barPadding: barPadding ?? this.barPadding,
       barBackgroundColor: barBackgroundColor ?? this.barBackgroundColor,
@@ -145,17 +145,17 @@ class MenuBarThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [MenuBarThemeData]s.
+  /// Linearly interpolate between two [MenuThemeData]s.
   ///
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static MenuBarThemeData? lerp(MenuBarThemeData? a, MenuBarThemeData? b, double t) {
+  static MenuThemeData? lerp(MenuThemeData? a, MenuThemeData? b, double t) {
     assert(t != null);
     if (a == null && b == null) {
       return null;
     }
-    return MenuBarThemeData(
+    return MenuThemeData(
       barHeight: lerpDouble(a?.barHeight, b?.barHeight, t),
       barPadding: EdgeInsets.lerp(a?.barPadding, b?.barPadding, t),
       barBackgroundColor: _lerpProperties<Color?>(a?.barBackgroundColor, b?.barBackgroundColor, t, Color.lerp),
@@ -221,7 +221,7 @@ class MenuBarThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MenuBarThemeData &&
+    return other is MenuThemeData &&
         other.barHeight == barHeight &&
         other.barPadding == barPadding &&
         other.barBackgroundColor == barBackgroundColor &&
@@ -295,10 +295,10 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
 ///  * [MenuBarButton], a widget that is a selectable item in a menu bar menu.
 ///  * [MenuBarMenu], a widget that specifies an item with a cascading
 ///    submenu in a [MenuBar] menu.
-class MenuBarTheme extends InheritedTheme {
+class MenuTheme extends InheritedTheme {
   /// Creates a theme that controls the configurations for [MenuBar] and
   /// [MenuBarButton] in its widget subtree.
-  const MenuBarTheme({
+  const MenuTheme({
     super.key,
     required this.data,
     required super.child,
@@ -306,28 +306,28 @@ class MenuBarTheme extends InheritedTheme {
 
   /// The properties for [MenuBar] and [MenuBarButton] in this widget's
   /// descendants.
-  final MenuBarThemeData data;
+  final MenuThemeData data;
 
   /// Returns the closest instance of this class's [data] value that encloses
   /// the given context. If there is no ancestor, it returns
-  /// [ThemeData.menuBarTheme]. Applications can assume that the returned
+  /// [ThemeData.menuTheme]. Applications can assume that the returned
   /// value will not be null.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// MenuBarThemeData theme = MenuBarTheme.of(context);
+  /// MenuThemeData theme = MenuTheme.of(context);
   /// ```
-  static MenuBarThemeData of(BuildContext context) {
-    final MenuBarTheme? menuBarTheme = context.dependOnInheritedWidgetOfExactType<MenuBarTheme>();
-    return menuBarTheme?.data ?? Theme.of(context).menuBarTheme;
+  static MenuThemeData of(BuildContext context) {
+    final MenuTheme? menuTheme = context.dependOnInheritedWidgetOfExactType<MenuTheme>();
+    return menuTheme?.data ?? Theme.of(context).menuTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    return MenuBarTheme(data: data, child: child);
+    return MenuTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(MenuBarTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(MenuTheme oldWidget) => data != oldWidget.data;
 }
