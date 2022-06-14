@@ -297,22 +297,21 @@ class ToolbarOptions {
 }
 
 class _KeyFrame {
-  const _KeyFrame(this.index, this.time, this.value);
+  const _KeyFrame(this.time, this.value);
   // Values extracted from iOS 15.4 UIKit.
   static const List<_KeyFrame> iOSBlinkingCaretKeyFrames = <_KeyFrame>[
-    _KeyFrame(0, 0,       1),
-    _KeyFrame(1, 0.5,     1),
-    _KeyFrame(2, 0.5375,  0.75),
-    _KeyFrame(3, 0.575,   0.5),
-    _KeyFrame(4, 0.6125,  0.25),
-    _KeyFrame(5, 0.65,    0),
-    _KeyFrame(6, 0.85,    0),
-    _KeyFrame(7, 0.8875,  0.25),
-    _KeyFrame(8, 0.925,   0.5),
-    _KeyFrame(9, 0.9625,  0.75),
+    _KeyFrame(0,       1),     // 0
+    _KeyFrame(0.5,     1),     // 1
+    _KeyFrame(0.5375,  0.75),  // 2
+    _KeyFrame(0.575,   0.5),   // 3
+    _KeyFrame(0.6125,  0.25),  // 4
+    _KeyFrame(0.65,    0),     // 5
+    _KeyFrame(0.85,    0),     // 6
+    _KeyFrame(0.8875,  0.25),  // 7
+    _KeyFrame(0.925,   0.5),   // 8
+    _KeyFrame(0.9625,  0.75),  // 9
   ];
 
-  final int index;
   final double time;
   final double value;
 }
@@ -333,6 +332,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
   @override
   bool isDone(double time) => time >= maxDuration;
 
+  // The index of the KeyFrame corresponds to the most recent input `time`.
   int _lastKeyFrameIndex = 0;
 
   @override
@@ -341,31 +341,32 @@ class _DiscreteKeyFrameSimulation extends Simulation {
     final int length = _keyFrames.length;
 
     // Perform a linear search in the sorted key frame list, starting from the
-    // last key frame found, since the input `time` usually slightly increments.
-    int offset;
+    // last key frame found, since the input `time` usually monotonically
+    // increases by a small amount.
+    int searchIndex;
     final int endIndex;
     if (_keyFrames[_lastKeyFrameIndex].time > time) {
-      // `time` has wrapped aroud, start the search from index [0, _lastKeyFrameIndex).
-      offset = -_lastKeyFrameIndex;
+      // `time` has wrapped aroud. Search within the index range
+      // [0, _lastKeyFrameIndex).
+      searchIndex = 0;
       endIndex = _lastKeyFrameIndex;
     } else {
-      // Search range [_lastKeyFrameIndex, length)
-      offset = 0;
+      searchIndex = _lastKeyFrameIndex;
       endIndex = length;
     }
 
-    // Don't have to check (endIndex - 1). If (endIndex - 2) doesn't work we'll
-    // have to pick (endIndex - 1) anyways.
-    while (_lastKeyFrameIndex + offset < endIndex - 1) {
-      assert(_keyFrames[(_lastKeyFrameIndex + offset)].time <= time);
-      final _KeyFrame next = _keyFrames[_lastKeyFrameIndex + offset + 1];
+    // Find the target key frame. Don't have to check (endIndex - 1): if
+    // (endIndex - 2) doesn't work we'll have to pick (endIndex - 1) anyways.
+    while (searchIndex < endIndex - 1) {
+      assert(_keyFrames[searchIndex].time <= time);
+      final _KeyFrame next = _keyFrames[searchIndex + 1];
       if (time < next.time) {
         break;
       }
-      offset += 1;
+      searchIndex += 1;
     }
 
-    _lastKeyFrameIndex = offset + _lastKeyFrameIndex;
+    _lastKeyFrameIndex = searchIndex;
     return _keyFrames[_lastKeyFrameIndex].value;
   }
 }
