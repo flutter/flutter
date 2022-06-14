@@ -50,7 +50,7 @@ dependency_overrides:
   googleapis_auth:
     path: ../../../third_party/pkg/googleapis/googleapis_auth
   http:
-    path: ../../../third_party/dart/third_party/pkg/http
+    path: ../../../third_party/dart/third_party/pkg/http/pkgs/http
   http_parser:
     path: ../../../third_party/dart/third_party/pkg/http_parser
   litetest:
