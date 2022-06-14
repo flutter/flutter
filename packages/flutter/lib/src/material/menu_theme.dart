@@ -29,13 +29,12 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [ThemeData], which describes the overall theme information for the
-///    application.
+///  * [ThemeData], which describes the overall theme for the application.
 @immutable
 class MenuThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [MenuTheme].
   const MenuThemeData({
-    this.barHeight,
+    this.barMinimumHeight,
     this.barPadding,
     this.barBackgroundColor,
     this.barElevation,
@@ -51,8 +50,8 @@ class MenuThemeData with Diagnosticable {
     this.itemShape,
   });
 
-  /// The minimum height of the menu bar.
-  final double? barHeight;
+  /// Override the default [MenuBar.minimumHeight].
+  final double? barMinimumHeight;
 
   /// The padding around the outside of a [MenuBar].
   final EdgeInsets? barPadding;
@@ -77,7 +76,7 @@ class MenuThemeData with Diagnosticable {
   ///  * [Material.elevation] for a description of how elevation works.
   final MaterialStateProperty<double?>? menuElevation;
 
-  /// The shape around a [MenuBarMenu].
+  /// The shape of a [MenuBarMenu].
   final MaterialStateProperty<ShapeBorder?>? menuShape;
 
   /// The padding around the outside of a [MenuBarMenu].
@@ -106,13 +105,13 @@ class MenuThemeData with Diagnosticable {
   /// The padding around the outside of an individual [MenuBarButton].
   final EdgeInsets? itemPadding;
 
-  /// The shape around an individual [MenuBarButton].
+  /// The shape of an individual [MenuBarButton].
   final MaterialStateProperty<OutlinedBorder?>? itemShape;
 
   /// Creates a copy of this object with the given fields replaced with the new
   /// values.
   MenuThemeData copyWith({
-    double? barHeight,
+    double? barMinimumHeight,
     EdgeInsets? barPadding,
     MaterialStateProperty<Color?>? barBackgroundColor,
     MaterialStateProperty<double?>? barElevation,
@@ -128,7 +127,7 @@ class MenuThemeData with Diagnosticable {
     MaterialStateProperty<OutlinedBorder?>? itemShape,
   }) {
     return MenuThemeData(
-      barHeight: barHeight ?? this.barHeight,
+      barMinimumHeight: barMinimumHeight ?? this.barMinimumHeight,
       barPadding: barPadding ?? this.barPadding,
       barBackgroundColor: barBackgroundColor ?? this.barBackgroundColor,
       barElevation: barElevation ?? this.barElevation,
@@ -156,7 +155,7 @@ class MenuThemeData with Diagnosticable {
       return null;
     }
     return MenuThemeData(
-      barHeight: lerpDouble(a?.barHeight, b?.barHeight, t),
+      barMinimumHeight: lerpDouble(a?.barMinimumHeight, b?.barMinimumHeight, t),
       barPadding: EdgeInsets.lerp(a?.barPadding, b?.barPadding, t),
       barBackgroundColor: _lerpProperties<Color?>(a?.barBackgroundColor, b?.barBackgroundColor, t, Color.lerp),
       barElevation: _lerpProperties<double?>(a?.barElevation, b?.barElevation, t, lerpDouble),
@@ -196,7 +195,7 @@ class MenuThemeData with Diagnosticable {
   @override
   int get hashCode {
     return Object.hash(
-      barHeight,
+      barMinimumHeight,
       barPadding,
       barBackgroundColor,
       barElevation,
@@ -222,7 +221,7 @@ class MenuThemeData with Diagnosticable {
       return false;
     }
     return other is MenuThemeData &&
-        other.barHeight == barHeight &&
+        other.barMinimumHeight == barMinimumHeight &&
         other.barPadding == barPadding &&
         other.barBackgroundColor == barBackgroundColor &&
         other.barElevation == barElevation &&
@@ -241,7 +240,7 @@ class MenuThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DoubleProperty('barHeight', barHeight, defaultValue: null));
+    properties.add(DoubleProperty('barMinimumHeight', barMinimumHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets>('barPadding', barPadding, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('barBackgroundColor', barBackgroundColor,
         defaultValue: null));
