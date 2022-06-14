@@ -237,7 +237,10 @@ void main() {
         (ByteData? _) {},
       );
       expect(record.length, 1);
-      expect(record[0].exception.toString(), endsWith("'range.start >= 0 && range.start <= text.length': Range start 2 is out of text of length 1"));
+      // Verify the error message in parts because Web formats the message
+      // differently from others.
+      expect(record[0].exception.toString(), matches(RegExp(r'\brange.start >= 0 && range.start <= text.length\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bRange start 2 is out of text of length 1\b')));
     });
   });
 
