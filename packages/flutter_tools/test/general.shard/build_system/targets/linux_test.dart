@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -16,6 +14,7 @@ import 'package:flutter_tools/src/build_system/targets/linux.dart';
 import 'package:flutter_tools/src/convert.dart';
 
 import '../../../src/common.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../../../src/context.dart';
 
 void main() {
@@ -90,7 +89,7 @@ void main() {
   });
 
   // Only required for the test below that still depends on the context.
-  FileSystem fileSystem;
+  late FileSystem fileSystem;
   setUp(() {
     fileSystem = MemoryFileSystem.test();
   });

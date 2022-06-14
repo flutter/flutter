@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -17,14 +15,15 @@ import 'package:flutter_tools/src/build_system/targets/android.dart';
 import 'package:flutter_tools/src/convert.dart';
 
 import '../../../src/common.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
 void main() {
-  FakeProcessManager processManager;
-  FileSystem fileSystem;
-  Artifacts artifacts;
-  Logger logger;
+  late FakeProcessManager processManager;
+  late FileSystem fileSystem;
+  late Artifacts artifacts;
+  late Logger logger;
 
   setUp(() {
     logger = BufferLogger.test();

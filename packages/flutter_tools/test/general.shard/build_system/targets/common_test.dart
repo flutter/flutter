@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,6 +15,7 @@ import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../../../src/common.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
@@ -26,12 +25,12 @@ const String kAssemblyAot = '--snapshot_kind=app-aot-assembly';
 
 final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
 void main() {
-  FakeProcessManager processManager;
-  Environment androidEnvironment;
-  Environment iosEnvironment;
-  Artifacts artifacts;
-  FileSystem fileSystem;
-  Logger logger;
+  late FakeProcessManager processManager;
+  late Environment androidEnvironment;
+  late Environment iosEnvironment;
+  late Artifacts artifacts;
+  late FileSystem fileSystem;
+  late Logger logger;
 
   setUp(() {
     processManager = FakeProcessManager.empty();

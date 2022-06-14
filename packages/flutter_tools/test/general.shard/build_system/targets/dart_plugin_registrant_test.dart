@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
@@ -20,6 +18,7 @@ import 'package:flutter_tools/src/build_system/targets/dart_plugin_registrant.da
 import 'package:flutter_tools/src/project.dart';
 
 import '../../../src/common.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../../../src/context.dart';
 
 const String _kEmptyPubspecFile = '''

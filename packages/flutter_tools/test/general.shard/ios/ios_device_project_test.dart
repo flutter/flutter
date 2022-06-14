@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -18,11 +16,12 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../../src/context.dart';
 
 // FlutterProject still depends on context.
 void main() {
-  FileSystem fileSystem;
+  late FileSystem fileSystem;
 
   // This setup is required to inject the context.
   setUp(() {
