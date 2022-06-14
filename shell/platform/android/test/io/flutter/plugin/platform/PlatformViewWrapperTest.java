@@ -13,7 +13,9 @@ import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -21,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
 @TargetApi(31)
@@ -295,6 +298,56 @@ public class PlatformViewWrapperTest {
     verify(viewTreeObserver, times(1)).removeOnGlobalFocusChangeListener(activeFocusListener);
   }
 
+  @Test
+  @Config(
+      shadows = {
+        ShadowViewGroup.class,
+      })
+  public void ignoreAccessibilityEvents() {
+    final PlatformViewWrapper wrapperView = new PlatformViewWrapper(ctx);
+
+    final View embeddedView = mock(View.class);
+    wrapperView.addView(embeddedView);
+
+    when(embeddedView.getImportantForAccessibility())
+        .thenReturn(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+    final boolean eventSent =
+        wrapperView.requestSendAccessibilityEvent(embeddedView, mock(AccessibilityEvent.class));
+    assertFalse(eventSent);
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowViewGroup.class,
+      })
+  public void sendAccessibilityEvents() {
+    final PlatformViewWrapper wrapperView = new PlatformViewWrapper(ctx);
+
+    final View embeddedView = mock(View.class);
+    wrapperView.addView(embeddedView);
+
+    when(embeddedView.getImportantForAccessibility())
+        .thenReturn(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+    boolean eventSent =
+        wrapperView.requestSendAccessibilityEvent(embeddedView, mock(AccessibilityEvent.class));
+    assertTrue(eventSent);
+
+    when(embeddedView.getImportantForAccessibility())
+        .thenReturn(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+    eventSent =
+        wrapperView.requestSendAccessibilityEvent(embeddedView, mock(AccessibilityEvent.class));
+    assertTrue(eventSent);
+  }
+
   @Implements(View.class)
   public static class ShadowView {}
+
+  @Implements(ViewGroup.class)
+  public static class ShadowViewGroup extends org.robolectric.shadows.ShadowView {
+    @Implementation
+    public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+      return true;
+    }
+  }
 }
