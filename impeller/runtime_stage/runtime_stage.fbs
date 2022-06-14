@@ -1,0 +1,53 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+namespace impeller.fb;
+
+enum Stage:byte {
+  kVertex,
+  kFragment,
+  kCompute,
+  kTessellationControl,
+  kTessellationEvaluation,
+}
+
+enum TargetPlatform:byte {
+  kMetal,
+  kOpenGLES,
+}
+
+enum UniformDataType:uint32 {
+  kBoolean,
+  kSignedByte,
+  kUnsignedByte,
+  kSignedShort,
+  kUnsignedShort,
+  kSignedInt,
+  kUnsignedInt,
+  kSignedInt64,
+  kUnsignedInt64,
+  kHalfFloat,
+  kFloat,
+  kDouble,
+  kSampledImage,
+}
+
+table UniformDescription {
+  name: string;
+  location: uint64;
+  type: UniformDataType;
+  rows: uint64;
+  columns: uint64;
+}
+
+table RuntimeStage {
+  stage: Stage;
+  target_platform: TargetPlatform;
+  entrypoint: string;
+  uniforms: [UniformDescription];
+  shader: [ubyte];
+}
+
+root_type RuntimeStage;
+file_identifier "IPLR";

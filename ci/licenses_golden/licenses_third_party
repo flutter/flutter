@@ -1,4 +1,4 @@
-Signature: 356ee23cb18832ea8023244e999bbf3b
+Signature: 199d1be0bd174db5609d6907bf86ef6e
 
 UNUSED LICENSES:
 
@@ -223,6 +223,7 @@ LIBRARY: abseil-cpp
 LIBRARY: angle
 LIBRARY: boringssl
 LIBRARY: expat
+LIBRARY: flatbuffers
 LIBRARY: fuchsia-vulkan
 LIBRARY: khronos
 LIBRARY: libwebp
@@ -1145,6 +1146,508 @@ FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/x448
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/xchacha20_poly1305_test.json
 FILE: ../../../third_party/expat/expat/fuzz/xml_parse_fuzzer.c
 FILE: ../../../third_party/expat/expat/fuzz/xml_parsebuffer_fuzzer.c
+FILE: ../../../third_party/flatbuffers/.bazelci/presubmit.yml
+FILE: ../../../third_party/flatbuffers/.editorconfig
+FILE: ../../../third_party/flatbuffers/.eslintrc.js
+FILE: ../../../third_party/flatbuffers/BUILD.bazel
+FILE: ../../../third_party/flatbuffers/CMake/CMakeLists_legacy.cmake.in
+FILE: ../../../third_party/flatbuffers/CMake/FlatbuffersConfigVersion.cmake.in
+FILE: ../../../third_party/flatbuffers/CMake/flatbuffers.pc.in
+FILE: ../../../third_party/flatbuffers/WORKSPACE
+FILE: ../../../third_party/flatbuffers/android/AndroidManifest.xml
+FILE: ../../../third_party/flatbuffers/android/app/proguard-rules.pro
+FILE: ../../../third_party/flatbuffers/android/app/src/main/AndroidManifest.xml
+FILE: ../../../third_party/flatbuffers/android/app/src/main/cpp/animals.cpp
+FILE: ../../../third_party/flatbuffers/android/app/src/main/cpp/generated/animal_generated.h
+FILE: ../../../third_party/flatbuffers/android/app/src/main/fbs/animal.fbs
+FILE: ../../../third_party/flatbuffers/android/app/src/main/java/com/flatbuffers/app/MainActivity.kt
+FILE: ../../../third_party/flatbuffers/android/app/src/main/java/generated/com/fbs/app/Animal.kt
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/drawable/ic_launcher_background.xml
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/layout/activity_main.xml
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/values/colors.xml
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/values/strings.xml
+FILE: ../../../third_party/flatbuffers/android/app/src/main/res/values/styles.xml
+FILE: ../../../third_party/flatbuffers/android/gradle.properties
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/META-INF/MANIFEST.MF
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/gradle-wrapper-classpath.properties
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/AbstractCommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/AbstractPropertiesCommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineArgumentException.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineOption.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$1.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$AfterFirstSubCommand.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$AfterOptions.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$BeforeFirstSubCommand.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$CaseInsensitiveStringComparator.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$KnownOptionParserState.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$MissingOptionArgState.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionAwareParserState.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionComparator.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionParserState.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionString.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionStringComparator.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$ParserState.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$UnknownOptionParserState.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/ParsedCommandLine.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/ParsedCommandLineOption.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/ProjectPropertiesCommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/SystemPropertiesCommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/BootstrapMainStarter$1.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/BootstrapMainStarter.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Download$1.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Download$DefaultDownloadProgressListener.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Download$ProxyAuthenticator.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Download.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/DownloadProgressListener.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/ExclusiveFileAccessManager.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/GradleUserHomeLookup.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/GradleWrapperMain.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/IDownload.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Install$1.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Install$InstallCheck.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Install.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Logger.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/PathAssembler$LocalDistribution.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/PathAssembler.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/SystemPropertiesHandler.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/WrapperConfiguration.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/WrapperExecutor.class
+FILE: ../../../third_party/flatbuffers/android/gradle/wrapper/gradle-wrapper.properties
+FILE: ../../../third_party/flatbuffers/android/gradlew
+FILE: ../../../third_party/flatbuffers/benchmarks/cpp/bench.h
+FILE: ../../../third_party/flatbuffers/benchmarks/cpp/benchmark_main.cpp
+FILE: ../../../third_party/flatbuffers/benchmarks/cpp/flatbuffers/bench.fbs
+FILE: ../../../third_party/flatbuffers/benchmarks/cpp/flatbuffers/bench_generated.h
+FILE: ../../../third_party/flatbuffers/benchmarks/cpp/flatbuffers/fb_bench.cpp
+FILE: ../../../third_party/flatbuffers/benchmarks/cpp/flatbuffers/fb_bench.h
+FILE: ../../../third_party/flatbuffers/benchmarks/cpp/raw/raw_bench.cpp
+FILE: ../../../third_party/flatbuffers/benchmarks/cpp/raw/raw_bench.h
+FILE: ../../../third_party/flatbuffers/build_defs.bzl
+FILE: ../../../third_party/flatbuffers/composer.json
+FILE: ../../../third_party/flatbuffers/conan/test_package/test_package.cpp
+FILE: ../../../third_party/flatbuffers/dart/example/example.dart
+FILE: ../../../third_party/flatbuffers/docs/footer.html
+FILE: ../../../third_party/flatbuffers/docs/header.html
+FILE: ../../../third_party/flatbuffers/docs/images/fpl_logo_small.png
+FILE: ../../../third_party/flatbuffers/docs/images/ftv2mnode.png
+FILE: ../../../third_party/flatbuffers/docs/images/ftv2pnode.png
+FILE: ../../../third_party/flatbuffers/docs/source/doxygen_layout.xml
+FILE: ../../../third_party/flatbuffers/docs/source/groups
+FILE: ../../../third_party/flatbuffers/go/BUILD.bazel
+FILE: ../../../third_party/flatbuffers/go/builder.go
+FILE: ../../../third_party/flatbuffers/go/doc.go
+FILE: ../../../third_party/flatbuffers/go/encode.go
+FILE: ../../../third_party/flatbuffers/go/grpc.go
+FILE: ../../../third_party/flatbuffers/go/lib.go
+FILE: ../../../third_party/flatbuffers/go/sizes.go
+FILE: ../../../third_party/flatbuffers/go/struct.go
+FILE: ../../../third_party/flatbuffers/go/table.go
+FILE: ../../../third_party/flatbuffers/grpc/boringssl.patch
+FILE: ../../../third_party/flatbuffers/grpc/examples/go/greeter/client/go.mod
+FILE: ../../../third_party/flatbuffers/grpc/examples/go/greeter/client/main.go
+FILE: ../../../third_party/flatbuffers/grpc/examples/go/greeter/models/Greeter_grpc.go
+FILE: ../../../third_party/flatbuffers/grpc/examples/go/greeter/models/HelloReply.go
+FILE: ../../../third_party/flatbuffers/grpc/examples/go/greeter/models/HelloRequest.go
+FILE: ../../../third_party/flatbuffers/grpc/examples/go/greeter/models/go.mod
+FILE: ../../../third_party/flatbuffers/grpc/examples/go/greeter/server/go.mod
+FILE: ../../../third_party/flatbuffers/grpc/examples/go/greeter/server/main.go
+FILE: ../../../third_party/flatbuffers/grpc/examples/greeter.fbs
+FILE: ../../../third_party/flatbuffers/grpc/examples/swift/Greeter/Package.swift
+FILE: ../../../third_party/flatbuffers/grpc/examples/swift/Greeter/Sources/Model/greeter.grpc.swift
+FILE: ../../../third_party/flatbuffers/grpc/examples/swift/Greeter/Sources/Model/greeter_generated.swift
+FILE: ../../../third_party/flatbuffers/grpc/examples/swift/Greeter/Sources/client/main.swift
+FILE: ../../../third_party/flatbuffers/grpc/examples/swift/Greeter/Sources/server/main.swift
+FILE: ../../../third_party/flatbuffers/grpc/examples/ts/greeter/package.json
+FILE: ../../../third_party/flatbuffers/grpc/examples/ts/greeter/src/client.ts
+FILE: ../../../third_party/flatbuffers/grpc/examples/ts/greeter/src/greeter.ts
+FILE: ../../../third_party/flatbuffers/grpc/examples/ts/greeter/src/greeter_grpc.d.ts
+FILE: ../../../third_party/flatbuffers/grpc/examples/ts/greeter/src/greeter_grpc.js
+FILE: ../../../third_party/flatbuffers/grpc/examples/ts/greeter/src/models/hello-reply.ts
+FILE: ../../../third_party/flatbuffers/grpc/examples/ts/greeter/src/models/hello-request.ts
+FILE: ../../../third_party/flatbuffers/grpc/examples/ts/greeter/src/server.ts
+FILE: ../../../third_party/flatbuffers/grpc/examples/ts/greeter/tsconfig.json
+FILE: ../../../third_party/flatbuffers/grpc/flatbuffers-java-grpc/src/main/java/com/google/flatbuffers/grpc/FlatbuffersUtils.java
+FILE: ../../../third_party/flatbuffers/grpc/samples/greeter/client.cpp
+FILE: ../../../third_party/flatbuffers/grpc/samples/greeter/greeter.fbs
+FILE: ../../../third_party/flatbuffers/grpc/samples/greeter/server.cpp
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/BUILD.bazel
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/cpp_generator.cc
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/cpp_generator.h
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/go_generator.cc
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/go_generator.h
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/java_generator.cc
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/java_generator.h
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/python_generator.cc
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/python_generator.h
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/schema_interface.h
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/swift_generator.cc
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/swift_generator.h
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/ts_generator.cc
+FILE: ../../../third_party/flatbuffers/grpc/src/compiler/ts_generator.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/allocator.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/array.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/base.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/bfbs_generator.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/buffer.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/buffer_ref.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/code_generators.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/default_allocator.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/detached_buffer.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/flatbuffer_builder.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/flatbuffers.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/flatc.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/flex_flat_util.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/flexbuffers.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/grpc.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/hash.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/idl.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/minireflect.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/pch/flatc_pch.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/pch/pch.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/reflection.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/reflection_generated.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/registry.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/stl_emulation.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/string.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/struct.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/table.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/util.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/vector.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/vector_downward.h
+FILE: ../../../third_party/flatbuffers/include/flatbuffers/verifier.h
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/ArrayReadWriteBuf.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/BaseVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/BooleanVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/ByteBufferReadWriteBuf.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/ByteBufferUtil.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/ByteVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/Constants.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/DoubleVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/FlatBufferBuilder.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/FlexBuffers.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/FlexBuffersBuilder.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/FloatVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/IntVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/LongVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/ReadBuf.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/ReadWriteBuf.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/ShortVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/StringVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/Struct.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/Table.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/UnionVector.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/Utf8.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/Utf8Old.java
+FILE: ../../../third_party/flatbuffers/java/com/google/flatbuffers/Utf8Safe.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/build.gradle.kts
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/ArrayReadWriteBuf.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/BaseVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/BooleanVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/ByteBufferReadWriteBuf.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/ByteBufferUtil.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/ByteVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/Constants.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/DoubleVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/FlatBufferBuilder.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/FlexBuffers.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/FlexBuffersBuilder.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/FloatVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/IntVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/LongVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/ReadBuf.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/ReadWriteBuf.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/ShortVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/StringVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/Struct.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/Table.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/UnionVector.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/Utf8.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/Utf8Old.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/java/com/google/flatbuffers/Utf8Safe.java
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/kotlin/com/google/flatbuffers/kotlin/benchmark/FlexBuffersBenchmark.kt
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/kotlin/com/google/flatbuffers/kotlin/benchmark/JsonBenchmark.kt
+FILE: ../../../third_party/flatbuffers/kotlin/benchmark/src/jvmMain/kotlin/com/google/flatbuffers/kotlin/benchmark/UTF8Benchmark.kt
+FILE: ../../../third_party/flatbuffers/kotlin/build.gradle.kts
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/build.gradle.kts
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonMain/kotlin/com/google/flatbuffers/kotlin/Buffers.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonMain/kotlin/com/google/flatbuffers/kotlin/ByteArray.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonMain/kotlin/com/google/flatbuffers/kotlin/FlexBuffers.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonMain/kotlin/com/google/flatbuffers/kotlin/FlexBuffersBuilder.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonMain/kotlin/com/google/flatbuffers/kotlin/FlexBuffersInternals.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonMain/kotlin/com/google/flatbuffers/kotlin/JSON.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonMain/kotlin/com/google/flatbuffers/kotlin/Utf8.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonTest/kotlin/com/google/flatbuffers/kotlin/ByteArrayTest.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonTest/kotlin/com/google/flatbuffers/kotlin/FlexBuffersTest.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/commonTest/kotlin/com/google/flatbuffers/kotlin/JSONTest.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/jsMain/kotlin/com/google/flatbuffers/kotlin/ByteArray.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/jvmMain/kotlin/com/google/flatbuffers/kotlin/ByteArray.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/jvmTest/kotlin/com/google/flatbuffers/kotlin/Utf8Test.kt
+FILE: ../../../third_party/flatbuffers/kotlin/flatbuffers-kotlin/src/nativeMain/kotlin/com/google/flatbuffers/kotlin/ByteArray.kt
+FILE: ../../../third_party/flatbuffers/kotlin/gradle.properties
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/libs.versions.toml
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/META-INF/MANIFEST.MF
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/gradle-wrapper-classpath.properties
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/AbstractCommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/AbstractPropertiesCommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineArgumentException.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineOption.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$1.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$AfterFirstSubCommand.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$AfterOptions.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$BeforeFirstSubCommand.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$CaseInsensitiveStringComparator.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$KnownOptionParserState.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$MissingOptionArgState.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionAwareParserState.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionComparator.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionParserState.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionString.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$OptionStringComparator.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$ParserState.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser$UnknownOptionParserState.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/CommandLineParser.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/ParsedCommandLine.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/ParsedCommandLineOption.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/ProjectPropertiesCommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/cli/SystemPropertiesCommandLineConverter.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/BootstrapMainStarter$1.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/BootstrapMainStarter.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Download$1.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Download$DefaultDownloadProgressListener.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Download$ProxyAuthenticator.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Download.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/DownloadProgressListener.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/ExclusiveFileAccessManager.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/GradleUserHomeLookup.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/GradleWrapperMain.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/IDownload.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Install$1.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Install$InstallCheck.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Install.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/Logger.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/PathAssembler$LocalDistribution.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/PathAssembler.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/SystemPropertiesHandler.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/WrapperConfiguration.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.jar!/org/gradle/wrapper/WrapperExecutor.class
+FILE: ../../../third_party/flatbuffers/kotlin/gradle/wrapper/gradle-wrapper.properties
+FILE: ../../../third_party/flatbuffers/kotlin/settings.gradle.kts
+FILE: ../../../third_party/flatbuffers/kotlin/spotless/spotless.kt
+FILE: ../../../third_party/flatbuffers/lobster/flatbuffers.lobster
+FILE: ../../../third_party/flatbuffers/lua/flatbuffers.lua
+FILE: ../../../third_party/flatbuffers/lua/flatbuffers/binaryarray.lua
+FILE: ../../../third_party/flatbuffers/lua/flatbuffers/builder.lua
+FILE: ../../../third_party/flatbuffers/lua/flatbuffers/compat.lua
+FILE: ../../../third_party/flatbuffers/lua/flatbuffers/compat_5_1.lua
+FILE: ../../../third_party/flatbuffers/lua/flatbuffers/compat_5_3.lua
+FILE: ../../../third_party/flatbuffers/lua/flatbuffers/compat_luajit.lua
+FILE: ../../../third_party/flatbuffers/lua/flatbuffers/numTypes.lua
+FILE: ../../../third_party/flatbuffers/lua/flatbuffers/view.lua
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/ByteBuffer.cs
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/ByteBufferUtil.cs
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/FlatBufferBuilder.cs
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/FlatBufferConstants.cs
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/FlatBuffers.csproj
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/FlatBuffers.net35.csproj
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/IFlatbufferObject.cs
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/Offset.cs
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/Properties/AssemblyInfo.cs
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/Struct.cs
+FILE: ../../../third_party/flatbuffers/net/FlatBuffers/Table.cs
+FILE: ../../../third_party/flatbuffers/package.json
+FILE: ../../../third_party/flatbuffers/php/ByteBuffer.php
+FILE: ../../../third_party/flatbuffers/php/Constants.php
+FILE: ../../../third_party/flatbuffers/php/FlatbufferBuilder.php
+FILE: ../../../third_party/flatbuffers/php/Struct.php
+FILE: ../../../third_party/flatbuffers/php/Table.php
+FILE: ../../../third_party/flatbuffers/python/setup.cfg
+FILE: ../../../third_party/flatbuffers/reflection/BUILD.bazel
+FILE: ../../../third_party/flatbuffers/reflection/reflection.fbs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/Cargo.toml
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/array.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/builder.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/endian_scalar.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/follow.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/get_root.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/lib.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/primitives.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/push.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/table.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/vector.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/verifier.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/vtable.rs
+FILE: ../../../third_party/flatbuffers/rust/flatbuffers/src/vtable_writer.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/Cargo.toml
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/bitwidth.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/buffer.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/builder/map.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/builder/mod.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/builder/push.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/builder/ser.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/builder/value.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/builder/vector.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/flexbuffer_type.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/lib.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/reader/de.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/reader/iter.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/reader/map.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/reader/mod.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/reader/serialize.rs
+FILE: ../../../third_party/flatbuffers/rust/flexbuffers/src/reader/vector.rs
+FILE: ../../../third_party/flatbuffers/samples/SampleBinary.cs
+FILE: ../../../third_party/flatbuffers/samples/SampleBinary.java
+FILE: ../../../third_party/flatbuffers/samples/SampleBinary.kt
+FILE: ../../../third_party/flatbuffers/samples/SampleBinary.php
+FILE: ../../../third_party/flatbuffers/samples/lua/MyGame/Sample/Color.lua
+FILE: ../../../third_party/flatbuffers/samples/lua/MyGame/Sample/Equipment.lua
+FILE: ../../../third_party/flatbuffers/samples/lua/MyGame/Sample/Monster.lua
+FILE: ../../../third_party/flatbuffers/samples/lua/MyGame/Sample/Vec3.lua
+FILE: ../../../third_party/flatbuffers/samples/lua/MyGame/Sample/Weapon.lua
+FILE: ../../../third_party/flatbuffers/samples/monster.bfbs
+FILE: ../../../third_party/flatbuffers/samples/monster.fbs
+FILE: ../../../third_party/flatbuffers/samples/monster_generated.h
+FILE: ../../../third_party/flatbuffers/samples/monster_generated.lobster
+FILE: ../../../third_party/flatbuffers/samples/monster_generated.swift
+FILE: ../../../third_party/flatbuffers/samples/monsterdata.json
+FILE: ../../../third_party/flatbuffers/samples/rust_generated/mod.rs
+FILE: ../../../third_party/flatbuffers/samples/rust_generated/my_game/sample/color_generated.rs
+FILE: ../../../third_party/flatbuffers/samples/rust_generated/my_game/sample/equipment_generated.rs
+FILE: ../../../third_party/flatbuffers/samples/rust_generated/my_game/sample/monster_generated.rs
+FILE: ../../../third_party/flatbuffers/samples/rust_generated/my_game/sample/vec_3_generated.rs
+FILE: ../../../third_party/flatbuffers/samples/rust_generated/my_game/sample/weapon_generated.rs
+FILE: ../../../third_party/flatbuffers/samples/sample_bfbs.cpp
+FILE: ../../../third_party/flatbuffers/samples/sample_binary.cpp
+FILE: ../../../third_party/flatbuffers/samples/sample_binary.go
+FILE: ../../../third_party/flatbuffers/samples/sample_binary.lobster
+FILE: ../../../third_party/flatbuffers/samples/sample_binary.lua
+FILE: ../../../third_party/flatbuffers/samples/sample_binary.rs
+FILE: ../../../third_party/flatbuffers/samples/sample_binary.swift
+FILE: ../../../third_party/flatbuffers/samples/sample_flexbuffers.rs
+FILE: ../../../third_party/flatbuffers/samples/sample_flexbuffers_serde.rs
+FILE: ../../../third_party/flatbuffers/samples/sample_text.cpp
+FILE: ../../../third_party/flatbuffers/samples/sample_text.lobster
+FILE: ../../../third_party/flatbuffers/src/BUILD.bazel
+FILE: ../../../third_party/flatbuffers/src/annotated_binary_text_gen.cpp
+FILE: ../../../third_party/flatbuffers/src/annotated_binary_text_gen.h
+FILE: ../../../third_party/flatbuffers/src/bfbs_gen.h
+FILE: ../../../third_party/flatbuffers/src/bfbs_gen_lua.cpp
+FILE: ../../../third_party/flatbuffers/src/bfbs_gen_lua.h
+FILE: ../../../third_party/flatbuffers/src/bfbs_namer.h
+FILE: ../../../third_party/flatbuffers/src/binary_annotator.cpp
+FILE: ../../../third_party/flatbuffers/src/binary_annotator.h
+FILE: ../../../third_party/flatbuffers/src/code_generators.cpp
+FILE: ../../../third_party/flatbuffers/src/flatc.cpp
+FILE: ../../../third_party/flatbuffers/src/flatc_main.cpp
+FILE: ../../../third_party/flatbuffers/src/flathash.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_cpp.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_csharp.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_dart.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_fbs.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_go.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_grpc.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_java.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_json_schema.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_kotlin.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_lobster.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_lua.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_php.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_python.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_rust.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_swift.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_text.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_gen_ts.cpp
+FILE: ../../../third_party/flatbuffers/src/idl_namer.h
+FILE: ../../../third_party/flatbuffers/src/idl_parser.cpp
+FILE: ../../../third_party/flatbuffers/src/namer.h
+FILE: ../../../third_party/flatbuffers/src/reflection.cpp
+FILE: ../../../third_party/flatbuffers/src/util.cpp
+FILE: ../../../third_party/flatbuffers/swift/BUILD.bazel
+FILE: ../../../third_party/flatbuffers/swift/FlatBuffers.podspec
+FILE: ../../../third_party/flatbuffers/swift/Package.swift
+FILE: ../../../third_party/flatbuffers/swift/Package@swift-5.5.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/ByteBuffer.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Constants.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/fbs/monster_step_1.fbs
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/fbs/monster_step_2.fbs
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/fbs/monster_step_3.fbs
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/fbs/monster_step_4.fbs
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/fbs/monster_step_5.fbs
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/fbs/monster_step_6.fbs
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/fbs/monster_step_7.fbs
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_1.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_10.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_11.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_12.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_13.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_2.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_3.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_4.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_5.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_6.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_7.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_8.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/code/swift/swift_code_9.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Resources/images/tutorial_cover_image_1.png
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Tutorials/Tutorial_Table_of_Contents.tutorial
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Tutorials/create_your_first_buffer.tutorial
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Tutorials/creating_flatbuffer_schema.tutorial
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Documentation.docc/Tutorials/reading_bytebuffer.tutorial
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Enum.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/FlatBufferBuilder.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/FlatBufferObject.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/FlatBuffersUtils.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/FlatbuffersErrors.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Int+extension.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Message.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Mutable.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/NativeObject.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Offset.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Root.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/String+extension.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Struct.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Table.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/TableVerifier.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/VeriferOptions.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Verifiable.swift
+FILE: ../../../third_party/flatbuffers/swift/Sources/FlatBuffers/Verifier.swift
+FILE: ../../../third_party/flatbuffers/ts/BUILD.bazel
+FILE: ../../../third_party/flatbuffers/ts/builder.ts
+FILE: ../../../third_party/flatbuffers/ts/byte-buffer.ts
+FILE: ../../../third_party/flatbuffers/ts/constants.ts
+FILE: ../../../third_party/flatbuffers/ts/encoding.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers/bit-width-util.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers/bit-width.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers/builder.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers/flexbuffers-util.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers/reference-util.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers/reference.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers/stack-value.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers/value-type-util.ts
+FILE: ../../../third_party/flatbuffers/ts/flexbuffers/value-type.ts
+FILE: ../../../third_party/flatbuffers/ts/index.ts
+FILE: ../../../third_party/flatbuffers/ts/types.ts
+FILE: ../../../third_party/flatbuffers/ts/utils.ts
+FILE: ../../../third_party/flatbuffers/tsconfig.json
+FILE: ../../../third_party/flatbuffers/tsconfig.mjs.json
+FILE: ../../../third_party/flatbuffers/typescript.bzl
+FILE: ../../../third_party/flatbuffers/yarn.lock
 FILE: ../../../third_party/fuchsia-vulkan/cmake/cmake_uninstall.cmake.in
 FILE: ../../../third_party/fuchsia-vulkan/include/vk_video/vulkan_video_codec_h264std.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vk_video/vulkan_video_codec_h264std_decode.h
@@ -9545,6 +10048,401 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
+LIBRARY: flatbuffers
+ORIGIN: ../../../third_party/dart/runtime/bin/crypto_fuchsia.cc + ../../../third_party/dart/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/bin/crypto_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/crypto_test.cc
+FILE: ../../../third_party/dart/runtime/bin/directory_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/directory_test.cc
+FILE: ../../../third_party/dart/runtime/bin/eventhandler_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/eventhandler_fuchsia.h
+FILE: ../../../third_party/dart/runtime/bin/file_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/file_support.cc
+FILE: ../../../third_party/dart/runtime/bin/file_system_watcher_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/loader.cc
+FILE: ../../../third_party/dart/runtime/bin/loader.h
+FILE: ../../../third_party/dart/runtime/bin/platform_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/process_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/reference_counting.h
+FILE: ../../../third_party/dart/runtime/bin/root_certificates_unsupported.cc
+FILE: ../../../third_party/dart/runtime/bin/socket_base_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/socket_base_fuchsia.h
+FILE: ../../../third_party/dart/runtime/bin/socket_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/stdio_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/thread_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/thread_fuchsia.h
+FILE: ../../../third_party/dart/runtime/bin/utils_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/lib/stacktrace.h
+FILE: ../../../third_party/dart/runtime/observatory/lib/event.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/models.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/repositories.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/app/notification.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/class_allocation_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/containers/virtual_collection.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/containers/virtual_tree.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/error_ref.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/general_error.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/custom_element.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/nav_bar.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/nav_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/rendering_queue.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/rendering_scheduler.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/uris.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/inbound_references.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/counter_chart.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/location.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/run_state.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/shared_summary.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/summary.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/metric/details.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/metric/graph.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/class_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/isolate_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/library_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/menu_item.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/notify.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/notify_event.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/notify_exception.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/refresh.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/top_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/vm_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/retaining_path.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/source_link.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/strongly_reachable_instances.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/vm_connect_target.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/exceptions.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/allocation_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/breakpoint.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/class.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/code.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/context.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/error.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/event.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/extension_data.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/field.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/flag.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/frame.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/function.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/guarded.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/heap_space.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/icdata.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/inbound_references.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/instance.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/isolate.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/library.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/local_var_descriptors.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/map_association.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/megamorphiccache.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/metric.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/notification.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/object.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/objectpool.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/objectstore.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/pc_descriptors.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/persistent_handles.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/ports.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/retaining_path.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/sample_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/script.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/sentinel.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/source_location.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/target.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/timeline_event.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/type_arguments.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/unknown.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/vm.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/allocation_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/breakpoint.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/class.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/context.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/editor.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/eval.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/event.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/field.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/flag.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/function.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/heap_snapshot.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/icdata.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/inbound_references.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/instance.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/isolate.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/library.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/megamorphiccache.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/metric.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/notification.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/object.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/objectpool.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/objectstore.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/persistent_handles.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/ports.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/reachable_size.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/retained_size.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/retaining_path.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/sample_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/script.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/strongly_reachable_instances.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/target.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/type_arguments.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/allocation_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/breakpoint.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/class.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/context.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/editor.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/eval.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/event.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/field.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/flag.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/function.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/heap_snapshot.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/icdata.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/inbound_references.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/instance.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/isolate.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/library.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/megamorphiccache.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/metric.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/notification.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/object.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/objectpool.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/objectstore.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/persistent_handles.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/ports.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/reachable_size.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/retained_size.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/retaining_path.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/sample_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/script.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/settings.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/strongly_reachable_instances.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/target.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/type_arguments.dart
+FILE: ../../../third_party/dart/runtime/observatory/web/timeline_message_handler.js
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/event.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/models.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/repositories.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/app/notification.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/class_allocation_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/containers/virtual_collection.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/containers/virtual_tree.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/error_ref.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/general_error.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/custom_element.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/nav_bar.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/nav_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/rendering_queue.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/rendering_scheduler.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/tag.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/uris.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/inbound_references.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/counter_chart.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/location.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/run_state.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/shared_summary.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/summary.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/metric/details.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/metric/graph.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/class_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/isolate_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/library_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/menu_item.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/notify.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/notify_event.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/notify_exception.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/refresh.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/top_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/vm_menu.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/retaining_path.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/source_link.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/strongly_reachable_instances.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/vm_connect_target.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/exceptions.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/allocation_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/breakpoint.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/class.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/code.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/context.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/error.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/event.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/extension_data.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/field.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/flag.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/frame.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/function.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/guarded.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/heap_space.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/icdata.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/inbound_references.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/instance.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/isolate.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/library.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/local_var_descriptors.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/map_association.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/megamorphiccache.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/metric.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/notification.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/object.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/objectpool.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/objectstore.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/pc_descriptors.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/persistent_handles.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/ports.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/retaining_path.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/sample_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/script.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/sentinel.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/source_location.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/target.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/timeline_event.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/type_arguments.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/unknown.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/vm.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/allocation_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/breakpoint.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/class.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/context.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/editor.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/eval.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/event.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/field.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/flag.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/function.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/heap_snapshot.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/icdata.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/inbound_references.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/instance.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/isolate.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/library.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/megamorphiccache.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/metric.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/notification.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/object.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/objectpool.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/objectstore.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/persistent_handles.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/ports.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/reachable_size.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/retained_size.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/retaining_path.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/sample_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/script.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/strongly_reachable_instances.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/target.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/type_arguments.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/allocation_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/breakpoint.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/class.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/context.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/editor.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/eval.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/event.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/field.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/flag.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/function.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/heap_snapshot.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/icdata.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/inbound_references.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/instance.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/isolate.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/library.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/megamorphiccache.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/metric.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/notification.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/object.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/objectpool.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/objectstore.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/persistent_handles.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/ports.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/reachable_size.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/retained_size.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/retaining_path.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/sample_profile.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/script.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/settings.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/strongly_reachable_instances.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/target.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/type_arguments.dart
+FILE: ../../../third_party/dart/runtime/observatory_2/web/timeline_message_handler.js
+FILE: ../../../third_party/dart/runtime/platform/syslog_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.h
+FILE: ../../../third_party/dart/runtime/vm/app_snapshot.cc
+FILE: ../../../third_party/dart/runtime/vm/app_snapshot.h
+FILE: ../../../third_party/dart/runtime/vm/canonical_tables.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/branch_optimizer.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/branch_optimizer.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.h
+FILE: ../../../third_party/dart/runtime/vm/cpuinfo_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/vm/dart_api_state.cc
+FILE: ../../../third_party/dart/runtime/vm/heap/become.cc
+FILE: ../../../third_party/dart/runtime/vm/heap/become.h
+FILE: ../../../third_party/dart/runtime/vm/heap/safepoint.cc
+FILE: ../../../third_party/dart/runtime/vm/heap/safepoint.h
+FILE: ../../../third_party/dart/runtime/vm/isolate_reload.cc
+FILE: ../../../third_party/dart/runtime/vm/isolate_reload.h
+FILE: ../../../third_party/dart/runtime/vm/isolate_reload_test.cc
+FILE: ../../../third_party/dart/runtime/vm/kernel.cc
+FILE: ../../../third_party/dart/runtime/vm/kernel.h
+FILE: ../../../third_party/dart/runtime/vm/kernel_binary.cc
+FILE: ../../../third_party/dart/runtime/vm/kernel_isolate.cc
+FILE: ../../../third_party/dart/runtime/vm/kernel_isolate.h
+FILE: ../../../third_party/dart/runtime/vm/kernel_loader.cc
+FILE: ../../../third_party/dart/runtime/vm/kernel_loader.h
+FILE: ../../../third_party/dart/runtime/vm/lockers.cc
+FILE: ../../../third_party/dart/runtime/vm/native_symbol_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/vm/object_reload.cc
+FILE: ../../../third_party/dart/runtime/vm/object_service.cc
+FILE: ../../../third_party/dart/runtime/vm/os_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/vm/os_thread_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/vm/os_thread_fuchsia.h
+FILE: ../../../third_party/dart/runtime/vm/signal_handler_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/vm/token_position.cc
+FILE: ../../../third_party/dart/runtime/vm/token_position.h
+FILE: ../../../third_party/dart/runtime/vm/uri.cc
+FILE: ../../../third_party/dart/runtime/vm/uri.h
+FILE: ../../../third_party/dart/runtime/vm/uri_test.cc
+FILE: ../../../third_party/dart/runtime/vm/virtual_memory_fuchsia.cc
+FILE: ../../../third_party/dart/sdk/lib/developer/service.dart
+FILE: ../../../third_party/dart/sdk/lib/js_util/js_util.dart
+FILE: ../../../third_party/dart/sdk/lib/vmservice/devfs.dart
+FILE: ../../../third_party/flatbuffers/dart/lib/flat_buffers.dart
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google LLC nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: dart
 ORIGIN: ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/.gitconfig
@@ -11491,399 +12389,6 @@ FILE: ../../../third_party/dart/sdk/lib/js/_js_server.dart
 FILE: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
-for details. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google LLC nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/bin/crypto_fuchsia.cc + ../../../third_party/dart/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/runtime/bin/crypto_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/crypto_test.cc
-FILE: ../../../third_party/dart/runtime/bin/directory_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/directory_test.cc
-FILE: ../../../third_party/dart/runtime/bin/eventhandler_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/eventhandler_fuchsia.h
-FILE: ../../../third_party/dart/runtime/bin/file_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/file_support.cc
-FILE: ../../../third_party/dart/runtime/bin/file_system_watcher_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/loader.cc
-FILE: ../../../third_party/dart/runtime/bin/loader.h
-FILE: ../../../third_party/dart/runtime/bin/platform_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/process_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/reference_counting.h
-FILE: ../../../third_party/dart/runtime/bin/root_certificates_unsupported.cc
-FILE: ../../../third_party/dart/runtime/bin/socket_base_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/socket_base_fuchsia.h
-FILE: ../../../third_party/dart/runtime/bin/socket_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/stdio_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/thread_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/thread_fuchsia.h
-FILE: ../../../third_party/dart/runtime/bin/utils_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/lib/stacktrace.h
-FILE: ../../../third_party/dart/runtime/observatory/lib/event.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/models.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/repositories.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/app/notification.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/class_allocation_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/containers/virtual_collection.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/containers/virtual_tree.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/error_ref.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/general_error.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/custom_element.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/nav_bar.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/nav_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/rendering_queue.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/rendering_scheduler.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/helpers/uris.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/inbound_references.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/counter_chart.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/location.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/run_state.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/shared_summary.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/isolate/summary.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/metric/details.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/metric/graph.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/class_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/isolate_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/library_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/menu_item.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/notify.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/notify_event.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/notify_exception.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/refresh.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/top_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/vm_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/retaining_path.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/source_link.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/strongly_reachable_instances.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/vm_connect_target.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/exceptions.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/allocation_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/breakpoint.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/class.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/code.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/context.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/error.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/event.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/extension_data.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/field.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/flag.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/frame.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/function.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/guarded.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/heap_space.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/icdata.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/inbound_references.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/instance.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/isolate.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/library.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/local_var_descriptors.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/map_association.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/megamorphiccache.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/metric.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/notification.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/object.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/objectpool.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/objectstore.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/pc_descriptors.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/persistent_handles.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/ports.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/retaining_path.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/sample_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/script.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/sentinel.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/source_location.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/target.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/timeline_event.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/type_arguments.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/unknown.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/vm.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/allocation_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/breakpoint.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/class.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/context.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/editor.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/eval.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/event.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/field.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/flag.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/function.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/heap_snapshot.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/icdata.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/inbound_references.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/instance.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/isolate.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/library.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/megamorphiccache.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/metric.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/notification.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/object.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/objectpool.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/objectstore.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/persistent_handles.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/ports.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/reachable_size.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/retained_size.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/retaining_path.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/sample_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/script.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/strongly_reachable_instances.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/target.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/type_arguments.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/allocation_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/breakpoint.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/class.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/context.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/editor.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/eval.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/event.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/field.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/flag.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/function.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/heap_snapshot.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/icdata.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/inbound_references.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/instance.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/isolate.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/library.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/megamorphiccache.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/metric.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/notification.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/object.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/objectpool.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/objectstore.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/persistent_handles.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/ports.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/reachable_size.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/retained_size.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/retaining_path.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/sample_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/script.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/settings.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/strongly_reachable_instances.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/target.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/type_arguments.dart
-FILE: ../../../third_party/dart/runtime/observatory/web/timeline_message_handler.js
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/event.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/models.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/repositories.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/app/notification.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/class_allocation_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/containers/virtual_collection.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/containers/virtual_tree.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/error_ref.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/general_error.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/custom_element.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/nav_bar.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/nav_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/rendering_queue.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/rendering_scheduler.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/tag.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/helpers/uris.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/inbound_references.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/counter_chart.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/location.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/run_state.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/shared_summary.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/isolate/summary.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/metric/details.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/metric/graph.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/class_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/isolate_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/library_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/menu_item.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/notify.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/notify_event.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/notify_exception.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/refresh.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/top_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/nav/vm_menu.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/retaining_path.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/source_link.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/strongly_reachable_instances.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/vm_connect_target.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/exceptions.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/allocation_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/breakpoint.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/class.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/code.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/context.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/error.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/event.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/extension_data.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/field.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/flag.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/frame.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/function.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/guarded.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/heap_space.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/icdata.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/inbound_references.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/instance.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/isolate.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/library.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/local_var_descriptors.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/map_association.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/megamorphiccache.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/metric.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/notification.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/object.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/objectpool.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/objectstore.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/pc_descriptors.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/persistent_handles.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/ports.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/retaining_path.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/sample_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/script.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/sentinel.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/source_location.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/target.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/timeline_event.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/type_arguments.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/unknown.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/vm.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/allocation_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/breakpoint.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/class.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/context.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/editor.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/eval.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/event.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/field.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/flag.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/function.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/heap_snapshot.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/icdata.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/inbound_references.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/instance.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/isolate.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/library.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/megamorphiccache.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/metric.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/notification.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/object.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/objectpool.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/objectstore.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/persistent_handles.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/ports.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/reachable_size.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/retained_size.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/retaining_path.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/sample_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/script.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/strongly_reachable_instances.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/target.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/type_arguments.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/allocation_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/breakpoint.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/class.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/context.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/editor.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/eval.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/event.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/field.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/flag.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/function.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/heap_snapshot.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/icdata.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/inbound_references.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/instance.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/isolate.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/library.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/megamorphiccache.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/metric.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/notification.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/object.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/objectpool.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/objectstore.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/persistent_handles.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/ports.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/reachable_size.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/retained_size.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/retaining_path.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/sample_profile.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/script.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/settings.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/strongly_reachable_instances.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/target.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/type_arguments.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/web/timeline_message_handler.js
-FILE: ../../../third_party/dart/runtime/platform/syslog_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.h
-FILE: ../../../third_party/dart/runtime/vm/app_snapshot.cc
-FILE: ../../../third_party/dart/runtime/vm/app_snapshot.h
-FILE: ../../../third_party/dart/runtime/vm/canonical_tables.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/branch_optimizer.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/branch_optimizer.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_to_il.h
-FILE: ../../../third_party/dart/runtime/vm/cpuinfo_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/vm/dart_api_state.cc
-FILE: ../../../third_party/dart/runtime/vm/heap/become.cc
-FILE: ../../../third_party/dart/runtime/vm/heap/become.h
-FILE: ../../../third_party/dart/runtime/vm/heap/safepoint.cc
-FILE: ../../../third_party/dart/runtime/vm/heap/safepoint.h
-FILE: ../../../third_party/dart/runtime/vm/isolate_reload.cc
-FILE: ../../../third_party/dart/runtime/vm/isolate_reload.h
-FILE: ../../../third_party/dart/runtime/vm/isolate_reload_test.cc
-FILE: ../../../third_party/dart/runtime/vm/kernel.cc
-FILE: ../../../third_party/dart/runtime/vm/kernel.h
-FILE: ../../../third_party/dart/runtime/vm/kernel_binary.cc
-FILE: ../../../third_party/dart/runtime/vm/kernel_isolate.cc
-FILE: ../../../third_party/dart/runtime/vm/kernel_isolate.h
-FILE: ../../../third_party/dart/runtime/vm/kernel_loader.cc
-FILE: ../../../third_party/dart/runtime/vm/kernel_loader.h
-FILE: ../../../third_party/dart/runtime/vm/lockers.cc
-FILE: ../../../third_party/dart/runtime/vm/native_symbol_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/vm/object_reload.cc
-FILE: ../../../third_party/dart/runtime/vm/object_service.cc
-FILE: ../../../third_party/dart/runtime/vm/os_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/vm/os_thread_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/vm/os_thread_fuchsia.h
-FILE: ../../../third_party/dart/runtime/vm/signal_handler_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/vm/token_position.cc
-FILE: ../../../third_party/dart/runtime/vm/token_position.h
-FILE: ../../../third_party/dart/runtime/vm/uri.cc
-FILE: ../../../third_party/dart/runtime/vm/uri.h
-FILE: ../../../third_party/dart/runtime/vm/uri_test.cc
-FILE: ../../../third_party/dart/runtime/vm/virtual_memory_fuchsia.cc
-FILE: ../../../third_party/dart/sdk/lib/developer/service.dart
-FILE: ../../../third_party/dart/sdk/lib/js_util/js_util.dart
-FILE: ../../../third_party/dart/sdk/lib/vmservice/devfs.dart
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -13985,6 +14490,219 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: flatbuffers
+ORIGIN: ../../../third_party/flatbuffers/dart/LICENSE
+TYPE: LicenseType.apache
+FILE: ../../../third_party/flatbuffers/dart/example/monster_my_game.sample_generated.dart
+FILE: ../../../third_party/flatbuffers/dart/lib/flex_buffers.dart
+FILE: ../../../third_party/flatbuffers/dart/lib/src/builder.dart
+FILE: ../../../third_party/flatbuffers/dart/lib/src/reference.dart
+FILE: ../../../third_party/flatbuffers/dart/lib/src/types.dart
+----------------------------------------------------------------------------------------------------
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+1. Definitions.
+
+   "License" shall mean the terms and conditions for use, reproduction,
+   and distribution as defined by Sections 1 through 9 of this document.
+
+   "Licensor" shall mean the copyright owner or entity authorized by
+   the copyright owner that is granting the License.
+
+   "Legal Entity" shall mean the union of the acting entity and all
+   other entities that control, are controlled by, or are under common
+   control with that entity. For the purposes of this definition,
+   "control" means (i) the power, direct or indirect, to cause the
+   direction or management of such entity, whether by contract or
+   otherwise, or (ii) ownership of fifty percent (50%) or more of the
+   outstanding shares, or (iii) beneficial ownership of such entity.
+
+   "You" (or "Your") shall mean an individual or Legal Entity
+   exercising permissions granted by this License.
+
+   "Source" form shall mean the preferred form for making modifications,
+   including but not limited to software source code, documentation
+   source, and configuration files.
+
+   "Object" form shall mean any form resulting from mechanical
+   transformation or translation of a Source form, including but
+   not limited to compiled object code, generated documentation,
+   and conversions to other media types.
+
+   "Work" shall mean the work of authorship, whether in Source or
+   Object form, made available under the License, as indicated by a
+   copyright notice that is included in or attached to the work
+   (an example is provided in the Appendix below).
+
+   "Derivative Works" shall mean any work, whether in Source or Object
+   form, that is based on (or derived from) the Work and for which the
+   editorial revisions, annotations, elaborations, or other modifications
+   represent, as a whole, an original work of authorship. For the purposes
+   of this License, Derivative Works shall not include works that remain
+   separable from, or merely link (or bind by name) to the interfaces of,
+   the Work and Derivative Works thereof.
+
+   "Contribution" shall mean any work of authorship, including
+   the original version of the Work and any modifications or additions
+   to that Work or Derivative Works thereof, that is intentionally
+   submitted to Licensor for inclusion in the Work by the copyright owner
+   or by an individual or Legal Entity authorized to submit on behalf of
+   the copyright owner. For the purposes of this definition, "submitted"
+   means any form of electronic, verbal, or written communication sent
+   to the Licensor or its representatives, including but not limited to
+   communication on electronic mailing lists, source code control systems,
+   and issue tracking systems that are managed by, or on behalf of, the
+   Licensor for the purpose of discussing and improving the Work, but
+   excluding communication that is conspicuously marked or otherwise
+   designated in writing by the copyright owner as "Not a Contribution."
+
+   "Contributor" shall mean Licensor and any individual or Legal Entity
+   on behalf of whom a Contribution has been received by Licensor and
+   subsequently incorporated within the Work.
+
+2. Grant of Copyright License. Subject to the terms and conditions of
+   this License, each Contributor hereby grants to You a perpetual,
+   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+   copyright license to reproduce, prepare Derivative Works of,
+   publicly display, publicly perform, sublicense, and distribute the
+   Work and such Derivative Works in Source or Object form.
+
+3. Grant of Patent License. Subject to the terms and conditions of
+   this License, each Contributor hereby grants to You a perpetual,
+   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+   (except as stated in this section) patent license to make, have made,
+   use, offer to sell, sell, import, and otherwise transfer the Work,
+   where such license applies only to those patent claims licensable
+   by such Contributor that are necessarily infringed by their
+   Contribution(s) alone or by combination of their Contribution(s)
+   with the Work to which such Contribution(s) was submitted. If You
+   institute patent litigation against any entity (including a
+   cross-claim or counterclaim in a lawsuit) alleging that the Work
+   or a Contribution incorporated within the Work constitutes direct
+   or contributory patent infringement, then any patent licenses
+   granted to You under this License for that Work shall terminate
+   as of the date such litigation is filed.
+
+4. Redistribution. You may reproduce and distribute copies of the
+   Work or Derivative Works thereof in any medium, with or without
+   modifications, and in Source or Object form, provided that You
+   meet the following conditions:
+
+   (a) You must give any other recipients of the Work or
+       Derivative Works a copy of this License; and
+
+   (b) You must cause any modified files to carry prominent notices
+       stating that You changed the files; and
+
+   (c) You must retain, in the Source form of any Derivative Works
+       that You distribute, all copyright, patent, trademark, and
+       attribution notices from the Source form of the Work,
+       excluding those notices that do not pertain to any part of
+       the Derivative Works; and
+
+   (d) If the Work includes a "NOTICE" text file as part of its
+       distribution, then any Derivative Works that You distribute must
+       include a readable copy of the attribution notices contained
+       within such NOTICE file, excluding those notices that do not
+       pertain to any part of the Derivative Works, in at least one
+       of the following places: within a NOTICE text file distributed
+       as part of the Derivative Works; within the Source form or
+       documentation, if provided along with the Derivative Works; or,
+       within a display generated by the Derivative Works, if and
+       wherever such third-party notices normally appear. The contents
+       of the NOTICE file are for informational purposes only and
+       do not modify the License. You may add Your own attribution
+       notices within Derivative Works that You distribute, alongside
+       or as an addendum to the NOTICE text from the Work, provided
+       that such additional attribution notices cannot be construed
+       as modifying the License.
+
+   You may add Your own copyright statement to Your modifications and
+   may provide additional or different license terms and conditions
+   for use, reproduction, or distribution of Your modifications, or
+   for any such Derivative Works as a whole, provided Your use,
+   reproduction, and distribution of the Work otherwise complies with
+   the conditions stated in this License.
+
+5. Submission of Contributions. Unless You explicitly state otherwise,
+   any Contribution intentionally submitted for inclusion in the Work
+   by You to the Licensor shall be under the terms and conditions of
+   this License, without any additional terms or conditions.
+   Notwithstanding the above, nothing herein shall supersede or modify
+   the terms of any separate license agreement you may have executed
+   with Licensor regarding such Contributions.
+
+6. Trademarks. This License does not grant permission to use the trade
+   names, trademarks, service marks, or product names of the Licensor,
+   except as required for reasonable and customary use in describing the
+   origin of the Work and reproducing the content of the NOTICE file.
+
+7. Disclaimer of Warranty. Unless required by applicable law or
+   agreed to in writing, Licensor provides the Work (and each
+   Contributor provides its Contributions) on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+   implied, including, without limitation, any warranties or conditions
+   of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+   PARTICULAR PURPOSE. You are solely responsible for determining the
+   appropriateness of using or redistributing the Work and assume any
+   risks associated with Your exercise of permissions under this License.
+
+8. Limitation of Liability. In no event and under no legal theory,
+   whether in tort (including negligence), contract, or otherwise,
+   unless required by applicable law (such as deliberate and grossly
+   negligent acts) or agreed to in writing, shall any Contributor be
+   liable to You for damages, including any direct, indirect, special,
+   incidental, or consequential damages of any character arising as a
+   result of this License or out of the use or inability to use the
+   Work (including but not limited to damages for loss of goodwill,
+   work stoppage, computer failure or malfunction, or any and all
+   other commercial damages or losses), even if such Contributor
+   has been advised of the possibility of such damages.
+
+9. Accepting Warranty or Additional Liability. While redistributing
+   the Work or Derivative Works thereof, You may choose to offer,
+   and charge a fee for, acceptance of support, warranty, indemnity,
+   or other liability obligations and/or rights consistent with this
+   License. However, in accepting such obligations, You may act only
+   on Your own behalf and on Your sole responsibility, not on behalf
+   of any other Contributor, and only if You agree to indemnify,
+   defend, and hold each Contributor harmless for any liability
+   incurred by, or claims asserted against, such Contributor by reason
+   of your accepting any such warranty or additional liability.
+
+END OF TERMS AND CONDITIONS
+
+APPENDIX: How to apply the Apache License to your work.
+
+   To apply the Apache License to your work, attach the following
+   boilerplate notice, with the fields enclosed by brackets "[]"
+   replaced with your own identifying information. (Don't include
+   the brackets!)  The text should be enclosed in the appropriate
+   comment syntax for the file format. We also recommend that a
+   file or class name and description of purpose be included on the
+   same "printed page" as the copyright notice for easier
+   identification within third-party archives.
+
+Copyright 2014 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ====================================================================================================
 
 ====================================================================================================
@@ -26596,4 +27314,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 416
+Total license count: 417

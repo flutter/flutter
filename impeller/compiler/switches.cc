@@ -18,10 +18,17 @@ static const std::map<std::string, TargetPlatform> kKnownPlatforms = {
     {"opengl-es", TargetPlatform::kOpenGLES},
     {"opengl-desktop", TargetPlatform::kOpenGLDesktop},
     {"flutter-spirv", TargetPlatform::kFlutterSPIRV},
+    {"runtime-stage-metal", TargetPlatform::kRuntimeStageMetal},
+    {"runtime-stage-gles", TargetPlatform::kRuntimeStageGLES},
 };
 
 void Switches::PrintHelp(std::ostream& stream) {
-  stream << std::endl << "Valid Argument are:" << std::endl;
+  stream << std::endl;
+  stream << "ImpellerC is an offline shader processor and reflection engine."
+         << std::endl;
+  stream << "---------------------------------------------------------------"
+         << std::endl;
+  stream << "Valid Argument are:" << std::endl;
   stream << "One of [";
   for (const auto& platform : kKnownPlatforms) {
     stream << " --" << platform.first;

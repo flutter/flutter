@@ -10,6 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/compiler_backend.h"
+#include "impeller/compiler/runtime_stage_data.h"
 #include "inja/inja.hpp"
 #include "third_party/spirv_cross/spirv_msl.hpp"
 #include "third_party/spirv_cross/spirv_parser.hpp"
@@ -39,6 +40,7 @@ struct StructMember {
 class Reflector {
  public:
   struct Options {
+    TargetPlatform target_platform = TargetPlatform::kUnknown;
     std::string entry_point_name;
     std::string shader_name;
     std::string header_file_name;
@@ -46,6 +48,7 @@ class Reflector {
 
   Reflector(Options options,
             std::shared_ptr<const spirv_cross::ParsedIR> ir,
+            std::shared_ptr<fml::Mapping> shader_data,
             CompilerBackend compiler);
 
   ~Reflector();
@@ -57,6 +60,8 @@ class Reflector {
   std::shared_ptr<fml::Mapping> GetReflectionHeader() const;
 
   std::shared_ptr<fml::Mapping> GetReflectionCC() const;
+
+  std::shared_ptr<RuntimeStageData> GetRuntimeStageData() const;
 
  private:
   struct StructDefinition {
@@ -79,10 +84,12 @@ class Reflector {
 
   const Options options_;
   const std::shared_ptr<const spirv_cross::ParsedIR> ir_;
+  const std::shared_ptr<fml::Mapping> shader_data_;
   const CompilerBackend compiler_;
   std::unique_ptr<const nlohmann::json> template_arguments_;
   std::shared_ptr<fml::Mapping> reflection_header_;
   std::shared_ptr<fml::Mapping> reflection_cc_;
+  std::shared_ptr<RuntimeStageData> runtime_stage_data_;
   bool is_valid_ = false;
 
   std::optional<nlohmann::json> GenerateTemplateArguments() const;
@@ -90,6 +97,8 @@ class Reflector {
   std::shared_ptr<fml::Mapping> GenerateReflectionHeader() const;
 
   std::shared_ptr<fml::Mapping> GenerateReflectionCC() const;
+
+  std::shared_ptr<RuntimeStageData> GenerateRuntimeStageData() const;
 
   std::shared_ptr<fml::Mapping> InflateTemplate(std::string_view tmpl) const;
 

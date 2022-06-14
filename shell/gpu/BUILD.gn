@@ -63,11 +63,18 @@ source_set("gpu_surface_metal") {
   sources = [
     "gpu_surface_metal_delegate.cc",
     "gpu_surface_metal_delegate.h",
-    "gpu_surface_metal_impeller.h",
-    "gpu_surface_metal_impeller.mm",
     "gpu_surface_metal_skia.h",
     "gpu_surface_metal_skia.mm",
   ]
 
-  public_deps = gpu_common_deps + [ "//flutter/impeller" ]
+  public_deps = gpu_common_deps
+
+  if (impeller_enable_metal) {
+    sources += [
+      "gpu_surface_metal_impeller.h",
+      "gpu_surface_metal_impeller.mm",
+    ]
+
+    public_deps += [ "//flutter/impeller" ]
+  }
 }

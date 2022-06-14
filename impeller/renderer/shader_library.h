@@ -4,10 +4,12 @@
 
 #pragma once
 
+#include <future>
 #include <memory>
 #include <string_view>
 
 #include "flutter/fml/macros.h"
+#include "fml/mapping.h"
 #include "impeller/renderer/shader_types.h"
 
 namespace impeller {
@@ -15,7 +17,7 @@ namespace impeller {
 class Context;
 class ShaderFunction;
 
-class ShaderLibrary {
+class ShaderLibrary : public std::enable_shared_from_this<ShaderLibrary> {
  public:
   virtual ~ShaderLibrary();
 
@@ -24,6 +26,12 @@ class ShaderLibrary {
   virtual std::shared_ptr<const ShaderFunction> GetFunction(
       std::string_view name,
       ShaderStage stage) = 0;
+
+  using RegistrationCallback = std::function<void(bool)>;
+  virtual void RegisterFunction(std::string name,
+                                ShaderStage stage,
+                                std::shared_ptr<fml::Mapping> code,
+                                RegistrationCallback callback);
 
  protected:
   ShaderLibrary();

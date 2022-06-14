@@ -8,6 +8,8 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "impeller/base/comparable.h"
+#include "impeller/base/thread.h"
 #include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/shader_library.h"
 
@@ -23,7 +25,9 @@ class ShaderLibraryGLES final : public ShaderLibrary {
 
  private:
   friend class ContextGLES;
-  ShaderFunctionMap functions_;
+  const UniqueID library_id_;
+  mutable RWMutex functions_mutex_;
+  ShaderFunctionMap functions_ IPLR_GUARDED_BY(functions_mutex_);
   bool is_valid_ = false;
 
   ShaderLibraryGLES(
@@ -32,6 +36,12 @@ class ShaderLibraryGLES final : public ShaderLibrary {
   // |ShaderLibrary|
   std::shared_ptr<const ShaderFunction> GetFunction(std::string_view name,
                                                     ShaderStage stage) override;
+
+  // |ShaderLibrary|
+  void RegisterFunction(std::string name,
+                        ShaderStage stage,
+                        std::shared_ptr<fml::Mapping> code,
+                        RegistrationCallback callback) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibraryGLES);
 };
