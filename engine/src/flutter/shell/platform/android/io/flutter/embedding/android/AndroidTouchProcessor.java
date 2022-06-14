@@ -6,12 +6,9 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.HashMap;
-import java.util.Map;
 
 /** Sends touch information from Android to Flutter in a format that Flutter understands. */
 public class AndroidTouchProcessor {
@@ -29,7 +26,7 @@ public class AndroidTouchProcessor {
     PointerChange.PAN_ZOOM_UPDATE,
     PointerChange.PAN_ZOOM_END
   })
-  public @interface PointerChange {
+  private @interface PointerChange {
     int CANCEL = 0;
     int ADD = 1;
     int REMOVE = 2;
@@ -51,7 +48,7 @@ public class AndroidTouchProcessor {
     PointerDeviceKind.TRACKPAD,
     PointerDeviceKind.UNKNOWN
   })
-  public @interface PointerDeviceKind {
+  private @interface PointerDeviceKind {
     int TOUCH = 0;
     int MOUSE = 1;
     int STYLUS = 2;
@@ -62,7 +59,7 @@ public class AndroidTouchProcessor {
 
   // Must match the PointerSignalKind enum in pointer.dart.
   @IntDef({PointerSignalKind.NONE, PointerSignalKind.SCROLL, PointerSignalKind.UNKNOWN})
-  public @interface PointerSignalKind {
+  private @interface PointerSignalKind {
     int NONE = 0;
     int SCROLL = 1;
     int UNKNOWN = 2;
@@ -70,7 +67,7 @@ public class AndroidTouchProcessor {
 
   // Must match the unpacking code in hooks.dart.
   private static final int POINTER_DATA_FIELD_COUNT = 35;
-  @VisibleForTesting static final int BYTES_PER_FIELD = 8;
+  private static final int BYTES_PER_FIELD = 8;
 
   // This value must match the value in framework's platform_view.dart.
   // This flag indicates whether the original Android pointer events were batched together.
@@ -79,11 +76,11 @@ public class AndroidTouchProcessor {
   @NonNull private final FlutterRenderer renderer;
   @NonNull private final MotionEventTracker motionEventTracker;
 
+  private static final int _POINTER_BUTTON_PRIMARY = 1;
+
   private static final Matrix IDENTITY_TRANSFORM = new Matrix();
 
   private final boolean trackMotionEvents;
-
-  private final Map<Integer, float[]> ongoingPans = new HashMap<>();
 
   /**
    * Constructs an {@code AndroidTouchProcessor} that will send touch event data to the Flutter
@@ -223,28 +220,6 @@ public class AndroidTouchProcessor {
     }
 
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
-    // We use this in lieu of using event.getRawX and event.getRawY as we wish to support
-    // earlier versions than API level 29.
-    float viewToScreenCoords[] = {event.getX(pointerIndex), event.getY(pointerIndex)};
-    transformMatrix.mapPoints(viewToScreenCoords);
-    long buttons;
-    if (pointerKind == PointerDeviceKind.MOUSE) {
-      buttons = event.getButtonState() & 0x1F;
-      if (buttons == 0
-          && event.getSource() == InputDevice.SOURCE_MOUSE
-          && pointerChange == PointerChange.DOWN) {
-        // Some implementations translate trackpad scrolling into a mouse down-move-up event
-        // sequence with buttons: 0, such as ARC on a Chromebook. See #11420, a legacy
-        // implementation that uses the same condition but converts differently.
-        ongoingPans.put(event.getPointerId(pointerIndex), viewToScreenCoords);
-      }
-    } else if (pointerKind == PointerDeviceKind.STYLUS) {
-      buttons = (event.getButtonState() >> 4) & 0xF;
-    } else {
-      buttons = 0;
-    }
-
-    boolean isTrackpadPan = ongoingPans.containsKey(event.getPointerId(pointerIndex));
 
     int signalKind =
         event.getActionMasked() == MotionEvent.ACTION_SCROLL
@@ -255,31 +230,39 @@ public class AndroidTouchProcessor {
 
     packet.putLong(motionEventId); // motionEventId
     packet.putLong(timeStamp); // time_stamp
-    if (isTrackpadPan) {
-      packet.putLong(getPointerChangeForPanZoom(pointerChange)); // change
-      packet.putLong(PointerDeviceKind.TRACKPAD); // kind
-    } else {
-      packet.putLong(pointerChange); // change
-      packet.putLong(pointerKind); // kind
-    }
+    packet.putLong(pointerChange); // change
+    packet.putLong(pointerKind); // kind
     packet.putLong(signalKind); // signal_kind
     packet.putLong(event.getPointerId(pointerIndex)); // device
     packet.putLong(0); // pointer_identifier, will be generated in pointer_data_packet_converter.cc.
 
-    if (isTrackpadPan) {
-      float[] panStart = ongoingPans.get(event.getPointerId(pointerIndex));
-      packet.putDouble(panStart[0]);
-      packet.putDouble(panStart[1]);
-    } else {
-      packet.putDouble(viewToScreenCoords[0]); // physical_x
-      packet.putDouble(viewToScreenCoords[1]); // physical_y
-    }
+    // We use this in lieu of using event.getRawX and event.getRawY as we wish to support
+    // earlier versions than API level 29.
+    float viewToScreenCoords[] = {event.getX(pointerIndex), event.getY(pointerIndex)};
+    transformMatrix.mapPoints(viewToScreenCoords);
+    packet.putDouble(viewToScreenCoords[0]); // physical_x
+    packet.putDouble(viewToScreenCoords[1]); // physical_y
 
     packet.putDouble(
         0.0); // physical_delta_x, will be generated in pointer_data_packet_converter.cc.
     packet.putDouble(
         0.0); // physical_delta_y, will be generated in pointer_data_packet_converter.cc.
 
+    long buttons;
+    if (pointerKind == PointerDeviceKind.MOUSE) {
+      buttons = event.getButtonState() & 0x1F;
+      // TODO(dkwingsmt): Remove this fix after implementing touchpad gestures
+      // https://github.com/flutter/flutter/issues/23604#issuecomment-524471152
+      if (buttons == 0
+          && event.getSource() == InputDevice.SOURCE_MOUSE
+          && (pointerChange == PointerChange.DOWN || pointerChange == PointerChange.MOVE)) {
+        buttons = _POINTER_BUTTON_PRIMARY;
+      }
+    } else if (pointerKind == PointerDeviceKind.STYLUS) {
+      buttons = (event.getButtonState() >> 4) & 0xF;
+    } else {
+      buttons = 0;
+    }
     packet.putLong(buttons); // buttons
 
     packet.putLong(0); // obscured
@@ -334,22 +317,12 @@ public class AndroidTouchProcessor {
       packet.putDouble(0.0); // scroll_delta_x
     }
 
-    if (isTrackpadPan) {
-      float[] panStart = ongoingPans.get(event.getPointerId(pointerIndex));
-      packet.putDouble(viewToScreenCoords[0] - panStart[0]);
-      packet.putDouble(viewToScreenCoords[1] - panStart[1]);
-    } else {
-      packet.putDouble(0.0); // pan_x
-      packet.putDouble(0.0); // pan_y
-    }
+    packet.putDouble(0.0); // pan_x
+    packet.putDouble(0.0); // pan_y
     packet.putDouble(0.0); // pan_delta_x
     packet.putDouble(0.0); // pan_delta_y
     packet.putDouble(1.0); // scale
     packet.putDouble(0.0); // rotation
-
-    if (isTrackpadPan && getPointerChangeForPanZoom(pointerChange) == PointerChange.PAN_ZOOM_END) {
-      ongoingPans.remove(event.getPointerId(pointerIndex));
-    }
   }
 
   @PointerChange
@@ -380,18 +353,6 @@ public class AndroidTouchProcessor {
     }
     if (maskedAction == MotionEvent.ACTION_SCROLL) {
       return PointerChange.HOVER;
-    }
-    return -1;
-  }
-
-  @PointerChange
-  private int getPointerChangeForPanZoom(int pointerChange) {
-    if (pointerChange == PointerChange.DOWN) {
-      return PointerChange.PAN_ZOOM_START;
-    } else if (pointerChange == PointerChange.MOVE) {
-      return PointerChange.PAN_ZOOM_UPDATE;
-    } else if (pointerChange == PointerChange.UP || pointerChange == PointerChange.CANCEL) {
-      return PointerChange.PAN_ZOOM_END;
     }
     return -1;
   }
