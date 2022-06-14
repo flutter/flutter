@@ -765,10 +765,10 @@ class TextEditingValue {
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
   }) : assert(text != null),
-       // The constructor does not verified that `selection` and `composing` are
+       // The constructor does not verify that `selection` and `composing` are
        // valid ranges within `text`, and is unable to do so due to limitation
-       // of const constructors. Some checks are performed by assertion
-       // in other occasions. See `_textRangeIsValid`.
+       // of const constructors. Some checks are performed by assertion in
+       // other occasions. See `_textRangeIsValid`.
        assert(selection != null),
        assert(composing != null);
 
@@ -1648,7 +1648,7 @@ class TextInput {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _channel.invokeMethod<void>(
       'TextInput.setClient',
-      <dynamic>[
+      <Object>[
         connection._id,
         configuration.toJson(),
       ],
