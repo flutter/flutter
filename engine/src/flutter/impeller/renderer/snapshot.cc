@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/entity/contents/snapshot.h"
+#include "impeller/renderer/snapshot.h"
 
 #include <optional>
-
-#include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/texture_contents.h"
 
 namespace impeller {
 
