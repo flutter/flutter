@@ -62,19 +62,19 @@ void main() {
     addTearDown(() => FocusManager.instance.removeListener(handleFocusChange));
   }
 
-  Finder findDivider() {
+  Finder findDividers() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuItemDivider');
   }
 
-  Finder findMenuBarMenu() {
+  Finder findMenuBarMenuLists() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuBarMenuList');
   }
 
-  Finder findMenuTopLevelBar() {
+  Finder findMenuTopLevelBars() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuBarTopLevelBar');
   }
 
-  Finder findMenuBarItemLabel() {
+  Finder findMenuBarItemLabels() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuBarItemLabel');
   }
 
@@ -82,7 +82,7 @@ void main() {
   Finder findMnemonic(String label) {
     return find
         .descendant(
-            of: find.ancestor(of: find.text(label), matching: findMenuBarItemLabel()), matching: find.byType(Text))
+            of: find.ancestor(of: find.text(label), matching: findMenuBarItemLabels()), matching: find.byType(Text))
         .last;
   }
 
@@ -95,7 +95,7 @@ void main() {
 
   Material getMenuBarMaterial(WidgetTester tester) {
     return tester.widget<Material>(
-      find.descendant(of: findMenuTopLevelBar(), matching: find.byType(Material)).first,
+      find.descendant(of: findMenuTopLevelBars(), matching: find.byType(Material)).first,
     );
   }
 
@@ -180,9 +180,9 @@ void main() {
         tester.getRect(find.text(TestMenu.subMenu10.label)),
         equals(const Rect.fromLTRB(120.0, 73.0, 274.0, 87.0)),
       );
-      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
+      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenuLists())),
           equals(const Rect.fromLTRB(96.0, 48.0, 358.0, 224.0)));
-      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(96.0, 104.0, 358.0, 120.0)));
+      expect(tester.getRect(findDividers()), equals(const Rect.fromLTRB(96.0, 104.0, 358.0, 120.0)));
 
       // Close and make sure it goes back where it was.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
@@ -221,9 +221,9 @@ void main() {
         tester.getRect(find.text(TestMenu.subMenu10.label)),
         equals(const Rect.fromLTRB(526.0, 73.0, 680.0, 87.0)),
       );
-      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
+      expect(tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenuLists())),
           equals(const Rect.fromLTRB(442.0, 48.0, 704.0, 224.0)));
-      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(442.0, 104.0, 704.0, 120.0)));
+      expect(tester.getRect(findDividers()), equals(const Rect.fromLTRB(442.0, 104.0, 704.0, 120.0)));
 
       // Close and make sure it goes back where it was.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
@@ -266,10 +266,10 @@ void main() {
         equals(const Rect.fromLTRB(142.0, 95.0, 296.0, 109.0)),
       );
       expect(
-        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
+        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenuLists())),
         equals(const Rect.fromLTRB(118.0, 70.0, 380.0, 246.0)),
       );
-      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(118.0, 126.0, 380.0, 142.0)));
+      expect(tester.getRect(findDividers()), equals(const Rect.fromLTRB(118.0, 126.0, 380.0, 142.0)));
 
       // Close and make sure it goes back where it was.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
@@ -315,10 +315,10 @@ void main() {
         equals(const Rect.fromLTRB(504.0, 95.0, 658.0, 109.0)),
       );
       expect(
-        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenu())),
+        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: findMenuBarMenuLists())),
         equals(const Rect.fromLTRB(420.0, 70.0, 682.0, 246.0)),
       );
-      expect(tester.getRect(findDivider()), equals(const Rect.fromLTRB(420.0, 126.0, 682.0, 142.0)));
+      expect(tester.getRect(findDividers()), equals(const Rect.fromLTRB(420.0, 126.0, 682.0, 142.0)));
 
       // Close and make sure it goes back where it was.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
@@ -344,7 +344,7 @@ void main() {
           ),
         ),
       );
-      expect(tester.getRect(findMenuTopLevelBar()), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+      expect(tester.getRect(findMenuTopLevelBars()), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
       final Material material = getMenuBarMaterial(tester);
       expect(material.elevation, equals(10));
       expect(material.color, equals(Colors.red));
@@ -1032,6 +1032,94 @@ void main() {
       expect(openPath, equalsIgnoringHashCodes('MenuBarMenu#00000(Menu 1) > MenuBarMenu#00000(Sub Menu 11)'));
     });
   });
+  group('MenuItemGroup', () {
+    testWidgets('Top level menu groups have appropriate dividers', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              menus: createTestMenus(
+                includeExtraGroups: true,
+                onSelected: onSelected,
+                onOpen: onOpen,
+                onClose: onClose,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(findDividers(), findsNWidgets(2));
+
+      // Children of the top level menu bar should be in the right order (with
+      // the dividers between the right items).
+      final Finder topLevelMenuBar = findMenuTopLevelBars().first;
+      final Finder topLevelList = find.descendant(of: topLevelMenuBar, matching: findMenuBarMenuLists().first);
+      // ignore: avoid_dynamic_calls
+      final List<Widget> children = (tester.widget(topLevelList) as dynamic).children as List<Widget>;
+      expect(
+        children.map<String>((Widget child) => child.runtimeType.toString()),
+        equals(
+          <String>[
+            '_MenuNodeWrapper',
+            '_MenuNodeWrapper',
+            '_MenuNodeWrapper',
+            '_MenuItemDivider',
+            '_MenuNodeWrapper',
+            '_MenuItemDivider',
+            '_MenuNodeWrapper',
+          ],
+        ),
+      );
+    });
+    testWidgets('Submenus have appropriate dividers', (WidgetTester tester) async {
+      final GlobalKey menuKey = GlobalKey(debugLabel: 'MenuBar');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              key: menuKey,
+              controller: controller,
+              menus: createTestMenus(
+                includeExtraGroups: true,
+                onSelected: onSelected,
+                onOpen: onOpen,
+                onClose: onClose,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(TestMenu.mainMenu4.label));
+      await tester.pumpAndSettle();
+
+      expect(findDividers(), findsNWidgets(4));
+
+      // The menu item that is open.
+      final Finder firstMenuList = find.descendant(
+        of: find.byWidget(Navigator.of(menuKey.currentContext!).overlay!.widget),
+        matching: findMenuBarMenuLists().first,
+      );
+      // ignore: avoid_dynamic_calls
+      final List<Widget> children = (tester.widget(firstMenuList) as dynamic).children as List<Widget>;
+      expect(
+        children.map<String>((Widget child) => child.runtimeType.toString()),
+        equals(
+          <String>[
+            '_MenuNodeWrapper',
+            '_MenuNodeWrapper',
+            '_MenuNodeWrapper',
+            '_MenuItemDivider',
+            '_MenuNodeWrapper',
+            '_MenuItemDivider',
+            '_MenuNodeWrapper',
+          ],
+        ),
+      );
+    });
+  });
   group('MenuBarController', () {
     testWidgets('enable and disable works', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1547,11 +1635,17 @@ enum TestMenu {
   mainMenu0('Menu 0'),
   mainMenu1('Menu 1'),
   mainMenu2('Menu 2'),
+  mainMenu3('Menu 3'),
+  mainMenu4('Menu 4'),
   subMenu00('Sub Menu 00'),
   subMenu10('Sub Menu 10'),
   subMenu11('Sub Menu 11'),
   subMenu12('Sub Menu 12'),
   subMenu20('Sub Menu 20'),
+  subMenu30('Sub Menu 30'),
+  subMenu40('Sub Menu 40'),
+  subMenu41('Sub Menu 41'),
+  subMenu42('Sub Menu 42'),
   subSubMenu100('Sub Sub Menu 100'),
   subSubMenu101('Sub Sub Menu 101'),
   subSubMenu102('Sub Sub Menu 102'),
@@ -1567,6 +1661,7 @@ List<MenuBarItem> createTestMenus({
   void Function(TestMenu)? onClose,
   Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
   bool includeStandard = false,
+  bool includeExtraGroups = false,
 }) {
   final List<MenuBarItem> result = <MenuBarItem>[
     MenuBarMenu(
@@ -1645,6 +1740,50 @@ List<MenuBarItem> createTestMenus({
         ),
       ],
     ),
+    if (includeExtraGroups)
+      MenuItemGroup(members: <MenuBarItem>[
+        MenuBarMenu(
+          label: TestMenu.mainMenu3.label,
+          onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu3) : null,
+          onClose: onClose != null ? () => onClose(TestMenu.mainMenu3) : null,
+          menus: <MenuBarItem>[
+            MenuBarButton(
+              // Always disabled.
+              label: TestMenu.subMenu30.label,
+              shortcut: shortcuts[TestMenu.subMenu30],
+            ),
+          ],
+        ),
+      ]),
+    if (includeExtraGroups)
+      MenuItemGroup(members: <MenuBarItem>[
+        MenuBarMenu(
+          label: TestMenu.mainMenu4.label,
+          onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu4) : null,
+          onClose: onClose != null ? () => onClose(TestMenu.mainMenu4) : null,
+          menus: <MenuBarItem>[
+            MenuBarButton(
+              // Always disabled.
+              label: TestMenu.subMenu40.label,
+              shortcut: shortcuts[TestMenu.subMenu40],
+            ),
+            MenuItemGroup(members: <MenuBarItem>[
+              MenuBarButton(
+                // Always disabled.
+                label: TestMenu.subMenu41.label,
+                shortcut: shortcuts[TestMenu.subMenu41],
+              ),
+            ]),
+            MenuItemGroup(members: <MenuBarItem>[
+              MenuBarButton(
+                // Always disabled.
+                label: TestMenu.subMenu42.label,
+                shortcut: shortcuts[TestMenu.subMenu42],
+              ),
+            ]),
+          ],
+        ),
+      ]),
   ];
   return result;
 }

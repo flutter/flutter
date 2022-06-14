@@ -282,7 +282,6 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
       return PlatformMenuBar(menus: menus);
     }
     return _MenuBar(
-      key: key,
       controller: controller,
       enabled: enabled,
       backgroundColor: backgroundColor,
@@ -743,7 +742,6 @@ class _MenuBarState extends State<_MenuBar> {
     for (final MenuBarItem item in topLevel) {
       _MenuNode(item: item, parent: _root).createChildren();
     }
-    assert(_root.children.length == topLevel.length);
   }
 
   // Closes the given menu, and any open descendant menus.
@@ -1369,6 +1367,9 @@ class _MenuBarButtonState extends State<MenuBarButton> {
         expanded.add(const _MenuItemDivider());
       }
       if (item.members.isNotEmpty) {
+        if (!lastWasGroup && expanded.isNotEmpty) {
+          expanded.add(const _MenuItemDivider());
+        }
         expanded.addAll(item.members);
         lastWasGroup = true;
       } else {
@@ -2272,11 +2273,42 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
   /// These are the top level [MenuBarMenu]s.
   final List<MenuBarItem> children;
 
+  List<Widget> _expandGroups(_MenuBarState menuBar) {
+    final List<Widget> expanded = <Widget>[];
+    int index = 0;
+    bool lastWasGroup = false;
+    for (final MenuBarItem item in children) {
+      if (lastWasGroup) {
+        expanded.add(const _MenuItemDivider(axis: Axis.horizontal));
+      }
+      if (item.members.isNotEmpty) {
+        if (!lastWasGroup && expanded.isNotEmpty) {
+          expanded.add(const _MenuItemDivider(axis: Axis.horizontal));
+        }
+        for (final MenuBarItem member in item.members) {
+          expanded.add(_MenuNodeWrapper(
+            menu: menuBar._root.children[index],
+            child: member,
+          ));
+          index += 1;
+        }
+        lastWasGroup = true;
+      } else {
+        expanded.add(_MenuNodeWrapper(
+          menu: menuBar._root.children[index],
+          child: item,
+        ));
+        index += 1;
+        lastWasGroup = false;
+      }
+    }
+    return expanded;
+  }
+
   @override
   Widget build(BuildContext context) {
     final _MenuBarState menuBar = _MenuBarState.of(context);
 
-    int index = 0;
     return _MenuNodeWrapper(
       menu: menuBar._root,
       child: _MenuBarMenuList(
@@ -2287,16 +2319,7 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
         menuPadding: padding,
         crossAxisMinSize: height,
         shape: const RoundedRectangleBorder(),
-        children: <Widget>[
-          ...children.map<Widget>((MenuBarItem child) {
-            final Widget result = _MenuNodeWrapper(
-              menu: menuBar._root.children[index],
-              child: child,
-            );
-            index += 1;
-            return result;
-          }).toList(),
-        ],
+        children: _expandGroups(menuBar),
       ),
     );
   }
