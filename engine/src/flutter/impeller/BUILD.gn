@@ -64,7 +64,9 @@ group("impeller") {
   }
 }
 
-executable("impeller_unittests") {
+impeller_component("impeller_unittests") {
+  target_type = "executable"
+
   testonly = true
 
   deps = [
@@ -73,6 +75,7 @@ executable("impeller_unittests") {
     "blobcat:blobcat_unittests",
     "compiler:compiler_unittests",
     "geometry:geometry_unittests",
+    "runtime_stage:runtime_stage_unittests",
     "tessellator:tessellator_unittests",
   ]
 

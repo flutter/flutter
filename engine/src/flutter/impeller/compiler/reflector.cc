@@ -108,9 +108,11 @@ static std::string StringToShaderStage(std::string str) {
 
 Reflector::Reflector(Options options,
                      std::shared_ptr<const spirv_cross::ParsedIR> ir,
+                     std::shared_ptr<fml::Mapping> shader_data,
                      CompilerBackend compiler)
     : options_(std::move(options)),
       ir_(std::move(ir)),
+      shader_data_(std::move(shader_data)),
       compiler_(std::move(compiler)) {
   if (!ir_ || !compiler_) {
     return;
@@ -131,6 +133,11 @@ Reflector::Reflector(Options options,
 
   reflection_cc_ = GenerateReflectionCC();
   if (!reflection_cc_) {
+    return;
+  }
+
+  runtime_stage_data_ = GenerateRuntimeStageData();
+  if (!runtime_stage_data_) {
     return;
   }
 
@@ -162,6 +169,10 @@ std::shared_ptr<fml::Mapping> Reflector::GetReflectionHeader() const {
 
 std::shared_ptr<fml::Mapping> Reflector::GetReflectionCC() const {
   return reflection_cc_;
+}
+
+std::shared_ptr<RuntimeStageData> Reflector::GetRuntimeStageData() const {
+  return runtime_stage_data_;
 }
 
 std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
@@ -291,6 +302,36 @@ std::shared_ptr<fml::Mapping> Reflector::GenerateReflectionHeader() const {
 
 std::shared_ptr<fml::Mapping> Reflector::GenerateReflectionCC() const {
   return InflateTemplate(kReflectionCCTemplate);
+}
+
+std::shared_ptr<RuntimeStageData> Reflector::GenerateRuntimeStageData() const {
+  const auto& entrypoints = compiler_->get_entry_points_and_stages();
+  if (entrypoints.size() != 1u) {
+    VALIDATION_LOG << "Single entrypoint not found.";
+    return nullptr;
+  }
+  auto data = std::make_shared<RuntimeStageData>(
+      options_.entry_point_name,            //
+      entrypoints.front().execution_model,  //
+      options_.target_platform              //
+  );
+  data->SetShaderData(shader_data_);
+  ir_->for_each_typed_id<spirv_cross::SPIRVariable>(
+      [&](uint32_t, const spirv_cross::SPIRVariable& var) {
+        if (var.storage != spv::StorageClassUniformConstant) {
+          return;
+        }
+        const auto spir_type = compiler_->get_type(var.basetype);
+        UniformDescription uniform_description;
+        uniform_description.name = compiler_->get_name(var.self);
+        uniform_description.location = compiler_->get_decoration(
+            var.self, spv::Decoration::DecorationLocation);
+        uniform_description.type = spir_type.basetype;
+        uniform_description.rows = spir_type.vecsize;
+        uniform_description.columns = spir_type.columns;
+        data->AddUniformDescription(std::move(uniform_description));
+      });
+  return data;
 }
 
 static std::string ToString(CompilerBackend::Type type) {
