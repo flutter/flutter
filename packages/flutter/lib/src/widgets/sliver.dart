@@ -9,11 +9,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
 import 'package:flutter/services.dart' show HapticFeedback;
-import 'package:flutter/widgets.dart' show Container, LayoutBuilder;
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
+import 'container.dart';
 import 'framework.dart';
+import 'layout_builder.dart';
 import 'selection_container.dart';
 
 export 'package:flutter/rendering.dart' show
@@ -2128,7 +2129,7 @@ enum RefreshIndicatorMode {
 ///
 /// See also:
 ///
-/// * [SliverRefreshControl], A sliver refresh control, that reflects the standard Material pull-to-refresh behavior.
+/// * [SliverRefreshIndicator], A sliver refresh indicator, that reflects the standard Material pull-to-refresh behavior.
 /// * [CupertinoSliverRefreshControl], A sliver refresh control, that reflects the standard iOS pull-to-refresh behavior.
 ///
 abstract class BaseSliverRefreshControl extends StatefulWidget {

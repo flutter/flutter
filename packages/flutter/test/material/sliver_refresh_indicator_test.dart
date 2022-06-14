@@ -20,13 +20,13 @@ void main() {
   SliverList buildAListOfStuff() {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        childCount: testListLength,
         (BuildContext context, int index) {
           return SizedBox(
             height: 200.0,
             child: Center(child: Text(index.toString())),
           );
         },
+        childCount: testListLength,
       ),
     );
   }
@@ -1447,7 +1447,6 @@ void main() {
               ),
               slivers: <Widget>[
                 SliverRefreshIndicator(
-                  builder: null,
                   onRefresh: mockHelper.refreshTask,
                   refreshIndicatorExtent: 0.0,
                 ),
@@ -1567,10 +1566,10 @@ void main() {
               const SliverRefreshIndicator(),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  childCount: 20,
                   (BuildContext context, int index) {
                     return const SizedBox(height: 100);
                   },
+                  childCount: 20,
                 ),
               ),
             ],

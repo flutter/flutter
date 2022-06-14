@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 
-void main() => const MyApp();
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -14,19 +14,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: SliverRefreshControlExample(),
+      home: SliverRefreshIndicatorExample(),
     );
   }
 }
 
-class SliverRefreshControlExample extends StatefulWidget {
-  const SliverRefreshControlExample({super.key});
+class SliverRefreshIndicatorExample extends StatefulWidget {
+  const SliverRefreshIndicatorExample({super.key});
 
   @override
-  State<SliverRefreshControlExample> createState() => _SliverRefreshControlExampleState();
+  State<SliverRefreshIndicatorExample> createState() => _SliverRefreshIndicatorExampleState();
 }
 
-class _SliverRefreshControlExampleState extends State<SliverRefreshControlExample> {
+class _SliverRefreshIndicatorExampleState extends State<SliverRefreshIndicatorExample> {
   List<Color> colors = <Color>[
     Colors.amber,
     Colors.orange,

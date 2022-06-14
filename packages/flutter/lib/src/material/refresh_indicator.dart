@@ -635,7 +635,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 /// this sample shows material pull to refresh indicator for 1 second and
 /// adds a new item to the top of the list view.
 ///
-/// ** See code in examples/api/lib/material/refresh_indicator/sliver_refresh_control.0.dart **
+/// ** See code in examples/api/lib/material/refresh_indicator/sliver_refresh_indicator.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -643,7 +643,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 ///  * [CustomScrollView], a typical sliver holding scroll view this control
 ///    should go into.
 ///  * [RefreshIndicator], a Material Design version of the pull-to-refresh
-///    paradigm. This widget works differently than [SliverRefreshControl]
+///    paradigm. This widget works differently than [SliverRefreshIndicator]
 ///    because instead of being part of the scrollable and actively occupies
 ///    scrollable space. it goose overlay on top of the scrollable.
 ///

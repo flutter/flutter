@@ -1265,7 +1265,6 @@ void main() {
             home: CustomScrollView(
               slivers: <Widget>[
                 CupertinoSliverRefreshControl(
-                  builder: null,
                   onRefresh: mockHelper.refreshTask,
                   refreshIndicatorExtent: 0.0,
                 ),
