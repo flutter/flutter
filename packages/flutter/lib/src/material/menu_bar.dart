@@ -65,20 +65,20 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 
 /// A menu bar with cascading child menus.
 ///
-/// This is a Material Design menu bar that resides above the main body of an
-/// application that defines a menu system for invoking callbacks or firing
-/// [Intent]s in response to user selection of the menu item.
+/// This is a Material Design menu bar that typically resides above the main
+/// body of an application (but can go anywhere) that defines a menu system for
+/// invoking callbacks or firing [Intent]s in response to user selection of a
+/// menu item.
 ///
-/// The menu can be navigated by the user using the arrow keys, and can be
-/// dismissed using the escape key, or by clicking away from the menu item
-/// (anywhere that is not a part of the menu bar or cascading menus). Once a
-/// menu is open, the menu hierarchy can be navigated by hovering over the menu
-/// with the mouse.
+/// The menu can be navigated by using the arrow keys. It can be dismissed using
+/// the escape key, or by clicking away from the menu item (anywhere that is not
+/// a part of the menu bar or cascading menus). Once a menu is open, the menu
+/// hierarchy can be navigated by hovering over the menu with the mouse.
 ///
 /// Menu items can have a [SingleActivator] or [CharacterActivator] assigned to
 /// them as their [MenuBarButton.shortcut], so that if the shortcut key sequence
 /// is pressed, the menu item corresponding to that shortcut will be selected
-/// even if the menu is closed. Shortcuts must be unique in the ambient
+/// even if its menu is closed. Shortcuts must be unique in the ambient
 /// [ShortcutRegistry].
 ///
 /// Selecting a menu item causes the [MenuBarButton.onSelected] callback to be

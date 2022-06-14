@@ -4,23 +4,22 @@
 
 // Flutter code sample for MenuBar
 
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+const String kMessage = '"Talk less. Smile more." - A. Burr';
 
 void main() => runApp(const MenuBarApp());
 
 enum MenuSelection {
   about('About'),
   showMessage('Show Message'),
+  resetMessage('Reset Message'),
   hideMessage('Hide Message'),
   colorMenu('Color Menu'),
   colorRed('Red Background'),
   colorGreen('Green Background'),
-  colorBlue('Blue Background'),
-  quit('Quit');
+  colorBlue('Blue Background');
 
   const MenuSelection(this.label);
   final String label;
@@ -46,6 +45,8 @@ class MyMenuBar extends StatefulWidget {
 }
 
 class _MyMenuBarState extends State<MyMenuBar> {
+  MenuSelection? lastSelection;
+
   bool get showingMessage => _showMessage;
   bool _showMessage = false;
   set showingMessage(bool value) {
@@ -67,6 +68,9 @@ class _MyMenuBarState extends State<MyMenuBar> {
   }
 
   void _activate(MenuSelection selection) {
+    setState(() {
+      lastSelection = selection;
+    });
     switch (selection) {
       case MenuSelection.about:
         showAboutDialog(
@@ -78,11 +82,10 @@ class _MyMenuBarState extends State<MyMenuBar> {
       case MenuSelection.showMessage:
         showingMessage = true;
         break;
+      case MenuSelection.resetMessage:
       case MenuSelection.hideMessage:
         showingMessage = false;
         break;
-      case MenuSelection.quit:
-        exit(0);
       case MenuSelection.colorMenu:
         break;
       case MenuSelection.colorRed:
@@ -111,9 +114,17 @@ class _MyMenuBarState extends State<MyMenuBar> {
                   label: MenuSelection.about.label,
                   onSelected: () => _activate(MenuSelection.about),
                 ),
+                // Toggles the message.
                 MenuBarButton(
                   label: showingMessage ? MenuSelection.hideMessage.label : MenuSelection.showMessage.label,
                   onSelected: () => _activate(showingMessage ? MenuSelection.hideMessage : MenuSelection.showMessage),
+                  shortcut: const SingleActivator(LogicalKeyboardKey.keyS, control: true),
+                ),
+                // Hides the message, but is only enabled if the message isn't already hidden.
+                MenuBarButton(
+                  label: MenuSelection.resetMessage.label,
+                  onSelected: showingMessage ? () => _activate(MenuSelection.resetMessage) : null,
+                  shortcut: const SingleActivator(LogicalKeyboardKey.escape),
                 ),
                 MenuBarMenu(
                   label: 'Background Color',
@@ -137,12 +148,6 @@ class _MyMenuBarState extends State<MyMenuBar> {
                     ),
                   ],
                 ),
-                // Only include the "quit" item on non-web platforms.
-                if (!kIsWeb)
-                  MenuBarButton(
-                    onSelected: () => _activate(MenuSelection.quit),
-                    label: MenuSelection.quit.label,
-                  ),
               ],
             ),
           ],
@@ -151,7 +156,18 @@ class _MyMenuBarState extends State<MyMenuBar> {
           child: Container(
             alignment: Alignment.center,
             color: backgroundColor,
-            child: Text(showingMessage ? '"Talk less. Smile more." - A. Burr' : 'Application Body'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(showingMessage ? kMessage : '',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ),
+                Text(lastSelection != null ? 'Last Selected: ${lastSelection!.label}' : ''),
+              ],
+            ),
           ),
         ),
       ],

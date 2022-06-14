@@ -33,11 +33,21 @@ enum MenuSelection {
   final String label;
 }
 
-class MenuApp extends StatelessWidget {
+class MenuApp extends StatefulWidget {
   const MenuApp({super.key});
+
+  @override
+  State<MenuApp> createState() => _MenuAppState();
+}
+
+class _MenuAppState extends State<MenuApp> {
+  MenuSelection? lastSelected;
 
   void _onSelected(BuildContext context, MenuSelection item) {
     debugPrint('Selected ${item.name}');
+    setState(() {
+      lastSelected = item;
+    });
     switch (item) {
       case MenuSelection.about:
         showAboutDialog(
@@ -174,9 +184,13 @@ class MenuApp extends StatelessWidget {
             ),
           ],
         ),
-        const Expanded(
-          child: Center(
-            child: Text('Body'),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text('Body'),
+              Text(lastSelected != null ? 'Last Selected: ${lastSelected!.label}' : ''),
+            ],
           ),
         ),
       ],
