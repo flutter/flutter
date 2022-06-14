@@ -2700,7 +2700,7 @@ class VisualDensity with Diagnosticable {
   Offset get baseSizeAdjustment {
     // The number of logical pixels represented by an increase or decrease in
     // density by one. The Material Design guidelines say to increment/decrement
-    // sized in terms of four pixel increments.
+    // sizes in terms of four pixel increments.
     const double interval = 4.0;
 
     return Offset(horizontal, vertical) * interval;

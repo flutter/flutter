@@ -22,6 +22,7 @@ import 'material_state.dart';
 import 'menu_bar_theme.dart';
 import 'text_button.dart';
 import 'text_button_theme.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -237,21 +238,21 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
 
   /// The background color of the menu bar.
   ///
-  /// Defaults to [MenuBarThemeData.barBackgroundColor] if not set.
+  /// Defaults to [MenuBarThemeData.barBackgroundColor] if null.
   ///
   /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final MaterialStateProperty<Color?>? backgroundColor;
 
   /// The preferred minimum height of the menu bar.
   ///
-  /// Defaults to the value of [MenuBarThemeData.barHeight] if not set.
+  /// Defaults to the value of [MenuBarThemeData.barHeight] if null.
   ///
   /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final double? height;
 
   /// The padding around the contents of the menu bar itself.
   ///
-  /// Defaults to the value of [MenuBarThemeData.barPadding] if not set.
+  /// Defaults to the value of [MenuBarThemeData.barPadding] if null.
   ///
   /// {@macro flutter.material.MenuBar.ignored_for_platform_provided_menus}
   final EdgeInsets? padding;
@@ -338,17 +339,23 @@ class _MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   /// The background color of the menu bar.
   ///
-  /// Defaults to [MenuBarThemeData.barBackgroundColor] if not set.
+  /// The default value is [MenuBarThemeData.barBackgroundColor]. If
+  /// [MenuBarThemeData.barBackgroundColor] is null, then the default value
+  /// is based on the [ColorScheme.surface] of [ThemeData.colorScheme].
   final MaterialStateProperty<Color?>? backgroundColor;
 
   /// The preferred minimum height of the menu bar.
   ///
-  /// Defaults to the value of [MenuBarThemeData.barHeight] if not set.
+  /// The default value is [MenuBarThemeData.barHeight]. If
+  /// [MenuBarThemeData.barHeight] is null, then the default value
+  /// is 48 pixels.
   final double? height;
 
   /// The padding around the contents of the menu bar itself.
   ///
-  /// Defaults to the value of [MenuBarThemeData.barPadding] if not set.
+  /// The default value is [MenuBarThemeData.barPadding]. If
+  /// [MenuBarThemeData.barPadding] is null, then the default value
+  /// is 4 pixels horizontally.
   final EdgeInsets? padding;
 
   /// The Material elevation of the menu bar (if any).
@@ -1146,34 +1153,67 @@ class MenuBarButton extends StatefulWidget with MenuBarItem {
 
   /// The background color for this [MenuBarButton].
   ///
-  /// Defaults to the value of [MenuBarThemeData.itemBackgroundColor] if not set.
+  /// Defaults to the ambient [Theme]'s [ColorScheme.surface] if null.
+  ///
+  /// See also:
+  ///
+  ///  * [MenuBarThemeData.itemBackgroundColor], for the value in the [MenuBarTheme] that
+  ///    can be set instead of this property.
   final MaterialStateProperty<Color?>? backgroundColor;
 
   /// The foreground color for this [MenuBarButton].
   ///
-  /// Defaults to the value of [MenuBarThemeData.itemForegroundColor] if not set.
+  /// Defaults to the ambient [Theme]'s [ColorScheme.primary] if null.
+  ///
+  /// See also:
+  ///
+  ///  * [MenuBarThemeData.itemForegroundColor], for the value in the [MenuBarTheme] that
+  ///    can be set instead of this property.
   final MaterialStateProperty<Color?>? foregroundColor;
 
   /// The overlay color for this [MenuBarButton].
   ///
-  /// Defaults to the value of [MenuBarThemeData.itemOverlayColor] if not set.
+  /// Defaults to the ambient [Theme]'s [ColorScheme.primary] (with appropriate
+  /// state-dependent opacity) if null.
+  ///
+  /// See also:
+  ///
+  ///  * [MenuBarThemeData.itemOverlayColor], for the value in the [MenuBarTheme] that
+  ///    can be set instead of this property.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// The padding around the contents of the [MenuBarButton].
   ///
-  /// Defaults to the value of [MenuBarThemeData.itemPadding] if not set.
+  /// Defaults to zero in the vertical direction, and 24 pixels on each side in
+  /// the horizontal direction.
+  ///
+  /// See also:
+  ///
+  ///  * [MenuBarThemeData.itemPadding], for the value in the [MenuBarTheme] that
+  ///    can be set instead of this property.
   final EdgeInsets? padding;
 
   /// The text style for the text in this menu bar item.
   ///
   /// May be overridden inside of [labelWidget], if supplied.
   ///
-  /// Defaults to the value of [MenuBarThemeData.itemTextStyle] if not set.
+  /// Defaults to the ambient [ThemeData.textTheme]'s [TextTheme.labelLarge] if null.
+  ///
+  /// See also:
+  ///
+  ///  * [MenuBarThemeData.itemTextStyle], for the value in the [MenuBarTheme] that
+  ///    can be set instead of this property.
   final MaterialStateProperty<TextStyle?>? textStyle;
 
   /// The shape of this menu bar item.
   ///
-  /// Defaults to the value of [MenuBarThemeData.itemShape] if not set.
+  /// Defaults to a [RoundedRectangleBorder] with a border radius of zero (i.e.
+  /// a rectangle) if null.
+  ///
+  /// See also:
+  ///
+  ///  * [MenuBarThemeData.itemShape], for the value in the [MenuBarTheme] that
+  ///    can be set instead of this property.
   final MaterialStateProperty<OutlinedBorder?>? shape;
 
   // Indicates that this is a button for a submenu, not just a regular item.
@@ -1321,18 +1361,18 @@ class _MenuBarButtonState extends State<MenuBarButton> {
   }
 
   // Expands groups and adds dividers when necessary.
-  List<Widget> _expandGroups(MenuItem parent) {
+  List<Widget> _expandGroups(MenuBarItem parent) {
     final List<Widget> expanded = <Widget>[];
     bool lastWasGroup = false;
-    for (final MenuItem item in parent.menus) {
+    for (final MenuBarItem item in parent.menus) {
       if (lastWasGroup) {
         expanded.add(const _MenuItemDivider());
       }
       if (item.members.isNotEmpty) {
-        expanded.addAll(item.members.cast<Widget>());
+        expanded.addAll(item.members);
         lastWasGroup = true;
       } else {
-        expanded.add(item as Widget);
+        expanded.add(item);
         lastWasGroup = false;
       }
     }
@@ -1824,7 +1864,7 @@ class MenuItemGroup extends StatelessWidget with MenuBarItem {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (hasDividerBefore) const _MenuItemDivider(axis: Axis.horizontal),
-          ...members.cast<Widget>(),
+          ...members,
           if (hasDividerAfter) const _MenuItemDivider(axis: Axis.horizontal),
         ],
       );
@@ -1833,7 +1873,7 @@ class MenuItemGroup extends StatelessWidget with MenuBarItem {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         if (hasDividerBefore) const _MenuItemDivider(),
-        ...members.cast<Widget>(),
+        ...members,
         if (hasDividerAfter) const _MenuItemDivider(),
       ],
     );
@@ -1850,7 +1890,6 @@ class MenuItemGroup extends StatelessWidget with MenuBarItem {
 }
 
 class _MenuItemDivider extends StatelessWidget {
-  /// Creates a [_MenuItemDivider].
   const _MenuItemDivider({this.axis = Axis.vertical});
 
   final Axis axis;
@@ -1860,25 +1899,17 @@ class _MenuItemDivider extends StatelessWidget {
     switch (axis) {
       case Axis.horizontal:
         return VerticalDivider(width: math.max(2, 16 + Theme.of(context).visualDensity.horizontal * 4));
-      // return Container(width: 10, height: 20, color: const Color(0xffff0000));
       case Axis.vertical:
         return Divider(height: math.max(2, 16 + Theme.of(context).visualDensity.vertical * 4));
     }
-
-    // switch (axis) {
-    //   case Axis.horizontal:
-    //     return VerticalDivider(width: math.max(2, 16 + Theme.of(context).visualDensity.horizontal * 4));
-    //   case Axis.vertical:
-    //     return Divider(height: math.max(2, 16 + Theme.of(context).visualDensity.vertical * 4));
-    // }
   }
 }
 
-// A widget used as the main widget for the overlay entry in the
-// _MenuBarController. Since the overlay is a Stack, this widget produces a
-// Positioned widget that fills the overlay, containing its own Stack to arrange
-// the menus with. Positioning of the top level submenus is relative to the
-// position of the menu buttons.
+// A widget used as the main widget for the overlay entry in the _MenuBarState.
+// Since the overlay is a Stack, this widget produces a Positioned widget that
+// fills the overlay, containing its own Stack to arrange the menus with.
+// Positioning of the top level submenus is relative to the position of the menu
+// buttons.
 class _MenuStack extends StatelessWidget {
   const _MenuStack(this.menuBar);
 
@@ -1911,7 +1942,9 @@ class _MenuStack extends StatelessWidget {
               state: menuBar,
               child: Stack(
                 children: <Widget>[
-                  ...menuBar.openMenus.where((_MenuNode node) => node.menuBuilder != null).map<Widget>(
+                  ...menuBar.openMenus.where((_MenuNode node) {
+                    return node.menuBuilder != null;
+                  }).map<Widget>(
                     (_MenuNode node) {
                       return Builder(
                         key: ValueKey<_MenuNode>(node),
@@ -1952,10 +1985,12 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
       : children = <_MenuNode>[],
         parent = null;
 
-  /// Adds any members of groups, or submenus to the tree, instantiating new
-  /// menu nodes as needed.
+  /// Recursively adds any members of groups, or submenus to the tree,
+  /// instantiating new menu nodes as needed.
   ///
-  /// Does not add [MenuItemGroup]s, since they don't participate in the tree.
+  /// Does not add [MenuItemGroup]s directly, since they don't participate in
+  /// the tree. In their place, the [MenuItemGroup.members] of each group are
+  /// added.
   void createChildren() {
     assert(!isGroup || item.menus.isEmpty);
     if (isGroup) {
@@ -2120,7 +2155,7 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
   }
 
   /// Called whenever this menu is opened by being set as the
-  /// [_MenuBarController.openMenu].
+  /// [_MenuBarState.openMenu].
   ///
   /// Used to avoid calling [MenuItem.onOpen] unnecessarily.
   void open() {
@@ -2132,7 +2167,7 @@ class _MenuNode with Diagnosticable, DiagnosticableTreeMixin {
   }
 
   /// Called whenever this menu is closed by another menu being set as the
-  /// [_MenuBarController.openMenu].
+  /// [_MenuBarState.openMenu].
   ///
   /// Used to avoid calling [MenuItem.onClose] unnecessarily.
   void close() {
@@ -2253,10 +2288,10 @@ class _MenuBarTopLevelBar extends StatelessWidget implements PreferredSizeWidget
         crossAxisMinSize: height,
         shape: const RoundedRectangleBorder(),
         children: <Widget>[
-          ...children.map<Widget>((MenuItem child) {
+          ...children.map<Widget>((MenuBarItem child) {
             final Widget result = _MenuNodeWrapper(
               menu: menuBar._root.children[index],
-              child: child as Widget,
+              child: child,
             );
             index += 1;
             return result;
