@@ -2370,6 +2370,10 @@ class _RepositoryFuchsiaDirectory extends _RepositoryDirectory {
   @override
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'toolchain'
+        // Applies to NOTICE.fuchsia file.
+        // This is a file that covers things that contribute to the Fuchsia SDK.
+        // See: fxb/94240
+        && !(entry.name == 'NOTICE.fuchsia')
         && super.shouldRecurse(entry);
   }
 
