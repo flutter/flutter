@@ -336,7 +336,7 @@ class FlutterViewEmbedder {
       _sceneHostElement!.style.opacity = '0.3';
     }
 
-    PointerBinding.initInstance(glassPaneElement as html.Element);
+    PointerBinding.initInstance(glassPaneElement);
     KeyboardBinding.initInstance(glassPaneElement);
 
     if (html.window.visualViewport == null && isWebKit) {
