@@ -1,4 +1,4 @@
-Signature: 9c51b72ad11eddec6e4b85655ad4c378
+Signature: 3028e26d90f2e185f0b5d2bdd276d51b
 
 UNUSED LICENSES:
 
@@ -5909,6 +5909,8 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/VertexChunkPatchAlloca
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack_graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/CommandTypes.h
+FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawGeometry.h
 FILE: ../../../third_party/skia/src/gpu/graphite/GlobalCache.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/GlobalCache.h
@@ -5947,6 +5949,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateStrokesRenderS
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateStrokesRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateWedgesRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateWedgesRenderStep.h
+FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/LinearTolerances.h
