@@ -16,7 +16,9 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const Duration _kTransitionDuration = Duration(milliseconds: 200);
+// The duration value extracted from:
+// https://github.com/material-components/material-components-android/blob/master/lib/java/com/google/android/material/textfield/TextInputLayout.java
+const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
@@ -186,6 +188,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
     _borderAnimation = CurvedAnimation(
       parent: _controller,
       curve: _kTransitionCurve,
+      reverseCurve: _kTransitionCurve.flipped,
     );
     _border = _InputBorderTween(
       begin: widget.border,
@@ -1861,8 +1864,9 @@ class InputDecorator extends StatefulWidget {
 }
 
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
-  late AnimationController _floatingLabelController;
-  late AnimationController _shakingLabelController;
+  late final AnimationController _floatingLabelController;
+  late final Animation<double> _floatingLabelAnimation;
+  late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
 
   @override
@@ -1879,6 +1883,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       value: labelIsInitiallyFloating ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
+    _floatingLabelAnimation = CurvedAnimation(
+      parent: _floatingLabelController,
+      curve: _kTransitionCurve,
+      reverseCurve: _kTransitionCurve.flipped,
+    );
 
     _shakingLabelController = AnimationController(
       duration: _kTransitionDuration,
@@ -2186,7 +2195,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget container = _BorderContainer(
       border: border,
       gap: _borderGap,
-      gapAnimation: _floatingLabelController.view,
+      gapAnimation: _floatingLabelAnimation,
       fillColor: _getFillColor(themeData),
       hoverColor: _getHoverColor(themeData),
       isHovering: isHovering,
@@ -2351,7 +2360,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isCollapsed: decoration!.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelAlignment: decoration!.floatingLabelAlignment!,
-        floatingLabelProgress: _floatingLabelController.value,
+        floatingLabelProgress: _floatingLabelAnimation.value,
         border: border,
         borderGap: _borderGap,
         alignLabelWithHint: decoration!.alignLabelWithHint ?? false,
