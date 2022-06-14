@@ -1342,19 +1342,10 @@ class VoidCallbackAction extends Action<VoidCallbackIntent> {
 ///    handlers in the focus chain.
 class DoNothingIntent extends Intent {
   /// Creates a const [DoNothingIntent].
-  ///
-  /// If you want to use [DoNothingIntent] in a const environment, use
-  /// [instance].
-  factory DoNothingIntent() => instance;
+  const factory DoNothingIntent() = DoNothingIntent._;
 
   // Make DoNothingIntent constructor private so it can't be subclassed.
   const DoNothingIntent._();
-
-  /// A const [DoNothingIntent].
-  ///
-  /// This is identical to the factory constructor, only that [instance] is
-  /// allowed in a const enviroment.
-  static const DoNothingIntent instance = DoNothingIntent._();
 }
 
 /// An [Intent] that is bound to a [DoNothingAction], but, in addition to not
@@ -1376,19 +1367,10 @@ class DoNothingIntent extends Intent {
 ///  * [DoNothingIntent], a similar intent that will handle the key event.
 class DoNothingAndStopPropagationIntent extends Intent {
   /// Creates a const [DoNothingAndStopPropagationIntent].
-  ///
-  /// If you want to use [DoNothingAndStopPropagationIntent] in a const
-  /// environment, use [instance].
-  factory DoNothingAndStopPropagationIntent() => instance;
+  const factory DoNothingAndStopPropagationIntent() = DoNothingAndStopPropagationIntent._;
 
   // Make DoNothingAndStopPropagationIntent constructor private so it can't be subclassed.
   const DoNothingAndStopPropagationIntent._();
-
-  /// A const [DoNothingAndStopPropagationIntent].
-  ///
-  /// This is identical to the factory constructor, only that [instance] is
-  /// allowed in a const enviroment.
-  static const DoNothingAndStopPropagationIntent instance = DoNothingAndStopPropagationIntent._();
 }
 
 /// An [Action] that doesn't perform any action when invoked.
