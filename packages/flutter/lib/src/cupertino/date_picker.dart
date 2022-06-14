@@ -977,7 +977,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       }
 
       if (fromDate.minute != newDate.minute) {
-        _animateColumnControllerToItem(minuteController, newDate.minute);
+        _animateColumnControllerToItem(minuteController, newDate.minute ~/ widget.minuteInterval);
       }
     });
   }
