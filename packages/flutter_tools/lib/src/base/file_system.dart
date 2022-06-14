@@ -219,10 +219,10 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   @override
   Directory get systemTempDirectory {
     if (_systemTemp == null) {
-      if (!directory(systemTempDirectoryPath).existsSync()) {
-        throwToolExit('Temporary directory: $systemTempDirectoryPath does not exists');
+      if (!superSystemTempDirectory.existsSync()) {
+        throwToolExit('Temporary directory: ${superSystemTempDirectory.path} does not exist');
       }
-      _systemTemp = super.systemTempDirectory.createTempSync('flutter_tools.')
+      _systemTemp = superSystemTempDirectory.createTempSync('flutter_tools.')
         ..createSync(recursive: true);
       // Make sure that the temporary directory is cleaned up if the tool is
       // killed by a signal.
@@ -246,5 +246,5 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
 
   // This only exist because the memory file system does not support a systemTemp that does not exists #74042
   @visibleForTesting
-  String get systemTempDirectoryPath => super.systemTempDirectory.path;
+  Directory get superSystemTempDirectory => super.systemTempDirectory;
 }

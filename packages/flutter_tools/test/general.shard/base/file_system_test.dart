@@ -20,7 +20,7 @@ class LocalFileSystemFake extends LocalFileSystem {
   LocalFileSystemFake.test({required super.signals}) : super.test();
 
   @override
-  String get systemTempDirectoryPath => '/does_not_exists';
+  Directory get superSystemTempDirectory => directory('/does_not_exist');
 }
 
 void main() {
@@ -193,7 +193,7 @@ void main() {
         localFileSystem.systemTempDirectory;
         fail('expected tool exit');
       } on ToolExit catch(e) {
-        expect(e.message, 'Temporary directory: /does_not_exists does not exists');
+        expect(e.message, 'Temporary directory: /does_not_exist does not exist');
       }
     });
   });
