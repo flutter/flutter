@@ -1343,7 +1343,8 @@ class VoidCallbackAction extends Action<VoidCallbackIntent> {
 class DoNothingIntent extends Intent {
   /// Creates a const [DoNothingIntent].
   ///
-  /// If you want to use [DoNothingIntent] as a constant, use [instance].
+  /// If you want to use [DoNothingIntent] in a const environment, use
+  /// [instance].
   factory DoNothingIntent() => instance;
 
   // Make DoNothingIntent constructor private so it can't be subclassed.
@@ -1376,8 +1377,8 @@ class DoNothingIntent extends Intent {
 class DoNothingAndStopPropagationIntent extends Intent {
   /// Creates a const [DoNothingAndStopPropagationIntent].
   ///
-  /// If you want to use [DoNothingAndStopPropagationIntent] as a constant,
-  /// use [instance].
+  /// If you want to use [DoNothingAndStopPropagationIntent] in a const
+  /// environment, use [instance].
   factory DoNothingAndStopPropagationIntent() => instance;
 
   // Make DoNothingAndStopPropagationIntent constructor private so it can't be subclassed.
