@@ -75,13 +75,16 @@ static int assertOneMessageAndGetSequenceNumber(NSMutableDictionary* messages, N
   XCTAssertTrue(
       [app.textFields[@"2,PointerChange.up,device=0,buttons=0"] waitForExistenceWithTimeout:1],
       @"PointerChange.up event did not occur for a normal tap");
+  XCTAssertTrue(
+      [app.textFields[@"3,PointerChange.remove,device=0,buttons=0"] waitForExistenceWithTimeout:1],
+      @"PointerChange.remove event did not occur for a normal tap");
   SEL rightClick = @selector(rightClick);
   XCTAssertTrue([flutterView respondsToSelector:rightClick],
                 @"If supportsPointerInteraction is true, this should be true too.");
   [flutterView performSelector:rightClick];
   // On simulated right click, a hover also occurs, so the hover pointer is added
   XCTAssertTrue(
-      [app.textFields[@"3,PointerChange.add,device=1,buttons=0"] waitForExistenceWithTimeout:1],
+      [app.textFields[@"4,PointerChange.add,device=1,buttons=0"] waitForExistenceWithTimeout:1],
       @"PointerChange.add event did not occur for a right-click's hover pointer");
 
   // The hover pointer is removed after ~3.5 seconds, this ensures that all events are received
@@ -89,8 +92,8 @@ static int assertOneMessageAndGetSequenceNumber(NSMutableDictionary* messages, N
   sleepExpectation.inverted = true;
   [self waitForExpectations:@[ sleepExpectation ] timeout:5.0];
 
-  // The hover events are interspersed with the right-click events in a varying order
-  // Ensure the individual orderings are respected without hardcoding the absolute sequence
+  // The hover events are interspersed with the right-click events in a varying order.
+  // Ensure the individual orderings are respected without hardcoding the absolute sequence.
   NSMutableDictionary<NSString*, NSMutableArray<NSNumber*>*>* messages =
       [[NSMutableDictionary alloc] init];
   for (XCUIElement* element in [app.textFields allElementsBoundByIndex]) {
@@ -109,7 +112,7 @@ static int assertOneMessageAndGetSequenceNumber(NSMutableDictionary* messages, N
     }
     [messageSequenceNumberList addObject:@(messageSequenceNumber)];
   }
-  // The number of hover events is not consistent, there could be one or many
+  // The number of hover events is not consistent, there could be one or many.
   NSMutableArray<NSNumber*>* hoverSequenceNumbers =
       messages[@"PointerChange.hover,device=1,buttons=0"];
   int hoverRemovedSequenceNumber =
@@ -137,7 +140,7 @@ static int assertOneMessageAndGetSequenceNumber(NSMutableDictionary* messages, N
                        @"Right-click pointer was pressed before it was added");
   XCTAssertGreaterThan(rightClickUpSequenceNumber, rightClickDownSequenceNumber,
                        @"Right-click pointer was released before it was pressed");
-  XCTAssertGreaterThan([[hoverSequenceNumbers firstObject] intValue], 3,
+  XCTAssertGreaterThan([[hoverSequenceNumbers firstObject] intValue], 4,
                        @"Hover occured before hover pointer was added");
   XCTAssertGreaterThan(hoverRemovedSequenceNumber, [[hoverSequenceNumbers lastObject] intValue],
                        @"Hover occured after hover pointer was removed");
@@ -195,6 +198,101 @@ static int assertOneMessageAndGetSequenceNumber(NSMutableDictionary* messages, N
       stringWithFormat:@"%ld,PointerChange.remove,device=0,buttons=0", lastHoverSequenceNumber + 1];
   XCTAssertTrue([app.textFields[removeMessage] waitForExistenceWithTimeout:1],
                 @"PointerChange.remove event did not occur for a hover");
+}
+
+- (void)testPointerScroll {
+  BOOL supportsPointerInteraction = NO;
+  SEL supportsPointerInteractionSelector = @selector(supportsPointerInteraction);
+  if ([XCUIDevice.sharedDevice respondsToSelector:supportsPointerInteractionSelector]) {
+    supportsPointerInteraction =
+        performBoolSelector(XCUIDevice.sharedDevice, supportsPointerInteractionSelector);
+  }
+  XCTSkipUnless(supportsPointerInteraction, "Device does not support pointer interaction.");
+  XCUIApplication* app = [[XCUIApplication alloc] init];
+  app.launchArguments = @[ @"--pointer-events" ];
+  [app launch];
+
+  NSPredicate* predicateToFindFlutterView =
+      [NSPredicate predicateWithFormat:@"identifier BEGINSWITH 'flutter_view'"];
+  XCUIElement* flutterView = [[app descendantsMatchingType:XCUIElementTypeAny]
+      elementMatchingPredicate:predicateToFindFlutterView];
+  if (![flutterView waitForExistenceWithTimeout:kSecondsToWaitForFlutterView]) {
+    XCTFail(@"Failed due to not able to find any flutterView with %@ seconds",
+            @(kSecondsToWaitForFlutterView));
+  }
+
+  XCTAssertNotNil(flutterView);
+
+  SEL scroll = @selector(scrollByDeltaX:deltaY:);
+  XCTAssertTrue([flutterView respondsToSelector:scroll],
+                @"If supportsPointerInteraction is true, this should be true too.");
+  // Need to use NSInvocation in order to send primitive arguments to selector.
+  NSInvocation* invocation = [NSInvocation
+      invocationWithMethodSignature:[XCUIElement instanceMethodSignatureForSelector:scroll]];
+  [invocation setSelector:scroll];
+  CGFloat deltaX = 0.0;
+  CGFloat deltaY = 1000.0;
+  [invocation setArgument:&deltaX atIndex:2];
+  [invocation setArgument:&deltaY atIndex:3];
+  [invocation invokeWithTarget:flutterView];
+
+  // The hover pointer is observed to be removed by the system after ~3.5 seconds of inactivity.
+  // While this is not a documented behavior, it is the only way to test for the removal of the
+  // hover pointer. Waiting for 5 seconds will ensure that all events are received before
+  // processing.
+  XCTestExpectation* sleepExpectation = [self expectationWithDescription:@"never fires"];
+  sleepExpectation.inverted = true;
+  [self waitForExpectations:@[ sleepExpectation ] timeout:5.0];
+
+  // There are hover events interspersed with the scroll events in a varying order.
+  // Ensure the individual orderings are respected without hardcoding the absolute sequence.
+  NSMutableDictionary<NSString*, NSMutableArray<NSNumber*>*>* messages =
+      [[NSMutableDictionary alloc] init];
+  for (XCUIElement* element in [app.textFields allElementsBoundByIndex]) {
+    NSString* rawMessage = element.value;
+    // Parse out the sequence number
+    NSUInteger commaIndex = [rawMessage rangeOfString:@","].location;
+    NSInteger messageSequenceNumber =
+        [rawMessage substringWithRange:NSMakeRange(0, commaIndex)].integerValue;
+    // Parse out the rest of the message
+    NSString* message = [rawMessage
+        substringWithRange:NSMakeRange(commaIndex + 1, rawMessage.length - (commaIndex + 1))];
+    NSMutableArray<NSNumber*>* messageSequenceNumberList = messages[message];
+    if (messageSequenceNumberList == nil) {
+      messageSequenceNumberList = [[NSMutableArray alloc] init];
+      messages[message] = messageSequenceNumberList;
+    }
+    [messageSequenceNumberList addObject:@(messageSequenceNumber)];
+  }
+  // The number of hover events is not consistent, there could be one or many.
+  int hoverAddedSequenceNumber =
+      assertOneMessageAndGetSequenceNumber(messages, @"PointerChange.add,device=0,buttons=0");
+  NSMutableArray<NSNumber*>* hoverSequenceNumbers =
+      messages[@"PointerChange.hover,device=0,buttons=0"];
+  int hoverRemovedSequenceNumber =
+      assertOneMessageAndGetSequenceNumber(messages, @"PointerChange.remove,device=0,buttons=0");
+  int panZoomAddedSequenceNumber =
+      assertOneMessageAndGetSequenceNumber(messages, @"PointerChange.add,device=1,buttons=0");
+  int panZoomStartSequenceNumber = assertOneMessageAndGetSequenceNumber(
+      messages, @"PointerChange.panZoomStart,device=1,buttons=0");
+  // The number of pan/zoom update events is not consistent, there could be one or many.
+  NSMutableArray<NSNumber*>* panZoomUpdateSequenceNumbers =
+      messages[@"PointerChange.panZoomUpdate,device=1,buttons=0"];
+  int panZoomEndSequenceNumber = assertOneMessageAndGetSequenceNumber(
+      messages, @"PointerChange.panZoomEnd,device=1,buttons=0");
+
+  XCTAssertGreaterThan(panZoomStartSequenceNumber, panZoomAddedSequenceNumber,
+                       @"PanZoomStart occured before pointer was added");
+  XCTAssertGreaterThan([[panZoomUpdateSequenceNumbers firstObject] intValue],
+                       panZoomStartSequenceNumber, @"PanZoomUpdate occured before PanZoomStart");
+  XCTAssertGreaterThan(panZoomEndSequenceNumber,
+                       [[panZoomUpdateSequenceNumbers lastObject] intValue],
+                       @"PanZoomUpdate occured after PanZoomUpdate");
+
+  XCTAssertGreaterThan([[hoverSequenceNumbers firstObject] intValue], hoverAddedSequenceNumber,
+                       @"Hover occured before pointer was added");
+  XCTAssertGreaterThan(hoverRemovedSequenceNumber, [[hoverSequenceNumbers lastObject] intValue],
+                       @"Hover occured after pointer was removed");
 }
 #pragma clang diagnostic pop
 
