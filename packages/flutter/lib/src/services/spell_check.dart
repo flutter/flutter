@@ -7,10 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/src/services/platform_channel.dart';
 import 'package:flutter/src/services/system_channels.dart';
 
-////////////////////////////////////////////////////////////////////////////////
-///                            START OF PR #1.1                              ///
-////////////////////////////////////////////////////////////////////////////////
-
 /// A data structure representing a range of misspelled text and the suggested
 /// replacements for this range.
 ///
@@ -95,13 +91,9 @@ abstract class SpellCheckService {
   );
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///                             END OF PR #1.1                               ///
-////////////////////////////////////////////////////////////////////////////////
-
 class DefaultSpellCheckService implements SpellCheckService {
-  List<SuggestionSpan>? reusableSpellCheckResults;
-  String? reusableText;
+  List<SuggestionSpan>? lastSavedSpans;
+  String? lastSavedText;
 
   late MethodChannel spellCheckChannel;
 
@@ -170,21 +162,20 @@ class DefaultSpellCheckService implements SpellCheckService {
     results.forEach((String result) {
       List<String> resultParsed = result.split(".");
       suggestionSpans.add(SuggestionSpan(TextRange(start: int.parse(resultParsed[0]),
-          end: int.parse(resultParsed[1])), resultParsed[2].split("\n")));
+          end: int.parse(resultParsed[1]) + 1), resultParsed[2].split("\n")));
     });
 
     /// Correct results if Gboard is currently trying to ignore the composing region.
-    if (reusableText != null &&
-        reusableText == text &&
-        reusableSpellCheckResults != null &&
-        suggestionSpans != null &&
-        !listEquals(reusableSpellCheckResults, suggestionSpans)) {
+    bool canMergeSpans = lastSavedText != null && lastSavedText == text;
+    bool shouldMergeSpans = lastSavedSpans != null && !listEquals(lastSavedSpans, suggestionSpans);
+    
+    if (canMergeSpans && shouldMergeSpans) {
         suggestionSpans =
-          mergeResults(reusableSpellCheckResults!, suggestionSpans);
+          mergeResults(lastSavedSpans!, suggestionSpans);
     }
 
-    reusableSpellCheckResults = suggestionSpans;
-    reusableText = text; 
+    lastSavedSpans = suggestionSpans;
+    lastSavedText = text; 
 
     return suggestionSpans;
   }

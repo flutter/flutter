@@ -172,14 +172,12 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     // be thrown and this EditableText will be built with a broken subtree.
     // composing.isValid && composing.isNormalized && composing.end <= text.length;
 
-    bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing; // this is poorly named -- this is if composing range is out of range for current text
+    bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing;
 
     //TODO: I think the configuration will never will be null, so just need to check if disabled and if there are any results.
     if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null) {
         return spellCheckConfiguration.spellCheckSuggestionsHandler!.buildTextSpanWithSpellCheckSuggestions(value, composingWithinCurrentTextRange, style, spellCheckConfiguration.spellCheckResults!);
-
-    }
-    else {
+    } else {
       if (composingWithinCurrentTextRange) {
         return TextSpan(style: style, text: text);
       }
@@ -2704,7 +2702,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (_spellCheckEnabled! && value.text.length > 0 && _value.text != value.text) {
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
           Future<List<SuggestionSpan>?> spellCheckResultsFuture = _spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
-          final String resultsText = _value.text;
+          final String resultsText = value.text;
 
           spellCheckResultsFuture.then((List<SuggestionSpan>? spans) {
             if (spans == null) {

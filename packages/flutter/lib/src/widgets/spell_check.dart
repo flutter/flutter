@@ -9,7 +9,7 @@ import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
 ////////////////////////////////////////////////////////////////////////////////
-///                            START OF PR #1.1                              ///
+///                            START OF PR #1                                ///
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Controls how spell check is performed for text input.
@@ -57,7 +57,7 @@ mixin SpellCheckSuggestionsHandler {
     SpellCheckResults spellCheckResults
   );
 
-  /// NOTE: NOT INCLUDED IN PR 1.1:
+  /// NOTE: NOT INCLUDED IN PR 1:
   Widget buildSpellCheckSuggestionsToolbar(
       TextSelectionDelegate delegate,
       List<TextSelectionPoint> endpoints,
@@ -66,10 +66,6 @@ mixin SpellCheckSuggestionsHandler {
       double textLineHeight,
       SpellCheckResults? spellCheckResults);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-///                             END OF PR #1.1                               ///
-////////////////////////////////////////////////////////////////////////////////
 
 class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   int scssSpans_consumed_index = 0;
@@ -103,59 +99,50 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
   List<SuggestionSpan> correctSpellCheckResults(
       String newText, String resultsText, List<SuggestionSpan> results) {
     List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
-
     int span_pointer = 0;
-    bool foundBadSpan = false;
 
     SuggestionSpan currentSpan;
-    String oldSpanText;
+    String currentSpanText;
     String newSpanText;
-    int spanLength = 0;
-    int newStart = 0;
-    int searchStart = 0;
-
-    int? start_index;
-    int? end_index;
-    bool spanWithinTextRange = true;
-
-    int currentSpanStart = 0;
-    int currentSpanEnd = 0;
+    int offset = 0;
+    int searchStart = 0; // Used for simplifying assumption to avoid searching the whole text each time.
+    bool foundCurrentSpan = false;
 
     while (span_pointer < results.length) {
       currentSpan = results[span_pointer];
-      currentSpanStart = currentSpan.range.start;
-      currentSpanEnd = currentSpan.range.end;
+      currentSpanText = resultsText.substring(currentSpan.range.start, currentSpan.range.end);
 
-      start_index = currentSpanStart < newText.length ? currentSpanStart : null;
-      end_index = currentSpanEnd < newText.length ? currentSpanEnd : null;
+      try {
+        newSpanText = newText.substring(currentSpan.range.start + offset, currentSpan.range.end + offset);
 
-      spanWithinTextRange = start_index != null && end_index != null;
-
-      if (!spanWithinTextRange) {
-        // No more of the spell check results will be within the range of the text
-        break;
-      } else {
-        oldSpanText =
-            resultsText.substring(currentSpanStart, currentSpanEnd + 1);
-        newSpanText = newText.substring(currentSpanStart, currentSpanEnd + 1);
-
-        if (oldSpanText == newSpanText) {
-          searchStart = currentSpanEnd + 1;
-          correctedSpellCheckResults.add(currentSpan);
-        } else {
-          spanLength = currentSpanEnd - currentSpanStart;
-          RegExp regex = RegExp('\\b$oldSpanText\\b');
-          int substring = newText.substring(searchStart).indexOf(regex);
-          newStart = substring + searchStart;
-
-          if (substring >= 0) {
-            correctedSpellCheckResults.add(SuggestionSpan(TextRange(
-                start: newStart, end: newStart + spanLength), currentSpan.suggestions));
-            searchStart = newStart + spanLength;
-          }
+        if (newSpanText == currentSpanText) {
+          foundCurrentSpan = true;
+          searchStart = currentSpan.range.end + offset;
+          SuggestionSpan adjustedSpan = 
+            SuggestionSpan(TextRange(start: currentSpan.range.start + offset, end: searchStart),
+              currentSpan.suggestions);
+          correctedSpellCheckResults.add(adjustedSpan);
         }
+      } catch(e) {
+        // currentSpan was not found and needs to be searched for.
       }
 
+      if (!foundCurrentSpan) {
+          RegExp regex = RegExp('\\b$currentSpanText\\b');
+          int foundIndex = newText.substring(searchStart).indexOf(regex);
+
+          if (foundIndex >= 0) {
+            foundIndex += searchStart;
+            int spanLength = currentSpan.range.end - currentSpan.range.start;
+            searchStart = foundIndex + spanLength;
+            SuggestionSpan adjustedSpan = 
+              SuggestionSpan(TextRange(start: foundIndex, end: searchStart), 
+                currentSpan.suggestions);
+            offset = foundIndex - currentSpan.range.start;
+
+            correctedSpellCheckResults.add(adjustedSpan);
+          }
+      }
       span_pointer += 1;
     }
 
@@ -168,9 +155,6 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
       bool composingWithinCurrentTextRange,
       TextStyle? style,
       SpellCheckResults spellCheckResults) {
-    scssSpans_consumed_index = 0;
-    text_consumed_index = 0;
-
     List<SuggestionSpan>? correctedSpellCheckResults;
     TextStyle misspelledStyle;
 
@@ -195,21 +179,14 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
         break;
     }
 
-    if (composingWithinCurrentTextRange) {
-      return TextSpan(
-          style: style,
-          children: buildSubtreesWithMisspelledWordsIndicated(
-              correctedSpellCheckResults, value, style, misspelledStyle, true));
-    } else {
-      return TextSpan(
-          style: style,
-          children: buildSubtreesWithMisspelledWordsIndicated(
-              correctedSpellCheckResults,
-              value,
-              style,
-              misspelledStyle,
-              false));
-    }
+    return TextSpan(
+      style: style,
+      children: buildSubtreesWithMisspelledWordsIndicated(
+          correctedSpellCheckResults,
+          value,
+          style,
+          misspelledStyle,
+          composingWithinCurrentTextRange));
   }
 
   /// Helper method for building TextSpan trees.
@@ -223,37 +200,45 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     int text_pointer = 0;
 
     String text = value.text;
-    TextRange composingRegion = value.composing; // here
+    TextRange composingRegion = value.composing;
     TextStyle composingStyle =
         style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
             TextStyle(decoration: TextDecoration.underline);
     TextStyle misspelledJointStyle =
-        overrideTextSpanStyle(style, misspelledStyle);
+        style?.merge(misspelledStyle) ?? misspelledStyle;
 
     int scss_pointer = 0;
 
     while (text_pointer < text.length && spellCheckSuggestions != null &&
         scss_pointer < spellCheckSuggestions.length) {
       int end_index;
-      bool isComposing;
       SuggestionSpan currScssSpan = spellCheckSuggestions[scss_pointer];
 
       if (currScssSpan.range.start > text_pointer) {
         end_index = currScssSpan.range.start < text.length
             ? currScssSpan.range.start
             : text.length;
-        isComposing = text_pointer >= composingRegion.start &&
-            end_index <= composingRegion.end &&
-            !composingWithinCurrentTextRange;
+        bool isComposingWithin = composingRegion.start >= text_pointer
+          && composingRegion.end <= end_index && !composingWithinCurrentTextRange;
+
+        if (isComposingWithin) {
+        addComposingRegionTextSpans(
+          tsTreeChildren, text, text_pointer, composingRegion, style, composingStyle);
         tsTreeChildren.add(TextSpan(
-            style: isComposing ? composingStyle : style,
+          style: style,
+          text: text.substring(composingRegion.end, end_index)));
+        } else {
+                  tsTreeChildren.add(TextSpan(
+            style: style,
             text: text.substring(text_pointer, end_index)));
+        }
+
         text_pointer = end_index;
       } else {
-        end_index = currScssSpan.range.end + 1 < text.length
-            ? (currScssSpan.range.end + 1)
+        end_index = currScssSpan.range.end < text.length
+            ? currScssSpan.range.end
             : text.length;
-        isComposing = text_pointer >= composingRegion.start &&
+        bool isComposing = text_pointer >= composingRegion.start &&
             end_index <= composingRegion.end &&
             !composingWithinCurrentTextRange;
         tsTreeChildren.add(TextSpan(
@@ -268,15 +253,13 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     if (text_pointer < text.length) {
       if (text_pointer < composingRegion.start &&
           !composingWithinCurrentTextRange) {
-        tsTreeChildren.add(TextSpan(
-            style: style,
-            text: text.substring(text_pointer, composingRegion.start)));
-        tsTreeChildren.add(TextSpan(
-            style: composingStyle,
-            text: text.substring(composingRegion.start, composingRegion.end)));
+        addComposingRegionTextSpans(
+          tsTreeChildren, text, text_pointer, composingRegion, style, composingStyle);
+        if (composingRegion.end != text.length) {
         tsTreeChildren.add(TextSpan(
             style: style,
             text: text.substring(composingRegion.end, text.length)));
+        }
       } else {
         tsTreeChildren.add(TextSpan(
             style: style, text: text.substring(text_pointer, text.length)));
@@ -286,17 +269,26 @@ class DefaultSpellCheckSuggestionsHandler with SpellCheckSuggestionsHandler {
     return tsTreeChildren;
   }
 
-  /// Responsible for defining the behavior of overriding/merging
-  /// the TestStyle specified for a particular TextSpan with the style used to
-  /// indicate misspelled words (straight red underline for Android).
-  /// Will be used in buildWithMisspelledWordsIndicated(...) method above.
-  TextStyle overrideTextSpanStyle(
-      TextStyle? currentTextStyle, TextStyle misspelledStyle) {
-    return currentTextStyle?.merge(misspelledStyle) ?? misspelledStyle;
+  /// Helper method to create TextSpan tree children based on the composing region
+  void addComposingRegionTextSpans(
+    List<TextSpan> treeChildren,
+    String text, int start,
+    TextRange composingRegion,
+    TextStyle? style,
+    TextStyle composingStyle) {
+    treeChildren.add(TextSpan(
+        style: style,
+        text: text.substring(start, composingRegion.start)));
+    treeChildren.add(TextSpan(
+        style: composingStyle,
+        text: text.substring(composingRegion.start, composingRegion.end)));
   }
 }
 
-/****************************** Toolbar logic ******************************/
+////////////////////////////////////////////////////////////////////////////////
+///                             END OF PR #1                                 ///
+////////////////////////////////////////////////////////////////////////////////
+
 //TODO(camillesimon): Either remove implementation or replace with dropdown menu.
 class _SpellCheckSuggestionsToolbarItemData {
   const _SpellCheckSuggestionsToolbarItemData({
@@ -351,12 +343,12 @@ class _SpellCheckSuggestionsToolbarState
       mid_index = (left_index + (right_index - left_index) / 2).floor();
 
       if (suggestionSpans[mid_index].range.start <= curr_index &&
-          suggestionSpans[mid_index].range.end + 1 >= curr_index) {
+          suggestionSpans[mid_index].range.end >= curr_index) {
             return suggestionSpans[mid_index];
       }
 
       if (suggestionSpans[mid_index].range.start <= curr_index) {
-        left_index = left_index + 1;
+        left_index = left_index;
       } else {
         right_index = right_index - 1;
       }
@@ -414,7 +406,7 @@ class _SpellCheckSuggestionsToolbarState
         label: suggestion,
         onPressed: () {
           widget.delegate.replaceSelection(SelectionChangedCause.toolbar,
-              suggestion, relevantSpan.range.start, relevantSpan.range.end + 1);
+              suggestion, relevantSpan.range.start, relevantSpan.range.end);
         },
       ));
     });
