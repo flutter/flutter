@@ -555,11 +555,10 @@ class AlertDialog extends StatelessWidget {
 
     if (actions != null) {
       final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
-      final EdgeInsetsGeometry effetiveActionsPadding = (actionsPadding ?? EdgeInsets.zero).add(
-        theme.useMaterial3 ? const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0) : EdgeInsets.all(spacing),
-      );
       actionsWidget = Padding(
-        padding: effetiveActionsPadding,
+        padding: actionsPadding ?? dialogTheme.actionsPadding ?? (
+          theme.useMaterial3 ? defaults.actionsPadding! : defaults.actionsPadding!.add(EdgeInsets.all(spacing))
+        ),
         child: OverflowBar(
           alignment: actionsAlignment ?? MainAxisAlignment.end,
           spacing: spacing,
@@ -1205,6 +1204,9 @@ class _DefaultsM2 extends DialogTheme {
 
   @override
   TextStyle? get contentTextStyle => _textTheme.subtitle1;
+
+  @override
+  EdgeInsetsGeometry? get actionsPadding => EdgeInsets.zero;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES
@@ -1235,6 +1237,9 @@ class _TokenDefaultsM3 extends DialogTheme {
 
   @override
   TextStyle? get contentTextStyle => _textTheme.bodyMedium;
+
+  @override
+  EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
 }
 
 // END GENERATED TOKEN PROPERTIES
